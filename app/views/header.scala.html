@@ -1,0 +1,51 @@
+@()(implicit request: Request[_])
+
+@activeLink(currentPath: String) = @{
+    if(request.path.equals(currentPath)) "active"
+}
+
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+
+        <div class="navbar-header">
+            <a class="navbar-brand" href="@routes.HomeController.index()">Portal</a>
+        </div>
+
+        <ul class="nav navbar-nav">
+            <li class="@activeLink(routes.HomeController.index().url)">
+                <a href="@routes.HomeController.index()">Home</a>
+            </li>
+
+            <li class="@activeLink(routes.SessionsController.sessions().url)">
+                <a href="@routes.SessionsController.sessions()">Sessions</a>
+            </li>
+
+            @if(SessionHelper.isAdmin) {
+                <li class="@activeLink(routes.SessionsController.manageSessions().url)">
+                    <a href="@routes.SessionsController.manageSessions()">Manage Sessions</a>
+                </li>
+            }
+
+            @if(SessionHelper.isLoggedIn) {
+                <li class="@activeLink(routes.UsersController.login().url)">
+                    <a href="@routes.UsersController.login()">Login</a>
+                </li>
+            }
+
+            @if(SessionHelper.isLoggedIn) {
+                <li class="@activeLink(routes.UsersController.register().url)">
+                    <a href="@routes.UsersController.register()">Register</a>
+                </li>
+            } else {
+                <li >
+                    <a href="@routes.UsersController.logout()">Logout</a>
+                </li>
+
+                <li >
+                    <a href="@routes.HomeController.index()">@SessionHelper.email</a>
+                </li>
+            }
+
+        </ul>
+    </div>
+</nav>

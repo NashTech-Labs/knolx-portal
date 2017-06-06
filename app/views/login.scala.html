@@ -1,0 +1,27 @@
+@(loginForm: Form[LoginInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+    @main("Login") {
+        @loginForm.globalError.map { error =>
+            <p class="error">
+                @error.message
+            </p>
+        }
+
+        <p class="information">
+        @flash.get("message").fold("")(message => message)
+        </p>
+
+        @helper.form(action = routes.UsersController.loginUser(), 'id -> "loginForm") {
+            @helper.inputText(
+                loginForm("email"),
+                'id -> "email",
+                '_label -> "Email",
+                '_showConstraints -> false)
+            @helper.inputPassword(
+                loginForm("password"),
+                'id -> "password",
+                '_label -> "Password",
+                '_showConstraints -> false)
+            <button type="submit">Submit</button>
+        }
+    }

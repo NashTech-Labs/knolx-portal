@@ -1,0 +1,36 @@
+@(userForm: Form[UserInformation])(implicit messages: Messages, request: Request[_], flash: Flash)
+
+    @main("Register") {
+
+        @userForm.globalError.map { error =>
+            <p class="error">
+                @error.message
+            </p>
+        }
+
+        <p class="information">
+        @flash.get("message").fold("")(message => message)
+        </p>
+
+        @helper.form(action = routes.UsersController.createUser(), 'id -> "registrationForm") {
+            @helper.inputText(
+                userForm("email"),
+                'id -> "email",
+                '_label -> "Email",
+                '_showConstraints -> false)
+            @helper.inputPassword(
+                userForm("password"),
+                'id -> "password",
+                'placeholder -> "must be at least 8 characters",
+                '_label -> "Password",
+                '_showConstraints -> false)
+            @helper.inputPassword(
+                userForm("confirmPassword"),
+                'id -> "confirmPassword",
+                'placeholder -> "must be at least 8 characters",
+                '_label -> "Confirm Password",
+                '_showConstraints -> false)
+            <button type="submit">Submit</button>
+        }
+
+    }

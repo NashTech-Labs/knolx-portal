@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
   "net.codingwell" %% "scala-guice" % "4.0.0",
   "org.reactivemongo" %% "reactivemongo-play-json" % "0.12.3",
   "org.reactivemongo" %% "play2-reactivemongo" % "0.12.3",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
+  specs2 % Test
 )
 

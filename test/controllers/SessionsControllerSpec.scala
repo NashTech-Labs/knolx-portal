@@ -1,5 +1,7 @@
 package controllers
 
+import java.util.Date
+
 import models.{SessionsRepository, UsersRepository}
 import org.specs2.mock.Mockito
 import play.api.i18n.MessagesApi
@@ -92,7 +94,7 @@ class SessionsControllerTest extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "Create Session" in new WithApplication {
+  /*  "Create Session" in new WithApplication {
       val sessionController = testObject
       val document = BSONDocument(
         "user_id" -> "123",
@@ -115,7 +117,30 @@ class SessionsControllerTest extends PlaySpecification with Mockito {
           ("topic", "topic"), ("meetup", "meetup")))
       status(result) must be equalTo BAD_REQUEST
     }
+  */
 
+    "Create Session" in new WithApplication {
+      val sessionController = testObject
+      val document = BSONDocument(
+        "user_id" -> "123",
+        "email" -> "test@example.com",
+        "date" -> new Date(),
+        "session" -> "session 1",
+        "topic" -> "topic",
+        "meetup" -> true,
+        "rating" -> "",
+        "cancelled" -> false,
+        "active" -> true)
+      val updateWriteResult = Future(UpdateWriteResult(true, 1, 1, Seq(), Seq(), None, None, None))
+      val emailObject = Future(List(JsObject(Seq("id" -> JsString("123"), "email" -> JsString("test@example.com"), "admin" -> JsBoolean(true)))))
+      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionController.sessionsRepository.create(document) returns updateWriteResult
+      val result = sessionController.sessionController.createSession(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(("email", "email"), ("date", "date"), ("session", "session"),
+          ("topic", "topic"), ("meetup", "meetup")))
+      status(result) must be equalTo OK
+    }
     //WRITE TEST CASE FOR CORRECT FORM
     //WRITE TEST CASE WHEN RESULT IS FALSE
   }

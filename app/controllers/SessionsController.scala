@@ -9,9 +9,8 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsString, JsNumber, JsValue}
 import play.api.mvc.{Action, AnyContent, Controller}
-import reactivemongo.bson.{BSONObjectID, BSONDateTime, BSONDocument}
+import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -80,6 +79,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             knolxSessionAsMap.get(Meetup).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
             knolxSessionAsMap.get(Cancelled).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
             knolxSessionAsMap.get(Rating).flatMap(_.validate[String].asOpt).getOrElse(""))
+
         }
 
         Ok(views.html.sessions(knolxSessions))
@@ -92,7 +92,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
           val knolxSessionAsMap = session.fields.toMap
-
           KnolxSession(
             knolxSessionAsMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).getOrElse(""),
             new util.Date(knolxSessionAsMap.get(Date).map(_.validate[Map[String, Long]].get("$date")).getOrElse(System.currentTimeMillis)),

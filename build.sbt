@@ -20,3 +20,4 @@ libraryDependencies ++= Seq(
   specs2 % Test
 )
 
+javaOptions in Test += "-Dconfig.file=conf/test.conf"

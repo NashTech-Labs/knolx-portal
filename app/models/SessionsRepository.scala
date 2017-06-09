@@ -1,15 +1,13 @@
 package models
 
 import javax.inject.Inject
-
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import play.modules.reactivemongo.json._
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import controllers.SessionFields._
@@ -23,7 +21,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .findAndUpdate(
-            BSONDocument("_id" -> id),
+            BSONDocument("_id" -> JsObject(Map("$oid"->JsString(id)))),
             BSONDocument("$set" -> BSONDocument(Active -> false)),
             fetchNewObject = true,
             upsert = true)

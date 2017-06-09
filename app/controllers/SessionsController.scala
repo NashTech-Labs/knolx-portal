@@ -69,17 +69,9 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-          val knolxSessionAsMap = session.fields.toMap
 
-          KnolxSession(
-            knolxSessionAsMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).getOrElse(""),
-            new util.Date(knolxSessionAsMap.get(Date).map(_.validate[Map[String, Long]].get("$date")).getOrElse(System.currentTimeMillis)),
-            knolxSessionAsMap.get(Session).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Topic).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Email).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Meetup).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
-            knolxSessionAsMap.get(Cancelled).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
-            knolxSessionAsMap.get(Rating).flatMap(_.validate[String].asOpt).getOrElse(""))
+          KnolxSession("id", session.date, session.session, session.topic, session.email, session.meetup,
+            session.cancelled, session.rating)
         }
 
         Ok(views.html.sessions(knolxSessions))
@@ -87,7 +79,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def manageSessions: Action[AnyContent] = AdminAction.async { implicit request =>
-    sessionsRepository
+    /*sessionsRepository
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
@@ -105,7 +97,9 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         }
 
         Ok(views.html.managesessions(knolxSessions))
-      }
+      }*/
+
+    Future.successful(Ok)
   }
 
   def create: Action[AnyContent] = UserAction { implicit request =>
@@ -128,19 +122,11 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
           } { userJson =>
             val userObjId = userJson.fields.toMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).get
 
-            sessionsRepository
-              .create(
-                BSONDocument(
-                  UserId -> BSONDocument("$oid" -> userObjId),
-                  Email -> sessionInfo.email.toLowerCase,
-                  Date -> BSONDateTime(sessionInfo.date.getTime),
-                  Session -> sessionInfo.session,
-                  Topic -> sessionInfo.topic,
-                  Meetup -> sessionInfo.meetup,
-                  Rating -> "",
-                  Cancelled -> false,
-                  Active -> true)
-              ).map { result =>
+            val session = models.Session(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
+              sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
+
+
+            sessionsRepository.insert(session) map { result =>
               if (result.ok) {
                 Logger.info(s"Session for user ${sessionInfo.email} successfully created")
                 Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully created!")
@@ -154,7 +140,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def deleteSession(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
-    sessionsRepository
+    /*sessionsRepository
       .delete(id)
       .map(_.fold {
         Logger.error(s"Failed to delete knolx session with id $id")
@@ -162,7 +148,9 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       } { sessionJson =>
         Logger.info(s"Knolx session $id successfully deleted")
         Ok
-      })
+      })*/
+
+    Future.successful(Ok)
   }
 
 }

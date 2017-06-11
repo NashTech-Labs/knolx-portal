@@ -2,17 +2,12 @@ package controllers
 
 import java.util
 import javax.inject.{Inject, Singleton}
-
-import controllers.SessionFields._
 import models.{SessionsRepository, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsString, JsNumber, JsValue}
 import play.api.mvc.{Action, AnyContent, Controller}
-import reactivemongo.bson.{BSONObjectID, BSONDateTime, BSONDocument}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -69,17 +64,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-          val knolxSessionAsMap = session.fields.toMap
-
-          KnolxSession(
-            knolxSessionAsMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).getOrElse(""),
-            new util.Date(knolxSessionAsMap.get(Date).map(_.validate[Map[String, Long]].get("$date")).getOrElse(System.currentTimeMillis)),
-            knolxSessionAsMap.get(Session).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Topic).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Email).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Meetup).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
-            knolxSessionAsMap.get(Cancelled).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
-            knolxSessionAsMap.get(Rating).flatMap(_.validate[String].asOpt).getOrElse(""))
+          KnolxSession(session.userId, session.date, session.session, session.topic, session.email, session.meetup,
+            session.cancelled, session.rating)
         }
 
         Ok(views.html.sessions(knolxSessions))
@@ -91,21 +77,20 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-          val knolxSessionAsMap = session.fields.toMap
 
-          KnolxSession(
-            knolxSessionAsMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).getOrElse(""),
-            new util.Date(knolxSessionAsMap.get(Date).map(_.validate[Map[String, Long]].get("$date")).getOrElse(System.currentTimeMillis)),
-            knolxSessionAsMap.get(Session).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Topic).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Email).flatMap(_.validate[String].asOpt).getOrElse(""),
-            knolxSessionAsMap.get(Meetup).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
-            knolxSessionAsMap.get(Cancelled).flatMap(_.validate[Boolean].asOpt).getOrElse(false),
-            knolxSessionAsMap.get(Rating).flatMap(_.validate[String].asOpt).getOrElse(""))
+          KnolxSession(session.userId,
+                        session.date,
+                        session.session,
+                        session.topic,
+                        session.email,
+                        session.meetup,
+                        session.cancelled,
+                        session.rating)
         }
 
         Ok(views.html.managesessions(knolxSessions))
       }
+    Future.successful(Ok)
   }
 
   def create: Action[AnyContent] = UserAction { implicit request =>
@@ -127,20 +112,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             )
           } { userJson =>
             val userObjId = userJson.fields.toMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).get
+            val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
+              sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
 
-            sessionsRepository
-              .create(
-                BSONDocument(
-                  UserId -> BSONDocument("$oid" -> userObjId),
-                  Email -> sessionInfo.email.toLowerCase,
-                  Date -> BSONDateTime(sessionInfo.date.getTime),
-                  Session -> sessionInfo.session,
-                  Topic -> sessionInfo.topic,
-                  Meetup -> sessionInfo.meetup,
-                  Rating -> "",
-                  Cancelled -> false,
-                  Active -> true)
-              ).map { result =>
+            sessionsRepository.insert(session) map { result =>
               if (result.ok) {
                 Logger.info(s"Session for user ${sessionInfo.email} successfully created")
                 Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully created!")
@@ -163,6 +138,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Logger.info(s"Knolx session $id successfully deleted")
         Ok
       })
+
+    Future.successful(Ok)
   }
 
 }

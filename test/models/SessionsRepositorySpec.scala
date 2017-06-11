@@ -1,48 +1,36 @@
 package models
 
-import controllers.SessionFields.{Date, _}
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString}
+import java.text.SimpleDateFormat
+import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.test.PlaySpecification
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionsRepositorySpec extends PlaySpecification {
+class SessionsRepositorySpec  extends PlaySpecification {
 
   val sessionsRepository = new SessionsRepository(TestDb.reactiveMongoApi)
 
   "Session repository" should {
-
-    "create Session" in {
-      val document =  BSONDocument(
-        UserId -> "userId",
-        Email -> "test@example.com",
-        Date -> BSONDateTime(1496922356361L),
-        Session -> "session",
-        Topic -> "sessionRepoTest",
-        Meetup -> true,
-        Rating -> "",
-        Cancelled -> false,
-        Active -> true)
-      val created = await(sessionsRepository.create(document).map(_.ok))
+    "Insert Session" in {
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+      val userInfo = SessionInfo("testid","test@example.com",date,"session","sessionRepoTest",true,"",false,true)
+      val created = await(sessionsRepository.insert(userInfo).map(_.ok))
       created must beEqualTo(true)
     }
 
     "get sessions" in {
       val sessions = await(sessionsRepository.sessions)
-      val head = sessions.headOption.getOrElse(JsObject(Seq.empty))
-      (head \ Email).getOrElse(JsString("")) must beEqualTo(JsString("test@example.com"))
-      (head \ Date).getOrElse(JsNumber(0)) must beEqualTo(JsObject(Map("$date" -> JsNumber(1496922356361L))))
-      (head \ Active).getOrElse(JsBoolean(false)) must beEqualTo(JsBoolean(true))
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("1111-11-11")
+      val defaultSession = SessionInfo("","",date,"","",false,"",false,false)
+      val head = sessions.headOption.getOrElse(defaultSession)
+      head.email must beEqualTo("test@example.com")
+      head.date  must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
+      head.active must beEqualTo(true)
     }
 
     "delete session" in {
-      val sessions = await(sessionsRepository.sessions)
-      val head = sessions.headOption.getOrElse(JsObject(Seq.empty))
-      val jsValueId= (head \"_id"\"$oid").getOrElse(JsObject(Map("$oid"->JsString(""))))
-      val id = jsValueId.asOpt[String].getOrElse("")
-      val deletedSessionUsers= await(sessionsRepository.delete(id))
-      val deletedSessionUser = deletedSessionUsers.headOption.getOrElse(JsObject(Seq.empty))
-      (deletedSessionUser \ Active).getOrElse(JsBoolean(true)) must beEqualTo(JsBoolean(false))
+      val deletedSessionUsers= await(sessionsRepository.delete("testid"))
+      val deletedSessionUser = deletedSessionUsers.getOrElse(JsObject(Seq.empty))
+      (deletedSessionUser \ "active").getOrElse(JsBoolean(true)) must beEqualTo(JsBoolean(false))
     }
 
   }

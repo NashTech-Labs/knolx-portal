@@ -90,7 +90,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
         Ok(views.html.managesessions(knolxSessions))
       }
-    Future.successful(Ok)
   }
 
   def create: Action[AnyContent] = UserAction { implicit request =>
@@ -139,7 +138,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Ok
       })
 
-    Future.successful(Ok)
   }
 
 }

@@ -31,13 +31,18 @@ object SessionJsonFormats {
 
   import play.api.libs.json.Json
 
-  implicit val feedFormat = Json.format[SessionInfo]
+  implicit val feedFormat = {
+    Json.format[SessionInfo]
+  }
 
 }
 
 class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
+
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[JsObject]] =
     collection
@@ -64,7 +69,5 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .insert(session))
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
 }

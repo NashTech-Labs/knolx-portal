@@ -48,10 +48,10 @@ trait SecuredImplicit {
         .flatMap(_.headOption.fold {
           Logger.info(s"Unauthorized access for email $emailFromSession")
           Future.successful(Unauthorized("Unauthorized access!"))
-        } { userJson =>
-          val id = userJson._id.stringify
-          val email = userJson.email
-          val admin = userJson.admin
+        } { userInfo =>
+          val id = userInfo._id.stringify
+          val email = userInfo.email
+          val admin = userInfo.admin
 
           if (admin) {
             val userSession = UserSession(id, email, admin)

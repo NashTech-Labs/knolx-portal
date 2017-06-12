@@ -21,11 +21,11 @@ class UsersRepositorySpec extends PlaySpecification {
 
     "get user by email" in {
       val user = await(usersRepository.getByEmail("test@example.com"))
-      val head = user.headOption.getOrElse(JsObject(Seq.empty))
-
-      (head \ "email").getOrElse(JsString("")) must beEqualTo(JsString("test@example.com"))
-      (head \ "password").getOrElse(JsNumber(0)) must beEqualTo(JsString("password"))
-      (head \ "active").getOrElse(JsBoolean(false)) must beEqualTo(JsBoolean(true))
+      val elseUser = UserInfo("", "", "", active = false, admin = false)
+      val head = user.headOption.getOrElse(elseUser)
+      head.email must beEqualTo("test@example.com")
+      head.password must beEqualTo("password")
+      head.active must beEqualTo(true)
     }
 
   }

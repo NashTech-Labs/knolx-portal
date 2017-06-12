@@ -9,7 +9,6 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -20,7 +19,7 @@ case class CreateSessionInformation(email: String,
                                     topic: String,
                                     meetup: Boolean)
 
-case class KnolxSession(id: BSONObjectID,
+case class KnolxSession(id: String,
                         userid: String,
                         date: util.Date,
                         session: String,
@@ -39,7 +38,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository) extends Controller with SecuredImplicit with I18nSupport {
 
-  val usersRepo = usersRepository
+  val usersRepo: UsersRepository = usersRepository
 
   val createSessionForm = Form(
     mapping(
@@ -56,7 +55,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-          KnolxSession(session._id, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
+          KnolxSession(session._id.stringify, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
             session.cancelled, session.rating)
         }
 
@@ -70,7 +69,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
 
-          KnolxSession(session._id,
+          KnolxSession(session._id.stringify,
             session.userId,
             session.date,
             session.session,

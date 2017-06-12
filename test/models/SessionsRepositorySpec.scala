@@ -13,7 +13,7 @@ class SessionsRepositorySpec extends PlaySpecification {
 
   "Session repository" should {
 
-    "Insert Session" in {
+    "insert session" in {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
       val userInfo = SessionInfo("testid", "test@example.com", date, "session", "sessionRepoTest", meetup = true, "", cancelled = false, active = true)
 

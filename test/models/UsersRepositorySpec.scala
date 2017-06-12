@@ -11,7 +11,7 @@ class UsersRepositorySpec extends PlaySpecification {
 
   "Users Repository" should {
 
-    "Create user" in {
+    "create user" in {
       val document = UserInfo("test@example.com", "password", "encryptedpassword", active = true, admin = false)
 
       val created = await(usersRepository.insert(document).map(_.ok))
@@ -19,7 +19,7 @@ class UsersRepositorySpec extends PlaySpecification {
       created must beEqualTo(true)
     }
 
-    "Get user by email" in {
+    "get user by email" in {
       val user = await(usersRepository.getByEmail("test@example.com"))
       val head = user.headOption.getOrElse(JsObject(Seq.empty))
 

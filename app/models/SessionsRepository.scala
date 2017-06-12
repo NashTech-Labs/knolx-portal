@@ -8,13 +8,15 @@ import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONObjectID, BSONDocument}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
-case class SessionInfo(userId: String,
+case class SessionInfo(_id: BSONObjectID = BSONObjectID.generate,
+                       userId: String,
                        email: String,
                        date: java.util.Date,
                        session: String,

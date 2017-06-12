@@ -113,8 +113,18 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             )
           } { userJson =>
             val userObjId = userJson.fields.toMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).get
-            val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
-              sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
+
+            val session =
+              models.SessionInfo(
+                userId = userObjId,
+                email = sessionInfo.email.toLowerCase,
+                date = sessionInfo.date,
+                session = sessionInfo.session,
+                topic = sessionInfo.topic,
+                meetup = sessionInfo.meetup,
+                rating = "",
+                cancelled = false,
+                active = true)
 
             sessionsRepository.insert(session) map { result =>
               if (result.ok) {

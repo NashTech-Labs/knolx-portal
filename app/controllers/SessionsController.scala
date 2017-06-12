@@ -2,12 +2,15 @@ package controllers
 
 import java.util
 import javax.inject.{Inject, Singleton}
+
 import models.{SessionsRepository, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
+import reactivemongo.bson.BSONObjectID
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -17,7 +20,8 @@ case class CreateSessionInformation(email: String,
                                     topic: String,
                                     meetup: Boolean)
 
-case class KnolxSession(id: String,
+case class KnolxSession(id: BSONObjectID,
+                        userid: String,
                         date: util.Date,
                         session: String,
                         topic: String,
@@ -64,7 +68,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-          KnolxSession(session.userId, session.date, session.session, session.topic, session.email, session.meetup,
+          KnolxSession(session._id, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
             session.cancelled, session.rating)
         }
 
@@ -78,14 +82,15 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
 
-          KnolxSession(session.userId,
-                        session.date,
-                        session.session,
-                        session.topic,
-                        session.email,
-                        session.meetup,
-                        session.cancelled,
-                        session.rating)
+          KnolxSession(session._id,
+            session.userId,
+            session.date,
+            session.session,
+            session.topic,
+            session.email,
+            session.meetup,
+            session.cancelled,
+            session.rating)
         }
 
         Ok(views.html.managesessions(knolxSessions))
@@ -110,7 +115,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
               BadRequest(views.html.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!")))
             )
           } { userJson =>
-            val userObjId = userJson.fields.toMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).get
+            val userObjId = userJson._id.stringify
             val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
               sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
 
@@ -138,6 +143,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Ok
       })
 
+  }
+
+  def updateSession(id: String): Action[AnyContent] = UserAction { implicit request =>
+    Ok(views.html.updatesession(createSessionForm))
   }
 
 }

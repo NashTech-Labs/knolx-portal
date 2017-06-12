@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-import controllers.UserFields._
+
 import models.UsersRepository
 import play.api.Logger
 import play.api.data.Forms._
@@ -9,6 +9,7 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
 import utilities.{EncryptionUtility, PasswordUtility}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -62,7 +63,8 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
           .flatMap(_.headOption.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, true, false)
+                models.UserInfo(userInfo.email,
+                  PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, true, false)
               )
               .map { result =>
                 if (result.ok) {
@@ -98,8 +100,8 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
             Logger.info(s"User ${loginInfo.email.toLowerCase} not found")
             Redirect(routes.HomeController.index()).flashing("message" -> "User not found!")
           } { user =>
-            val admin = user.fields.toMap.get("admin").flatMap(_.validate[Boolean].asOpt).getOrElse(false)
-            val password = user.fields.toMap.get(Password).flatMap(_.validate[String].asOpt).getOrElse("")
+            val admin = user.admin
+            val password = user.password
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, password)) {
               Logger.info(s"User ${loginInfo.email.toLowerCase} successfully logged in")

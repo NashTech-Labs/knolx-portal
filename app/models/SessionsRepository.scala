@@ -1,48 +1,56 @@
+
 package models
 
 import javax.inject.Inject
+
 import controllers.SessionFields._
 import models.SessionJsonFormats._
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-case class SessionInfo(userId: String,
-                   email: String,
-                   date: java.util.Date,
-                   session: String,
-                   topic: String,
-                   meetup: Boolean,
-                   rating: String,
-                   cancelled: Boolean,
-                   active: Boolean)
+case class SessionInfo(
+                        userId: String,
+                        email: String,
+                        date: java.util.Date,
+                        session: String,
+                        topic: String,
+                        meetup: Boolean,
+                        rating: String,
+                        cancelled: Boolean,
+                        active: Boolean,
+                        _id: BSONObjectID = BSONObjectID.generate)
 
 object SessionJsonFormats {
+
   import play.api.libs.json.Json
+
   implicit val feedFormat = Json.format[SessionInfo]
+
 }
 
 class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
-
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[JsObject]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .findAndUpdate(
-            BSONDocument("userId" -> id),
+            BSONDocument("_id" -> BSONDocument("$oid" -> id)),
             BSONDocument("$set" -> BSONDocument(Active -> false)),
             fetchNewObject = true,
             upsert = false)
           .map(_.value))
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
   def sessions(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection

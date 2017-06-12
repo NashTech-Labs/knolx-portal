@@ -30,18 +30,6 @@ case class KnolxSession(id: BSONObjectID,
                         cancelled: Boolean,
                         rating: String)
 
-object SessionFields {
-  val Email = "email"
-  val Date = "date"
-  val UserId = "user_id"
-  val Session = "session"
-  val Topic = "topic"
-  val Meetup = "meetup"
-  val Cancelled = "cancelled"
-  val Rating = "rating"
-  val Active = "active"
-}
-
 object SessionValues {
   val Sessions = Seq("session 1" -> "Session 1", "session 2" -> "Session 2")
 }
@@ -118,7 +106,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             val userObjId = userJson._id.stringify
             val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
               sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
-
             sessionsRepository.insert(session) map { result =>
               if (result.ok) {
                 Logger.info(s"Session for user ${sessionInfo.email} successfully created")

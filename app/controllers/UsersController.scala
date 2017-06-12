@@ -65,6 +65,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
               .insert(
                 models.UserInfo(userInfo.email,
                   PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, true, false)
+
               )
               .map { result =>
                 if (result.ok) {

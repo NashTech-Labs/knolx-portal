@@ -11,26 +11,26 @@ import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
-case class UserInfo (email : String,
-                     password: String,
-                     algorithm: String,
-                     active: Boolean,
-                     admin: Boolean,
-                     _id: BSONObjectID = BSONObjectID.generate)
+case class UserInfo(email: String,
+                    password: String,
+                    algorithm: String,
+                    active: Boolean,
+                    admin: Boolean,
+                    _id: BSONObjectID = BSONObjectID.generate)
+
 
 object UserJsonFormats {
+
   import play.api.libs.json.Json
-  implicit val feedFormat3 = Json.format[UserInfo]
+
+  implicit val feedFormat = Json.format[UserInfo]
 }
 
 class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def getByEmail(email: String)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
     collection
@@ -40,6 +40,8 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[UserInfo](ReadPreference.Primary)
           .collect[List]())
   }
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection

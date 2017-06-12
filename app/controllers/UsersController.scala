@@ -1,7 +1,6 @@
 package controllers
 
 import javax.inject._
-
 import controllers.UserFields._
 import models.UsersRepository
 import play.api.Logger
@@ -9,7 +8,6 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
-import reactivemongo.bson.BSONDocument
 import utilities.{EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,17 +58,13 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
         Future.successful(BadRequest(views.html.register(formWithErrors)))
       },
       userInfo => {
+        val user =  models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, true, false)
         usersRepository
           .getByEmail(userInfo.email.toLowerCase)
           .flatMap(_.headOption.fold {
             usersRepository
-              .create(
-                BSONDocument(
-                  Email -> userInfo.email,
-                  Password -> PasswordUtility.encrypt(userInfo.password).substring(0,7),
-                  Algorithm -> PasswordUtility.BCrypt,
-                  Active -> true,
-                  Admin -> false)
+              .insert(
+                user
               )
               .map { result =>
                 if (result.ok) {

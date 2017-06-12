@@ -16,6 +16,8 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo-play-json" % "0.12.3",
   "org.reactivemongo" %% "play2-reactivemongo" % "0.12.3",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
+  "com.github.simplyscala" %% "scalatest-embedmongo" % "0.2.4",
   specs2 % Test
 )
 
+javaOptions in Test += "-Dconfig.file=conf/test.conf"

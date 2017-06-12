@@ -4,24 +4,21 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.typesafe.config.ConfigFactory
-import models.{SessionsRepository, UsersRepository}
+import models.{SessionInfo, SessionsRepository, UsersRepository}
 import org.specs2.mock.Mockito
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString}
+import play.api.libs.json.{JsBoolean, JsObject, JsString}
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 import play.api.{Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SessionsControllerSpec extends PlaySpecification with Mockito {
 
-  val sessionObject: Future[List[JsObject]] = Future.successful(List(JsObject(Seq("Email" -> JsString("email"), "Date" -> JsString("date"),
-    "UserId" -> JsString("user_id"), "Session" -> JsString("sessions"), "Topic" -> JsString("topic"),
-    "Meetup" -> JsString("meetup"), "Cancelled" -> JsString("cancelled"),
-    "Rating" -> JsString("rating"), "Active" -> JsString("Active")))))
+  val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+  val sessionObject = Future.successful(List(SessionInfo("userId", "email", date, "sessions", "topic", true, "rating", false, true)))
 
   "Session Controller" should {
 
@@ -155,50 +152,32 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-
     "create session" in new WithApplication {
       val sessionController = testObject
 
-      val document = BSONDocument(
-        "user_id" -> BSONDocument("$oid" -> "593938f42e00002e008516ee"),
-        "email" -> "test@example.com",
-        "date" -> BSONDateTime(1497119400000L),
-        "session" -> "session 1",
-        "topic" -> "topic",
-        "meetup" -> true,
-        "rating" -> "",
-        "cancelled" -> false,
-        "active" -> true)
-
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+      val document = SessionInfo("593938f42e00002e008516ee", "test@example.com", date, "session 1", "topic", true, "", false, true)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
       val jsObj = JsObject(Map("_id" -> JsObject(Map("$oid" -> JsString("593938f42e00002e008516ee"))),
-        "user_id" -> JsString("userId"),
         "email" -> JsString("test@example.com"),
-        "date" -> JsObject(Map("$date" -> JsNumber(1497119400000L))),
-        "session" -> JsString("session 1"),
-        "topic" -> JsString("topic"),
-        "meetup" -> JsBoolean(true),
-        "rating" -> JsString(""),
-        "cancelled" -> JsBoolean(false),
-        "active" -> JsBoolean(true)
+        "password" -> JsString("abc"),
+        "algorithm" -> JsString("BCrypt"),
+        "active" -> JsBoolean(true),
+        "admin" -> JsBoolean(false)
       ))
+
       val emailObject = Future.successful(List(jsObj))
-
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.create(document) returns updateWriteResult
+      sessionController.sessionsRepository.insert(document) returns updateWriteResult
 
-      val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
-      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-      val sessionDateString = simpleDateFormat.format(sessionDate)
-
-      val result =
-        sessionController.sessionController.createSession(FakeRequest(POST, "create")
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-          .withFormUrlEncodedBody("email" -> "test@example.com",
-            "date" -> sessionDateString,
-            "session" -> "session 1",
-            "topic" -> "topic",
-            "meetup" -> "true"))
+      val result = sessionController.sessionController.createSession(FakeRequest(POST, "create")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("email" -> "test@example.com",
+          "date" -> "2017-06-25",
+          "session" -> "session 1",
+          "topic" -> "topic",
+          "meetup" -> "true"))
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -206,46 +185,29 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
     "not create session when result is false" in new WithApplication {
       val sessionController = testObject
 
-      val document = BSONDocument(
-        "user_id" -> BSONDocument("$oid" -> "593938f42e00002e008516ee"),
-        "email" -> "test@example.com",
-        "date" -> BSONDateTime(1497119400000L),
-        "session" -> "session 1",
-        "topic" -> "topic",
-        "meetup" -> true,
-        "rating" -> "",
-        "cancelled" -> false,
-        "active" -> true)
-
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+      val document = SessionInfo("593938f42e00002e008516ee", "test@example.com", date, "session 1", "topic", true, "", false, true)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
       val jsObj = JsObject(Map("_id" -> JsObject(Map("$oid" -> JsString("593938f42e00002e008516ee"))),
-        "user_id" -> JsString("userId"),
         "email" -> JsString("test@example.com"),
-        "date" -> JsObject(Map("$date" -> JsNumber(1497119400000L))),
-        "session" -> JsString("session"),
-        "topic" -> JsString("topic"),
-        "meetup" -> JsBoolean(true),
-        "rating" -> JsString(""),
-        "cancelled" -> JsBoolean(false),
-        "active" -> JsBoolean(true)
+        "password" -> JsString("abc"),
+        "algorithm" -> JsString("BCrypt"),
+        "active" -> JsBoolean(true),
+        "admin" -> JsBoolean(false)
       ))
+
       val emailObject = Future.successful(List(jsObj))
-
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.create(document) returns updateWriteResult
+      sessionController.sessionsRepository.insert(document) returns updateWriteResult
 
-      val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
-      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-      val sessionDateString = simpleDateFormat.format(sessionDate)
-
-      val result =
-        sessionController.sessionController.createSession(FakeRequest(POST, "create")
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-          .withFormUrlEncodedBody("email" -> "test@example.com",
-            "date" -> sessionDateString,
-            "session" -> "session 1",
-            "topic" -> "topic",
-            "meetup" -> "true"))
+      val result = sessionController.sessionController.createSession(FakeRequest(POST, "create")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("email" -> "test@example.com",
+          "date" -> "2017-06-25",
+          "session" -> "session 1",
+          "topic" -> "topic",
+          "meetup" -> "true"))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
@@ -254,15 +216,11 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val sessionController = testObject
 
       val jsObj = JsObject(Map("_id" -> JsObject(Map("$oid" -> JsString("593938f42e00002e008516ee"))),
-        "user_id" -> JsString("userId"),
         "email" -> JsString("test@example.com"),
-        "date" -> JsObject(Map("$date" -> JsNumber(1497119400000L))),
-        "session" -> JsString("session"),
-        "topic" -> JsString("topic"),
-        "meetup" -> JsBoolean(true),
-        "rating" -> JsString(""),
-        "cancelled" -> JsBoolean(false),
-        "active" -> JsBoolean(true)
+        "password" -> JsString("abc"),
+        "algorithm" -> JsString("BCrypt"),
+        "active" -> JsBoolean(true),
+        "admin" -> JsBoolean(false)
       ))
       val emailObject = Future.successful(List(jsObj))
 
@@ -276,8 +234,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         sessionController.sessionController.createSession(FakeRequest(POST, "create")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("email" -> "test@example.com",
-            "date" -> sessionDateString,
-            "session" -> "session",
+            "date" -> "25/06/2017",
+            "session" -> "session 1",
             "topic" -> "topic",
             "meetup" -> "true"))
 

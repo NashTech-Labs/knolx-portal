@@ -1,17 +1,17 @@
 package controllers
 
 import com.typesafe.config.ConfigFactory
-import models.UsersRepository
+import models.{UserInfo, UsersRepository}
+import org.mockito.Matchers.{eq => eqTo}
 import org.specs2.mock.Mockito
-import play.api.{Configuration, Environment}
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
+import play.api.{Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class UsersControllerSpec extends PlaySpecification with Mockito {
@@ -45,20 +45,12 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
 
     "create user" in new WithApplication {
       val controller = testObject
-
-      val document = BSONDocument(
-        "email" -> "usertest@example.com",
-        "password" -> "$2a$10$",
-        "algorithm" -> "BCrypt",
-        "active" -> true,
-        "admin" -> false)
-
+      val document = UserInfo("usertest@example.com", "$2a$10$", "BCrypt", true, false)
       val emailObject = Future.successful(List.empty)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       controller.usersRepository.getByEmail("usertest@example.com") returns emailObject
-
-      controller.usersRepository.create(document) returns updateWriteResult
+      controller.usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
       val result = controller.usersController.createUser(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("email" -> "usertest@example.com",
@@ -71,19 +63,14 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
     "not create user due to some error" in new WithApplication {
       val controller = testObject
 
-      val document = BSONDocument(
-        "email" -> "usertest@example.com",
-        "password" -> "$2a$10$",
-        "algorithm" -> "BCrypt",
-        "active" -> true,
-        "admin" -> false)
+      val document = UserInfo("usertest@example.com", "$2a$10$", "BCrypt", true, false)
 
       val emailObject = Future.successful(List.empty)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       controller.usersRepository.getByEmail("usertest@example.com") returns emailObject
 
-      controller.usersRepository.create(document) returns updateWriteResult
+      controller.usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
       val result = controller.usersController.createUser(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("email" -> "usertest@example.com",

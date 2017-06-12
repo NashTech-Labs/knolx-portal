@@ -2,7 +2,6 @@ package models
 
 import javax.inject.Inject
 
-import controllers.SessionFields._
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi

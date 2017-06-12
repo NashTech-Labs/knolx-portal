@@ -66,8 +66,15 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .sessions
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-          KnolxSession(session.userId, session.date, session.session, session.topic, session.email, session.meetup,
-            session.cancelled, session.rating)
+
+          KnolxSession(session.userId,
+            session.date,
+            session.session,
+            session.topic,
+            session.email,
+            session.meetup,
+            session.cancelled,
+            session.rating)
         }
 
         Ok(views.html.sessions(knolxSessions))
@@ -80,7 +87,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
 
-          KnolxSession(session.userId,
+          KnolxSession(session._id.stringify,
             session.date,
             session.session,
             session.topic,

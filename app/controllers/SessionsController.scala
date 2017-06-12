@@ -2,12 +2,14 @@ package controllers
 
 import java.util
 import javax.inject.{Inject, Singleton}
+
 import models.{SessionsRepository, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -79,13 +81,13 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         val knolxSessions = sessionsJson map { session =>
 
           KnolxSession(session.userId,
-                        session.date,
-                        session.session,
-                        session.topic,
-                        session.email,
-                        session.meetup,
-                        session.cancelled,
-                        session.rating)
+            session.date,
+            session.session,
+            session.topic,
+            session.email,
+            session.meetup,
+            session.cancelled,
+            session.rating)
         }
 
         Ok(views.html.managesessions(knolxSessions))

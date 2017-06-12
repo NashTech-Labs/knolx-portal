@@ -1,6 +1,7 @@
 package controllers
 
 import javax.inject._
+
 import controllers.UserFields._
 import models.UsersRepository
 import play.api.Logger
@@ -9,6 +10,7 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
 import utilities.{EncryptionUtility, PasswordUtility}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -36,7 +38,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
       verifying(
       "Password and confirm password do not match!",
       user => user.password.toLowerCase == user.confirmPassword.toLowerCase
-    )
+      )
   )
 
   val loginForm = Form(
@@ -62,7 +64,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
           .flatMap(_.headOption.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, true, false)
+                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false)
               )
               .map { result =>
                 if (result.ok) {

@@ -28,18 +28,6 @@ case class KnolxSession(id: String,
                         cancelled: Boolean,
                         rating: String)
 
-object SessionFields {
-  val Email = "email"
-  val Date = "date"
-  val UserId = "user_id"
-  val Session = "session"
-  val Topic = "topic"
-  val Meetup = "meetup"
-  val Cancelled = "cancelled"
-  val Rating = "rating"
-  val Active = "active"
-}
-
 object SessionValues {
   val Sessions = Seq("session 1" -> "Session 1", "session 2" -> "Session 2")
 }

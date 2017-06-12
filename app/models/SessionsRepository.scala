@@ -47,7 +47,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .findAndUpdate(
             BSONDocument("userId" -> id),
-            BSONDocument("$set" -> BSONDocument(Active -> false)),
+            BSONDocument("$set" -> BSONDocument("active" -> false)),
             fetchNewObject = true,
             upsert = false)
           .map(_.value))
@@ -56,8 +56,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj(Active -> true))
-          .sort(Json.obj(Date -> 1))
+          .find(Json.obj("active" -> true))
+          .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List]())
 

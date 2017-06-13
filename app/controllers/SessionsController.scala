@@ -98,13 +98,12 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         usersRepository
           .getByEmail(sessionInfo.email.toLowerCase)
           .flatMap(_.headOption.fold {
-            Future.successful(
-              BadRequest(views.html.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!")))
-            )
+            Future.successful(BadRequest(views.html.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!"))))
           } { userJson =>
             val userObjId = userJson._id.stringify
             val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
               sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
+
             sessionsRepository.insert(session) map { result =>
               if (result.ok) {
                 Logger.info(s"Session for user ${sessionInfo.email} successfully created")
@@ -128,7 +127,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Logger.info(s"Knolx session $id successfully deleted")
         Ok
       })
-
   }
 
   def updateSession(id: String): Action[AnyContent] = UserAction { implicit request =>

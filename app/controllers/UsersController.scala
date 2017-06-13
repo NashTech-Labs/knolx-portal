@@ -35,9 +35,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
       "confirmPassword" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8)
     )(UserInformation.apply)(UserInformation.unapply)
       verifying(
-      "Password and confirm password do not match!",
-      user => user.password.toLowerCase == user.confirmPassword.toLowerCase
-    )
+      "Password and confirm password do not match!", user => user.password.toLowerCase == user.confirmPassword.toLowerCase)
   )
 
   val loginForm = Form(
@@ -64,9 +62,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
             usersRepository
               .insert(
                 models.UserInfo(userInfo.email,
-                  PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false)
-
-              )
+                  PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
               .map { result =>
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")

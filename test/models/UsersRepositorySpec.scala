@@ -1,6 +1,5 @@
 package models
 
-import play.api.libs.json.{JsBoolean, JsNumber, JsObject, JsString}
 import play.api.test.PlaySpecification
 
 import scala.concurrent.ExecutionContext.Implicits.global

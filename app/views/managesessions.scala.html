@@ -40,7 +40,7 @@
                             @knolxSessions.map { knolxSession =>
                                 <tr>
                                     <td align="center">
-                                        <a href="@routes.SessionsController.updateSession(knolxSession.id)" class="btn btn-default"><em class="fa fa-pencil"></em></a>
+                                        <a href="@routes.SessionsController.update(knolxSession.id)" class="btn btn-default"><em class="fa fa-pencil"></em></a>
                                         <a href="@routes.SessionsController.deleteSession(knolxSession.id)" class="btn btn-danger">
                                             <em class="fa fa-trash"></em>
                                         </a>

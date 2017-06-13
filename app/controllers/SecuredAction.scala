@@ -28,10 +28,11 @@ trait SecuredImplicit {
         .flatMap(_.headOption.fold {
           Logger.info(s"Unauthorized access for email $emailFromSession")
           Future.successful(Unauthorized("Unauthorized access!"))
-        } { userJson =>
-          val email = userJson.email
-          val admin = userJson.admin
+        } { userInfo =>
+          val email = userInfo.email
+          val admin = userInfo.admin
           val userSession = UserSession("id", email, admin)
+
           block(SecuredRequest(userSession, request))
         })
     }

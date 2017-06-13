@@ -20,17 +20,18 @@ case class UserInfo(email: String,
                     admin: Boolean,
                     _id: BSONObjectID = BSONObjectID.generate)
 
-
 object UserJsonFormats {
 
   import play.api.libs.json.Json
 
-  implicit val feedFormat = Json.format[UserInfo]
+  implicit val userFormat = Json.format[UserInfo]
 }
 
 class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def getByEmail(email: String)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
     collection
@@ -40,8 +41,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[UserInfo](ReadPreference.Primary)
           .collect[List]())
   }
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection

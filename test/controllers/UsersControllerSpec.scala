@@ -5,10 +5,10 @@ import models.{UserInfo, UsersRepository}
 import org.mockito.Matchers.{eq => eqTo}
 import org.specs2.mock.Mockito
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
-import play.api.libs.json.{JsBoolean, JsObject, JsString}
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 import play.api.{Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -83,10 +83,14 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
 
     "not create user when email already exists" in new WithApplication {
       val controller = testObject
+      /*
 
-      val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"), "email" -> JsString("test@example.com"),
-        "admin" -> JsBoolean(false), "password" -> JsString("$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.")))))
+            val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"), "email" -> JsString("test@example.com"),
+              "admin" -> JsBoolean(false), "password" -> JsString("$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.")))))
+      */
 
+      val _id: BSONObjectID = BSONObjectID.generate
+      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", true, false, _id)))
       controller.usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.usersController.createUser(FakeRequest(POST, "create")
@@ -101,9 +105,11 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
     "not create user due to BadFormRequest" in new WithApplication {
       val controller = testObject
 
-      val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
-        "email" -> JsString("test@example.com"), "admin" -> JsBoolean(false)))))
+      /*val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
+        "email" -> JsString("test@example.com"), "admin" -> JsBoolean(false)))))*/
 
+      val _id: BSONObjectID = BSONObjectID.generate
+      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", true, false, _id)))
       controller.usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.usersController.createUser(FakeRequest(POST, "create")
@@ -118,9 +124,12 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
     "login user when he is an admin" in new WithApplication {
       val controller = testObject
 
-      val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
+      /*val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
         "email" -> JsString("test@example.com"), "admin" -> JsBoolean(true),
-        "password" -> JsString("$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.")))))
+        "password" -> JsString("$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.")))))*/
+
+      val _id: BSONObjectID = BSONObjectID.generate
+      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", true, false, _id)))
 
       controller.usersRepository.getByEmail("test@example.com") returns emailObject
       val result = controller.usersController.loginUser(FakeRequest()
@@ -135,9 +144,11 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
     "login user when he is not an admin" in new WithApplication {
       val controller = testObject
 
-      val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
+      /*val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
         "email" -> JsString("test@example.com"), "admin" -> JsBoolean(false),
-        "password" -> JsString("$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.")))))
+        "password" -> JsString("$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.")))))*/
+      val _id: BSONObjectID = BSONObjectID.generate
+      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", true, false, _id)))
 
       controller.usersRepository.getByEmail("test@example.com") returns emailObject
       val result = controller.usersController.loginUser(FakeRequest()
@@ -168,9 +179,11 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
     "not login user when credentials are invalid" in new WithApplication {
       val controller = testObject
 
-      val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
+      /*val emailObject = Future.successful(List(JsObject(Seq("id" -> JsString("123"),
         "email" -> JsString("test@example.com"),
-        "password" -> JsString("$2a$10$RdgzSPeWFo/jvadX3ykvGes1Y8OrY8HBqNExxeEoORoEEHEFeUnUG")))))
+        "password" -> JsString("$2a$10$RdgzSPeWFo/jvadX3ykvGes1Y8OrY8HBqNExxeEoORoEEHEFeUnUG")))))*/
+      val _id: BSONObjectID = BSONObjectID.generate
+      val emailObject = Future.successful(List(UserInfo("usertest@example.com", "$2a$10$RdgzSPeWFo/jvadX3ykvGes1Y8OrY8HBqNExxeEoORoEEHEFeUnUG", "BCrypt", true, false, _id)))
 
       controller.usersRepository.getByEmail("test@example.com") returns emailObject
       val result = controller.usersController.loginUser(FakeRequest()

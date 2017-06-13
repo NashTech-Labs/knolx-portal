@@ -17,6 +17,7 @@ GET         /session/manage        controllers.SessionsController.manageSessions
 GET         /session/create        controllers.SessionsController.create
 POST        /session/create        controllers.SessionsController.createSession
 GET         /session/delete        controllers.SessionsController.deleteSession(id: String)
+#GET         /session/update        controllers.SessionsController.updateSession(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file          controllers.Assets.versioned(path="/public", file: Asset)

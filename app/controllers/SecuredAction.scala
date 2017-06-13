@@ -28,11 +28,11 @@ trait SecuredImplicit {
         .flatMap(_.headOption.fold {
           Logger.info(s"Unauthorized access for email $emailFromSession")
           Future.successful(Unauthorized("Unauthorized access!"))
-        } { userJson =>
-          val email = userJson.fields.toMap.get("email").flatMap(_.validate[String].asOpt).getOrElse("")
-          val admin = userJson.fields.toMap.get("admin").flatMap(_.validate[Boolean].asOpt).getOrElse(false)
-
+        } { userInfo =>
+          val email = userInfo.email
+          val admin = userInfo.admin
           val userSession = UserSession("id", email, admin)
+
           block(SecuredRequest(userSession, request))
         })
     }
@@ -49,10 +49,10 @@ trait SecuredImplicit {
         .flatMap(_.headOption.fold {
           Logger.info(s"Unauthorized access for email $emailFromSession")
           Future.successful(Unauthorized("Unauthorized access!"))
-        } { userJson =>
-          val id = userJson.fields.toMap.get("_id").map(_.validate[Map[String, String]].get("$oid")).getOrElse("")
-          val email = userJson.fields.toMap.get("email").flatMap(_.validate[String].asOpt).getOrElse("")
-          val admin = userJson.fields.toMap.get("admin").flatMap(_.validate[Boolean].asOpt).getOrElse(false)
+        } { userInfo =>
+          val id = userInfo._id.stringify
+          val email = userInfo.email
+          val admin = userInfo.admin
 
           if (admin) {
             val userSession = UserSession(id, email, admin)

@@ -8,7 +8,7 @@
     <div class="container-fluid">
 
         <div class="navbar-header">
-            <a class="navbar-brand" href="@routes.HomeController.index()">Portal</a>
+            <a class="navbar-brand" href="@routes.HomeController.index()">Knolx Portal</a>
         </div>
 
         <ul class="nav navbar-nav">
@@ -23,6 +23,12 @@
             @if(SessionHelper.isAdmin) {
                 <li class="@activeLink(routes.SessionsController.manageSessions().url)">
                     <a href="@routes.SessionsController.manageSessions()">Manage Sessions</a>
+                </li>
+            }
+
+            @if(SessionHelper.isAdmin) {
+                <li class="@activeLink(routes.FeedbackController.feedbackForm().url)">
+                    <a href="@routes.FeedbackController.feedbackForm()">Manage Feedback Forms</a>
                 </li>
             }
 

@@ -2,19 +2,42 @@ package models
 
 import javax.inject.Inject
 
+import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
-import play.modules.reactivemongo.json._
 import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import controllers.SessionFields._
+
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+
+case class SessionInfo(
+                        userId: String,
+                        email: String,
+                        date: java.util.Date,
+                        session: String,
+                        topic: String,
+                        meetup: Boolean,
+                        rating: String,
+                        cancelled: Boolean,
+                        active: Boolean,
+                        _id: BSONObjectID = BSONObjectID.generate)
+
+object SessionJsonFormats {
+
+  import play.api.libs.json.Json
+
+  implicit val sessionFormat = Json.format[SessionInfo]
+
+}
 
 class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+
+  import play.modules.reactivemongo.json._
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
@@ -23,24 +46,25 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .findAndUpdate(
-            BSONDocument("_id" -> id),
-            BSONDocument("$set" -> BSONDocument(Active -> false)),
+            BSONDocument("_id" -> BSONDocument("$oid" -> id)),
+            BSONDocument("$set" -> BSONDocument("active" -> false)),
             fetchNewObject = true,
-            upsert = true)
+            upsert = false)
           .map(_.value))
 
-  def sessions(implicit ex: ExecutionContext): Future[List[JsObject]] =
+  def sessions(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj(Active -> true))
-          .sort(Json.obj(Date -> 1))
-          .cursor[JsObject](ReadPreference.Primary)
+          .find(Json.obj("active" -> true))
+          .sort(Json.obj("date" -> 1))
+          .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List]())
 
-  def create(document: BSONDocument)(implicit ex: ExecutionContext): Future[UpdateWriteResult] =
+  def insert(session: SessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
-        jsonCollection.
-          update(BSONDocument("_id" -> document.get("_id").getOrElse(BSONObjectID.generate)), document, upsert = true))
+        jsonCollection
+          .insert(session))
+
 }

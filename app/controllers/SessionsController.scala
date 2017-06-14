@@ -59,7 +59,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.cancelled, session.rating)
         }
 
-        Ok(views.html.sessions(knolxSessions))
+        Ok(views.html.sessions.sessions(knolxSessions))
       }
   }
 
@@ -80,25 +80,25 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.rating)
         }
 
-        Ok(views.html.managesessions(knolxSessions))
+        Ok(views.html.sessions.managesessions(knolxSessions))
       }
   }
 
   def create: Action[AnyContent] = UserAction { implicit request =>
-    Ok(views.html.createsession(createSessionForm))
+    Ok(views.html.sessions.createsession(createSessionForm))
   }
 
   def createSession: Action[AnyContent] = UserAction.async { implicit request =>
     createSessionForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
-        Future.successful(BadRequest(views.html.createsession(formWithErrors)))
+        Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors)))
       },
       sessionInfo => {
         usersRepository
           .getByEmail(sessionInfo.email.toLowerCase)
           .flatMap(_.headOption.fold {
-            Future.successful(BadRequest(views.html.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!"))))
+            Future.successful(BadRequest(views.html.sessions.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!"))))
           } { userJson =>
             val userObjId = userJson._id.stringify
             val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,

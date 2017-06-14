@@ -12,7 +12,7 @@ class FeedbackController @Inject()(mailerClient: MailerClient,
   val usersRepo = usersRepository
 
   def feedbackForm: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.createfeedbackform())
+    Ok(views.html.feedback.createfeedbackform())
   }
 
   def createFeedbackForm: Action[AnyContent] = Action { implicit request =>

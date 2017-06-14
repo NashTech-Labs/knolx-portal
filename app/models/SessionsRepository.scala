@@ -1,4 +1,3 @@
-
 package models
 
 import javax.inject.Inject
@@ -14,6 +13,7 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
@@ -33,9 +33,7 @@ object SessionJsonFormats {
 
   import play.api.libs.json.Json
 
-  implicit val feedFormat = {
-    Json.format[SessionInfo]
-  }
+  implicit val sessionFormat = Json.format[SessionInfo]
 
 }
 

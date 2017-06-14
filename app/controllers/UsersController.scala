@@ -17,14 +17,6 @@ case class UserInformation(email: String, password: String, confirmPassword: Str
 
 case class LoginInformation(email: String, password: String)
 
-object UserFields {
-  val Email = "email"
-  val Password = "password"
-  val Algorithm = "algorithm"
-  val Active = "active"
-  val Admin = "admin"
-}
-
 @Singleton
 class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: UsersRepository) extends Controller with I18nSupport {
 
@@ -35,9 +27,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
       "confirmPassword" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8)
     )(UserInformation.apply)(UserInformation.unapply)
       verifying(
-      "Password and confirm password do not match!",
-      user => user.password.toLowerCase == user.confirmPassword.toLowerCase
-    )
+      "Password and confirm password do not match!", user => user.password.toLowerCase == user.confirmPassword.toLowerCase)
   )
 
   val loginForm = Form(
@@ -48,14 +38,14 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
   )
 
   def register: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.register(userForm))
+    Ok(views.html.users.register(userForm))
   }
 
   def createUser: Action[AnyContent] = Action.async { implicit request =>
     userForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user registration $formWithErrors")
-        Future.successful(BadRequest(views.html.register(formWithErrors)))
+        Future.successful(BadRequest(views.html.users.register(formWithErrors)))
       },
       userInfo => {
         usersRepository
@@ -63,10 +53,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
           .flatMap(_.headOption.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email,
-                  PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false)
-
-              )
+                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
               .map { result =>
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")
@@ -86,13 +73,13 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
   }
 
   def login: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.login(loginForm))
+    Ok(views.html.users.login(loginForm))
   }
 
   def loginUser: Action[AnyContent] = Action.async { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => {
-        Future.successful(BadRequest(views.html.login(formWithErrors)))
+        Future.successful(BadRequest(views.html.users.login(formWithErrors)))
       },
       loginInfo => {
         usersRepository
@@ -106,7 +93,6 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, password)) {
               Logger.info(s"User ${loginInfo.email.toLowerCase} successfully logged in")
-
               if (admin) {
                 Redirect(routes.HomeController.index())
                   .withSession(
@@ -120,7 +106,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
               }
             } else {
               Logger.info(s"Incorrect password for user ${loginInfo.email}")
-              Unauthorized(views.html.login(loginForm.fill(loginInfo).withGlobalError("Invalid credentials!")))
+              Unauthorized(views.html.users.login(loginForm.fill(loginInfo).withGlobalError("Invalid credentials!")))
             }
           })
       }

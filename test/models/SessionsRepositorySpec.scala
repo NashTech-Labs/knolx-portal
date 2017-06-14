@@ -55,6 +55,16 @@ class SessionsRepositorySpec extends PlaySpecification {
       updated must beEqualTo(true)
     }
 
+    "pageinate" in {
+      val page= await(sessionsRepository.pageinate(1))
+      page.size must beEqualTo(1)
+    }
+
+    "active count" in {
+      val count = await(sessionsRepository.activeCount)
+      count must beEqualTo(1)
+    }
+
     "delete session" in {
       val deletedSessionUsers = await(sessionsRepository.delete(_id.stringify))
 

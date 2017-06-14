@@ -47,6 +47,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
   val usersRepo: UsersRepository = usersRepository
 
+  val pageSize = 2d
+
   val createSessionForm = Form(
     mapping(
       "email" -> email,
@@ -67,25 +69,28 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions: Action[AnyContent] = Action.async { implicit request =>
-    sessionsRepository
-      .sessions
+  def sessions(pageNumber:Int): Action[AnyContent] = Action.async { implicit request =>
+  val result =  sessionsRepository
+      .pageinate(pageNumber)
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
           KnolxSession(session._id.stringify, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
             session.cancelled, session.rating)
         }
+           sessionsRepository.activeCount.map{count =>
+            val pages = Math.ceil(count/pageSize).toInt
+             Ok(views.html.sessions.sessions(knolxSessions,pages,pageNumber))
+           }
 
-        Ok(views.html.sessions.sessions(knolxSessions))
       }
+    result.flatMap(result => result)
   }
 
-  def manageSessions: Action[AnyContent] = AdminAction.async { implicit request =>
-    sessionsRepository
-      .sessions
+  def manageSessions(pageNumber:Int): Action[AnyContent] = AdminAction.async { implicit request =>
+    val result = sessionsRepository
+      .pageinate(pageNumber)
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
-
           KnolxSession(session._id.stringify,
             session.userId,
             session.date,
@@ -96,9 +101,13 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.cancelled,
             session.rating)
         }
+        sessionsRepository.activeCount.map{count =>
+          val pages = Math.ceil(count/pageSize).toInt
+          Ok(views.html.sessions.managesessions(knolxSessions,pages,pageNumber))
+        }
 
-        Ok(views.html.sessions.managesessions(knolxSessions))
       }
+    result.flatMap(result => result)
   }
 
   def create: Action[AnyContent] = UserAction { implicit request =>
@@ -157,7 +166,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
               sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
           Ok(views.html.sessions.updatesession(filledForm))
 
-        case None => Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "something went wrong")
+        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "something went wrong")
       }
   }
 
@@ -171,7 +180,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
          sessionsRepository.update(sessionUpdateInfo) map { result =>
            if (result.ok) {
              Logger.info(s"UPDATED Session for user ${sessionUpdateInfo._id} successfully created")
-             Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully Updated")
+             Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully Updated")
            } else {
              Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
              InternalServerError("Something went wrong!")

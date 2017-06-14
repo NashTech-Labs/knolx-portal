@@ -6,7 +6,7 @@ import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -38,7 +38,7 @@ object SessionJsonFormats {
 }
 
 class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
-
+  val pageSize = 2
   import play.modules.reactivemongo.json._
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
@@ -77,6 +77,23 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .insert(session))
+
+  def pageinate(pageNumber:Int)(implicit ex: ExecutionContext) : Future[List[SessionInfo]] = {
+    val skipN = (pageNumber-1) * pageSize
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.find(Json.obj("active" -> true)).options(queryOptions).
+          sort(Json.obj("date" -> 1)).
+          cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](pageSize))
+  }
+
+  def activeCount(implicit ex: ExecutionContext): Future[Int] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(Some(Json.obj("active" -> true)))
+      )
 
   def update(updatedRecord : UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] ={
 

@@ -29,9 +29,10 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
     "display sessions page" in {
       val sessionController = testObject
 
-      sessionController.sessionsRepository.sessions returns sessionObject
+      sessionController.sessionsRepository.pageinate(1) returns sessionObject
+      sessionController.sessionsRepository.activeCount returns  Future.successful(1)
 
-      val result = sessionController.sessionController.sessions(FakeRequest())
+      val result = sessionController.sessionController.sessions(1)(FakeRequest())
 
       contentAsString(result) must be contain "<th>Topic</th>"
       status(result) must be equalTo OK
@@ -44,9 +45,10 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.sessions returns sessionObject
+      sessionController.sessionsRepository.pageinate(1) returns sessionObject
+      sessionController.sessionsRepository.activeCount returns  Future.successful(1)
 
-      val result = sessionController.sessionController.manageSessions(FakeRequest()
+      val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""
@@ -61,7 +63,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       sessionController.usersRepository.getByEmail("") returns emailObject
       sessionController.sessionsRepository.sessions returns sessionObject
 
-      val result = sessionController.sessionController.manageSessions(FakeRequest())
+      val result = sessionController.sessionController.manageSessions(1)(FakeRequest())
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo UNAUTHORIZED
@@ -76,7 +78,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionController.sessionsRepository.sessions returns sessionObject
 
-      val result = sessionController.sessionController.manageSessions(FakeRequest()
+      val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""
@@ -89,7 +91,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val emailObject = Future.successful(List.empty)
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = sessionController.sessionController.manageSessions(FakeRequest()
+      val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""

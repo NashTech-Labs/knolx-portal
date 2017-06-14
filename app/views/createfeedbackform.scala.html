@@ -1,18 +1,20 @@
 @()(implicit request: Request[_])
 
-@main("Create New Form") {
+@main("Create Feedback Form") {
 
-    <form>
+    <form id="feedbackform">
+
         <a onclick="addQuestion()">+</a>
+
         <div id="questions">
             <div id="question-0">
-                <input placeholder="Question" type="text">
+                <input id="questionValue-0" placeholder="Question" type="text">
                 <br>
 
                 <div id="options-0">
                     <div id="option-0-0">
                         <input type="radio" disabled>
-                        <input placeholder="Option" type="text">
+                        <input id="optionValue-0-0" placeholder="Option" type="text">
                     </div>
 
                     <a id="addOption-0-0" onclick="addOption(this)">Add option</a>
@@ -21,13 +23,43 @@
                 <br>
             </div>
         </div>
+
     </form>
 
+    <a onclick="createForm()">Create</a>
+
+
     <script>
+            class Question {
+                constructor(question, options) {
+                    this.question = question;
+                    this.options = options;
+                }
+            }
+
             var optionsCount = 0;
             var questionCount = 0;
             var questions = new Map([]);
             questions.set(0, 1);
+
+            function createForm() {
+                var questionsValues = [];
+
+                questions.forEach(function (options, question, obj) {
+                    var questionValue = document.getElementById('questionValue-' + question).value;
+                    var optionValues = [];
+
+                    for(i = 0; i < options; i++) {
+                        var optionValue = document.getElementById('optionValue-' + question + '-' + i).value;
+
+                        optionValues.push(optionValue)
+                    }
+
+                    questionsValues.push(new Question(questionValue, options))
+                });
+
+                console.log(JSON.stringify(questionsValues))
+            }
 
             function deleteOption(deleteElem) {
                 var splitIds = deleteElem.id.split("-");
@@ -58,7 +90,7 @@
                 $('#options-' + questionCountId).append(
                         '<div id="option-' + questionCountId + '-' + optionCountId + '">' +
                         '   <input type="radio" disabled>' +
-                        '   <input placeholder="Option" type="text">' +
+                        '   <input id="optionValue-' + questionCountId + '-' + optionCountId + '" placeholder="Option" type="text">' +
                         '   <a id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)">X</a>' +
                         '   <br>' +
                         '   <a id="addOption-' + questionCountId + '-' + optionCountId + '" onclick="addOption(this)">Add option</a>' +
@@ -84,13 +116,13 @@
 
                 $('#questions').append(
                         '<div id="question-' + questionCount + '">' +
-                        '   <input placeholder="Question" type="text">' +
+                        '   <input id="questionValue-' + questionCount + '" placeholder="Question" type="text">' +
                         '   <a id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)">X</a>' +
                         '   <br>' +
                         '   <div id="options-' + questionCount + '">' +
                         '       <div id="option-' + questionCount + '-' + optionsCount + '">' +
                         '           <input type="radio" disabled>' +
-                        '           <input placeholder="Option" type="text">' +
+                        '           <input id="optionValue-' + questionCount + '-' + 0 + '" placeholder="Option" type="text">' +
                         '       </div>' +
                         '   </div>' +
                         '   <br>' +

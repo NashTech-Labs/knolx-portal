@@ -1,0 +1,102 @@
+@()(implicit request: Request[_])
+
+@main("Create New Form") {
+
+    <form>
+        <a onclick="addQuestion()">+</a>
+        <div id="questions">
+            <div id="question-0">
+                <input placeholder="Question" type="text">
+                <br>
+
+                <div id="options-0">
+                    <div id="option-0-0">
+                        <input type="radio" disabled>
+                        <input placeholder="Option" type="text">
+                    </div>
+
+                    <a id="addOption-0-0" onclick="addOption(this)">Add option</a>
+                </div>
+
+                <br>
+            </div>
+        </div>
+    </form>
+
+    <script>
+            var optionsCount = 0;
+            var questionCount = 0;
+            var questions = new Map([]);
+            questions.set(0, 1);
+
+            function deleteOption(deleteElem) {
+                var splitIds = deleteElem.id.split("-");
+                var questionCountId = parseInt(splitIds[1]);
+                var optionCountId = parseInt(splitIds[2]);
+
+                var currentQuestionOptions = questions.get(questionCountId);
+
+                questions.set(questionCountId, currentQuestionOptions - 1);
+                var questionOptionsAfterDelete = questions.get(questionCountId);
+
+                $('#option-' + questionCountId + '-' + optionCountId).remove();
+
+                if(questionOptionsAfterDelete == 1) {
+                    $('#options-' + questionCountId).append('<a id="addOption-' + questionCountId + '-0" onclick="addOption(this)">Add option</a>')
+                }
+            }
+
+            function addOption(addElem) {
+                var splitIds = addElem.id.split("-");
+
+                var questionCountId = parseInt(splitIds[1]);
+                var optionCountId = parseInt(splitIds[2]) + 1;
+
+                var currentQuestionOptions = questions.get(questionCountId);
+                questions.set(questionCountId, currentQuestionOptions + 1);
+
+                $('#options-' + questionCountId).append(
+                        '<div id="option-' + questionCountId + '-' + optionCountId + '">' +
+                        '   <input type="radio" disabled>' +
+                        '   <input placeholder="Option" type="text">' +
+                        '   <a id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)">X</a>' +
+                        '   <br>' +
+                        '   <a id="addOption-' + questionCountId + '-' + optionCountId + '" onclick="addOption(this)">Add option</a>' +
+                        '</div>'
+                );
+
+                $('#addOption-' + questionCountId + '-' + (optionCountId - 1)).remove();
+            }
+
+            function deleteQuestion(questionElem) {
+                var splitIds = questionElem.id.split("-");
+
+                var questionCountId = parseInt(splitIds[1]);
+
+                questions.delete(questionCountId);
+
+                $('#question-' + questionCountId).remove()
+            }
+
+            function addQuestion() {
+                questionCount = questionCount + 1;
+                questions.set(questionCount, 1);
+
+                $('#questions').append(
+                        '<div id="question-' + questionCount + '">' +
+                        '   <input placeholder="Question" type="text">' +
+                        '   <a id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)">X</a>' +
+                        '   <br>' +
+                        '   <div id="options-' + questionCount + '">' +
+                        '       <div id="option-' + questionCount + '-' + optionsCount + '">' +
+                        '           <input type="radio" disabled>' +
+                        '           <input placeholder="Option" type="text">' +
+                        '       </div>' +
+                        '   </div>' +
+                        '   <br>' +
+                        '   <a id="addOption-' + questionCount + '-' + optionsCount + '" onclick="addOption(this)">Add option</a>' +
+                        '</div>')
+            }
+    </script>
+
+}

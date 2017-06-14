@@ -242,7 +242,6 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo BAD_REQUEST
     }
 
-
     "not create session due to unauthorized access" in new WithApplication {
       val sessionController = testObject
 
@@ -265,6 +264,159 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       status(result) must be equalTo UNAUTHORIZED
     }
+
+    "render update session form" in new WithApplication {
+      val sessionsController = testObject
+
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+
+      val emailObject = Future.successful(List(UserInfo("test@example.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+      val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", date, "session 1",
+        "topic", meetup = false, "", cancelled = false, active = true, _id)))
+      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
+
+      val result = sessionsController.sessionController.update(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo OK
+    }
+
+    "render manage session form" in new WithApplication {
+      val sessionsController = testObject
+
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+
+      val emailObject = Future.successful(List(UserInfo("test@example.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+      val sessionInfo = Future.successful(None)
+      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
+
+      val result = sessionsController.sessionController.update(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "not render update session form/manage session form due to unauthorized access" in new WithApplication {
+      val sessionController = testObject
+
+      val emailObject = Future.successful(List.empty)
+
+      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
+      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+      val sessionDateString = simpleDateFormat.format(sessionDate)
+
+      val result = sessionController.sessionController.update(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo UNAUTHORIZED
+    }
+
+    "update session" in new WithApplication {
+      val sessionController = testObject
+
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+
+      val emailObject = Future.successful(List(UserInfo("test@example.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "topic", meetup = true)
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
+
+      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("sessionId" -> _id.stringify,
+          "date" -> "2017-06-25",
+          "session" -> "session 1",
+          "topic" -> "topic",
+          "meetup" -> "true"))
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "not update session when result is false" in new WithApplication {
+      val sessionController = testObject
+
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+
+      val emailObject = Future.successful(List(UserInfo("test@example.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "topic", meetup = true)
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
+
+      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("sessionId" -> _id.stringify,
+          "date" -> "2017-06-25",
+          "session" -> "session 1",
+          "topic" -> "topic",
+          "meetup" -> "true"))
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "not update session due to BadFormRequest" in new WithApplication {
+      val sessionController = testObject
+
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+
+      val emailObject = Future.successful(List(UserInfo("test@example.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("sessionId" -> _id.stringify,
+          "date" -> "25/06/2017",
+          "session" -> "session",
+          "topic" -> "topic",
+          "meetup" -> "true"))
+      status(result) must be equalTo BAD_REQUEST
+
+    }
+
+    "not update session due to unauthorized access" in new WithApplication {
+      val sessionController = testObject
+
+      val emailObject = Future.successful(List.empty)
+
+      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
+      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+      val sessionDateString = simpleDateFormat.format(sessionDate)
+
+      val result =
+        sessionController.sessionController.createSession(FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("sessionId" -> _id.stringify,
+            "date" -> sessionDateString,
+            "session" -> "session 1",
+            "topic" -> "topic",
+            "meetup" -> "true"))
+
+      status(result) must be equalTo UNAUTHORIZED
+    }
+
   }
 
   def testObject: TestObject = {

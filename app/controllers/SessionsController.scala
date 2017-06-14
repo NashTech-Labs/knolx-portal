@@ -145,7 +145,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Logger.info(s"Knolx session $id successfully deleted")
         Ok
       })
-
   }
 
   def update(id:String): Action[AnyContent] = AdminAction.async { implicit request =>

@@ -1,1 +1,0 @@
-# knolx-portal

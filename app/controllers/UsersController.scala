@@ -61,8 +61,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
           .flatMap(_.headOption.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email,
-                  PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
+                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
               .map { result =>
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")
@@ -102,7 +101,6 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, password)) {
               Logger.info(s"User ${loginInfo.email.toLowerCase} successfully logged in")
-
               if (admin) {
                 Redirect(routes.HomeController.index())
                   .withSession(

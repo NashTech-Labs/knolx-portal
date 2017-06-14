@@ -9,13 +9,13 @@ import scala.concurrent.duration._
 
 object TestDb extends MongoEmbedDatabase {
 
-  mongoStart(27017)
+  mongoStart(27018)
 
   private val appBuilder = new GuiceApplicationBuilder().build
 
   val reactiveMongoApi = appBuilder.injector.instanceOf[ReactiveMongoApi]
 
-  private val defaultDb = Await.result(reactiveMongoApi.database, 5.seconds)
+  private val defaultDb = Await.result(reactiveMongoApi.database, Duration.Inf)
 
   require(defaultDb.connection.active)
 

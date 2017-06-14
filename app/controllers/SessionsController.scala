@@ -129,8 +129,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       })
   }
 
-  def updateSession(id: String): Action[AnyContent] = UserAction { implicit request =>
-    Ok(views.html.updatesession(createSessionForm))
-  }
+  /* def updateSession(id: String): Action[AnyContent] = UserAction { implicit request =>
+     Ok(views.html.updatesession(createSessionForm))
+   }*/
 
 }

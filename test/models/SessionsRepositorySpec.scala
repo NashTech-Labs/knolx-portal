@@ -55,8 +55,8 @@ class SessionsRepositorySpec extends PlaySpecification {
       updated must beEqualTo(true)
     }
 
-    "pageinate" in {
-      val page= await(sessionsRepository.pageinate(1))
+    "paginate" in {
+      val page= await(sessionsRepository.paginate(1))
       page.size must beEqualTo(1)
     }
 

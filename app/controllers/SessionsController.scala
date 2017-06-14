@@ -47,7 +47,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
   val usersRepo: UsersRepository = usersRepository
 
-  val pageSize = 2d
+  val pageSize = 10d
 
   val createSessionForm = Form(
     mapping(
@@ -71,7 +71,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
   def sessions(pageNumber:Int): Action[AnyContent] = Action.async { implicit request =>
   val result =  sessionsRepository
-      .pageinate(pageNumber)
+      .paginate(pageNumber)
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
           KnolxSession(session._id.stringify, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
@@ -88,7 +88,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
   def manageSessions(pageNumber:Int): Action[AnyContent] = AdminAction.async { implicit request =>
     val result = sessionsRepository
-      .pageinate(pageNumber)
+      .paginate(pageNumber)
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
           KnolxSession(session._id.stringify,
@@ -188,6 +188,5 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
          }
       })
   }
-
 
 }

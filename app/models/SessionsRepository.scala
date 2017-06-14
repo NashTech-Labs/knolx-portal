@@ -38,7 +38,7 @@ object SessionJsonFormats {
 }
 
 class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
-  val pageSize = 2
+  val pageSize = 10
   import play.modules.reactivemongo.json._
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
@@ -78,7 +78,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .insert(session))
 
-  def pageinate(pageNumber:Int)(implicit ex: ExecutionContext) : Future[List[SessionInfo]] = {
+  def paginate(pageNumber:Int)(implicit ex: ExecutionContext) : Future[List[SessionInfo]] = {
     val skipN = (pageNumber-1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
     collection

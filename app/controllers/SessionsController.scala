@@ -152,8 +152,12 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
    sessionsRepository
       .getById(id)
       .map {
-        case Some(x)=> Ok(views.html.updatesession(x))
-        case None => Redirect(routes.UsersController.register()).flashing("message" -> "something went wrong")
+        case Some(sessionInformation)=>
+            val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
+              sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
+          Ok(views.html.updatesession(filledForm))
+
+        case None => Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "something went wrong")
       }
   }
 
@@ -161,13 +165,13 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     updateSessionForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for update session $formWithErrors")
-        Future.successful(Redirect(routes.UsersController.register()).flashing("message" -> "session update failed"))
+        Future.successful(BadRequest(views.html.updatesession(formWithErrors)))
       },
       sessionUpdateInfo => {
          sessionsRepository.update(sessionUpdateInfo) map { result =>
            if (result.ok) {
              Logger.info(s"UPDATED Session for user ${sessionUpdateInfo._id} successfully created")
-             Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully Updated")
+             Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully Updated")
            } else {
              Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
              InternalServerError("Something went wrong!")

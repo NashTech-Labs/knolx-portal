@@ -17,14 +17,6 @@ case class UserInformation(email: String, password: String, confirmPassword: Str
 
 case class LoginInformation(email: String, password: String)
 
-object UserFields {
-  val Email = "email"
-  val Password = "password"
-  val Algorithm = "algorithm"
-  val Active = "active"
-  val Admin = "admin"
-}
-
 @Singleton
 class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: UsersRepository) extends Controller with I18nSupport {
 

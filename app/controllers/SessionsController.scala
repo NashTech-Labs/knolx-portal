@@ -76,7 +76,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.cancelled, session.rating)
         }
 
-        Ok(views.html.sessions(knolxSessions))
+        Ok(views.html.sessions.sessions(knolxSessions))
       }
   }
 
@@ -97,26 +97,26 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.rating)
         }
 
-        Ok(views.html.managesessions(knolxSessions))
+        Ok(views.html.sessions.managesessions(knolxSessions))
       }
   }
 
   def create: Action[AnyContent] = UserAction { implicit request =>
-    Ok(views.html.createsession(createSessionForm))
+    Ok(views.html.sessions.createsession(createSessionForm))
   }
 
   def createSession: Action[AnyContent] = UserAction.async { implicit request =>
     createSessionForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
-        Future.successful(BadRequest(views.html.createsession(formWithErrors)))
+        Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors)))
       },
       sessionInfo => {
         usersRepository
           .getByEmail(sessionInfo.email.toLowerCase)
           .flatMap(_.headOption.fold {
             Future.successful(
-              BadRequest(views.html.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!")))
+              BadRequest(views.html.sessions.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!")))
             )
           } { userJson =>
             val userObjId = userJson._id.stringify
@@ -155,7 +155,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         case Some(sessionInformation)=>
             val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
               sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
-          Ok(views.html.updatesession(filledForm))
+          Ok(views.html.sessions.updatesession(filledForm))
 
         case None => Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "something went wrong")
       }
@@ -165,7 +165,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     updateSessionForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for update session $formWithErrors")
-        Future.successful(BadRequest(views.html.updatesession(formWithErrors)))
+        Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors)))
       },
       sessionUpdateInfo => {
          sessionsRepository.update(sessionUpdateInfo) map { result =>

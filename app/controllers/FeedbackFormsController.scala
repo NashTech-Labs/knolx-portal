@@ -1,6 +1,6 @@
 package controllers
 
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
 import models.{Question, FeedbackForm, FeedbackFormsRepository, UsersRepository}
 import play.api.Logger
@@ -38,6 +38,7 @@ case class FeedbackFormInformation(questions: List[QuestionInformation]) {
 
 case class QuestionInformation(question: String, options: List[String])
 
+@Singleton
 class FeedbackFormsController @Inject()(mailerClient: MailerClient,
                                         usersRepository: UsersRepository,
                                         feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit {

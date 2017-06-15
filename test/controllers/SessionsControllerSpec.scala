@@ -31,7 +31,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val sessionController = testObject
 
       sessionController.sessionsRepository.paginate(1) returns sessionObject
-      sessionController.sessionsRepository.activeCount returns  Future.successful(1)
+      sessionController.sessionsRepository.activeCount returns Future.successful(1)
 
       val result = sessionController.sessionController.sessions(1)(FakeRequest())
 
@@ -47,7 +47,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionController.sessionsRepository.paginate(1) returns sessionObject
-      sessionController.sessionsRepository.activeCount returns  Future.successful(1)
+      sessionController.sessionsRepository.activeCount returns Future.successful(1)
 
       val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))

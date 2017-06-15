@@ -58,12 +58,14 @@ class SessionsRepositorySpec extends PlaySpecification {
     }
 
     "paginate" in {
-      val page= await(sessionsRepository.paginate(1))
+      val page = await(sessionsRepository.paginate(1))
+
       page.size must beEqualTo(1)
     }
 
     "active count" in {
       val count = await(sessionsRepository.activeCount)
+
       count must beEqualTo(1)
     }
 

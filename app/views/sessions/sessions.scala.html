@@ -1,4 +1,4 @@
-@(knolxSessions: List[KnolxSession],pages : Int,pageNumber : Int)(implicit request: Request[_])
+@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_])
 
     @main("Sessions") {
 
@@ -53,9 +53,9 @@
                                 </div>
                                 <div class="col col-xs-8">
                                     <ul class="pagination hidden-xs pull-right">
-                                        @for(pagenumber <- (1 to pages) ) {
-                                        <li><a href="@routes.SessionsController.sessions(pagenumber)">@pagenumber</a></li>
-                                        }
+                                    @for(pageNumber <- 1 to pages) {
+                                        <li><a href="@routes.SessionsController.sessions(pageNumber)">@pageNumber</a></li>
+                                    }
                                     </ul>
                                     <ul class="pagination visible-xs pull-right">
                                         <li><a href="#">«</a></li>

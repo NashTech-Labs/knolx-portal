@@ -13,7 +13,6 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -80,9 +79,10 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .insert(session))
 
-  def paginate(pageNumber:Int)(implicit ex: ExecutionContext) : Future[List[SessionInfo]] = {
-    val skipN = (pageNumber-1) * pageSize
+  def paginate(pageNumber: Int)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection.find(Json.obj("active" -> true)).options(queryOptions).
@@ -94,12 +94,10 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def activeCount(implicit ex: ExecutionContext): Future[Int] =
     collection
       .flatMap(jsonCollection =>
-        jsonCollection.count(Some(Json.obj("active" -> true)))
-      )
+        jsonCollection.count(Some(Json.obj("active" -> true))))
 
-  def update(updatedRecord : UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] ={
-
-    val selector =  BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord._id))
+  def update(updatedRecord: UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord._id))
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(

@@ -45,6 +45,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                                    sessionsRepository: SessionsRepository) extends Controller with SecuredImplicit with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
+
   val createSessionForm = Form(
     mapping(
       "email" -> email,
@@ -64,28 +65,29 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions(pageNumber: Int): Action[AnyContent] = Action.async { implicit request =>
-    val result = sessionsRepository
+  def sessions(pageNumber: Int = 1): Action[AnyContent] = Action.async { implicit request =>
+    sessionsRepository
       .paginate(pageNumber)
-      .map { sessionsJson =>
-        val knolxSessions = sessionsJson map { session =>
+      .flatMap { sessionInfo =>
+        val knolxSessions = sessionInfo map (session =>
           KnolxSession(session._id.stringify, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
-            session.cancelled, session.rating)
-        }
-        sessionsRepository.activeCount.map { count =>
-          val pages = Math.ceil(count / pageSize).toInt
-          Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
-        }
+            session.cancelled, session.rating))
 
+        sessionsRepository
+          .activeCount
+          .map { count =>
+            val pages = Math.ceil(count / 10D).toInt
+
+            Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
+          }
       }
-    result.flatMap(result => result)
   }
 
-  def manageSessions(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
-    val result = sessionsRepository
+  def manageSessions(pageNumber: Int = 1): Action[AnyContent] = AdminAction.async { implicit request =>
+    sessionsRepository
       .paginate(pageNumber)
-      .map { sessionsJson =>
-        val knolxSessions = sessionsJson map { session =>
+      .flatMap { sessionsJson =>
+        val knolxSessions = sessionsJson map (session =>
           KnolxSession(session._id.stringify,
             session.userId,
             session.date,
@@ -94,19 +96,17 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.email,
             session.meetup,
             session.cancelled,
-            session.rating)
-        }
-        sessionsRepository.activeCount.map { count =>
-          val pages = Math.ceil(count / pageSize).toInt
-          Ok(views.html.sessions.managesessions(knolxSessions, pages, pageNumber))
-        }
+            session.rating))
 
+        sessionsRepository
+          .activeCount
+          .map { count =>
+            val pages = Math.ceil(count / 10D).toInt
+
+            Ok(views.html.sessions.managesessions(knolxSessions, pages, pageNumber))
+          }
       }
-
-    result.flatMap(result => result)
   }
-
-  def pageSize = 10d
 
   def create: Action[AnyContent] = UserAction { implicit request =>
     Ok(views.html.sessions.createsession(createSessionForm))
@@ -164,7 +164,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
           Ok(views.html.sessions.updatesession(filledForm))
 
-        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "  Something went wrong")
+        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 

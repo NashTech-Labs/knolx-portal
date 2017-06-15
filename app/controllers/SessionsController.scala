@@ -44,21 +44,11 @@ object SessionValues {
 @Singleton
 class SessionsController @Inject()(val messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
-                                   sessionsRepository: SessionsRepository,
-                                   configuration: play.api.Configuration) extends Controller with SecuredImplicit with I18nSupport {
+                                   sessionsRepository: SessionsRepository) extends Controller with SecuredImplicit with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
 
-  def pageSize: Double ={
-    Try{
-      configuration.underlying.getString("pageSize").toInt
-    }
-    match{
-      case Success(pagesize) => pagesize.toDouble
-      case Failure(e) => 0.toDouble
-    }
-  }
-
+  def pageSize = 10d
 
   val createSessionForm = Form(
     mapping(

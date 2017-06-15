@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import models.{SessionInfo, SessionsRepository, UserInfo, UsersRepository}
 import org.specs2.mock.Mockito
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 import play.api.{Configuration, Environment}
@@ -422,9 +423,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
   }
 
   def testObject: TestObject = {
+
     val mockedSessionsRepository: SessionsRepository = mock[SessionsRepository]
     val mockedUsersRepository: UsersRepository = mock[UsersRepository]
-
     val config = Configuration(ConfigFactory.load("application.conf"))
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 

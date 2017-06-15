@@ -38,19 +38,11 @@ object SessionJsonFormats {
 
 }
 
-class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi,configuration: play.api.Configuration) {
+class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
 
-  def pageSize: Int ={
-    Try{
-      configuration.underlying.getString("pageSize").toInt
-    }
-    match{
-      case Success(pagesize) => pagesize
-      case Failure(e) => 0
-    }
-  }
+  val pageSize = 10
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 

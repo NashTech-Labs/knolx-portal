@@ -1,6 +1,5 @@
 package controllers
 
-import java.util
 import java.util.Date
 import javax.inject.{Inject, Singleton}
 
@@ -13,7 +12,6 @@ import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 case class CreateSessionInformation(email: String,
                                     date: Date,
@@ -47,9 +45,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                                    sessionsRepository: SessionsRepository) extends Controller with SecuredImplicit with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
-
-  def pageSize = 10d
-
   val createSessionForm = Form(
     mapping(
       "email" -> email,
@@ -59,7 +54,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "meetup" -> boolean
     )(CreateSessionInformation.apply)(CreateSessionInformation.unapply)
   )
-
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
@@ -70,24 +64,24 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions(pageNumber:Int): Action[AnyContent] = Action.async { implicit request =>
-  val result =  sessionsRepository
+  def sessions(pageNumber: Int): Action[AnyContent] = Action.async { implicit request =>
+    val result = sessionsRepository
       .paginate(pageNumber)
       .map { sessionsJson =>
         val knolxSessions = sessionsJson map { session =>
           KnolxSession(session._id.stringify, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
             session.cancelled, session.rating)
         }
-           sessionsRepository.activeCount.map{count =>
-            val pages = Math.ceil(count/pageSize).toInt
-             Ok(views.html.sessions.sessions(knolxSessions,pages,pageNumber))
-           }
+        sessionsRepository.activeCount.map { count =>
+          val pages = Math.ceil(count / pageSize).toInt
+          Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
+        }
 
       }
     result.flatMap(result => result)
   }
 
-  def manageSessions(pageNumber:Int): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageSessions(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     val result = sessionsRepository
       .paginate(pageNumber)
       .map { sessionsJson =>
@@ -102,15 +96,17 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.cancelled,
             session.rating)
         }
-        sessionsRepository.activeCount.map{count =>
-          val pages = Math.ceil(count/pageSize).toInt
-          Ok(views.html.sessions.managesessions(knolxSessions,pages,pageNumber))
+        sessionsRepository.activeCount.map { count =>
+          val pages = Math.ceil(count / pageSize).toInt
+          Ok(views.html.sessions.managesessions(knolxSessions, pages, pageNumber))
         }
 
       }
 
     result.flatMap(result => result)
   }
+
+  def pageSize = 10d
 
   def create: Action[AnyContent] = UserAction { implicit request =>
     Ok(views.html.sessions.createsession(createSessionForm))
@@ -168,7 +164,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
           Ok(views.html.sessions.updatesession(filledForm))
 
-        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "something went wrong")
+        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "  Something went wrong")
       }
   }
 
@@ -179,15 +175,15 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors)))
       },
       sessionUpdateInfo => {
-         sessionsRepository.update(sessionUpdateInfo) map { result =>
-           if (result.ok) {
-             Logger.info(s"UPDATED Session for user ${sessionUpdateInfo._id} successfully created")
-             Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully Updated")
-           } else {
-             Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
-             InternalServerError("Something went wrong!")
-           }
-         }
+        sessionsRepository.update(sessionUpdateInfo) map { result =>
+          if (result.ok) {
+            Logger.info(s"UPDATED session for user ${sessionUpdateInfo._id} successfully created")
+            Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
+          } else {
+            Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
+            InternalServerError("Something went wrong!")
+          }
+        }
       })
   }
 

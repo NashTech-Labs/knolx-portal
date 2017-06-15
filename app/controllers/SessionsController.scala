@@ -168,7 +168,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def updateSession: Action[AnyContent] = AdminAction.async { implicit request =>
+  def updateSession(): Action[AnyContent] = AdminAction.async { implicit request =>
     updateSessionForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for update session $formWithErrors")
@@ -177,7 +177,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       sessionUpdateInfo => {
         sessionsRepository.update(sessionUpdateInfo) map { result =>
           if (result.ok) {
-            Logger.info(s"Updated session for user ${sessionUpdateInfo._id} successfully created")
+            Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
             Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
           } else {
             Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")

@@ -177,7 +177,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       sessionUpdateInfo => {
         sessionsRepository.update(sessionUpdateInfo) map { result =>
           if (result.ok) {
-            Logger.info(s"UPDATED session for user ${sessionUpdateInfo._id} successfully created")
+            Logger.info(s"Updated session for user ${sessionUpdateInfo._id} successfully created")
             Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
           } else {
             Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")

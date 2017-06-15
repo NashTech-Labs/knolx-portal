@@ -9,18 +9,18 @@ import reactivemongo.api.commands.DefaultWriteResult
 import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackControllerSpec extends PlaySpecification with Mockito {
+
+  private val _id: BSONObjectID = BSONObjectID.generate()
+  private val emailObject = Future.successful(List(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
   "Feedback controller" should {
 
     "create render feedback form page" in new WithApplication {
       val feedbackFormsController = testObject
-
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       feedbackFormsController.usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -39,14 +39,11 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
       val questions = List(Question("How good is knolx portal?", List("1", "2", "3", "4", "5")))
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       feedbackFormsController.usersRepository.getByEmail("test@example.com") returns emailObject
-      feedbackFormsController.feedbackRepository.insert(FeedbackForm(questions)) returns writeResult
+      feedbackFormsController.feedbackRepository.insert(any[FeedbackForm])(any[ExecutionContext]) returns writeResult
 
       val response = feedbackFormsController.controller.createFeedbackForm()(request)
 
@@ -62,14 +59,11 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
       val questions = List(Question("How good is knolx portal?", List("1", "2", "3", "4", "5")))
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
 
       feedbackFormsController.usersRepository.getByEmail("test@example.com") returns emailObject
-      feedbackFormsController.feedbackRepository.insert(FeedbackForm(questions)) returns writeResult
+      feedbackFormsController.feedbackRepository.insert(any[FeedbackForm])(any[ExecutionContext]) returns writeResult
 
       val response = feedbackFormsController.controller.createFeedbackForm()(request)
 
@@ -81,10 +75,6 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
       val feedbackFormsController = testObject
 
       val payload = """[{"questions":"","options":["1","2","3","4","5"]}]"""
-
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -102,10 +92,6 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
 
       val payload = """[{"question":"","options":["1","2","3","4","5"]}]"""
 
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
@@ -122,10 +108,6 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
 
       val payload = """[{"question":"How good is the knolx portal ?","options":["","2","3","4","5"]}]"""
 
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
@@ -141,10 +123,6 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
       val feedbackFormsController = testObject
 
       val payload = """[{"question":"How good is the knolx portal ?","options":[]}]"""
-
-      val _id: BSONObjectID = BSONObjectID.generate()
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")

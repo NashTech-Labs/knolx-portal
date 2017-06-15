@@ -4,10 +4,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.typesafe.config.ConfigFactory
-import models.{SessionInfo, SessionsRepository, UserInfo, UsersRepository}
+import models._
 import org.specs2.mock.Mockito
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
 import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
 import play.api.{Configuration, Environment}
@@ -22,7 +21,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
   val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   val _id: BSONObjectID = BSONObjectID.generate()
   val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", date, "sessions", "topic",
+    Future.successful(List(SessionInfo(_id.stringify, "email", date, "sessions", "feedbackFormId", "topic",
       meetup = true, "rating", cancelled = false, active = true, _id)))
 
   "Session Controller" should {
@@ -163,7 +162,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
+      sessionController.feedbackFormsRepository.getAll returns Future(feedbackForms)
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = sessionController.sessionController.create(FakeRequest()
@@ -181,7 +182,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
+      sessionController.feedbackFormsRepository.getAll returns Future(feedbackForms)
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionController.sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
@@ -190,6 +193,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         .withFormUrlEncodedBody("email" -> "test@example.com",
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
@@ -206,7 +210,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
+      sessionController.feedbackFormsRepository.getAll returns Future(feedbackForms)
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionController.sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
@@ -215,6 +221,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         .withFormUrlEncodedBody("email" -> "test@example.com",
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
@@ -226,7 +233,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
+      sessionController.feedbackFormsRepository.getAll returns Future(feedbackForms)
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
@@ -249,7 +258,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val sessionController = testObject
 
       val emailObject = Future.successful(List.empty)
+      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
+      sessionController.feedbackFormsRepository.getAll returns Future(feedbackForms)
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
@@ -277,7 +288,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", date, "session 1",
-        "topic", meetup = false, "", cancelled = false, active = true, _id)))
+        "feedbackFormId", "topic", meetup = false, "", cancelled = false, active = true, _id)))
 
       sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -339,11 +350,12 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
 
-      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+      val result = sessionController.sessionController.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
@@ -365,11 +377,12 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
 
-      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+      val result = sessionController.sessionController.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
@@ -386,11 +399,12 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+      val result = sessionController.sessionController.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
           "date" -> "25/06/2017",
           "session" -> "session",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
@@ -426,17 +440,19 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
     val mockedSessionsRepository: SessionsRepository = mock[SessionsRepository]
     val mockedUsersRepository: UsersRepository = mock[UsersRepository]
+    val mockedFeedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
     val config = Configuration(ConfigFactory.load("application.conf"))
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 
-    val controller = new SessionsController(messages, mockedUsersRepository, mockedSessionsRepository)
+    val controller = new SessionsController(messages, mockedUsersRepository, mockedSessionsRepository, mockedFeedbackFormsRepository)
 
-    TestObject(messages, mockedUsersRepository, mockedSessionsRepository, controller)
+    TestObject(messages, mockedUsersRepository, mockedSessionsRepository, mockedFeedbackFormsRepository, controller)
   }
 
   case class TestObject(messagesApi: MessagesApi,
                         usersRepository: UsersRepository,
                         sessionsRepository: SessionsRepository,
+                        feedbackFormsRepository: FeedbackFormsRepository,
                         sessionController: SessionsController)
 
 }

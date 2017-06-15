@@ -3,7 +3,7 @@ package controllers
 import java.util.Date
 import javax.inject.{Inject, Singleton}
 
-import models.{SessionsRepository, UsersRepository}
+import models.{FeedbackFormsRepository, SessionsRepository, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -16,6 +16,7 @@ import scala.concurrent.Future
 case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
+                                    feedbackFormId: String,
                                     topic: String,
                                     meetup: Boolean)
 
@@ -42,7 +43,8 @@ object SessionValues {
 @Singleton
 class SessionsController @Inject()(val messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
-                                   sessionsRepository: SessionsRepository) extends Controller with SecuredImplicit with I18nSupport {
+                                   sessionsRepository: SessionsRepository,
+                                   feedbackFormsRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
 
@@ -51,6 +53,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "email" -> email,
       "date" -> date.verifying("Invalid date selected!", date => date.after(new Date)),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
+      "feedbackFormId" -> nonEmptyText,
       "topic" -> nonEmptyText,
       "meetup" -> boolean
     )(CreateSessionInformation.apply)(CreateSessionInformation.unapply)
@@ -108,38 +111,50 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def create: Action[AnyContent] = UserAction { implicit request =>
-    Ok(views.html.sessions.createsession(createSessionForm))
+  def create: Action[AnyContent] = UserAction.async { implicit request =>
+    feedbackFormsRepository
+      .getAll
+      .map { feedbackForms =>
+        val formIds = feedbackForms.map(form => (form._id.stringify, form._id.stringify))
+
+        Ok(views.html.sessions.createsession(createSessionForm, formIds))
+      }
   }
 
   def createSession: Action[AnyContent] = UserAction.async { implicit request =>
-    createSessionForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request for create session $formWithErrors")
-        Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors)))
-      },
-      sessionInfo => {
-        usersRepository
-          .getByEmail(sessionInfo.email.toLowerCase)
-          .flatMap(_.headOption.fold {
-            Future.successful(
-              BadRequest(views.html.sessions.createsession(createSessionForm.fill(sessionInfo).withGlobalError("Email not valid!")))
-            )
-          } { userJson =>
-            val userObjId = userJson._id.stringify
-            val session = models.SessionInfo(userObjId, sessionInfo.email.toLowerCase, sessionInfo.date, sessionInfo.session,
-              sessionInfo.topic, sessionInfo.meetup, rating = "", cancelled = false, active = true)
-            sessionsRepository.insert(session) map { result =>
-              if (result.ok) {
-                Logger.info(s"Session for user ${sessionInfo.email} successfully created")
-                Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully created!")
-              } else {
-                Logger.error(s"Something went wrong when creating a new Knolx session for user ${sessionInfo.email}")
-                InternalServerError("Something went wrong!")
-              }
-            }
+    feedbackFormsRepository
+      .getAll
+      .flatMap { feedbackForms =>
+        val formIds = feedbackForms.map(form => (form._id.stringify, form._id.stringify))
+
+        createSessionForm.bindFromRequest.fold(
+          formWithErrors => {
+            Logger.error(s"Received a bad request for create session $formWithErrors")
+            Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors, formIds)))
+          },
+          createSessionInfo => {
+            usersRepository
+              .getByEmail(createSessionInfo.email.toLowerCase)
+              .flatMap(_.headOption.fold {
+                Future.successful(
+                  BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds))
+                )
+              } { userJson =>
+                val userObjId = userJson._id.stringify
+                val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, createSessionInfo.date, createSessionInfo.session,
+                  createSessionInfo.feedbackFormId, createSessionInfo.topic, createSessionInfo.meetup, rating = "", cancelled = false, active = true)
+                sessionsRepository.insert(session) map { result =>
+                  if (result.ok) {
+                    Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
+                    Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully created!")
+                  } else {
+                    Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
+                    InternalServerError("Something went wrong!")
+                  }
+                }
+              })
           })
-      })
+      }
   }
 
   def deleteSession(id: String): Action[AnyContent] = AdminAction.async { implicit request =>

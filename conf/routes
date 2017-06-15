@@ -12,13 +12,13 @@ GET         /register                            controllers.UsersController.reg
 POST        /register                            controllers.UsersController.createUser
 
 # Session
-GET         /session               controllers.SessionsController.sessions(pageNumber: Int)
-GET         /session/manage        controllers.SessionsController.manageSessions(pageNumber: Int)
-GET         /session/create        controllers.SessionsController.create
-POST        /session/create        controllers.SessionsController.createSession
-GET         /session/delete        controllers.SessionsController.deleteSession(id: String)
-POST        /session/updateSession        controllers.SessionsController.updateSession
-GET        /session/update          controllers.SessionsController.update(id: String)
+GET         /session                             controllers.SessionsController.sessions
+GET         /session/manage                      controllers.SessionsController.manageSessions
+GET         /session/create                      controllers.SessionsController.create
+POST        /session/create                      controllers.SessionsController.createSession
+GET         /session/delete                      controllers.SessionsController.deleteSession(id: String)
+POST        /session/update                      controllers.SessionsController.updateSession
+GET         /session/update                      controllers.SessionsController.update(id: String)
 
 # Feedback
 GET         /feedbackform/create                 controllers.FeedbackController.feedbackForm

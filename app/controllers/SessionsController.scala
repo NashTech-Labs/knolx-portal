@@ -1,6 +1,7 @@
 package controllers
 
 import java.util
+import java.util.Date
 import javax.inject.{Inject, Singleton}
 
 import models.{SessionsRepository, UsersRepository}
@@ -9,27 +10,26 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
-import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 case class CreateSessionInformation(email: String,
-                                    date: java.util.Date,
+                                    date: Date,
                                     session: String,
                                     topic: String,
                                     meetup: Boolean)
 
-case class UpdateSessionInformation( _id : String,
-                                     date: java.util.Date,
+case class UpdateSessionInformation(_id: String,
+                                    date: Date,
                                     session: String,
                                     topic: String,
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
                         userid: String,
-                        date: java.util.Date,
+                        date: Date,
                         session: String,
                         topic: String,
                         email: String,
@@ -53,7 +53,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val createSessionForm = Form(
     mapping(
       "email" -> email,
-      "date" -> date.verifying("Invalid date selected!", date => date.after(new util.Date)),
+      "date" -> date.verifying("Invalid date selected!", date => date.after(new Date)),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "topic" -> nonEmptyText,
       "meetup" -> boolean
@@ -63,7 +63,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
-      "date" -> date.verifying("Invalid date selected!", date => date.after(new util.Date)),
+      "date" -> date.verifying("Invalid date selected!", date => date.after(new Date)),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "topic" -> nonEmptyText,
       "meetup" -> boolean
@@ -158,13 +158,14 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       })
   }
 
-  def update(id:String): Action[AnyContent] = AdminAction.async { implicit request =>
-   sessionsRepository
+  def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    sessionsRepository
       .getById(id)
       .map {
-        case Some(sessionInformation)=>
-            val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-              sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
+        case Some(sessionInformation) =>
+          val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
+            sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
+
           Ok(views.html.sessions.updatesession(filledForm))
 
         case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "something went wrong")

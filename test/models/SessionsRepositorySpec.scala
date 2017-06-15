@@ -40,18 +40,20 @@ class SessionsRepositorySpec extends PlaySpecification {
     }
 
     "get session by id" in {
-     val session = await(sessionsRepository.getById(_id.stringify))
+      val session = await(sessionsRepository.getById(_id.stringify))
 
-     val head = session.getOrElse(defaultSession)
+      val head = session.getOrElse(defaultSession)
 
-     head.email must beEqualTo("test@example.com")
-     head.date must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
-     head.active must beEqualTo(true)
+      head.email must beEqualTo("test@example.com")
+      head.date must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
+      head.active must beEqualTo(true)
     }
 
     "update session" in {
-      val updatedSession =  UpdateSessionInformation(_id.stringify,date,"testsession","updaterecord")
-      val updated= await(sessionsRepository.update(updatedSession).map(_.ok))
+      val updatedSession = UpdateSessionInformation(_id.stringify, date, "testsession", "updaterecord")
+
+      val updated = await(sessionsRepository.update(updatedSession).map(_.ok))
+
       updated must beEqualTo(true)
     }
 

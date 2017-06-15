@@ -16,13 +16,13 @@
                 <a href="@routes.HomeController.index()">Home</a>
             </li>
 
-            <li class="@activeLink(routes.SessionsController.sessions().url)">
-                <a href="@routes.SessionsController.sessions()">Sessions</a>
+            <li class="@activeLink(routes.SessionsController.sessions(1).url)">
+                <a href="@routes.SessionsController.sessions(1)">Sessions</a>
             </li>
 
             @if(SessionHelper.isAdmin) {
-                <li class="@activeLink(routes.SessionsController.manageSessions().url)">
-                    <a href="@routes.SessionsController.manageSessions()">Manage Sessions</a>
+                <li class="@activeLink(routes.SessionsController.manageSessions(1).url)">
+                    <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
                 </li>
             }
 

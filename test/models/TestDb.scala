@@ -13,7 +13,7 @@ object TestDb extends MongoEmbedDatabase {
 
   private val appBuilder = new GuiceApplicationBuilder().build
 
-  val reactiveMongoApi = appBuilder.injector.instanceOf[ReactiveMongoApi]
+  val reactiveMongoApi: ReactiveMongoApi = appBuilder.injector.instanceOf[ReactiveMongoApi]
 
   private val defaultDb = Await.result(reactiveMongoApi.database, Duration.Inf)
 

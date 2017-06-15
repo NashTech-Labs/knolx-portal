@@ -12,8 +12,8 @@ GET         /register                            controllers.UsersController.reg
 POST        /register                            controllers.UsersController.createUser
 
 # Session
-GET         /session                             controllers.SessionsController.sessions
-GET         /session/manage                      controllers.SessionsController.manageSessions
+GET         /session                             controllers.SessionsController.sessions(pageNumber: Int)
+GET         /session/manage                      controllers.SessionsController.manageSessions(pageNumber:Int)
 GET         /session/create                      controllers.SessionsController.create
 POST        /session/create                      controllers.SessionsController.createSession
 GET         /session/delete                      controllers.SessionsController.deleteSession(id: String)

@@ -13,6 +13,7 @@ import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 case class CreateSessionInformation(email: String,
                                     date: java.util.Date,
@@ -43,11 +44,21 @@ object SessionValues {
 @Singleton
 class SessionsController @Inject()(val messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
-                                   sessionsRepository: SessionsRepository) extends Controller with SecuredImplicit with I18nSupport {
+                                   sessionsRepository: SessionsRepository,
+                                   configuration: play.api.Configuration) extends Controller with SecuredImplicit with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
 
-  val pageSize = 10d
+  def pageSize: Double ={
+    Try{
+      configuration.underlying.getString("pageSize").toInt
+    }
+    match{
+      case Success(pagesize) => pagesize.toDouble
+      case Failure(e) => 0.toDouble
+    }
+  }
+
 
   val createSessionForm = Form(
     mapping(
@@ -107,6 +118,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         }
 
       }
+
     result.flatMap(result => result)
   }
 

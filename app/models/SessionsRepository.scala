@@ -13,6 +13,7 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -37,9 +38,19 @@ object SessionJsonFormats {
 
 }
 
-class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
-  val pageSize = 10
+class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi,configuration: play.api.Configuration) {
+
   import play.modules.reactivemongo.json._
+
+  def pageSize: Int ={
+    Try{
+      configuration.underlying.getString("pageSize").toInt
+    }
+    match{
+      case Success(pagesize) => pagesize
+      case Failure(e) => 0
+    }
+  }
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 

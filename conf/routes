@@ -17,7 +17,8 @@ GET         /session/manage                      controllers.SessionsController.
 GET         /session/create                      controllers.SessionsController.create
 POST        /session/create                      controllers.SessionsController.createSession
 GET         /session/delete                      controllers.SessionsController.deleteSession(id: String)
-# GET         /session/update                      controllers.SessionsController.updateSession(id: String)
+POST        /session/update                      controllers.SessionsController.updateSession
+GET         /session/update                      controllers.SessionsController.update(id: String)
 
 # Feedback
 GET         /feedbackform/create                 controllers.FeedbackController.feedbackForm

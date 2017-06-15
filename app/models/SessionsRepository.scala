@@ -17,17 +17,16 @@ import scala.concurrent.{ExecutionContext, Future}
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
-case class SessionInfo(
-                        userId: String,
-                        email: String,
-                        date: java.util.Date,
-                        session: String,
-                        topic: String,
-                        meetup: Boolean,
-                        rating: String,
-                        cancelled: Boolean,
-                        active: Boolean,
-                        _id: BSONObjectID = BSONObjectID.generate)
+case class SessionInfo(userId: String,
+                       email: String,
+                       date: java.util.Date,
+                       session: String,
+                       topic: String,
+                       meetup: Boolean,
+                       rating: String,
+                       cancelled: Boolean,
+                       active: Boolean,
+                       _id: BSONObjectID = BSONObjectID.generate)
 
 object SessionJsonFormats {
 
@@ -63,7 +62,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List]())
 
-  def getById(id:String)(implicit ex: ExecutionContext): Future[Option[SessionInfo]] =
+  def getById(id: String)(implicit ex: ExecutionContext): Future[Option[SessionInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
@@ -78,19 +77,18 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .insert(session))
 
-  def update(updatedRecord : UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] ={
-
-    val selector =  BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord._id))
+  def update(updatedRecord: UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord._id))
 
     val modifier = BSONDocument(
-       "$set" -> BSONDocument(
+      "$set" -> BSONDocument(
         "date" -> updatedRecord.date.getTime,
         "topic" -> updatedRecord.topic,
         "session" -> updatedRecord.session,
-        "meetup" ->updatedRecord.meetup)
+        "meetup" -> updatedRecord.meetup)
     )
 
-      collection.flatMap(jsonCollection =>
+    collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
   }
 

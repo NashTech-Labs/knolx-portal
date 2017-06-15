@@ -1,26 +1,27 @@
 @(sessionInfo: Form[UpdateSessionInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Create Session") {
+    @main("Create Session") {
 
-    <p class="information">
-    @flash.get("message").fold("")(message => message)
-    </p>
+        <p class="information">
+        @flash.get("message").fold("")(message => message)
+        </p>
 
-<form class="RegForm" action="@routes.SessionsController.updateSession()" method="post">
-   <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'></input>
-   <input name ="date" type="date" value='@sessionInfo.data.get("date")'></input>
-    <span class="help-block align-error">@{sessionInfo("date").error.map { error => messages(error.message)}}</span>
-    <select name="session">
-        <option value="session 1"  @if(sessionInfo.data.get("session").getOrElse("") == "session 1"){selected}>Session 1</option>
-        <option value="session 2"  @if(sessionInfo.data.get("session").getOrElse("") == "session 2"){selected}>Session 2</option>
-    </select>
-    <input name="topic" type="text" value='@sessionInfo.data.get("topic")'></input>
+        <form class="RegForm" action="@routes.SessionsController.updateSession()" method="post">
+            <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'></input>
+            <input name ="date" type="date" value='@sessionInfo.data.get("date")'></input>
+            <span class="help-block align-error">@{
+                sessionInfo("date").error.map { error => messages(error.message) }
+            }</span>
+            <select name="session">
+                <option value="session 1"  @if(sessionInfo.data.getOrElse("session", "") == "session 1") {selected}>Session 1</option>
+                <option value="session 2"  @if(sessionInfo.data.getOrElse("session", "") == "session 2") {selected}>Session 2</option>
+            </select>
+            <input name="topic" type="text" value='@sessionInfo.data.get("topic")'></input>
 
-    <input type="checkbox" name="meetup" value="true"
-    @if(sessionInfo.data.get("meetup").getOrElse("false") == "true"){
-    checked="checked"
-    }>is meetup?</input>
-    <button type="submit">Save</button>
-</form>
+            <input type="checkbox" name="meetup" value="true"
+                @if(sessionInfo.data.getOrElse("meetup", "false") == "true") {
+                    checked="checked"
+                    }>Is meetup?</input>
+            <button type="submit">Save</button>
+        </form>
     }
-

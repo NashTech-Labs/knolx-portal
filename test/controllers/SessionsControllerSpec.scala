@@ -275,8 +275,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", date, "session 1",
         "topic", meetup = false, "", cancelled = false, active = true, _id)))
-      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
 
+      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
 
       val result = sessionsController.sessionController.update(_id.stringify)(FakeRequest()
@@ -285,7 +285,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "render manage session form" in new WithApplication {
+    "redirect to manage sessions page when session is not found" in new WithApplication {
       val sessionsController = testObject
 
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
@@ -294,8 +294,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val sessionInfo = Future.successful(None)
-      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
 
+      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
 
       val result = sessionsController.sessionController.update(_id.stringify)(FakeRequest()
@@ -334,7 +334,6 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-
       sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
 
       val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
@@ -344,6 +343,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
           "session" -> "session 1",
           "topic" -> "topic",
           "meetup" -> "true"))
+
       status(result) must be equalTo SEE_OTHER
     }
 
@@ -360,7 +360,6 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-
       sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
 
       val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
@@ -370,6 +369,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
           "session" -> "session 1",
           "topic" -> "topic",
           "meetup" -> "true"))
+
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
@@ -390,8 +390,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
           "session" -> "session",
           "topic" -> "topic",
           "meetup" -> "true"))
-      status(result) must be equalTo BAD_REQUEST
 
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not update session due to unauthorized access" in new WithApplication {

@@ -1,4 +1,4 @@
-@(knolxSessions: List[KnolxSession])(implicit request: Request[_],flash: Flash)
+@(knolxSessions: List[KnolxSession])(implicit request: Request[_], flash: Flash)
 
 @main("Manage Sessions") {
 
@@ -9,7 +9,7 @@
 
             <div class="col-md-10 col-md-offset-1">
                 <p class="information">
-                    @flash.get("message").fold("")(message => message)
+                @flash.get("message").fold("")(message => message)
                 </p>
                 <div class="panel panel-default panel-table">
                     <div class="panel-heading">

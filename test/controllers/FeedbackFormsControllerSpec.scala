@@ -1,13 +1,15 @@
 package controllers
 
 import akka.stream.Materializer
+import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.matcher.ShouldThrownExpectations
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.{Environment, Configuration, Application}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
@@ -33,7 +35,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
     val usersRepository: UsersRepository = mock[UsersRepository]
     val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
 
-    val controller = new FeedbackFormsController(mailerClient, usersRepository, feedbackFormsRepository)
+    val config = Configuration(ConfigFactory.load("application.conf"))
+    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+
+    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
   }
 
   private val _id: BSONObjectID = BSONObjectID.generate()
@@ -142,6 +147,20 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
 
       status(response) must be equalTo BAD_REQUEST
       contentAsString(response) must be equalTo "Question must require at least 1 option!"
+    }
+
+    "render manage feedback forms page" in new WithTestApplication {
+      val feedbackForms = List(FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.paginate(1) returns Future.successful(feedbackForms)
+      feedbackFormsRepository.activeCount returns Future.successful(1)
+
+      val response = controller.manageFeedbackForm(1)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+      contentAsString(response) must contain("""<td>form name</td>""")
     }
   }
 

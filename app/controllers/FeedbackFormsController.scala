@@ -4,12 +4,17 @@ import javax.inject.{Singleton, Inject}
 
 import models.{Question, FeedbackForm, FeedbackFormsRepository, UsersRepository}
 import play.api.Logger
+import play.api.i18n.{MessagesApi, I18nSupport}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+case class QuestionInformation(question: String, options: List[String])
+
+case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation])
 
 case class FeedbackFormInformation(name: String, questions: List[QuestionInformation]) {
 
@@ -43,17 +48,34 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
 
 }
 
-case class QuestionInformation(question: String, options: List[String])
-
 @Singleton
-class FeedbackFormsController @Inject()(mailerClient: MailerClient,
+class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
+                                        mailerClient: MailerClient,
                                         usersRepository: UsersRepository,
-                                        feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit {
+                                        feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit with I18nSupport {
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
 
   val usersRepo = usersRepository
+
+  def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
+    feedbackRepository
+      .paginate(pageNumber)
+      .flatMap { feedbackForms =>
+        val updateFormInformation = feedbackForms map { feedbackForm =>
+          val questionInformation = feedbackForm.questions.map(question => QuestionInformation(question.question, question.options))
+
+          UpdateFeedbackFormInformation(feedbackForm._id.stringify, feedbackForm.name, questionInformation)
+        }
+
+        feedbackRepository
+          .activeCount
+          .map { pages =>
+            Ok(views.html.feedback.managefeedbackforms(updateFormInformation, pageNumber, pages))
+          }
+      }
+  }
 
   def feedbackForm: Action[AnyContent] = AdminAction { implicit request =>
     Ok(views.html.feedback.createfeedbackform())

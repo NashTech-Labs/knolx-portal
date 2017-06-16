@@ -5,7 +5,7 @@ import javax.inject.Inject
 import models.FeedbackFormat._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
@@ -32,6 +32,8 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
 
+  val pageSize = 10
+
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
 
   def insert(feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] =
@@ -48,4 +50,23 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("active" -> true))
           .cursor[FeedbackForm](ReadPreference.primary)
           .collect[List]())
+
+  def paginate(pageNumber: Int)(implicit ex: ExecutionContext): Future[List[FeedbackForm]] = {
+    val skipN = (pageNumber - 1) * pageSize
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("active" -> true))
+          .options(queryOptions)
+          .sort(Json.obj("name" -> 1))
+          .cursor[FeedbackForm](ReadPreference.Primary)
+          .collect[List](pageSize))
+  }
+
+  def activeCount(implicit ex: ExecutionContext): Future[Int] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(Some(Json.obj("active" -> true))))
 }

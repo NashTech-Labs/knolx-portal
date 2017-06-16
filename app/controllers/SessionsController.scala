@@ -115,7 +115,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     feedbackFormsRepository
       .getAll
       .map { feedbackForms =>
-        val formIds = feedbackForms.map(form => (form._id.stringify, form._id.stringify))
+        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
 
         Ok(views.html.sessions.createsession(createSessionForm, formIds))
       }
@@ -125,7 +125,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
-        val formIds = feedbackForms.map(form => (form._id.stringify, form._id.stringify))
+        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
 
         createSessionForm.bindFromRequest.fold(
           formWithErrors => {

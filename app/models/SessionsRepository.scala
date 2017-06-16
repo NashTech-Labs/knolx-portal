@@ -86,9 +86,11 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     collection
       .flatMap(jsonCollection =>
-        jsonCollection.find(Json.obj("active" -> true)).options(queryOptions).
-          sort(Json.obj("date" -> 1)).
-          cursor[SessionInfo](ReadPreference.Primary)
+        jsonCollection
+          .find(Json.obj("active" -> true))
+          .options(queryOptions)
+          .sort(Json.obj("date" -> 1))
+          .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List](pageSize))
   }
 

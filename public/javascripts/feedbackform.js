@@ -1,3 +1,10 @@
+class FeedbackForm {
+    constructor(name, questions) {
+        this.name = name;
+        this.questions = questions;
+    }
+}
+
 class Question {
     constructor(question, options) {
         this.question = question;
@@ -13,11 +20,13 @@ questions.set(0, 1);
 function createForm() {
     var questionsValues = [];
 
+    var formName = document.getElementById('formName').value;
+
     questions.forEach(function (options, question, obj) {
         var questionValue = document.getElementById('questionValue-' + question).value;
         var optionValues = [];
 
-        for(i = 0; i < options; i++) {
+        for (i = 0; i < options; i++) {
             var optionValue = document.getElementById('optionValue-' + question + '-' + i).value;
 
             optionValues.push(optionValue)
@@ -26,7 +35,7 @@ function createForm() {
         questionsValues.push(new Question(questionValue, optionValues))
     });
 
-    console.log(JSON.stringify(questionsValues));
+    var feedbackForm = new FeedbackForm(formName, questionsValues);
 
     $('#errorMessage').remove();
     $('#successMessage').remove();
@@ -36,12 +45,13 @@ function createForm() {
             type: "POST",
             processData: false,
             contentType: 'application/json',
-            data: JSON.stringify(questionsValues),
-            success: function(data){
-                $('#response').append('<span id="successMessage">' + data +'</span>')
+            data: JSON.stringify(feedbackForm),
+            success: function (data) {
+                $('#response').append('<span id="successMessage">' + data + '</span>');
+                document.getElementById('feedbackform').reset();
             },
-            error: function(er) {
-                $('#response').append('<span id="errorMessage">' + er.responseText +'</span>')
+            error: function (er) {
+                $('#response').append('<span id="errorMessage">' + er.responseText + '</span>')
             }
         })
 }
@@ -58,7 +68,7 @@ function deleteOption(deleteElem) {
 
     $('#option-' + questionCountId + '-' + optionCountId).remove();
 
-    if(questionOptionsAfterDelete == 1) {
+    if (questionOptionsAfterDelete == 1) {
         $('#options-' + questionCountId).append('<a id="addOption-' + questionCountId + '-0" onclick="addOption(this)">Add option</a>')
     }
 }

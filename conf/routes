@@ -21,8 +21,10 @@ POST        /session/update                      controllers.SessionsController.
 GET         /session/update                      controllers.SessionsController.update(id: String)
 
 # Feedback
+GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
 GET         /feedbackform/create                 controllers.FeedbackFormsController.feedbackForm
 POST        /feedbackform/create                 controllers.FeedbackFormsController.createFeedbackForm
+GET         /feedbackform/delete                 controllers.FeedbackFormsController.delete(id: String)
 GET         /feedbackform/send/:sessionid        controllers.FeedbackFormsController.sendFeedbackForm(sessionid: String)
 
 GET         /jsRoutes                            controllers.JavascriptRouter.jsRoutes

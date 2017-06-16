@@ -1,5 +1,9 @@
 @(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
+    @{
+        val renderTemplate = ""
+    }
+
     @main("Create Session") {
 
         @createSessionForm.globalError.map { error =>

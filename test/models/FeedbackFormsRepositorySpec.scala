@@ -39,6 +39,14 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
       activeForms must beEqualTo(1)
     }
 
+    "delete feedback form" in {
+      val formId = await(feedbackFormsRepository.getAll).head._id
+
+      val deleted = await(feedbackFormsRepository.delete(formId.stringify))
+
+      deleted.isDefined must beEqualTo(true)
+    }
+
   }
 
 }

@@ -162,6 +162,29 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
       status(response) must be equalTo OK
       contentAsString(response) must contain("""<td>form name</td>""")
     }
+
+    "delete feedback form" in new WithTestApplication {
+      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
+
+      val response = controller.delete("5943cdd60900000900409b26")(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo SEE_OTHER
+    }
+
+    "not delete feedback form because of some error at database layer" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(None)
+
+      val response = controller.delete("5943cdd60900000900409b26")(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo SEE_OTHER
+    }
   }
 
 }

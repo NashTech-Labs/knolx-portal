@@ -7,7 +7,7 @@ import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -69,4 +69,15 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.count(Some(Json.obj("active" -> true))))
+
+  def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .findAndUpdate(
+            BSONDocument("_id" -> BSONDocument("$oid" -> id)),
+            BSONDocument("$set" -> BSONDocument("active" -> false)),
+            fetchNewObject = true,
+            upsert = false)
+          .map(_.result[FeedbackForm]))
 }

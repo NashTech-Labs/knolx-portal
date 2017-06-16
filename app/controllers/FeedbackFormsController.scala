@@ -109,6 +109,16 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
+  def delete(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    feedbackRepository
+      .delete(id)
+      .map(_.fold {
+        Logger.error(s"Could not delete feddback form for id, $id")
+        Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
+      }(_ =>
+        Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form deleted successfully")))
+  }
+
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
     val email =
       Email(subject = "Knolx Feedback Form",

@@ -11,7 +11,14 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class FeedbackFormInformation(questions: List[QuestionInformation]) {
+case class FeedbackFormInformation(name: String, questions: List[QuestionInformation]) {
+
+  def validateName: Option[String] =
+    if (name.nonEmpty) {
+      None
+    } else {
+      Some("Form name must not be empty!")
+    }
 
   def validateForm: Option[String] =
     if (questions.flatMap(_.options).nonEmpty) {
@@ -43,7 +50,8 @@ class FeedbackFormsController @Inject()(mailerClient: MailerClient,
                                         usersRepository: UsersRepository,
                                         feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit {
 
-  implicit val feedbackFormInformationFormat = Json.format[QuestionInformation]
+  implicit val questionInformationFormat = Json.format[QuestionInformation]
+  implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
 
   val usersRepo = usersRepository
 
@@ -52,19 +60,18 @@ class FeedbackFormsController @Inject()(mailerClient: MailerClient,
   }
 
   def createFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
-    request.body.validate[List[QuestionInformation]].asOpt.fold {
+    request.body.validate[FeedbackFormInformation].asOpt.fold {
       Logger.error(s"Received a bad request while creating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
-    } { questionsInformation =>
-      val feedbackFormInformation = FeedbackFormInformation(questionsInformation)
+    } { feedbackFormInformation =>
 
       val formValid =
         feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
       formValid.fold {
-        val questions = questionsInformation.map(feedbackForm => Question(feedbackForm.question, feedbackForm.options))
+        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
 
-        feedbackRepository.insert(FeedbackForm(questions)) map { result =>
+        feedbackRepository.insert(FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
           if (result.ok) {
             Logger.info(s"Feedback form successfully created")
             Ok("Feedback form successfully created!")

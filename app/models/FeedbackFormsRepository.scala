@@ -18,7 +18,7 @@ import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class Question(question: String, options: List[String])
 
-case class FeedbackForm(questions: List[Question], active: Boolean = true, _id: BSONObjectID = BSONObjectID.generate)
+case class FeedbackForm(name: String, questions: List[Question], active: Boolean = true, _id: BSONObjectID = BSONObjectID.generate)
 
 object FeedbackFormat {
 

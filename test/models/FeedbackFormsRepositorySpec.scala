@@ -11,7 +11,7 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
 
     "create a new feedback form" in {
       val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
-      val feedbackForm = FeedbackForm(questions)
+      val feedbackForm = FeedbackForm("form name", questions)
 
       val created = await(feedbackFormsRepository.insert(feedbackForm).map(_.ok))
 

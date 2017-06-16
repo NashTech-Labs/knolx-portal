@@ -41,7 +41,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
     val controller = new SessionsController(messages, usersRepository, sessionsRepository, feedbackFormsRepository)
   }
-  
+
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
@@ -168,7 +168,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
     "render create session form" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -186,7 +186,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -212,7 +212,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -233,7 +233,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
     "not create session due to BadFormRequest" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -256,7 +256,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
     "not create session due to unauthorized access" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)
-      val feedbackForms = List(FeedbackForm(List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject

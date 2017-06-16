@@ -18,7 +18,7 @@ import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class FeedbackControllerSpec extends PlaySpecification with Mockito {
+class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
 
   abstract class WithTestApplication(val app: Application = FakeApplication()) extends Around with Scope with ShouldThrownExpectations with Mockito {
     implicit def implicitApp: play.api.Application = app
@@ -53,7 +53,7 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
     }
 
     "create feedback form" in new WithTestApplication {
-      val payload = """[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]"""
+      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]}"""
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -71,7 +71,7 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
     }
 
     "not create feedback form because feedback form is not inserted in database" in new WithTestApplication {
-      val payload = """[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]"""
+      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]}"""
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -103,7 +103,7 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
     }
 
     "not create feedback form because question value is empty" in new WithTestApplication {
-      val payload = """[{"question":"","options":["1","2","3","4","5"]}]"""
+      val payload = """{"name":"Test Form","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -117,7 +117,7 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
     }
 
     "not create feedback form because options value is empty" in new WithTestApplication {
-      val payload = """[{"question":"How good is the knolx portal ?","options":["","2","3","4","5"]}]"""
+      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["","2","3","4","5"]}]}"""
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -131,7 +131,7 @@ class FeedbackControllerSpec extends PlaySpecification with Mockito {
     }
 
     "not create feedback form because options are not present" in new WithTestApplication {
-      val payload = """[{"question":"How good is the knolx portal ?","options":[]}]"""
+      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":[]}]}"""
 
       val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")

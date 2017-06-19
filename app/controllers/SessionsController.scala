@@ -51,7 +51,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val createSessionForm = Form(
     mapping(
       "email" -> email,
-      "date" -> date.verifying("Invalid date selected!", date => date.after(new Date)),
+      "date" -> date("yyyy-MM-dd'T'HH:mm")/*.verifying("Invalid date selected!", date => date.after(new Date))*/,
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> nonEmptyText,
       "topic" -> nonEmptyText,
@@ -61,7 +61,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
-      "date" -> date.verifying("Invalid date selected!", date => date.after(new Date)),
+      "date" -> date("yyyy-MM-dd'T'HH:mm")/*.verifying("Invalid date selected!", date => date.after(new Date))*/,
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "topic" -> nonEmptyText,
       "meetup" -> boolean

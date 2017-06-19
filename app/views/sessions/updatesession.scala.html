@@ -8,7 +8,7 @@
 
         <form class="RegForm" action="@routes.SessionsController.updateSession()" method="post">
             <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'></input>
-            <input name ="date" type="date" value='@sessionInfo.data.get("date")'></input>
+            <input name ="date" type="datetime-local" value='@sessionInfo.data.get("date")'></input>
             <span class="help-block align-error">@{
                 sessionInfo("date").error.map { error => messages(error.message) }
             }</span>

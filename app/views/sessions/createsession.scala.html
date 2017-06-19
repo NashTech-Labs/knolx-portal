@@ -22,11 +22,12 @@
                 'id -> "email",
                 '_label -> "Email",
                 '_showConstraints -> false)
-            @helper.inputDate(
+            @helper.inputText(
                 createSessionForm("date"),
                 'id -> "date",
                 '_label -> "Date",
-                '_showConstraints -> false)
+                '_showConstraints -> false,
+                'type -> "datetime-local")
             @helper.select(
                 createSessionForm("session"),
                 SessionValues.Sessions,

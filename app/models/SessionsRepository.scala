@@ -8,8 +8,9 @@ import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,6 +57,21 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
             upsert = false)
           .map(_.value))
 
+  def sessionsScheduledToday(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    println(">>>>>>>> " + new java.util.Date(DateTimeUtility.startOfDayMillis))
+    println(">>>>>>>> " + new java.util.Date(DateTimeUtility.endOfDayMillis))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+            "active" -> true,
+            "date" -> BSONDocument("$gte" -> BSONDateTime(DateTimeUtility.startOfDayMillis)),
+            "date" -> BSONDocument("$lte" -> BSONDateTime(DateTimeUtility.endOfDayMillis))))
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List]())
+  }
+
   def sessions(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection
       .flatMap(jsonCollection =>
@@ -69,8 +85,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(
-            BSONDocument("_id" -> BSONDocument("$oid" -> id)))
+          .find(BSONDocument("_id" -> BSONDocument("$oid" -> id)))
           .cursor[SessionInfo](ReadPreference.Primary)
           .headOption)
 

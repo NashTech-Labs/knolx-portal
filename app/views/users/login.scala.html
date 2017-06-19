@@ -1,27 +1,59 @@
 @(loginForm: Form[LoginInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
 
     @main("Login") {
-        @loginForm.globalError.map { error =>
-            <p class="error">
-                @error.message
-            </p>
-        }
 
-        <p class="information">
-        @flash.get("message").fold("")(message => message)
-        </p>
+        <div class="row">
+            <div class="col-md-4" >
 
-        @helper.form(action = routes.UsersController.loginUser(), 'id -> "loginForm") {
-            @helper.inputText(
-                loginForm("email"),
-                'id -> "email",
-                '_label -> "Email",
-                '_showConstraints -> false)
-            @helper.inputPassword(
-                loginForm("password"),
-                'id -> "password",
-                '_label -> "Password",
-                '_showConstraints -> false)
-            <button type="submit">Submit</button>
-        }
+            </div>
+            <div class="col-md-4 profile" >
+                <div class="container-fluid" style="margin-top:90px ;">
+                </div>
+                <div class="login-outer">
+                    <div class="col-md-12 login-one" > </div>
+
+                    <form id="loginForm" action="@routes.UsersController.loginUser()" method="POST">
+                        <div class="col-md-12 login-two" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="text" name="email" id="email" value='@loginForm.data.get("email")' placeholder="Your Email" required class="inputField loge"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-three">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="password" name="password" id="password" placeholder="Your Password" required class="inputField loge"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-four" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="submit" value="Login" class="inputField logbtn"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4" ></div>
+        </div>
+
+        <div class="row loginError">
+            <div class="col-md-4" ></div>
+            <div class="col-md-4" >
+            @if(loginForm.hasGlobalErrors || loginForm("email").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in ">
+                    @flash.get("message").fold("")(message => message)
+                    @loginForm("email").error.map(error => messages(error.message))
+                    @loginForm.globalError.map(_.message)
+                </div>
+            }
+            </div>
+            <div class="col-md-4" ></div>
+        </div>
     }

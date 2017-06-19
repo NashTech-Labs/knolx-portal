@@ -12,7 +12,7 @@ th{
   font-family: 'gothic' ;
     font-size: 16px;
     letter-spacing: 2px;
-    color:#2E4053;
+    color:#fff;
 }
 
 thead > tr{
@@ -24,6 +24,9 @@ box-shadow: 0 0 20px rgba(0,0,0,0.4);
 .table-striped>tbody>tr:nth-of-type(odd) {
     background-color: #fff;
 }
+.table-striped>tbody>tr:nth-of-type(even) {
+    background-color: #eee;
+}
 
 @font-face {
   font-family: 'gothic';
@@ -31,8 +34,8 @@ box-shadow: 0 0 20px rgba(0,0,0,0.4);
 }
 .table-responsive{
 
-  box-shadow: 0 4px 6px -5px #333;
-border-radius: 20px;
+  box-shadow: 0 4px 10px -5px #333;
+border-radius: 0px 0px 20px 20px;
  margin-bottom: 100px;
         -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
        -moz-animation: fadein 2s; /* Firefox < 16 */
@@ -104,3 +107,4 @@ ul.pagination.pagination-lg li a {
 .pagination li:hover:not(.active) a {
   background-color: #ddd;
 }
+

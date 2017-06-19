@@ -2,82 +2,78 @@
 
 @main("Manage Sessions") {
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
+<div class="row">
+    <div class="col-md-1" >
 
-    <div class="container">
-        <div class="row">
-
-            <div class="col-md-10 col-md-offset-1">
-                <p class="information">
-                @flash.get("message").fold("")(message => message)
-                </p>
-                <div class="panel panel-default panel-table">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col col-xs-6">
-                                <h3 class="panel-title">Sessions</h3>
-                            </div>
-                            <div class="col col-xs-6 text-right">
-                                <a href="@routes.SessionsController.create()" class="btn btn-sm btn-primary btn-create">
-                                    Create New</a>
-                            </div>
+    </div>
+    <div class="col-md-10 " >
+        <div class="container-fluid" style="margin-top:74px;">
+        </div>
+        @if(!flash.isEmpty) {
+        <div class="alert alert-success  alert-dismissable">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> @flash.get("message").fold("")(message => message)
+        </div>
+        }
+        <div class="table-responsive manageSession">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>
+                        <div class="col col-xs-6 text-right">
+                        <a href="@routes.SessionsController.create()" class="btn btn-sm btn-primary btn-create"><i class="fa fa-plus" aria-hidden="true"></i> New</a>
                         </div>
-                    </div>
-                    <div class="panel-body">
-                        <table class="table table-striped table-bordered table-list">
-                            <thead>
-                                <tr>
-                                    <th><em class="fa fa-cog"></em></th>
-                                    <th>Date</th>
-                                    <th>Session</th>
-                                    <th>Topic</th>
-                                    <th>Email</th>
-                                    <th>Meetup</th>
-                                    <th>Cancelled</th>
-                                    <th>Rating</th>
-                                </tr>
-                            </thead>
+                    </th>
+                    <th>Date</th>
+                    <th>Session</th>
+                    <th>Topic</th>
+                    <th>Email</th>
+                    <th>Meetup</th>
+                    <th>Cancelled</th>
+                    <th>Rating</th>
+                </tr>
+                </thead>
+                <tbody>
+                @knolxSessions.map { knolxSession =>
+                <tr>
+                    <td align="center">
+                        <a href="@routes.SessionsController.update(knolxSession.id)" class="btn btn-default"><em class="fa fa-pencil"></em></a>
+                        <a href="@routes.SessionsController.deleteSession(knolxSession.id)" class="btn btn-danger">
+                            <em class="fa fa-trash"></em>
+                        </a>
+                    </td>
+                    <td>@knolxSession.date</td>
+                    <td>@knolxSession.session</td>
+                    <td>@knolxSession.topic</td>
+                    <td>@knolxSession.email</td>
+                    <td>@if(knolxSession.meetup) { Yes } else { No } </td>
+                    <td>@if(knolxSession.cancelled) { Yes } else { No } </td>
+                    <td>0<!--@knolxSession.rating--></td>
+                </tr>
+                }
+                </tbody>
+            </table>
+        </div>
 
-                            <tbody>
-                            @knolxSessions.map { knolxSession =>
-                                <tr>
-                                    <td align="center">
-                                        <a href="@routes.SessionsController.update(knolxSession.id)" class="btn btn-default"><em class="fa fa-pencil"></em></a>
-                                        <a href="@routes.SessionsController.deleteSession(knolxSession.id)" class="btn btn-danger">
-                                            <em class="fa fa-trash"></em>
-                                        </a>
-                                    </td>
-                                    <td>@knolxSession.date</td>
-                                    <td>@knolxSession.session</td>
-                                    <td>@knolxSession.topic</td>
-                                    <td>@knolxSession.email</td>
-                                    <td>@if(knolxSession.meetup) { Yes } else { No } </td>
-                                    <td>@if(knolxSession.cancelled) { Yes } else { No } </td>
-                                    <td>@knolxSession.rating</td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
+    </div>
 
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <div class="col col-xs-4">Page @pageNumber of @pages
-                            </div>
-                            <div class="col col-xs-8">
-                                <ul class="pagination hidden-xs pull-right">
-                                    @for(pagenumber <- (1 to pages) ) {
-                                    <li><a href="@routes.SessionsController.manageSessions(pagenumber)">@pagenumber</a></li>
-                                    }
-                                </ul>
-                                <ul class="pagination visible-xs pull-right">
-                                    <li><a href="#">«</a></li>
-                                    <li><a href="#">»</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="col-md-1" >
 
-            </div></div></div>
+    </div>
+</div>
+
+<div class="center">
+    <div class="v-align">
+
+        <ul class="pagination pagination-lg">
+            @for(pagenumber <- (1 to pages) ) {
+            <li @if(pagenumber == pageNumber){class="active"}><a href="@routes.SessionsController.manageSessions(pagenumber)" >@pagenumber</a></li>
+            }
+        </ul>
+
+    </div>
+</div>
+
+<div id="foo"></div>
+
 }

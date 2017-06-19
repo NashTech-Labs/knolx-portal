@@ -5,6 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Scheduler, Actor}
 import FeedbackFormScheduler._
 import models.SessionsRepository
+import play.api.Logger
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,8 +24,8 @@ class FeedbackFormScheduler @Inject()(sessionsRepository: SessionsRepository) ex
     import scala.concurrent.duration._
     import scala.concurrent.Await
 
-    val asd = Await.result(sessionsRepository.sessionsScheduledToday, 10.seconds)
-    println(">>>>>>> asd " + asd)
+    val sessions = Await.result(sessionsRepository.sessionsScheduledToday, 10.seconds)
+    Logger.info("Sessions " + sessions)
 
     self ! ScheduleFeedbackForms(15.days, 15.days)
   }

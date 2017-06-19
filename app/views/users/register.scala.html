@@ -1,36 +1,82 @@
 @(userForm: Form[UserInformation])(implicit messages: Messages, request: Request[_], flash: Flash)
 
     @main("Register") {
+        <div class="row">
+            <div class="col-md-4" >
 
-        @userForm.globalError.map { error =>
-            <p class="error">
-                @error.message
-            </p>
-        }
+            </div>
+            <div class="col-md-4 profile" >
+                <div class="container-fluid" style="margin-top:90px ;">
+                </div>
+                <div class="login-outer">
+                    <div class="col-md-12 login-one" > </div>
 
-        <p class="information">
-        @flash.get("message").fold("")(message => message)
-        </p>
+                    <form id="registrationForm" action="@routes.UsersController.createUser()" method="POST">
+                        <div class="col-md-12 topfield" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Email" required class="inputField reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
 
-        @helper.form(action = routes.UsersController.createUser(), 'id -> "registrationForm") {
-            @helper.inputText(
-                userForm("email"),
-                'id -> "email",
-                '_label -> "Email",
-                '_showConstraints -> false)
-            @helper.inputPassword(
-                userForm("password"),
-                'id -> "password",
-                'placeholder -> "must be at least 8 characters",
-                '_label -> "Password",
-                '_showConstraints -> false)
-            @helper.inputPassword(
-                userForm("confirmPassword"),
-                'id -> "confirmPassword",
-                'placeholder -> "must be at least 8 characters",
-                '_label -> "Confirm Password",
-                '_showConstraints -> false)
-            <button type="submit">Submit</button>
-        }
+                        <div class="col-md-12 login-two login-three">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="password" value='@userForm.data.get("password")' name="password" id="password" placeholder="Choose Password" required class="inputField reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-three">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="password" value='@userForm.data.get("confirmPassword")' name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required class="inputField reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-four" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="submit" value="Register" class="inputField regbtn"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4"></div>
+        </div>
+
+        <div class="row regError">
+            <div class="col-md-4" ></div>
+            <div class="col-md-4" >
+            @if(userForm.hasGlobalErrors || userForm("email").hasErrors || userForm("password").hasErrors ||
+                    userForm("confirmPassword").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in ">
+                    <ul>
+                        @if(userForm.hasGlobalErrors) {
+                            <li>@userForm.globalError.map(_.message)</li>
+                        }
+                        @if(userForm("email").hasErrors) {
+                            <li>@userForm("email").error.map(error => messages(error.message))</li>
+                        }
+                        @if(userForm("password").hasErrors) {
+                            <li>@userForm("password").error.map(error => messages(error.message))</li>
+                        }
+                        @if(userForm("confirmPassword").hasErrors) {
+                            <li>@userForm("confirmPassword").error.map(error => messages(error.message))</li>
+                        }
+                        @if(!flash.isEmpty) {
+                            <li>@flash.get("message").fold("")(message => message)</li>
+                        }
+                    </ul>
+                </div>
+            }
+            </div>
+            <div class="col-md-4" ></div>
+        </div>
 
     }

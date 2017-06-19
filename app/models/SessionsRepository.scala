@@ -57,10 +57,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
             upsert = false)
           .map(_.value))
 
-  def sessionsScheduledToday(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
-    println(">>>>>>>> " + new java.util.Date(DateTimeUtility.startOfDayMillis))
-    println(">>>>>>>> " + new java.util.Date(DateTimeUtility.endOfDayMillis))
-
+  def sessionsScheduledToday(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
@@ -70,7 +67,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
             "date" -> BSONDocument("$lte" -> BSONDateTime(DateTimeUtility.endOfDayMillis))))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List]())
-  }
 
   def sessions(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection

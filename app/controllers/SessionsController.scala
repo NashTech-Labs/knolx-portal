@@ -132,7 +132,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             sessionsRepository.insert(session) map { result =>
               if (result.ok) {
                 Logger.info(s"Session for user ${sessionInfo.email} successfully created")
-                Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully created!")
+                Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully created!")
               } else {
                 Logger.error(s"Something went wrong when creating a new Knolx session for user ${sessionInfo.email}")
                 InternalServerError("Something went wrong!")

@@ -108,3 +108,7 @@ ul.pagination.pagination-lg li a {
   background-color: #ddd;
 }
 
+.v-align-mobile {
+    padding-right: 30px;
+}
+

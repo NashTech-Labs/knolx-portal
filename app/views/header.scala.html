@@ -31,8 +31,8 @@
                         </li>
                     }
                     @if(SessionHelper.isAdmin) {
-                        <li class="@activeLink(routes.FeedbackFormsController.feedbackForm().url) alignLinks">
-                            <a href="@routes.FeedbackFormsController.feedbackForm()">Manage Feedback Forms</a>
+                        <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks">
+                            <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Manage Feedback Forms</a>
                         </li>
                     }
 

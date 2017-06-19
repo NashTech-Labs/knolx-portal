@@ -22,43 +22,43 @@
         <a href="#" class="pull-left logo"><img src='@routes.Assets.versioned("images/logo.png")'></a>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
-                <li class="@activeLink(routes.SessionsController.sessions(1).url) alignlinks">
+                <li class="@activeLink(routes.SessionsController.sessions(1).url) alignLinks">
                     <a href="@routes.SessionsController.sessions(1)">Home</a>
                 </li>
                 @if(SessionHelper.isAdmin) {
-                    <li class="@activeLink(routes.SessionsController.manageSessions(1).url) alignlinks">
+                    <li class="@activeLink(routes.SessionsController.manageSessions(1).url) alignLinks">
                         <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
                     </li>
                 }
                 @if(SessionHelper.isAdmin) {
-                    <li class="@activeLink(routes.FeedbackFormsController.feedbackForm().url) alignlinks">
+                    <li class="@activeLink(routes.FeedbackFormsController.feedbackForm().url) alignLinks">
                         <a href="@routes.FeedbackFormsController.feedbackForm()">Manage Feedback Forms</a>
                     </li>
                 }
 
                 @if(SessionHelper.isLoggedIn) {
-                    <li class="@activeLink(routes.UsersController.login().url) alignlinks">
+                    <li class="@activeLink(routes.UsersController.login().url) alignLinks">
                         <a href="@routes.UsersController.login()">Login</a>
                     </li>
                 }
 
                 @if(SessionHelper.isLoggedIn) {
-                    <li class="@activeLink(routes.UsersController.register().url) alignlinks">
+                    <li class="@activeLink(routes.UsersController.register().url) alignLinks">
                         <a href="@routes.UsersController.register()">Register</a>
                     </li>
                 } else {
 
-                    <li class="dropdown alignlinks">
+                    <li class="dropdown alignLinks">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-user"></i>
                             <b class="caret"></b>
                         </a>
 
                         <ul class="dropdown-menu">
-                            <li class="alignlinks">
+                            <li class="alignLinks">
                                 <a href="@routes.HomeController.index()">@SessionHelper.email</a>
                             </li>
-                            <li class="alignlinks">
+                            <li class="alignLinks">
                                 <a href="@routes.UsersController.logout()">Logout</a>
                             </li>
                         </ul>

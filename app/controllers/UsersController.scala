@@ -24,7 +24,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
     mapping(
       "email" -> email,
       "password" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
-      "confirmPassword" -> nonEmptyText.verifying("Password and confirm password miss match!",password => password.length >= 8)
+      "confirmPassword" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8)
     )(UserInformation.apply)(UserInformation.unapply)
       verifying(
       "Password and confirm password miss match!", user => user.password.toLowerCase == user.confirmPassword.toLowerCase)

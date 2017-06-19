@@ -3,63 +3,12 @@
 @activeLink(currentPath: String) = @{
     if(request.path.equals(currentPath)) "active"
 }
-<!--
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
 
-        <div class="navbar-header">
-            <a class="navbar-brand" href="@routes.HomeController.index()">Knolx Portal</a>
-        </div>
-
-        <ul class="nav navbar-nav">
-            <li class="@activeLink(routes.HomeController.index().url)">
-                <a href="@routes.HomeController.index()">Home</a>
-            </li>
-
-            <li class="@activeLink(routes.SessionsController.sessions(1).url)">
-                <a href="@routes.SessionsController.sessions(1)">Sessions</a>
-            </li>
-
-            @if(SessionHelper.isAdmin) {
-                <li class="@activeLink(routes.SessionsController.manageSessions(1).url)">
-                    <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
-                </li>
-            }
-
-            @if(SessionHelper.isAdmin) {
-                <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url)">
-                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Manage Feedback Forms</a>
-                </li>
-            }
-
-            @if(SessionHelper.isLoggedIn) {
-                <li class="@activeLink(routes.UsersController.login().url)">
-                    <a href="@routes.UsersController.login()">Login</a>
-                </li>
-            }
-
-            @if(SessionHelper.isLoggedIn) {
-                <li class="@activeLink(routes.UsersController.register().url)">
-                    <a href="@routes.UsersController.register()">Register</a>
-                </li>
-            } else {
-                <li >
-                    <a href="@routes.UsersController.logout()">Logout</a>
-                </li>
-
-                <li >
-                    <a href="@routes.HomeController.index()">@SessionHelper.email</a>
-                </li>
-            }
-
-        </ul>
-    </div>
-</nav>
--->
 <div id ="parallex_layer_1"></div>
 <div class="container-fluid">
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <!-- Brand and toggle get grouped for better mobile display -->
+
+            <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -68,52 +17,56 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
         <a href="#" class="pull-left logo"><img src='@routes.Assets.versioned("images/logo.png")'></a>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
-                <li  class="@activeLink(routes.SessionsController.sessions(1).url) alignlinks">
+                <li class="@activeLink(routes.SessionsController.sessions(1).url) alignlinks">
                     <a href="@routes.SessionsController.sessions(1)">Home</a>
                 </li>
                 @if(SessionHelper.isAdmin) {
-                <li class="@activeLink(routes.SessionsController.manageSessions(1).url) alignlinks">
-                    <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
-                </li>
+                    <li class="@activeLink(routes.SessionsController.manageSessions(1).url) alignlinks">
+                        <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
+                    </li>
                 }
                 @if(SessionHelper.isAdmin) {
-                <li class="@activeLink(routes.FeedbackFormsController.feedbackForm().url) alignlinks">
-                    <a href="@routes.FeedbackFormsController.feedbackForm()">Manage Feedback Forms</a>
-                </li>
+                    <li class="@activeLink(routes.FeedbackFormsController.feedbackForm().url) alignlinks">
+                        <a href="@routes.FeedbackFormsController.feedbackForm()">Manage Feedback Forms</a>
+                    </li>
                 }
 
                 @if(SessionHelper.isLoggedIn) {
-                <li class="@activeLink(routes.UsersController.login().url) alignlinks">
-                    <a href="@routes.UsersController.login()">Login</a>
-                </li>
+                    <li class="@activeLink(routes.UsersController.login().url) alignlinks">
+                        <a href="@routes.UsersController.login()">Login</a>
+                    </li>
                 }
 
                 @if(SessionHelper.isLoggedIn) {
-                <li class="@activeLink(routes.UsersController.register().url) alignlinks">
-                    <a href="@routes.UsersController.register()">Register</a>
-                </li>
+                    <li class="@activeLink(routes.UsersController.register().url) alignlinks">
+                        <a href="@routes.UsersController.register()">Register</a>
+                    </li>
                 } else {
 
-                <li class="dropdown alignlinks">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">                    <i class="fa fa-user"></i><b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li class="alignlinks">
-                            <a href="@routes.HomeController.index()">@SessionHelper.email</a>
-                        </li>
-                        <li class="alignlinks">
-                            <a href="@routes.UsersController.logout()">Logout</a>
-                        </li>
-                    </ul>
-                </li>
+                    <li class="dropdown alignlinks">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-user"></i>
+                            <b class="caret"></b>
+                        </a>
 
+                        <ul class="dropdown-menu">
+                            <li class="alignlinks">
+                                <a href="@routes.HomeController.index()">@SessionHelper.email</a>
+                            </li>
+                            <li class="alignlinks">
+                                <a href="@routes.UsersController.logout()">Logout</a>
+                            </li>
+                        </ul>
+                    </li>
                 }
 
             </ul>
-        </div><!-- /.navbar-collapse -->
+        </div>
     </nav>
 
 </div>

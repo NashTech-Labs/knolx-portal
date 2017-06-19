@@ -14,7 +14,7 @@ class HomeControllerSpec extends PlaySpecification with Mockito {
 
       status(result) must be equalTo OK
 
-      contentAsString(result) must be contain "<a href=\"/session\">Sessions</a>"
+      contentAsString(result) must be contain """<title>Welcome!</title>"""
     }
 
   }

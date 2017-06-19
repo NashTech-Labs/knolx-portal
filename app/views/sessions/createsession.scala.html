@@ -1,63 +1,81 @@
-@(createSessionForm: Form[CreateSessionInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Create Session") {
 
 <div class="row">
-    <div class="col-md-4" >
+    <div class="col-md-4">
 
     </div>
-    <div class="col-md-4 profile" >
+    <div class="col-md-4 profile">
         <div class="container-fluid" style="margin-top:90px;">
         </div>
         <div class="create-outer">
-            <div class="col-md-12 login-one top" > </div>
+            <div class="col-md-12 login-one top"></div>
 
             <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
-                <div class="col-md-12" >
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
-                        <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email" placeholder="Email" required class="updatefield reg"/>
+                <div class="col-md-12">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
+                               placeholder="Email" required class="updatefield reg"/>
                     </div>
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-1"></div>
                 </div>
-                <div class="col-md-12" >
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
-                        <input type="date" value='@createSessionForm.data.get("date")' name="date" id="date" placeholder="Date" required class="updatefield reg"/>
+                <div class="col-md-12">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="date" value='@createSessionForm.data.get("date")' name="date" id="date"
+                               placeholder="Date" required class="updatefield reg"/>
                     </div>
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-1"></div>
                 </div>
                 <div class="col-md-12 login-two login-three updatetwo">
 
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
 
                         <select name="session" id="session" class="updatefield login-two">
-                            <option value="session 1"  @if(createSessionForm.data.getOrElse("session", "") == "session 1") {selected}>Session 1</option>
-                            <option value="session 2"  @if(createSessionForm.data.getOrElse("session", "") == "session 2") {selected}>Session 2</option>
+                            @for(session <- SessionValues.Sessions){
+                            <option value="@session._1" @if(createSessionForm.data.getOrElse(
+                            "session", "") == "session 1") {selected}>@session._2</option>
+                            }
                         </select>
                     </div>
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-1"></div>
+
+                </div>
+                <div class="col-md-12 login-two login-three updatetwo">
+
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <select name="feedbackFormId" id="feedbackFormId" class="updatefield login-two">
+                            @for(feedbackForm <- feedbackForms){
+                            <option value="@feedbackForm._1">@feedbackForm._2</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-1"></div>
 
                 </div>
                 <div class="col-md-12 login-three updatetwo">
 
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
 
-                        <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")' placeholder="Topic" required class="updatefield"/>
+                        <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
+                               placeholder="Topic" required class="updatefield"/>
 
                     </div>
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-1"></div>
 
                 </div>
 
                 <div class="col-md-12 login-three">
 
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
 
-                        <label class="testy" >
+                        <label class="testy">
                             <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'
 
                                    @if(createSessionForm.data.getOrElse("meetup", "false") == "true") {
@@ -69,33 +87,34 @@
                         </label>
 
                     </div>
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-1"></div>
 
                 </div>
-                <div class="col-md-12 update-two login-four" >
+                <div class="col-md-12 update-two login-four">
 
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
 
                         <input type="submit" value="Create" class="inputfield updatebtn"/>
 
                     </div>
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-1"></div>
 
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="col-md-4" >
+    <div class="col-md-4">
 
     </div>
 </div>
 
 <div class="row regError">
-    <div class="col-md-4" ></div>
-    <div class="col-md-4" >
-        @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors || createSessionForm("date").hasErrors || createSessionForm("session").hasErrors || !flash.isEmpty){
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
+        createSessionForm("date").hasErrors || createSessionForm("session").hasErrors || !flash.isEmpty){
         <div class="alert alert-danger fade in ">
             <ul>
                 @if(createSessionForm.hasGlobalErrors ){
@@ -114,8 +133,10 @@
                 <li>@flash.get("message").fold("")(message => message)</li>
                 }
             </ul>
-        </div>}
+        </div>
+        }
     </div>
-    <div class="col-md-4" ></div>
+    <div class="col-md-4"></div>
 </div>
 }
+

@@ -16,13 +16,14 @@ class SessionsRepositorySpec extends PlaySpecification {
   val _id: BSONObjectID = BSONObjectID.generate
   val date: Date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   val dateDefault: Date = new SimpleDateFormat("yyyy-MM-dd").parse("1111-11-11")
-  val defaultSession = SessionInfo("", "", dateDefault, "", "", meetup = false, "", cancelled = false, active = false)
+  val defaultSession = SessionInfo("", "", dateDefault, "", "", "", meetup = false, "", cancelled = false, active = false)
 
   "Session repository" should {
 
     "insert session" in {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-      val userInfo = SessionInfo("testid", "test@example.com", date, "session", "sessionRepoTest", meetup = true, "", cancelled = false, active = true, _id)
+      val userInfo = SessionInfo("testid", "test@example.com", date, "session", "feedbackFormId", "sessionRepoTest",
+        meetup = true, "", cancelled = false, active = true, _id)
 
       val created = await(sessionsRepository.insert(userInfo).map(_.ok))
 
@@ -58,12 +59,14 @@ class SessionsRepositorySpec extends PlaySpecification {
     }
 
     "paginate" in {
-      val page= await(sessionsRepository.paginate(1))
+      val page = await(sessionsRepository.paginate(1))
+
       page.size must beEqualTo(1)
     }
 
     "active count" in {
       val count = await(sessionsRepository.activeCount)
+
       count must beEqualTo(1)
     }
 

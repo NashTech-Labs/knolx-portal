@@ -3,14 +3,19 @@ package controllers
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
-import models.{SessionInfo, SessionsRepository, UserInfo, UsersRepository}
+import models._
+import org.specs2.execute.{AsResult, Result}
+import org.specs2.matcher.ShouldThrownExpectations
 import org.specs2.mock.Mockito
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi, MessagesApi}
+import org.specs2.mutable.Around
+import org.specs2.specification.Scope
+import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
-import play.api.test.{FakeRequest, PlaySpecification, WithApplication}
-import play.api.{Configuration, Environment}
+import play.api.test._
+import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.BSONObjectID
 
@@ -19,89 +24,95 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SessionsControllerSpec extends PlaySpecification with Mockito {
 
-  val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  val _id: BSONObjectID = BSONObjectID.generate()
-  val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", date, "sessions", "topic",
+  abstract class WithTestApplication(val app: Application = FakeApplication()) extends Around with Scope with ShouldThrownExpectations with Mockito {
+    implicit def implicitApp: play.api.Application = app
+
+    implicit def implicitMaterializer: Materializer = app.materializer
+
+    def this(builder: GuiceApplicationBuilder => GuiceApplicationBuilder) = this(builder(GuiceApplicationBuilder()).build())
+
+    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
+
+    val sessionsRepository: SessionsRepository = mock[SessionsRepository]
+    val usersRepository: UsersRepository = mock[UsersRepository]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val config = Configuration(ConfigFactory.load("application.conf"))
+    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+
+    val controller = new SessionsController(messages, usersRepository, sessionsRepository, feedbackFormsRepository)
+  }
+
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+  private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", date, "sessions", "feedbackFormId", "topic",
       meetup = true, "rating", cancelled = false, active = true, _id)))
 
   "Session Controller" should {
 
-    "display sessions page" in {
-      val sessionController = testObject
+    "display sessions page" in new WithTestApplication {
+      sessionsRepository.paginate(1) returns sessionObject
+      sessionsRepository.activeCount returns Future.successful(1)
 
-      sessionController.sessionsRepository.paginate(1) returns sessionObject
-      sessionController.sessionsRepository.activeCount returns  Future.successful(1)
-
-      val result = sessionController.sessionController.sessions(1)(FakeRequest())
+      val result = controller.sessions(1)(FakeRequest())
 
       contentAsString(result) must be contain "<th>Topic</th>"
       status(result) must be equalTo OK
     }
 
-    "display manage sessions page" in new WithApplication {
-      val sessionController = testObject
-
+    "display manage sessions page" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.paginate(1) returns sessionObject
-      sessionController.sessionsRepository.activeCount returns  Future.successful(1)
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.paginate(1) returns sessionObject
+      sessionsRepository.activeCount returns Future.successful(1)
 
-      val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
+      val result = controller.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo OK
     }
 
-    "not open manage sessions page when wrong username is specified" in new WithApplication {
-      val sessionController = testObject
-
+    "not open manage sessions page when wrong username is specified" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)
 
-      sessionController.usersRepository.getByEmail("") returns emailObject
-      sessionController.sessionsRepository.sessions returns sessionObject
+      usersRepository.getByEmail("") returns emailObject
+      sessionsRepository.sessions returns sessionObject
 
-      val result = sessionController.sessionController.manageSessions(1)(FakeRequest())
+      val result = controller.manageSessions(1)(FakeRequest())
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "not open manage sessions page when user is not admin" in new WithApplication {
-      val sessionController = testObject
-
+    "not open manage sessions page when user is not admin" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.sessions returns sessionObject
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.sessions returns sessionObject
 
-      val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
+      val result = controller.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "not open manage sessions page when unauthorized access is performed" in new WithApplication {
-      val sessionController = testObject
-
+    "not open manage sessions page when unauthorized access is performed" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = sessionController.sessionController.manageSessions(1)(FakeRequest()
+      val result = controller.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "delete session" in new WithApplication {
-      val sessionController = testObject
-
+    "delete session" in new WithTestApplication {
       val objectToDelete =
         Future.successful(Some(JsObject(Seq("Email" -> JsString("email"), "Date" -> JsString("date"),
           "UserId" -> JsString(_id.stringify), "Session" -> JsString("sessions"), "Topic" -> JsString("topic"),
@@ -111,35 +122,31 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.delete(_id.stringify) returns objectToDelete
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.delete(_id.stringify) returns objectToDelete
 
-      val result = sessionController.sessionController.deleteSession(_id.stringify)(FakeRequest()
+      val result = controller.deleteSession(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo OK
     }
 
-    "not delete session when wrong id is specified" in new WithApplication {
-      val sessionController = testObject
-
+    "not delete session when wrong id is specified" in new WithTestApplication {
       val objectToDelete = Future.successful(None)
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.delete("1") returns objectToDelete
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.delete("1") returns objectToDelete
 
-      val result = sessionController.sessionController.deleteSession("1")(FakeRequest()
+      val result = controller.deleteSession("1")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "not delete session when user is not admin" in new WithApplication {
-      val sessionController = testObject
-
+    "not delete session when user is not admin" in new WithTestApplication {
       val objectToDelete =
         Future.successful(Some(JsObject(Seq("Email" -> JsString("email"), "Date" -> JsString("date"),
           "UserId" -> JsString("123"), "Session" -> JsString("sessions"), "Topic" -> JsString("topic"),
@@ -149,47 +156,48 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.delete("123") returns objectToDelete
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.delete("123") returns objectToDelete
 
-      val result = sessionController.sessionController.deleteSession("123")(FakeRequest()
+      val result = controller.deleteSession("123")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "render create session form" in new WithApplication {
-      val sessionController = testObject
-
+    "render create session form" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getAll returns Future(feedbackForms)
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = sessionController.sessionController.create(FakeRequest()
+      val result = controller.create(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo OK
     }
 
-    "create session" in new WithApplication {
-      val sessionController = testObject
-
+    "create session" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+      feedbackFormsRepository.getAll returns Future(feedbackForms)
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
-      val result = sessionController.sessionController.createSession(FakeRequest(POST, "create")
+      val result = controller.createSession(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("email" -> "test@example.com",
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
@@ -197,44 +205,45 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
     }
 
 
-    "not create session when result is false" in new WithApplication {
-      val sessionController = testObject
-
+    "not create session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+      feedbackFormsRepository.getAll returns Future(feedbackForms)
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
-      val result = sessionController.sessionController.createSession(FakeRequest(POST, "create")
+      val result = controller.createSession(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("email" -> "test@example.com",
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "not create session due to BadFormRequest" in new WithApplication {
-      val sessionController = testObject
-
+    "not create session due to BadFormRequest" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getAll returns Future(feedbackForms)
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
       val sessionDateString = simpleDateFormat.format(sessionDate)
 
       val result =
-        sessionController.sessionController.createSession(FakeRequest(POST, "create")
+        controller.createSession(FakeRequest(POST, "create")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("email" -> "test@example.com",
             "date" -> "25/06/2017",
@@ -245,19 +254,19 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "not create session due to unauthorized access" in new WithApplication {
-      val sessionController = testObject
-
+    "not create session due to unauthorized access" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getAll returns Future(feedbackForms)
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
       val sessionDateString = simpleDateFormat.format(sessionDate)
 
       val result =
-        sessionController.sessionController.createSession(FakeRequest(POST, "create")
+        controller.createSession(FakeRequest(POST, "create")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("email" -> "test@example.com",
             "date" -> sessionDateString,
@@ -268,29 +277,25 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "render update session form" in new WithApplication {
-      val sessionsController = testObject
-
+    "render update session form" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", date, "session 1",
-        "topic", meetup = false, "", cancelled = false, active = true, _id)))
+        "feedbackFormId", "topic", meetup = false, "", cancelled = false, active = true, _id)))
 
-      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.getById(_id.stringify) returns sessionInfo
 
-      val result = sessionsController.sessionController.update(_id.stringify)(FakeRequest()
+      val result = controller.update(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo OK
     }
 
-    "redirect to manage sessions page when session is not found" in new WithApplication {
-      val sessionsController = testObject
-
+    "redirect to manage sessions page when session is not found" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
@@ -298,35 +303,31 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val sessionInfo = Future.successful(None)
 
-      sessionsController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsController.sessionsRepository.getById(_id.stringify) returns sessionInfo
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.getById(_id.stringify) returns sessionInfo
 
-      val result = sessionsController.sessionController.update(_id.stringify)(FakeRequest()
+      val result = controller.update(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not render update session form/manage session form due to unauthorized access" in new WithApplication {
-      val sessionController = testObject
-
+    "not render update session form/manage session form due to unauthorized access" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
       val sessionDateString = simpleDateFormat.format(sessionDate)
 
-      val result = sessionController.sessionController.update(_id.stringify)(FakeRequest()
+      val result = controller.update(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "update session" in new WithApplication {
-      val sessionController = testObject
-
+    "update session" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
@@ -336,23 +337,22 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.update(updatedInformation) returns updateWriteResult
 
-      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+      val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not update session when result is false" in new WithApplication {
-      val sessionController = testObject
-
+    "not update session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
@@ -362,54 +362,52 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionController.sessionsRepository.update(updatedInformation) returns updateWriteResult
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.update(updatedInformation) returns updateWriteResult
 
-      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+      val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
           "date" -> "2017-06-25",
           "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "not update session due to BadFormRequest" in new WithApplication {
-      val sessionController = testObject
-
+    "not update session due to BadFormRequest" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = sessionController.sessionController.updateSession(FakeRequest(POST, "update")
+      val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
           "date" -> "25/06/2017",
           "session" -> "session",
+          "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
           "meetup" -> "true"))
 
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "not update session due to unauthorized access" in new WithApplication {
-      val sessionController = testObject
-
+    "not update session due to unauthorized access" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)
 
-      sessionController.usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
       val sessionDateString = simpleDateFormat.format(sessionDate)
 
       val result =
-        sessionController.sessionController.createSession(FakeRequest(POST, "create")
+        controller.createSession(FakeRequest(POST, "create")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> sessionDateString,
@@ -421,22 +419,5 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
     }
 
   }
-
-  def testObject: TestObject = {
-
-    val mockedSessionsRepository: SessionsRepository = mock[SessionsRepository]
-    val mockedUsersRepository: UsersRepository = mock[UsersRepository]
-    val config = Configuration(ConfigFactory.load("application.conf"))
-    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
-
-    val controller = new SessionsController(messages, mockedUsersRepository, mockedSessionsRepository)
-
-    TestObject(messages, mockedUsersRepository, mockedSessionsRepository, controller)
-  }
-
-  case class TestObject(messagesApi: MessagesApi,
-                        usersRepository: UsersRepository,
-                        sessionsRepository: SessionsRepository,
-                        sessionController: SessionsController)
 
 }

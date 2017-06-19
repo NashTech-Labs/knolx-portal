@@ -9,6 +9,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -51,7 +52,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val createSessionForm = Form(
     mapping(
       "email" -> email,
-      "date" -> date("yyyy-MM-dd'T'HH:mm")/*.verifying("Invalid date selected!", date => date.after(new Date))*/,
+      "date" -> date("yyyy-MM-dd'T'HH:mm").verifying("Invalid date selected!", date => date.after(new Date(DateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> nonEmptyText,
       "topic" -> nonEmptyText,
@@ -61,7 +62,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
-      "date" -> date("yyyy-MM-dd'T'HH:mm")/*.verifying("Invalid date selected!", date => date.after(new Date))*/,
+      "date" -> date("yyyy-MM-dd'T'HH:mm").verifying("Invalid date selected!", date => date.after(new Date(DateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "topic" -> nonEmptyText,
       "meetup" -> boolean

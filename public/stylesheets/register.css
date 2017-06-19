@@ -2,17 +2,18 @@
     padding-top: 30px;
 }
 
-.regbtn{
-    background-color: rgb(125,158,192);
+.regbtn {
+    background-color: rgb(125, 158, 192);
     color: #fff;
     border: None;
 }
 
-input.inputfield.reg:focus {
+input.inputField.reg:focus {
     outline: none;
-    border-bottom: 2px solid rgb(125,158,192);
+    border-bottom: 2px solid rgb(125, 158, 192);
 }
-.regError{
-margin-top:20px;
-font-size:16px;
+
+.regError {
+    margin-top: 20px;
+    font-size: 16px;
 }

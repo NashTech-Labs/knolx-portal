@@ -9,6 +9,7 @@
 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <link rel="stylesheet" href="@routes.Assets.versioned("plugins/bootstrap.min.css")">
         <link rel="stylesheet" href="@routes.Assets.versioned("font-awesome/css/font-awesome.min.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/header.css")">
@@ -26,12 +27,12 @@
         <script type="text/javascript" src="@routes.JavascriptRouter.jsRoutes"></script>
 
     </head>
-    <body>
-    @header()
-    <div class="container-fluid">
-    @content
-    </div>
 
+    <body>
+        @header()
+        <div class="container-fluid">
+        @content
+        </div>
     </body>
 
 </html>

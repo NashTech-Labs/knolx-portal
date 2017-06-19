@@ -1,63 +1,59 @@
-.login-outer{
-
-  height:450px;
-    background-color:#FFF;
+.login-outer {
+    height: 450px;
+    background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
     -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
-   -moz-animation: fadein 0.5s; /* Firefox < 16 */
+    -moz-animation: fadein 0.5s; /* Firefox < 16 */
     -ms-animation: fadein 0.5s; /* Internet Explorer */
-     -o-animation: fadein 0.5s; /* Opera < 12.1 */
-        animation: fadein 0.5s;
+    -o-animation: fadein 0.5s; /* Opera < 12.1 */
+    animation: fadein 0.5s;
 }
 
-.login-one{
-    border-radius:20px 20px 0px 0px;
+.login-one {
+    border-radius: 20px 20px 0px 0px;
     height: 80px;
-     box-shadow: 0 4px 6px -5px #333;
+    box-shadow: 0 4px 6px -5px #333;
 }
 
-.login-two{
+.login-two {
     line-height: 50px;
     padding-top: 50px;
 }
 
-.inputfield{
-
+.inputField {
     width: 100%;
     text-align: center;
-    border:none;
-    border-bottom:2px solid #CACFD2  ;
-    font-family:'gothic';
+    border: none;
+    border-bottom: 2px solid #CACFD2;
+    font-family: 'gothic';
     font-size: 18px;
-    color:#566573;
-
+    color: #566573;
 }
 
-.login-three{
+.login-three {
     padding-top: 30px;
 }
 
-.logbtn{
-
-    background-color: #45B39D ;
+.logbtn {
+    background-color: #45B39D;
     color: #fff;
-    border:None;
-     outline: none;
+    border: None;
+    outline: none;
 }
 
-input.inputfield.loge:focus {
+input.inputField.loge:focus {
     outline: none;
     border-bottom: 2px solid #45B39D;
 }
 
-.error{
-padding-top: 30px;
-line-height: 15px;
-text-align:center;
+.error {
+    padding-top: 30px;
+    line-height: 15px;
+    text-align: center;
 }
 
-.loginError{
-margin-top:20px;
-text-align:center;
-font-size:16px;
+.loginError {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 16px;
 }

@@ -9,12 +9,10 @@ class HomeControllerSpec extends PlaySpecification with Mockito {
 
   "HomeController" should {
 
-    "render index page" in {
+    "redirect index page to sessions page" in {
       val result = homeController.index(FakeRequest())
 
-      status(result) must be equalTo OK
-
-      contentAsString(result) must be contain """<title>Welcome!</title>"""
+      status(result) must be equalTo SEE_OTHER
     }
 
   }

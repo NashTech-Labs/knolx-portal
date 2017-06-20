@@ -6,23 +6,22 @@ import java.util.Date
 import controllers.UpdateSessionInformation
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.test.PlaySpecification
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionsRepositorySpec extends PlaySpecification {
 
   val sessionsRepository = new SessionsRepository(TestDb.reactiveMongoApi)
-  val _id: BSONObjectID = BSONObjectID.generate
-  val date: Date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  val dateDefault: Date = new SimpleDateFormat("yyyy-MM-dd").parse("1111-11-11")
-  val defaultSession = SessionInfo("", "", dateDefault, "", "", "", meetup = false, "", cancelled = false, active = false)
+  val _id = BSONObjectID.generate
+  val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-19")
+  val dateDefault = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-19")
 
   "Session repository" should {
 
     "insert session" in {
-      val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-      val userInfo = SessionInfo("testid", "test@example.com", date, "session", "feedbackFormId", "sessionRepoTest",
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-19")
+      val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
         meetup = true, "", cancelled = false, active = true, _id)
 
       val created = await(sessionsRepository.insert(userInfo).map(_.ok))
@@ -33,20 +32,20 @@ class SessionsRepositorySpec extends PlaySpecification {
     "get sessions" in {
       val sessions = await(sessionsRepository.sessions)
 
-      val head = sessions.headOption.getOrElse(defaultSession)
+      val head = sessions.head
 
       head.email must beEqualTo("test@example.com")
-      head.date must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
+      head.date must beEqualTo(BSONDateTime(date.getTime))
       head.active must beEqualTo(true)
     }
 
     "get session by id" in {
       val session = await(sessionsRepository.getById(_id.stringify))
 
-      val head = session.getOrElse(defaultSession)
+      val head = session.get
 
       head.email must beEqualTo("test@example.com")
-      head.date must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
+      head.date must beEqualTo(BSONDateTime(date.getTime))
       head.active must beEqualTo(true)
     }
 

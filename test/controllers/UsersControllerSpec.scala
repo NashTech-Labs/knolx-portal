@@ -20,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UsersControllerSpec extends PlaySpecification with Mockito {
 
-  abstract class WithTestApplication(val app: Application = FakeApplication()) extends Around with Scope with ShouldThrownExpectations with Mockito {
+  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().build()) extends Around with Scope with ShouldThrownExpectations with Mockito {
     implicit def implicitApp: play.api.Application = app
 
     implicit def implicitMaterializer: Materializer = app.materializer

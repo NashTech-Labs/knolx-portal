@@ -6,7 +6,7 @@ import schedulers.FeedbackFormScheduler
 class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
-    bindActor[FeedbackFormScheduler]("FeedbackFormScheduler")
+    // bindActor[FeedbackFormScheduler]("FeedbackFormScheduler")
   }
 
 }

@@ -17,10 +17,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class SessionInfo(userId: String,
                        email: String,
-                       date: java.util.Date,
+                       date: BSONDateTime,
                        session: String,
                        feedbackFormId: String,
                        topic: String,
@@ -62,6 +63,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj(
+            "cancelled" -> false,
             "active" -> true,
             "date" -> BSONDocument("$gte" -> BSONDateTime(DateTimeUtility.startOfDayMillis)),
             "date" -> BSONDocument("$lte" -> BSONDateTime(DateTimeUtility.endOfDayMillis))))
@@ -115,7 +117,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
-        "date" -> updatedRecord.date.getTime,
+        "date" -> BSONDateTime(updatedRecord.date.getTime),
         "topic" -> updatedRecord.topic,
         "session" -> updatedRecord.session,
         "meetup" -> updatedRecord.meetup)

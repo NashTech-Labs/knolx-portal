@@ -9,11 +9,11 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
-import play.api.{Environment, Configuration, Application}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
-import play.api.test.{FakeApplication, FakeRequest, Helpers, _}
+import play.api.test.{FakeRequest, Helpers, _}
+import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.DefaultWriteResult
 import reactivemongo.bson.BSONObjectID
 
@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
 
-  abstract class WithTestApplication(val app: Application = FakeApplication()) extends Around with Scope with ShouldThrownExpectations with Mockito {
+  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().build()) extends Around with Scope with ShouldThrownExpectations with Mockito {
     implicit def implicitApp: play.api.Application = app
 
     implicit def implicitMaterializer: Materializer = app.materializer

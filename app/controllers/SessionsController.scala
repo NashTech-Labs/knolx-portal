@@ -9,6 +9,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
+import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,8 +75,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .paginate(pageNumber)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map (session =>
-          KnolxSession(session._id.stringify, session.userId, session.date, session.session, session.topic, session.email, session.meetup,
-            session.cancelled, session.rating))
+          KnolxSession(session._id.stringify, session.userId, new Date(session.date.value), session.session, session.topic,
+            session.email, session.meetup, session.cancelled, session.rating))
 
         sessionsRepository
           .activeCount
@@ -94,7 +95,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         val knolxSessions = sessionsJson map (session =>
           KnolxSession(session._id.stringify,
             session.userId,
-            session.date,
+            new Date(session.date.value),
             session.session,
             session.topic,
             session.email,
@@ -142,8 +143,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                 )
               } { userJson =>
                 val userObjId = userJson._id.stringify
-                val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, createSessionInfo.date, createSessionInfo.session,
-                  createSessionInfo.feedbackFormId, createSessionInfo.topic, createSessionInfo.meetup, rating = "", cancelled = false, active = true)
+                val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, BSONDateTime(createSessionInfo.date.getTime),
+                  createSessionInfo.session, createSessionInfo.feedbackFormId, createSessionInfo.topic, createSessionInfo.meetup, rating = "",
+                  cancelled = false, active = true)
+
                 sessionsRepository.insert(session) map { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
@@ -176,7 +179,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .map {
         case Some(sessionInformation) =>
           val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-            sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
+            new Date(sessionInformation.date.value), sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
 
           Ok(views.html.sessions.updatesession(filledForm))
 

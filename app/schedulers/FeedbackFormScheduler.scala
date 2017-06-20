@@ -40,6 +40,7 @@ class FeedbackFormScheduler @Inject()(sessionsRepository: SessionsRepository) ex
         receiver = self,
         message = SendFeedbackForm
       )(context.dispatcher)
+
     case SendFeedbackForm                              => ???
   }
 

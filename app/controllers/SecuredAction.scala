@@ -27,6 +27,7 @@ trait SecuredImplicit {
         .getByEmail(emailFromSession)
         .flatMap(_.headOption.fold {
           Logger.info(s"Unauthorized access for email $emailFromSession")
+          
           Future.successful(Unauthorized("Unauthorized access!"))
         } { userInfo =>
           val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
@@ -53,6 +54,8 @@ trait SecuredImplicit {
 
             block(SecuredRequest(userSession, request))
           } else {
+            Logger.info(s"Unauthorized access for email $emailFromSession")
+
             Future.successful(Unauthorized("Unauthorized access!"))
           }
         })

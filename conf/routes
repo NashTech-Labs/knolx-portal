@@ -16,7 +16,7 @@ GET         /session                             controllers.SessionsController.
 GET         /session/manage                      controllers.SessionsController.manageSessions(pageNumber:Int)
 GET         /session/create                      controllers.SessionsController.create
 POST        /session/create                      controllers.SessionsController.createSession
-GET         /session/delete                      controllers.SessionsController.deleteSession(id: String)
+GET         /session/delete                      controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
 POST        /session/update                      controllers.SessionsController.updateSession
 GET         /session/update                      controllers.SessionsController.update(id: String)
 

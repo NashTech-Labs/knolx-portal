@@ -5,7 +5,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
 
     <div class="container">
-        <div class="row">
+        <div class="row" style="margin-top:100px ;">
 
             <div class="col-md-10 col-md-offset-1">
                 <p class="information">
@@ -18,7 +18,8 @@
                                 <h3 class="panel-title">Feedback Forms</h3>
                             </div>
                             <div class="col col-xs-6 text-right">
-                                <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create">Create New</a>
+                                <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create">
+                                    Create New</a>
                             </div>
                         </div>
                     </div>
@@ -35,7 +36,9 @@
                             @updateFeedbackFormInformation.map { feedbackFormInformation =>
                                 <tr>
                                     <td align="center">
-                                        <a href="@routes.SessionsController.update(feedbackFormInformation.id)" class="btn btn-default"><em class="fa fa-pencil"></em></a>
+                                        <a href="@routes.SessionsController.update(feedbackFormInformation.id)" class="btn btn-default">
+                                            <em class="fa fa-pencil"></em>
+                                        </a>
                                         <a href="@routes.FeedbackFormsController.delete(feedbackFormInformation.id)" class="btn btn-danger">
                                             <em class="fa fa-trash"></em>
                                         </a>
@@ -52,8 +55,8 @@
                             <div class="col col-xs-4">Page @pageNumber of @pages</div>
                             <div class="col col-xs-8">
                                 <ul class="pagination hidden-xs pull-right">
-                                @for(pageNumber <- 1 to pages) {
-                                    <li><a href="@routes.SessionsController.manageSessions(pageNumber)">@pageNumber</a></li>
+                                @for(pages <- 1 to pages) {
+                                    <li><a href="@routes.SessionsController.manageSessions(pages)">@pages</a></li>
                                 }
                                 </ul>
                                 <ul class="pagination visible-xs pull-right">
@@ -67,4 +70,3 @@
 
             </div></div></div>
 }
-

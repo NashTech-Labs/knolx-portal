@@ -1,56 +1,127 @@
 @(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    @{
-        val renderTemplate = ""
-    }
-
     @main("Create Session") {
 
-        @createSessionForm.globalError.map { error =>
-            <p class="error">
-                @error.message
-            </p>
-        }
+        <div class="row">
+            <div class="col-md-4">
 
-        <p class="information">
-        @flash.get("message").fold("")(message => message)
-        </p>
+            </div>
+            <div class="col-md-4 profile">
+                <div class="container-fluid" style="margin-top: 90px ;"></div>
 
-        @helper.form(action = routes.SessionsController.createSession()) {
-            @helper.inputText(
-                createSessionForm("email"),
-                'id -> "email",
-                '_label -> "Email",
-                '_showConstraints -> false)
-            @helper.inputDate(
-                createSessionForm("date"),
-                'id -> "date",
-                '_label -> "Date",
-                '_showConstraints -> false)
-            @helper.select(
-                createSessionForm("session"),
-                SessionValues.Sessions,
-                'id -> "session",
-                '_label -> "Session",
-                '_showConstraints -> false)
-            @helper.select(
-                createSessionForm("feedbackFormId"),
-                feedbackForms,
-                'id -> "feedback",
-                '_label -> "Feedback form template",
-                '_showConstraints -> false)
-            @helper.inputText(
-                createSessionForm("topic"),
-                'id -> "topic",
-                '_label -> "Topic",
-                '_showConstraints -> false)
-            @helper.checkbox(
-                createSessionForm("meetup"),
-                'id -> "meetup",
-                '_label -> "Is meetup ?",
-                '_showConstraints -> false
-            )
-            <button type="submit">Submit</button>
-        }
+                <div class="create-outer">
+                    <div class="col-md-12 login-one top"></div>
 
+                    <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
+                        <div class="col-md-12">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+                                <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
+                                placeholder="Email" required class="updateField reg"/>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+                                <input type="date" value='@createSessionForm.data.get("date")' name="date" id="date"
+                                placeholder="Date" required class="updateField reg"/>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-three updatetwo">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+                                <select name="session" id="session" class="updateField login-two">
+                                @for(session <- SessionValues.Sessions) {
+                                    <option value="@session._1">@session._2</option>
+                                }
+                                </select>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-three updatetwo">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+                                <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                                @for(feedbackForm <- feedbackForms) {
+                                    <option value="@feedbackForm._1">@feedbackForm._2</option>
+                                }
+                                </select>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                        <div class="col-md-12 login-three updatetwo">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+
+                                <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
+                                placeholder="Topic" required class="updateField"/>
+
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                        <div class="col-md-12 login-three">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+
+                                <label class="testy">
+                                    <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
+
+                                    <span class="label_text"></span>
+                                    <p class="checkbox-text">Is Meetup ?</p>
+                                </label>
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                        <div class="col-md-12 update-two login-four">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 ">
+
+                                <input type="submit" value="Create" class="inputField updateButton"/>
+
+                            </div>
+                            <div class="col-md-1"></div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+
+        <div class="row regError">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+            @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
+                    createSessionForm("date").hasErrors || createSessionForm("session").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in ">
+                    <ul>
+                        @if(createSessionForm.hasGlobalErrors) {
+                            <li>@createSessionForm.globalError.map(_.message)</li>
+                        }
+                        @if(createSessionForm("email").hasErrors) {
+                            <li>@createSessionForm("email").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("date").hasErrors) {
+                            <li>@createSessionForm("date").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("session").hasErrors) {
+                            <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
+                        }
+                        @if(!flash.isEmpty) {
+                            <li>@flash.get("message").fold("")(message => message)</li>
+                        }
+                    </ul>
+                </div>
+            }
+            </div>
+            <div class="col-md-4"></div>
+        </div>
     }

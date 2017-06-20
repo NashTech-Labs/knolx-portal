@@ -1,27 +1,97 @@
 @(sessionInfo: Form[UpdateSessionInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    @main("Create Session") {
+    @main("Update Session") {
 
-        <p class="information">
-        @flash.get("message").fold("")(message => message)
-        </p>
+        <div class="row">
+            <div class="col-md-4" >
 
-        <form class="RegForm" action="@routes.SessionsController.updateSession()" method="post">
-            <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'></input>
-            <input name ="date" type="date" value='@sessionInfo.data.get("date")'></input>
-            <span class="help-block align-error">@{
-                sessionInfo("date").error.map { error => messages(error.message) }
-            }</span>
-            <select name="session">
-                <option value="session 1"  @if(sessionInfo.data.getOrElse("session", "") == "session 1") {selected}>Session 1</option>
-                <option value="session 2"  @if(sessionInfo.data.getOrElse("session", "") == "session 2") {selected}>Session 2</option>
-            </select>
-            <input name="topic" type="text" value='@sessionInfo.data.get("topic")'></input>
+            </div>
+            <div class="col-md-4 profile" >
+                <div class="container-fluid" style="margin-top: 90px ;"></div>
 
-            <input type="checkbox" name="meetup" value="true"
-                @if(sessionInfo.data.getOrElse("meetup", "false") == "true") {
-                    checked="checked"
-                    }>Is meetup?</input>
-            <button type="submit">Save</button>
-        </form>
+                <div class="update-outer">
+                    <div class="col-md-12 login-one top" > </div>
+
+                    <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
+                        <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+
+                        <div class="col-md-12" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="date" value='@sessionInfo.data.get("date")' name="date" id="date" placeholder="Date" required class="updateField reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-two login-three updatetwo">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 ">
+                                <select name="session" id="session" class="updateField login-two">
+                                    <option value="session 1"
+                                        @(if(sessionInfo.data.getOrElse("session", "") == "session 1") {
+                                            "selected"
+                                        })>
+                                        Session 1
+                                    </option>
+                                    <option value="session 2"
+                                        @(if(sessionInfo.data.getOrElse("session", "") == "session 2") {
+                                            "selected"
+                                        })>
+                                        Session 2
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-three updatetwo">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="text" name="topic" id="topic" value='@sessionInfo.data.get("topic")' placeholder="Topic" required class="updateField"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 login-three">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <label class="testy" >
+                                    <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'
+                                    @(if(sessionInfo.data.getOrElse("meetup", "false") == "true") {
+                                        """checked="checked""""
+                                    })/>
+                                    <span class="label_text"></span>
+                                    <p class="checkbox-text">Is Meetup ?</p>
+                                </label>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+
+                        <div class="col-md-12 update-two login-four" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="submit" value="Save" class="inputField updateButton"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4" ></div>
+        </div>
+
+        <div class="row updateError">
+            <div class="col-md-4" ></div>
+            <div class="col-md-4" >
+            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in ">
+                    @flash.get("message").fold("")(message => message)
+                    @sessionInfo("date").error.map(error => messages(error.message))
+                    @sessionInfo.globalError.map(_.message)
+                </div>
+            }
+            </div>
+            <div class="col-md-4" ></div>
+        </div>
     }

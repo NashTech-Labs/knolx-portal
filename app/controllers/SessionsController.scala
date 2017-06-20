@@ -146,7 +146,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                 sessionsRepository.insert(session) map { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
-                    Redirect(routes.SessionsController.create()).flashing("message" -> "Session successfully created!")
+                    Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully created!")
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     InternalServerError("Something went wrong!")
@@ -157,7 +157,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def deleteSession(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
       .map(_.fold {
@@ -165,7 +165,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         InternalServerError("Something went wrong!")
       } { sessionJson =>
         Logger.info(s"Knolx session $id successfully deleted")
-        Ok
+        Redirect(routes.SessionsController.manageSessions(pageNumber)).flashing("message" -> "Session successfully Deleted!")
       })
   }
 

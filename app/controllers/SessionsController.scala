@@ -81,7 +81,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
           .map { count =>
             val pages = Math.ceil(count / 10D).toInt
 
-            Ok(views.html.sessions.sessions(knolxSessions,pages, pageNumber))
+            Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
           }
       }
   }
@@ -156,7 +156,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def deleteSession(id: String,pageNumber:Int): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
       .map(_.fold {

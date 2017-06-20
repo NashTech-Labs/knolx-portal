@@ -3,7 +3,7 @@ package controllers
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import akka.stream.Materializer
+import com.google.inject.Module
 import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
@@ -18,21 +18,14 @@ import play.api.test._
 import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import schedulers.FeedbackFormScheduler
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class SessionsControllerSpec extends PlaySpecification with Mockito {
 
-  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().build()) extends Around
+  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().disable[Module].build()) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
-    implicit def implicitApp: play.api.Application = app
-
-    implicit def implicitMaterializer: Materializer = app.materializer
-
-    def this(builder: GuiceApplicationBuilder => GuiceApplicationBuilder) = this(builder(GuiceApplicationBuilder()).build())
-
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
 
     val sessionsRepository: SessionsRepository = mock[SessionsRepository]

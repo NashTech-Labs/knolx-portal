@@ -3,14 +3,14 @@ package schedulers
 import javax.inject.Inject
 
 import akka.actor.{Scheduler, Actor}
-import FeedbackFormScheduler._
+import FeedbackFormsScheduler._
 import models.SessionsRepository
 import play.api.Logger
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object FeedbackFormScheduler {
+object FeedbackFormsScheduler {
 
   case object SendFeedbackForm
 
@@ -18,7 +18,7 @@ object FeedbackFormScheduler {
 
 }
 
-class FeedbackFormScheduler @Inject()(sessionsRepository: SessionsRepository) extends Actor {
+class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository) extends Actor {
 
   override def preStart(): Unit = {
     import scala.concurrent.duration._

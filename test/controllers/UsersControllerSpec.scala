@@ -1,6 +1,6 @@
 package controllers
 
-import akka.stream.Materializer
+import com.google.inject.Module
 import com.typesafe.config.ConfigFactory
 import models.{UserInfo, UsersRepository}
 import org.specs2.execute.{AsResult, Result}
@@ -20,13 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UsersControllerSpec extends PlaySpecification with Mockito {
 
-  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().build()) extends Around with Scope with ShouldThrownExpectations with Mockito {
-    implicit def implicitApp: play.api.Application = app
-
-    implicit def implicitMaterializer: Materializer = app.materializer
-
-    def this(builder: GuiceApplicationBuilder => GuiceApplicationBuilder) = this(builder(GuiceApplicationBuilder()).build())
-
+  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().disable[Module].build()) extends Around
+    with Scope with ShouldThrownExpectations with Mockito {
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
 
     val config = Configuration(ConfigFactory.load("application.conf"))
@@ -109,7 +104,6 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
 
       status(result) must be equalTo SEE_OTHER
     }
-
     "not create user due to BadFormRequest" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", active = true, admin = false, _id)))
 

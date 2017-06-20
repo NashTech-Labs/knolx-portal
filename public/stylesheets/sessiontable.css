@@ -127,3 +127,8 @@ ul.pagination.pagination-lg li a {
 .pagination li:hover:not(.active) a {
     background-color: #ddd;
 }
+
+.v-align-mobile {
+    padding-right: 30px;
+}
+

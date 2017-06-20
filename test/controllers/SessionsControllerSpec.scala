@@ -127,10 +127,10 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete(_id.stringify) returns objectToDelete
 
-      val result = controller.deleteSession(_id.stringify)(FakeRequest()
+      val result = controller.deleteSession(_id.stringify,1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
-      status(result) must be equalTo OK
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not delete session when wrong id is specified" in new WithTestApplication {
@@ -142,7 +142,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete("1") returns objectToDelete
 
-      val result = controller.deleteSession("1")(FakeRequest()
+      val result = controller.deleteSession("1",1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
@@ -161,7 +161,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete("123") returns objectToDelete
 
-      val result = controller.deleteSession("123")(FakeRequest()
+      val result = controller.deleteSession("123",1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo UNAUTHORIZED

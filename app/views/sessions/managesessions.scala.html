@@ -7,7 +7,7 @@
 
             </div>
             <div class="col-md-10 " >
-                <div class="container-fluid" style="margin-top:74px ;">
+                <div class="container-fluid" style="margin-top: 74px ;">
                 </div>
                 @if(!flash.isEmpty) {
                     <div class="alert alert-success  alert-dismissable">
@@ -43,7 +43,7 @@
                                     <a href="@routes.SessionsController.update(knolxSession.id)" class="btn btn-default">
                                         <em class="fa fa-pencil"></em>
                                     </a>
-                                    <a href="@routes.SessionsController.deleteSession(knolxSession.id)" class="btn btn-danger">
+                                    <a href="@routes.SessionsController.deleteSession(knolxSession.id, pageNumber)" class="btn btn-danger">
                                         <em class="fa fa-trash"></em>
                                     </a>
                                 </td>
@@ -67,17 +67,6 @@
             </div>
         </div>
 
-        <div class="center">
-            <div class="v-align">
-
-                <ul class="pagination pagination-lg">
-                @for(page <- 1 to pages) {
-                    <li @if(page == pageNumber) {
-                        class="active"}><a href="@routes.SessionsController.manageSessions(page)" >@page</a></li>
-                }
-                </ul>
-
-            </div>
-        </div>
+        @pagination(pageNumber, pages, routes.SessionsController.manageSessions)
 
     }

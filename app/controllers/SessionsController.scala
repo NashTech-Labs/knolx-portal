@@ -157,7 +157,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def deleteSession(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
       .map(_.fold {
@@ -165,7 +165,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         InternalServerError("Something went wrong!")
       } { sessionJson =>
         Logger.info(s"Knolx session $id successfully deleted")
-        Ok
+        Redirect(routes.SessionsController.manageSessions(pageNumber)).flashing("message" -> "Session successfully Deleted!")
       })
   }
 

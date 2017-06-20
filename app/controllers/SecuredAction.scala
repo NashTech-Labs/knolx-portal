@@ -29,9 +29,7 @@ trait SecuredImplicit {
           Logger.info(s"Unauthorized access for email $emailFromSession")
           Future.successful(Unauthorized("Unauthorized access!"))
         } { userInfo =>
-          val email = userInfo.email
-          val admin = userInfo.admin
-          val userSession = UserSession("id", email, admin)
+          val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
 
           block(SecuredRequest(userSession, request))
         })
@@ -50,12 +48,9 @@ trait SecuredImplicit {
           Logger.info(s"Unauthorized access for email $emailFromSession")
           Future.successful(Unauthorized("Unauthorized access!"))
         } { userInfo =>
-          val id = userInfo._id.stringify
-          val email = userInfo.email
-          val admin = userInfo.admin
+          if (userInfo.admin) {
+            val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
 
-          if (admin) {
-            val userSession = UserSession(id, email, admin)
             block(SecuredRequest(userSession, request))
           } else {
             Future.successful(Unauthorized("Unauthorized access!"))

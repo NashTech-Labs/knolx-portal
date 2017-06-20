@@ -1,0 +1,61 @@
+@(pageNumber: Int, pages: Int, redirectUrl: Int => Call)
+<div class="center">
+    <div class="v-align v-align-mobile">
+
+        <ul class="pagination pagination-lg">
+
+            @if(pages>5 && pageNumber<5){
+            @for(iterator <- 1 to 5){
+            <li @if(pageNumber == iterator){class="active"}><a href=@redirectUrl(iterator) >@iterator</a></li>
+            }
+            <li><a>...</a></li>
+            <li><a href=@redirectUrl(pages) >@pages</a></li>
+            }
+
+            @if(pages<=5 && pageNumber<=5){
+            @for(iterator <- 1 to pages){
+            <li @if(pageNumber == iterator){class="active"}><a href="@redirectUrl(iterator)" >@iterator</a></li>
+            }
+            }
+
+            @if(pages>5 && pageNumber>=5 && pages==pageNumber){
+            @for(iterator <- (1 to 5).reverse){
+            <li @if(pageNumber == {pages-iterator}){class="active"}><a href="@redirectUrl({pages-iterator})" >@{pages-iterator}</a></li>
+            }
+            <li><a>...</a></li>
+            <li @if(pageNumber ==  pages){class="active"}><a href="@redirectUrl(pages)" >@pages</a></li>
+            }
+
+            @if(pages>5 && pageNumber>=5 && pageNumber< {pages-2}){
+            <li @if(pageNumber == {pageNumber-2}){class="active"}><a href="@redirectUrl({pageNumber-2})" >@{pageNumber-2}</a></li>
+            <li @if(pageNumber == {pageNumber-1}){class="active"}><a href="@redirectUrl({pageNumber-1})" >@{pageNumber-1}</a></li>
+            <li @if(pageNumber ==  pageNumber){class="active"}><a href="@redirectUrl({pageNumber})" >@pageNumber</a></li>
+            <li @if(pageNumber == {pageNumber+1}){class="active"}><a href="@redirectUrl({pageNumber+1})" >@{pageNumber+1}</a></li>
+            <li @if(pageNumber == {pageNumber+2}){class="active"}><a href="@redirectUrl({pageNumber+2})" >@{pageNumber+2}</a></li>
+            <li><a>...</a></li>
+            <li><a href="@redirectUrl(pages)" >@pages</a></li>
+            }
+
+            @if(pages>5 && pageNumber>=5 && pageNumber == {pages-2}){
+            <li @if(pageNumber == {pageNumber-3}){class="active"}><a href="@redirectUrl({pageNumber-3})" >@{pageNumber-3}</a></li>
+            <li @if(pageNumber == {pageNumber-2}){class="active"}><a href="@redirectUrl({pageNumber-2})" >@{pageNumber-2}</a></li>
+            <li @if(pageNumber == {pageNumber-1}){class="active"}><a href="@redirectUrl({pageNumber-1})" >@{pageNumber-1}</a></li>
+            <li @if(pageNumber ==  pageNumber){class="active"}><a href="@redirectUrl({pageNumber})" >@pageNumber</a></li>
+            <li @if(pageNumber == {pageNumber+1}){class="active"}><a href="@redirectUrl({pageNumber+1})" >@{pageNumber+1}</a></li>
+            <li><a>...</a></li>
+            <li><a href="@redirectUrl(pages)" >@pages</a></li>
+            }
+
+            @if(pages>5 && pageNumber>=5 && pageNumber > {pages-2} && pageNumber!=pages){
+
+            @for(iterator <- (1 to 4).reverse){
+            <li @if(pageNumber == {pageNumber-iterator}){class="active"}><a href="@redirectUrl({pageNumber-iterator})" >@{pageNumber-iterator}</a></li>
+            }
+            <li @if(pageNumber == pageNumber){class="active"}><a href="@redirectUrl({pageNumber})" >@pageNumber</a></li>
+            <li><a>...</a></li>
+            <li><a href="@redirectUrl(pages)" >@pages</a></li>
+            }
+
+        </ul>
+    </div>
+</div>

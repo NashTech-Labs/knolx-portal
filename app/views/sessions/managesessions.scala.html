@@ -7,7 +7,11 @@
 
         </div>
         <div class="col-md-10 " >
+<<<<<<< HEAD
             <div class="container-fluid" style="margin-top:74px ;">
+=======
+            <div class="container-fluid" style="margin-top: 74px ;">
+>>>>>>> develop
             </div>
             @if(!flash.isEmpty) {
                 <div class="alert alert-success  alert-dismissable">
@@ -34,6 +38,7 @@
                             <th>Meetup</th>
                             <th>Cancelled</th>
                             <th>Rating</th>
+                            <th>Feedback Form Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,9 +56,22 @@
                             <td>@knolxSession.session</td>
                             <td>@knolxSession.topic</td>
                             <td>@knolxSession.email</td>
-                            <td>@if(knolxSession.meetup) { Yes } else { No } </td>
-                            <td>@if(knolxSession.cancelled) { Yes } else { No } </td>
-                            <td>0<!--@knolxSession.rating--></td>
+                            <td>@(if(knolxSession.meetup) {
+                                "Yes"
+                            } else {
+                                "No"
+                            }) </td>
+                            <td>@(if(knolxSession.cancelled) {
+                                "Yes"
+                            } else {
+                                "No"
+                            }) </td>
+                            <td>@(if(knolxSession.rating.isEmpty) {
+                                "N/A"
+                            } else {
+                                knolxSession.rating
+                            })</td>
+                            <td>N/A</td>
                         </tr>
                     }
                     </tbody>

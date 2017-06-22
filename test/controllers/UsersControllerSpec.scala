@@ -2,6 +2,7 @@ package controllers
 
 import com.google.inject.Module
 import com.typesafe.config.ConfigFactory
+import helpers.BeforeAllAfterAll
 import models.{UserInfo, UsersRepository}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.matcher.ShouldThrownExpectations
@@ -18,9 +19,9 @@ import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class UsersControllerSpec extends PlaySpecification with Mockito {
+class UsersControllerSpec extends PlaySpecification with TestEnvironment {
 
-  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().disable[Module].build()) extends Around
+  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
 

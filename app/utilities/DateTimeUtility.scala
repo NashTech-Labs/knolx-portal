@@ -2,9 +2,15 @@ package utilities
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
-object DateTimeUtility {
+import com.google.inject.Singleton
+
+@Singleton
+class DateTimeUtility {
 
   val ISTZoneId = ZoneId.of("Asia/Calcutta")
+
+  def nowMillis: Long =
+    System.currentTimeMillis
 
   def localDateIST: LocalDate =
     LocalDate.now(ISTZoneId)

@@ -39,7 +39,7 @@ object SessionJsonFormats {
 
 }
 
-class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
 
   import play.modules.reactivemongo.json._
 
@@ -65,8 +65,10 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj(
             "cancelled" -> false,
             "active" -> true,
-            "date" -> BSONDocument("$gte" -> BSONDateTime(DateTimeUtility.startOfDayMillis)),
-            "date" -> BSONDocument("$lte" -> BSONDateTime(DateTimeUtility.endOfDayMillis))))
+            "date" -> BSONDocument(
+              "$gte" -> BSONDateTime(dateTimeUtility.startOfDayMillis),
+              "$lte" -> BSONDateTime(dateTimeUtility.endOfDayMillis))))
+          .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List]())
 

@@ -1,6 +1,5 @@
 package controllers
 
-import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
@@ -9,7 +8,6 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
 import play.api.test.{FakeRequest, Helpers, _}
@@ -20,15 +18,10 @@ import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
+class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
 
-  abstract class WithTestApplication(val app: Application = GuiceApplicationBuilder().build()) extends Around with Scope with ShouldThrownExpectations with Mockito {
-    implicit def implicitApp: play.api.Application = app
-
-    implicit def implicitMaterializer: Materializer = app.materializer
-
-    def this(builder: GuiceApplicationBuilder => GuiceApplicationBuilder) = this(builder(GuiceApplicationBuilder()).build())
-
+  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
+    with Scope with ShouldThrownExpectations with Mockito {
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
 
     val mailerClient = mock[MailerClient]

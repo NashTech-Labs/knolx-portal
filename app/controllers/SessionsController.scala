@@ -214,7 +214,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             .map { feedbackForms =>
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-                new Date(sessionInformation.date.value), sessionInformation.session, sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.meetup))
+                new Date(sessionInformation.date.value), sessionInformation.session,
+                sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 

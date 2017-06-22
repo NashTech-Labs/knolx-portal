@@ -1,35 +1,87 @@
 @()(implicit request: Request[_])
-
 <script src="@routes.Assets.versioned("javascripts/feedbackform.js")" type="text/javascript"></script>
-<div style="margin-top:300px;"></div>
 @main("Create Feedback Form") {
-    <div id="response"></div>
-    <form id="feedbackform">
+    <div class="row">
+        <div class="col-md-3" >
 
-        <a onclick="addQuestion()">+</a>
-        <br>
-        <input id="formName" placeholder="Form Name" type="text">
-        <br>
-
-        <div id="questions">
-            <div id="question-0">
-                <input id="questionValue-0" placeholder="Question" type="text">
-                <br>
-
-                <div id="options-0">
-                    <div id="option-0-0">
-                        <input type="radio" disabled>
-                        <input id="optionValue-0-0" placeholder="Option" type="text">
-                    </div>
-
-                    <a id="addOption-0-0" onclick="addOption(this)">Add option</a>
-                </div>
-
-                <br>
+        </div>
+        <div class="col-md-6" >
+            <div class="container-fluid" style="margin-top: 90px ;">
             </div>
+
+            <div id="response">
+            </div>
+            <form id="feedbackform">
+
+                <div id="questions">
+                    <div class ="question-card first-question-card">
+                        <div class="col-md-12 feedtitle" >
+
+                            <input id="formName" placeholder="Form Title" type="text">
+
+                        </div>
+                        <div id="question-0">
+                            <div class="col-md-12">
+                                <input class="card-questions" id="questionValue-0" placeholder="Question ?" type="text">
+                            </div>
+
+                            <br>
+
+                            <div id="options-0">
+                                <div class="row" id="option-0-0">
+                                    <div class="col-md-1" > </div>
+                                    <div class="col-md-10" >
+                                        <label class="testrad">
+                                            <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
+                                            <span class="lab_text"></span>                         <p class="checkbox-text">        <input id="optionValue-0-0" class="card-options" placeholder="Option" type="text"/>
+                                        </p>
+                                        </label>
+
+                                    </div>
+                                    <div class="col-md-1" ></div>
+
+                                </div>
+                            </div>
+
+                            <div id="parent" style="width: 100%;">
+                                <div class="addoption" onclick="">
+                                    <i class="fa fa-plus-circle" aria-hidden="true" onclick="addOption(this)" id="addOption-0-0" ></i>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div id='parent' style='width: 100%;'>
+
+                <div class="addquestion" onclick="addQuestion()">
+                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                </div>
+            </div>
+            <button type="button" onclick="createForm()" class="btn btn-primary btn-lg createfeedbtn">Create</button>
         </div>
 
-    </form>
-
-    <a onclick="createForm()">Create</a>
+        <div class="col-md-3" ></div>
+    </div>
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

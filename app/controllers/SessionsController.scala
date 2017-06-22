@@ -23,6 +23,7 @@ case class CreateSessionInformation(email: String,
 case class UpdateSessionInformation(_id: String,
                                     date: Date,
                                     session: String,
+                                    feedbackFormId: String,
                                     topic: String,
                                     meetup: Boolean = false)
 
@@ -63,6 +64,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "sessionId" -> nonEmptyText,
       "date" -> date.verifying("Invalid date selected!", date => date.after(new Date)),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
+      "feedbackFormId" -> nonEmptyText,
       "topic" -> nonEmptyText,
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
@@ -138,8 +140,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                 Future.successful(
                   BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds))
                 )
-              } { userJson =>
-                val userObjId = userJson._id.stringify
+              } { userInfo =>
+                val userObjId = userInfo._id.stringify
                 val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, createSessionInfo.date, createSessionInfo.session,
                   createSessionInfo.feedbackFormId, createSessionInfo.topic, createSessionInfo.meetup, rating = "", cancelled = false, active = true)
                 sessionsRepository.insert(session) map { result =>
@@ -171,34 +173,45 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .getById(id)
-      .map {
+      .flatMap {
         case Some(sessionInformation) =>
-          val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-            sessionInformation.date, sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
+          feedbackFormsRepository
+            .getAll
+            .map { feedbackForms =>
+              val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+              val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
+                sessionInformation.date, sessionInformation.session, sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.meetup))
+              Ok(views.html.sessions.updatesession(filledForm, formIds))
+            }
 
-          Ok(views.html.sessions.updatesession(filledForm))
-
-        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!"))
       }
   }
 
   def updateSession(): Action[AnyContent] = AdminAction.async { implicit request =>
-    updateSessionForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request for update session $formWithErrors")
-        Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors)))
-      },
-      sessionUpdateInfo => {
-        sessionsRepository.update(sessionUpdateInfo) map { result =>
-          if (result.ok) {
-            Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
-            Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
-          } else {
-            Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
-            InternalServerError("Something went wrong!")
-          }
-        }
-      })
+
+    feedbackFormsRepository
+      .getAll
+      .flatMap { feedbackForms =>
+        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+
+        updateSessionForm.bindFromRequest.fold(
+          formWithErrors => {
+            Logger.error(s"Received a bad request for update session $formWithErrors")
+            Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
+          },
+          sessionUpdateInfo => {
+            sessionsRepository.update(sessionUpdateInfo) map { result =>
+              if (result.ok) {
+                Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
+                Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
+              } else {
+                Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
+                InternalServerError("Something went wrong!")
+              }
+            }
+          })
+      }
   }
 
 }

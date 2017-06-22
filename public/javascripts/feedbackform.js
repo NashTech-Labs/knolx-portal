@@ -47,11 +47,11 @@ function createForm() {
             contentType: 'application/json',
             data: JSON.stringify(feedbackForm),
             success: function (data) {
-                $('#response').append('<span id="successMessage">' + data + '</span>');
-                document.getElementById('feedbackform').reset();
+                window.location = "/feedbackform/manage?pageNumber=1";
+                alert("Form Sucessfully Created !")
             },
             error: function (er) {
-                $('#response').append('<span id="errorMessage">' + er.responseText + '</span>')
+                $('#response').html("<div class='alert alert-danger alert-dismissable fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText + "</div>")
             }
         })
 }
@@ -65,13 +65,12 @@ function deleteOption(deleteElem) {
 
     questions.set(questionCountId, currentQuestionOptions - 1);
     var questionOptionsAfterDelete = questions.get(questionCountId);
+    $('#option-' + questionCountId + '-' + optionCountId).fadeOut('slow', function () {
+        $(this).remove();
 
-    $('#option-' + questionCountId + '-' + optionCountId).remove();
-
-    if (questionOptionsAfterDelete == 1) {
-        $('#options-' + questionCountId).append('<a id="addOption-' + questionCountId + '-0" onclick="addOption(this)">Add option</a>')
-    }
+    });
 }
+
 
 function addOption(addElem) {
     var splitIds = addElem.id.split("-");
@@ -83,13 +82,17 @@ function addOption(addElem) {
     questions.set(questionCountId, currentQuestionOptions + 1);
 
     $('#options-' + questionCountId).append(
-        '<div id="option-' + questionCountId + '-' + optionCountId + '">' +
-        '   <input type="radio" disabled>' +
-        '   <input id="optionValue-' + questionCountId + '-' + optionCountId + '" placeholder="Option" type="text">' +
-        '   <a id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)">X</a>' +
-        '   <br>' +
-        '   <a id="addOption-' + questionCountId + '-' + optionCountId + '" onclick="addOption(this)">Add option</a>' +
-        '</div>'
+        ' <div class="row" id="option-' + questionCountId + '-' + optionCountId + '">' +
+        '<div class="col-md-1" > </div>' +
+        ' <div class="col-md-10" > <label class="testrad">' +
+
+        '<input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' +
+        '<span class="lab_text"></span><p class="checkbox-text"> <input id="optionValue-' + questionCountId + '-' + optionCountId + '" class="card-options" placeholder="Option" type="text"/></p><a class="fa fa-times-circle xmen" id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)"></a></label>'
+        +
+        '</div>' +
+        '<div class="col-md-1" > </div>' +
+        '</div>' +
+        '<div id="parent" style="width: 100%; text-align:center;"><div><i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"  ></i></div></div>'
     );
 
     $('#addOption-' + questionCountId + '-' + (optionCountId - 1)).remove();
@@ -102,25 +105,28 @@ function deleteQuestion(questionElem) {
 
     questions.delete(questionCountId);
 
-    $('#question-' + questionCountId).remove()
+
+    $('#question-' + questionCountId).fadeOut('slow', function () {
+        $(this).remove();
+
+    });
 }
 
+/*'   <a id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)">X</a>'*/
 function addQuestion() {
     questionCount = questionCount + 1;
     questions.set(questionCount, 1);
 
     $('#questions').append(
-        '<div id="question-' + questionCount + '">' +
-        '   <input id="questionValue-' + questionCount + '" placeholder="Question" type="text">' +
-        '   <a id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)">X</a>' +
-        '   <br>' +
+        '<div class="question-card" id="question-' + questionCount + '">' +
+        ' <label class="card-questions-label"><input id="questionValue-' + questionCount + '" class="card-questions-other" placeholder="Question ?" type="text"><i id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i></label>' +
         '   <div id="options-' + questionCount + '">' +
-        '       <div id="option-' + questionCount + '-' + optionsCount + '">' +
-        '           <input type="radio" disabled>' +
-        '           <input id="optionValue-' + questionCount + '-' + 0 + '" placeholder="Option" type="text">' +
+        '       <div class="row" id="option-' + questionCount + '-' + optionsCount + '"> <div class="col-md-1" > </div><div class="col-md-10" ><label class="testrad">' +
+        '<input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' + '<span class="lab_text"></span><p class="checkbox-text"> <input id="optionValue-' + questionCount + '-' + 0 + '"  class="card-options" placeholder="Option" type="text"/></p></label>' + '</div><div class="col-md-1" > </div>' +
         '       </div>' +
         '   </div>' +
-        '   <br>' +
-        '   <a id="addOption-' + questionCount + '-' + optionsCount + '" onclick="addOption(this)">Add option</a>' +
+        '   <br>' + '<div id="parent" style="width: 100%; text-align:center;"><div><i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"  ></i></div></div>' +
         '</div>')
+
+    window.scrollTo(0, document.body.scrollHeight);
 }

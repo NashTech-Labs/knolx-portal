@@ -1,4 +1,4 @@
-@(sessionInfo: Form[UpdateSessionInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
 
@@ -22,28 +22,42 @@
                         </div>
                         <div class="col-md-1" ></div>
                     </div>
-
                     <div class="col-md-12 login-two login-three updatetwo">
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 ">
                             <select name="session" id="session" class="updateField login-two">
-                                <option value="session 1"
-                                    @(if(sessionInfo.data.getOrElse("session", "") == "session 1") {
+                            @for(session <- SessionValues.Sessions) {
+                                <option value="@session._1"
+                                    @(if(sessionInfo.data.getOrElse("session", "") == session._2.toLowerCase()) {
                                         "selected"
                                     })>
-                                    Session 1
+                                @session._2
                                 </option>
-                                <option value="session 2"
-                                    @(if(sessionInfo.data.getOrElse("session", "") == "session 2") {
-                                        "selected"
-                                    })>
-                                    Session 2
-                                </option>
+                            }
                             </select>
                         </div>
                         <div class="col-md-1" ></div>
                     </div>
+                    <div class="col-md-12 login-two login-three updatetwo">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                            @for(feedbackForm <- feedbackForms) {
 
+                                <option value="@feedbackForm._1"
+                                    @(if(sessionInfo.data.getOrElse("session", "") == feedbackForm._2.toLowerCase()) {
+                                        "selected"
+                                    })>
+                                @feedbackForm._2
+                                </option>
+
+
+                                <option value="@feedbackForm._1">@feedbackForm._2</option>
+                            }
+                            </select>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
                     <div class="col-md-12 login-three updatetwo">
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >

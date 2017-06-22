@@ -100,7 +100,7 @@
         <div class="col-md-4"></div>
         <div class="col-md-4">
         @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
-                createSessionForm("date").hasErrors || createSessionForm("session").hasErrors || !flash.isEmpty) {
+                createSessionForm("date").hasErrors || createSessionForm("session").hasErrors || createSessionForm("feedbackFormId").hasErrors || !flash.isEmpty) {
             <div class="alert alert-danger fade in ">
                 <ul>
                     @if(createSessionForm.hasGlobalErrors) {
@@ -114,6 +114,9 @@
                     }
                     @if(createSessionForm("session").hasErrors) {
                         <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("feedbackFormId").hasErrors) {
+                        <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
                     }
                     @if(!flash.isEmpty) {
                         <li>@flash.get("message").fold("")(message => message)</li>

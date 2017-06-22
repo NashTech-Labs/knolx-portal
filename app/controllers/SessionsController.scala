@@ -174,10 +174,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                         Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully created!")
                       case NotRestarted =>
                         Logger.error(s"Cannot refresh feedback form schedulers while creating session ${createSessionInfo.topic}")
-                        Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Cannot refresh feedback form scheduler!")
+                        InternalServerError("Something went wrong!")
                       case msg          =>
                         Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while creating session ${createSessionInfo.topic}")
-                        Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+                        InternalServerError("Something went wrong!")
                     }
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
@@ -205,10 +205,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             Redirect(routes.SessionsController.manageSessions(pageNumber)).flashing("message" -> "Session successfully Deleted!")
           case NotRestarted =>
             Logger.error(s"Cannot refresh feedback form schedulers while deleting session $id")
-            Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Cannot refresh feedback form scheduler!")
+            InternalServerError("Something went wrong!")
           case msg          =>
             Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while deleting session $id")
-            Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+            InternalServerError("Something went wrong!")
         }
       })
   }
@@ -245,10 +245,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                   Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
                 case NotRestarted =>
                   Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo._id}")
-                  Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Cannot refresh feedback form scheduler!")
+                  InternalServerError("Something went wrong!")
                 case msg          =>
                   Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo._id}")
-                  Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+                  InternalServerError("Something went wrong!")
               }
             } else {
               Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")

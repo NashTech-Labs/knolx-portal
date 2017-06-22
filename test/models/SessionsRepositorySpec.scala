@@ -1,27 +1,22 @@
 package models
 
-import java.text.SimpleDateFormat
 import java.util.Date
 
-import akka.actor.Scheduler
-import akka.testkit.TestActorRef
 import controllers.UpdateSessionInformation
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.libs.json.{JsBoolean, JsObject}
-import play.api.libs.mailer.MailerClient
 import play.api.test.PlaySpecification
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import schedulers.FeedbackFormsScheduler
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
-  val _id = BSONObjectID.generate
-  val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-19")
-  val dateDefault = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-19")
+  private val sessionId = BSONObjectID.generate
+  private val nowMillis = System.currentTimeMillis
+  private val date = new Date(nowMillis)
 
   trait TestScope extends Scope {
     val dateTimeUtility = mock[DateTimeUtility]
@@ -32,9 +27,8 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   "Session repository" should {
 
     "insert session" in new TestScope {
-      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-19")
       val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
-        meetup = true, "", cancelled = false, active = true, _id)
+        meetup = true, "", cancelled = false, active = true, sessionId)
 
       val created = await(sessionsRepository.insert(userInfo).map(_.ok))
 
@@ -43,26 +37,29 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "get sessions" in new TestScope {
       val sessions = await(sessionsRepository.sessions)
-
-      val head = sessions.head
-
-      head.email must beEqualTo("test@example.com")
-      head.date must beEqualTo(BSONDateTime(date.getTime))
-      head.active must beEqualTo(true)
+      sessions.headOption.map(_.email) contains "test@example.com"
+      sessions.headOption.map(_.date.value) contains date.getTime
+      sessions.headOption.exists(_.active)
     }
 
     "get session by id" in new TestScope {
-      val session = await(sessionsRepository.getById(_id.stringify))
+      val session = await(sessionsRepository.getById(sessionId.stringify))
 
-      val head = session.get
+      session.map(_.email) contains "test@example.com"
+      session.map(_.date.value) contains date.getTime
+      session.exists(_.active)
+    }
 
-      head.email must beEqualTo("test@example.com")
-      head.date must beEqualTo(BSONDateTime(date.getTime))
-      head.active must beEqualTo(true)
+    "get sessions scheduled today" in new TestScope {
+      val sessions = await(sessionsRepository.sessionsScheduledToday)
+
+      sessions.headOption.map(_.email) contains "test@example.com"
+      sessions.headOption.map(_.date.value) contains date.getTime
+      sessions.headOption.exists(_.active)
     }
 
     "update session" in new TestScope {
-      val updatedSession = UpdateSessionInformation(_id.stringify, date, "testsession", "updaterecord")
+      val updatedSession = UpdateSessionInformation(sessionId.stringify, date, "testsession", "updaterecord")
 
       val updated = await(sessionsRepository.update(updatedSession).map(_.ok))
 
@@ -82,7 +79,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "delete session" in new TestScope {
-      val deletedSessionUsers = await(sessionsRepository.delete(_id.stringify))
+      val deletedSessionUsers = await(sessionsRepository.delete(sessionId.stringify))
 
       val deletedSessionUser = deletedSessionUsers.getOrElse(JsObject(Seq.empty))
 

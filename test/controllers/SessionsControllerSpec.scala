@@ -341,7 +341,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "topic", meetup = true)
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "feedbackFormId", "session 1", "topic", meetup = true)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -366,7 +366,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "topic", meetup = true)
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "feedbackFormId", "session 1", "topic", meetup = true)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 

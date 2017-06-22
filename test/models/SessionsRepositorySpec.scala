@@ -59,7 +59,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "update session" in new TestScope {
-      val updatedSession = UpdateSessionInformation(sessionId.stringify, date, "testsession", "updaterecord")
+      val updatedSession = UpdateSessionInformation(sessionId.stringify, date, "testsession", "feedbackFormId", "updaterecord")
 
       val updated = await(sessionsRepository.update(updatedSession).map(_.ok))
 

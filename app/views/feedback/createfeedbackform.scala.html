@@ -1,5 +1,7 @@
 @()(implicit request: Request[_])
+
 <script src="@routes.Assets.versioned("javascripts/feedbackform.js")" type="text/javascript"></script>
+
 @main("Create Feedback Form") {
     <div class="row">
         <div class="col-md-3" >
@@ -16,9 +18,7 @@
                 <div id="questions">
                     <div class ="question-card first-question-card">
                         <div class="col-md-12 feedtitle" >
-
                             <input id="formName" placeholder="Form Title" type="text">
-
                         </div>
                         <div id="question-0">
                             <div class="col-md-12">
@@ -33,17 +33,17 @@
                                     <div class="col-md-10" >
                                         <label class="testrad">
                                             <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
-                                            <span class="lab_text"></span>                         <p class="checkbox-text">        <input id="optionValue-0-0" class="card-options" placeholder="Option" type="text"/>
-                                        </p>
+                                            <span class="lab_text"></span>
+                                            <p class="checkbox-text">
+                                                <input id="optionValue-0-0" class="card-options" placeholder="Option" type="text"/>
+                                            </p>
                                         </label>
-
                                     </div>
                                     <div class="col-md-1" ></div>
-
                                 </div>
                             </div>
 
-                            <div id="parent" style="width: 100%;">
+                            <div id="parent" style="width: 100% ;">
                                 <div class="addoption" onclick="">
                                     <i class="fa fa-plus-circle" aria-hidden="true" onclick="addOption(this)" id="addOption-0-0" ></i>
                                 </div>
@@ -54,8 +54,7 @@
                 </div>
             </form>
 
-            <div id='parent' style='width: 100%;'>
-
+            <div id='parent' style='width: 100% ;'>
                 <div class="addquestion" onclick="addQuestion()">
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>
@@ -66,22 +65,3 @@
         <div class="col-md-3" ></div>
     </div>
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -134,7 +134,7 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   private def scheduleFeedbackForms(sessionsDateFuture: Future[List[SessionInfo]]): Future[List[Option[Cancellable]]] = {
     sessionsDateFuture flatMap { sessions =>
-      Logger.info(s"Sessions ${sessions.map(session => new Date(session.date.value))}")
+      Logger.info(s"Scheduling sessions today booked at ${sessions.map(session => new Date(session.date.value))}")
 
       Future.sequence {
         sessions map { session =>

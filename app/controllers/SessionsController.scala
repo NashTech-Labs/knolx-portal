@@ -109,7 +109,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .flatMap { sessionsJson =>
         val knolxSessions =
           sessionsJson map { session =>
-            feedbackFormScheduler ?
 
             KnolxSession(session._id.stringify,
               session.userId,

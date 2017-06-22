@@ -40,7 +40,8 @@ case class KnolxSession(id: String,
                         email: String,
                         meetup: Boolean,
                         cancelled: Boolean,
-                        rating: String)
+                        rating: String,
+                        feedbackFormScheduled: Boolean = false)
 
 object SessionValues {
   val Sessions = Seq("session 1" -> "Session 1", "session 2" -> "Session 2")
@@ -82,8 +83,15 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .paginate(pageNumber)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map (session =>
-          KnolxSession(session._id.stringify, session.userId, new Date(session.date.value), session.session, session.topic,
-            session.email, session.meetup, session.cancelled, session.rating))
+          KnolxSession(session._id.stringify,
+            session.userId,
+            new Date(session.date.value),
+            session.session,
+            session.topic,
+            session.email,
+            session.meetup,
+            session.cancelled,
+            session.rating))
 
         sessionsRepository
           .activeCount
@@ -99,16 +107,20 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsJson =>
-        val knolxSessions = sessionsJson map (session =>
-          KnolxSession(session._id.stringify,
-            session.userId,
-            new Date(session.date.value),
-            session.session,
-            session.topic,
-            session.email,
-            session.meetup,
-            session.cancelled,
-            session.rating))
+        val knolxSessions =
+          sessionsJson map { session =>
+            feedbackFormScheduler ?
+
+            KnolxSession(session._id.stringify,
+              session.userId,
+              new Date(session.date.value),
+              session.session,
+              session.topic,
+              session.email,
+              session.meetup,
+              session.cancelled,
+              session.rating)
+          }
 
         sessionsRepository
           .activeCount

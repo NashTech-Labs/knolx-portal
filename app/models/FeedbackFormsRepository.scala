@@ -18,7 +18,10 @@ import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class Question(question: String, options: List[String])
 
-case class FeedbackForm(name: String, questions: List[Question], active: Boolean = true, _id: BSONObjectID = BSONObjectID.generate)
+case class FeedbackForm(name: String,
+                        questions: List[Question],
+                        active: Boolean = true,
+                        _id: BSONObjectID = BSONObjectID.generate)
 
 object FeedbackFormat {
 
@@ -42,6 +45,24 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .insert(feedbackData))
 
+  def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .findAndUpdate(
+            BSONDocument("_id" -> BSONDocument("$oid" -> id)),
+            BSONDocument("$set" -> BSONDocument("active" -> false)),
+            fetchNewObject = true,
+            upsert = false)
+          .map(_.result[FeedbackForm]))
+
+  def getByFeedbackFormId(feedbackFormId: String): Future[Option[FeedbackForm]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
+          .cursor[FeedbackForm](ReadPreference.Primary)
+          .headOption)
 
   def getAll(implicit ex: ExecutionContext): Future[List[FeedbackForm]] =
     collection
@@ -69,15 +90,4 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.count(Some(Json.obj("active" -> true))))
-
-  def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .findAndUpdate(
-            BSONDocument("_id" -> BSONDocument("$oid" -> id)),
-            BSONDocument("$set" -> BSONDocument("active" -> false)),
-            fetchNewObject = true,
-            upsert = false)
-          .map(_.result[FeedbackForm]))
 }

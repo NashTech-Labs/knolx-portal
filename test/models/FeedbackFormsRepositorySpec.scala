@@ -8,11 +8,13 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
 
   val feedbackFormsRepository = new FeedbackFormsRepository(TestDb.reactiveMongoApi)
 
+  val feedbackFormId = BSONObjectID.generate
+
   "Feedback forms repository" should {
 
     "create a new feedback form" in {
       val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
-      val feedbackForm = FeedbackForm("form name", questions)
+      val feedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
 
       val created = await(feedbackFormsRepository.insert(feedbackForm).map(_.ok))
 
@@ -22,14 +24,14 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
     "get all feedback forms" in {
       val forms = await(feedbackFormsRepository.getAll)
 
-      forms.map(_.name) must contain("form name")
+      forms.map(_.name) must contain("Feedback Form Template 1")
       forms.flatMap(_.questions) must contain(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
     }
 
     "get feedback forms in paginated format" in {
       val paginatedForms = await(feedbackFormsRepository.paginate(1))
 
-      paginatedForms.map(_.name) must contain("form name")
+      paginatedForms.map(_.name) must contain("Feedback Form Template 1")
       paginatedForms.flatMap(_.questions) must contain(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
     }
 
@@ -37,6 +39,15 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
       val activeForms = await(feedbackFormsRepository.activeCount)
 
       activeForms must beEqualTo(1)
+    }
+
+    "get feedback form by id" in {
+      val feedbackForm = await(feedbackFormsRepository.getByFeedbackFormId(feedbackFormId.stringify))
+
+      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      val expectedFeedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
+
+      expectedFeedbackForm must beEqualTo(FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId))
     }
 
     "delete feedback form" in {

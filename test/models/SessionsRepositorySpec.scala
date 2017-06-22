@@ -1,77 +1,85 @@
 package models
 
-import java.text.SimpleDateFormat
 import java.util.Date
 
 import controllers.UpdateSessionInformation
+import org.specs2.mock.Mockito
+import org.specs2.specification.Scope
 import play.api.libs.json.{JsBoolean, JsObject}
 import play.api.test.PlaySpecification
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionsRepositorySpec extends PlaySpecification {
+class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
-  val sessionsRepository = new SessionsRepository(TestDb.reactiveMongoApi)
-  val _id: BSONObjectID = BSONObjectID.generate
-  val date: Date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  val dateDefault: Date = new SimpleDateFormat("yyyy-MM-dd").parse("1111-11-11")
-  val defaultSession = SessionInfo("", "", dateDefault, "", "", "", meetup = false, "", cancelled = false, active = false)
+  private val sessionId = BSONObjectID.generate
+  private val nowMillis = System.currentTimeMillis
+  private val date = new Date(nowMillis)
+
+  trait TestScope extends Scope {
+    val dateTimeUtility = mock[DateTimeUtility]
+
+    val sessionsRepository: SessionsRepository = new SessionsRepository(TestDb.reactiveMongoApi, mock[DateTimeUtility])
+  }
 
   "Session repository" should {
 
-    "insert session" in {
-      val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-      val userInfo = SessionInfo("testid", "test@example.com", date, "session", "feedbackFormId", "sessionRepoTest",
-        meetup = true, "", cancelled = false, active = true, _id)
+    "insert session" in new TestScope {
+      val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
+        meetup = true, "", cancelled = false, active = true, sessionId)
 
       val created = await(sessionsRepository.insert(userInfo).map(_.ok))
 
       created must beEqualTo(true)
     }
 
-    "get sessions" in {
+    "get sessions" in new TestScope {
       val sessions = await(sessionsRepository.sessions)
-
-      val head = sessions.headOption.getOrElse(defaultSession)
-
-      head.email must beEqualTo("test@example.com")
-      head.date must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
-      head.active must beEqualTo(true)
+      sessions.headOption.map(_.email) contains "test@example.com"
+      sessions.headOption.map(_.date.value) contains date.getTime
+      sessions.headOption.exists(_.active)
     }
 
-    "get session by id" in {
-      val session = await(sessionsRepository.getById(_id.stringify))
+    "get session by id" in new TestScope {
+      val session = await(sessionsRepository.getById(sessionId.stringify))
 
-      val head = session.getOrElse(defaultSession)
-
-      head.email must beEqualTo("test@example.com")
-      head.date must beEqualTo(new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15"))
-      head.active must beEqualTo(true)
+      session.map(_.email) contains "test@example.com"
+      session.map(_.date.value) contains date.getTime
+      session.exists(_.active)
     }
 
-    "update session" in {
-      val updatedSession = UpdateSessionInformation(_id.stringify, date, "testsession", "updaterecord")
+    "get sessions scheduled today" in new TestScope {
+      val sessions = await(sessionsRepository.sessionsScheduledToday)
+
+      sessions.headOption.map(_.email) contains "test@example.com"
+      sessions.headOption.map(_.date.value) contains date.getTime
+      sessions.headOption.exists(_.active)
+    }
+
+    "update session" in new TestScope {
+      val updatedSession = UpdateSessionInformation(sessionId.stringify, date, "testsession", "updaterecord")
 
       val updated = await(sessionsRepository.update(updatedSession).map(_.ok))
 
       updated must beEqualTo(true)
     }
 
-    "paginate" in {
+    "paginate" in new TestScope {
       val page = await(sessionsRepository.paginate(1))
 
       page.size must beEqualTo(1)
     }
 
-    "active count" in {
+    "active count" in new TestScope {
       val count = await(sessionsRepository.activeCount)
 
       count must beEqualTo(1)
     }
 
-    "delete session" in {
-      val deletedSessionUsers = await(sessionsRepository.delete(_id.stringify))
+    "delete session" in new TestScope {
+      val deletedSessionUsers = await(sessionsRepository.delete(sessionId.stringify))
 
       val deletedSessionUser = deletedSessionUsers.getOrElse(JsObject(Seq.empty))
 

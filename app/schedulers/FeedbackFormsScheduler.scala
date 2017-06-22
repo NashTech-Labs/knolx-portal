@@ -3,7 +3,7 @@ package schedulers
 import java.util.Date
 import javax.inject.Inject
 
-import akka.actor.{ActorRef, Actor, Cancellable, Scheduler}
+import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
 import models.{FeedbackForm, FeedbackFormsRepository, SessionInfo, SessionsRepository}
 import play.api.Logger
 import play.api.libs.mailer.{Email, MailerClient}
@@ -11,7 +11,7 @@ import schedulers.FeedbackFormsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
 
 object FeedbackFormsScheduler {
@@ -48,7 +48,8 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
     val initialDelay = ((dateTimeUtility.endOfDayMillis + 61 * 1000) - millis).milliseconds
     Logger.info(s"Feedback forms scheduler will start after $initialDelay")
 
-    self ! StartFeedbackFormsScheduler(initialDelay, 1.day) // schedules starting next day
+    // starts feedback form schedulers for sessions starting next day
+    self ! StartFeedbackFormsScheduler(initialDelay, 1.day)
 
     val sessionsScheduledToday = sessionsRepository.sessionsScheduledToday map { sessions =>
       sessions collect { case session
@@ -56,7 +57,8 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
       }
     }
 
-    self ! ScheduleFeedbackFormsForToday(self, sessionsScheduledToday) // schedules for today
+    // starts feedback form schedulers for today's sessions
+    self ! ScheduleFeedbackFormsForToday(self, sessionsScheduledToday)
   }
 
   def scheduler: Scheduler = context.system.scheduler

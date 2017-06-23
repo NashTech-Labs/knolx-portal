@@ -16,6 +16,10 @@ import scala.concurrent.duration.{FiniteDuration, _}
 
 object FeedbackFormsScheduler {
 
+  case object RefreshFeedbackFormSchedulers
+
+  case class RemoveFeedbackFormScheduler(sessionId: String)
+
   private[schedulers] case class ScheduleFeedbackFormsForToday(originalSender: ActorRef, sessionsFuture: Future[List[SessionInfo]])
 
   private[schedulers] case class ScheduleFeedbackForms(originalSender: ActorRef)
@@ -23,8 +27,6 @@ object FeedbackFormsScheduler {
   private[schedulers] case class StartFeedbackFormsScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[schedulers] case class SendFeedbackForm(session: SessionInfo, feedbackForm: FeedbackForm)
-
-  case object RefreshFeedbackFormSchedulers
 
   sealed trait FeedbackFormSchedulerResponses
 
@@ -41,7 +43,7 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                        mailerClient: MailerClient,
                                        dateTimeUtility: DateTimeUtility) extends Actor {
 
-  var feedbackFormsSchedulers: List[Cancellable] = List.empty
+  var feedbackFormsSchedulers: Map[String, Cancellable] = Map.empty
 
   override def preStart(): Unit = {
     val millis = dateTimeUtility.nowMillis
@@ -65,6 +67,7 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def receive: Receive =
     initializationHandler orElse
+      schedulingHandler orElse
       reconfigurationHandler orElse
       emailHandler
 
@@ -83,14 +86,14 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
       val feedbackFormsSchedulersFuture = scheduleFeedbackForms(sessionsFuture)
 
       feedbackFormsSchedulersFuture foreach { feedbackSchedulers =>
-        feedbackFormsSchedulers = feedbackFormsSchedulers ++ feedbackSchedulers.flatten
+        feedbackFormsSchedulers = feedbackFormsSchedulers ++ feedbackSchedulers
 
         originalSender ! feedbackFormsSchedulers.size
       }
   }
 
-  def reconfigurationHandler: PartialFunction[Any, Unit] = {
-    case ScheduleFeedbackForms(oririnalSender) =>
+  def schedulingHandler: PartialFunction[Any, Unit] = {
+    case ScheduleFeedbackForms(originalSender) =>
       Logger.info(s"Starting schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
       val sessionsFuture =
         sessionsRepository.sessionsScheduledToday map { sessions =>
@@ -101,23 +104,38 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
       val feedbackFormsSchedulersFuture = scheduleFeedbackForms(sessionsFuture)
 
       feedbackFormsSchedulersFuture foreach { feedbackSchedulers =>
-        feedbackFormsSchedulers = feedbackFormsSchedulers ++ feedbackSchedulers.flatten
+        feedbackFormsSchedulers = feedbackFormsSchedulers ++ feedbackSchedulers
 
-        oririnalSender ! feedbackFormsSchedulers.size
+        originalSender ! feedbackFormsSchedulers.size
       }
-    case RefreshFeedbackFormSchedulers         =>
+  }
+
+  def reconfigurationHandler: PartialFunction[Any, Unit] = {
+    case RefreshFeedbackFormSchedulers          =>
+      Logger.info(s"Feedback forms in memory before refreshing $feedbackFormsSchedulers")
       Logger.info(s"Refreshing schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
-      val cancelled = feedbackFormsSchedulers.forall(_.cancel)
+      val cancelled = feedbackFormsSchedulers.forall { case (_, cancellable) => cancellable.cancel }
 
       if (feedbackFormsSchedulers.isEmpty || (feedbackFormsSchedulers.nonEmpty && cancelled)) {
         val sessionsFuture = sessionsRepository.sessionsScheduledToday
         val feedbackFormsSchedulersFuture = scheduleFeedbackForms(sessionsFuture)
-        feedbackFormsSchedulersFuture foreach { feedbackSchedulers => feedbackFormsSchedulers = feedbackSchedulers.flatten }
+        feedbackFormsSchedulersFuture foreach { feedbackSchedulers => feedbackFormsSchedulers = feedbackSchedulers }
 
         sender ! Restarted
       } else {
         sender ! NotRestarted
       }
+    case RemoveFeedbackFormScheduler(sessionId) =>
+      Logger.info(s"Removing feedback form scheduler for session $sessionId")
+
+      feedbackFormsSchedulers.get(sessionId).exists(_.cancel) match {
+        case true  => Logger.info(s"Feedback form scheduler for session $sessionId successfully cancelled")
+        case false => Logger.info(s"Feedback form scheduler for session $sessionId was already cancelled")
+      }
+
+      feedbackFormsSchedulers = feedbackFormsSchedulers - sessionId
+
+      sender ! feedbackFormsSchedulers.size
   }
 
   def emailHandler: PartialFunction[Any, Unit] = {
@@ -131,10 +149,12 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
       val emailSent = mailerClient.send(email)
 
+      self ! RemoveFeedbackFormScheduler(session._id.stringify)
+
       Logger.info(s"Email for session ${session.session} sent result $emailSent")
   }
 
-  private def scheduleFeedbackForms(sessionsDateFuture: Future[List[SessionInfo]]): Future[List[Option[Cancellable]]] = {
+  private def scheduleFeedbackForms(sessionsDateFuture: Future[List[SessionInfo]]): Future[Map[String, Cancellable]] = {
     sessionsDateFuture flatMap { sessions =>
       Logger.info(s"Scheduling sessions today booked at ${sessions.map(session => new Date(session.date.value))}")
 
@@ -144,16 +164,16 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
           val delay = (session.date.value - dateTimeUtility.nowMillis).milliseconds
 
           feedbackFormFuture map { maybeFeedbackForm =>
-            maybeFeedbackForm.fold[Option[Cancellable]] {
+            maybeFeedbackForm.fold[Option[(String, Cancellable)]] {
               Logger.error(s"Something went wrong while getting feedback ${session.feedbackFormId}")
               None
             } { feedbackForm =>
-              Some(scheduler.scheduleOnce(delay, self, SendFeedbackForm(session, feedbackForm)))
+              Some(session._id.stringify -> scheduler.scheduleOnce(delay, self, SendFeedbackForm(session, feedbackForm)))
             }
           }
         }
       }
-    }
+    } map (_.flatten.toMap)
   }
 
 }

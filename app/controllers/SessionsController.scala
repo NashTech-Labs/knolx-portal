@@ -41,7 +41,8 @@ case class KnolxSession(id: String,
                         email: String,
                         meetup: Boolean,
                         cancelled: Boolean,
-                        rating: String)
+                        rating: String,
+                        feedbackFormScheduled: Boolean = false)
 
 object SessionValues {
   val Sessions = Seq("session 1" -> "Session 1", "session 2" -> "Session 2")
@@ -84,8 +85,15 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       .paginate(pageNumber)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map (session =>
-          KnolxSession(session._id.stringify, session.userId, new Date(session.date.value), session.session, session.topic,
-            session.email, session.meetup, session.cancelled, session.rating))
+          KnolxSession(session._id.stringify,
+            session.userId,
+            new Date(session.date.value),
+            session.session,
+            session.topic,
+            session.email,
+            session.meetup,
+            session.cancelled,
+            session.rating))
 
         sessionsRepository
           .activeCount
@@ -101,16 +109,19 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsJson =>
-        val knolxSessions = sessionsJson map (session =>
-          KnolxSession(session._id.stringify,
-            session.userId,
-            new Date(session.date.value),
-            session.session,
-            session.topic,
-            session.email,
-            session.meetup,
-            session.cancelled,
-            session.rating))
+        val knolxSessions =
+          sessionsJson map { session =>
+
+            KnolxSession(session._id.stringify,
+              session.userId,
+              new Date(session.date.value),
+              session.session,
+              session.topic,
+              session.email,
+              session.meetup,
+              session.cancelled,
+              session.rating)
+          }
 
         sessionsRepository
           .activeCount
@@ -161,14 +172,14 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
 
                     (feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses] map {
-                      case Restarted =>
+                      case Restarted    =>
                         Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully created!")
                       case NotRestarted =>
                         Logger.error(s"Cannot refresh feedback form schedulers while creating session ${createSessionInfo.topic}")
-                        Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Cannot refresh feedback form scheduler!")
-                      case msg =>
+                        InternalServerError("Something went wrong!")
+                      case msg          =>
                         Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while creating session ${createSessionInfo.topic}")
-                        Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+                        InternalServerError("Something went wrong!")
                     }
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
@@ -192,14 +203,14 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Logger.info(s"Knolx session $id successfully deleted")
 
         (feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses] map {
-          case Restarted =>
+          case Restarted    =>
             Redirect(routes.SessionsController.manageSessions(pageNumber)).flashing("message" -> "Session successfully Deleted!")
           case NotRestarted =>
             Logger.error(s"Cannot refresh feedback form schedulers while deleting session $id")
-            Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Cannot refresh feedback form scheduler!")
-          case msg =>
+            InternalServerError("Something went wrong!")
+          case msg          =>
             Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while deleting session $id")
-            Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+            InternalServerError("Something went wrong!")
         }
       })
   }
@@ -241,14 +252,14 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                   Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
 
                   (feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses] map {
-                    case Restarted =>
+                    case Restarted    =>
                       Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
                     case NotRestarted =>
                       Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo._id}")
-                      Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Cannot refresh feedback form scheduler!")
-                    case msg =>
+                      InternalServerError("Something went wrong!")
+                    case msg          =>
                       Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo._id}")
-                      Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+                      InternalServerError("Something went wrong!")
                   }
                 } else {
                   Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")

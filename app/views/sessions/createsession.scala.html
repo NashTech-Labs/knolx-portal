@@ -34,8 +34,8 @@
                             <div class="col-md-1"></div>
                             <div class="col-md-10 ">
                                 <select name="session" id="session" class="updateField login-two">
-                                @for(session <- SessionValues.Sessions) {
-                                    <option value="@session._1">@session._2</option>
+                                @for((value, key) <- SessionValues.Sessions) {
+                                    <option value="@value">@key</option>
                                 }
                                 </select>
                             </div>

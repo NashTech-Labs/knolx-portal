@@ -47,7 +47,6 @@
     background-color: #eee;
     color: #5499C7;
     border: 2px solid #fff;
-
 }
 
 .feedtitle {
@@ -59,7 +58,6 @@
 }
 
 #formName {
-
     border: none;
     outline: none;
     font-size: 20px;
@@ -115,7 +113,6 @@ input#formName:focus {
     font-family: 'headerfont';
     color: #888888;
     align-self: center;
-
 }
 
 .lab_text:before {

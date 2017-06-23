@@ -122,6 +122,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "date" -> BSONDateTime(updatedRecord.date.getTime),
         "topic" -> updatedRecord.topic,
         "session" -> updatedRecord.session,
+        "feedbackFormId" -> updatedRecord.feedbackFormId,
         "meetup" -> updatedRecord.meetup)
     )
 

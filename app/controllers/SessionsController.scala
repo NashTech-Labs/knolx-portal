@@ -29,6 +29,7 @@ case class CreateSessionInformation(email: String,
 case class UpdateSessionInformation(_id: String,
                                     date: Date,
                                     session: String,
+                                    feedbackFormId: String,
                                     topic: String,
                                     meetup: Boolean = false)
 
@@ -73,6 +74,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "sessionId" -> nonEmptyText,
       "date" -> date("yyyy-MM-dd'T'HH:mm").verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
+      "feedbackFormId" -> nonEmptyText,
       "topic" -> nonEmptyText,
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
@@ -216,47 +218,55 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .getById(id)
-      .map {
+      .flatMap {
         case Some(sessionInformation) =>
-          val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-            new Date(sessionInformation.date.value), sessionInformation.session, sessionInformation.topic, sessionInformation.meetup))
+          feedbackFormsRepository
+            .getAll
+            .map { feedbackForms =>
+              val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+              val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
+                new Date(sessionInformation.date.value), sessionInformation.session,
+                sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.meetup))
+              Ok(views.html.sessions.updatesession(filledForm, formIds))
+            }
 
-          Ok(views.html.sessions.updatesession(filledForm))
-
-        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!"))
       }
   }
 
   def updateSession(): Action[AnyContent] = AdminAction.async { implicit request =>
-    updateSessionForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request for update session $formWithErrors")
-        Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors)))
-      },
-      sessionUpdateInfo => {
-        sessionsRepository
-          .update(sessionUpdateInfo)
-          .flatMap { result =>
-            if (result.ok) {
-              Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
+    feedbackFormsRepository
+      .getAll
+      .flatMap { feedbackForms =>
+        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+        updateSessionForm.bindFromRequest.fold(
+          formWithErrors => {
+            Logger.error(s"Received a bad request for update session $formWithErrors")
+            Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
+          },
+          sessionUpdateInfo => {
+            sessionsRepository
+              .update(sessionUpdateInfo)
+              .flatMap { result =>
+                if (result.ok) {
+                  Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
 
-              (feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses] map {
-                case Restarted    =>
-                  Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
-                case NotRestarted =>
-                  Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo._id}")
-                  InternalServerError("Something went wrong!")
-                case msg          =>
-                  Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo._id}")
-                  InternalServerError("Something went wrong!")
+                  (feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses] map {
+                    case Restarted    =>
+                      Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
+                    case NotRestarted =>
+                      Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo._id}")
+                      InternalServerError("Something went wrong!")
+                    case msg          =>
+                      Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo._id}")
+                      InternalServerError("Something went wrong!")
+                  }
+                } else {
+                  Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
+                  Future.successful(InternalServerError("Something went wrong!"))
+                }
               }
-            } else {
-              Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo._id}")
-
-              Future.successful(InternalServerError("Something went wrong!"))
-            }
-          }
-      })
+          })
+      }
   }
-
 }

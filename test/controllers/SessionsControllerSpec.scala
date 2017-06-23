@@ -28,7 +28,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
-    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
 
     val feedbackFormsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("FeedbackFormsScheduler")))))
@@ -37,8 +36,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     val usersRepository = mock[UsersRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
-
     val config = Configuration(ConfigFactory.load("application.conf"))
+
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 
     val controller =
@@ -49,6 +48,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
         feedbackFormsRepository,
         dateTimeUtility,
         feedbackFormsScheduler)
+
+    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
 
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
@@ -288,6 +289,9 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     "render update session form" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
@@ -296,6 +300,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
+      feedbackFormsRepository.getAll returns getAll
 
       val result = controller.update(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
@@ -338,15 +343,17 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     "update session" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
 
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "topic", meetup = true)
-
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", meetup = true)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.update(updatedInformation) returns updateWriteResult
+      feedbackFormsRepository.getAll returns getAll
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -363,15 +370,18 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     "not update session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
 
+
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "topic", meetup = true)
-
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", meetup = true)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.update(updatedInformation) returns updateWriteResult
+      feedbackFormsRepository.getAll returns getAll
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -382,16 +392,21 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "topic" -> "topic",
           "meetup" -> "true"))
 
+
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
+
 
     "not update session due to BadFormRequest" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")

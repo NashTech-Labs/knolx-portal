@@ -47,7 +47,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
-      contentAsString(response) must contain("""<title>Create Feedback Form</title>""")
+      contentAsString(response) must contain("""formName""")
     }
 
     "create feedback form" in new WithTestApplication {
@@ -153,7 +153,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.manageFeedbackForm(1)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
-      contentAsString(response) must contain("""<td>form name</td>""")
+      contentAsString(response) must contain("""feedouters""")
     }
 
     "delete feedback form" in new WithTestApplication {

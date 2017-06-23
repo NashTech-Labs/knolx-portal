@@ -1,0 +1,198 @@
+.question-card {
+    padding-top: 30px;
+    padding-bottom: 20px;
+    background-color: #fff;
+    margin-top: 15px;
+    box-shadow: 0 4px 6px -5px #333;
+    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 1s; /* Firefox < 16 */
+    -ms-animation: fadein 1s; /* Internet Explorer */
+    -o-animation: fadein 1s; /* Opera < 12.1 */
+    animation: fadein 1s;
+}
+
+.first-question-card {
+    padding-top: 0px;
+}
+
+.addquestion {
+    width: 60px;
+    height: 60px;
+    background-color: #dcdcdc;
+    border-radius: 50%;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 60px;
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0px 6px #999;
+    padding-top: 15;
+}
+
+.addquestion:hover {
+    color: #5499C7;
+    text-shadow: 0 0px 0px #999;
+}
+
+.createfeedbtn {
+    border-radius: 0px;
+    bottom: 0px;
+    right: 0px;
+    position: fixed;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    background-color: #eee;
+    color: #5499C7;
+    border: 2px solid #fff;
+}
+
+.feedtitle {
+    height: 70px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    margin-bottom: 20px;
+    line-height: 67px;
+    border: none;
+}
+
+#formName {
+    border: none;
+    outline: none;
+    font-size: 20px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    width: 100%;
+    text-align: center;
+    color: #2980B9;
+    font-weight: bold;
+}
+
+input#formName:focus {
+    border-bottom: 2px solid rgb(125, 158, 192);
+}
+
+.card-questions {
+    margin-bottom: 10px;
+    line-height: 40px;
+    border: none;
+    width: 100%;
+    outline: none;
+    border-bottom: 1px solid #dcdcdc;
+    font-size: 20px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    text-align: center;
+    color: #EC7063;
+    font-weight: bold;
+}
+
+.card-options {
+    line-height: 40px;
+    border: none;
+    width: 100%;
+    outline: none;
+    border-bottom: 1px solid #dcdcdc;
+    font-size: 18px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    color: #7F8C8D;
+    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 2s; /* Firefox < 16 */
+    -ms-animation: fadein 2s; /* Internet Explorer */
+    -o-animation: fadein 2s; /* Opera < 12.1 */
+    animation: fadein 2s;
+}
+
+.testrad {
+    display: flex;
+}
+
+.lab_text {
+    font-family: 'headerfont';
+    color: #888888;
+    align-self: center;
+}
+
+.lab_text:before {
+    margin-top: 15px;
+    content: "\f10c";
+    font-family: "FontAwesome";
+    display: inline-block;
+    width: 10px;
+    color: #7F8C8D;
+    font-size: 35px;
+    margin-right: 25px;
+    margin-left: 15px;
+    font-size: 25px;
+}
+
+.ckb:checked + .lab_text:before {
+    margin-top: 15px;
+    content: "\f111";
+    font-family: "FontAwesome";
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: tick 150ms ease-in;
+    font-size: 25px;
+}
+
+p.checkbox-text {
+    width: 100%;
+}
+
+.xmen {
+    margin-top: 24px;
+    margin-left: 18px;
+    margin-right: 10px;
+    font-size: 28px;
+    color: #EC7063;
+    text-shadow: 1px 1px 3px #888888;
+    text-decoration: none;
+}
+
+a.fa.fa-times-circle.xmen:hover {
+    text-decoration: none;
+    color: #E74C3C;
+}
+
+.addoption {
+    margin: 0 auto;
+    margin-top: 20px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 30px;
+    color: #C39BD3;
+    text-shadow: 0 0px 3px #999;
+    text-align: center;
+}
+
+.card-questions-label {
+    margin-bottom: 10px;
+    line-height: 40px;
+    border: none;
+    width: 100%;
+    outline: none;
+}
+
+.card-questions-other {
+    margin-bottom: 10px;
+    line-height: 40px;
+    border: none;
+    width: 89%;
+    outline: none;
+    border-bottom: 1px solid #dcdcdc;
+    font-size: 20px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    text-align: center;
+    color: #EC7063;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+i.fa.fa-trash-o.delQuestion {
+    font-size: 30px;
+    color: #F1948A
+}

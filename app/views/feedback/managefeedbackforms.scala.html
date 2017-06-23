@@ -1,72 +1,40 @@
 @(updateFeedbackFormInformation: List[UpdateFeedbackFormInformation], pageNumber: Int, pages: Int)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Manage Sessions") {
+    <div class="row">
+        <div class="col-md-2" > </div>
+        <div class="col-md-8 feedbackformcontainer" >
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel='stylesheet' type='text/css'>
+            <div class="col-md-12 login-one" style="margin-bottom:50px;" >
+                <div class="col-md-8 infofeed" ></div>
+                <div class="col-md-4 text-right newfeedbtn" >
+                    <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed"><i class="fa fa-plus" aria-hidden="true"></i> New
+                    </a>
 
-    <div class="container">
-        <div class="row" style="margin-top:100px ;">
-
-            <div class="col-md-10 col-md-offset-1">
-                <p class="information">
-                @flash.get("message").fold("")(message => message)
-                </p>
-                <div class="panel panel-default panel-table">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col col-xs-6">
-                                <h3 class="panel-title">Feedback Forms</h3>
-                            </div>
-                            <div class="col col-xs-6 text-right">
-                                <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create">
-                                    Create New</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <table class="table table-striped table-bordered table-list">
-                            <thead>
-                                <tr>
-                                    <th><em class="fa fa-cog"></em></th>
-                                    <th>Name</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                            @updateFeedbackFormInformation.map { feedbackFormInformation =>
-                                <tr>
-                                    <td align="center">
-                                        <a href="@routes.SessionsController.update(feedbackFormInformation.id)" class="btn btn-default">
-                                            <em class="fa fa-pencil"></em>
-                                        </a>
-                                        <a href="@routes.FeedbackFormsController.delete(feedbackFormInformation.id)" class="btn btn-danger">
-                                            <em class="fa fa-trash"></em>
-                                        </a>
-                                    </td>
-                                    <td>@feedbackFormInformation.name</td>
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
-
-                    </div>
-                    <div class="panel-footer">
-                        <div class="row">
-                            <div class="col col-xs-4">Page @pageNumber of @pages</div>
-                            <div class="col col-xs-8">
-                                <ul class="pagination hidden-xs pull-right">
-                                @for(pages <- 1 to pages) {
-                                    <li><a href="@routes.SessionsController.manageSessions(pages)">@pages</a></li>
-                                }
-                                </ul>
-                                <ul class="pagination visible-xs pull-right">
-                                    <li><a href="#">«</a></li>
-                                    <li><a href="#">»</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+            <div class="row">
 
-            </div></div></div>
+                @updateFeedbackFormInformation.map { feedbackFormInformation =>
+
+                    <div class="col-md-4 feedouters" >
+                        <div class="feedform" onclick="window.location='@routes.SessionsController.update(feedbackFormInformation.id)';">
+                            <div class="feedformupper">
+
+                            </div>
+                            <div class="feedformlower">
+                                @feedbackFormInformation.name
+                            </div>
+
+                        </div>
+                    </div>
+
+                }
+                <div class="col-md-4 feedouters" ></div>
+                <div class="col-md-4 feedouters" ></div>
+            </div>
+
+        </div>
+        <div class="col-md-2" ></div>
+    </div>
 }

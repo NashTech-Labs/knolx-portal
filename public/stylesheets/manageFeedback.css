@@ -1,0 +1,72 @@
+.feedbackformcontainer {
+    background-color: #fff;
+    color: #000;
+    margin-top: 100px;
+    background-color: #FFF;
+    box-shadow: 0 4px 6px -5px #333;
+    padding-bottom: 50px;
+}
+
+.feedouters {
+    padding: 30px 0px 30px 0px;
+}
+
+.feedform {
+
+    width: 12em;
+    height: 12em;
+    float: none;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.feedformupper {
+    width: 70%;
+    height: 70%;
+    float: none;
+    margin: 0 auto;
+    background-image: url('../images/file.png');
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.feedformlower {
+    width: 100%;
+    float: none;
+    margin: 0 auto;
+    text-align: center;
+    overflow: hidden;
+    font-family: 'gothic';
+    font-size: 20px;
+    color: #27AE60;
+}
+
+.feedform:hover {
+    box-shadow: 0 4px 6px -5px #333;
+}
+
+.newfeedbtn {
+    height: 80px;
+    line-height: 75px;
+}
+
+.infofeed {
+    height: 80px;
+}
+
+.btn-create-feed {
+    padding: 5px 15px 5px 15px;
+    background-color: #fff;
+    border: 2px solid rgb(125, 158, 192);
+    font-size: 15px;
+    color: rgb(125, 158, 192);
+    font-weight: bold;
+}
+
+a.btn.btn-sm.btn-primary.btn-create-feed:hover {
+    background-color: rgb(125, 158, 192);
+}

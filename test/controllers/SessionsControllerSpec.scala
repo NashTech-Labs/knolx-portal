@@ -26,22 +26,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
-  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  private val _id: BSONObjectID = BSONObjectID.generate()
-  private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      meetup = true, "rating", cancelled = false, active = true, _id)))
-
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
+
     val feedbackFormsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("FeedbackFormsScheduler")))))
+
     val sessionsRepository = mock[SessionsRepository]
     val usersRepository = mock[UsersRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val config = Configuration(ConfigFactory.load("application.conf"))
+
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+
     val controller =
       new SessionsController(
         messages,
@@ -54,8 +52,13 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
 
-  "Session Controller" should {
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+  private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      meetup = true, "rating", cancelled = false, active = true, _id)))
 
+  "Session Controller" should {
 
     "display sessions page" in new WithTestApplication {
       sessionsRepository.paginate(1) returns sessionObject

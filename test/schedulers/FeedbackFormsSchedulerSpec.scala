@@ -109,7 +109,7 @@ class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: 
         def isCancelled: Boolean = false
       }
 
-      feedbackFormScheduler.underlyingActor.feedbackFormsSchedulers = Map(sessionId.stringify -> cancellable)
+      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
@@ -119,6 +119,23 @@ class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: 
       result mustEqual Restarted
     }
 
+    "get all scheduled feedback forms" in new TestScope {
+      val cancellable = new Cancellable {
+        def cancel(): Boolean = true
+
+        def isCancelled: Boolean = true
+      }
+
+      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
+
+      sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
+
+      val result = await((feedbackFormScheduler ? GetScheduledFeedbackForms) (5.seconds).mapTo[ScheduledFeedbackForms])
+
+      result mustEqual ScheduledFeedbackForms(List(sessionId.stringify))
+    }
+
     "not refresh feedback forms schedulers because of empty feedback forms" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = false
@@ -126,7 +143,7 @@ class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: 
         def isCancelled: Boolean = true
       }
 
-      feedbackFormScheduler.underlyingActor.feedbackFormsSchedulers = Map(sessionId.stringify -> cancellable)
+      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
@@ -158,7 +175,7 @@ class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: 
         def isCancelled: Boolean = true
       }
 
-      feedbackFormScheduler.underlyingActor.feedbackFormsSchedulers = Map(sessionId.stringify -> cancellable)
+      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)

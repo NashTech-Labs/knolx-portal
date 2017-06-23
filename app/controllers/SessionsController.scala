@@ -11,7 +11,7 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller}
 import reactivemongo.bson.BSONDateTime
-import schedulers.FeedbackFormsScheduler.{Restarted, NotRestarted, FeedbackFormSchedulerResponses, RefreshFeedbackFormSchedulers}
+import schedulers.FeedbackFormsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -108,28 +108,39 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   def manageSessions(pageNumber: Int = 1): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
-      .flatMap { sessionsJson =>
+      .flatMap { sessionsInfo =>
         val knolxSessions =
-          sessionsJson map { session =>
+          sessionsInfo map (sessionInfo =>
+            KnolxSession(sessionInfo._id.stringify,
+              sessionInfo.userId,
+              new Date(sessionInfo.date.value),
+              sessionInfo.session,
+              sessionInfo.topic,
+              sessionInfo.email,
+              sessionInfo.meetup,
+              sessionInfo.cancelled,
+              sessionInfo.rating))
 
-            KnolxSession(session._id.stringify,
-              session.userId,
-              new Date(session.date.value),
-              session.session,
-              session.topic,
-              session.email,
-              session.meetup,
-              session.cancelled,
-              session.rating)
+        val eventualScheduledFeedbackForms =
+          (feedbackFormScheduler ? GetScheduledFeedbackForms) (5.seconds).mapTo[ScheduledFeedbackForms]
+
+        val eventualKnolxSessions = eventualScheduledFeedbackForms map { scheduledFeedbackForms =>
+          knolxSessions map { session =>
+            val scheduled = scheduledFeedbackForms.feedbackForms.contains(session.id)
+
+            session.copy(feedbackFormScheduled = scheduled)
           }
+        }
 
-        sessionsRepository
-          .activeCount
-          .map { count =>
-            val pages = Math.ceil(count / 10D).toInt
+        eventualKnolxSessions flatMap { sessions =>
+          sessionsRepository
+            .activeCount
+            .map { count =>
+              val pages = Math.ceil(count / 10D).toInt
 
-            Ok(views.html.sessions.managesessions(knolxSessions, pages, pageNumber))
-          }
+              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber))
+            }
+        }
       }
   }
 

@@ -15,7 +15,7 @@ class Question {
 var optionsCount = 0;
 var questionCount = 0;
 var questions = new Map([]);
-questions.set(0, [1]);
+questions.set(0, [0]);
 
 function searchAndRemove(arr, elem) {
     for (var i = 0; i <= arr.length - 1; i++) {
@@ -31,14 +31,10 @@ function createForm() {
     var formName = document.getElementById('formName').value;
 
     questions.forEach(function (options, question, obj) {
-            console.log(">>>>>> question " + question)
-            console.log(">>>>>> options " + options)
-
             var questionValue = document.getElementById('questionValue-' + question).value;
             var optionValues = [];
 
             for (var i = 0; i <= options.length - 1; i++) {
-                console.log(">>>>>>>>> " + options[i])
                 var optionValue = document.getElementById('optionValue-' + question + '-' + options[i]).value;
 
                 optionValues.push(optionValue)
@@ -78,7 +74,7 @@ function deleteOption(deleteElem) {
     var questionCountId = parseInt(splitIds[1]);
     var optionCountId = parseInt(splitIds[2]);
 
-    searchAndRemove(questions.get(questionCountId), optionCountId + 1);
+    searchAndRemove(questions.get(questionCountId), optionCountId);
 
     $('#option-' + questionCountId + '-' + optionCountId).fadeOut('slow', function () {
         $(this).remove();
@@ -92,7 +88,7 @@ function addOption(addElem) {
     var questionCountId = parseInt(splitIds[1]);
     var optionCountId = parseInt(splitIds[2]) + 1;
 
-    questions.get(questionCountId).push(optionCountId + 1);
+    questions.get(questionCountId).push(optionCountId);
 
     $('#options-' + questionCountId).append(
         '<div class="row" id="option-' + questionCountId + '-' + optionCountId + '">' +
@@ -133,7 +129,7 @@ function deleteQuestion(questionElem) {
 
 function addQuestion() {
     questionCount = questionCount + 1;
-    questions.set(questionCount, [1]);
+    questions.set(questionCount, [0]);
 
     $('#questions').append(
         '<div class="question-card" id="question-' + questionCount + '">' +

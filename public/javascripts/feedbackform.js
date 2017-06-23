@@ -23,14 +23,14 @@ function createForm() {
     var formName = document.getElementById('formName').value;
 
     questions.forEach(function (options, question, obj) {
-        if(document.getElementById('questionValue-' + question) != null) {
+        if (document.getElementById('questionValue-' + question) != null) {
             var questionValue = document.getElementById('questionValue-' + question).value;
         }
         var optionValues = [];
 
         for (i = 0; i < options; i++) {
 
-            if(document.getElementById('optionValue-' + question + '-' + i) !=null) {
+            if (document.getElementById('optionValue-' + question + '-' + i) != null) {
                 var optionValue = document.getElementById('optionValue-' + question + '-' + i).value;
                 optionValues.push(optionValue)
             }
@@ -55,7 +55,11 @@ function createForm() {
                 alert("Form Sucessfully Created !")
             },
             error: function (er) {
-                $('#response').html("<div class='alert alert-danger alert-dismissable fade in'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText + "</div>")
+                $('#response').html(
+                    "<div class='alert alert-danger alert-dismissable fade in'>" +
+                    "<a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText +
+                    "</div>"
+                )
             }
         })
 }
@@ -86,17 +90,24 @@ function addOption(addElem) {
     questions.set(questionCountId, currentQuestionOptions + 1);
 
     $('#options-' + questionCountId).append(
-        ' <div class="row" id="option-' + questionCountId + '-' + optionCountId + '">' +
-        '<div class="col-md-1" > </div>' +
-        ' <div class="col-md-10" > <label class="testrad">' +
-
-        '<input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' +
-        '<span class="lab_text"></span><p class="checkbox-text"> <input id="optionValue-' + questionCountId + '-' + optionCountId + '" class="card-options" placeholder="Option" type="text"/></p><a class="fa fa-times-circle xmen" id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)"></a></label>'
-        +
+        '<div class="row" id="option-' + questionCountId + '-' + optionCountId + '">' +
+        '   <div class="col-md-1"></div>' +
+        '   <div class="col-md-10">' +
+        '       <label class="testrad">' +
+        '           <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' +
+        '           <span class="lab_text"></span>' +
+        '           <p class="checkbox-text">' +
+        '               <input id="optionValue-' + questionCountId + '-' + optionCountId + '" class="card-options" placeholder="Option" type="text"/>' +
+        '           </p>' +
+        '           <a class="fa fa-times-circle xmen" id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)"></a>' +
+        '       </label>' +
+        '   </div>' +
+        '   <div class="col-md-1" ></div>' +
         '</div>' +
-        '<div class="col-md-1" > </div>' +
+        '<div id="parent" style="width: 100%; text-align:center;"><div>' +
+        '<i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
         '</div>' +
-        '<div id="parent" style="width: 100%; text-align:center;"><div><i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"  ></i></div></div>'
+        '</div>'
     );
 
     $('#addOption-' + questionCountId + '-' + (optionCountId - 1)).remove();
@@ -122,14 +133,30 @@ function addQuestion() {
 
     $('#questions').append(
         '<div class="question-card" id="question-' + questionCount + '">' +
-        ' <label class="card-questions-label"><input id="questionValue-' + questionCount + '" class="card-questions-other" placeholder="Question ?" type="text"><i id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i></label>' +
+        '   <label class="card-questions-label">' +
+        '       <input id="questionValue-' + questionCount + '" class="card-questions-other" placeholder="Question ?" type="text">' +
+        '       <i id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i>' +
+        '   </label>' +
         '   <div id="options-' + questionCount + '">' +
-        '       <div class="row" id="option-' + questionCount + '-' + optionsCount + '"> <div class="col-md-1" > </div><div class="col-md-10" ><label class="testrad">' +
-        '<input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' + '<span class="lab_text"></span><p class="checkbox-text"> <input id="optionValue-' + questionCount + '-' + 0 + '"  class="card-options" placeholder="Option" type="text"/></p></label>' + '</div><div class="col-md-1" > </div>' +
+        '       <div class="row" id="option-' + questionCount + '-' + optionsCount + '">' +
+        '           <div class="col-md-1" ></div>' +
+        '           <div class="col-md-10" >' +
+        '               <label class="testrad">' +
+        '                   <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' +
+        '                   <span class="lab_text"></span>' +
+        '                   <p class="checkbox-text">' +
+        '                       <input id="optionValue-' + questionCount + '-' + 0 + '"  class="card-options" placeholder="Option" type="text"/>' +
+        '                   </p>' +
+        '               </label>' +
+        '           </div>' +
+        '           <div class="col-md-1" > </div>' +
         '       </div>' +
         '   </div>' +
-        '   <br>' + '<div id="parent" style="width: 100%; text-align:center;"><div><i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"  ></i></div></div>' +
-        '</div>')
+        '   <br>' +
+        '   <div id="parent" style="width: 100%; text-align:center;"><div>' +
+        '   <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
+        '   </div></div>' +
+        '</div>');
 
     window.scrollTo(0, document.body.scrollHeight);
 }

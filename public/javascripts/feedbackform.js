@@ -15,7 +15,15 @@ class Question {
 var optionsCount = 0;
 var questionCount = 0;
 var questions = new Map([]);
-questions.set(0, 1);
+questions.set(0, [1]);
+
+function searchAndRemove(arr, elem) {
+    for (var i = 0; i <= arr.length - 1; i++) {
+        if (arr[i] === elem) {
+            arr.splice(i, 1)
+        }
+    }
+}
 
 function createForm() {
     var questionsValues = [];
@@ -23,21 +31,22 @@ function createForm() {
     var formName = document.getElementById('formName').value;
 
     questions.forEach(function (options, question, obj) {
-        if (document.getElementById('questionValue-' + question) != null) {
+            console.log(">>>>>> question " + question)
+            console.log(">>>>>> options " + options)
+
             var questionValue = document.getElementById('questionValue-' + question).value;
-        }
-        var optionValues = [];
+            var optionValues = [];
 
-        for (i = 0; i < options; i++) {
+            for (var i = 0; i <= options.length - 1; i++) {
+                console.log(">>>>>>>>> " + options[i])
+                var optionValue = document.getElementById('optionValue-' + question + '-' + options[i]).value;
 
-            if (document.getElementById('optionValue-' + question + '-' + i) != null) {
-                var optionValue = document.getElementById('optionValue-' + question + '-' + i).value;
                 optionValues.push(optionValue)
             }
-        }
 
-        questionsValues.push(new Question(questionValue, optionValues))
-    });
+            questionsValues.push(new Question(questionValue, optionValues))
+        }
+    );
 
     var feedbackForm = new FeedbackForm(formName, questionsValues);
 
@@ -57,7 +66,7 @@ function createForm() {
             error: function (er) {
                 $('#response').html(
                     "<div class='alert alert-danger alert-dismissable fade in'>" +
-                    "<a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText +
+                    "   <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText +
                     "</div>"
                 )
             }
@@ -69,13 +78,10 @@ function deleteOption(deleteElem) {
     var questionCountId = parseInt(splitIds[1]);
     var optionCountId = parseInt(splitIds[2]);
 
-    var currentQuestionOptions = questions.get(questionCountId);
+    searchAndRemove(questions.get(questionCountId), optionCountId + 1);
 
-    questions.set(questionCountId, currentQuestionOptions - 1);
-    var questionOptionsAfterDelete = questions.get(questionCountId);
     $('#option-' + questionCountId + '-' + optionCountId).fadeOut('slow', function () {
         $(this).remove();
-
     });
 }
 
@@ -86,8 +92,7 @@ function addOption(addElem) {
     var questionCountId = parseInt(splitIds[1]);
     var optionCountId = parseInt(splitIds[2]) + 1;
 
-    var currentQuestionOptions = questions.get(questionCountId);
-    questions.set(questionCountId, currentQuestionOptions + 1);
+    questions.get(questionCountId).push(optionCountId + 1);
 
     $('#options-' + questionCountId).append(
         '<div class="row" id="option-' + questionCountId + '-' + optionCountId + '">' +
@@ -120,7 +125,6 @@ function deleteQuestion(questionElem) {
 
     questions.delete(questionCountId);
 
-
     $('#question-' + questionCountId).fadeOut('slow', function () {
         $(this).remove();
 
@@ -129,7 +133,7 @@ function deleteQuestion(questionElem) {
 
 function addQuestion() {
     questionCount = questionCount + 1;
-    questions.set(questionCount, 1);
+    questions.set(questionCount, [1]);
 
     $('#questions').append(
         '<div class="question-card" id="question-' + questionCount + '">' +

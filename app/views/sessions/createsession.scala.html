@@ -3,9 +3,8 @@
     @main("Create Session") {
 
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-4"></div>
 
-            </div>
             <div class="col-md-4 profile">
                 <div class="container-fluid" style="margin-top: 90px ;"></div>
 
@@ -43,53 +42,50 @@
                             <div class="col-md-1"></div>
                         </div>
                         <div class="col-md-1"></div>
-                    </div>
 
-                    <div class="col-md-12 login-two login-three updatetwo">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-                            <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
-                            @for((value,key) <- feedbackForms) {
-                                <option value="@value">@key</option>
-                            }
-                            </select>
-                        </div>
-
-                        <div class="col-md-12 login-three updatetwo">
+                        <div class="col-md-12 login-two login-three updatetwo">
                             <div class="col-md-1"></div>
+
                             <div class="col-md-10 ">
-
-                                <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
-                                placeholder="Topic" required class="updateField"/>
-
+                                <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                                @for((value, key) <- feedbackForms) {
+                                    <option value="@value">@key</option>
+                                }
+                                </select>
                             </div>
-                            <div class="col-md-1"></div>
-                        </div>
 
-                        <div class="col-md-12 login-three">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10 ">
+                            <div class="col-md-12 login-three updatetwo">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10 ">
+                                    <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
+                                    placeholder="Topic" required class="updateField"/>
 
-                                <label class="testy">
-                                    <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
-
-                                    <span class="label_text"></span>
-                                    <p class="checkbox-text">Is Meetup ?</p>
-                                </label>
+                                </div>
+                                <div class="col-md-1"></div>
                             </div>
-                            <div class="col-md-1"></div>
-                        </div>
 
-                        <div class="col-md-12 update-two login-four">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10 ">
+                            <div class="col-md-12 login-three">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10 ">
 
-                                <input type="submit" value="Create" class="inputField updateButton"/>
+                                    <label class="testy">
+                                        <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
 
+                                        <span class="label_text"></span>
+                                        <p class="checkbox-text">Is Meetup ?</p>
+                                    </label>
+                                </div>
+                                <div class="col-md-1"></div>
                             </div>
-                            <div class="col-md-1"></div>
-                        </div>
 
+                            <div class="col-md-12 update-two login-four">
+                                <div class="col-md-1"></div>
+                                <div class="col-md-10 ">
+                                    <input type="submit" value="Create" class="inputField updateButton"/>
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

@@ -23,13 +23,17 @@ function createForm() {
     var formName = document.getElementById('formName').value;
 
     questions.forEach(function (options, question, obj) {
-        var questionValue = document.getElementById('questionValue-' + question).value;
+        if(document.getElementById('questionValue-' + question) != null) {
+            var questionValue = document.getElementById('questionValue-' + question).value;
+        }
         var optionValues = [];
 
         for (i = 0; i < options; i++) {
-            var optionValue = document.getElementById('optionValue-' + question + '-' + i).value;
 
-            optionValues.push(optionValue)
+            if(document.getElementById('optionValue-' + question + '-' + i) !=null) {
+                var optionValue = document.getElementById('optionValue-' + question + '-' + i).value;
+                optionValues.push(optionValue)
+            }
         }
 
         questionsValues.push(new Question(questionValue, optionValues))
@@ -112,7 +116,6 @@ function deleteQuestion(questionElem) {
     });
 }
 
-/*'   <a id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)">X</a>'*/
 function addQuestion() {
     questionCount = questionCount + 1;
     questions.set(questionCount, 1);

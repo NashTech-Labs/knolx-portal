@@ -26,12 +26,12 @@
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 ">
                             <select name="session" id="session" class="updateField login-two">
-                            @for(session <- SessionValues.Sessions) {
-                                <option value="@session._1"
-                                    @(if(sessionInfo.data.getOrElse("session", "") == session._2.toLowerCase()) {
+                            @for((value,key)<- SessionValues.Sessions) {
+                                <option value="@value"
+                                    @(if(sessionInfo.data.getOrElse("session", "") == key.toLowerCase()) {
                                         "selected"
                                     })>
-                                @session._2
+                                @key
                                 </option>
                             }
                             </select>
@@ -42,17 +42,17 @@
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
                             <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
-                            @for(feedbackForm <- feedbackForms) {
+                            @for((value,key)<- feedbackForms) {
 
-                                <option value="@feedbackForm._1"
-                                    @(if(sessionInfo.data.getOrElse("session", "") == feedbackForm._2.toLowerCase()) {
+                                <option value="@value"
+                                    @(if(sessionInfo.data.getOrElse("session", "") == key.toLowerCase()) {
                                         "selected"
                                     })>
-                                @feedbackForm._2
+                                @key
                                 </option>
 
 
-                                <option value="@feedbackForm._1">@feedbackForm._2</option>
+                                <option value="@value">@key</option>
                             }
                             </select>
                         </div>

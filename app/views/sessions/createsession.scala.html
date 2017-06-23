@@ -47,8 +47,8 @@
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
                             <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
-                            @for(feedbackForm <- feedbackForms) {
-                                <option value="@feedbackForm._1">@feedbackForm._2</option>
+                            @for((value,key) <- feedbackForms) {
+                                <option value="@value">@key</option>
                             }
                             </select>
                         </div>

@@ -4,11 +4,20 @@
     <div class="row">
         <div class="col-md-2" > </div>
         <div class="col-md-8 feedbackformcontainer" >
+            @if(!flash.isEmpty) {
+                <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px;
+                    font-family: 'gothic';
+                    font-size: 17px;">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Success!</strong> @flash.get("message").fold("")(message => message)
+                </div>
+            }
 
-            <div class="col-md-12 login-one" style="margin-bottom:50px;" >
+            <div class="col-md-12 login-one test" style="margin-bottom: 50px;" >
                 <div class="col-md-8 infofeed" ></div>
                 <div class="col-md-4 text-right newfeedbtn" >
-                    <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed"><i class="fa fa-plus" aria-hidden="true"></i> New
+                    <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed"><i class="fa fa-plus" aria-hidden="true"></i>
+                        New
                     </a>
 
                 </div>
@@ -18,12 +27,12 @@
                 @updateFeedbackFormInformation.map { feedbackFormInformation =>
 
                     <div class="col-md-4 feedouters" >
-                        <div class="feedform" onclick="window.location='@routes.SessionsController.update(feedbackFormInformation.id)';">
+                        <div class="feedform" onclick="window.location = '@routes.FeedbackFormsController.update(feedbackFormInformation.id)'; >
                             <div class="feedformupper">
 
                             </div>
                             <div class="feedformlower">
-                                @feedbackFormInformation.name
+                            @feedbackFormInformation.name
                             </div>
 
                         </div>

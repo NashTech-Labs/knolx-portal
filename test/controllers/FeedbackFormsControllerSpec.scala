@@ -20,23 +20,21 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
 
-  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
-    with Scope with ShouldThrownExpectations with Mockito {
-    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
-
-    val mailerClient = mock[MailerClient]
-    val usersRepository: UsersRepository = mock[UsersRepository]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-
-    val config = Configuration(ConfigFactory.load("application.conf"))
-    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
-
-    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
-  }
-
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val emailObject = Future.successful(List(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
+    with Scope with ShouldThrownExpectations with Mockito {
+    val mailerClient = mock[MailerClient]
+    val usersRepository: UsersRepository = mock[UsersRepository]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val config = Configuration(ConfigFactory.load("application.conf"))
+    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
+
+    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
+  }
 
   "Feedback controller" should {
 
@@ -163,7 +161,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val response = controller.delete("5943cdd60900000900409b26")(FakeRequest()
+      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo SEE_OTHER
@@ -173,11 +171,37 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val response = controller.delete("5943cdd60900000900409b26")(FakeRequest()
+      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "send form asked to update to feedback update page" in new WithTestApplication {
+
+      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
+
+      val response = controller.update("5943cdd60900000900409b26")(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+    "Feedback Form asked to update not found" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
+
+      val response = controller.update("5943cdd60900000900409b26")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo SEE_OTHER
     }
+
   }
 
 }

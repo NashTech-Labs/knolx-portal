@@ -7,7 +7,7 @@ import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,6 +29,13 @@ object FeedbackFormat {
 
   implicit val questionFormat = Json.format[Question]
   implicit val feedbackFormat = Json.format[FeedbackForm]
+
+  implicit object QuestionWriter extends BSONDocumentWriter[Question] {
+    def write(ques: Question): BSONDocument = BSONDocument(
+      "question" -> ques.question,
+      "options" -> ques.options)
+  }
+
 }
 
 class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
@@ -44,6 +51,19 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .insert(feedbackData))
+
+  def update(id:String,feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "name" -> feedbackData.name,
+        "questions" -> feedbackData.questions,
+        "active" ->feedbackData.active)
+    )
+
+      collection.flatMap(jsonCollection =>
+      jsonCollection.update(selector, modifier))
+}
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
     collection

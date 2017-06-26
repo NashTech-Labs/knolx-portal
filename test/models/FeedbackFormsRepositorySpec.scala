@@ -2,6 +2,7 @@ package models
 
 import play.api.test.PlaySpecification
 import reactivemongo.bson.BSONObjectID
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class FeedbackFormsRepositorySpec extends PlaySpecification {
@@ -56,6 +57,15 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
       val deleted = await(feedbackFormsRepository.delete(formId.stringify))
 
       deleted.isDefined must beEqualTo(true)
+    }
+
+    "update feedback form" in {
+
+      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      val feedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
+      val updated = await(feedbackFormsRepository.update(feedbackFormId.stringify,feedbackForm).map(_.ok))
+      updated must beEqualTo(true)
+
     }
 
   }

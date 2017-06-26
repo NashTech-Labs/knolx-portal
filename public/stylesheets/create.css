@@ -1,5 +1,7 @@
 .create-outer {
-    height: 620px;
+    height: 650px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
 }

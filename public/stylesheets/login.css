@@ -1,5 +1,5 @@
 .login-outer {
-    height: 470px;
+    height: 440px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
     -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
@@ -12,9 +12,11 @@
 }
 
 .login-one {
-    border-radius: 20px 20px 0px 0px;
     height: 80px;
-    box-shadow: 0 4px 6px -5px #333;
+    padding: 0px 0px;
+    background-color: rgb(125, 158, 192);
+    box-shadow: 0 9px 8px -5px #a8a8a8;
+    border-bottom: 1px solid #fff;
 }
 
 .login-two {

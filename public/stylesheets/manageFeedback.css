@@ -4,14 +4,14 @@
     margin-top: 100px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
-    padding-bottom: 50px;
+    padding: 0px 0px;
+   // padding-bottom: 50px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
+    border-radius: 30px;
 }
 
 .feedouters {
@@ -67,11 +67,12 @@
 
 .btn-create-feed {
     padding: 5px 15px 5px 15px;
-    background-color: #fff;
-    border: 2px solid rgb(125, 158, 192);
+    background-color:rgb(125, 158, 192);
+    border: 2px solid #fff;
     font-size: 15px;
-    color: rgb(125, 158, 192);
+    color: #fff;
     font-weight: bold;
+    box-shadow: 0 4px 5px -5px #333;
 }
 
 a.btn.btn-sm.btn-primary.btn-create-feed:hover {

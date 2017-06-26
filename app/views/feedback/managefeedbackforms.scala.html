@@ -4,16 +4,7 @@
     <div class="row">
         <div class="col-md-2" > </div>
         <div class="col-md-8 feedbackformcontainer" >
-        @if(!flash.isEmpty) {
-            <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px;
-                font-family: 'gothic';
-                font-size: 17px;">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <strong>Success!</strong> @flash.get("message").fold("")(message => message)
-            </div>
-        }
-
-            <div class="col-md-12 login-one test" style="margin-bottom:50px;" >
+            <div class="col-md-12 login-one test" style="margin-bottom:50px;background-color: rgb(125, 158, 192);box-shadow: 0 9px 8px -5px #a8a8a8;border-bottom: 1px solid #fff;" >
                 <div class="col-md-8 infofeed" ></div>
                 <div class="col-md-4 text-right newfeedbtn" >
                     <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed"><i class="fa fa-plus" aria-hidden="true"></i> New
@@ -21,6 +12,14 @@
 
                 </div>
             </div>
+            @if(!flash.isEmpty) {
+                <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px;
+                    font-family: 'gothic';
+                    font-size: 17px;">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Success!</strong> @flash.get("message").fold("")(message => message)
+                </div>
+            }
 
                 @updateFeedbackFormInformation.map { feedbackFormInformation =>
 
@@ -39,9 +38,8 @@
                 }
                 <div class="col-md-4 feedouters" ></div>
                 <div class="col-md-4 feedouters" ></div>
+            <div class="col-md-12" style="height:30px;background-color:#eee; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;"> </div>
             </div>
-
-        </div>
         <div class="col-md-2" ></div>
     </div>
 }

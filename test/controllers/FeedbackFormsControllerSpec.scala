@@ -202,6 +202,22 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo SEE_OTHER
     }
 
+/*    "update feedback form" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request = FakeRequest(POST, "/feedbackform/update").withJsonBody(Json.parse(
+        """
+          |{"id":"5943cdd60900000900409b26","name":"title","questions":
+          |[{"question":"question?","options":["option","option"]}]}
+          |""".stripMargin))
+
+      val response = controller.updateFeedbackForm(request
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo SEE_OTHER
+    }*/
+
   }
 
 }

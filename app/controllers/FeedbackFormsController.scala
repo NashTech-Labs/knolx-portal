@@ -88,7 +88,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     } { feedbackFormInformation =>
 
       val formValid =
-        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
       formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
 
@@ -147,7 +147,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
       val formValid =
-        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
       formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
         (request.body \ "id").asOpt[String].fold {

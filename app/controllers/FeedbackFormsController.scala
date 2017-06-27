@@ -150,7 +150,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
       formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
-        (request.body \ "id").getOrElse(JsString("")).asOpt[String].fold {
+        (request.body \ "id").asOpt[String].fold {
           Logger.error(s"Received a bad request form id to update not found")
           Future.successful(BadRequest("Malformed data!"))
         } {

@@ -13,12 +13,22 @@
                 </div>
             </div>
             @if(!flash.isEmpty) {
-                <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px;
-                    font-family: 'gothic';
-                    font-size: 17px;">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    <strong>Success!</strong> @flash.get("message").fold("")(message => message)
-                </div>
+                @if(!flash.get("message").fold("")(message => message).isEmpty) {
+                    <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px;
+                        font-family: 'gothic';
+                        font-size: 17px;">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>Success!</strong> @flash.get("message").fold("")(message => message)
+                    </div>
+                }
+                @if(!flash.get("errormessage").fold("")(message => message).isEmpty) {
+                    <div class="alert alert-danger  alert-dismissable fade in" style="margin-top: 20px;
+                        font-family: 'gothic';
+                        font-size: 17px;">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>Error!</strong> @flash.get("errormessage").fold("")(message => message)
+                    </div>
+                }
             }
 
                 @updateFeedbackFormInformation.map { feedbackFormInformation =>

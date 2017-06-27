@@ -93,7 +93,7 @@ input#formName:focus {
     border: none;
     width: 100%;
     outline: none;
-    border-bottom: 1px solid #dcdcdc;
+    border-bottom: 1px dotted #dcdcdc;
     font-size: 18px;
     font-family: 'gothic';
     letter-spacing: 2px;
@@ -182,7 +182,7 @@ a.fa.fa-times-circle.xmen:hover {
     border: none;
     width: 80%;
     outline: none;
-    border-bottom: 1px solid #dcdcdc;
+    border-bottom: 1px dotted #dcdcdc;
     font-size: 20px;
     font-family: 'gothic';
     letter-spacing: 2px;

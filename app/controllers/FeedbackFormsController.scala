@@ -150,16 +150,22 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
       formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
-        val updateId = (request.body \ "id").getOrElse(JsString("")).asOpt[String].getOrElse("")
-        feedbackRepository.update(updateId, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
-          if (result.ok) {
-            Logger.info(s"Feedback form successfully updated")
-            Ok("Feedback form successfully updated!")
-          } else {
-            Logger.error(s"Something went wrong when updated a feedback")
-            InternalServerError("Something went wrong!")
-          }
+        (request.body \ "id").getOrElse(JsString("")).asOpt[String].fold {
+          Logger.error(s"Received a bad request form id to update not found")
+          Future.successful(BadRequest("Malformed data!"))
+        } {
+          updateId: String =>
+            feedbackRepository.update(updateId, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
+              if (result.ok) {
+                Logger.info(s"Feedback form successfully updated")
+                Ok("Feedback form successfully updated!")
+              } else {
+                Logger.error(s"Something went wrong when updated a feedback")
+                InternalServerError("Something went wrong!")
+              }
+            }
         }
+
       } { errorMessage =>
         Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
         Future.successful(BadRequest(errorMessage))
@@ -172,8 +178,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .delete(id)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete knolx feedback form with id $id")
-
-        Future.successful(InternalServerError("Something went wrong!"))
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("errormessage" -> "Something went wrong!"))
       } { sessionJson =>
         Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))

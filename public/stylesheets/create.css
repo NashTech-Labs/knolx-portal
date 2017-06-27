@@ -5,3 +5,26 @@
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
 }
+
+.col-md-12{
+    position: relative;
+    min-height: 1px;
+    padding-right: 0px;
+    padding-left: 0px;
+}
+.updateField2{
+
+    width: 100%;
+    border: none;
+    border-bottom: 2px dotted #CACFD2;
+    font-family: 'gothic';
+    font-size: 18px;
+    color: #566573;
+    background-color: #fff;
+    padding: 0px 0px;
+    outline: none;
+}
+.createemail{
+
+    margin-top: 15px;
+}

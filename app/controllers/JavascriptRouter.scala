@@ -6,12 +6,9 @@ import play.api.routing.JavaScriptReverseRouter
 class JavascriptRouter extends Controller {
 
   def jsRoutes: Action[AnyContent] = Action { implicit request =>
-    Ok(
-      JavaScriptReverseRouter("jsRoutes")(
-        controllers.routes.javascript.FeedbackFormsController.createFeedbackForm,
-        controllers.routes.javascript.FeedbackFormsController.updateFeedbackForm
-      )
-    ).as("text/javascript")
+    Ok(JavaScriptReverseRouter("jsRoutes")(
+      controllers.routes.javascript.FeedbackFormsController.createFeedbackForm,
+      controllers.routes.javascript.FeedbackFormsController.updateFeedbackForm)).as("text/javascript")
   }
 
 }

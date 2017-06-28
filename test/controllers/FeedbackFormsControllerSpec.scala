@@ -263,7 +263,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val feedbackForm = FeedbackForm("test", List(questions), true, BSONObjectID("5943cdd60900000900409b26"))
 
-      val result = controller.jSONCountBuilder(feedbackForm)
+      val result = controller.jsonCountBuilder(feedbackForm)
       result  must be equalTo """{"0":"2"}"""
     }
 

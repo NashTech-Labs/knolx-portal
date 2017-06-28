@@ -14,7 +14,38 @@ import scala.concurrent.Future
 
 case class QuestionInformation(question: String, options: List[String])
 
-case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation])
+case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation]){
+
+  def validateName: Option[String] =
+    if (name.nonEmpty) {
+      None
+    } else {
+      Some("Form name must not be empty!")
+    }
+
+  def validateForm: Option[String] =
+    if (questions.flatMap(_.options).nonEmpty) {
+      None
+    } else {
+      Some("Question must require at least 1 option!")
+    }
+
+  def validateQuestion: Option[String] =
+    if (!questions.map(_.question).contains("")) {
+      None
+    } else {
+      Some("Question must not be empty!")
+    }
+
+  def validateOptions: Option[String] =
+    if (!questions.flatMap(_.options).contains("")) {
+      None
+    } else {
+      Some("Options must not be empty!")
+    }
+
+
+}
 
 case class FeedbackFormInformation(name: String, questions: List[QuestionInformation]) {
 
@@ -56,6 +87,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
+  implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 
   val usersRepo = usersRepository
 
@@ -108,20 +140,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-
-
-  def getFeedbackFormPreview: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
-    println("================>" + (request.body \ "id").asOpt[String])
-    (request.body \ "id").asOpt[String].fold {
-      Logger.error(s"Received a bad request form id to update not found")
-      Future.successful(BadRequest("Malformed data!"))
-    }{ data =>
-    Future.successful(Ok("""{"name":"ankit"}"""))
-    }
-  }
-
-
-
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
     val email =
       Email(subject = "Knolx Feedback Form",
@@ -139,12 +157,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, JSONBuilder(feedForm)))
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, jSONCountBuilder(feedForm)))
         case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
-  def JSONBuilder(feedForm: FeedbackForm): String = {
+  def jSONCountBuilder(feedForm: FeedbackForm): String = {
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil => json
@@ -156,7 +174,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def updateFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
-    request.body.validate[FeedbackFormInformation].asOpt.fold {
+    request.body.validate[UpdateFeedbackFormInformation].asOpt.fold {
       Logger.error(s"Received a bad request while updating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
@@ -164,12 +182,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
       formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
-        (request.body \ "id").asOpt[String].fold {
-          Logger.error(s"Received a bad request form id to update not found")
-          Future.successful(BadRequest("Malformed data!"))
-        } {
-          updateId: String =>
-            feedbackRepository.update(updateId, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
+        feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
               if (result.ok) {
                 Logger.info(s"Feedback form successfully updated")
                 Ok("Feedback form successfully updated!")
@@ -178,8 +191,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                 InternalServerError("Something went wrong!")
               }
             }
-        }
-
       } { errorMessage =>
         Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
         Future.successful(BadRequest(errorMessage))

@@ -1,5 +1,5 @@
 class FeedbackForm {
-    constructor(id,name, questions) {
+    constructor(id, name, questions) {
         this.id = id;
         this.name = name;
         this.questions = questions;
@@ -15,15 +15,14 @@ class Question {
 
 var optionsCount = 0;
 var questionCount = parseInt(document.getElementById('questionCount').value);
-var existingCounts =JSON.parse(document.getElementById('existingCounts').value);
-var questions = new Map([]) ;
+var existingCounts = JSON.parse(document.getElementById('existingCounts').value);
+var questions = new Map([]);
 
-for(var question=0 ; question<questionCount ; question++)
-{
-    var optionCount  = parseInt(existingCounts[question]);
+for (var question = 0; question < questionCount; question++) {
+    var optionCount = parseInt(existingCounts[question]);
     var optionArray = [];
 
-    for (var option=0 ; option<optionCount ; option++){
+    for (var option = 0; option < optionCount; option++) {
         optionArray.push(option);
     }
 
@@ -58,7 +57,7 @@ function updateForm() {
         }
     );
 
-    var feedbackForm = new FeedbackForm(formId,formName, questionsValues);
+    var feedbackForm = new FeedbackForm(formId, formName, questionsValues);
 
     $('#errorMessage').remove();
     $('#successMessage').remove();

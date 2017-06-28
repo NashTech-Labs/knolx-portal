@@ -177,7 +177,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
-      status(response) must be equalTo INTERNAL_SERVER_ERROR
+      status(response) must be equalTo SEE_OTHER
     }
 
     "send form asked to update to feedback update page" in new WithTestApplication {
@@ -263,7 +263,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val feedbackForm = FeedbackForm("test", List(questions), true, BSONObjectID("5943cdd60900000900409b26"))
 
-      val result = controller.JSONBuilder(feedbackForm)
+      val result = controller.jSONCountBuilder(feedbackForm)
       result  must be equalTo """{"0":"2"}"""
     }
 

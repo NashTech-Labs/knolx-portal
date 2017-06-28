@@ -13,7 +13,7 @@
                 </div>
             </div>
             @if(!flash.isEmpty) {
-                @if(!flash.get("message").fold("")(message => message).isEmpty) {
+                @if(!flash.get("message").fold("")(identity).isEmpty) {
                     <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px;
                         font-family: 'gothic';
                         font-size: 17px;">
@@ -21,7 +21,7 @@
                         <strong>Success!</strong> @flash.get("message").fold("")(message => message)
                     </div>
                 }
-                @if(!flash.get("errormessage").fold("")(message => message).isEmpty) {
+                @if(!flash.get("errormessage").fold("")(identity).isEmpty) {
                     <div class="alert alert-danger  alert-dismissable fade in" style="margin-top: 20px;
                         font-family: 'gothic';
                         font-size: 17px;">

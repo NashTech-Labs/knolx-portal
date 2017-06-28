@@ -1,37 +1,35 @@
-@(feedbackForm: FeedbackForm,json : String)(implicit request: Request[_], messages: Messages, flash: Flash)
-@main("Update Feedback Form") {
-<div class="row">
+@(feedbackForm: FeedbackForm, json: String)(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    <div class="col-md-3" >
+    @main("Update Feedback Form") {
+        <div class="row">
 
-    </div>
-    <div class="col-md-6" >
-        <div class="container-fluid" style="margin-top: 90px ;">
-        </div>
-        <div id="response">
-        </div>
-        <form id="feedbackform">
-            <div id="questions">
-                <div class ="question-card first-question-card">
-                    <div class="col-md-12 feedtitle" >
-                        <input id="formID" value='@feedbackForm._id.stringify' type="hidden">
-                        <input id="questionCount" value='@feedbackForm.questions.size' type="hidden">
-                        <input id="existingCounts" value='@json' type="hidden">
-                        <input id="formName" placeholder="Form Title" value="@feedbackForm.name" type="text" class="FormName">
-                        <a href="@routes.FeedbackFormsController.deleteFeedbackForm(feedbackForm._id.stringify)"  class="fa fa-trash delForm" aria-hidden="true"></a>
-                    </div>
-                    @feedbackForm.questions match {
+            <div class="col-md-3" ></div>
 
-                        case head::tail => {
+            <div class="col-md-6" >
+                <div class="container-fluid" style="margin-top: 90px ;"></div>
+                <div id="response"></div>
 
-                            <div id="question-0">
-                                <div class="col-md-12">
-                                    <input class="card-questions" id="questionValue-0" value="@head.question" placeholder="Question ?" type="text">
-                                </div>
-                                <br>
-                                <div id="options-0">
-                                    @for(option <- head.options.indices){
-                                        <div class="row" id="option-0-@option">
+                <form id="feedbackform">
+                    <div id="questions">
+                        <div class ="question-card first-question-card">
+                            <div class="col-md-12 feedtitle" >
+                                <input id="formID" value='@feedbackForm._id.stringify' type="hidden">
+                                <input id="questionCount" value='@feedbackForm.questions.size' type="hidden">
+                                <input id="existingCounts" value='@json' type="hidden">
+                                <input id="formName" placeholder="Form Title" value="@feedbackForm.name" type="text" class="FormName">
+                                <a href="@routes.FeedbackFormsController.deleteFeedbackForm(feedbackForm._id.stringify)" class="fa fa-trash delForm" aria-hidden="true"></a>
+                            </div>
+
+                            @feedbackForm.questions match {
+                                case readOnlyQuestion :: editableQuestions => {
+                                    <div id="question-0">
+                                        <div class="col-md-12">
+                                            <input class="card-questions" id="questionValue-0" value="@readOnlyQuestion.question" placeholder="Question ?" type="text">
+                                        </div>
+                                        <br>
+                                        <div id="options-0">
+                                        @for(option <- readOnlyQuestion.options.indices) {
+                                            <div class="row" id="option-0-@option">
                                             @if(option == 0) {
                                                 <div class="col-md-1" > </div>
                                                 <div class="col-md-10" >
@@ -39,12 +37,71 @@
                                                         <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
                                                         <span class="lab_text"></span>
                                                         <p class="checkbox-text">
-                                                            <input id="optionValue-0-@option" value="@head.options(option)" class="card-options" placeholder="Option" type="text"/>
+                                                            <input id="optionValue-0-@option" value="@readOnlyQuestion.options(option)" class="card-options" placeholder="Option" type="text"/>
                                                         </p>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-1" ></div>
-                                            }else{
+                                            } else {
+                                                <div class="col-md-1"></div>
+                                                <div class="col-md-10">
+                                                    <label class="testrad">
+                                                        <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>
+                                                        <span class="lab_text"></span>
+                                                        <p class="checkbox-text">
+                                                            <input id="optionValue-0-@option" value="@readOnlyQuestion.options(option)" class="card-options" placeholder="Option" type="text"/>
+                                                        </p>
+                                                        <a class="fa fa-times-circle xmen" id="deleteOption-0-@option" onclick="deleteOption(this)"></a>
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-1" ></div>
+                                            }
+                                            </div>
+                                        }
+
+                                        </div>
+
+                                        <div id="parent" style="width: 100% ; text-align:center ;">
+                                            <div>
+                                                <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-0-@{
+                                                    feedbackForm.questions.size - 1
+                                                }"></i>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                }
+                                case Nil => {
+                                    ""
+                                }
+                            }
+
+                        </div>
+                        @feedbackForm.questions match {
+                            case readOnlyQuestion :: editableQuestions => {
+                                @for(questionCount <- 1 to editableQuestions.size) {
+                                    <div class="question-card" id="question-@questionCount">
+                                        <label class="card-questions-label">
+                                            <input id="questionValue-@questionCount" class="card-questions-other" value="@editableQuestions(questionCount - 1).question" placeholder="Question ?" type="text">
+                                            <i id="deleteQuestion-@questionCount" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i>
+                                        </label>
+
+                                        <div id="options-@questionCount">
+                                        @for(option <- editableQuestions(questionCount - 1).options.indices) {
+                                            <div class="row" id="option-@questionCount-@option">
+                                            @if(option == 0) {
+                                                <div class="col-md-1" > </div>
+                                                <div class="col-md-10" >
+                                                    <label class="testrad">
+                                                        <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
+                                                        <span class="lab_text"></span>
+                                                        <p class="checkbox-text">
+                                                            <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-1" ></div>
+                                            } else {
 
                                                 <div class="col-md-1"></div>
                                                 <div class="col-md-10">
@@ -52,97 +109,44 @@
                                                         <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>
                                                         <span class="lab_text"></span>
                                                         <p class="checkbox-text">
-                                                            <input id="optionValue-0-@option" value="@head.options(option)" class="card-options" placeholder="Option" type="text"/>
+                                                            <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
                                                         </p>
-                                                        <a class="fa fa-times-circle xmen" id="deleteOption-0-@option" onclick="deleteOption(this)"></a>
+                                                        <a class="fa fa-times-circle xmen" id="deleteOption-@questionCount-@option" onclick="deleteOption(this)"></a>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-1" ></div>
                                             }
+                                            </div>
+                                        }
+
                                         </div>
-                                    }
 
-                                </div>
-
-                                <div id="parent" style="width: 100%; text-align:center;">
-                                    <div>
-                                        <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-0-@{feedbackForm.questions.size-1}"></i>
+                                        <br>
+                                        <div id="parent" style="width: 100% ; text-align:center ;"><div>
+                                            <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-@questionCount-@{
+                                                editableQuestions(questionCount - 1).options.size - 1
+                                            }"></i>
+                                        </div>
+                                        </div>
                                     </div>
-                                </div>
-
-                            </div>
-
+                                }
+                            }
+                            case Nil => {""}
                         }
-                        case Nil => {""}
-                    }
-
-                </div>
-                @feedbackForm.questions match {
-
-                    case head::tail => {
-                @for(questionCount <- 1 to tail.size){
-                <div class="question-card" id="question-@questionCount">
-                    <label class="card-questions-label">
-                        <input id="questionValue-@questionCount" class="card-questions-other" value="@tail(questionCount-1).question" placeholder="Question ?" type="text">
-                        <i id="deleteQuestion-@questionCount" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i>
-                    </label>
-
-                    <div id="options-@questionCount">
-                    @for(option <- tail(questionCount-1).options.indices){
-                        <div class="row" id="option-@questionCount-@option">
-                        @if(option == 0) {
-                            <div class="col-md-1" > </div>
-                            <div class="col-md-10" >
-                                <label class="testrad">
-                                    <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
-                                    <span class="lab_text"></span>
-                                    <p class="checkbox-text">
-                                        <input id="optionValue-@questionCount-@option" value="@tail(questionCount-1).options(option)" class="card-options" placeholder="Option" type="text"/>
-                                    </p>
-                                </label>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        }else{
-
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10">
-                                <label class="testrad">
-                                    <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>
-                                    <span class="lab_text"></span>
-                                    <p class="checkbox-text">
-                                        <input id="optionValue-@questionCount-@option" value="@tail(questionCount-1).options(option)" class="card-options" placeholder="Option" type="text"/>
-                                    </p>
-                                    <a class="fa fa-times-circle xmen" id="deleteOption-@questionCount-@option" onclick="deleteOption(this)"></a>
-                                </label>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        }
-                        </div>
-                    }
-
                     </div>
+                </form>
 
-                    <br>
-                    <div id="parent" style="width: 100%; text-align:center;"><div>
-                        <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-@questionCount-@{tail(questionCount-1).options.size-1}"></i>
-                    </div></div>
-                </div>}
-                    }
-                    case Nil => {""}
-                }
+                <div id='parent' style='width: 100% ;'>
+                    <div class="addquestion" onclick="addQuestion()">
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <button type="button" onclick="updateForm()" class="btn btn-primary btn-lg createfeedbtn">Update</button>
             </div>
-        </form>
 
-        <div id='parent' style='width: 100% ;'>
-            <div class="addquestion" onclick="addQuestion()">
-                <i class="fa fa-plus-circle" aria-hidden="true"></i>
-            </div>
+            <div class="col-md-3" ></div>
         </div>
-        <button type="button" onclick="updateForm()" class="btn btn-primary btn-lg createfeedbtn">Update</button>
-    </div>
 
-    <div class="col-md-3" ></div>
-</div>
-<script src="@routes.Assets.versioned("javascripts/updatefeedbackform.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/updatefeedbackform.js")" type="text/javascript"></script>
 
-}
+    }

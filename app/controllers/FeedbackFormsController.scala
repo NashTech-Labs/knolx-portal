@@ -121,7 +121,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         .map {
           case Some(feedForm: FeedbackForm) =>
             val json = s"""{"status":${Json.toJson(feedForm).toString}}"""
-            println("==>" + json)
             Ok(json)
           case None => Ok("""{"status":"failure"}""")
         }

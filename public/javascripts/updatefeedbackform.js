@@ -70,7 +70,7 @@ function updateForm() {
             data: JSON.stringify(feedbackForm),
             success: function (data) {
                 window.location = "/feedbackform/manage?pageNumber=1";
-                alert("Form Sucessfully Updated !")
+                alert("Form Successfully Updated !")
             },
             error: function (er) {
                 $('#response').html(

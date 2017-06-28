@@ -42,7 +42,7 @@ function updateForm() {
     var questionsValues = [];
 
     var formName = document.getElementById('formName').value;
-    var formId = document.getElementById('formID').value;
+    var formId = document.getElementById('formId').value;
     questions.forEach(function (options, question, obj) {
             var questionValue = document.getElementById('questionValue-' + question).value;
             var optionValues = [];

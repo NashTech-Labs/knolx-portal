@@ -12,42 +12,43 @@ function generatePreview() {
 
                 var values = JSON.parse(data);
 
-                if(values['status'] == "success") {
+                if (values['status'] == "failure") {
 
-                    var formName = values['name'];
-                    var questions = values['ques'];
-                    var optionsLoad = "";
+                    $('#formData').html("Sorry ! unable to load feedback form template");
 
-                    $('#feedFormName').html(formName);
-                    $('#datao').html("");
+                }
+                else {
 
-                    for (var i = 0; i < questions.length; i++) {
+                    $('#formData').html("");
+                    var optionsLoaded = "";
 
-                        var options = values[questions[i]];
+                    var feedbackFormJson = values['status'];
+                    var questions = feedbackFormJson['questions'];
 
-                        for (var j = 0; j < options.length; j++) {
+                    $('#feedFormName').html(feedbackFormJson['name']);
 
-                            optionsLoad = optionsLoad + "<h2>" + options[j] + "</h2><br/>";
+                    for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {
+                        var options = questions[questionNumber]['options'];
+
+                        for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
+                            optionsLoaded += "<h4>" + options[optionNumber] + "</h4><br/>"
                         }
 
-                        $('#datao').append(
-                            "<h1>" + questions[i] + "</h1><br/>" + optionsLoad
+                        $('#formData').append(
+                            "<h1>" + questions[questionNumber]['question'] + "</h1><br/>" + optionsLoaded
                         );
 
-                        optionsLoad = "";
+                        optionsLoaded = "";
                     }
-                }
-                else{
-
-                    $('#datao').html("Sorry ! No such record exists");
 
                 }
+
                 $('#myModal').modal('toggle');
 
             },
             error: function (er) {
 
-                $('#datao').html("Sorry ! No such record exists");
+                $('#formData').html("Sorry ! unable to load feedback form template");
                 $('#myModal').modal('toggle');
             }
 

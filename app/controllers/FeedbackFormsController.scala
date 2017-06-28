@@ -8,6 +8,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsString, JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
+import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -56,6 +57,8 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
+  implicit val questionFormat = Json.format[Question]
+  implicit val feedbackFormat = Json.format[FeedbackForm]
 
   val usersRepo = usersRepository
 
@@ -112,25 +115,17 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     (request.body \ "id").asOpt[String].fold {
       Logger.error(s"Received a bad request form id to update not found")
       Future.successful(BadRequest("Malformed data!"))
-    }{ id =>
+    } { id =>
       feedbackRepository
         .getByFeedbackFormId(id)
         .map {
-          case Some(feedForm: FeedbackForm) => Ok(JSONBuilder(feedForm))
+          case Some(feedForm: FeedbackForm) =>
+            val json = s"""{"status":${Json.toJson(feedForm).toString}}"""
+            println("==>" + json)
+            Ok(json)
           case None => Ok("""{"status":"failure"}""")
         }
     }
-  }
-
-  def JSONBuilder(feedForm: FeedbackForm): String = {
-    def builder(questions: List[Question], question: List[String], options:List[String]): String= {
-      questions match {
-        case Nil => s"""{"status":"success","name":"${feedForm.name}","ques":[${question.mkString(",")}],${options.mkString(",")}}"""
-        case head :: tail =>  builder(tail,
-                              question:+s""""${head.question}"""",options :+ s""""${head.question}":[${head.options.map(option => s""""$option"""").mkString(",")}]""")
-      }
-    }
-    builder(feedForm.questions,Nil, Nil)
   }
 
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>

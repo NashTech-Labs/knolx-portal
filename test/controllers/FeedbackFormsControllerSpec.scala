@@ -309,16 +309,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Malformed data!"
     }
 
-    "build json from case class" in new WithTestApplication{
-      val questions =Question("how is knolx portal?",List("awesome","i can do it better"))
-
-      val expectedJson = """{"status":"success","name":"test","ques":["how is knolx portal?"],"how is knolx portal?":["awesome","i can do it better"]}"""
-      val feedbackForm = FeedbackForm("test", List(questions), true, BSONObjectID("5943cdd60900000900409b26"))
-
-      val result = controller.JSONBuilder(feedbackForm)
-      result  must be equalTo expectedJson
-    }
-
   }
 
 }

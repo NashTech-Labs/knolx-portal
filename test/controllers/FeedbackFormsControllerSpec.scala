@@ -210,61 +210,59 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
-      feedbackFormsRepository.update(any[String],any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+      feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
 
-      val request = FakeRequest(POST, "/feedbackform/update").withBody(Json.parse(
-        """
-          |{"id":"5943cdd60900000900409b26","name":"title","questions":
-          |[{"question":"question?","options":["option","option"]}]}
-          |""".stripMargin))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.updateFeedbackForm()(request)
+
       status(response) must be equalTo OK
       contentAsString(response) must be equalTo "Feedback form successfully updated!"
     }
 
     "update feedback form is malformed with options missing" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val request = FakeRequest(POST, "/feedbackform/update").withBody(Json.parse(
-        """
-          |{"id":"5943cdd60900000900409b26","name":"test","questions":
-          |[{"question":"question?","options":[]}]}
-          |""".stripMargin))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"test","questions":[{"question":"question?","options":[]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.updateFeedbackForm()(request)
+
       status(response) must be equalTo BAD_REQUEST
       contentAsString(response) must be equalTo "Question must require at least 1 option!"
     }
-    "update feedback form not updated internal server error" in new WithTestApplication {
 
+    "update feedback form not updated internal server error" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
-      feedbackFormsRepository.update(any[String],any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+      feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
 
-      val request = FakeRequest(POST, "/feedbackform/update").withBody(Json.parse(
-        """
-          |{"id":"","name":"title","questions":
-          |[{"question":"question?","options":["option","option"]}]}
-          |""".stripMargin))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.updateFeedbackForm()(request)
       status(response) must be equalTo INTERNAL_SERVER_ERROR
       contentAsString(response) must be equalTo "Something went wrong!"
     }
 
-    "build json from case class" in new WithTestApplication{
-      val questions =Question("how is knolx portal?",List("awesome","i can do it better"))
+    "build json from case class" in new WithTestApplication {
+      val questions = Question("how is knolx portal?", List("awesome", "i can do it better"))
 
-      val feedbackForm = FeedbackForm("test", List(questions), true, BSONObjectID("5943cdd60900000900409b26"))
+      val feedbackForm = FeedbackForm("test", List(questions), active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
 
       val result = controller.jsonCountBuilder(feedbackForm)
-      result  must be equalTo """{"0":"2"}"""
+      result must be equalTo """{"0":"2"}"""
     }
 
   }

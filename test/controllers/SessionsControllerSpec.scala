@@ -246,19 +246,46 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
-
-      val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
-      val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-      val sessionDateString = simpleDateFormat.format(sessionDate)
+      dateTimeUtility.startOfDayMillis returns System.currentTimeMillis()
 
       val result =
         controller.createSession(FakeRequest(POST, "create")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("email" -> "test@example.com",
-            "date" -> "25/06/2017",
-            "session" -> "session 1",
+            "date" -> "2017-06-21T16:00",
+            "feedbackFormId" -> _id.stringify,
+            "session" -> "session",
             "topic" -> "topic",
             "meetup" -> "true"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not create session due to Invalid Email" in new WithTestApplication {
+      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      val emailObject = Future.successful(List(UserInfo("test@example.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+
+      feedbackFormsRepository.getAll returns Future(feedbackForms)
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test2@example.com") returns Future.successful(Nil)
+
+      sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+
+      val result = controller.createSession(FakeRequest(POST, "create")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("email" -> "test2@example.com",
+          "date" -> "2017-06-25T16:00",
+          "session" -> "session 1",
+          "feedbackFormId" -> "feedbackFormId",
+          "topic" -> "topic",
+          "meetup" -> "true"))
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -279,6 +306,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("email" -> "test@example.com",
             "date" -> sessionDateString,
+            "feedbackFormId" -> _id.stringify,
             "session" -> "session 1",
             "topic" -> "topic",
             "meetup" -> "true"))
@@ -370,7 +398,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     "not update session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
 
-
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
       val emailObject = Future.successful(List(UserInfo("test@example.com",
@@ -392,10 +419,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "topic" -> "topic",
           "meetup" -> "true"))
 
-
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
-
 
     "not update session due to BadFormRequest" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
@@ -407,11 +432,12 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
+      dateTimeUtility.startOfDayMillis returns System.currentTimeMillis()
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("sessionId" -> _id.stringify,
-          "date" -> "25/06/2017",
+          "date" -> "2017-06-21T16:00",
           "session" -> "session",
           "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
@@ -434,13 +460,13 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> sessionDateString,
+            "feedbackFormId" -> _id.stringify,
             "session" -> "session 1",
             "topic" -> "topic",
             "meetup" -> "true"))
 
       status(result) must be equalTo UNAUTHORIZED
     }
-
   }
 
 }

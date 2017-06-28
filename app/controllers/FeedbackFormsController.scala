@@ -1,10 +1,10 @@
 package controllers
 
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 
-import models.{Question, FeedbackForm, FeedbackFormsRepository, UsersRepository}
+import models.{FeedbackForm, FeedbackFormsRepository, Question, UsersRepository}
 import play.api.Logger
-import play.api.i18n.{MessagesApi, I18nSupport}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -87,7 +87,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
 
-      val formValid =
+      val formValid = feedbackFormInformation.validateName orElse
         feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
       formValid.fold {

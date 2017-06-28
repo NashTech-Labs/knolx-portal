@@ -9,7 +9,7 @@ import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
-import play.api.libs.mailer.MailerClient
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{FakeRequest, Helpers, _}
 import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.DefaultWriteResult
@@ -100,6 +100,20 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Malformed data!"
     }
 
+    "not create feedback form because name is empty" in new WithTestApplication {
+      val payload = """{"name":"","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
+
+      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.createFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Form name must not be empty!"
+    }
+
     "not create feedback form because question value is empty" in new WithTestApplication {
       val payload = """{"name":"Test Form","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
 
@@ -178,6 +192,23 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       status(response) must be equalTo SEE_OTHER
     }
-  }
 
+    "send feedback form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val email = Email(subject = "Knolx Feedback Form",
+        from = "sidharth@knoldus.com",
+        to = List("sidharth@knoldus.com"),
+        bodyHtml = None,
+        bodyText = Some("Hello World"), replyTo = None)
+      mailerClient.send(email) returns ""
+
+      val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+  }
 }
+

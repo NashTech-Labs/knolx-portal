@@ -158,7 +158,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, jsonCountBuilder(feedForm)))
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
         case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }

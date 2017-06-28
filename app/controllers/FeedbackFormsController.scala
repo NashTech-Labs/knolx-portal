@@ -108,19 +108,30 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-
-
   def getFeedbackFormPreview: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
-    println("================>" + (request.body \ "id").asOpt[String])
     (request.body \ "id").asOpt[String].fold {
       Logger.error(s"Received a bad request form id to update not found")
       Future.successful(BadRequest("Malformed data!"))
-    }{ data =>
-    Future.successful(Ok("""{"name":"ankit"}"""))
+    }{ id =>
+      feedbackRepository
+        .getByFeedbackFormId(id)
+        .map {
+          case Some(feedForm: FeedbackForm) => Ok(JSONBuilder(feedForm))
+          case None => Ok("""{"status":"failure"}""")
+        }
     }
   }
 
-
+  def JSONBuilder(feedForm: FeedbackForm): String = {
+    def builder(questions: List[Question], question: List[String], options:List[String]): String= {
+      questions match {
+        case Nil => s"""{"status":"success","name":"${feedForm.name}","ques":[${question.mkString(",")}],${options.mkString(",")}}"""
+        case head :: tail =>  builder(tail,
+                              question:+s""""${head.question}"""",options :+ s""""${head.question}":[${head.options.map(option => s""""$option"""").mkString(",")}]""")
+      }
+    }
+    builder(feedForm.questions,Nil, Nil)
+  }
 
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
     val email =
@@ -139,12 +150,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, JSONBuilder(feedForm)))
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, JSONCountBuilder(feedForm)))
         case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
-  def JSONBuilder(feedForm: FeedbackForm): String = {
+  def JSONCountBuilder(feedForm: FeedbackForm): String = {
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil => json

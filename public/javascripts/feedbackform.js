@@ -56,7 +56,6 @@ function createForm() {
             contentType: 'application/json',
             data: JSON.stringify(feedbackForm),
             success: function (data) {
-                alert("hello0" + data);
                 window.location = "/feedbackform/manage?pageNumber=1";
                 alert("Form Sucessfully Created !")
             },

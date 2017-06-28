@@ -177,7 +177,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
-      status(response) must be equalTo INTERNAL_SERVER_ERROR
+      status(response) must be equalTo SEE_OTHER
     }
 
     "send form asked to update to feedback update page" in new WithTestApplication {
@@ -258,13 +258,65 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Something went wrong!"
     }
 
-    "build json from case class" in new WithTestApplication{
+    "build json from case class counts" in new WithTestApplication{
       val questions =Question("how is knolx portal?",List("awesome","i can do it better"))
 
       val feedbackForm = FeedbackForm("test", List(questions), true, BSONObjectID("5943cdd60900000900409b26"))
 
-      val result = controller.JSONBuilder(feedbackForm)
+      val result = controller.JSONCountBuilder(feedbackForm)
       result  must be equalTo """{"0":"2"}"""
+    }
+
+    "generate feedback form preview for success" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
+
+      val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":"5943cdd60900000900409b26"}"""))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.getFeedbackFormPreview(request)
+      status(response) must be equalTo OK
+    }
+
+    "generate feedback form preview for failure" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
+
+      val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":"5943cdd60900000900409b26"}"""))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.getFeedbackFormPreview(request)
+      status(response) must be equalTo OK
+      contentAsString(response) must be equalTo """{"status":"failure"}"""
+    }
+
+    "generate feedback form preview for badrequest" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":null}"""))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.getFeedbackFormPreview(request)
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed data!"
+    }
+
+    "build json from case class" in new WithTestApplication{
+      val questions =Question("how is knolx portal?",List("awesome","i can do it better"))
+
+      val expectedJson = """{"status":"success","name":"test","ques":["how is knolx portal?"],"how is knolx portal?":["awesome","i can do it better"]}"""
+      val feedbackForm = FeedbackForm("test", List(questions), true, BSONObjectID("5943cdd60900000900409b26"))
+
+      val result = controller.JSONBuilder(feedbackForm)
+      result  must be equalTo expectedJson
     }
 
   }

@@ -3,11 +3,11 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormat._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,6 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+
 
 case class Question(question: String, options: List[String])
 
@@ -29,6 +30,13 @@ object FeedbackFormat {
 
   implicit val questionFormat = Json.format[Question]
   implicit val feedbackFormat = Json.format[FeedbackForm]
+
+  implicit object QuestionWriter extends BSONDocumentWriter[Question] {
+    def write(ques: Question): BSONDocument = BSONDocument(
+      "question" -> ques.question,
+      "options" -> ques.options)
+  }
+
 }
 
 class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
@@ -37,13 +45,24 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   val pageSize = 10
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
-
   def insert(feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .insert(feedbackData))
+
+  def update(id: String, feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "name" -> feedbackData.name,
+        "questions" -> feedbackData.questions,
+        "active" -> feedbackData.active)
+    )
+
+    collection.flatMap(jsonCollection =>
+      jsonCollection.update(selector, modifier))
+  }
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
     collection
@@ -64,6 +83,14 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[FeedbackForm](ReadPreference.Primary)
           .headOption)
 
+  def getByFeedbackFormJsonId(feedbackFormId: String): Future[Option[JsObject]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
+          .cursor[JsObject](ReadPreference.Primary)
+          .headOption)
+
   def getAll(implicit ex: ExecutionContext): Future[List[FeedbackForm]] =
     collection
       .flatMap(jsonCollection =>
@@ -71,6 +98,8 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("active" -> true))
           .cursor[FeedbackForm](ReadPreference.primary)
           .collect[List]())
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
 
   def paginate(pageNumber: Int)(implicit ex: ExecutionContext): Future[List[FeedbackForm]] = {
     val skipN = (pageNumber - 1) * pageSize

@@ -50,23 +50,23 @@
 }
 
 .feedtitle {
-    height: 70px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
     margin-bottom: 20px;
     line-height: 67px;
     border: none;
 }
 
-#formName {
+#formName{
     border: none;
     outline: none;
     font-size: 20px;
     font-family: 'gothic';
     letter-spacing: 2px;
-    width: 100%;
+    width: 85%;
     text-align: center;
     color: #2980B9;
     font-weight: bold;
+    margin-left: 7.5%;
 }
 
 input#formName:focus {
@@ -93,7 +93,7 @@ input#formName:focus {
     border: none;
     width: 100%;
     outline: none;
-    border-bottom: 1px solid #dcdcdc;
+    border-bottom: 1px dotted #dcdcdc;
     font-size: 18px;
     font-family: 'gothic';
     letter-spacing: 2px;
@@ -180,19 +180,33 @@ a.fa.fa-times-circle.xmen:hover {
     margin-bottom: 10px;
     line-height: 40px;
     border: none;
-    width: 89%;
+    width: 80%;
     outline: none;
-    border-bottom: 1px solid #dcdcdc;
+    border-bottom: 1px dotted #dcdcdc;
     font-size: 20px;
     font-family: 'gothic';
     letter-spacing: 2px;
     text-align: center;
     color: #EC7063;
     font-weight: bold;
-    margin-left: 20px;
+    margin-left: 10%;
 }
 
 i.fa.fa-trash-o.delQuestion {
     font-size: 30px;
-    color: #F1948A
+    color: #F1948A;
+}
+
+.delForm {
+    font-size: 30px;
+    color: #F1948A;
+    cursor: pointer;
+    text-shadow: 0px 0px 3px #eee;
+    text-align:center;
+
+}
+
+a.fa.fa-trash.delForm:hover {
+    text-decoration: none;
+    color: #F1948A;
 }

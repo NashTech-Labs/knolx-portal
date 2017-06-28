@@ -84,14 +84,6 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[FeedbackForm](ReadPreference.Primary)
           .headOption)
 
-  def getByFeedbackFormJsonId(feedbackFormId: String): Future[Option[JsObject]] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
-          .cursor[JsObject](ReadPreference.Primary)
-          .headOption)
-
   def getAll(implicit ex: ExecutionContext): Future[List[FeedbackForm]] =
     collection
       .flatMap(jsonCollection =>

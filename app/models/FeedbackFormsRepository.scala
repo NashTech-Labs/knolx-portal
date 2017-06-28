@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormat._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
@@ -81,6 +81,14 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
           .cursor[FeedbackForm](ReadPreference.Primary)
+          .headOption)
+
+  def getByFeedbackFormJsonId(feedbackFormId: String): Future[Option[JsObject]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
+          .cursor[JsObject](ReadPreference.Primary)
           .headOption)
 
   def getAll(implicit ex: ExecutionContext): Future[List[FeedbackForm]] =

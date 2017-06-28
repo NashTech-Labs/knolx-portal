@@ -108,6 +108,20 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
+
+
+  def getFeedbackFormPreview: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
+    println("================>" + (request.body \ "id").asOpt[String])
+    (request.body \ "id").asOpt[String].fold {
+      Logger.error(s"Received a bad request form id to update not found")
+      Future.successful(BadRequest("Malformed data!"))
+    }{ data =>
+    Future.successful(Ok("""{"name":"ankit"}"""))
+    }
+  }
+
+
+
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
     val email =
       Email(subject = "Knolx Feedback Form",

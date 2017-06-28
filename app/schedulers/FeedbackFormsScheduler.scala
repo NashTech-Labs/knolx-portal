@@ -18,9 +18,11 @@ object FeedbackFormsScheduler {
 
   case object RefreshFeedbackFormSchedulers
 
+  case object GetScheduledFeedbackForms
+
   case class RemoveFeedbackFormScheduler(sessionId: String)
 
-  private[schedulers] case class ScheduleFeedbackFormsForToday(originalSender: ActorRef, sessionsFuture: Future[List[SessionInfo]])
+  private[schedulers] case class ScheduleFeedbackFormsForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
 
   private[schedulers] case class ScheduleFeedbackForms(originalSender: ActorRef)
 
@@ -34,6 +36,8 @@ object FeedbackFormsScheduler {
 
   case object NotRestarted extends FeedbackFormSchedulerResponses
 
+  case class ScheduledFeedbackForms(feedbackForms: List[String])
+
   val ToEmail = "sidharth@knoldus.com"
   val FromEmail = "sidharth@knoldus.com"
 }
@@ -43,7 +47,7 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                        mailerClient: MailerClient,
                                        dateTimeUtility: DateTimeUtility) extends Actor {
 
-  var feedbackFormsSchedulers: Map[String, Cancellable] = Map.empty
+  var scheduledFeedbackForms: Map[String, Cancellable] = Map.empty
 
   override def preStart(): Unit = {
     val millis = dateTimeUtility.nowMillis
@@ -72,7 +76,7 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
       emailHandler
 
   def initializationHandler: PartialFunction[Any, Unit] = {
-    case StartFeedbackFormsScheduler(initialDelay, interval)           =>
+    case StartFeedbackFormsScheduler(initialDelay, interval)             =>
       Logger.info(s"Configuring feedback forms scheduler to run every day")
 
       scheduler.schedule(
@@ -81,45 +85,49 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
         receiver = self,
         message = ScheduleFeedbackForms
       )(context.dispatcher)
-    case ScheduleFeedbackFormsForToday(originalSender, sessionsFuture) =>
+    case ScheduleFeedbackFormsForToday(originalSender, eventualSessions) =>
       Logger.info(s"Configuring feedback form schedulers for today's sessions")
-      val feedbackFormsSchedulersFuture = scheduleFeedbackForms(sessionsFuture)
+      val feedbackFormsSchedulersFuture = scheduleFeedbackForms(eventualSessions)
 
       feedbackFormsSchedulersFuture foreach { feedbackSchedulers =>
-        feedbackFormsSchedulers = feedbackFormsSchedulers ++ feedbackSchedulers
+        scheduledFeedbackForms = scheduledFeedbackForms ++ feedbackSchedulers
 
-        originalSender ! feedbackFormsSchedulers.size
+        originalSender ! scheduledFeedbackForms.size
       }
   }
 
   def schedulingHandler: PartialFunction[Any, Unit] = {
     case ScheduleFeedbackForms(originalSender) =>
       Logger.info(s"Starting schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
-      val sessionsFuture =
+      val eventualSessions =
         sessionsRepository.sessionsScheduledToday map { sessions =>
           sessions collect { case session
             if new Date(session.date.value).after(new Date(dateTimeUtility.nowMillis)) => session
           }
         }
-      val feedbackFormsSchedulersFuture = scheduleFeedbackForms(sessionsFuture)
+      val feedbackFormsSchedulersFuture = scheduleFeedbackForms(eventualSessions)
 
       feedbackFormsSchedulersFuture foreach { feedbackSchedulers =>
-        feedbackFormsSchedulers = feedbackFormsSchedulers ++ feedbackSchedulers
+        scheduledFeedbackForms = scheduledFeedbackForms ++ feedbackSchedulers
 
-        originalSender ! feedbackFormsSchedulers.size
+        originalSender ! scheduledFeedbackForms.size
       }
+    case GetScheduledFeedbackForms             =>
+      Logger.info(s"Following feedback forms are scheduled ${scheduledFeedbackForms.keys}")
+
+      sender ! ScheduledFeedbackForms(scheduledFeedbackForms.keys.toList)
   }
 
   def reconfigurationHandler: PartialFunction[Any, Unit] = {
     case RefreshFeedbackFormSchedulers          =>
-      Logger.info(s"Feedback forms in memory before refreshing $feedbackFormsSchedulers")
+      Logger.info(s"Feedback forms in memory before refreshing $scheduledFeedbackForms")
       Logger.info(s"Refreshing schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
-      val cancelled = feedbackFormsSchedulers.forall { case (_, cancellable) => cancellable.cancel }
+      val cancelled = scheduledFeedbackForms.forall { case (_, cancellable) => cancellable.cancel }
 
-      if (feedbackFormsSchedulers.isEmpty || (feedbackFormsSchedulers.nonEmpty && cancelled)) {
-        val sessionsFuture = sessionsRepository.sessionsScheduledToday
-        val feedbackFormsSchedulersFuture = scheduleFeedbackForms(sessionsFuture)
-        feedbackFormsSchedulersFuture foreach { feedbackSchedulers => feedbackFormsSchedulers = feedbackSchedulers }
+      if (scheduledFeedbackForms.isEmpty || (scheduledFeedbackForms.nonEmpty && cancelled)) {
+        val eventualSessionInfoes = sessionsRepository.sessionsScheduledToday
+        val eventualFormSchedulers = scheduleFeedbackForms(eventualSessionInfoes)
+        eventualFormSchedulers foreach { feedbackSchedulers => scheduledFeedbackForms = feedbackSchedulers }
 
         sender ! Restarted
       } else {
@@ -128,14 +136,14 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
     case RemoveFeedbackFormScheduler(sessionId) =>
       Logger.info(s"Removing feedback form scheduler for session $sessionId")
 
-      feedbackFormsSchedulers.get(sessionId).exists(_.cancel) match {
+      scheduledFeedbackForms.get(sessionId).exists(_.cancel) match {
         case true  => Logger.info(s"Feedback form scheduler for session $sessionId successfully cancelled")
         case false => Logger.info(s"Feedback form scheduler for session $sessionId was already cancelled")
       }
 
-      feedbackFormsSchedulers = feedbackFormsSchedulers - sessionId
+      scheduledFeedbackForms = scheduledFeedbackForms - sessionId
 
-      sender ! feedbackFormsSchedulers.size
+      sender ! scheduledFeedbackForms.size
   }
 
   def emailHandler: PartialFunction[Any, Unit] = {
@@ -154,16 +162,16 @@ class FeedbackFormsScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.info(s"Email for session ${session.session} sent result $emailSent")
   }
 
-  private def scheduleFeedbackForms(sessionsDateFuture: Future[List[SessionInfo]]): Future[Map[String, Cancellable]] = {
-    sessionsDateFuture flatMap { sessions =>
+  private def scheduleFeedbackForms(eventualSessions: Future[List[SessionInfo]]): Future[Map[String, Cancellable]] = {
+    eventualSessions flatMap { sessions =>
       Logger.info(s"Scheduling sessions today booked at ${sessions.map(session => new Date(session.date.value))}")
 
       Future.sequence {
         sessions map { session =>
-          val feedbackFormFuture = feedbackFormsRepository.getByFeedbackFormId(session.feedbackFormId)
+          val eventualMaybeFeedbackForm = feedbackFormsRepository.getByFeedbackFormId(session.feedbackFormId)
           val delay = (session.date.value - dateTimeUtility.nowMillis).milliseconds
 
-          feedbackFormFuture map { maybeFeedbackForm =>
+          eventualMaybeFeedbackForm map { maybeFeedbackForm =>
             maybeFeedbackForm.fold[Option[(String, Cancellable)]] {
               Logger.error(s"Something went wrong while getting feedback ${session.feedbackFormId}")
               None

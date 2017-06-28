@@ -8,7 +8,7 @@ import com.google.inject.{AbstractModule, Module}
 import helpers.BeforeAllAfterAll
 import play.api.Application
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import schedulers.FeedbackFormsScheduler.{RefreshFeedbackFormSchedulers, Restarted}
+import schedulers.FeedbackFormsScheduler.{ScheduledFeedbackForms, GetScheduledFeedbackForms, RefreshFeedbackFormSchedulers, Restarted}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -57,6 +57,7 @@ trait TestEnvironment extends BeforeAllAfterAll {
   private class DummyFeedbackFormsScheduler extends Actor {
     def receive: Receive = {
       case RefreshFeedbackFormSchedulers => sender ! Restarted
+      case GetScheduledFeedbackForms     => sender ! ScheduledFeedbackForms(List.empty)
     }
   }
 

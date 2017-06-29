@@ -1,7 +1,7 @@
 .updateField {
     width: 100%;
     border: none;
-    border-bottom: 2px solid #CACFD2;
+    border-bottom: 2px dotted #CACFD2;
     font-family: 'gothic';
     font-size: 18px;
     color: #566573;
@@ -15,7 +15,7 @@
 }
 
 .update-outer {
-    height: 490px;
+    height: 560px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
 }
@@ -118,3 +118,4 @@ label {
     text-align: center;
     font-size: 16px;
 }
+

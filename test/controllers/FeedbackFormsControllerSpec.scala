@@ -1,6 +1,5 @@
 package controllers
 
-import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
@@ -9,27 +8,24 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
-import play.api.{Environment, Configuration, Application}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.libs.mailer.MailerClient
-import play.api.test.{FakeApplication, FakeRequest, Helpers, _}
+import play.api.libs.mailer.{Email, MailerClient}
+import play.api.test.{FakeRequest, Helpers, _}
+import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.DefaultWriteResult
 import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
+class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
 
-  abstract class WithTestApplication(val app: Application = FakeApplication()) extends Around with Scope with ShouldThrownExpectations with Mockito {
-    implicit def implicitApp: play.api.Application = app
+  private val _id: BSONObjectID = BSONObjectID.generate()
+  private val emailObject = Future.successful(List(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-    implicit def implicitMaterializer: Materializer = app.materializer
-
-    def this(builder: GuiceApplicationBuilder => GuiceApplicationBuilder) = this(builder(GuiceApplicationBuilder()).build())
-
-    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
+  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
+    with Scope with ShouldThrownExpectations with Mockito {
 
     val mailerClient = mock[MailerClient]
     val usersRepository: UsersRepository = mock[UsersRepository]
@@ -39,11 +35,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 
     val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
-  }
 
-  private val _id: BSONObjectID = BSONObjectID.generate()
-  private val emailObject = Future.successful(List(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
+  }
 
   "Feedback controller" should {
 
@@ -54,7 +48,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
-      contentAsString(response) must contain("""<title>Create Feedback Form</title>""")
+      contentAsString(response) must contain("""formName""")
     }
 
     "create feedback form" in new WithTestApplication {
@@ -105,6 +99,20 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
 
       status(response) must be equalTo BAD_REQUEST
       contentAsString(response) must be equalTo "Malformed data!"
+    }
+
+    "not create feedback form because name is empty" in new WithTestApplication {
+      val payload = """{"name":"","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
+
+      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.createFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Form name must not be empty!"
     }
 
     "not create feedback form because question value is empty" in new WithTestApplication {
@@ -160,7 +168,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
       val response = controller.manageFeedbackForm(1)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
-      contentAsString(response) must contain("""<td>form name</td>""")
+      contentAsString(response) must contain("""feedouters""")
     }
 
     "delete feedback form" in new WithTestApplication {
@@ -170,7 +178,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val response = controller.delete("5943cdd60900000900409b26")(FakeRequest()
+      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo SEE_OTHER
@@ -180,11 +188,172 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val response = controller.delete("5943cdd60900000900409b26")(FakeRequest()
+      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo SEE_OTHER
     }
-  }
 
+    "send form asked to update to feedback update page" in new WithTestApplication {
+
+      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
+
+      val response = controller.update("5943cdd60900000900409b26")(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+    "Feedback Form asked to update not found" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
+
+      val response = controller.update("5943cdd60900000900409b26")(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo SEE_OTHER
+    }
+
+
+    "update feedback form" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo OK
+      contentAsString(response) must be equalTo "Feedback form successfully updated!"
+    }
+
+    "not update feedback form due to malformed data" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """[{"question":"question?","options":["option","option"]}]""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed data!"
+    }
+
+    "not update feedback form due to malformed data with options missing" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"test","questions":[{"question":"question?","options":[]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+    }
+
+    "not update feedback form due to malformed data when name is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Form name must not be empty!"
+    }
+
+    "not update feedback form due to malformed data when question is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Question must not be empty!"
+    }
+
+    "not update feedback form due to malformed data when option value is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Options must not be empty!"
+    }
+
+    "update feedback form not updated internal server error" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+      status(response) must be equalTo INTERNAL_SERVER_ERROR
+      contentAsString(response) must be equalTo "Something went wrong!"
+    }
+
+    "build json from case class" in new WithTestApplication {
+      val questions = Question("how is knolx portal?", List("awesome", "i can do it better"))
+
+      val feedbackForm = FeedbackForm("test", List(questions), active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
+      val result = controller.jsonCountBuilder(feedbackForm)
+      result must be equalTo """{"0":"2"}"""
+    }
+
+    "send feedback form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val email = Email(subject = "Knolx Feedback Form",
+        from = "sidharth@knoldus.com",
+        to = List("sidharth@knoldus.com"),
+        bodyHtml = None,
+        bodyText = Some("Hello World"), replyTo = None)
+      mailerClient.send(email) returns ""
+
+      val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+  }
 }
+

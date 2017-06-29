@@ -1,0 +1,82 @@
+.feedbackformcontainer {
+    background-color: #fff;
+    color: #000;
+    margin-top: 100px;
+    background-color: #FFF;
+    box-shadow: 0 4px 6px -5px #333;
+    padding: 0px 0px;
+   // padding-bottom: 50px;
+    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 2s; /* Firefox < 16 */
+    -ms-animation: fadein 2s; /* Internet Explorer */
+    -o-animation: fadein 2s; /* Opera < 12.1 */
+    animation: fadein 2s;
+    border-radius: 30px;
+}
+
+.feedouters {
+    padding: 30px 0px 30px 0px;
+}
+
+.feedform {
+
+    width: 12em;
+    height: 12em;
+    float: none;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.feedformupper {
+    width: 70%;
+    height: 70%;
+    float: none;
+    margin: 0 auto;
+    background-image: url('../images/file.png');
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.feedformlower {
+    width: 100%;
+    float: none;
+    margin: 0 auto;
+    text-align: center;
+    overflow: hidden;
+    font-family: 'gothic';
+    font-size: 20px;
+    color: #27AE60;
+}
+
+.feedform:hover {
+    box-shadow: 0 4px 6px -5px #333;
+}
+
+.newfeedbtn {
+    height: 80px;
+    line-height: 75px;
+}
+
+.infofeed {
+    height: 80px;
+}
+
+.btn-create-feed {
+    padding: 5px 15px 5px 15px;
+    background-color:rgb(125, 158, 192);
+    border: 2px solid #fff;
+    font-size: 15px;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 4px 5px -5px #333;
+}
+
+a.btn.btn-sm.btn-primary.btn-create-feed:hover {
+    background-color: rgb(125, 158, 192);
+}
+
+

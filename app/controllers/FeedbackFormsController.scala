@@ -1,10 +1,10 @@
 package controllers
 
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
 
-import models.{Question, FeedbackForm, FeedbackFormsRepository, UsersRepository}
+import models.{FeedbackForm, FeedbackFormsRepository, Question, UsersRepository}
 import play.api.Logger
-import play.api.i18n.{MessagesApi, I18nSupport}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -14,7 +14,38 @@ import scala.concurrent.Future
 
 case class QuestionInformation(question: String, options: List[String])
 
-case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation])
+case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation]) {
+
+  def validateName: Option[String] =
+    if (name.nonEmpty) {
+      None
+    } else {
+      Some("Form name must not be empty!")
+    }
+
+  def validateForm: Option[String] =
+    if (questions.flatMap(_.options).nonEmpty) {
+      None
+    } else {
+      Some("Question must require at least 1 option!")
+    }
+
+  def validateQuestion: Option[String] =
+    if (!questions.map(_.question).contains("")) {
+      None
+    } else {
+      Some("Question must not be empty!")
+    }
+
+  def validateOptions: Option[String] =
+    if (!questions.flatMap(_.options).contains("")) {
+      None
+    } else {
+      Some("Options must not be empty!")
+    }
+
+
+}
 
 case class FeedbackFormInformation(name: String, questions: List[QuestionInformation]) {
 
@@ -56,6 +87,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
+  implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 
   val usersRepo = usersRepository
 
@@ -86,9 +118,8 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       Logger.error(s"Received a bad request while creating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
-
-      val formValid =
-        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+      val formValid = feedbackFormInformation.validateName orElse feedbackFormInformation.validateForm orElse
+        feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
       formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
@@ -109,16 +140,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def delete(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
-    feedbackRepository
-      .delete(id)
-      .map(_.fold {
-        Logger.error(s"Could not delete feddback form for id, $id")
-        Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
-      }(_ =>
-        Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form deleted successfully")))
-  }
-
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
     val email =
       Email(subject = "Knolx Feedback Form",
@@ -130,5 +151,66 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     val emailSent = mailerClient.send(email)
 
     Ok(emailSent)
+  }
+
+  def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    feedbackRepository
+      .getByFeedbackFormId(id)
+      .map {
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+      }
+  }
+
+  def jsonCountBuilder(feedForm: FeedbackForm): String = {
+
+    def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
+      questions match {
+        case Nil          => json
+        case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
+      }
+    }
+
+    s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
+  }
+
+  def updateFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
+    request.body.validate[UpdateFeedbackFormInformation].asOpt.fold {
+      Logger.error(s"Received a bad request while updating feedback form, ${request.body}")
+      Future.successful(BadRequest("Malformed data!"))
+    } { feedbackFormInformation =>
+      val validatedForm =
+        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse
+          feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+
+      validatedForm.fold {
+        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+
+        feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
+          if (result.ok) {
+            Logger.info(s"Feedback form successfully updated")
+            Ok("Feedback form successfully updated!")
+          } else {
+            Logger.error(s"Something went wrong when updated a feedback")
+            InternalServerError("Something went wrong!")
+          }
+        }
+      } { errorMessage =>
+        Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
+        Future.successful(BadRequest(errorMessage))
+      }
+    }
+  }
+
+  def deleteFeedbackForm(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    feedbackRepository
+      .delete(id)
+      .flatMap(_.fold {
+        Logger.error(s"Failed to delete knolx feedback form with id $id")
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("errormessage" -> "Something went wrong!"))
+      } { sessionJson =>
+        Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
+      })
   }
 }

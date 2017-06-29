@@ -1,6 +1,5 @@
 package controllers
 
-import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import models.{UserInfo, UsersRepository}
 import org.specs2.execute.{AsResult, Result}
@@ -9,7 +8,6 @@ import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test._
 import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
@@ -18,15 +16,10 @@ import reactivemongo.bson.BSONObjectID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class UsersControllerSpec extends PlaySpecification with Mockito {
+class UsersControllerSpec extends PlaySpecification with TestEnvironment {
 
-  abstract class WithTestApplication(val app: Application = FakeApplication()) extends Around with Scope with ShouldThrownExpectations with Mockito {
-    implicit def implicitApp: play.api.Application = app
-
-    implicit def implicitMaterializer: Materializer = app.materializer
-
-    def this(builder: GuiceApplicationBuilder => GuiceApplicationBuilder) = this(builder(GuiceApplicationBuilder()).build())
-
+  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
+    with Scope with ShouldThrownExpectations with Mockito {
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
 
     val config = Configuration(ConfigFactory.load("application.conf"))
@@ -124,14 +117,43 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo BAD_REQUEST
     }
 
+    "not create user when password length is less than 8" in new WithTestApplication {
+      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", active = true, admin = false, _id)))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.createUser(FakeRequest(POST, "create")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("email" -> "test@example.com",
+          "password" -> "test",
+          "confirmPassword" -> "test"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not create user when password and confirm password does not match" in new WithTestApplication {
+      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", active = true, admin = false, _id)))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.createUser(FakeRequest(POST, "create")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody("email" -> "test@example.com",
+          "password" -> "test1234",
+          "confirmPassword" -> "test12345"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
     "login user when he is an admin" in new WithTestApplication {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.loginUser(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=",
+          "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
         .withFormUrlEncodedBody("email" -> "test@example.com",
           "password" -> "12345678"))
 
@@ -152,7 +174,6 @@ class UsersControllerSpec extends PlaySpecification with Mockito {
 
       status(result) must be equalTo SEE_OTHER
     }
-
 
     "not login when user is not found" in new WithTestApplication {
       val emailObject = Future.successful(List.empty)

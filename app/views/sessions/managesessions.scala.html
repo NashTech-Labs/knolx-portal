@@ -1,72 +1,91 @@
 @(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_], flash: Flash)
 
-    @main("Manage Sessions") {
+@main("Manage Sessions") {
 
-        <div class="row">
-            <div class="col-md-1" >
+    <div class="row">
+        <div class="col-md-1" >
 
-            </div>
-            <div class="col-md-10 " >
-                <div class="container-fluid" style="margin-top: 74px ;">
+        </div>
+        <div class="col-md-10 " >
+            <div class="container-fluid" style="margin-top:74px ;"></div>
+            @if(!flash.isEmpty) {
+                <div class="alert alert-success  alert-dismissable">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Success!</strong> @flash.get("message").fold("")(message => message)
                 </div>
-                @if(!flash.isEmpty) {
-                    <div class="alert alert-success  alert-dismissable">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        <strong>Success!</strong> @flash.get("message").fold("")(message => message)
-                    </div>
-                }
-                <div class="table-responsive manageSession">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <div class="col col-xs-6 text-right">
-                                        <a href="@routes.SessionsController.create()" class="btn btn-sm btn-primary btn-create">
-                                            <i class="fa fa-plus" aria-hidden="true"></i>
-                                            New
-                                        </a>
-                                    </div>
-                                </th>
-                                <th>Date</th>
-                                <th>Session</th>
-                                <th>Topic</th>
-                                <th>Email</th>
-                                <th>Meetup</th>
-                                <th>Cancelled</th>
-                                <th>Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @knolxSessions.map { knolxSession =>
-                            <tr>
-                                <td align="center">
-                                    <a href="@routes.SessionsController.update(knolxSession.id)" class="btn btn-default">
-                                        <em class="fa fa-pencil"></em>
+            }
+            <div class="table-responsive manageSession">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="col col-xs-6 text-right">
+                                    <a href="@routes.SessionsController.create()" class="btn btn-sm btn-primary btn-create">
+                                        <i class="fa fa-plus" aria-hidden="true"></i>
+                                        New
                                     </a>
-                                    <a href="@routes.SessionsController.deleteSession(knolxSession.id, pageNumber)" class="btn btn-danger">
-                                        <em class="fa fa-trash"></em>
-                                    </a>
-                                </td>
-                                <td>@knolxSession.date</td>
-                                <td>@knolxSession.session</td>
-                                <td>@knolxSession.topic</td>
-                                <td>@knolxSession.email</td>
-                                <td>@if(knolxSession.meetup) { Yes } else { No } </td>
-                                <td>@if(knolxSession.cancelled) { Yes } else { No } </td>
-                                <td>0<!--@knolxSession.rating--></td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-
+                                </div>
+                            </th>
+                            <th>Date</th>
+                            <th>Session</th>
+                            <th>Topic</th>
+                            <th>Email</th>
+                            <th>Meetup</th>
+                            <th>Cancelled</th>
+                            <th>Rating</th>
+                            <th>Feedback Form Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @knolxSessions.map { knolxSession =>
+                        <tr>
+                            <td align="center">
+                                <a href="@routes.SessionsController.update(knolxSession.id)" class="btn btn-default">
+                                    <em class="fa fa-pencil"></em>
+                                </a>
+                                <a href="@routes.SessionsController.deleteSession(knolxSession.id, pageNumber)" class="btn btn-danger">
+                                    <em class="fa fa-trash"></em>
+                                </a>
+                            </td>
+                            <td>@knolxSession.date</td>
+                            <td>@knolxSession.session</td>
+                            <td>@knolxSession.topic</td>
+                            <td>@knolxSession.email</td>
+                            <td>@(if(knolxSession.meetup) {
+                                "Yes"
+                            } else {
+                                "No"
+                            }) </td>
+                            <td>@(if(knolxSession.cancelled) {
+                                "Yes"
+                            } else {
+                                "No"
+                            }) </td>
+                            <td>@(if(knolxSession.rating.isEmpty) {
+                                "N/A"
+                            } else {
+                                knolxSession.rating
+                            })</td>
+                            <td> @(if(knolxSession.date.before(new java.util.Date(System.currentTimeMillis))) {
+                                "completed"
+                            } else if(knolxSession.feedbackFormScheduled) {
+                                "scheduled"
+                            } else {
+                                "pending"
+                            })</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
             </div>
 
-            <div class="col-md-1" >
-
-            </div>
         </div>
 
-        @pagination(pageNumber, pages, routes.SessionsController.manageSessions)
+        <div class="col-md-1" >
 
-    }
+        </div>
+    </div>
+
+    @pagination(pageNumber, pages, routes.SessionsController.manageSessions)
+
+}

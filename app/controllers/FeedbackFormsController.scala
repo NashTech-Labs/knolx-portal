@@ -184,7 +184,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
   def JSONCountBuilder(feedForm: FeedbackForm): String = {
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
-        case Nil          => json
+        case Nil => json
         case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
       }
     }

@@ -333,7 +333,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "build json from case class" in new WithTestApplication {
       val questions = Question("how is knolx portal?", List("awesome", "i can do it better"))
       val feedbackForm = FeedbackForm("test", List(questions), active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
-      val result = controller.JSONCountBuilder(feedbackForm)
+      val result = controller.jsonCountBuilder(feedbackForm)
       result must be equalTo """{"0":"2"}"""
     }
 

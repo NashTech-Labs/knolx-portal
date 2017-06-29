@@ -175,12 +175,13 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, JSONCountBuilder(feedForm)))
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, jsonCountBuilder(feedForm)))
         case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
-  def JSONCountBuilder(feedForm: FeedbackForm): String = {
+  def jsonCountBuilder(feedForm: FeedbackForm): String = {
+    
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil          => json

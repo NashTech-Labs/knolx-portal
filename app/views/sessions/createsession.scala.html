@@ -1,127 +1,132 @@
 @(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    @main("Create Session") {
+@main("Create Session") {
 
-        <div class="row">
-            <div class="col-md-4"></div>
+    <div class="row">
+        <div class="col-md-4"></div>
 
-            <div class="col-md-4 profile">
-                <div class="container-fluid" style="margin-top: 90px ;"></div>
+        <div class="col-md-4 profile">
+            <div class="container-fluid" style="margin-top: 90px ;"></div>
 
-                <div class="create-outer">
-                    <div class="col-md-12 login-one top"></div>
+            <div class="create-outer">
+                <div class="col-md-12 login-one top"></div>
 
-                    <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
-                        <div class="col-md-12">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10 ">
-                                <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
-                                placeholder="Email" required class="updateField reg"/>
-                            </div>
-                            <div class="col-md-1"></div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10 ">
-                                <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
-                                placeholder="Date" required class="updateField reg"/>
-                            </div>
-                            <div class="col-md-1"></div>
-                        </div>
-
-                        <div class="col-md-12 login-two login-three updatetwo">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10 ">
-                                <select name="session" id="session" class="updateField login-two">
-                                @for((value, key) <- SessionValues.Sessions) {
-                                    <option value="@value">@key</option>
-                                }
-                                </select>
-                            </div>
-                            <div class="col-md-1"></div>
+                <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
+                    <div class="col-md-12">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
+                            placeholder="Email" required class="updateField reg createemail"/>
                         </div>
                         <div class="col-md-1"></div>
+                    </div>
 
-                        <div class="col-md-12 login-two login-three updatetwo">
-                            <div class="col-md-1"></div>
-
-                            <div class="col-md-10 ">
-                                <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
-                                @for((value, key) <- feedbackForms) {
-                                    <option value="@value">@key</option>
-                                }
-                                </select>
-                            </div>
-
-                            <div class="col-md-12 login-three updatetwo">
-                                <div class="col-md-1"></div>
-                                <div class="col-md-10 ">
-                                    <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
-                                    placeholder="Topic" required class="updateField"/>
-
-                                </div>
-                                <div class="col-md-1"></div>
-                            </div>
-
-                            <div class="col-md-12 login-three">
-                                <div class="col-md-1"></div>
-                                <div class="col-md-10 ">
-
-                                    <label class="testy">
-                                        <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
-
-                                        <span class="label_text"></span>
-                                        <p class="checkbox-text">Is Meetup ?</p>
-                                    </label>
-                                </div>
-                                <div class="col-md-1"></div>
-                            </div>
-
-                            <div class="col-md-12 update-two login-four">
-                                <div class="col-md-1"></div>
-                                <div class="col-md-10 ">
-                                    <input type="submit" value="Create" class="inputField updateButton"/>
-                                </div>
-                                <div class="col-md-1"></div>
-                            </div>
+                    <div class="col-md-12">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
+                            placeholder="Date" required class="updateField reg"/>
                         </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-md-4"></div>
-        </div>
+                        <div class="col-md-1"></div>
+                    </div>
 
-        <div class="row regError">
-            <div class="col-md-4"></div>
-            <div class="col-md-4">
-            @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
-                    createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
-                    createSessionForm("feedbackFormId").hasErrors || !flash.isEmpty) {
-                <div class="alert alert-danger fade in ">
-                    <ul>
-                        @if(createSessionForm.hasGlobalErrors) {
-                            <li>@createSessionForm.globalError.map(_.message)</li>
-                        }
-                        @if(createSessionForm("email").hasErrors) {
-                            <li>@createSessionForm("email").error.map(error => messages(error.message))</li>
-                        }
-                        @if(createSessionForm("date").hasErrors) {
-                            <li>@createSessionForm("date").error.map(error => messages(error.message))</li>
-                        }
-                        @if(createSessionForm("session").hasErrors) {
-                            <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
-                        }
-                        @if(createSessionForm("feedbackFormId").hasErrors) {
-                            <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
-                        }
-                        @if(!flash.isEmpty) {
-                            <li>@flash.get("message").fold("")(message => message)</li>
-                        }
-                    </ul>
-                </div>
-            }
+                    <div class="col-md-12 login-two login-three updatetwo">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <select name="session" id="session" class="updateField login-two">
+                            @for((value, key) <- SessionValues.Sessions) {
+                                <option value="@value">@key</option>
+                            }
+                            </select>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="col-md-1"></div>
+
+                    <div class="col-md-12 login-two login-three updatetwo">
+                        <div class="col-md-1"></div>
+
+                        <div class="col-md-8">
+                            <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                            @for((value, key) <- feedbackForms) {
+                                <option value="@value">@key</option>
+                            }
+                            </select>
+                        </div>
+                        <div class="col-md-2"><i class="fa fa-eye preview" onclick="hello()" ></i></div>
+                        <div class="col-md-1"></div>
+                    </div>
+
+                    <div class="col-md-12 login-three updatetwo">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
+                            placeholder="Topic" required class="updateField"/>
+
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+
+                    <div class="col-md-12 login-three">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+
+                            <label class="testy">
+                                <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
+
+                                <span class="label_text"></span>
+                                <p class="checkbox-text">Is Meetup ?</p>
+                            </label>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+
+                    <div class="col-md-12 update-two login-four">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <input type="submit" value="Create" class="inputField updateButton"/>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                </form>
             </div>
-            <div class="col-md-4"></div>
         </div>
-    }
+        <div class="col-md-4"></div>
+    </div>
+
+    <div class="row regError">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+        @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
+                createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
+                createSessionForm("feedbackFormId").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                <ul>
+                    @if(createSessionForm.hasGlobalErrors) {
+                        <li>@createSessionForm.globalError.map(_.message)</li>
+                    }
+                    @if(createSessionForm("email").hasErrors) {
+                        <li>@createSessionForm("email").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("date").hasErrors) {
+                        <li>@createSessionForm("date").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("session").hasErrors) {
+                        <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("feedbackFormId").hasErrors) {
+                        <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
+                    }
+                    @if(!flash.isEmpty) {
+                        <li>@flash.get("message").fold("")(message => message)</li>
+                    }
+                </ul>
+            </div>
+        }
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+
+    @feedback.feedbackformpreview()
+
+}

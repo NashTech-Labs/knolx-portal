@@ -1,5 +1,28 @@
 .create-outer {
-    height: 620px;
+    height: 650px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.col-md-12{
+    position: relative;
+    min-height: 1px;
+    padding-right: 0px;
+    padding-left: 0px;
+}
+.createemail{
+
+    margin-top: 15px;
+}
+.preview{
+    font-size: 30px;
+    text-align: center;
+    padding-top: 15px;
+    cursor: pointer;
+    color: #666;
+}
+.preview:hover{
+    color: #EC7063;
 }

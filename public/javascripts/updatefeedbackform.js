@@ -1,5 +1,6 @@
 class FeedbackForm {
-    constructor(name, questions) {
+    constructor(id, name, questions) {
+        this.id = id;
         this.name = name;
         this.questions = questions;
     }
@@ -13,9 +14,20 @@ class Question {
 }
 
 var optionsCount = 0;
-var questionCount = 0;
+var questionCount = parseInt(document.getElementById('questionCount').value);
+var existingCounts = JSON.parse(document.getElementById('existingCounts').value);
 var questions = new Map([]);
-questions.set(0, [0]);
+
+for (var question = 0; question < questionCount; question++) {
+    var optionCount = parseInt(existingCounts[question]);
+    var optionArray = [];
+
+    for (var option = 0; option < optionCount; option++) {
+        optionArray.push(option);
+    }
+
+    questions.set(question, optionArray);
+}
 
 function searchAndRemove(arr, elem) {
     for (var i = 0; i <= arr.length - 1; i++) {
@@ -25,10 +37,12 @@ function searchAndRemove(arr, elem) {
     }
 }
 
-function createForm() {
+function updateForm() {
+
     var questionsValues = [];
 
     var formName = document.getElementById('formName').value;
+    var formId = document.getElementById('formId').value;
 
     questions.forEach(function (options, question, obj) {
             var questionValue = document.getElementById('questionValue-' + question).value;
@@ -44,12 +58,12 @@ function createForm() {
         }
     );
 
-    var feedbackForm = new FeedbackForm(formName, questionsValues);
+    var feedbackForm = new FeedbackForm(formId, formName, questionsValues);
 
     $('#errorMessage').remove();
     $('#successMessage').remove();
 
-    jsRoutes.controllers.FeedbackFormsController.createFeedbackForm().ajax(
+    jsRoutes.controllers.FeedbackFormsController.updateFeedbackForm().ajax(
         {
             type: "POST",
             processData: false,
@@ -57,7 +71,7 @@ function createForm() {
             data: JSON.stringify(feedbackForm),
             success: function (data) {
                 window.location = "/feedbackform/manage?pageNumber=1";
-                alert("Form Successfully Created !")
+                alert("Form Successfully Updated !")
             },
             error: function (er) {
                 $('#response').html(
@@ -75,7 +89,6 @@ function deleteOption(deleteElem) {
     var optionCountId = parseInt(splitIds[2]);
 
     searchAndRemove(questions.get(questionCountId), optionCountId);
-
     $('#option-' + questionCountId + '-' + optionCountId).fadeOut('slow', function () {
         $(this).remove();
     });
@@ -84,7 +97,6 @@ function deleteOption(deleteElem) {
 
 function addOption(addElem) {
     var splitIds = addElem.id.split("-");
-
     var questionCountId = parseInt(splitIds[1]);
     var optionCountId = parseInt(splitIds[2]) + 1;
 

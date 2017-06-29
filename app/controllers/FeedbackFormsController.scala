@@ -149,12 +149,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     } { id =>
       feedbackRepository
         .getByFeedbackFormId(id)
-        .map(_.fold {
-          Ok("""{"status":"failure"}""")
-        } { feedForm =>
-          val json = s"""{"status":${Json.toJson(feedForm).toString}}"""
-          Ok(json)
-        })
+        .map {
+          case Some(feedbackForm: FeedbackForm) =>
+            val json = s"""{"status":${Json.toJson(feedbackForm).toString}}"""
+            Ok(json)
+          case None                             => Ok("""{"status":"failure"}""")
+        }
     }
   }
 
@@ -181,7 +181,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
-    
+
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil          => json

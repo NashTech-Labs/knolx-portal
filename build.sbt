@@ -23,3 +23,5 @@ libraryDependencies ++= Seq(
 )
 
 javaOptions in Test += "-Dconfig.file=conf/test.conf"
+
+coverageExcludedPackages := "<empty>;Reverse.*;router.Routes.*;controllers.JavascriptRouter"

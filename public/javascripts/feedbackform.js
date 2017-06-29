@@ -57,7 +57,7 @@ function createForm() {
             data: JSON.stringify(feedbackForm),
             success: function (data) {
                 window.location = "/feedbackform/manage?pageNumber=1";
-                alert("Form Sucessfully Created !")
+                alert("Form Successfully Created !")
             },
             error: function (er) {
                 $('#response').html(

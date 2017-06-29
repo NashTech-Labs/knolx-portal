@@ -45,6 +45,8 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   val pageSize = 10
 
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
+
   def insert(feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -53,15 +55,14 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def update(id: String, feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-    val modifier = BSONDocument(
-      "$set" -> BSONDocument(
-        "name" -> feedbackData.name,
-        "questions" -> feedbackData.questions,
-        "active" -> feedbackData.active)
-    )
+    val modifier =
+      BSONDocument(
+        "$set" -> BSONDocument(
+          "name" -> feedbackData.name,
+          "questions" -> feedbackData.questions,
+          "active" -> feedbackData.active))
 
-    collection.flatMap(jsonCollection =>
-      jsonCollection.update(selector, modifier))
+    collection.flatMap(_.update(selector, modifier))
   }
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
@@ -83,14 +84,6 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[FeedbackForm](ReadPreference.Primary)
           .headOption)
 
-  def getByFeedbackFormJsonId(feedbackFormId: String): Future[Option[JsObject]] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
-          .cursor[JsObject](ReadPreference.Primary)
-          .headOption)
-
   def getAll(implicit ex: ExecutionContext): Future[List[FeedbackForm]] =
     collection
       .flatMap(jsonCollection =>
@@ -98,8 +91,6 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("active" -> true))
           .cursor[FeedbackForm](ReadPreference.primary)
           .collect[List]())
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
 
   def paginate(pageNumber: Int)(implicit ex: ExecutionContext): Future[List[FeedbackForm]] = {
     val skipN = (pageNumber - 1) * pageSize

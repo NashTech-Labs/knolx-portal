@@ -1,5 +1,5 @@
 class FeedbackForm {
-    constructor(id,name, questions) {
+    constructor(id, name, questions) {
         this.id = id;
         this.name = name;
         this.questions = questions;
@@ -15,15 +15,14 @@ class Question {
 
 var optionsCount = 0;
 var questionCount = parseInt(document.getElementById('questionCount').value);
-var existingCounts =JSON.parse(document.getElementById('existingCounts').value);
-var questions = new Map([]) ;
+var existingCounts = JSON.parse(document.getElementById('existingCounts').value);
+var questions = new Map([]);
 
-for(var question=0 ; question<questionCount ; question++)
-{
-    var optionCount  = parseInt(existingCounts[question]);
+for (var question = 0; question < questionCount; question++) {
+    var optionCount = parseInt(existingCounts[question]);
     var optionArray = [];
 
-    for (var option=0 ; option<optionCount ; option++){
+    for (var option = 0; option < optionCount; option++) {
         optionArray.push(option);
     }
 
@@ -43,7 +42,8 @@ function updateForm() {
     var questionsValues = [];
 
     var formName = document.getElementById('formName').value;
-    var formId = document.getElementById('formID').value;
+    var formId = document.getElementById('formId').value;
+
     questions.forEach(function (options, question, obj) {
             var questionValue = document.getElementById('questionValue-' + question).value;
             var optionValues = [];
@@ -58,7 +58,7 @@ function updateForm() {
         }
     );
 
-    var feedbackForm = new FeedbackForm(formId,formName, questionsValues);
+    var feedbackForm = new FeedbackForm(formId, formName, questionsValues);
 
     $('#errorMessage').remove();
     $('#successMessage').remove();
@@ -71,7 +71,7 @@ function updateForm() {
             data: JSON.stringify(feedbackForm),
             success: function (data) {
                 window.location = "/feedbackform/manage?pageNumber=1";
-                alert("Form Sucessfully Updated !")
+                alert("Form Successfully Updated !")
             },
             error: function (er) {
                 $('#response').html(

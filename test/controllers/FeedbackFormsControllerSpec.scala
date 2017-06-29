@@ -9,7 +9,7 @@ import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.libs.json.Json
-import play.api.libs.mailer.MailerClient
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{FakeRequest, Helpers, _}
 import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.DefaultWriteResult
@@ -99,6 +99,20 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       status(response) must be equalTo BAD_REQUEST
       contentAsString(response) must be equalTo "Malformed data!"
+    }
+
+    "not create feedback form because name is empty" in new WithTestApplication {
+      val payload = """{"name":"","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
+
+      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.createFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Form name must not be empty!"
     }
 
     "not create feedback form because question value is empty" in new WithTestApplication {
@@ -224,7 +238,22 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Feedback form successfully updated!"
     }
 
-    "update feedback form is malformed with options missing" in new WithTestApplication {
+    "not update feedback form due to malformed data" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """[{"question":"question?","options":["option","option"]}]""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed data!"
+    }
+
+    "not update feedback form due to malformed data with options missing" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val request =
@@ -237,6 +266,51 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       status(response) must be equalTo BAD_REQUEST
       contentAsString(response) must be equalTo "Question must require at least 1 option!"
+    }
+
+    "not update feedback form due to malformed data when name is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Form name must not be empty!"
+    }
+
+    "not update feedback form due to malformed data when question is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["option","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Question must not be empty!"
+    }
+
+    "not update feedback form due to malformed data when option value is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/update")
+          .withBody(Json.parse(
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["","option"]}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Options must not be empty!"
     }
 
     "update feedback form not updated internal server error" in new WithTestApplication {
@@ -265,6 +339,21 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       result must be equalTo """{"0":"2"}"""
     }
 
-  }
+    "send feedback form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
+      val email = Email(subject = "Knolx Feedback Form",
+        from = "sidharth@knoldus.com",
+        to = List("sidharth@knoldus.com"),
+        bodyHtml = None,
+        bodyText = Some("Hello World"), replyTo = None)
+      mailerClient.send(email) returns ""
+
+      val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+  }
 }
+

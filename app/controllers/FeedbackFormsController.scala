@@ -118,11 +118,10 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       Logger.error(s"Received a bad request while creating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
-      val validatedForm =
-        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse
-          feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+      val formValid = feedbackFormInformation.validateName orElse feedbackFormInformation.validateForm orElse
+        feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
-      validatedForm.fold {
+      formValid.fold {
         val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
 
         feedbackRepository.insert(FeedbackForm(feedbackFormInformation.name, questions)) map { result =>

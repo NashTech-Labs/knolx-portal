@@ -92,7 +92,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
   implicit val feedbackFormat = Json.format[FeedbackForm]
   implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 
-
   val usersRepo = usersRepository
 
   def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
@@ -143,7 +142,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       }
     }
   }
-
 
   def getFeedbackFormPreview: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
     (request.body \ "id").asOpt[String].fold {

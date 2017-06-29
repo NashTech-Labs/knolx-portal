@@ -390,12 +390,25 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      status(response) must be equalTo OK
+
+    }
+
+    "send feedback form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val email = Email(subject = "Knolx Feedback Form",
+        from = "sidharth@knoldus.com",
+        to = List("sidharth@knoldus.com"),
+        bodyHtml = None,
+        bodyText = Some("Hello World"), replyTo = None)
+      mailerClient.send(email) returns ""
+
+      val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
     }
 
   }
-
 }
-
-

@@ -256,6 +256,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
           },
           sessionUpdateInfo => {
+            println("===============>" + sessionUpdateInfo)
             sessionsRepository
               .update(sessionUpdateInfo)
               .flatMap { result =>

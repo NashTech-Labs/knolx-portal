@@ -31,11 +31,15 @@ function generatePreview() {
                         var options = questions[questionNumber]['options'];
 
                         for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-                            optionsLoaded += "<h4>" + options[optionNumber] + "</h4><br/>"
+                            optionsLoaded += "<div class='col-md-12'><label class='preview-options'><i class='fa fa-circle-o' aria-hidden='true'></i> " + options[optionNumber] + "</label></div>"
+
                         }
 
                         $('#formData').append(
-                            "<h1>" + questions[questionNumber]['question'] + "</h1><br/>" + optionsLoaded
+                            "<div class='row'>" +
+                            "<div class='col-md-12'>" +
+                            "<label class='preview-questions'>" + questions[questionNumber]['question'] + "</label>" +
+                            "</div>" + optionsLoaded + "</div>"
                         );
 
                         optionsLoaded = "";

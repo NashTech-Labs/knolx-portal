@@ -1,0 +1,63 @@
+.modal-title-outer {
+
+    background-color: #F1948A;
+    text-align: center;
+    -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 20px #555;
+    border-bottom: 1px solid #a8a8a8;
+
+}
+
+.from-title {
+    font-size: 25px;
+    color: #fff;
+    font-family: 'gothic';
+}
+
+.preview-questions {
+    margin-top: 20px;
+    padding-left: 20px;
+    line-height: 40px;
+    border: none;
+    width: 100%;
+    outline: none;
+    font-size: 20px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    text-align: left;
+    color: #EC7063;
+    font-weight: bold;
+}
+
+.preview-options {
+    padding-left: 20px;
+    line-height: 40px;
+    border: none;
+    width: 100%;
+    outline: none;
+    font-size: 18px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    color: #7F8C8D;
+}
+
+.modal-body {
+    border: none;
+}
+
+.modal-footer-outer {
+    background-color: #5D6D7E;
+    text-align: center;
+}
+
+.close-modal-btn {
+    padding: 5px 15px 5px 15px;
+    border-radius: 0px;
+    border: 2px solid #fff;
+    background-color: #5D6D7E;
+    color: #fff;
+    font-family: 'gothic';
+    font-size: 15px;
+    font-weight: bolder;
+}

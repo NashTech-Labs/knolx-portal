@@ -1,17 +1,31 @@
 
-    <div class="modal fade" id="myModal" role="dialog">
-        <div class="modal-dialog">
+    <div class="modal fade " id="myModal" role="dialog">
+        <div class="modal-dialog ">
 
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content ">
+                <div class="modal-header modal-title-outer">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title" id="feedFormName"></h4>
+                    <h4 class="modal-title from-title" id="feedFormName"></h4>
                 </div>
-                <div id="formData" class="modal-body">
+                <div  class="modal-body modal-body-outer" id="formData">
+
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <label class="preview-questions">questions[questionNumber]['question']</label>
+                    </div>
+                    <div class="col-md-12"><label class="preview-options"><i class="fa fa-circle-o" aria-hidden="true"></i> option</label></div>
+                    <div class="col-md-12">
+                        <label class="preview-options"><i class="fa fa-circle-o" aria-hidden="true"></i> option</label>
+                    </div>                    <div class="col-md-12">
+                    <label class="preview-options"><i class="fa fa-circle-o" aria-hidden="true"></i> option</label>
+                    </div>
+                </div>
+
 
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <div class="modal-footer modal-footer-outer">
+                    <button type="button" class="btn btn-default close-modal-btn" data-dismiss="modal">Close</button>
                 </div>
             </div>
 

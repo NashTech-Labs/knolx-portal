@@ -9,11 +9,14 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
 import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class QuestionInformation(question: String, options: List[String])
+
+case class FeedbackFormPreview(name: String, questions: List[Question])
 
 case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation]) {
 
@@ -44,6 +47,11 @@ case class UpdateFeedbackFormInformation(id: String, name: String, questions: Li
     } else {
       Some("Options must not be empty!")
     }
+
+  case class FeedbackForm(name: String,
+                          questions: List[Question],
+                          active: Boolean = true,
+                          _id: BSONObjectID = BSONObjectID.generate)
 
 
 }
@@ -89,7 +97,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
   implicit val questionFormat = Json.format[Question]
-  implicit val feedbackFormat = Json.format[FeedbackForm]
+  implicit val feedbackPreviewFormat = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 
   val usersRepo = usersRepository
@@ -143,20 +151,15 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def getFeedbackFormPreview: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
-    (request.body \ "id").asOpt[String].fold {
-      Logger.error(s"Received a bad request form id to update not found")
-      Future.successful(BadRequest("Malformed data!"))
-    } { id =>
-      feedbackRepository
-        .getByFeedbackFormId(id)
-        .map {
-          case Some(feedForm: FeedbackForm) =>
-            val json = s"""{"status":${Json.toJson(feedForm).toString}}"""
-            Ok(json)
-          case None => Ok("""{"status":"failure"}""")
-        }
-    }
+  def getFeedbackFormPreview(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    feedbackRepository
+      .getByFeedbackFormId(id)
+      .map {
+        case Some(feedForm) =>
+          val feedbackPayload = FeedbackFormPreview(feedForm.name, feedForm.questions)
+          Ok(Json.toJson(feedbackPayload).toString)
+        case None => NotFound("404")
+      }
   }
 
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>

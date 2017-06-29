@@ -208,7 +208,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo OK
     }
 
-    "Feedback Form asked to update not found" in new WithTestApplication {
+    "not update Feedback Form as not found" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
@@ -313,7 +313,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Options must not be empty!"
     }
 
-    "update feedback form not updated internal server error" in new WithTestApplication {
+    "not update feedback form and yield internal server error" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -337,7 +337,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       result must be equalTo """{"0":"2"}"""
     }
 
-    "generate feedback form preview for success" in new WithTestApplication {
+    "get feedback form" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
@@ -348,11 +348,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":"5943cdd60900000900409b26"}"""))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
-      val response = controller.getFeedbackFormPreview(request)
+      val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
       status(response) must be equalTo OK
     }
 
-    "generate feedback form preview for failure" in new WithTestApplication {
+    "not get feedback form because form by id does not exist" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
@@ -363,20 +363,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":"5943cdd60900000900409b26"}"""))
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
-      val response = controller.getFeedbackFormPreview(request)
-      status(response) must be equalTo OK
+      val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
+      status(response) must be equalTo NOT_FOUND
       contentAsString(response) must be equalTo """{"status":"failure"}"""
-    }
-
-    "generate feedback form preview for badrequest" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
-
-      val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":null}"""))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-
-      val response = controller.getFeedbackFormPreview(request)
-      status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Malformed data!"
     }
 
     "send feedback form" in new WithTestApplication {

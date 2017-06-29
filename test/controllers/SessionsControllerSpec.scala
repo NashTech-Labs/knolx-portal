@@ -265,17 +265,14 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       usersRepository.getByEmail("test2@example.com") returns Future.successful(Nil)
-
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
       val result = controller.createSession(FakeRequest(POST, "create")

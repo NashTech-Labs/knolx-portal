@@ -158,7 +158,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         case Some(feedForm) =>
           val feedbackPayload = FeedbackFormPreview(feedForm.name, feedForm.questions)
           Ok(Json.toJson(feedbackPayload).toString)
-        case None => NotFound("404")
+        case None => NotFound("404! feedback form not found")
       }
   }
 

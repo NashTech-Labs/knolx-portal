@@ -345,7 +345,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":"5943cdd60900000900409b26"}"""))
+      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
@@ -360,12 +360,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val request = FakeRequest(POST, "/feedbackform/preview").withBody(Json.parse("""{"id":"5943cdd60900000900409b26"}"""))
+      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
       status(response) must be equalTo NOT_FOUND
-      contentAsString(response) must be equalTo """{"status":"failure"}"""
     }
 
     "send feedback form" in new WithTestApplication {

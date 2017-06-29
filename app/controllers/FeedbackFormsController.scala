@@ -48,15 +48,6 @@ case class UpdateFeedbackFormInformation(id: String, name: String, questions: Li
       Some("Options must not be empty!")
     }
 
-<<<<<<< HEAD
-  case class FeedbackForm(name: String,
-                          questions: List[Question],
-                          active: Boolean = true,
-                          _id: BSONObjectID = BSONObjectID.generate)
-
-
-=======
->>>>>>> e931db8de6f6b5124bf467648d522ffb8684c81e
 }
 
 case class FeedbackFormInformation(name: String, questions: List[QuestionInformation]) {

@@ -45,7 +45,6 @@ case class UpdateFeedbackFormInformation(id: String, name: String, questions: Li
       Some("Options must not be empty!")
     }
 
-
 }
 
 case class FeedbackFormInformation(name: String, questions: List[QuestionInformation]) {
@@ -150,12 +149,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     } { id =>
       feedbackRepository
         .getByFeedbackFormId(id)
-        .map {
-          case Some(feedForm: FeedbackForm) =>
-            val json = s"""{"status":${Json.toJson(feedForm).toString}}"""
-            Ok(json)
-          case None => Ok("""{"status":"failure"}""")
-        }
+        .map(_.fold {
+          Ok("""{"status":"failure"}""")
+        } { feedForm =>
+          val json = s"""{"status":${Json.toJson(feedForm).toString}}"""
+          Ok(json)
+        })
     }
   }
 
@@ -177,14 +176,14 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updateFeedbackForm(feedForm, JSONCountBuilder(feedForm)))
-        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
   def JSONCountBuilder(feedForm: FeedbackForm): String = {
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
-        case Nil => json
+        case Nil          => json
         case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
       }
     }

@@ -8,8 +8,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
-import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
-import reactivemongo.bson.BSONObjectID
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -91,7 +89,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
-  implicit val questionFormat = Json.format[Question]
   implicit val feedbackPreviewFormat = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 

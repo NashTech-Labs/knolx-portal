@@ -8,7 +8,6 @@ function generatePreview() {
             processData: false,
             contentType: 'application/json',
             success: function (data) {
-
                 var values = JSON.parse(data);
 
                 $('#formData').html("");

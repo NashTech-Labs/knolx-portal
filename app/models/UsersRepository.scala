@@ -39,7 +39,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .find(Json.obj("email" -> email.toLowerCase))
           .cursor[UserInfo](ReadPreference.Primary)
-          .collect[List]())
+          .collect[List](-1, reactivemongo.api.Cursor.FailOnError[List[UserInfo]]()))
   }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =

@@ -9,10 +9,13 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
 
+import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class QuestionInformation(question: String, options: List[String])
+
+case class FeedbackFormPreview(name: String, questions: List[QuestionInformation])
 
 case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation]) {
 
@@ -43,7 +46,6 @@ case class UpdateFeedbackFormInformation(id: String, name: String, questions: Li
     } else {
       Some("Options must not be empty!")
     }
-
 
 }
 
@@ -87,6 +89,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
+  implicit val feedbackPreviewFormat = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 
   val usersRepo = usersRepository
@@ -140,6 +143,19 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
+  def getFeedbackFormPreview(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    feedbackRepository
+      .getByFeedbackFormId(id)
+      .map {
+        case Some(feedbackForm) =>
+          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options))
+          val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
+
+          Ok(Json.toJson(feedbackPayload).toString)
+        case None               => NotFound("404! feedback form not found")
+      }
+  }
+
   def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
     val email =
       Email(subject = "Knolx Feedback Form",
@@ -164,6 +180,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
 
+    @tailrec
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil          => json

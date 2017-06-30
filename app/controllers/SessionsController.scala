@@ -282,7 +282,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
-    (sessionsScheduler ? RemoveSessionScheduler(sessionId)) (5.seconds).mapTo[Boolean] map {
+    (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1))
           .flashing("message" -> "Scheduled feedback form successfully cancelled!")

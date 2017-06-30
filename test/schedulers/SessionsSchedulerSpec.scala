@@ -168,7 +168,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       verify(mailerClient).send(feedbackFormEmail)
     }
 
-    "remove session scheduler from the list of scheduled sessions" in new TestScope {
+    "cancel a scheduled session" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = true
 
@@ -180,11 +180,20 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      sessionsScheduler ! RemoveSessionScheduler(sessionId.stringify)
+      sessionsScheduler ! CancelScheduledSession(sessionId.stringify)
 
       expectMsg(true)
     }
 
+    "schedule a session" in new TestScope {
+      sessionsRepository.getById(sessionId.stringify) returns Future.successful(sessionsScheduledToday.headOption)
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
+
+      sessionsScheduler ! ScheduleSession(sessionId.stringify)
+
+      expectMsg(true)
+      sessionsScheduler.underlyingActor.scheduledSessions.keys must contain(sessionId.stringify)
+    }
   }
 
 }

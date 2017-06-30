@@ -20,7 +20,7 @@ object SessionsScheduler {
 
   case object GetScheduledSessions
 
-  case class RemoveSessionScheduler(sessionId: String)
+  case class CancelScheduledSession(sessionId: String)
 
   case class ScheduleSession(sessionId: String)
 
@@ -152,7 +152,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       } else {
         sender ! ScheduledSessionsNotRefreshed
       }
-    case RemoveSessionScheduler(sessionId) =>
+    case CancelScheduledSession(sessionId) =>
       Logger.info(s"Removing scheduler for session $sessionId")
 
       scheduledSessions.get(sessionId).exists(_.cancel) match {

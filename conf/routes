@@ -29,6 +29,7 @@ GET         /feedbackform/update                 controllers.FeedbackFormsContro
 POST        /feedbackform/update                 controllers.FeedbackFormsController.updateFeedbackForm
 GET         /feedbackform/delete                 controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
 GET         /feedbackform/preview/:id            controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
+
 GET         /jsRoutes                            controllers.JavascriptRouter.jsRoutes
 
 # Map static resources from the /public folder to the /assets URL path

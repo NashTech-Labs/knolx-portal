@@ -11,14 +11,14 @@ import org.specs2.specification.Scope
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import schedulers.FeedbackFormsScheduler._
+import schedulers.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
+class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   with WordSpecLike with DefaultAwaitTimeout with FutureAwaits with MustMatchers
   with Mockito with ImplicitSender with BeforeAndAfterAll {
   def this() = this(ActorSystem("MySpec"))
@@ -61,96 +61,96 @@ class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: 
         active = true,
         _id = feedbackFormId))
 
-    val feedbackFormScheduler =
+    val sessionsScheduler =
       TestActorRef(
-        new FeedbackFormsScheduler(sessionsRepository, feedbackFormsRepository, mailerClient, dateTimeUtility) {
+        new SessionsScheduler(sessionsRepository, feedbackFormsRepository, mailerClient, dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def scheduler: Scheduler = mockedScheduler
         })
   }
 
-  "Feedback form scheduler" should {
+  "Sessions scheduler" should {
 
-    "start feedback forms scheduler" in new TestScope {
+    "start sessions scheduler" in new TestScope {
       val initialDelay = 1.minute
       val interval = 1.minute
 
-      feedbackFormScheduler ! StartFeedbackFormsScheduler(initialDelay, interval)
+      sessionsScheduler ! StartSessionsScheduler(initialDelay, interval)
 
-      verify(feedbackFormScheduler.underlyingActor.scheduler)
+      verify(sessionsScheduler.underlyingActor.scheduler)
         .schedule(
           initialDelay,
           interval,
-          feedbackFormScheduler, ScheduleFeedbackForms)(feedbackFormScheduler.underlyingActor.context.dispatcher)
+          sessionsScheduler, ScheduleSessions)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
-    "schedule feedback forms" in new TestScope {
+    "schedule sessions" in new TestScope {
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      feedbackFormScheduler ! ScheduleFeedbackForms(self)
+      sessionsScheduler ! ScheduleSessions(self)
 
       expectMsg(1)
     }
 
-    "start feedback forms schedulers for Knolx sessions scheduled today" in new TestScope {
+    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val schedulersSize = feedbackFormScheduler ! ScheduleFeedbackFormsForToday(self, Future.successful(sessionsScheduledToday))
+      val schedulersSize = sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsScheduledToday))
 
       expectMsg(1)
     }
 
-    "refresh feedback forms schedulers" in new TestScope {
+    "refresh sessions schedulers" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = true
 
         def isCancelled: Boolean = false
       }
 
-      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses])
+      val result = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
 
-      result mustEqual Restarted
+      result mustEqual ScheduledSessionsRefreshed
     }
 
-    "get all scheduled feedback forms" in new TestScope {
+    "get all scheduled sessions" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = true
 
         def isCancelled: Boolean = true
       }
 
-      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((feedbackFormScheduler ? GetScheduledFeedbackForms) (5.seconds).mapTo[ScheduledFeedbackForms])
+      val result = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
 
-      result mustEqual ScheduledFeedbackForms(List(sessionId.stringify))
+      result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
 
-    "not refresh feedback forms schedulers because of empty feedback forms" in new TestScope {
+    "not refresh sessions schedulers because of empty feedback forms" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = false
 
         def isCancelled: Boolean = true
       }
 
-      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((feedbackFormScheduler ? RefreshFeedbackFormSchedulers) (5.seconds).mapTo[FeedbackFormSchedulerResponses])
+      val result = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
 
-      result mustEqual NotRestarted
+      result mustEqual ScheduledSessionsNotRefreshed
     }
 
     "send feedback form" in new TestScope {
@@ -163,26 +163,26 @@ class FeedbackFormsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: 
 
       mailerClient.send(feedbackFormEmail) returns "sent"
 
-      feedbackFormScheduler ! SendFeedbackForm(sessionsScheduledToday.head, maybeFeedbackForm.get)
+      sessionsScheduler ! SendSessionFeedbackForm(sessionsScheduledToday.head, maybeFeedbackForm.get)
 
       verify(mailerClient).send(feedbackFormEmail)
     }
 
-    "remove feedback form scheduler from the list of scheduled forms" in new TestScope {
+    "remove session scheduler from the list of scheduled sessions" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = true
 
         def isCancelled: Boolean = true
       }
 
-      feedbackFormScheduler.underlyingActor.scheduledFeedbackForms = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      feedbackFormScheduler ! RemoveFeedbackFormScheduler(sessionId.stringify)
+      sessionsScheduler ! RemoveSessionScheduler(sessionId.stringify)
 
-      expectMsg(0)
+      expectMsg(true)
     }
 
   }

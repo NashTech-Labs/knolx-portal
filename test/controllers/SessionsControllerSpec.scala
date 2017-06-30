@@ -30,7 +30,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     with Scope with ShouldThrownExpectations with Mockito {
 
     val feedbackFormsScheduler =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("FeedbackFormsScheduler")))))
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
 
     val sessionsRepository = mock[SessionsRepository]
     val usersRepository = mock[UsersRepository]

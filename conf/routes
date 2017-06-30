@@ -19,6 +19,8 @@ POST        /session/create                      controllers.SessionsController.
 GET         /session/delete                      controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
 POST        /session/update                      controllers.SessionsController.updateSession
 GET         /session/update                      controllers.SessionsController.update(id: String)
+GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
+GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
 
 # Feedback
 GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)

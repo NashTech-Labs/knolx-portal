@@ -11,12 +11,13 @@ import play.api.mvc.{Action, AnyContent, Controller}
 import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.bson.BSONObjectID
 
+import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class QuestionInformation(question: String, options: List[String])
 
-case class FeedbackFormPreview(name: String, questions: List[Question])
+case class FeedbackFormPreview(name: String, questions: List[QuestionInformation])
 
 case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation]) {
 
@@ -149,10 +150,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm) =>
-          val feedbackPayload = FeedbackFormPreview(feedForm.name, feedForm.questions)
+        case Some(feedbackForm) =>
+          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options))
+          val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
+
           Ok(Json.toJson(feedbackPayload).toString)
-        case None => NotFound("404! feedback form not found")
+        case None               => NotFound("404! feedback form not found")
       }
   }
 
@@ -180,6 +183,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
 
+    @tailrec
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil          => json

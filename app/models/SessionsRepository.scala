@@ -6,6 +6,7 @@ import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
@@ -70,7 +71,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
               "$lte" -> BSONDateTime(dateTimeUtility.endOfDayMillis))))
           .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List]())
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
   def sessions(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection
@@ -79,7 +80,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .find(Json.obj("active" -> true))
           .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List]())
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
   def getById(id: String)(implicit ex: ExecutionContext): Future[Option[SessionInfo]] =
     collection
@@ -106,7 +107,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .options(queryOptions)
           .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List](pageSize))
+          .collect[List](pageSize, FailOnError[List[SessionInfo]]()))
   }
 
   def activeCount(implicit ex: ExecutionContext): Future[Int] =

@@ -34,7 +34,7 @@ case class UpdateSessionInformation(_id: String,
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
-                        userid: String,
+                        userId: String,
                         date: Date,
                         session: String,
                         topic: String,

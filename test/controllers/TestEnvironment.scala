@@ -8,7 +8,7 @@ import com.google.inject.{AbstractModule, Module}
 import helpers.BeforeAllAfterAll
 import play.api.Application
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import schedulers.SessionsScheduler.{ScheduledSessions, GetScheduledSessions, RefreshSessionsSchedulers, ScheduledSessionsRefreshed}
+import schedulers.SessionsScheduler._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -21,13 +21,13 @@ trait TestEnvironment extends BeforeAllAfterAll {
   }
 
   def fakeApp: Application = {
-    val feedbackFormsScheduler = actorSystem.actorOf(Props(new DummySessionsScheduler))
+    val sessionsScheduler = actorSystem.actorOf(Props(new DummySessionsScheduler))
 
     val testModule = Option(new AbstractModule {
       override def configure(): Unit = {
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("SessionsScheduler"))
-          .toInstance(feedbackFormsScheduler)
+          .toInstance(sessionsScheduler)
       }
     })
 
@@ -56,8 +56,10 @@ trait TestEnvironment extends BeforeAllAfterAll {
 
   private class DummySessionsScheduler extends Actor {
     def receive: Receive = {
-      case RefreshSessionsSchedulers => sender ! ScheduledSessionsRefreshed
-      case GetScheduledSessions      => sender ! ScheduledSessions(List.empty)
+      case RefreshSessionsSchedulers         => sender ! ScheduledSessionsRefreshed
+      case GetScheduledSessions              => sender ! ScheduledSessions(List.empty)
+      case CancelScheduledSession(sessionId) => sender ! true
+      case ScheduleSession(sessionId)        => sender ! true
     }
   }
 

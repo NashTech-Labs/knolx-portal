@@ -107,13 +107,13 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         feedbackRepository
           .activeCount
           .map { pages =>
-            Ok(views.html.feedback.managefeedbackforms(updateFormInformation, pageNumber, pages))
+            Ok(views.html.feedbackforms.managefeedbackforms(updateFormInformation, pageNumber, pages))
           }
       }
   }
 
   def feedbackForm: Action[AnyContent] = AdminAction { implicit request =>
-    Ok(views.html.feedback.createfeedbackform())
+    Ok(views.html.feedbackforms.createfeedbackform())
   }
 
   def createFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
@@ -173,7 +173,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
         case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }

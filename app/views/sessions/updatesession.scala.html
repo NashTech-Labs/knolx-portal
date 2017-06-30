@@ -38,26 +38,27 @@
                             </div>
                             <div class="col-md-1" ></div>
                         </div>
+
                         <div class="col-md-12 login-two login-three updatetwo">
                             <div class="col-md-1"></div>
-                            <div class="col-md-10 ">
+
+                            <div class="col-md-8">
                                 <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
                                 @for((value, key) <- feedbackForms) {
-
                                     <option value="@value"
-                                        @(if(sessionInfo.data.getOrElse("session", "") == key.toLowerCase()) {
+                                        @(if(sessionInfo.data.getOrElse("feedbackFormId", "") == value) {
                                             "selected"
                                         })>
                                     @key
                                     </option>
-
-
-                                    <option value="@value">@key</option>
                                 }
+
                                 </select>
                             </div>
+                            <div class="col-md-2"><i class="fa fa-eye preview"  onclick="generatePreview()" ></i></div>
                             <div class="col-md-1"></div>
                         </div>
+
                         <div class="col-md-12 login-three updatetwo">
                             <div class="col-md-1" ></div>
                             <div class="col-md-10 " >
@@ -108,4 +109,7 @@
             </div>
             <div class="col-md-4" ></div>
         </div>
+
+    @feedback.feedbackformpreview()
+
     }

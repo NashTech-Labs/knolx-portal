@@ -227,11 +227,11 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
-    sessionsRepository
+   sessionsRepository
       .getById(id)
       .flatMap {
         case Some(sessionInformation) =>
-          feedbackFormsRepository
+             feedbackFormsRepository
             .getAll
             .map { feedbackForms =>
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))

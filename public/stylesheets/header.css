@@ -132,3 +132,8 @@ i.fa.fa-user:active {
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
     background-color: rgb(125, 158, 192);
 }
+
+.fa-comments{
+
+    color: #fff;
+}

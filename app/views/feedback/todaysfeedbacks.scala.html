@@ -1,0 +1,12 @@
+@(todayFeeds:List[Map[FeedbackSessions,FeedbackForms]])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+<h1>
+
+  @for(a <- todayFeeds){
+
+    <p>@a</p>
+  }
+
+</h1>
+
+<h1>hello</h1>

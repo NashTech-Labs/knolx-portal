@@ -2,21 +2,40 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import models.{FeedbackForm, FeedbackFormsRepository, Question, UsersRepository}
+import models.{SessionInfo, _}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
 import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 case class QuestionInformation(question: String, options: List[String])
 
 case class FeedbackFormPreview(name: String, questions: List[Question])
+
+case class FeedbackSessions(userId: String,
+                            email: String,
+                            date: BSONDateTime,
+                            session: String,
+                            feedbackFormId: String,
+                            topic: String,
+                            meetup: Boolean,
+                            rating: String,
+                            cancelled: Boolean,
+                            active: Boolean,
+                            _id: BSONObjectID = BSONObjectID.generate)
+
+case class FeedbackForms(name: String,
+                         questions: List[QuestionInformation],
+                         active: Boolean = true,
+                         _id: BSONObjectID = BSONObjectID.generate)
 
 case class UpdateFeedbackFormInformation(id: String, name: String, questions: List[QuestionInformation]) {
 
@@ -86,7 +105,9 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
 class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                                         mailerClient: MailerClient,
                                         usersRepository: UsersRepository,
-                                        feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit with I18nSupport {
+                                        feedbackRepository: FeedbackFormsRepository,
+                                        sessionsRepository: SessionsRepository,
+                                        dateTimeUtility: DateTimeUtility) extends Controller with SecuredImplicit with I18nSupport {
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
@@ -174,7 +195,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
@@ -182,7 +203,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
-        case Nil          => json
+        case Nil => json
         case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
       }
     }
@@ -229,4 +250,37 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
       })
   }
+
+  def getFeedbackFormsForToday: Action[AnyContent] = Action.async { implicit request =>
+    sessionsRepository
+      .getSessionsTillNow
+      .flatMap { sessions =>
+        val sessionFeedbackMappings = Future.sequence(sessions.map { session =>
+          feedbackRepository.getByFeedbackFormId(session.feedbackFormId).map(feedbackform =>
+            feedbackform match {
+              case Some(form) =>
+                val sessionInformation = FeedbackSessions(session.userId,
+                  session.email,
+                  session.date,
+                  session.session,
+                  session.feedbackFormId,
+                  session.topic,
+                  session.meetup,
+                  session.rating,
+                  session.cancelled,
+                  session.active,
+                  session._id)
+
+                val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
+                val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
+
+                Some(Map(sessionInformation -> associatedFeedbackFormInformation))
+              case None => None
+            }
+          )
+        })
+        sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten)))
+      }
+  }
+
 }

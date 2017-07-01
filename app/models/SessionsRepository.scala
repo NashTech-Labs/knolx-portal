@@ -130,4 +130,16 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       jsonCollection.update(selector, modifier))
   }
 
-}
+  def getSessionsTillNow : Future[List[SessionInfo]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+            "active" -> true,
+            "cancelled" -> false,
+            "date" -> BSONDocument("$lte" -> BSONDateTime(dateTimeUtility.nowMillis))))
+          .sort(Json.obj("date" -> 1))
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List]())
+
+  }

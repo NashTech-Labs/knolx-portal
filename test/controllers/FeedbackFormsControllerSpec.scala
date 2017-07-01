@@ -378,8 +378,8 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      
       status(response) must be equalTo OK
-
     }
 
     "send feedback form" in new WithTestApplication {

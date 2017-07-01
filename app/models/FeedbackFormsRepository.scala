@@ -5,6 +5,7 @@ import javax.inject.Inject
 import models.FeedbackFormat._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
@@ -15,7 +16,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-
 
 case class Question(question: String, options: List[String])
 
@@ -92,7 +92,7 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .find(Json.obj("active" -> true))
           .cursor[FeedbackForm](ReadPreference.primary)
-          .collect[List]())
+          .collect[List](-1, FailOnError[List[FeedbackForm]]()))
 
   def paginate(pageNumber: Int)(implicit ex: ExecutionContext): Future[List[FeedbackForm]] = {
     val skipN = (pageNumber - 1) * pageSize
@@ -105,7 +105,7 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .options(queryOptions)
           .sort(Json.obj("name" -> 1))
           .cursor[FeedbackForm](ReadPreference.Primary)
-          .collect[List](pageSize))
+          .collect[List](pageSize, FailOnError[List[FeedbackForm]]()))
   }
 
   def activeCount(implicit ex: ExecutionContext): Future[Int] =

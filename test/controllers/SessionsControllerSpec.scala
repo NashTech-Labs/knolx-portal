@@ -29,8 +29,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
 
-    val feedbackFormsScheduler =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("FeedbackFormsScheduler")))))
+    val sessionsScheduler =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
 
     val sessionsRepository = mock[SessionsRepository]
     val usersRepository = mock[UsersRepository]
@@ -47,7 +47,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
         sessionsRepository,
         feedbackFormsRepository,
         dateTimeUtility,
-        feedbackFormsScheduler)
+        sessionsScheduler)
 
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
@@ -464,6 +464,18 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       status(result) must be equalTo UNAUTHORIZED
     }
+  }
+
+  "cancel session by session id" in new WithTestApplication {
+    val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest())
+
+    status(result) must be equalTo SEE_OTHER
+  }
+
+  "schedule session by session id" in new WithTestApplication {
+    val result = controller.scheduleSession(_id.stringify)(FakeRequest())
+
+    status(result) must be equalTo SEE_OTHER
   }
 
 }

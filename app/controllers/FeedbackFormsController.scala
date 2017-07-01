@@ -12,13 +12,15 @@ import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
+
+import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 case class QuestionInformation(question: String, options: List[String])
 
-case class FeedbackFormPreview(name: String, questions: List[Question])
+case class FeedbackFormPreview(name: String, questions: List[QuestionInformation])
 
 case class FeedbackSessions(userId: String,
                             email: String,
@@ -111,7 +113,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
-  implicit val questionFormat = Json.format[Question]
   implicit val feedbackPreviewFormat = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
 
@@ -130,13 +131,13 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         feedbackRepository
           .activeCount
           .map { pages =>
-            Ok(views.html.feedback.managefeedbackforms(updateFormInformation, pageNumber, pages))
+            Ok(views.html.feedbackforms.managefeedbackforms(updateFormInformation, pageNumber, pages))
           }
       }
   }
 
   def feedbackForm: Action[AnyContent] = AdminAction { implicit request =>
-    Ok(views.html.feedback.createfeedbackform())
+    Ok(views.html.feedbackforms.createfeedbackform())
   }
 
   def createFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
@@ -170,10 +171,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm) =>
-          val feedbackPayload = FeedbackFormPreview(feedForm.name, feedForm.questions)
+        case Some(feedbackForm) =>
+          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options))
+          val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
+
           Ok(Json.toJson(feedbackPayload).toString)
-        case None => NotFound("404! feedback form not found")
+        case None               => NotFound("404! feedback form not found")
       }
   }
 
@@ -194,13 +197,14 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedback.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+        case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
         case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
 
+    @tailrec
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
         case Nil => json

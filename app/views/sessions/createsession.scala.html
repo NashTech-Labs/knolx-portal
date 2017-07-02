@@ -9,14 +9,14 @@
             <div class="container-fluid" style="margin-top: 90px ;"></div>
 
             <div class="create-outer">
-                <div class="col-md-12 login-one top"></div>
+                <div class="col-md-12 login-first top"></div>
 
                 <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
                     <div class="col-md-12">
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
                             <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
-                            placeholder="Email" required class="updateField reg createemail"/>
+                            placeholder="Email" required class="update-field reg create-email"/>
                         </div>
                         <div class="col-md-1"></div>
                     </div>
@@ -25,15 +25,15 @@
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
                             <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
-                            placeholder="Date" required class="updateField reg"/>
+                            placeholder="Date" required class="update-field reg"/>
                         </div>
                         <div class="col-md-1"></div>
                     </div>
 
-                    <div class="col-md-12 login-two login-three updatetwo">
+                    <div class="col-md-12 login-second login-third update-second">
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
-                            <select name="session" id="session" class="updateField login-two">
+                            <select name="session" id="session" class="update-field login-second">
                             @for((value, key) <- SessionValues.Sessions) {
                                 <option value="@value">@key</option>
                             }
@@ -43,11 +43,11 @@
                     </div>
                     <div class="col-md-1"></div>
 
-                    <div class="col-md-12 login-two login-three updatetwo">
+                    <div class="col-md-12 login-second login-third update-second">
                         <div class="col-md-1"></div>
 
                         <div class="col-md-8">
-                            <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                            <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
                             @for((value, key) <- feedbackForms) {
                                 <option value="@value">@key</option>
                             }
@@ -57,22 +57,22 @@
                         <div class="col-md-1"></div>
                     </div>
 
-                    <div class="col-md-12 login-three updatetwo">
+                    <div class="col-md-12 login-third update-second">
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
                             <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
-                            placeholder="Topic" required class="updateField"/>
+                            placeholder="Topic" required class="update-field"/>
 
                         </div>
                         <div class="col-md-1"></div>
                     </div>
 
-                    <div class="col-md-12 login-three">
+                    <div class="col-md-12 login-third">
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
 
-                            <label class="testy">
-                                <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
+                            <label class="checkbox-outer">
+                                <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'/>
 
                                 <span class="label_text"></span>
                                 <p class="checkbox-text">Is Meetup ?</p>
@@ -81,10 +81,10 @@
                         <div class="col-md-1"></div>
                     </div>
 
-                    <div class="col-md-12 update-two login-four">
+                    <div class="col-md-12 update-second-field login-four">
                         <div class="col-md-1"></div>
                         <div class="col-md-10 ">
-                            <input type="submit" value="Create" class="inputField updateButton"/>
+                            <input type="submit" value="Create" class="input-field update-button"/>
                         </div>
                         <div class="col-md-1"></div>
                     </div>
@@ -94,7 +94,7 @@
         <div class="col-md-4"></div>
     </div>
 
-    <div class="row regError">
+    <div class="row registration-error">
         <div class="col-md-4"></div>
         <div class="col-md-4">
         @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||

@@ -9,37 +9,37 @@
             <div class="container-fluid" style="margin-top: 90px ;">
             </div>
             <div class="login-outer" style="height: 470px;">
-                <div class="col-md-12 login-one" > </div>
+                <div class="col-md-12 login-first" > </div>
 
                 <form id="registrationForm" action="@routes.UsersController.createUser()" method="POST">
-                    <div class="col-md-12 topfield" >
+                    <div class="col-md-12 top-registration-field" >
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >
-                            <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Email" required class="inputField reg"/>
+                            <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Email" required class="input-field reg"/>
                         </div>
                         <div class="col-md-1" ></div>
                     </div>
 
-                    <div class="col-md-12 login-two login-three">
+                    <div class="col-md-12 login-second login-third">
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >
-                            <input type="password" value='@userForm.data.get("password")' name="password" id="password" placeholder="Choose Password" required class="inputField reg"/>
+                            <input type="password" value='@userForm.data.get("password")' name="password" id="password" placeholder="Choose Password" required class="input-field reg"/>
                         </div>
                         <div class="col-md-1" ></div>
                     </div>
 
-                    <div class="col-md-12 login-two login-three">
+                    <div class="col-md-12 login-second login-third">
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >
-                            <input type="password" value='@userForm.data.get("confirmPassword")' name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required class="inputField reg"/>
+                            <input type="password" value='@userForm.data.get("confirmPassword")' name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required class="input-field reg"/>
                         </div>
                         <div class="col-md-1" ></div>
                     </div>
 
-                    <div class="col-md-12 login-two login-four" >
+                    <div class="col-md-12 login-second login-four" >
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >
-                            <input type="submit" value="Register" class="inputField regbtn"/>
+                            <input type="submit" value="Register" class="input-field registration-button"/>
                         </div>
                         <div class="col-md-1" ></div>
                     </div>
@@ -50,7 +50,7 @@
         <div class="col-md-4"></div>
     </div>
 
-    <div class="row regError">
+    <div class="row registration-error">
         <div class="col-md-4" ></div>
         <div class="col-md-4" >
         @if(userForm.hasGlobalErrors || userForm("email").hasErrors || userForm("password").hasErrors ||

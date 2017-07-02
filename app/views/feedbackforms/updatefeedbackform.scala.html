@@ -12,12 +12,12 @@
                 <form id="feedbackform">
                     <div id="questions">
                         <div class ="question-card first-question-card">
-                            <div class="col-md-12 feedtitle" >
+                            <div class="col-md-12 feedback-title" >
                                 <input id="formId" value='@feedbackForm._id.stringify' type="hidden">
                                 <input id="questionCount" value='@feedbackForm.questions.size' type="hidden">
                                 <input id="existingCounts" value='@json' type="hidden">
-                                <input id="formName" placeholder="Form Title" value="@feedbackForm.name" type="text" class="FormName">
-                                <a href="@routes.FeedbackFormsController.deleteFeedbackForm(feedbackForm._id.stringify)" class="fa fa-trash delForm" aria-hidden="true"></a>
+                                <input id="form-name" placeholder="Form Title" value="@feedbackForm.name" type="text" class="FormName">
+                                <a href="@routes.FeedbackFormsController.deleteFeedbackForm(feedbackForm._id.stringify)" class="fa fa-trash delete-form" aria-hidden="true"></a>
                             </div>
 
                             @feedbackForm.questions match {
@@ -33,8 +33,8 @@
                                             @if(option == 0) {
                                                 <div class="col-md-1" > </div>
                                                 <div class="col-md-10" >
-                                                    <label class="testrad">
-                                                        <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
+                                                    <label class="radio-button">
+                                                        <input type='radio' disabled name='radopt' id='' class='custom-checkbox' value='true'/>
                                                         <span class="lab_text"></span>
                                                         <p class="checkbox-text">
                                                             <input id="optionValue-0-@option" value="@readOnlyQuestion.options(option)" class="card-options" placeholder="Option" type="text"/>
@@ -45,13 +45,13 @@
                                             } else {
                                                 <div class="col-md-1"></div>
                                                 <div class="col-md-10">
-                                                    <label class="testrad">
-                                                        <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>
+                                                    <label class="radio-button">
+                                                        <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>
                                                         <span class="lab_text"></span>
                                                         <p class="checkbox-text">
                                                             <input id="optionValue-0-@option" value="@readOnlyQuestion.options(option)" class="card-options" placeholder="Option" type="text"/>
                                                         </p>
-                                                        <a class="fa fa-times-circle xmen" id="deleteOption-0-@option" onclick="deleteOption(this)"></a>
+                                                        <a class="fa fa-times-circle delete-option-button" id="deleteOption-0-@option" onclick="deleteOption(this)"></a>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-1" ></div>
@@ -63,7 +63,7 @@
 
                                         <div id="parent" style="width: 100% ; text-align:center ;">
                                             <div>
-                                                <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-0-@{
+                                                <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-0-@{
                                                     feedbackForm.questions.size - 1
                                                 }"></i>
                                             </div>
@@ -90,8 +90,8 @@
                                             @if(option == 0) {
                                                 <div class="col-md-1" > </div>
                                                 <div class="col-md-10" >
-                                                    <label class="testrad">
-                                                        <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
+                                                    <label class="radio-button">
+                                                        <input type='radio' disabled name='radopt' id='' class='custom-checkbox' value='true'/>
                                                         <span class="lab_text"></span>
                                                         <p class="checkbox-text">
                                                             <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
@@ -103,13 +103,13 @@
 
                                                 <div class="col-md-1"></div>
                                                 <div class="col-md-10">
-                                                    <label class="testrad">
-                                                        <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>
+                                                    <label class="radio-button">
+                                                        <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>
                                                         <span class="lab_text"></span>
                                                         <p class="checkbox-text">
                                                             <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
                                                         </p>
-                                                        <a class="fa fa-times-circle xmen" id="deleteOption-@questionCount-@option" onclick="deleteOption(this)"></a>
+                                                        <a class="fa fa-times-circle delete-option-button" id="deleteOption-@questionCount-@option" onclick="deleteOption(this)"></a>
                                                     </label>
                                                 </div>
                                                 <div class="col-md-1" ></div>
@@ -121,7 +121,7 @@
 
                                         <br>
                                         <div id="parent" style="width: 100% ; text-align:center ;"><div>
-                                            <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-@questionCount-@{
+                                            <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-@questionCount-@{
                                                 editableQuestions(questionCount - 1).options.size - 1
                                             }"></i>
                                         </div>
@@ -135,11 +135,11 @@
                 </form>
 
                 <div id='parent' style='width: 100% ;'>
-                    <div class="addquestion" onclick="addQuestion()">
+                    <div class="add-question-button" onclick="addQuestion()">
                         <i class="fa fa-plus-circle" aria-hidden="true"></i>
                     </div>
                 </div>
-                <button type="button" onclick="updateForm()" class="btn btn-primary btn-lg createfeedbtn">Update</button>
+                <button type="button" onclick="updateForm()" class="btn btn-primary btn-lg create-feedback-button">Update</button>
             </div>
 
             <div class="col-md-3" ></div>

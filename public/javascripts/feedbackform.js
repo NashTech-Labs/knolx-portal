@@ -28,7 +28,7 @@ function searchAndRemove(arr, elem) {
 function createForm() {
     var questionsValues = [];
 
-    var formName = document.getElementById('formName').value;
+    var formName = document.getElementById('form-name').value;
 
     questions.forEach(function (options, question, obj) {
             var questionValue = document.getElementById('questionValue-' + question).value;
@@ -94,19 +94,19 @@ function addOption(addElem) {
         '<div class="row" id="option-' + questionCountId + '-' + optionCountId + '">' +
         '   <div class="col-md-1"></div>' +
         '   <div class="col-md-10">' +
-        '       <label class="testrad">' +
-        '           <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' +
+        '       <label class="radio-button">' +
+        '           <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>' +
         '           <span class="lab_text"></span>' +
         '           <p class="checkbox-text">' +
         '               <input id="optionValue-' + questionCountId + '-' + optionCountId + '" class="card-options" placeholder="Option" type="text"/>' +
         '           </p>' +
-        '           <a class="fa fa-times-circle xmen" id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)"></a>' +
+        '           <a class="fa fa-times-circle delete-option-button" id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)"></a>' +
         '       </label>' +
         '   </div>' +
         '   <div class="col-md-1" ></div>' +
         '</div>' +
         '<div id="parent" style="width: 100%; text-align:center;"><div>' +
-        '<i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
+        '<i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
         '</div>' +
         '</div>'
     );
@@ -141,8 +141,8 @@ function addQuestion() {
         '       <div class="row" id="option-' + questionCount + '-' + optionsCount + '">' +
         '           <div class="col-md-1" ></div>' +
         '           <div class="col-md-10" >' +
-        '               <label class="testrad">' +
-        '                   <input type="radio" disabled name="radopt" id="" class="ckb" value="true"/>' +
+        '               <label class="radio-button">' +
+        '                   <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>' +
         '                   <span class="lab_text"></span>' +
         '                   <p class="checkbox-text">' +
         '                       <input id="optionValue-' + questionCount + '-' + 0 + '"  class="card-options" placeholder="Option" type="text"/>' +
@@ -154,7 +154,7 @@ function addQuestion() {
         '   </div>' +
         '   <br>' +
         '   <div id="parent" style="width: 100%; text-align:center;"><div>' +
-        '   <i class="fa fa-plus-circle addoption" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
+        '   <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
         '   </div></div>' +
         '</div>');
 

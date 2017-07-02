@@ -17,8 +17,8 @@
 
                 <div id="questions">
                     <div class ="question-card first-question-card">
-                        <div class="col-md-12 feedtitle" >
-                            <input id="formName" placeholder="Form Title" type="text">
+                        <div class="col-md-12 feedback-title" >
+                            <input id="form-name" placeholder="Form Title" type="text">
                         </div>
                         <div id="question-0">
                             <div class="col-md-12">
@@ -31,8 +31,8 @@
                                 <div class="row" id="option-0-0">
                                     <div class="col-md-1" > </div>
                                     <div class="col-md-10" >
-                                        <label class="testrad">
-                                            <input type='radio' disabled name='radopt' id='' class='ckb' value='true'/>
+                                        <label class="radio-button">
+                                            <input type='radio' disabled name='radopt' id='' class='custom-checkbox' value='true'/>
                                             <span class="lab_text"></span>
                                             <p class="checkbox-text">
                                                 <input id="optionValue-0-0" class="card-options" placeholder="Option" type="text"/>
@@ -44,7 +44,7 @@
                             </div>
 
                             <div id="parent" style="width: 100% ;">
-                                <div class="addoption" onclick="">
+                                <div class="add-option" onclick="">
                                     <i class="fa fa-plus-circle" aria-hidden="true" onclick="addOption(this)" id="addOption-0-0" ></i>
                                 </div>
                             </div>
@@ -55,11 +55,11 @@
             </form>
 
             <div id='parent' style='width: 100% ;'>
-                <div class="addquestion" onclick="addQuestion()">
+                <div class="add-question-button" onclick="addQuestion()">
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>
             </div>
-            <button type="button" onclick="createForm()" class="btn btn-primary btn-lg createfeedbtn">Create</button>
+            <button type="button" onclick="createForm()" class="btn btn-primary btn-lg create-feedback-button">Create</button>
         </div>
 
         <div class="col-md-3" ></div>

@@ -15,7 +15,7 @@
     padding-top: 0px;
 }
 
-.addquestion {
+.add-question-button {
     width: 60px;
     height: 60px;
     background-color: #dcdcdc;
@@ -32,12 +32,12 @@
     padding-top: 15;
 }
 
-.addquestion:hover {
+.add-question-button:hover {
     color: #5499C7;
     text-shadow: 0 0px 0px #999;
 }
 
-.createfeedbtn {
+.create-feedback-button {
     border-radius: 0px;
     bottom: 0px;
     right: 0px;
@@ -49,14 +49,14 @@
     border: 2px solid #fff;
 }
 
-.feedtitle {
+.feedback-title {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
     margin-bottom: 20px;
     line-height: 67px;
     border: none;
 }
 
-#formName{
+#form-name{
     border: none;
     outline: none;
     font-size: 20px;
@@ -69,7 +69,7 @@
     margin-left: 7.5%;
 }
 
-input#formName:focus {
+input#form-name:focus {
     border-bottom: 2px solid rgb(125, 158, 192);
 }
 
@@ -105,7 +105,7 @@ input#formName:focus {
     animation: fadein 2s;
 }
 
-.testrad {
+.radio-button {
     display: flex;
 }
 
@@ -128,7 +128,7 @@ input#formName:focus {
     font-size: 25px;
 }
 
-.ckb:checked + .lab_text:before {
+.custom-checkbox:checked + .lab_text:before {
     margin-top: 15px;
     content: "\f111";
     font-family: "FontAwesome";
@@ -142,7 +142,7 @@ p.checkbox-text {
     width: 100%;
 }
 
-.xmen {
+.delete-option-button {
     margin-top: 24px;
     margin-left: 18px;
     margin-right: 10px;
@@ -152,12 +152,12 @@ p.checkbox-text {
     text-decoration: none;
 }
 
-a.fa.fa-times-circle.xmen:hover {
+a.fa.fa-times-circle.delete-option-button:hover {
     text-decoration: none;
     color: #E74C3C;
 }
 
-.addoption {
+.add-option {
     margin: 0 auto;
     margin-top: 20px;
     cursor: pointer;
@@ -197,7 +197,7 @@ i.fa.fa-trash-o.delQuestion {
     color: #F1948A;
 }
 
-.delForm {
+.delete-form {
     font-size: 30px;
     color: #F1948A;
     cursor: pointer;
@@ -206,7 +206,7 @@ i.fa.fa-trash-o.delQuestion {
 
 }
 
-a.fa.fa-trash.delForm:hover {
+a.fa.fa-trash.delete-form:hover {
     text-decoration: none;
     color: #F1948A;
 }

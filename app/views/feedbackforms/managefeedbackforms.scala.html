@@ -3,10 +3,10 @@
     @main("Manage Sessions") {
         <div class="row">
             <div class="col-md-2" ></div>
-            <div class="col-md-8 feedbackformcontainer" >
-                <div class="col-md-12 login-one test" style="margin-bottom:50px ; background-color: rgb(125, 158, 192) ; box-shadow: 0 9px 8px -5px #a8a8a8 ; border-bottom: 1px solid #fff ;" >
-                    <div class="col-md-8 infofeed" ></div>
-                    <div class="col-md-4 text-right newfeedbtn" >
+            <div class="col-md-8 feedback-form-container" >
+                <div class="col-md-12 login-first test" style="margin-bottom:50px ; background-color: rgb(125, 158, 192) ; box-shadow: 0 9px 8px -5px #a8a8a8 ; border-bottom: 1px solid #fff ;" >
+                    <div class="col-md-8 info-feedback" ></div>
+                    <div class="col-md-4 text-right new-feedback-button" >
                         <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed">
                             <i class="fa fa-plus" aria-hidden="true"></i> New
                         </a>
@@ -34,19 +34,19 @@
                 }
 
                 @updateFeedbackFormInformation.map { feedbackFormInformation =>
-                    <div class="col-md-4 feedouters">
-                        <div class="feedform" onclick="window.location='@routes.FeedbackFormsController.update(feedbackFormInformation.id)'">
-                            <div class="feedformupper"></div>
+                    <div class="col-md-4 feedback-div-outer">
+                        <div class="feedback-form" onclick="window.location='@routes.FeedbackFormsController.update(feedbackFormInformation.id)'">
+                            <div class="feedback-form-upper"></div>
 
-                            <div class="feedformlower">
+                            <div class="feedback-form-lower">
                             @feedbackFormInformation.name
                             </div>
                         </div>
                     </div>
                 }
 
-                <div class="col-md-4 feedouters" ></div>
-                <div class="col-md-4 feedouters" ></div>
+                <div class="col-md-4 feedback-div-outer" ></div>
+                <div class="col-md-4 feedback-div-outer" ></div>
                 <div class="col-md-12" style="height:30px ; background-color:#eee ; border-bottom-left-radius: 30px ; border-bottom-right-radius: 30px ;"> </div>
             </div>
             <div class="col-md-2" ></div>

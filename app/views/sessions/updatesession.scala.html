@@ -9,7 +9,7 @@
             <div class="col-md-4 profile" >
                 <div class="container-fluid" style="margin-top: 90px ;"></div>
                 <div class="update-outer">
-                    <div class="col-md-12 login-one top" > </div>
+                    <div class="col-md-12 login-first top" > </div>
 
                     <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
                         <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
@@ -17,15 +17,15 @@
                         <div class="col-md-12" >
                             <div class="col-md-1" ></div>
                             <div class="col-md-10 " >
-                                <input type="datetime-local" value='@sessionInfo.data.get("date")' name="date" id="date" placeholder="Date" required class="updateField reg"/>
+                                <input type="datetime-local" value='@sessionInfo.data.get("date")' name="date" id="date" placeholder="Date" required class="update-field reg"/>
                             </div>
                             <div class="col-md-1" ></div>
                         </div>
 
-                        <div class="col-md-12 login-two login-three updatetwo">
+                        <div class="col-md-12 login-second login-third update-second">
                             <div class="col-md-1" ></div>
                             <div class="col-md-10 ">
-                                <select name="session" id="session" class="updateField login-two">
+                                <select name="session" id="session" class="update-field login-second">
                                 @for((value, key) <- SessionValues.Sessions) {
                                     <option value="@value"
                                         @(if(sessionInfo.data.getOrElse("session", "") == key.toLowerCase()) {
@@ -39,11 +39,11 @@
                             <div class="col-md-1" ></div>
                         </div>
 
-                        <div class="col-md-12 login-two login-three updatetwo">
+                        <div class="col-md-12 login-second login-third update-second">
                             <div class="col-md-1"></div>
 
                             <div class="col-md-8">
-                                <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                                <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
                                 @for((value, key) <- feedbackForms) {
                                     <option value="@value"
                                         @(if(sessionInfo.data.getOrElse("feedbackFormId", "") == value) {
@@ -59,19 +59,19 @@
                             <div class="col-md-1"></div>
                         </div>
 
-                        <div class="col-md-12 login-three updatetwo">
+                        <div class="col-md-12 login-third update-second">
                             <div class="col-md-1" ></div>
                             <div class="col-md-10 " >
-                                <input type="text" name="topic" id="topic" value='@sessionInfo.data.get("topic")' placeholder="Topic" required class="updateField"/>
+                                <input type="text" name="topic" id="topic" value='@sessionInfo.data.get("topic")' placeholder="Topic" required class="update-field"/>
                             </div>
                             <div class="col-md-1" ></div>
                         </div>
 
-                        <div class="col-md-12 login-three">
+                        <div class="col-md-12 login-third">
                             <div class="col-md-1" ></div>
                             <div class="col-md-10 " >
-                                <label class="testy" >
-                                    <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'
+                                <label class="checkbox-outer" >
+                                    <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'
                                     @(if(sessionInfo.data.getOrElse("meetup", "false") == "true") {
                                         """checked="checked""""
                                     })/>
@@ -82,10 +82,10 @@
                             <div class="col-md-1" ></div>
                         </div>
 
-                        <div class="col-md-12 update-two login-four" >
+                        <div class="col-md-12 update-second-field login-four" >
                             <div class="col-md-1" ></div>
                             <div class="col-md-10 " >
-                                <input type="submit" value="Save" class="inputField updateButton"/>
+                                <input type="submit" value="Save" class="input-field update-button"/>
                             </div>
                             <div class="col-md-1" ></div>
                         </div>
@@ -96,7 +96,7 @@
             <div class="col-md-4" ></div>
         </div>
 
-        <div class="row updateError">
+        <div class="row update-error">
             <div class="col-md-4" ></div>
             <div class="col-md-4" >
             @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || !flash.isEmpty) {

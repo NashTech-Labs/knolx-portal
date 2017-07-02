@@ -1,4 +1,4 @@
-.feedbackformcontainer {
+.feedback-form-container {
     background-color: #fff;
     color: #000;
     margin-top: 100px;
@@ -14,11 +14,11 @@
     border-radius: 30px;
 }
 
-.feedouters {
+.feedback-div-outer {
     padding: 30px 0px 30px 0px;
 }
 
-.feedform {
+.feedback-form {
 
     width: 12em;
     height: 12em;
@@ -27,7 +27,7 @@
     cursor: pointer;
 }
 
-.feedformupper {
+.feedback-form-upper {
     width: 70%;
     height: 70%;
     float: none;
@@ -41,7 +41,7 @@
     background-size: contain;
 }
 
-.feedformlower {
+.feedback-form-lower {
     width: 100%;
     float: none;
     margin: 0 auto;
@@ -52,16 +52,16 @@
     color: #27AE60;
 }
 
-.feedform:hover {
+.feedback-form:hover {
     box-shadow: 0 4px 6px -5px #333;
 }
 
-.newfeedbtn {
+.new-feedback-button {
     height: 80px;
     line-height: 75px;
 }
 
-.infofeed {
+.info-feedback {
     height: 80px;
 }
 

@@ -86,6 +86,15 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       (deletedSessionUser \ "active").getOrElse(JsBoolean(true)) must beEqualTo(JsBoolean(false))
     }
 
+    "fetch sessions scheduled  till now" in new TestScope {
+      val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
+        meetup = true, "", cancelled = false, active = true, sessionId)
+
+      val sessions = await(sessionsRepository.getSessionsTillNow)
+
+      sessions contains userInfo
+    }
+
   }
 
 }

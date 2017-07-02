@@ -1,5 +1,7 @@
 package controllers
 
+import java.text.SimpleDateFormat
+
 import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
@@ -13,16 +15,22 @@ import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{FakeRequest, Helpers, _}
 import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.DefaultWriteResult
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
-
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      meetup = true, "rating", cancelled = false, active = true, _id)))
   private val emailObject = Future.successful(List(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+  private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
+    active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
 
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
@@ -30,11 +38,13 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     val mailerClient = mock[MailerClient]
     val usersRepository: UsersRepository = mock[UsersRepository]
     val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsRepository = mock[SessionsRepository]
 
     val config = Configuration(ConfigFactory.load("application.conf"))
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 
-    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
+    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository, sessionsRepository, dateTimeUtility)
 
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
@@ -196,9 +206,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "send form asked to update to feedback update page" in new WithTestApplication {
 
-      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
-        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
@@ -340,9 +347,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "get feedback form" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
-        active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
-
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
       val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
@@ -378,7 +382,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
-      
+
       status(response) must be equalTo OK
     }
 
@@ -397,6 +401,52 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       status(response) must be equalTo OK
     }
+    "not render feedback form for today if session associated feedback form not found" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.getSessionsTillNow returns sessionObject
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
+
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+    "render feedback form for today if session associated feedback form found and session not expired" in new WithTestApplication {
+      val sessionObjectWithCurrentDate =
+        Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
+          meetup = true, "rating", cancelled = false, active = true, _id)))
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.getSessionsTillNow returns sessionObjectWithCurrentDate
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
+
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+    "render feedback form for today if session associated feedback form found and session expired" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.getSessionsTillNow returns sessionObject
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
+
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+    "check for the expired feedback" in new WithTestApplication {
+      val (result, associatedDate) = controller.isExpired(date.getTime)
+      result must beEqualTo(true)
+    }
+
+    "check for the active feedback" in new WithTestApplication {
+      val (result, associatedDate) = controller.isExpired(System.currentTimeMillis)
+      result must beEqualTo(false)
+    }
 
   }
+
 }

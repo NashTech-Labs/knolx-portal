@@ -249,13 +249,13 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .flatMap(_.fold {
         Logger.error(s"Failed to delete knolx feedback form with id $id")
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("errormessage" -> "Something went wrong!"))
-      } { sessionJson =>
+      } { _ =>
         Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
       })
   }
 
-  def getFeedbackFormsForToday: Action[AnyContent] = Action.async { implicit request =>
+  def getFeedbackFormsForToday: Action[AnyContent] = UserAction.async { implicit request =>
     sessionsRepository
       .getSessionsTillNow
       .flatMap { sessions =>

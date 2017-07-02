@@ -1,22 +1,20 @@
 package controllers
 
+import java.util.{Calendar, Date}
 import javax.inject.{Inject, Singleton}
 
-import models.{SessionInfo, _}
+import models._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
-import play.modules.reactivemongo.json.BSONFormats.BSONObjectIDFormat
-import reactivemongo.bson.{BSONDateTime, BSONObjectID}
+import reactivemongo.bson.BSONObjectID
 import utilities.DateTimeUtility
-
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 case class QuestionInformation(question: String, options: List[String])
 
@@ -24,7 +22,7 @@ case class FeedbackFormPreview(name: String, questions: List[QuestionInformation
 
 case class FeedbackSessions(userId: String,
                             email: String,
-                            date: BSONDateTime,
+                            date: Date,
                             session: String,
                             feedbackFormId: String,
                             topic: String,
@@ -32,7 +30,9 @@ case class FeedbackSessions(userId: String,
                             rating: String,
                             cancelled: Boolean,
                             active: Boolean,
-                            _id: BSONObjectID = BSONObjectID.generate)
+                            _id: BSONObjectID,
+                            expired: Boolean,
+                            expirationStatusAssociatedDate: Date)
 
 case class FeedbackForms(name: String,
                          questions: List[QuestionInformation],
@@ -111,12 +111,12 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                                         sessionsRepository: SessionsRepository,
                                         dateTimeUtility: DateTimeUtility) extends Controller with SecuredImplicit with I18nSupport {
 
-  implicit val questionInformationFormat = Json.format[QuestionInformation]
-  implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
-  implicit val feedbackPreviewFormat = Json.format[FeedbackFormPreview]
-  implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
+  implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
+  implicit val feedbackFormInformationFormat: OFormat[FeedbackFormInformation] = Json.format[FeedbackFormInformation]
+  implicit val feedbackPreviewFormat: OFormat[FeedbackFormPreview] = Json.format[FeedbackFormPreview]
+  implicit val updateFeedbackFormInformationFormat: OFormat[UpdateFeedbackFormInformation] = Json.format[UpdateFeedbackFormInformation]
 
-  val usersRepo = usersRepository
+  val usersRepo: UsersRepository = usersRepository
 
   def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     feedbackRepository
@@ -176,7 +176,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
-        case None               => NotFound("404! feedback form not found")
+        case None => NotFound("404! feedback form not found")
       }
   }
 
@@ -260,31 +260,73 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .getSessionsTillNow
       .flatMap { sessions =>
         val sessionFeedbackMappings = Future.sequence(sessions.map { session =>
-          feedbackRepository.getByFeedbackFormId(session.feedbackFormId).map(feedbackform =>
-            feedbackform match {
-              case Some(form) =>
-                val sessionInformation = FeedbackSessions(session.userId,
-                  session.email,
-                  session.date,
-                  session.session,
-                  session.feedbackFormId,
-                  session.topic,
-                  session.meetup,
-                  session.rating,
-                  session.cancelled,
-                  session.active,
-                  session._id)
+          feedbackRepository.getByFeedbackFormId(session.feedbackFormId).map {
+            case Some(form) =>
+              val (expired, expirationStatusAssociatedDate) = isExpired(session.date.value)
+              val sessionInformation = FeedbackSessions(session.userId,
+                session.email,
+                new Date(session.date.value),
+                session.session,
+                session.feedbackFormId,
+                session.topic,
+                session.meetup,
+                session.rating,
+                session.cancelled,
+                session.active,
+                session._id,
+                expired,
+                expirationStatusAssociatedDate)
 
-                val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
-                val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
-
-                Some(Map(sessionInformation -> associatedFeedbackFormInformation))
-              case None => None
-            }
-          )
+              val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
+              val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
+              if (!expired) {
+                Some((sessionInformation, Some(associatedFeedbackFormInformation)))
+              }
+              else {
+                Some((sessionInformation, None))
+              }
+            case None => None
+          }
         })
         sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten)))
       }
+  }
+
+  def isExpired(sessionScheduledDate: Long): (Boolean, Date) = {
+    //sun, mon, tue, wed ,thu
+    val feedbackExpireOnWorkingDays = List(1, 2, 3, 4, 5)
+
+    val currentDate = new Date(dateTimeUtility.nowMillis)
+    val scheduledDate = new Date(sessionScheduledDate)
+
+    val calendar = Calendar.getInstance()
+    calendar.setTime(scheduledDate)
+    calendar.set(Calendar.HOUR_OF_DAY, 23)
+    calendar.set(Calendar.MINUTE, 59)
+    calendar.set(Calendar.SECOND, 59)
+    calendar.set(Calendar.MILLISECOND, 999)
+
+    if (feedbackExpireOnWorkingDays.contains(calendar.get(Calendar.DAY_OF_WEEK))) {
+      calendar.add(Calendar.DAY_OF_WEEK, 1)
+      //current date < sessionDate + 1 day(end of the day) then display
+    }
+    else {
+      //friday ---> if current date < sessionDate + 3 days(end of the day) then display
+      if (calendar.get(Calendar.DAY_OF_WEEK) == 6) {
+        calendar.add(Calendar.DAY_OF_WEEK, 3)
+      }
+      //saturday ---> if current date < sessionDate + 2 days(end of the day) then display
+      else {
+        calendar.add(Calendar.DAY_OF_WEEK, 2)
+      }
+    }
+
+    if (currentDate.compareTo(calendar.getTime) <= 0) {
+      (false, calendar.getTime)
+    }
+    else {
+      (true, calendar.getTime)
+    }
   }
 
 }

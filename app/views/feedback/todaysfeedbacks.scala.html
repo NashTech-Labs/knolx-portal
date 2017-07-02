@@ -1,12 +1,18 @@
-@(todayFeeds:List[Map[FeedbackSessions,FeedbackForms]])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(todayFeeds:List[(FeedbackSessions,Option[FeedbackForms])])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-<h1>
 
-  @for(a <- todayFeeds){
+  <h4>
 
-    <p>@a</p>
+  @for((key, value) <- todayFeeds) {
+
+    ._1 ======> @key<br/>
+    <br/>
+    ._2 ======> @value.getOrElse("") <br/>
+    <br/>
+    <br/>
+    <br/>
   }
 
-</h1>
+  </h4>
 
-<h1>hello</h1>
+

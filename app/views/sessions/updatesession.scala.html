@@ -44,6 +44,7 @@
 
                             <div class="col-md-8">
                                 <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
+                                <option selected value="">! Select Please</option>>
                                 @for((value, key) <- feedbackForms) {
                                     <option value="@value"
                                         @(if(sessionInfo.data.getOrElse("feedbackFormId", "") == value) {
@@ -99,10 +100,11 @@
         <div class="row update-error">
             <div class="col-md-4" ></div>
             <div class="col-md-4" >
-            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || !flash.isEmpty) {
+            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || !flash.isEmpty) {
                 <div class="alert alert-danger fade in ">
                     @flash.get("message").fold("")(message => message)
                     @sessionInfo("date").error.map(error => messages(error.message))
+                    @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
                     @sessionInfo.globalError.map(_.message)
                 </div>
             }

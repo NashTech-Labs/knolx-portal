@@ -17,8 +17,10 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class QuestionResponse(question: String, options: List[String], response: String)
 
-case class FeedbackFormsResponse(userId: String,
+case class FeedbackFormsResponse(email: String,
+                                 userId: String,
                                  sessionId: String,
+                                 feedbackFormId: String,
                                  name: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,

@@ -30,11 +30,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     val mailerClient = mock[MailerClient]
     val usersRepository: UsersRepository = mock[UsersRepository]
     val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
 
     val config = Configuration(ConfigFactory.load("application.conf"))
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 
-    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
+    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository, feedbackResponseRepository)
 
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
@@ -378,7 +379,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
-      
+
       status(response) must be equalTo OK
     }
 

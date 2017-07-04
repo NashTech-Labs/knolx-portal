@@ -19,7 +19,8 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
 
     "store a feedback form response" in {
       val questionsResponse = List(QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "1"))
-      val feedbackFormResponse = FeedbackFormsResponse("userId", "sessionId", "formName", questionsResponse, BSONDateTime(date.getTime), feedbackFormResponseId)
+      val feedbackFormResponse = FeedbackFormsResponse("test@example.com", "userId", "sessionId", "feedbackFormId", "formName",
+        questionsResponse, BSONDateTime(date.getTime), feedbackFormResponseId)
 
       val created = await(feedbackFormsResponseRepository.insert(feedbackFormResponse).map(_.ok))
 
@@ -28,7 +29,8 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
 
     "update feedback form response" in {
       val questionsResponse = List(QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "1"))
-      val feedbackFormResponse = FeedbackFormsResponse("userId", "sessionId", "formName", questionsResponse, BSONDateTime(date.getTime), feedbackFormResponseId)
+      val feedbackFormResponse = FeedbackFormsResponse("test@example.com", "userId", "sessionId", "feedbackFormId", "formName",
+        questionsResponse, BSONDateTime(date.getTime), feedbackFormResponseId)
 
       val updated = await(feedbackFormsResponseRepository.update(feedbackFormResponseId.stringify, feedbackFormResponse).map(_.ok))
 

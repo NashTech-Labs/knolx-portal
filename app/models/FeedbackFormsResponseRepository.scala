@@ -19,6 +19,7 @@ case class QuestionResponse(question: String, options: List[String], response: S
 
 case class FeedbackFormsResponse(userId: String,
                                  sessionId: String,
+                                 name: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
                                  _id: BSONObjectID = BSONObjectID.generate)

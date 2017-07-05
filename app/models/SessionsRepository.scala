@@ -1,5 +1,6 @@
 package models
 
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
@@ -30,7 +31,8 @@ case class SessionInfo(userId: String,
                        rating: String,
                        cancelled: Boolean,
                        active: Boolean,
-                       _id: BSONObjectID = BSONObjectID.generate)
+                       _id: BSONObjectID = BSONObjectID.generate,
+                      expirationDate: Option[LocalDateTime] = None)
 
 object SessionJsonFormats {
 

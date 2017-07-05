@@ -1,0 +1,179 @@
+.feedback-form-display-container{
+    color: #000;
+    margin: 100px 0px;
+    background-color: #fff;
+    box-shadow: 0 4px 7px -5px #333;
+    padding: 0px 0px 0px 0px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+}
+.feedback-top-banner{
+    margin-bottom:80px ;
+    background-color: rgb(125, 158, 192);;
+    box-shadow: 0 9px 8px -5px #a8a8a8 ;
+    border-bottom: 1px solid #fff ;
+
+}
+.feedback-footer{
+    height:30px ;
+    background-color:#eee ;
+    border-bottom-left-radius: 30px ;
+    border-bottom-right-radius: 30px ;
+    margin-top: 30px;
+}
+.feedback-display{
+
+}
+.card-body {
+    width: 100%;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 60px;
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0px 6px #999;
+    background-color:#dcdcdc;
+    box-shadow: 0 6px 4px -5px #333 ;
+}
+.stick-out{
+    position:relative;
+    top:-40px;
+    padding-top: 13px;
+    border: 3px solid #fff ;
+}
+
+.feedback-card-head {
+    width: 80px;
+    height: 80px;
+    background-color: #dcdcdc;
+    border-radius: 50%;
+    margin: 0 auto;
+    cursor: pointer;
+    text-align: center;
+    line-height: 60px;
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0px 6px #999;
+}
+
+.feedback-display-logo{
+
+   font-size: 40px;
+    text-shadow: none;
+   color:#639593; ;
+}
+
+.feedback-card-button{
+border-radius: 0;
+width: 80%;
+margin-bottom: 20px;
+border:2px solid #dcdcdc;
+letter-spacing: 2px;
+background-color:#639593;
+outline: none!important;
+padding:12px 0px;
+font-size: 18px;
+color:#fff;
+position:relative;
+top:-10px;
+}
+
+.feedback-card-button:hover{
+    background-color: #5D8D8C  ;
+    border:2px solid #dcdcdc;
+    outline: none!important;
+    color:#fff;
+
+}
+.feedback-card-button:active{
+    background-color: #5D8D8C  ;
+    border:2px solid #dcdcdc;
+    outline: none!important;
+    color:#fff;
+}
+.feedback-card-button:focus{
+    outline: none!important;
+    color:#fff;
+}
+.feedback-card-topic{
+    font-size: 20px;
+    word-wrap: break-word;
+    line-height: 1.2em;
+    margin: 0.2em 0;
+    top:-30px;
+    color:#fff ;
+    text-shadow: none;
+    background-color: #F1948A;
+    padding:8px 3px 3px 3px;
+    box-shadow: 0 9px 8px -5px #a8a8a8 ;
+}
+
+
+.session-details{
+    border-collapse:collapse; table-layout:fixed;
+}
+
+.session-details > tr > td:first-child {
+    color: #566573;
+    text-shadow:none;
+    font-weight: bold;
+    font-family: 'headerfont';
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: left;
+}
+.session-table{
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+.session-card-values{
+    font-size: 22px;
+    color:#F1948A;
+}
+.feedback-card-details{
+    position:relative;
+}
+.feedback-card-expire-button{
+    border-radius: 0;
+    width: 80%;
+    margin-bottom: 20px;
+    border:2px solid #dcdcdc;
+    letter-spacing: 2px;
+    background-color:#639593;
+    outline: none!important;
+    padding:12px 0px;
+    font-size: 18px;
+    color:#fff;
+    position:relative;
+    top:-10px;
+}
+
+.expired{
+    background-color: #a8a8a8;
+    box-shadow: none;
+    color: #fff;
+}
+
+.expired-details-button{
+background-color:#a8a8a8;
+  color: #fff;
+}
+
+.feedback-card-expire-button:hover{
+    background-color: #a8a8a8;
+    color: #fff;
+
+}
+.feedback-card-expire-button:active{
+    background-color: #a8a8a8;
+    color: #fff;
+}
+.feedback-card-expire-button:focus {
+    background-color: #a8a8a8;
+    color: #fff;
+}

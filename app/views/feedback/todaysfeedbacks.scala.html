@@ -1,18 +1,99 @@
-@(todayFeeds:List[(FeedbackSessions,Option[FeedbackForms])])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@(active:List[(FeedbackSessions,FeedbackForms)],expired:List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@main("Feedbacks") {
+
+  <div class="row">
+    <div class="col-md-2" ></div>
+    <div class="col-md-8 feedback-form-display-container">
+      <div class="col-md-12 login-first test feedback-top-banner"></div>
+      @if(active.nonEmpty){
+        @for((sessions,feedbackForm)<- active){
+          <div class="col-md-4">
+            <div class="col-md-12">
+              <div id='parent' style='width: 100% ;'>
+                <div class="card-body">
+                @defining(if(sessions.meetup) "Meetup" else "Knolx" ) { sessionType =>
+                  <div class="feedback-card-head stick-out" onclick='opener("{\"author\":\"@sessions.email\",\"session\":\"@sessions.session\",\"scheduled\":\"@sessions.date\",\"expire\":\"@sessions.expirationDate\",\"sessiontype\":\"@sessionType\"}")'><i class="fa fa-list-alt feedback-display-logo" aria-hidden="true"></i></div>
+                  <div class="session-content">
+                    <div class="col-md-12 feedback-card-topic"><p>@sessions.topic</p></div>
+                  </div>
+                  <button type="button" class="btn  feedback-card-button">Fill Out</button>
+                </div>
+              </div>
+            </div>
+          </div>}
+        }
+      }else{
+      @for(expiredSession<- expired) {
+        <div class="col-md-4">
+          <div class="col-md-12">
+            <div id='parent' style='width: 100% ;'>
+              <div class="card-body">
+                @defining(if(expiredSession.meetup) "Meetup" else "Knolx" ) { sessionType =>
+                <div class="feedback-card-head stick-out  expired-details-button" onclick='opener("{\"author\":\"@expiredSession.email\",\"session\":\"@expiredSession.session\",\"scheduled\":\"@expiredSession.date\",\"expire\":\"@expiredSession.expirationDate\",\"sessiontype\":\"@sessionType\"}")'><i class="fa fa-list-alt feedback-display-logo expired-details-button" aria-hidden="true"></i></div>
+                <div class="session-content">
+                  <div class="col-md-12 feedback-card-topic expired"><p>@expiredSession.topic</p></div>
+                </div>
+                <button type="button" class="btn  feedback-card-expire-button expired">Expired</button>
+              </div>
+            </div>
+          </div>
+        </div>}
+         }
+      }
+      <div class="col-md-12 feedback-footer"></div>
+    </div>
+    <div class="col-md-2" ></div>
+  </div>
 
 
-  <h4>
+  <div class="modal fade" id="session-detail-info" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+            <table class="table table-striped session-table">
+              <tbody class="session-details">
+                <tr>
+                  <td>Presenter<br/><span class="session-card-values" id="author" ></span></td>
+                </tr>
+                <tr>
+                  <td>Session<br/><span class="session-card-values" id="session">Session 1</span></td>
+                </tr>
+                <tr>
+                  <td>scheduled<br/><span class="session-card-values" id="scheduled"></span></td>
+                </tr>
+                <tr>
+                  <td>Expiration<br/><span class="session-card-values" id="expire"></span></td>
+                </tr>
+                <tr>
+                  <td>Type<br/><span class="session-card-values" id="sessiontype"></span></td>
+                </tr>
+              </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  @for((key, value) <- todayFeeds) {
 
-    ._1 ======> @key<br/>
-    <br/>
-    ._2 ======> @value.getOrElse("") <br/>
-    <br/>
-    <br/>
-    <br/>
+<script>
+  function opener(value) {
+     var details = JSON.parse(value);
+     $('#author').html(details.author);
+    $('#session').html(details.session);
+    $('#scheduled').html(details.scheduled);
+    $('#expire').html(details.expire);
+    $('#sessiontype').html(details.sessiontype);
+    $('#session-detail-info').modal('show');
   }
-
-  </h4>
-
+</script>
+}
 

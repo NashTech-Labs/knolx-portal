@@ -1,6 +1,7 @@
 package controllers
 
-import java.util.{Calendar, Date}
+import java.time.{DayOfWeek, _}
+import java.util.Date
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -31,8 +32,7 @@ case class FeedbackSessions(userId: String,
                             cancelled: Boolean,
                             active: Boolean,
                             _id: BSONObjectID,
-                            expired: Boolean,
-                            expirationStatusAssociatedDate: Date)
+                            expirationDate: String)
 
 case class FeedbackForms(name: String,
                          questions: List[QuestionInformation],
@@ -259,73 +259,122 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     sessionsRepository
       .getSessionsTillNow
       .flatMap { sessions =>
-        val sessionFeedbackMappings = Future.sequence(sessions.map { session =>
-          feedbackRepository.getByFeedbackFormId(session.feedbackFormId).map {
-            case Some(form) =>
-              val (expired, expirationStatusAssociatedDate) = isExpired(session.date.value)
-              val sessionInformation = FeedbackSessions(session.userId,
-                session.email,
-                new Date(session.date.value),
-                session.session,
-                session.feedbackFormId,
-                session.topic,
-                session.meetup,
-                session.rating,
-                session.cancelled,
-                session.active,
-                session._id,
-                expired,
-                expirationStatusAssociatedDate)
+        val (active, expired) = getActiveAndExpiredSessions(sessions)
+        if (!active.isEmpty) {
+          val sessionFeedbackMappings = Future.sequence(active.map { session =>
+            feedbackRepository.getByFeedbackFormId(session.feedbackFormId).map {
+              case Some(form) =>
+                val sessionInformation = FeedbackSessions(session.userId,
+                  session.email,
+                  new Date(session.date.value),
+                  session.session,
+                  session.feedbackFormId,
+                  session.topic,
+                  session.meetup,
+                  session.rating,
+                  session.cancelled,
+                  session.active,
+                  session._id,
+                  session.expirationDate.fold{
+                    "OOps! Unable to Load!"
+                  }{ localDateTime =>
+                    val date =  Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
+                    date.toString
+                  })
 
-              val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
-              val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
-              if (!expired) {
-                Some((sessionInformation, Some(associatedFeedbackFormInformation)))
-              }
-              else {
-                Some((sessionInformation, None))
-              }
-            case None => None
-          }
-        })
-        sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten)))
+                val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
+                val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
+                Some((sessionInformation, associatedFeedbackFormInformation))
+
+              case None => Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
+                None
+            }
+          })
+          sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten, getImmediatePreviousSessions(expired).flatten)))
+        }
+        else {
+          Logger.info("No active Session for Feedback Found")
+          Future.successful(Ok(views.html.feedback.todaysfeedbacks(Nil, getImmediatePreviousSessions(expired).flatten)))
+        }
       }
   }
 
-  def isExpired(sessionScheduledDate: Long): (Boolean, Date) = {
-    //sun, mon, tue, wed ,thu
-    val feedbackExpireOnWorkingDays = List(1, 2, 3, 4, 5)
+  private def getImmediatePreviousSessions(expiredSessions: List[SessionInfo]): List[Option[FeedbackSessions]] = {
+    if (!expiredSessions.isEmpty) {
+      val mostRecentSession :: _ = expiredSessions.reverse
+      val immediateLastSessionDate = Instant.ofEpochMilli(mostRecentSession.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
+      expiredSessions.map(session => {
+        val sessionDate = Instant.ofEpochMilli(session.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
+        if (sessionDate == immediateLastSessionDate) {
+          val feedbackSession = FeedbackSessions(session.userId,
+            session.email,
+            new Date(session.date.value),
+            session.session,
+            session.feedbackFormId,
+            session.topic,
+            session.meetup,
+            session.rating,
+            session.cancelled,
+            session.active,
+            session._id,
+            session.expirationDate.fold{
+                "OOps! Unable to Load!"
+              }{ localDateTime =>
+                val date =  Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
+                date.toString
+              }
+            )
 
-    val currentDate = new Date(dateTimeUtility.nowMillis)
-    val scheduledDate = new Date(sessionScheduledDate)
-
-    val calendar = Calendar.getInstance()
-    calendar.setTime(scheduledDate)
-    calendar.set(Calendar.HOUR_OF_DAY, 23)
-    calendar.set(Calendar.MINUTE, 59)
-    calendar.set(Calendar.SECOND, 59)
-    calendar.set(Calendar.MILLISECOND, 999)
-
-    if (feedbackExpireOnWorkingDays.contains(calendar.get(Calendar.DAY_OF_WEEK))) {
-      calendar.add(Calendar.DAY_OF_WEEK, 1)
-      //current date < sessionDate + 1 day(end of the day) then display
+          Some(feedbackSession)
+        }
+        else {
+          None
+        }
+      })
     }
     else {
-      //friday ---> if current date < sessionDate + 3 days(end of the day) then display
-      if (calendar.get(Calendar.DAY_OF_WEEK) == 6) {
-        calendar.add(Calendar.DAY_OF_WEEK, 3)
+      List(None)
+    }
+  }
+
+  private def getActiveAndExpiredSessions(sessions: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
+    val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUtility.nowMillis), dateTimeUtility.ISTZoneId)
+
+    @tailrec
+    def check(sessions: List[SessionInfo], active: List[SessionInfo], expired: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
+      sessions match {
+        case Nil => (active, expired)
+        case session :: rest =>
+          val scheduledDate = Instant.ofEpochMilli(session.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
+          val sessionFeedbackExpirationDate = getSessionExpirationDate(scheduledDate)
+          if (currentDate.isAfter(sessionFeedbackExpirationDate)) {
+            check(rest, active, expired :+ session.copy(expirationDate = Some(sessionFeedbackExpirationDate)))
+          }
+          else {
+            check(rest, active :+  session.copy(expirationDate = Some(sessionFeedbackExpirationDate)), expired)
+          }
       }
-      //saturday ---> if current date < sessionDate + 2 days(end of the day) then display
+    }
+
+    check(sessions, Nil, Nil)
+  }
+
+  private def getSessionExpirationDate(scheduledDate: LocalDate): LocalDateTime = {
+    val feedbackExpireOnWorkingDays: List[DayOfWeek] = List(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
+    val dayOfTheWeek = scheduledDate.getDayOfWeek
+    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
+
+    if (feedbackExpireOnWorkingDays.contains(dayOfTheWeek)) {
+      LocalDateTime.of(scheduledDate.plusDays(1), tillEndOfTheDay)
+    }
+    else {
+      if (dayOfTheWeek == DayOfWeek.FRIDAY) {
+        LocalDateTime.of(scheduledDate.plusDays(3), tillEndOfTheDay)
+      }
       else {
-        calendar.add(Calendar.DAY_OF_WEEK, 2)
+        //SATURDAY
+        LocalDateTime.of(scheduledDate.plusDays(2), tillEndOfTheDay)
       }
-    }
-
-    if (currentDate.compareTo(calendar.getTime) <= 0) {
-      (false, calendar.getTime)
-    }
-    else {
-      (true, calendar.getTime)
     }
   }
 

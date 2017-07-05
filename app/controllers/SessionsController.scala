@@ -72,7 +72,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
-      "date" -> date("yyyy-MM-dd'T'HH:mm").verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
+      "date" -> date("yyyy-MM-dd'T'HH:mm"),//.verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", {
         !_.isEmpty

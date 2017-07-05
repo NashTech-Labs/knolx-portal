@@ -24,6 +24,20 @@ case class QuestionAndResponseInformation(question: String, options: List[String
 case class FeedbackResponse(id: Option[String], feedBackFormId: String, sessionId: String, name: String,
                             questionsAndResponses: List[QuestionAndResponseInformation]) {
 
+  def validateFeedFormId: Option[String] =
+    if (feedBackFormId.nonEmpty) {
+      None
+    } else {
+      Some("Feedback form id must not be empty!")
+    }
+
+  def validateSessionId: Option[String] =
+    if (sessionId.nonEmpty) {
+      None
+    } else {
+      Some("Session id must not be empty!")
+    }
+
   def validateName: Option[String] =
     if (name.nonEmpty) {
       None
@@ -283,18 +297,19 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       Future.successful(BadRequest("Malformed Data!"))
     } { feedbackFormResponse =>
       val validatedForm =
-        feedbackFormResponse.validateName orElse feedbackFormResponse.validateForm orElse feedbackFormResponse.validateQuestion orElse
+        feedbackFormResponse.validateFeedFormId orElse feedbackFormResponse.validateSessionId orElse
+          feedbackFormResponse.validateName orElse feedbackFormResponse.validateForm orElse feedbackFormResponse.validateQuestion orElse
           feedbackFormResponse.validateOptions orElse feedbackFormResponse.validateFormResponse
 
       validatedForm.fold {
-        val questionAndResponseInformations =
+        val questionAndResponseInformation =
           feedbackFormResponse.questionsAndResponses.map(responseInformation =>
             QuestionResponse(responseInformation.question, responseInformation.options, responseInformation.response))
 
         val dateTime = new Date(System.currentTimeMillis).getTime
 
         val feedbackResponseData = FeedbackFormsResponse(request.user.id, request.user.email, feedbackFormResponse.sessionId,
-          feedbackFormResponse.feedBackFormId, feedbackFormResponse.name, questionAndResponseInformations, BSONDateTime(dateTime))
+          feedbackFormResponse.feedBackFormId, feedbackFormResponse.name, questionAndResponseInformation, BSONDateTime(dateTime))
 
         feedbackResponseRepository.insert(feedbackResponseData).map { result =>
           if (result.ok) {

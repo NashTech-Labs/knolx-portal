@@ -24,6 +24,7 @@ case class CreateSessionInformation(email: String,
                                     session: String,
                                     feedbackFormId: String,
                                     topic: String,
+                                    feedbackExpirationDays: Int,
                                     meetup: Boolean)
 
 case class UpdateSessionInformation(_id: String,
@@ -31,6 +32,7 @@ case class UpdateSessionInformation(_id: String,
                                     session: String,
                                     feedbackFormId: String,
                                     topic: String,
+                                    feedbackExpirationDays: Int,
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
@@ -66,18 +68,21 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> nonEmptyText,
       "topic" -> nonEmptyText,
+      "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
       "meetup" -> boolean
     )(CreateSessionInformation.apply)(CreateSessionInformation.unapply)
   )
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
-      "date" -> date("yyyy-MM-dd'T'HH:mm"),//.verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
+      "date" -> date("yyyy-MM-dd'T'HH:mm"),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", {
         !_.isEmpty
       }),
       "topic" -> nonEmptyText,
+      "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
+        "must be in range 1 to 31", number => number >= 0 && number <= 31),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
@@ -177,7 +182,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
               } { userJson =>
                 val userObjId = userJson._id.stringify
                 val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, BSONDateTime(createSessionInfo.date.getTime),
-                  createSessionInfo.session, createSessionInfo.feedbackFormId, createSessionInfo.topic, createSessionInfo.meetup, rating = "",
+                  createSessionInfo.session, createSessionInfo.feedbackFormId, createSessionInfo.topic,
+                  createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
                   cancelled = false, active = true)
 
                 sessionsRepository.insert(session) flatMap { result =>
@@ -239,7 +245,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
-                sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.meetup))
+                sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 

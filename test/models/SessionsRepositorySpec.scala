@@ -28,7 +28,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "insert session" in new TestScope {
       val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
-        meetup = true, "", cancelled = false, active = true, sessionId)
+        1, meetup = true, "", cancelled = false, active = true, sessionId)
 
       val created = await(sessionsRepository.insert(userInfo).map(_.ok))
 
@@ -60,7 +60,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "update session" in new TestScope {
 
-      val updatedSession = UpdateSessionInformation(sessionId.stringify, date, "testsession", "feedbackFormId", "updaterecord")
+      val updatedSession = UpdateSessionInformation(sessionId.stringify, date, "testsession", "feedbackFormId", "updaterecord", 1)
       val updated = await(sessionsRepository.update(updatedSession).map(_.ok))
 
       updated must beEqualTo(true)
@@ -88,7 +88,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "fetch sessions scheduled  till now" in new TestScope {
       val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
-        meetup = true, "", cancelled = false, active = true, sessionId)
+        1, meetup = true, "", cancelled = false, active = true, sessionId)
 
       val sessions = await(sessionsRepository.getSessionsTillNow)
 

@@ -275,10 +275,10 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                   session.cancelled,
                   session.active,
                   session._id,
-                  session.expirationDate.fold{
+                  session.expirationDate.fold {
                     "OOps! Unable to Load!"
-                  }{ localDateTime =>
-                    val date =  Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
+                  } { localDateTime =>
+                    val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
                     date.toString
                   })
 
@@ -317,13 +317,13 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
             session.cancelled,
             session.active,
             session._id,
-            session.expirationDate.fold{
-                "OOps! Unable to Load!"
-              }{ localDateTime =>
-                val date =  Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
-                date.toString
-              }
-            )
+            session.expirationDate.fold {
+              "OOps! Unable to Load!"
+            } { localDateTime =>
+              val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
+              date.toString
+            }
+          )
 
           Some(feedbackSession)
         }
@@ -339,19 +339,24 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   private def getActiveAndExpiredSessions(sessions: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
     val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUtility.nowMillis), dateTimeUtility.ISTZoneId)
-
     @tailrec
     def check(sessions: List[SessionInfo], active: List[SessionInfo], expired: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
       sessions match {
         case Nil => (active, expired)
         case session :: rest =>
           val scheduledDate = Instant.ofEpochMilli(session.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
-          val sessionFeedbackExpirationDate = getSessionExpirationDate(scheduledDate)
+          val expirationDays = session.feedbackExpirationDays
+          val sessionFeedbackExpirationDate = if (expirationDays > 0) {
+            getCustomSessionExpirationDate(scheduledDate, session.feedbackExpirationDays)
+          }
+          else {
+            getDefaultSessionExpirationDate(scheduledDate)
+          }
           if (currentDate.isAfter(sessionFeedbackExpirationDate)) {
             check(rest, active, expired :+ session.copy(expirationDate = Some(sessionFeedbackExpirationDate)))
           }
           else {
-            check(rest, active :+  session.copy(expirationDate = Some(sessionFeedbackExpirationDate)), expired)
+            check(rest, active :+ session.copy(expirationDate = Some(sessionFeedbackExpirationDate)), expired)
           }
       }
     }
@@ -359,7 +364,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     check(sessions, Nil, Nil)
   }
 
-  private def getSessionExpirationDate(scheduledDate: LocalDate): LocalDateTime = {
+  private def getDefaultSessionExpirationDate(scheduledDate: LocalDate): LocalDateTime = {
     val feedbackExpireOnWorkingDays: List[DayOfWeek] = List(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
     val dayOfTheWeek = scheduledDate.getDayOfWeek
     val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
@@ -376,6 +381,11 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         LocalDateTime.of(scheduledDate.plusDays(2), tillEndOfTheDay)
       }
     }
+  }
+
+  private def getCustomSessionExpirationDate(scheduledDate: LocalDate, days: Int): LocalDateTime = {
+    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
+    LocalDateTime.of(scheduledDate.plusDays(days), tillEndOfTheDay)
   }
 
 }

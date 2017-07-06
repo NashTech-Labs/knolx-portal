@@ -1,6 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 
 import com.typesafe.config.ConfigFactory
 import models._
@@ -26,7 +27,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      meetup = true, "rating", cancelled = false, active = true, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, _id)))
   private val emailObject = Future.successful(List(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
@@ -405,7 +406,8 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getSessionsTillNow returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
-
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.nowMillis returns date.getTime
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
@@ -415,11 +417,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "render feedback form for today if session associated feedback form found and session not expired" in new WithTestApplication {
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
-          meetup = true, "rating", cancelled = false, active = true, _id)))
+          1, meetup = true, "rating", cancelled = false, active = true, _id)))
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getSessionsTillNow returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
-
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.nowMillis returns date.getTime
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
@@ -430,21 +433,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getSessionsTillNow returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
-
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.nowMillis returns date.getTime
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
-    }
-
-    "check for the expired feedback" in new WithTestApplication {
-      val (result, associatedDate) = controller.isExpired(date.getTime)
-      result must beEqualTo(true)
-    }
-
-    "check for the active feedback" in new WithTestApplication {
-      val (result, associatedDate) = controller.isExpired(System.currentTimeMillis)
-      result must beEqualTo(false)
     }
 
   }

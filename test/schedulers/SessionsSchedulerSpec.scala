@@ -49,6 +49,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         session = "session 1",
         feedbackFormId = "feedbackFormId",
         topic = "Play Framework",
+        feedbackExpirationDays = 1,
         meetup = true,
         rating = "",
         cancelled = false,

@@ -26,6 +26,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+  private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, _id)))
+
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
 
@@ -51,12 +57,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
-
-  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  private val _id: BSONObjectID = BSONObjectID.generate()
-  private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      meetup = true, "rating", cancelled = false, active = true, _id)))
 
   "Session Controller" should {
 
@@ -209,6 +209,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "session" -> "session 1",
           "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
+          "feedbackExpirationDays" -> "1",
           "meetup" -> "true"))
 
       status(result) must be equalTo SEE_OTHER
@@ -234,6 +235,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "session" -> "session 1",
           "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
+          "feedbackExpirationDays" -> "1",
           "meetup" -> "true"))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
@@ -321,7 +323,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", BSONDateTime(date.getTime), "session 1",
-        "feedbackFormId", "topic", meetup = false, "", cancelled = false, active = true, _id)))
+        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -373,7 +375,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", meetup = true)
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -387,6 +389,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "session" -> "session 1",
           "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
+          "feedbackExpirationDays" -> "1",
           "meetup" -> "true"))
 
       status(result) must be equalTo SEE_OTHER
@@ -400,7 +403,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", meetup = true)
+      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -414,6 +417,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "session" -> "session 1",
           "feedbackFormId" -> "feedbackFormId",
           "topic" -> "topic",
+          "feedbackExpirationDays" -> "1",
           "meetup" -> "true"))
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR

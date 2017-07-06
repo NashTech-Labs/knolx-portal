@@ -8,6 +8,7 @@
     background-color: #fff;
     padding: 15px 0px;
     outline: none;
+
 }
 
 .top {
@@ -15,9 +16,15 @@
 }
 
 .update-outer {
-    height: 560px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 1px;
+    padding-right: 0px;
+    padding-left: 0px;
 }
 
 #date {

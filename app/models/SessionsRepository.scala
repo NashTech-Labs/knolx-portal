@@ -27,12 +27,13 @@ case class SessionInfo(userId: String,
                        session: String,
                        feedbackFormId: String,
                        topic: String,
+                       feedbackExpirationDays: Int,
                        meetup: Boolean,
                        rating: String,
                        cancelled: Boolean,
                        active: Boolean,
                        _id: BSONObjectID = BSONObjectID.generate,
-                      expirationDate: Option[LocalDateTime] = None)
+                       expirationDate: Option[LocalDateTime] = None)
 
 object SessionJsonFormats {
 
@@ -47,8 +48,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   import play.modules.reactivemongo.json._
 
   val pageSize = 10
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[JsObject]] =
     collection
@@ -126,6 +125,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "topic" -> updatedRecord.topic,
         "session" -> updatedRecord.session,
         "feedbackFormId" -> updatedRecord.feedbackFormId,
+        "feedbackExpirationDays" -> updatedRecord.feedbackExpirationDays,
         "meetup" -> updatedRecord.meetup)
     )
 
@@ -133,7 +133,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       jsonCollection.update(selector, modifier))
   }
 
-  def getSessionsTillNow : Future[List[SessionInfo]] =
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
+
+  def getSessionsTillNow: Future[List[SessionInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
@@ -145,4 +147,4 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List]())
 
-  }
+}

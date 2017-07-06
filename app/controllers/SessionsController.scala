@@ -77,9 +77,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "sessionId" -> nonEmptyText,
       "date" -> date("yyyy-MM-dd'T'HH:mm"),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
-      "feedbackFormId" -> text.verifying("Please attach a feedback form template", {
-        !_.isEmpty
-      }),
+      "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
         "must be in range 1 to 31", number => number >= 0 && number <= 31),

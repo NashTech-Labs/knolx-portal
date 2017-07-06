@@ -278,7 +278,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                   session.expirationDate.fold {
                     "OOps! Unable to Load!"
                   } { localDateTime =>
-                    val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
+                    val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant())
                     date.toString
                   })
 
@@ -286,7 +286,8 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
                 Some((sessionInformation, associatedFeedbackFormInformation))
 
-              case None => Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
+              case None =>
+                Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                 None
             }
           })
@@ -306,6 +307,14 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       expiredSessions.map(session => {
         val sessionDate = Instant.ofEpochMilli(session.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
         if (sessionDate == immediateLastSessionDate) {
+
+          val expirationDate = session.expirationDate.fold {
+            "OOps! Unable to Load!"
+          } { localDateTime =>
+            val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
+            date.toString
+          }
+
           val feedbackSession = FeedbackSessions(session.userId,
             session.email,
             new Date(session.date.value),
@@ -317,12 +326,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
             session.cancelled,
             session.active,
             session._id,
-            session.expirationDate.fold {
-              "OOps! Unable to Load!"
-            } { localDateTime =>
-              val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant());
-              date.toString
-            }
+            expirationDate
           )
 
           Some(feedbackSession)
@@ -339,6 +343,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   private def getActiveAndExpiredSessions(sessions: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
     val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUtility.nowMillis), dateTimeUtility.ISTZoneId)
+
     @tailrec
     def check(sessions: List[SessionInfo], active: List[SessionInfo], expired: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
       sessions match {

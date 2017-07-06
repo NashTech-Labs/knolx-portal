@@ -1,6 +1,6 @@
 package utilities
 
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 import com.google.inject.Singleton
 
@@ -15,8 +15,8 @@ class DateTimeUtility {
   def startOfDayMillis: Long =
     localDateIST.atStartOfDay(ISTZoneId).toEpochSecond * 1000
 
-  def localDateIST: java.time.LocalDate =
-    java.time.LocalDate.now(ISTZoneId)
+  def localDateIST: LocalDate =
+    LocalDate.now(ISTZoneId)
 
   def endOfDayMillis: Long = {
     val zoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))

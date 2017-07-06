@@ -30,11 +30,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     val mailerClient = mock[MailerClient]
     val usersRepository: UsersRepository = mock[UsersRepository]
     val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
 
     val config = Configuration(ConfigFactory.load("application.conf"))
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
 
-    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository)
+    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository, feedbackResponseRepository)
 
     override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
@@ -378,7 +379,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
-      
+
       status(response) must be equalTo OK
     }
 
@@ -398,5 +399,220 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo OK
     }
 
+    "store feedback form response" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "feedBackFormId",
+          |	"sessionId": "sessionId",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackResponseRepository.insert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo OK
+      contentAsString(response) must be equalTo "Feedback form response successfully strored!"
+    }
+
+    "not store feedback form response because feedback response is not insert in database" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "feedBackFormId",
+          |	"sessionId": "sessionId",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackResponseRepository.insert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo INTERNAL_SERVER_ERROR
+      contentAsString(response) must be equalTo "Something Went Wrong!"
+    }
+
+    "not feedback form response because of malformed data" in new WithTestApplication {
+      val payload =
+        """{
+          |	"sessionId": "sessionId",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed Data!"
+    }
+
+    "not store feedback form response because feedback form id is empty" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "",
+          |	"sessionId": "sessionId",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed Data!"
+    }
+
+    "not store feedback form response because session id is empty" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "feedBackFormId",
+          |	"sessionId": "",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed Data!"
+    }
+
+    "not store feedback form response because feedback form name is empty" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "feedBackFormId",
+          |	"sessionId": "sessionId",
+          |	"name": "",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed Data!"
+    }
+
+    "not store feedback form response because option is empty" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "feedBackFormId",
+          |	"sessionId": "sessionId",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": [],
+          |		"response": "1"
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed Data!"
+    }
+
+    "not store feedback form response because response is empty" in new WithTestApplication {
+      val payload =
+        """{
+          |	"id": "id",
+          |	"feedBackFormId": "feedBackFormId",
+          |	"sessionId": "sessionId",
+          |	"name": "Test Form",
+          |	"questionsAndResponses": [{
+          |		"question": "How good is knolx portal?",
+          |		"options": ["1", "2", "3", "4", "5"],
+          |		"response": ""
+          |	}]
+          |}""".stripMargin.replace("\n", "")
+
+      val request = FakeRequest(POST, "/feedbackform/response").withBody(Json.parse(payload))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val response = controller.storeFeedbackFormResponse()(request)
+
+      status(response) must be equalTo BAD_REQUEST
+      contentAsString(response) must be equalTo "Malformed Data!"
+    }
   }
 }

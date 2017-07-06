@@ -7,7 +7,7 @@ import play.api.routing.JavaScriptReverseRouter
 
 class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents) extends KnolxAbstractController(controllerComponents) {
 
-  def jsRoutes: Action[AnyContent] = Action { implicit request =>
+  def jsRoutes: Action[AnyContent] = action { implicit request =>
     Ok(JavaScriptReverseRouter("jsRoutes")(
       controllers.routes.javascript.FeedbackFormsController.createFeedbackForm,
       controllers.routes.javascript.FeedbackFormsController.updateFeedbackForm,

@@ -81,7 +81,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions(pageNumber: Int = 1): Action[AnyContent] = Action.async { implicit request =>
+  def sessions(pageNumber: Int = 1): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionInfo =>
@@ -282,7 +282,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def cancelScheduledSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
+  def cancelScheduledSession(sessionId: String): Action[AnyContent] = action.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1))
@@ -293,7 +293,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def scheduleSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
+  def scheduleSession(sessionId: String): Action[AnyContent] = action.async { implicit request =>
     (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1))

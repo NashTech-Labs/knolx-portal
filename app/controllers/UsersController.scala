@@ -75,11 +75,11 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def login: Action[AnyContent] = Action { implicit request =>
+  def login: Action[AnyContent] = action { implicit request =>
     Ok(views.html.users.login(loginForm))
   }
 
-  def loginUser: Action[AnyContent] = Action.async { implicit request =>
+  def loginUser: Action[AnyContent] = action.async { implicit request =>
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))
@@ -116,7 +116,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def logout: Action[AnyContent] = Action { implicit request =>
+  def logout: Action[AnyContent] = action { implicit request =>
     Redirect(routes.HomeController.index()).withNewSession
   }
 

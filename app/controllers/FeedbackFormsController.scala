@@ -7,7 +7,7 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.{Email, MailerClient}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc._
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -82,10 +82,12 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
 }
 
 @Singleton
-class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
+class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
                                         mailerClient: MailerClient,
                                         usersRepository: UsersRepository,
-                                        feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit with I18nSupport {
+                                        feedbackRepository: FeedbackFormsRepository,
+                                        controllerComponents: KnolxControllerComponents
+                                       ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val questionInformationFormat = Json.format[QuestionInformation]
   implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
@@ -94,7 +96,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   val usersRepo = usersRepository
 
-  def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .paginate(pageNumber)
       .flatMap { feedbackForms =>
@@ -112,11 +114,11 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def feedbackForm: Action[AnyContent] = AdminAction { implicit request =>
+  def feedbackForm: Action[AnyContent] = adminAction { implicit request =>
     Ok(views.html.feedbackforms.createfeedbackform())
   }
 
-  def createFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
+  def createFeedbackForm: Action[JsValue] = adminAction.async(parse.json) { implicit request =>
     request.body.validate[FeedbackFormInformation].asOpt.fold {
       Logger.error(s"Received a bad request while creating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
@@ -143,7 +145,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def getFeedbackFormPreview(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def getFeedbackFormPreview(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
@@ -156,7 +158,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
+  def sendFeedbackForm(sessionId: String): Action[AnyContent] = adminAction { implicit request =>
     val email =
       Email(subject = "Knolx Feedback Form",
         from = "sidharth@knoldus.com",
@@ -169,7 +171,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     Ok(emailSent)
   }
 
-  def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .getByFeedbackFormId(id)
       .map {
@@ -191,7 +193,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
   }
 
-  def updateFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
+  def updateFeedbackForm: Action[JsValue] = adminAction.async(parse.json) { implicit request =>
     request.body.validate[UpdateFeedbackFormInformation].asOpt.fold {
       Logger.error(s"Received a bad request while updating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
@@ -219,7 +221,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def deleteFeedbackForm(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteFeedbackForm(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .delete(id)
       .flatMap(_.fold {

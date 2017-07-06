@@ -18,7 +18,10 @@ case class UserInformation(email: String, password: String, confirmPassword: Str
 case class LoginInformation(email: String, password: String)
 
 @Singleton
-class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: UsersRepository) extends Controller with I18nSupport {
+class UsersController @Inject()(messagesApi: MessagesApi,
+                                usersRepository: UsersRepository,
+                                controllerComponents: KnolxControllerComponents
+                               ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   val userForm = Form(
     mapping(

@@ -49,13 +49,14 @@ object SessionValues {
 }
 
 @Singleton
-class SessionsController @Inject()(val messagesApi: MessagesApi,
+class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
-                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef) extends Controller
-  with SecuredImplicit with I18nSupport {
+                                   controllerComponents: KnolxControllerComponents,
+                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef
+                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
 
@@ -105,7 +106,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def manageSessions(pageNumber: Int = 1): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageSessions(pageNumber: Int = 1): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsInfo =>
@@ -144,7 +145,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def create: Action[AnyContent] = UserAction.async { implicit request =>
+  def create: Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .map { feedbackForms =>
@@ -154,7 +155,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def createSession: Action[AnyContent] = UserAction.async { implicit request =>
+  def createSession: Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -203,7 +204,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
       .flatMap(_.fold {
@@ -226,7 +227,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       })
   }
 
-  def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .getById(id)
       .flatMap {
@@ -245,7 +246,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def updateSession(): Action[AnyContent] = AdminAction.async { implicit request =>
+  def updateSession(): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>

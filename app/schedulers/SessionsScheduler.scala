@@ -42,6 +42,7 @@ object SessionsScheduler {
 
   val ToEmail = "sidharth@knoldus.com"
   val FromEmail = "sidharth@knoldus.com"
+
 }
 
 class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
@@ -56,17 +57,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     val initialDelay = ((dateTimeUtility.endOfDayMillis + 61 * 1000) - millis).milliseconds
     Logger.info(s"Sessions scheduler will start after $initialDelay")
 
-    // starts feedback form schedulers for sessions starting next day
     self ! StartSessionsScheduler(initialDelay, 1.day)
-
-    val sessionsScheduledToday = sessionsRepository.sessionsScheduledToday map { sessions =>
-      sessions collect { case session
-        if new Date(session.date.value).after(new Date(millis)) => session
-      }
-    }
-
-    // starts feedback form schedulers for today's sessions
-    self ! ScheduleSessionsForToday(self, sessionsScheduledToday)
+    self ! ScheduleSessionsForToday(self, sessionsScheduledToday(millis))
   }
 
   def scheduler: Scheduler = context.system.scheduler
@@ -102,12 +94,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def schedulingHandler: Receive = {
     case ScheduleSessions(originalSender) =>
       Logger.info(s"Starting schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
-      val eventualSessions =
-        sessionsRepository.sessionsScheduledToday map { sessions =>
-          sessions collect { case session
-            if new Date(session.date.value).after(new Date(dateTimeUtility.nowMillis)) => session
-          }
-        }
+      val eventualSessions = sessionsScheduledToday(dateTimeUtility.nowMillis)
       val eventualScheduledSessions = scheduleSessions(eventualSessions)
 
       eventualScheduledSessions foreach { schedulers =>
@@ -188,7 +175,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.error(s"Received a message $msg in Sessions Scheduler which cannot be handled")
   }
 
-  private def scheduleSessions(eventualSessions: Future[List[SessionInfo]]): Future[Map[String, Cancellable]] = {
+  def scheduleSessions(eventualSessions: Future[List[SessionInfo]]): Future[Map[String, Cancellable]] =
     eventualSessions flatMap { sessions =>
       Logger.info(s"Scheduling sessions today booked at ${sessions.map(session => new Date(session.date.value))}")
 
@@ -208,6 +195,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         }
       }
     } map (_.flatten.toMap)
-  }
+
+  def sessionsScheduledToday(millis: Long): Future[List[SessionInfo]] =
+    sessionsRepository.sessionsScheduledToday map { sessions =>
+      sessions collect { case session
+        if new Date(session.date.value).after(new Date(millis)) => session
+      }
+    }
 
 }

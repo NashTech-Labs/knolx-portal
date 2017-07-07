@@ -16,6 +16,8 @@ import utilities.DateTimeUtility
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class QuestionInformation(question: String, options: List[String])
 
@@ -115,6 +117,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
   implicit val feedbackFormInformationFormat: OFormat[FeedbackFormInformation] = Json.format[FeedbackFormInformation]
   implicit val feedbackPreviewFormat: OFormat[FeedbackFormPreview] = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat: OFormat[UpdateFeedbackFormInformation] = Json.format[UpdateFeedbackFormInformation]
+  implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
 
   val usersRepo: UsersRepository = usersRepository
 
@@ -284,7 +287,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
                 val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id)
-                Some((sessionInformation, associatedFeedbackFormInformation))
+                Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
 
               case None =>
                 Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")

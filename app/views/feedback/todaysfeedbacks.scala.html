@@ -1,14 +1,14 @@
 
-@(active:List[(FeedbackSessions,FeedbackForms)],expired:List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(active:List[(FeedbackSessions,String)],expired:List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Feedbacks") {
-
   <div class="row">
     <div class="col-md-2" ></div>
     <div class="col-md-8 feedback-form-display-container">
       <div class="col-md-12 login-first test feedback-top-banner"></div>
       @if(active.nonEmpty){
         @for((sessions,feedbackForm)<- active){
+@*          <h1>@feedbackForm</h1>*@
           <div class="col-md-4">
             <div class="col-md-12">
               <div id='parent' style='width: 100% ;'>
@@ -18,7 +18,7 @@
                     <div class="col-md-12 feedback-card-topic"><p>@sessions.topic</p></div>
                     <div class="col-md-12 feedback-card-by">by</div>
                   <div class="col-md-12 feedback-card-author"><p>@sessions.email</p></div>
-                  <button type="button" class="btn  feedback-card-button">Fill Out</button>
+                  <button type="button" class="btn  feedback-card-button" onclick='formOpener("{\"topic\":\"@sessions.topic\",\"author\":\"@sessions.email\",\"session\":\"@sessions.session\",\"scheduled\":\"@sessions.date\",\"expire\":\"@sessions.expirationDate\",\"sessiontype\":\"@sessionType\"}"); loadFeedbackForm(@feedbackForm)'>Fill Out</button>
                   <div class="col-md-12 feedback-card-author more"><p onclick='opener("{\"topic\":\"@sessions.topic\",\"author\":\"@sessions.email\",\"session\":\"@sessions.session\",\"scheduled\":\"@sessions.date\",\"expire\":\"@sessions.expirationDate\",\"sessiontype\":\"@sessionType\"}")'>More...</p></div>
                 </div>
               </div>
@@ -65,7 +65,7 @@
                   <td>Presenter<br/><span class="session-card-values" id="author" ></span></td>
                 </tr>
                 <tr>
-                  <td>Session<br/><span class="session-card-values" id="session">Session 1</span></td>
+                  <td>Session<br/><span class="session-card-values" id="session"></span></td>
                 </tr>
                 <tr>
                   <td>scheduled<br/><span class="session-card-values" id="scheduled"></span></td>
@@ -88,6 +88,50 @@
 
   <script src="@routes.Assets.versioned("javascripts/todayssessioninfo.js")" type="text/javascript"></script>
 
+    <!-- Modal -->
+  <div class="modal fade" id="session-form-info" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content feedback-response-outer">
+        <div class="modal-body">
 
+          <div class="row">
+            <div class="col-md-4 feedback-response-details" >
+
+              <div class="modal-body session-information-modal form-session-information-modal">
+                <table class="table table-striped session-table">
+                  <tbody class="session-details">
+                    <tr>
+                      <td>Presenter<br/><span class="session-card-values" id="form-author" ></span></td>
+                    </tr>
+                    <tr>
+                      <td>Session<br/><span class="session-card-values" id="form-session"></span></td>
+                    </tr>
+                    <tr>
+                      <td>scheduled<br/><span class="session-card-values" id="form-scheduled"></span></td>
+                    </tr>
+                    <tr>
+                      <td>Expiration<br/><span class="session-card-values" id="form-expire"></span></td>
+                    </tr>
+                    <tr>
+                      <td>Type<br/><span class="session-card-values" id="form-sessiontype"></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="col-md-8 feedback-response-form" >
+              <div id="feedback-response-form"></div>
+              <div id='parent' style='width: 100% ;text-align: center;'>
+                  <button type="button" class="btn btn-primary btn-lg submit-form-button">Submit</button>
+              </div>
+              </div>
+
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
 }
 

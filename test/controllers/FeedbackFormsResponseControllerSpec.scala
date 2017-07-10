@@ -21,7 +21,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnvironment {
-
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
@@ -57,6 +56,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       dateTimeUtility.nowMillis returns date.getTime
+
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
@@ -67,11 +67,13 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
           1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
+
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getSessionsTillNow returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       dateTimeUtility.nowMillis returns date.getTime
+
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
@@ -84,6 +86,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       dateTimeUtility.nowMillis returns date.getTime
+
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 

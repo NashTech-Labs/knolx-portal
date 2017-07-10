@@ -1,7 +1,5 @@
 package controllers
 
-import java.time.{DayOfWeek, _}
-import java.util.Date
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -10,14 +8,11 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
-import reactivemongo.bson.BSONObjectID
 import utilities.DateTimeUtility
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-// this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class QuestionInformation(question: String, options: List[String])
 

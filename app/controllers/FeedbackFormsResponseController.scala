@@ -28,7 +28,7 @@ case class FeedbackSessions(userId: String,
                             rating: String,
                             cancelled: Boolean,
                             active: Boolean,
-                            _id: String,
+                            id: String,
                             expirationDate: String)
 
 case class FeedbackForms(name: String,

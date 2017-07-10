@@ -1,0 +1,1 @@
+$('#update-restricted').modal('show');

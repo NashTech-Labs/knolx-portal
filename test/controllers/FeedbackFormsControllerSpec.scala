@@ -1,6 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 
 import com.typesafe.config.ConfigFactory
 import models._
@@ -205,7 +206,8 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "send form asked to update to feedback update page" in new WithTestApplication {
-
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      sessionsRepository.sessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
@@ -216,7 +218,8 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not update Feedback Form as not found" in new WithTestApplication {
-
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      sessionsRepository.sessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 

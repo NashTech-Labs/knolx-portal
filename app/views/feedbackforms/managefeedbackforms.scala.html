@@ -1,6 +1,25 @@
 @(updateFeedbackFormInformation: List[UpdateFeedbackFormInformation], pageNumber: Int, pages: Int)(implicit request: Request[_], messages: Messages, flash: Flash)
 
     @main("Manage Sessions") {
+
+    <div class="modal fade " id="update-restricted" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-body update-warning-outer" style="text-align: center">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="col-md-12 update-warning-title">
+                        <i class="fa fa-bolt update-warning-sign" aria-hidden="true"></i>
+                        <span class="update-warning-title-message">Form editing Restricted</span>
+                    </div>
+                    <div class="col-md-12 update-warning-message">This Feedback form is currently being used by some active Session(s)</div>
+                    <div class="col-md-12 update-warning-message update-warning_message">Please Try later!</div>
+                    <button type="button" class="btn btn-default update-warning-close-btn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
         <div class="row">
             <div class="col-md-2" ></div>
             <div class="col-md-8 feedback-form-container" >
@@ -21,6 +40,10 @@
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                             <strong>Success!</strong> @flash.get("message").fold("")(message => message)
                         </div>
+                        <script src="@routes.Assets.versioned("javascripts/managefeedbackformupdate.js")" type="text/javascript"></script>
+                    }
+                    @if(!flash.get("info").fold("")(identity).isEmpty) {
+                        <script src="@routes.Assets.versioned("javascripts/managefeedbackformupdate.js")" type="text/javascript"></script>
                     }
                     @if(!flash.get("errormessage").fold("")(identity).isEmpty) {
                         <div class="alert alert-danger  alert-dismissable fade in" style="margin-top: 20px ;
@@ -51,4 +74,6 @@
             </div>
             <div class="col-md-2" ></div>
         </div>
+
+
     }

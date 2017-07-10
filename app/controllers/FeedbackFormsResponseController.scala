@@ -109,13 +109,11 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
           )
 
           Some(feedbackSession)
-        }
-        else {
+        } else {
           None
         }
       })
-    }
-    else {
+    } else {
       List(None)
     }
   }

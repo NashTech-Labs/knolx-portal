@@ -65,7 +65,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val createSessionForm = Form(
     mapping(
       "email" -> email,
-      "date" -> date("yyyy-MM-dd'T'HH:mm").verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
+      "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone)
+        .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
@@ -76,7 +77,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   val updateSessionForm = Form(
     mapping(
       "sessionId" -> nonEmptyText,
-      "date" -> date("yyyy-MM-dd'T'HH:mm"),
+      "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
@@ -176,29 +177,26 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
               .getByEmail(createSessionInfo.email.toLowerCase)
               .flatMap(_.headOption.fold {
                 Future.successful(
-                  BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds))
-                )
+                  BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
               } { userJson =>
-                val userObjId = userJson._id.stringify
-                val expirationDate = Date.from(getSessionExpirationDate(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
-                  .atZone(dateTimeUtility.ISTZoneId).toInstant)
+                val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
 
-                val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, BSONDateTime(createSessionInfo.date.getTime),
-                  createSessionInfo.session, createSessionInfo.feedbackFormId, createSessionInfo.topic,
-                  createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  cancelled = false, active = true, BSONDateTime(expirationDate.getTime))
+                val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
+                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
+                  createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
+                  cancelled = false, active = true, BSONDateTime(expirationDateMillis))
 
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
 
                     (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-                      case ScheduledSessionsRefreshed =>
+                      case ScheduledSessionsRefreshed    =>
                         Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully created!")
                       case ScheduledSessionsNotRefreshed =>
                         Logger.error(s"Cannot refresh feedback form schedulers while creating session ${createSessionInfo.topic}")
                         InternalServerError("Something went wrong!")
-                      case msg =>
+                      case msg                           =>
                         Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while creating session ${createSessionInfo.topic}")
                         InternalServerError("Something went wrong!")
                     }
@@ -212,41 +210,6 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  private def getSessionExpirationDate(date: Date, customDays: Int): LocalDateTime = {
-    val scheduledDate = Instant.ofEpochMilli(date.getTime).atZone(dateTimeUtility.ISTZoneId).toLocalDate
-
-    if (customDays > 0) {
-      getCustomSessionExpirationDate(scheduledDate, customDays)
-    }
-    else {
-      getDefaultSessionExpirationDate(scheduledDate)
-    }
-  }
-
-  private def getDefaultSessionExpirationDate(scheduledDate: LocalDate): LocalDateTime = {
-    val feedbackExpireOnWorkingDays: List[DayOfWeek] = List(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
-    val dayOfTheWeek = scheduledDate.getDayOfWeek
-    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
-
-    if (feedbackExpireOnWorkingDays.contains(dayOfTheWeek)) {
-      LocalDateTime.of(scheduledDate.plusDays(1), tillEndOfTheDay)
-    }
-    else {
-      if (dayOfTheWeek == DayOfWeek.FRIDAY) {
-        LocalDateTime.of(scheduledDate.plusDays(3), tillEndOfTheDay)
-      }
-      else {
-        //SATURDAY
-        LocalDateTime.of(scheduledDate.plusDays(2), tillEndOfTheDay)
-      }
-    }
-  }
-
-  private def getCustomSessionExpirationDate(scheduledDate: LocalDate, days: Int): LocalDateTime = {
-    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
-    LocalDateTime.of(scheduledDate.plusDays(days), tillEndOfTheDay)
-  }
-
   def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
@@ -258,12 +221,12 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
         Logger.info(s"Knolx session $id successfully deleted")
 
         (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-          case ScheduledSessionsRefreshed =>
+          case ScheduledSessionsRefreshed    =>
             Redirect(routes.SessionsController.manageSessions(pageNumber)).flashing("message" -> "Session successfully Deleted!")
           case ScheduledSessionsNotRefreshed =>
             Logger.error(s"Cannot refresh feedback form schedulers while deleting session $id")
             InternalServerError("Something went wrong!")
-          case msg =>
+          case msg                           =>
             Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while deleting session $id")
             InternalServerError("Something went wrong!")
         }
@@ -300,9 +263,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
           },
           sessionUpdateInfo => {
-            val expirationDate = Date.from(getSessionExpirationDate(sessionUpdateInfo.date, sessionUpdateInfo.feedbackExpirationDays)
-              .atZone(dateTimeUtility.ISTZoneId).toInstant)
-            val updatedSession = UpdateSessionInfo(sessionUpdateInfo, BSONDateTime(expirationDate.getTime))
+            val expirationMillis = sessionExpirationMillis(sessionUpdateInfo.date, sessionUpdateInfo.feedbackExpirationDays)
+            val updatedSession = UpdateSessionInfo(sessionUpdateInfo, BSONDateTime(expirationMillis))
 
             sessionsRepository
               .update(updatedSession)
@@ -311,12 +273,12 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                   Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")
 
                   (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-                    case ScheduledSessionsRefreshed =>
+                    case ScheduledSessionsRefreshed    =>
                       Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
                     case ScheduledSessionsNotRefreshed =>
                       Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo._id}")
                       InternalServerError("Something went wrong!")
-                    case msg =>
+                    case msg                           =>
                       Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo._id}")
                       InternalServerError("Something went wrong!")
                   }
@@ -331,7 +293,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
-      case true =>
+      case true  =>
         Redirect(routes.SessionsController.manageSessions(1))
           .flashing("message" -> "Scheduled feedback form successfully cancelled!")
       case false =>
@@ -342,13 +304,39 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
   def scheduleSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
     (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
-      case true =>
+      case true  =>
         Redirect(routes.SessionsController.manageSessions(1))
           .flashing("message" -> "Feedback form successfully scheduled!")
       case false =>
         Redirect(routes.SessionsController.manageSessions(1))
           .flashing("message" -> "Something went wrong while scheduling feedback form!")
     }
+  }
+
+  private def sessionExpirationMillis(date: Date, customDays: Int): Long =
+    if (customDays > 0) {
+      customSessionExpirationMillis(date, customDays)
+    } else {
+      defaultSessionExpirationMillis(date)
+    }
+
+  private def defaultSessionExpirationMillis(date: Date): Long = {
+    val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
+
+    val expirationDate = scheduledDate.getDayOfWeek match {
+      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(3)
+      case DayOfWeek.SATURDAY => scheduledDate.plusDays(2)
+      case _: DayOfWeek       => scheduledDate.plusDays(1)
+    }
+
+    dateTimeUtility.toMillis(expirationDate)
+  }
+
+  private def customSessionExpirationMillis(date: Date, days: Int): Long = {
+    val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
+    val expirationDate = scheduledDate.plusDays(days)
+
+    dateTimeUtility.toMillis(expirationDate)
   }
 
 }

@@ -15,6 +15,7 @@ import utilities.DateTimeUtility
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
@@ -34,7 +35,7 @@ case class FeedbackSessions(userId: String,
 case class FeedbackForms(name: String,
                          questions: List[QuestionInformation],
                          active: Boolean = true,
-                         _id: String)
+                         id: String)
 
 class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
@@ -128,7 +129,7 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
     @tailrec
     def check(sessions: List[SessionInfo], active: List[SessionInfo], expired: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
       sessions match {
-        case Nil => (active, expired)
+        case Nil             => (active, expired)
         case session :: rest =>
           val expiredDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(session.expirationDate.value), dateTimeUtility.ISTZoneId)
           if (currentDate.isAfter(expiredDate)) {

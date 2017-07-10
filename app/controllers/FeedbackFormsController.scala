@@ -155,7 +155,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
-        case None => NotFound("404! feedback form not found")
+        case None               => NotFound("404! feedback form not found")
       }
   }
 
@@ -177,7 +177,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-        case None => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
       }
   }
 
@@ -186,7 +186,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     @tailrec
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
-        case Nil => json
+        case Nil          => json
         case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
       }
     }

@@ -1,11 +1,12 @@
 package controllers
 
+import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.actor.ActorRef
 import akka.pattern.ask
-import models.{FeedbackFormsRepository, SessionsRepository, UsersRepository}
+import models.{FeedbackFormsRepository, SessionsRepository, UpdateSessionInfo, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -66,7 +67,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "email" -> email,
       "date" -> date("yyyy-MM-dd'T'HH:mm").verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
-      "feedbackFormId" -> nonEmptyText,
+      "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
       "meetup" -> boolean
@@ -179,10 +180,13 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                 )
               } { userJson =>
                 val userObjId = userJson._id.stringify
+                val expirationDate = Date.from(getSessionExpirationDate(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
+                  .atZone(dateTimeUtility.ISTZoneId).toInstant)
+
                 val session = models.SessionInfo(userObjId, createSessionInfo.email.toLowerCase, BSONDateTime(createSessionInfo.date.getTime),
                   createSessionInfo.session, createSessionInfo.feedbackFormId, createSessionInfo.topic,
                   createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  cancelled = false, active = true)
+                  cancelled = false, active = true, BSONDateTime(expirationDate.getTime))
 
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
@@ -200,13 +204,47 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
                     }
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
-
                     Future.successful(InternalServerError("Something went wrong!"))
                   }
                 }
               })
           })
       }
+  }
+
+  private def getSessionExpirationDate(date: Date, customDays: Int): LocalDateTime = {
+    val scheduledDate = Instant.ofEpochMilli(date.getTime).atZone(dateTimeUtility.ISTZoneId).toLocalDate
+
+    if (customDays > 0) {
+      getCustomSessionExpirationDate(scheduledDate, customDays)
+    }
+    else {
+      getDefaultSessionExpirationDate(scheduledDate)
+    }
+  }
+
+  private def getDefaultSessionExpirationDate(scheduledDate: LocalDate): LocalDateTime = {
+    val feedbackExpireOnWorkingDays: List[DayOfWeek] = List(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
+    val dayOfTheWeek = scheduledDate.getDayOfWeek
+    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
+
+    if (feedbackExpireOnWorkingDays.contains(dayOfTheWeek)) {
+      LocalDateTime.of(scheduledDate.plusDays(1), tillEndOfTheDay)
+    }
+    else {
+      if (dayOfTheWeek == DayOfWeek.FRIDAY) {
+        LocalDateTime.of(scheduledDate.plusDays(3), tillEndOfTheDay)
+      }
+      else {
+        //SATURDAY
+        LocalDateTime.of(scheduledDate.plusDays(2), tillEndOfTheDay)
+      }
+    }
+  }
+
+  private def getCustomSessionExpirationDate(scheduledDate: LocalDate, days: Int): LocalDateTime = {
+    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
+    LocalDateTime.of(scheduledDate.plusDays(days), tillEndOfTheDay)
   }
 
   def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
@@ -262,8 +300,12 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
           },
           sessionUpdateInfo => {
+            val expirationDate = Date.from(getSessionExpirationDate(sessionUpdateInfo.date, sessionUpdateInfo.feedbackExpirationDays)
+              .atZone(dateTimeUtility.ISTZoneId).toInstant)
+            val updatedSession = UpdateSessionInfo(sessionUpdateInfo, BSONDateTime(expirationDate.getTime))
+
             sessionsRepository
-              .update(sessionUpdateInfo)
+              .update(updatedSession)
               .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"Successfully updated session ${sessionUpdateInfo._id}")

@@ -1,6 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.util.Date
 
 import akka.actor.ActorRef
@@ -30,7 +31,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
@@ -201,6 +202,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
 
       val result = controller.createSession(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -227,6 +229,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
 
       val result = controller.createSession(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -323,7 +326,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", BSONDateTime(date.getTime), "session 1",
-        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, _id)))
+        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -375,12 +378,13 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true)
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.update(updatedInformation) returns updateWriteResult
       feedbackFormsRepository.getAll returns getAll
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -403,12 +407,13 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      val updatedInformation = UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true)
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.update(updatedInformation) returns updateWriteResult
       feedbackFormsRepository.getAll returns getAll
+      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")

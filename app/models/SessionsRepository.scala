@@ -1,6 +1,7 @@
 package models
 
 import java.time.LocalDateTime
+import java.util.Date
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
@@ -32,8 +33,11 @@ case class SessionInfo(userId: String,
                        rating: String,
                        cancelled: Boolean,
                        active: Boolean,
-                       _id: BSONObjectID = BSONObjectID.generate,
-                       expirationDate: Option[LocalDateTime] = None)
+                       expirationDate: BSONDateTime,
+                       _id: BSONObjectID = BSONObjectID.generate)
+
+case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
+                             expirationDate: BSONDateTime)
 
 object SessionJsonFormats {
 
@@ -116,17 +120,18 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection.count(Some(Json.obj("active" -> true))))
 
-  def update(updatedRecord: UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord._id))
+  def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData._id))
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
-        "date" -> BSONDateTime(updatedRecord.date.getTime),
-        "topic" -> updatedRecord.topic,
-        "session" -> updatedRecord.session,
-        "feedbackFormId" -> updatedRecord.feedbackFormId,
-        "feedbackExpirationDays" -> updatedRecord.feedbackExpirationDays,
-        "meetup" -> updatedRecord.meetup)
+        "date" -> BSONDateTime(updatedRecord.sessionUpdateFormData.date.getTime),
+        "topic" -> updatedRecord.sessionUpdateFormData.topic,
+        "session" -> updatedRecord.sessionUpdateFormData.session,
+        "feedbackFormId" -> updatedRecord.sessionUpdateFormData.feedbackFormId,
+        "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
+        "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
+        "expirationDate" -> updatedRecord.expirationDate)
     )
 
     collection.flatMap(jsonCollection =>

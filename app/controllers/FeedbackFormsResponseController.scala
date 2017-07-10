@@ -1,6 +1,6 @@
 package controllers
 
-import java.time.{DayOfWeek, _}
+import java.time.{Instant, LocalDateTime}
 import java.util.Date
 import javax.inject.Inject
 
@@ -68,12 +68,7 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
                   session.cancelled,
                   session.active,
                   session._id.stringify,
-                  session.expirationDate.fold {
-                    "OOps! Unable to Load!"
-                  } { localDateTime =>
-                    val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant)
-                    date.toString
-                  })
+                  new Date(session.expirationDate.value).toString)
 
                 val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
@@ -101,13 +96,6 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
         val sessionDate = Instant.ofEpochMilli(session.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
         if (sessionDate == immediateLastSessionDate) {
 
-          val expirationDate = session.expirationDate.fold {
-            "OOps! Unable to Load!"
-          } { localDateTime =>
-            val date = Date.from(localDateTime.atZone(dateTimeUtility.ISTZoneId).toInstant)
-            date.toString
-          }
-
           val feedbackSession = FeedbackSessions(session.userId,
             session.email,
             new Date(session.date.value),
@@ -119,7 +107,7 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
             session.cancelled,
             session.active,
             session._id.stringify,
-            expirationDate
+            new Date(session.expirationDate.value).toString
           )
 
           Some(feedbackSession)
@@ -142,48 +130,17 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
       sessions match {
         case Nil => (active, expired)
         case session :: rest =>
-          val scheduledDate = Instant.ofEpochMilli(session.date.value).atZone(dateTimeUtility.ISTZoneId).toLocalDate
-          val expirationDays = session.feedbackExpirationDays
-          val sessionFeedbackExpirationDate = if (expirationDays > 0) {
-            getCustomSessionExpirationDate(scheduledDate, session.feedbackExpirationDays)
+          val expiredDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(session.expirationDate.value), dateTimeUtility.ISTZoneId)
+          if (currentDate.isAfter(expiredDate)) {
+            check(rest, active, expired :+ session)
           }
           else {
-            getDefaultSessionExpirationDate(scheduledDate)
-          }
-          if (currentDate.isAfter(sessionFeedbackExpirationDate)) {
-            check(rest, active, expired :+ session.copy(expirationDate = Some(sessionFeedbackExpirationDate)))
-          }
-          else {
-            check(rest, active :+ session.copy(expirationDate = Some(sessionFeedbackExpirationDate)), expired)
+            check(rest, active :+ session, expired)
           }
       }
     }
 
     check(sessions, Nil, Nil)
-  }
-
-  private def getDefaultSessionExpirationDate(scheduledDate: LocalDate): LocalDateTime = {
-    val feedbackExpireOnWorkingDays: List[DayOfWeek] = List(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY)
-    val dayOfTheWeek = scheduledDate.getDayOfWeek
-    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
-
-    if (feedbackExpireOnWorkingDays.contains(dayOfTheWeek)) {
-      LocalDateTime.of(scheduledDate.plusDays(1), tillEndOfTheDay)
-    }
-    else {
-      if (dayOfTheWeek == DayOfWeek.FRIDAY) {
-        LocalDateTime.of(scheduledDate.plusDays(3), tillEndOfTheDay)
-      }
-      else {
-        //SATURDAY
-        LocalDateTime.of(scheduledDate.plusDays(2), tillEndOfTheDay)
-      }
-    }
-  }
-
-  private def getCustomSessionExpirationDate(scheduledDate: LocalDate, days: Int): LocalDateTime = {
-    val tillEndOfTheDay = LocalTime.of(23, 59, 59, 9999)
-    LocalDateTime.of(scheduledDate.plusDays(days), tillEndOfTheDay)
   }
 
 }

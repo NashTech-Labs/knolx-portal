@@ -26,7 +26,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
   private val emailObject = Future.successful(List(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
@@ -66,7 +66,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
     "render feedback form for today if session associated feedback form found and session not expired" in new WithTestApplication {
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
-          1, meetup = true, "rating", cancelled = false, active = true, _id)))
+          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getSessionsTillNow returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))

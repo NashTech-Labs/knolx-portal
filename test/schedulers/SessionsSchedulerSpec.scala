@@ -54,6 +54,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         rating = "",
         cancelled = false,
         active = true,
+        BSONDateTime(knolxSessionDateTime),
         _id = sessionId))
     val maybeFeedbackForm =
       Option(FeedbackForm(

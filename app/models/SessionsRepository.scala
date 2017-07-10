@@ -121,7 +121,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection.count(Some(Json.obj("active" -> true))))
 
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData._id))
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(

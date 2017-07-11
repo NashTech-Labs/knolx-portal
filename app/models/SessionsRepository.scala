@@ -1,17 +1,17 @@
 package models
 
 import java.time.LocalDateTime
-import java.util.Date
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsString, JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
+import reactivemongo.api.commands.{Command, WriteResult}
+import reactivemongo.bson.{BSONString, BSONDateTime, BSONDocument, BSONObjectID}
+import reactivemongo.core.commands.{Match, SumField, Group}
 import reactivemongo.play.json.collection.JSONCollection
 import utilities.DateTimeUtility
 
@@ -139,6 +139,33 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
   }
+
+  def populatedStates = {
+    collection
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework.{Group, Match, PushField}
+
+        val dateFormat = Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$expirationDate"))
+
+        jsonCollection
+          .aggregate(
+            firstOperator = Group(dateFormat)("sessions" -> PushField("$ROOT")),
+            otherOperators = List(Match(Json.obj("active" -> true, "cancelled" -> false))))
+          .map(_.firstBatch)
+      }
+  }
+
+  def activeSessions: Future[List[SessionInfo]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+            "active" -> true,
+            "cancelled" -> false,
+            "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(dateTimeUtility.nowMillis))))
+          .sort(Json.obj("date" -> 1))
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
   def getSessionsTillNow: Future[List[SessionInfo]] =
     collection

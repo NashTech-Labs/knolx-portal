@@ -52,7 +52,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
 
     "not render feedback form for today if session associated feedback form not found" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.getSessionsTillNow returns sessionObject
+      sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       dateTimeUtility.nowMillis returns date.getTime
@@ -69,7 +69,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
           1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.getSessionsTillNow returns sessionObjectWithCurrentDate
+      sessionsRepository.activeSessions returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       dateTimeUtility.nowMillis returns date.getTime
@@ -82,7 +82,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
 
     "render feedback form for today if session associated feedback form found and session expired" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.getSessionsTillNow returns sessionObject
+      sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       dateTimeUtility.nowMillis returns date.getTime

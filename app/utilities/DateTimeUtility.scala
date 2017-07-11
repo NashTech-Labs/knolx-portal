@@ -18,11 +18,20 @@ class DateTimeUtility {
   def startOfDayMillis: Long =
     localDateIST.atStartOfDay(ISTZoneId).toEpochSecond * 1000
 
+  def endOfDayMillis: Long =
+    localDateIST.atTime(23, 59, 59).toEpochSecond(ZoneOffset) * 1000
+
   def localDateIST: LocalDate =
     LocalDate.now(ISTZoneId)
 
-  def endOfDayMillis: Long =
-    localDateIST.atTime(23, 59, 59).toEpochSecond(ZoneOffset) * 1000
+  def localDateTimeIST: LocalDateTime =
+    LocalDateTime.now(ISTZoneId)
+
+  def toLocalDate(millis: Long): LocalDate =
+    Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDate
+
+  def toLocalDateTime(millis: Long): LocalDateTime =
+    Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime
 
   def toLocalDateTimeEndOfDay(date: Date): LocalDateTime =
     Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)

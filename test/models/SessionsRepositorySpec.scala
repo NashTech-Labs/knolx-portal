@@ -92,7 +92,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       val userInfo = SessionInfo("testid", "test@example.com", BSONDateTime(date.getTime), "session", "feedbackFormId", "sessionRepoTest",
         1, meetup = true, "", cancelled = false, active = true, BSONDateTime(date.getTime), sessionId)
 
-      val sessions = await(sessionsRepository.getSessionsTillNow)
+      val sessions = await(sessionsRepository.activeSessions)
 
       sessions contains userInfo
     }

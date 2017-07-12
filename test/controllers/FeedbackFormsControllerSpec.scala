@@ -345,7 +345,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
+      val request = FakeRequest(GET, "/feedbackform/5943cdd60900000900409b26/preview")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
@@ -360,42 +360,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
+      val request = FakeRequest(GET, "/feedbackform/5943cdd60900000900409b26/preview")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
       status(response) must be equalTo NOT_FOUND
-    }
-
-    "send feedback form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
-      val email = Email(subject = "Knolx Feedback Form",
-        from = "sidharth@knoldus.com",
-        to = List("sidharth@knoldus.com"),
-        bodyHtml = None,
-        bodyText = Some("Hello World"), replyTo = None)
-      mailerClient.send(email) returns ""
-
-      val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
-
-      status(response) must be equalTo OK
-    }
-
-    "send feedback form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
-
-      val email = Email(subject = "Knolx Feedback Form",
-        from = "sidharth@knoldus.com",
-        to = List("sidharth@knoldus.com"),
-        bodyHtml = None,
-        bodyText = Some("Hello World"), replyTo = None)
-      mailerClient.send(email) returns ""
-
-      val response = controller.sendFeedbackForm(_id.stringify)(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
-
-      status(response) must be equalTo OK
     }
 
   }

@@ -46,6 +46,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     val config = Configuration(ConfigFactory.load("application.conf"))
 
     val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+    val testDateTimeUtility = new DateTimeUtility
 
     val controller =
       new SessionsController(
@@ -191,7 +192,10 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "create session" in new WithTestApplication {
-      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val localDateTimeEndOfDay = testDateTimeUtility.toLocalDateTimeEndOfDay(date)
+      val expirationDate = localDateTimeEndOfDay.plusDays(1)
+      val expirationMillis = testDateTimeUtility.toMillis(expirationDate)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -202,7 +206,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.toMillis(expirationDate) returns expirationMillis
 
       val result = controller.createSession(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -218,7 +223,10 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create session when result is false" in new WithTestApplication {
-      val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val localDateTimeEndOfDay = testDateTimeUtility.toLocalDateTimeEndOfDay(date)
+      val expirationDate = localDateTimeEndOfDay.plusDays(1)
+      val expirationMillis = testDateTimeUtility.toMillis(expirationDate)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -229,7 +237,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.toMillis(expirationDate) returns expirationMillis
 
       val result = controller.createSession(FakeRequest(POST, "create")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -372,19 +381,24 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
     "update session" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val localDateTimeEndOfDay = testDateTimeUtility.toLocalDateTimeEndOfDay(date)
+      val expirationDate = localDateTimeEndOfDay.plusDays(1)
+      val expirationMillis = testDateTimeUtility.toMillis(expirationDate)
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+        "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.update(updatedInformation) returns updateWriteResult
       feedbackFormsRepository.getAll returns getAll
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.toMillis(expirationDate) returns expirationMillis
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -401,19 +415,24 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
     "not update session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val localDateTimeEndOfDay = testDateTimeUtility.toLocalDateTimeEndOfDay(date)
+      val expirationDate = localDateTimeEndOfDay.plusDays(1)
+      val expirationMillis = testDateTimeUtility.toMillis(expirationDate)
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
       val emailObject = Future.successful(List(UserInfo("test@example.com",
         "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+        "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.update(updatedInformation) returns updateWriteResult
       feedbackFormsRepository.getAll returns getAll
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.toMillis(expirationDate) returns expirationMillis
 
       val result = controller.updateSession()(FakeRequest(POST, "update")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -473,18 +492,19 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       status(result) must be equalTo UNAUTHORIZED
     }
-  }
 
-  "cancel session by session id" in new WithTestApplication {
-    val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest())
+    "cancel session by session id" in new WithTestApplication {
+      val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest())
 
-    status(result) must be equalTo SEE_OTHER
-  }
+      status(result) must be equalTo SEE_OTHER
+    }
 
-  "schedule session by session id" in new WithTestApplication {
-    val result = controller.scheduleSession(_id.stringify)(FakeRequest())
+    "schedule session by session id" in new WithTestApplication {
+      val result = controller.scheduleSession(_id.stringify)(FakeRequest())
 
-    status(result) must be equalTo SEE_OTHER
+      status(result) must be equalTo SEE_OTHER
+    }
+
   }
 
 }

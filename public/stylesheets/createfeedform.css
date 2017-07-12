@@ -55,7 +55,7 @@
     border: none;
 }
 
-#form-name{
+#form-name {
     border: none;
     outline: none;
     font-size: 20px;
@@ -201,7 +201,7 @@ i.fa.fa-trash-o.delQuestion {
     color: #F1948A;
     cursor: pointer;
     text-shadow: 0px 0px 3px #eee;
-    text-align:center;
+    text-align: center;
 
 }
 
@@ -210,7 +210,6 @@ a.fa.fa-trash.delete-form:hover {
     color: #F1948A;
 }
 
-.text-alignment{
- padding-top: 15px;
+.text-alignment {
+    padding-top: 15px;
 }
-

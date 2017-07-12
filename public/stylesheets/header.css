@@ -41,9 +41,9 @@ ul > li > a {
 
 body {
     background-color: #eee;
-    background-image:url('../images/bg.svg');
-    background-repeat:no-repeat;
-    background-size:cover;
+    background-image: url('../images/bg.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 @font-face {
@@ -92,13 +92,11 @@ hr {
 i.fa.fa-user:hover {
     color: #fff;
     text-shadow: 0 0 10px #85929E;
-
 }
 
 i.fa.fa-user:active {
     background-color: rgb(125, 158, 192);
     text-shadow: 0 0 10px #85929E;
-
 }
 
 .navbar-nav > li > a {
@@ -133,7 +131,6 @@ i.fa.fa-user:active {
     background-color: rgb(125, 158, 192);
 }
 
-.fa-comments{
-
+.fa-comments {
     color: #fff;
 }

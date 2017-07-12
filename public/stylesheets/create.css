@@ -9,28 +9,31 @@
     padding-left: 0px;
 }
 
-.col-md-12{
+.col-md-12 {
     position: relative;
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
 }
-.create-email{
+
+.create-email {
 
     margin-top: 15px;
 }
-.preview{
+
+.preview {
     font-size: 30px;
     text-align: center;
     padding-top: 15px;
     cursor: pointer;
     color: #666;
 }
-.preview:hover{
+
+.preview:hover {
     color: #EC7063;
 }
 
-.feedback-duration{
+.feedback-duration {
 
     margin-top: 20px;
     line-height: 0.5em;
@@ -38,41 +41,47 @@
     padding-left: 20px;
     box-shadow: 0 4px 10px -5px #a8a8a8;
 }
-.radio-style{
+
+.radio-style {
     font-family: 'gothic';
     font-size: 16px;
     color: #566573;
     font-weight: normal;
     margin-top: 15px;
 }
-.radio-style-days{
+
+.radio-style-days {
     font-family: 'gothic';
     font-size: 16px;
     color: #566573;
     font-weight: normal;
     margin-top: 1px;
 }
-.days{
-    width:55px ;
+
+.days {
+    width: 55px;
     font-size: 20px;
     font-weight: bold;
     border: none;
     outline: none;
     margin-left: 8px;
 }
-.default-radio{
+
+.default-radio {
     margin-top: 3px;
 }
-#days{
+
+#days {
     font-size: 30px;
-    color:#F1948A;
+    color: #F1948A;
 }
 
-#days:disabled{
-   background-color:#fff;
+#days:disabled {
+    background-color: #fff;
     color: #dcdcdc;
- }
-.duration-title{
+}
+
+.duration-title {
     text-align: center;
     font-family: 'gothic';
     font-size: 16px;
@@ -81,18 +90,11 @@
     margin-bottom: 18px;
     margin-left: -15px;
 }
-/*.col-md-4{
-    position: relative;
-    min-height: 1px;
-    padding-right: 0px;
-    padding-left: 0px;
-}*/
-.create-footer{
-    height:30px ;
-    background-color:#dcdcdc;
-    border-bottom-left-radius: 20px ;
-    border-bottom-right-radius: 20px ;
+
+.create-footer {
+    height: 30px;
+    background-color: #dcdcdc;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
     margin-top: 25px;
 }
-
-

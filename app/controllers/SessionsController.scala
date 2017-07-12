@@ -48,7 +48,7 @@ case class KnolxSession(id: String,
                         feedbackFormScheduled: Boolean = false)
 
 object SessionValues {
-  val Sessions = Seq("session 1" -> "Session 1", "session 2" -> "Session 2")
+  val Sessions = 1 to 5 map (number => (s"session $number", s"Session $number"))
 }
 
 @Singleton
@@ -67,7 +67,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       "email" -> email,
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone)
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
-      "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
+      "session" -> nonEmptyText.verifying("Wrong session type specified!",
+        session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
@@ -78,7 +79,8 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     mapping(
       "sessionId" -> nonEmptyText,
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone),
-      "session" -> nonEmptyText.verifying("Wrong session type specified!", session => session == "session 1" || session == "session 2"),
+      "session" -> nonEmptyText.verifying("Wrong session type specified!",
+        session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +

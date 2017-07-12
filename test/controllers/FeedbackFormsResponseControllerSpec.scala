@@ -1,7 +1,6 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.ZoneId
 
 import com.typesafe.config.ConfigFactory
 import models._
@@ -52,10 +51,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
 
     "not render feedback form for today if session associated feedback form not found" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.getSessionsTillNow returns sessionObject
+      sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
-      dateTimeUtility.nowMillis returns date.getTime
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
@@ -63,16 +60,14 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
       status(response) must be equalTo OK
     }
 
-    "render feedback form for today if session associated feedback form found and session not expired" in new WithTestApplication {
+    "render feedback form for today if session associated feedback form exists and session has not expired" in new WithTestApplication {
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
           1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.getSessionsTillNow returns sessionObjectWithCurrentDate
+      sessionsRepository.activeSessions returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
-      dateTimeUtility.nowMillis returns date.getTime
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
@@ -80,12 +75,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
       status(response) must be equalTo OK
     }
 
-    "render feedback form for today if session associated feedback form found and session expired" in new WithTestApplication {
+    "render feedback form for today if session associated feedback form exists and session has expired expired" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.getSessionsTillNow returns sessionObject
+      sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
-      dateTimeUtility.nowMillis returns date.getTime
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))

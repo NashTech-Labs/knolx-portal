@@ -12,9 +12,9 @@
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
     border-radius: 30px;
-    background-image:url('../images/mesh.svg');
-    background-repeat:no-repeat;
-    background-size:cover;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .feedback-div-outer {
@@ -81,5 +81,3 @@
 a.btn.btn-sm.btn-primary.btn-create-feed:hover {
     background-color: rgb(125, 158, 192);
 }
-
-

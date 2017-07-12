@@ -25,13 +25,8 @@
                 <li class="@activeLink(routes.SessionsController.sessions(1).url) alignLinks">
                     <a href="@routes.SessionsController.sessions(1)">Home</a>
                 </li>
-                @if(SessionHelper.isAdmin) {
-                    <li class="@activeLink(routes.SessionsController.manageSessions(1).url) alignLinks">
-                        <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
-                    </li>
 
                     @if(SessionHelper.isAdmin) {
-
                         <li class="dropdown alignLinks">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                  Manage
@@ -52,8 +47,7 @@
                         </li>
 
                     }
-
-
+                
                     @if(SessionHelper.isLoggedIn) {
                         <li class="@activeLink(routes.UsersController.login().url) alignLinks">
                             <a href="@routes.UsersController.login()">Login</a>

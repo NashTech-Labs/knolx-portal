@@ -160,19 +160,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
-    val email =
-      Email(subject = "Knolx Feedback Form",
-        from = "sidharth@knoldus.com",
-        to = List("sidharth@knoldus.com"),
-        bodyHtml = None,
-        bodyText = Some("Hello World"), replyTo = None)
-
-    val emailSent = mailerClient.send(email)
-
-    Ok(emailSent)
-  }
-
   def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .sessions

@@ -345,7 +345,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val request = FakeRequest(GET, "/feedbackform/5943cdd60900000900409b26/preview")
+      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
@@ -360,7 +360,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val request = FakeRequest(GET, "/feedbackform/5943cdd60900000900409b26/preview")
+      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)

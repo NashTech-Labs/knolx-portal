@@ -138,28 +138,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       jsonCollection.update(selector, modifier))
   }
 
-  def immediatePreviousExpiredSessions: Future[List[SessionInfo]] =
-    collection
-      .flatMap { jsonCollection =>
-        import jsonCollection.BatchCommands.AggregationFramework.{Descending, Group, Limit, Match, PushField, Sort}
-
-        jsonCollection
-          .aggregate(
-            firstOperator = Match(
-              Json.obj(
-                "active" -> true,
-                "cancelled" -> false,
-                "date" -> BSONDocument("$lt" -> BSONDateTime(dateTimeUtility.nowMillis)))
-            ),
-            otherOperators = List(
-              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
-              Sort(Descending("_id")),
-              Limit(1)
-            ))
-          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
-          .map(_.flatten)
-      }
-
   def activeSessions: Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis
 
@@ -179,6 +157,31 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
             otherOperators = List(
               Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
               Sort(Ascending("_id")),
+              Limit(1)
+            ))
+          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
+          .map(_.flatten)
+      }
+  }
+
+  def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+    collection
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework.{Descending, Group, Limit, Match, PushField, Sort}
+
+        jsonCollection
+          .aggregate(
+            firstOperator = Match(
+              Json.obj(
+                "active" -> true,
+                "cancelled" -> false,
+                "expirationDate" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+            ),
+            otherOperators = List(
+              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
+              Sort(Descending("_id")),
               Limit(1)
             ))
           .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))

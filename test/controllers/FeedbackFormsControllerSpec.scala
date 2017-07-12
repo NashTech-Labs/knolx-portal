@@ -29,6 +29,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
 
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
+
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
 
@@ -193,6 +198,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "not delete feedback form because of some error at database layer" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(None)
 
       val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
@@ -204,6 +210,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "send form asked to update to feedback update page" in new WithTestApplication {
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       sessionsRepository.sessions returns sessionObject
+      sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
@@ -216,6 +223,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not update Feedback Form as not found" in new WithTestApplication {
       dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
       sessionsRepository.sessions returns sessionObject
+      sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 

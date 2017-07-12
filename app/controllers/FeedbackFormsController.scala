@@ -1,12 +1,13 @@
 package controllers
 
+import java.time.{LocalDateTime, Instant}
 import javax.inject.{Inject, Singleton}
 
 import models._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json, OFormat}
-import play.api.libs.mailer.MailerClient
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
 import utilities.DateTimeUtility
 
@@ -159,13 +160,58 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
+  def sendFeedbackForm(sessionId: String): Action[AnyContent] = AdminAction { implicit request =>
+    val email =
+      Email(subject = "Knolx Feedback Form",
+        from = "sidharth@knoldus.com",
+        to = List("sidharth@knoldus.com"),
+        bodyHtml = None,
+        bodyText = Some("Hello World"), replyTo = None)
+
+    val emailSent = mailerClient.send(email)
+
+    Ok(emailSent)
+  }
+
   def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
-    feedbackRepository
-      .getByFeedbackFormId(id)
-      .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+    sessionsRepository
+      .sessions
+      .flatMap { sessions =>
+        val activeSessions = getActiveSessions(sessions)
+        val result = activeSessions.foldLeft(false)(_ || _.feedbackFormId == id)
+        if (result) {
+          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("info" -> "cant edit its active"))
+        }
+        else {
+          feedbackRepository
+            .getByFeedbackFormId(id)
+            .map {
+              case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+              case None                         => Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
+            }
+        }
       }
+  }
+
+  private def getActiveSessions(sessions: List[SessionInfo]): List[SessionInfo] = {
+    val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUtility.nowMillis), dateTimeUtility.ISTZoneId)
+
+    @tailrec
+    def check(sessions: List[SessionInfo], active: List[SessionInfo]): List[SessionInfo] = {
+      sessions match {
+        case Nil             => active
+        case session :: rest =>
+          val expiredDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(session.expirationDate.value), dateTimeUtility.ISTZoneId)
+          if (currentDate.isAfter(expiredDate)) {
+            check(rest, active)
+          }
+          else {
+            check(rest, active :+ session)
+          }
+      }
+    }
+
+    check(sessions, Nil)
   }
 
   def jsonCountBuilder(feedForm: FeedbackForm): String = {

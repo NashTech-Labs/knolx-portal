@@ -1,6 +1,5 @@
 package controllers
 
-import java.time.{LocalDate, Instant, LocalDateTime}
 import java.util.Date
 import javax.inject.Inject
 
@@ -12,8 +11,6 @@ import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent, Controller}
 import utilities.DateTimeUtility
 
-import scala.annotation.tailrec
-import scala.collection.immutable.TreeMap
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -48,16 +45,11 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
   val usersRepo: UsersRepository = usersRepository
 
   def getFeedbackFormsForToday: Action[AnyContent] = UserAction.async { implicit request =>
-    sessionsRepository.populatedStates.foreach(println)
-
-
     sessionsRepository
       .activeSessions
-      .flatMap { sessions =>
-        val (activeSessions, expired) = activeAndExpiredSessions(sessions)
-
-        if (sessions.nonEmpty) {
-          val sessionFeedbackMappings = Future.sequence(sessions map { session =>
+      .flatMap { activeSessions =>
+        if (activeSessions.nonEmpty) {
+          val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
             feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
               case Some(form) =>
                 val sessionInformation =
@@ -86,16 +78,15 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
           sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten, Nil)))
         } else {
           Logger.info("No active sessions found")
-          Future.successful(Ok(views.html.feedback.todaysfeedbacks(Nil, getImmediatePreviousSessions(expired))))
+          immediatePreviousSessions.map(sessions => Ok(views.html.feedback.todaysfeedbacks(Nil, sessions)))
         }
       }
   }
 
-  private def getImmediatePreviousSessions(expiredSessions: List[SessionInfo]) =
-    TreeMap(expiredSessions.groupBy(session => dateTimeUtility.toLocalDate(session.date.value).getDayOfMonth).toSeq: _*)(implicitly[Ordering[Int]].reverse)
-      .headOption
-      .toList
-      .flatMap { case (_, sessions) =>
+  private def immediatePreviousSessions: Future[List[FeedbackSessions]] =
+    sessionsRepository
+      .immediatePreviousExpiredSessions
+      .map { sessions =>
         sessions map (session =>
           FeedbackSessions(session.userId,
             session.email,
@@ -110,25 +101,5 @@ class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
             session._id.stringify,
             new Date(session.expirationDate.value).toString))
       }
-
-  private def activeAndExpiredSessions(sessions: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) = {
-    val currentDate = dateTimeUtility.localDateTimeIST
-
-    @tailrec
-    def check(allSessions: List[SessionInfo], active: List[SessionInfo], expired: List[SessionInfo]): (List[SessionInfo], List[SessionInfo]) =
-      allSessions match {
-        case Nil             => (active, expired)
-        case session :: rest =>
-          val expirationDate = dateTimeUtility.toLocalDateTime(session.expirationDate.value)
-
-          if (currentDate.isAfter(expirationDate)) {
-            check(rest, active, expired :+ session)
-          } else {
-            check(rest, active :+ session, expired)
-          }
-      }
-
-    check(sessions, Nil, Nil)
-  }
 
 }

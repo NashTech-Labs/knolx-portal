@@ -1,6 +1,10 @@
 package controllers
 
+<<<<<<< HEAD
 import java.time.{Instant, LocalDateTime}
+=======
+import java.time.{LocalDateTime, Instant}
+>>>>>>> ab2816dbb766db5ab3d39861cb22e6d29e0b4699
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -173,15 +177,44 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
           feedbackRepository
             .getByFeedbackFormId(id)
             .map {
+<<<<<<< HEAD
               case Some(feedForm: FeedbackForm) =>
                 Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
               case None =>
                 Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
+=======
+              case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+              case None                         => Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
+>>>>>>> ab2816dbb766db5ab3d39861cb22e6d29e0b4699
             }
         })
       }
   }
 
+<<<<<<< HEAD
+=======
+  private def getActiveSessions(sessions: List[SessionInfo]): List[SessionInfo] = {
+    val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUtility.nowMillis), dateTimeUtility.ISTZoneId)
+
+    @tailrec
+    def check(sessions: List[SessionInfo], active: List[SessionInfo]): List[SessionInfo] = {
+      sessions match {
+        case Nil             => active
+        case session :: rest =>
+          val expiredDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(session.expirationDate.value), dateTimeUtility.ISTZoneId)
+          if (currentDate.isAfter(expiredDate)) {
+            check(rest, active)
+          }
+          else {
+            check(rest, active :+ session)
+          }
+      }
+    }
+
+    check(sessions, Nil)
+  }
+
+>>>>>>> ab2816dbb766db5ab3d39861cb22e6d29e0b4699
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
 
     @tailrec

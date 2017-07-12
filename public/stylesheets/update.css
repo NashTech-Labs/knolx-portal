@@ -1,4 +1,4 @@
-.updateField {
+.update-field {
     width: 100%;
     border: none;
     border-bottom: 2px dotted #CACFD2;
@@ -15,9 +15,15 @@
 }
 
 .update-outer {
-    height: 560px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 1px;
+    padding-right: 0px;
+    padding-left: 0px;
 }
 
 #date {
@@ -36,11 +42,11 @@ label {
     cursor: pointer;
 }
 
-.ckb {
+.custom-checkbox {
     display: none;
 }
 
-.testy {
+.checkbox-outer {
     display: flex;
 }
 
@@ -71,7 +77,7 @@ label {
     margin-right: 50px;
 }
 
-.ckb:checked + .label_text:before {
+.custom-checkbox:checked + .label_text:before {
     margin-top: 3px;
     content: "\f14a";
     font-family: "FontAwesome";
@@ -94,28 +100,27 @@ label {
     }
 }
 
-.update-two {
+.update-second-field {
     padding-top: 20px;
     line-height: 50px;
 }
 
-.customalert {
+.custom-alert {
     margin-bottom: 0px;
     border-radius: 0px;
 }
 
-.updatetwo {
+.update-second {
     padding-top: 10px;
 }
 
-.updateButton {
+.update-button {
     background-color: #F1948A;
     color: #fff;
 }
 
-.updateError {
+.update-error {
     margin-top: 5px;
     text-align: center;
     font-size: 16px;
 }
-

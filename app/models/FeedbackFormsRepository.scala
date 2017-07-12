@@ -80,7 +80,9 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj("_id" -> Json.obj("$oid" -> feedbackFormId)))
+          .find(Json.obj(
+            "_id" -> Json.obj("$oid" -> feedbackFormId),
+            "active" -> true))
           .cursor[FeedbackForm](ReadPreference.Primary)
           .headOption)
 
@@ -110,4 +112,5 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.count(Some(Json.obj("active" -> true))))
+
 }

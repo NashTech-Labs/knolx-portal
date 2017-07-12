@@ -2,12 +2,13 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import models.{FeedbackForm, FeedbackFormsRepository, Question, UsersRepository}
+import models._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent, Controller}
+import utilities.DateTimeUtility
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -85,14 +86,16 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
 class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
                                         mailerClient: MailerClient,
                                         usersRepository: UsersRepository,
-                                        feedbackRepository: FeedbackFormsRepository) extends Controller with SecuredImplicit with I18nSupport {
+                                        feedbackRepository: FeedbackFormsRepository,
+                                        sessionsRepository: SessionsRepository,
+                                        dateTimeUtility: DateTimeUtility) extends Controller with SecuredImplicit with I18nSupport {
 
-  implicit val questionInformationFormat = Json.format[QuestionInformation]
-  implicit val feedbackFormInformationFormat = Json.format[FeedbackFormInformation]
-  implicit val feedbackPreviewFormat = Json.format[FeedbackFormPreview]
-  implicit val updateFeedbackFormInformationFormat = Json.format[UpdateFeedbackFormInformation]
+  implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
+  implicit val feedbackFormInformationFormat: OFormat[FeedbackFormInformation] = Json.format[FeedbackFormInformation]
+  implicit val feedbackPreviewFormat: OFormat[FeedbackFormPreview] = Json.format[FeedbackFormPreview]
+  implicit val updateFeedbackFormInformationFormat: OFormat[UpdateFeedbackFormInformation] = Json.format[UpdateFeedbackFormInformation]
 
-  val usersRepo = usersRepository
+  val usersRepo: UsersRepository = usersRepository
 
   def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
     feedbackRepository
@@ -225,9 +228,10 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .flatMap(_.fold {
         Logger.error(s"Failed to delete knolx feedback form with id $id")
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("errormessage" -> "Something went wrong!"))
-      } { sessionJson =>
+      } { _ =>
         Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
       })
   }
+
 }

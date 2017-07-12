@@ -19,7 +19,7 @@
                         font-size: 17px ;
                         ">
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            <strong>Success!</strong> @flash.get("message").fold("")(message => message)
+                            <strong>Success!</strong> @flash.get("message").fold("")(identity)
                         </div>
                     }
                     @if(!flash.get("errormessage").fold("")(identity).isEmpty) {
@@ -28,7 +28,7 @@
                         font-size: 17px ;
                         ">
                             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            <strong>Error!</strong> @flash.get("errormessage").fold("")(message => message)
+                            <strong>Error!</strong> @flash.get("errormessage").fold("")(identity)
                         </div>
                     }
                 }

@@ -1,39 +1,39 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET         /                                    controllers.HomeController.index
+GET         /                                   controllers.HomeController.index
 
 # User
-GET         /login                               controllers.UsersController.login
-POST        /login                               controllers.UsersController.loginUser
-GET         /logout                              controllers.UsersController.logout
+GET         /login                              controllers.UsersController.login
+POST        /login                              controllers.UsersController.loginUser
+GET         /logout                             controllers.UsersController.logout
 
-GET         /register                            controllers.UsersController.register
-POST        /register                            controllers.UsersController.createUser
-GET         /users/manage                        controllers.UsersController.manageUser
-POST        /users/search                        controllers.UsersController.searchUser
+GET         /register                           controllers.UsersController.register
+POST        /register                           controllers.UsersController.createUser
+GET         /users/manage                       controllers.UsersController.manageUser
+POST        /users/search                       controllers.UsersController.searchUser
 
 # Session
-GET         /session                             controllers.SessionsController.sessions(pageNumber: Int)
-GET         /session/manage                      controllers.SessionsController.manageSessions(pageNumber:Int)
-GET         /session/create                      controllers.SessionsController.create
-POST        /session/create                      controllers.SessionsController.createSession
-GET         /session/delete                      controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
-POST        /session/update                      controllers.SessionsController.updateSession
-GET         /session/update                      controllers.SessionsController.update(id: String)
-GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
-GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
+GET         /session                            controllers.SessionsController.sessions(pageNumber: Int)
+GET         /session/manage                     controllers.SessionsController.manageSessions(pageNumber:Int)
+GET         /session/create                     controllers.SessionsController.create
+POST        /session/create                     controllers.SessionsController.createSession
+GET         /session/delete                     controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
+POST        /session/update                     controllers.SessionsController.updateSession
+GET         /session/update                     controllers.SessionsController.update(id: String)
+GET         /session/:sessionId/cancel          controllers.SessionsController.cancelScheduledSession(sessionId: String)
+GET         /session/:sessionId/schedule        controllers.SessionsController.scheduleSession(sessionId: String)
 
 # Feedback
-GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
-GET         /feedbackform/create                 controllers.FeedbackFormsController.feedbackForm
-POST        /feedbackform/create                 controllers.FeedbackFormsController.createFeedbackForm
-GET         /feedbackform/send/:sessionid        controllers.FeedbackFormsController.sendFeedbackForm(sessionid: String)
-GET         /feedbackform/update                 controllers.FeedbackFormsController.update(id: String)
-POST        /feedbackform/update                 controllers.FeedbackFormsController.updateFeedbackForm
-GET         /feedbackform/delete                 controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
-GET         /feedbackform/preview/:id            controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
-GET         /feedbackform/for/today              controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
-GET         /jsRoutes                            controllers.JavascriptRouter.jsRoutes
+GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
+GET         /feedbackform/create                controllers.FeedbackFormsController.feedbackForm
+POST        /feedbackform/create                controllers.FeedbackFormsController.createFeedbackForm
+GET         /feedbackform/update                controllers.FeedbackFormsController.update(id: String)
+POST        /feedbackform/update                controllers.FeedbackFormsController.updateFeedbackForm
+GET         /feedbackform/delete                controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
+GET         /feedbackform/preview               controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
+GET         /feedbackform/for/today             controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
+GET         /jsRoutes                           controllers.JavascriptRouter.jsRoutes
+
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                        controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)

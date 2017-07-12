@@ -8,6 +8,6 @@ function disableDays() {
 
 $("#days").bind('keyup mouseup', function () {
     var days = $("#days").val();
+
     document.getElementById('radio-days').value = days;
 });
-

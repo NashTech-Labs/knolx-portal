@@ -1,146 +1,149 @@
 @(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    @main("Update Session") {
+@main("Update Session") {
 
-        <div class="row">
-            <div class="col-md-4" ></div>
-            <div class="col-md-4 update-outer" style="margin-top: 90px ;">
-                    <div class="col-md-12 login-first top" > </div>
-                    <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
-                        <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+    <div class="row">
+        <div class="col-md-4" ></div>
+        <div class="col-md-4 update-outer" style="margin-top: 90px ;">
+            <div class="col-md-12 login-first top" > </div>
+            <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
+                <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
 
-                        <div class="col-md-12" >
-                            <div class="col-md-1" ></div>
-                            <div class="col-md-10 " >
-                                <input type="datetime-local" value='@sessionInfo.data.get("date")' name="date" id="date" placeholder="Date" required class="update-field reg"/>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        </div>
-
-                        <div class="col-md-12 login-second login-third update-second">
-                            <div class="col-md-1" ></div>
-                            <div class="col-md-10 ">
-                                <select name="session" id="session" class="update-field login-second">
-                                @for((value, key) <- SessionValues.Sessions) {
-                                    <option value="@value"
-                                        @(if(sessionInfo.data.getOrElse("session", "") == key.toLowerCase()) {
-                                            "selected"
-                                        })>
-                                    @key
-                                    </option>
-                                }
-                                </select>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        </div>
-
-                        <div class="col-md-12 login-second login-third update-second">
-                            <div class="col-md-1"></div>
-
-                            <div class="col-md-8">
-                                <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
-                                <option selected value="">! Select Please</option>>
-                                @for((value, key) <- feedbackForms) {
-                                    <option value="@value"
-                                        @(if(sessionInfo.data.getOrElse("feedbackFormId", "") == value) {
-                                            "selected"
-                                        })>
-                                    @key
-                                    </option>
-                                }
-
-                                </select>
-                            </div>
-                            <div class="col-md-2"><i class="fa fa-eye preview"  onclick="generatePreview()" ></i></div>
-                            <div class="col-md-1"></div>
-                        </div>
-
-                        <div class="col-md-12 login-third update-second">
-                            <div class="col-md-1" ></div>
-                            <div class="col-md-10 " >
-                                <input type="text" name="topic" id="topic" value='@sessionInfo.data.get("topic")' placeholder="Topic" required class="update-field"/>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        </div>
-
-                        <div class="col-md-12 ">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-10 feedback-duration">
-                                <div class="col-md-12 duration-title">Feedback form expiration duration</div>
-                                <div class="col-md-6" style="padding-top:8px;" >
-                                    <label class="radio-button default-radio">
-                                        <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0'checked="checked"/>
-                                        <span class="lab_text"></span>
-                                        <p class="checkbox-text radio-style">Default</p>
-                                    </label>
-                                </div>
-                                <div class="col-md-6 days-outer" >
-                                    <label class="radio-button">
-                                        @if(sessionInfo.data.get("feedbackExpirationDays").nonEmpty && !sessionInfo.data.get("feedbackExpirationDays").contains("0")){
-                                            <input type='radio'name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
-                                            <span class="lab_text"></span>
-                                            <p class="checkbox-text radio-style-days">
-                                                <input type="number" min="1" max="31" value="@sessionInfo.data.get("feedbackExpirationDays")" class="days" id="days">day/s
-                                                }else{
-                                            <input type='radio'name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1'/>
-                                            <span class="lab_text"></span>
-                                            <p class="checkbox-text radio-style-days">
-                                                <input type="number" disabled min="1" max="32" value="1" class="days" id="days">day/s
-                                                }
-                                    </p>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-1"></div>
-                        </div>
-
-                        <div class="col-md-12 login-third">
-                            <div class="col-md-1" ></div>
-                            <div class="col-md-10 " >
-                                <label class="checkbox-outer" >
-                                    <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'
-                                    @(if(sessionInfo.data.getOrElse("meetup", "false") == "true") {
-                                        """checked="checked""""
-                                    })/>
-                                    <span class="label_text"></span>
-                                    <p class="checkbox-text">Is Meetup ?</p>
-                                </label>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        </div>
-
-                        <div class="col-md-12 update-second-field login-four" >
-                            <div class="col-md-1" ></div>
-                            <div class="col-md-10 " >
-                                <input type="submit" value="Save" class="input-field update-button"/>
-                            </div>
-                            <div class="col-md-1" ></div>
-                        </div>
-                    </form>
-                <div class="col-md-12 create-footer"></div>
-            </div>
-
-            <div class="col-md-4" ></div>
-        </div>
-
-        <div class="row update-error">
-            <div class="col-md-4" ></div>
-            <div class="col-md-4" >
-            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
-                <div class="alert alert-danger fade in ">
-                    @flash.get("message").fold("")(message => message)
-                    @sessionInfo("date").error.map(error => messages(error.message))
-                    @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
-                    @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
-                    @sessionInfo.globalError.map(_.message)
+                <div class="col-md-12" >
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="datetime-local" value='@sessionInfo.data.get("date")' name="date" id="date" placeholder="Date" required class="update-field reg"/>
+                    </div>
+                    <div class="col-md-1" ></div>
                 </div>
-            }
-            </div>
-            <div class="col-md-4" ></div>
+
+                <div class="col-md-12 login-second login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 ">
+                        <select name="session" id="session" class="update-field login-second">
+                        @for((value, key) <- SessionValues.Sessions) {
+                            <option value="@value"
+                                @(if(sessionInfo.data.getOrElse("session", "") == key.toLowerCase()) {
+                                    "selected"
+                                })>
+                            @key
+                            </option>
+                        }
+                        </select>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-second login-third update-second">
+                    <div class="col-md-1"></div>
+
+                    <div class="col-md-8">
+                        <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
+                            <option selected value="">! Select Please</option>>
+                            @for((value, key) <- feedbackForms) {
+                                <option value="@value"
+                                    @(if(sessionInfo.data.getOrElse("feedbackFormId", "") == value) {
+                                        "selected"
+                                    })>
+                                @key
+                                </option>
+                            }
+
+                        </select>
+                    </div>
+                    <div class="col-md-2"><i class="fa fa-eye preview" onclick="generatePreview()" ></i></div>
+                    <div class="col-md-1"></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="text" name="topic" id="topic" value='@sessionInfo.data.get("topic")' placeholder="Topic" required class="update-field"/>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 ">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 feedback-duration">
+                        <div class="col-md-12 duration-title">Feedback form expiration duration</div>
+                        <div class="col-md-6" style="padding-top:8px ;" >
+                            <label class="radio-button default-radio">
+                                <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0' checked="checked"/>
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style">Default</p>
+                            </label>
+                        </div>
+                        <div class="col-md-6 days-outer" >
+                            <label class="radio-button">
+                            @if(sessionInfo.data.get("feedbackExpirationDays").nonEmpty && !sessionInfo.data.get("feedbackExpirationDays").contains("0")) {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style-days">
+                                    <input type="number" min="1" max="31" value="@sessionInfo.data.get("feedbackExpirationDays")" class="days" id="days">
+                                    day/s
+                                </p>
+                            } else {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1'/>
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style-days">
+                                    <input type="number" disabled min="1" max="32" value="1" class="days" id="days">
+                                    day/s
+                                </p>
+                            }
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+
+                <div class="col-md-12 login-third">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <label class="checkbox-outer" >
+                            <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'
+                            @(if(sessionInfo.data.getOrElse("meetup", "false") == "true") {
+                                """checked="checked""""
+                            })/>
+                            <span class="label_text"></span>
+                            <p class="checkbox-text">Is Meetup ?</p>
+                        </label>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 update-second-field login-four" >
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="submit" value="Save" class="input-field update-button"/>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+            </form>
+            <div class="col-md-12 create-footer"></div>
         </div>
+
+        <div class="col-md-4" ></div>
+    </div>
+
+    <div class="row update-error">
+        <div class="col-md-4" ></div>
+        <div class="col-md-4" >
+        @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                @flash.get("message").fold("")(message => message)
+                @sessionInfo("date").error.map(error => messages(error.message))
+                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
+                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
+                @sessionInfo.globalError.map(_.message)
+            </div>
+        }
+        </div>
+        <div class="col-md-4" ></div>
+    </div>
 
     @feedbackforms.feedbackformpreview()
 
     <script src="@routes.Assets.versioned("javascripts/expirationdays.js")" type="text/javascript"></script>
 
-    }
+}

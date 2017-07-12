@@ -1,7 +1,5 @@
 package models
 
-import java.time.LocalDateTime
-import java.util.Date
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
@@ -9,8 +7,8 @@ import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import utilities.DateTimeUtility
@@ -52,6 +50,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   import play.modules.reactivemongo.json._
 
   val pageSize = 10
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[JsObject]] =
     collection
@@ -121,7 +121,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection.count(Some(Json.obj("active" -> true))))
 
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData._id))
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
@@ -138,18 +138,56 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       jsonCollection.update(selector, modifier))
   }
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
+  def activeSessions: Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
 
-  def getSessionsTillNow: Future[List[SessionInfo]] =
     collection
-      .flatMap(jsonCollection =>
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework.{Ascending, Group, Limit, Match, PushField, Sort}
+
         jsonCollection
-          .find(Json.obj(
-            "active" -> true,
-            "cancelled" -> false,
-            "date" -> BSONDocument("$lte" -> BSONDateTime(dateTimeUtility.nowMillis))))
-          .sort(Json.obj("date" -> 1))
-          .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List](-1,FailOnError[List[SessionInfo]]()))
+
+          .aggregate(
+            firstOperator = Match(
+              Json.obj(
+                "active" -> true,
+                "cancelled" -> false,
+                "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+                "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+            ),
+            otherOperators = List(
+              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
+              Sort(Ascending("_id")),
+              Limit(1)
+            ))
+          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
+          .map(_.flatten)
+      }
+  }
+
+  def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+    collection
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework.{Descending, Group, Limit, Match, PushField, Sort}
+
+        jsonCollection
+          .aggregate(
+            firstOperator = Match(
+              Json.obj(
+                "active" -> true,
+                "cancelled" -> false,
+                "expirationDate" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+            ),
+            otherOperators = List(
+              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
+              Sort(Descending("_id")),
+              Limit(1)
+            ))
+          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
+          .map(_.flatten)
+      }
+  }
 
 }

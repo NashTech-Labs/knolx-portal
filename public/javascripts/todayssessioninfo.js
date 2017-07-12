@@ -24,8 +24,7 @@ function expire() {
     $('#session-modal-footer-btn').css('background-color', '#a8a8a8');
 }
 
-function loadFeedbackForm(form){
-
+function loadFeedbackForm(form) {
     var formJson = JSON.stringify(form);
     var values = JSON.parse(formJson);
 
@@ -38,24 +37,24 @@ function loadFeedbackForm(form){
         var options = questions[questionNumber]['options'];
 
         for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-            optionsLoaded += "<div class='row'>"+
-                "<div class='col-md-1'></div>"+
-                "<div class='col-md-10'>"+
-                "<label class='radio-button'>"+
-                "<input type='radio'  name='radio-"+questionNumber+"' id='' class='custom-checkbox' value='true'/>"+
-                "<span class='lab_text'></span>"+
-                "<p class='checkbox-text form-card-options'>"+options[optionNumber]+
-                "</p>"+
-                "</label>"+
-                "</div>"+
+            optionsLoaded += "<div class='row'>" +
+                "<div class='col-md-1'></div>" +
+                "<div class='col-md-10'>" +
+                "<label class='radio-button'>" +
+                "<input type='radio'  name='radio-" + questionNumber + "' id='' class='custom-checkbox' value='true'/>" +
+                "<span class='lab_text'></span>" +
+                "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
+                "</p>" +
+                "</label>" +
+                "</div>" +
                 "</div>";
         }
 
         $('#feedback-response-form').append(
-        "<div class='question-card form-question-card' id='question'>"+
-            "<label class='card-questions-label'>"+
-            "<p id='questionValue' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>"+
-        "</label>"+optionsLoaded+"</div>"
+            "<div class='question-card form-question-card' id='question'>" +
+            "<label class='card-questions-label'>" +
+            "<p id='questionValue' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
+            "</label>" + optionsLoaded + "</div>"
         );
 
         optionsLoaded = "";

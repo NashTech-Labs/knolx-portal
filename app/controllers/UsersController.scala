@@ -7,8 +7,12 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
+import reactivemongo.bson.BSONObjectID
 import utilities.{EncryptionUtility, PasswordUtility}
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,8 +21,16 @@ case class UserInformation(email: String, password: String, confirmPassword: Str
 
 case class LoginInformation(email: String, password: String)
 
+case class UserEmailInformation(email: String)
+
+case class ManageUserInfo(email: String, active: Boolean, _id: BSONObjectID)
+
 @Singleton
-class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: UsersRepository) extends Controller with I18nSupport {
+class UsersController @Inject()(val messagesApi: MessagesApi,
+                                usersRepository: UsersRepository) extends Controller with SecuredImplicit with I18nSupport {
+  val usersRepo: UsersRepository = usersRepository
+
+  implicit val ManageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
 
   val userForm = Form(
     mapping(
@@ -35,6 +47,12 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
       "email" -> email,
       "password" -> nonEmptyText
     )(LoginInformation.apply)(LoginInformation.unapply)
+  )
+
+  val emailForm = Form(
+    mapping(
+      "email" -> email
+    )(UserEmailInformation.apply)(UserEmailInformation.unapply)
   )
 
   def register: Action[AnyContent] = Action { implicit request =>
@@ -115,6 +133,29 @@ class UsersController @Inject()(val messagesApi: MessagesApi, usersRepository: U
 
   def logout: Action[AnyContent] = Action { implicit request =>
     Redirect(routes.HomeController.index()).withNewSession
+  }
+
+  def manageUser: Action[AnyContent] = AdminAction { implicit request =>
+    Ok(views.html.users.manageusers())
+  }
+
+  def searchUser: Action[AnyContent] = AdminAction.async { implicit request =>
+    emailForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for user manage $formWithErrors")
+        Future.successful(BadRequest("Invalid email"))
+      },
+      userInfo => {
+        usersRepository
+          .getByEmail(userInfo.email.toLowerCase)
+          .flatMap {
+            case Some(user) =>
+              val foundUser = ManageUserInfo(user.email, user.active, user._id)
+              Future.successful(Ok(Json.toJson(foundUser).toString))
+            case None =>
+              Future.successful(NotFound("404! User not found"))
+          }
+      })
   }
 
 }

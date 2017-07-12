@@ -5,6 +5,7 @@ import javax.inject.Inject
 import models.UserJsonFormats._
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONObjectID
@@ -33,13 +34,12 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
-  def getByEmail(email: String)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+  def getByEmail(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj("email" -> email.toLowerCase))
-          .cursor[UserInfo](ReadPreference.Primary)
-          .collect[List](-1, reactivemongo.api.Cursor.FailOnError[List[UserInfo]]()))
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =

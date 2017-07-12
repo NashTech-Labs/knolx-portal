@@ -9,7 +9,9 @@ class JavascriptRouter extends Controller {
     Ok(JavaScriptReverseRouter("jsRoutes")(
       controllers.routes.javascript.FeedbackFormsController.createFeedbackForm,
       controllers.routes.javascript.FeedbackFormsController.updateFeedbackForm,
-      controllers.routes.javascript.FeedbackFormsController.getFeedbackFormPreview)).as("text/javascript")
+      controllers.routes.javascript.FeedbackFormsController.getFeedbackFormPreview,
+      controllers.routes.javascript.UsersController.searchUser
+    )).as("text/javascript")
   }
 
 }

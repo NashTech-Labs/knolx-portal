@@ -1,0 +1,160 @@
+.manage-user-custom-margin {
+    margin-bottom: 0px;
+}
+
+.search-bar {
+    height: 60px;
+    border: 1px solid #dcdcdc;
+    margin-top: 200px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px -5px #333;
+    border-radius: 4px;
+}
+
+.search-text {
+    height: 100%;
+    width: 90%;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    font-family: 'gothic';
+    font-size: 22px;
+    text-align: center;
+    letter-spacing: 2px;
+    padding-left: 40px;
+    color: #EC7063;
+    float: left;
+}
+
+.search-button {
+    float: left;
+    width: 10%;
+    height: 100%;
+    text-align: center;
+    padding-top: 12px;
+    font-size: 25px;
+    color: #888;
+    cursor: pointer;
+}
+
+.found-user-card {
+    height: 200px;
+    background-color: red;
+    margin-bottom: 40px;
+}
+
+.manage-user-custom-stick-out {
+    padding-top: 0px;
+    font-size: 50px;
+    top: -45px;
+    background-color: transparent;
+    border: none;
+    color: #dcdcdc;
+    text-shadow: none;
+    margin-top: 10px;
+}
+
+.manage-user-container-custom-margin {
+    margin-bottom: 100px;
+    height: 600px;
+}
+
+.manage-user-container-custom-btn {
+    margin-bottom: 0px;
+    top: -100px;
+}
+
+.manage-user-container-email {
+    font-family: 'gothic';
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 0px 0px 15px 0px;
+    margin-top: 10px;
+}
+
+.horizontal-rular {
+    height: 10px;
+    background-color: #000;
+    color: #000;
+    width: 50%;
+    top: 0px;
+}
+
+.manage-user-checkbox-text {
+    text-align: left;
+    font-size: 17px;
+    font-family: 'gothic';
+    color: #888888;
+    margin-right: 50%;
+    text-shadow: none;
+    letter-spacing: 2px;
+}
+
+.manage-user-label_text:before {
+    margin-top: 3px;
+    content: "\f096";
+    font-family: "FontAwesome";
+    display: inline-block;
+    width: 10px;
+    color: #EC7063;
+    font-size: 35px;
+    margin-right: 50px;
+}
+
+.custom-checkbox:checked + .manage-user-label_text:before {
+    margin-top: 3px;
+    content: "\f14a";
+    font-family: "FontAwesome";
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: tick 150ms ease-in;
+}
+
+.custom-manage-user-body {
+    text-shadow: none;
+    height: 350px;
+}
+
+.custom-manage-user-body-error {
+    text-shadow: none;
+    height: 200px;
+}
+
+.suspend-ckb-outer {
+    top: -50px;
+    text-align: center;
+    padding-left: 15%;
+}
+
+.password-bar {
+    top: -100px;
+    height: 80px;
+    border-bottom: 2px solid #fff;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.password-text {
+    height: 100%;
+    width: 90%;
+    border: none;
+    background-color: transparent;
+    outline: none;
+    text-align: center;
+    color: #EC7063;
+    font-size: 20px;
+    font-family: 'gothic';
+    text-shadow: none;
+    letter-spacing: 2px;
+}
+
+.empty-email {
+    text-align: center;
+    margin-top: -160px;
+    color: #EC7063;
+    font-size: 20px;
+    font-family: 'gothic';
+    text-shadow: none;
+    letter-spacing: 2px;
+    font-weight: bold;
+}

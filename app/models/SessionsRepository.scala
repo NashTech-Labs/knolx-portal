@@ -150,6 +150,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
             "date" -> BSONDocument("$lte" -> BSONDateTime(dateTimeUtility.nowMillis))))
           .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List]())
+          .collect[List](-1,FailOnError[List[SessionInfo]]()))
 
 }

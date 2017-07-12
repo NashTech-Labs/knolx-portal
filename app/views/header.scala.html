@@ -26,15 +26,28 @@
                         <a href="@routes.SessionsController.sessions(1)">Home</a>
                     </li>
                     @if(SessionHelper.isAdmin) {
-                        <li class="@activeLink(routes.SessionsController.manageSessions(1).url) alignLinks">
-                            <a href="@routes.SessionsController.manageSessions(1)">Manage Sessions</a>
+
+                        <li class="dropdown alignLinks">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                 Manage
+                                <b class="caret"></b>
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                <li class="alignLinks">
+                                    <a href="@routes.SessionsController.manageSessions(1)">Sessions</a>
+                                </li>
+                                <li class="alignLinks">
+                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Feedback Forms</a>
+                                </li>
+                                <li class="alignLinks">
+                                    <a href="@routes.UsersController.manageUser()">Users</a>
+                                </li>
+                            </ul>
                         </li>
+
                     }
-                    @if(SessionHelper.isAdmin) {
-                        <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks">
-                            <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Manage Feedback Forms</a>
-                        </li>
-                    }
+
 
                     @if(SessionHelper.isLoggedIn) {
                         <li class="@activeLink(routes.UsersController.login().url) alignLinks">

@@ -207,9 +207,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo SEE_OTHER
     }
 
-    "send form asked to update to feedback update page" in new WithTestApplication {
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
-      sessionsRepository.sessions returns sessionObject
+    "render feedback form update page" in new WithTestApplication {
       sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
@@ -221,8 +219,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not update Feedback Form as not found" in new WithTestApplication {
-      dateTimeUtility.ISTZoneId returns ZoneId.of("Asia/Calcutta")
-      sessionsRepository.sessions returns sessionObject
       sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
@@ -232,7 +228,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       status(response) must be equalTo SEE_OTHER
     }
-
 
     "update feedback form" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))

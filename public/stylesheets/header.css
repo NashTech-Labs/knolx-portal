@@ -35,15 +35,15 @@ ul > li > a {
 }
 
 .navbar {
-    background-color: rgb(125, 158, 192);
+    background-color: transparent;
     border-color: transparent;
 }
 
 body {
     background-color: #eee;
-    background-image:url('../images/bg.svg');
-    background-repeat:no-repeat;
-    background-size:cover;
+    background-image: url('../images/bg.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 @font-face {
@@ -66,7 +66,7 @@ nav.navbar.shrink {
     opacity: 1;
 }
 
-.homeInfo {
+.home-info {
     height: 800px;
 }
 
@@ -92,13 +92,11 @@ hr {
 i.fa.fa-user:hover {
     color: #fff;
     text-shadow: 0 0 10px #85929E;
-
 }
 
 i.fa.fa-user:active {
     background-color: rgb(125, 158, 192);
     text-shadow: 0 0 10px #85929E;
-
 }
 
 .navbar-nav > li > a {
@@ -121,7 +119,7 @@ i.fa.fa-user:active {
     margin-left: auto;
 }
 
-#parallex_layer_1 {
+#parallex-layer {
     position: fixed;
     width: 100%;
     height: 250px;
@@ -131,4 +129,8 @@ i.fa.fa-user:active {
 
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
     background-color: rgb(125, 158, 192);
+}
+
+.fa-comments {
+    color: #fff;
 }

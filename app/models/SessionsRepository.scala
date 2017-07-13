@@ -7,8 +7,8 @@ import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import utilities.DateTimeUtility
@@ -26,11 +26,16 @@ case class SessionInfo(userId: String,
                        session: String,
                        feedbackFormId: String,
                        topic: String,
+                       feedbackExpirationDays: Int,
                        meetup: Boolean,
                        rating: String,
                        cancelled: Boolean,
                        active: Boolean,
+                       expirationDate: BSONDateTime,
                        _id: BSONObjectID = BSONObjectID.generate)
+
+case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
+                             expirationDate: BSONDateTime)
 
 object SessionJsonFormats {
 
@@ -115,20 +120,73 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection.count(Some(Json.obj("active" -> true))))
 
-  def update(updatedRecord: UpdateSessionInformation)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord._id))
+  def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
-        "date" -> BSONDateTime(updatedRecord.date.getTime),
-        "topic" -> updatedRecord.topic,
-        "session" -> updatedRecord.session,
-        "feedbackFormId" -> updatedRecord.feedbackFormId,
-        "meetup" -> updatedRecord.meetup)
+        "date" -> BSONDateTime(updatedRecord.sessionUpdateFormData.date.getTime),
+        "topic" -> updatedRecord.sessionUpdateFormData.topic,
+        "session" -> updatedRecord.sessionUpdateFormData.session,
+        "feedbackFormId" -> updatedRecord.sessionUpdateFormData.feedbackFormId,
+        "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
+        "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
+        "expirationDate" -> updatedRecord.expirationDate)
     )
 
     collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
+  }
+
+  def activeSessions: Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+    collection
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework.{Ascending, Group, Limit, Match, PushField, Sort}
+
+        jsonCollection
+          .aggregate(
+            firstOperator = Match(
+              Json.obj(
+                "active" -> true,
+                "cancelled" -> false,
+                "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+                "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+            ),
+            otherOperators = List(
+              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
+              Sort(Ascending("_id")),
+              Limit(1)
+            ))
+          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
+          .map(_.flatten)
+      }
+  }
+
+  def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+    collection
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework.{Descending, Group, Limit, Match, PushField, Sort}
+
+        jsonCollection
+          .aggregate(
+            firstOperator = Match(
+              Json.obj(
+                "active" -> true,
+                "cancelled" -> false,
+                "expirationDate" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+            ),
+            otherOperators = List(
+              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
+              Sort(Descending("_id")),
+              Limit(1)
+            ))
+          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
+          .map(_.flatten)
+      }
   }
 
 }

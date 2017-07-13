@@ -15,6 +15,8 @@
             </div>
             <form id="feedbackform">
 
+                @helper.CSRF.formField
+
                 <div id="questions">
                     <div class ="question-card first-question-card">
                         <div class="col-md-12 feedback-title" >

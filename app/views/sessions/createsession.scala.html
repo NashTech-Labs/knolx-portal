@@ -8,6 +8,9 @@
         <div class="col-md-4  create-outer" style="margin-top: 90px ;">
             <div class="col-md-12 login-first top"></div>
             <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
+
+                @helper.CSRF.formField
+
                 <div class="col-md-12">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">

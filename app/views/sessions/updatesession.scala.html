@@ -7,6 +7,9 @@
         <div class="col-md-4 update-outer" style="margin-top: 90px ;">
             <div class="col-md-12 login-first top" > </div>
             <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
+
+                @helper.CSRF.formField
+
                 <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
 
                 <div class="col-md-12" >

@@ -12,6 +12,9 @@
                 <div class="col-md-12 login-first" > </div>
 
                 <form id="registrationForm" action="@routes.UsersController.createUser()" method="POST">
+
+                    @helper.CSRF.formField
+
                     <div class="col-md-12 top-registration-field" >
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >

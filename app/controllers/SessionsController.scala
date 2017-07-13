@@ -265,28 +265,28 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             Logger.error(s"Received a bad request for update session $formWithErrors")
             Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
           },
-          sessionUpdateInfo => {
-            val expirationMillis = sessionExpirationMillis(sessionUpdateInfo.date, sessionUpdateInfo.feedbackExpirationDays)
-            val updatedSession = UpdateSessionInfo(sessionUpdateInfo, BSONDateTime(expirationMillis))
+          updateSessionInfo => {
+            val expirationMillis = sessionExpirationMillis(updateSessionInfo.date, updateSessionInfo.feedbackExpirationDays)
+            val updatedSession = UpdateSessionInfo(updateSessionInfo, BSONDateTime(expirationMillis))
 
             sessionsRepository
               .update(updatedSession)
               .flatMap { result =>
                 if (result.ok) {
-                  Logger.info(s"Successfully updated session ${sessionUpdateInfo.id}")
+                  Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
 
                   (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
                     case ScheduledSessionsRefreshed    =>
                       Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
                     case ScheduledSessionsNotRefreshed =>
-                      Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo.id}")
+                      Logger.error(s"Cannot refresh feedback form schedulers while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                     case msg                           =>
-                      Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo.id}")
+                      Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                   }
                 } else {
-                  Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo.id}")
+                  Logger.error(s"Something went wrong when updating a new Knolx session for user  ${updateSessionInfo.id}")
                   Future.successful(InternalServerError("Something went wrong!"))
                 }
               }

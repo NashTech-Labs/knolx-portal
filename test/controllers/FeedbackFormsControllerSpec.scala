@@ -17,32 +17,40 @@ import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.DefaultWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
+import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
+
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val emailObject = Future.successful(List(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
 
-  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
-    with Scope with ShouldThrownExpectations with Mockito {
+  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+    lazy val app: Application = fakeApp
 
     val mailerClient = mock[MailerClient]
-    val usersRepository: UsersRepository = mock[UsersRepository]
     val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsRepository = mock[SessionsRepository]
 
-    val config = Configuration(ConfigFactory.load("application.conf"))
-    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
 
-    val controller = new FeedbackFormsController(messages, mailerClient, usersRepository, feedbackFormsRepository, sessionsRepository, dateTimeUtility)
-
-    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
+    lazy val controller =
+      new FeedbackFormsController(
+        knolxControllerComponent.messagesApi,
+        mailerClient,
+        usersRepository,
+        feedbackFormsRepository,
+        sessionsRepository,
+        dateTimeUtility,
+        knolxControllerComponent)
   }
 
   "Feedback controller" should {
@@ -50,8 +58,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "create render feedback form page" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val response = controller.feedbackForm()(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.feedbackForm()(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
 
       status(response) must be equalTo OK
       contentAsString(response) must contain("""form-name""")
@@ -60,8 +70,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "create feedback form" in new WithTestApplication {
       val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]}"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val questions = List(Question("How good is knolx portal?", List("1", "2", "3", "4", "5")))
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
@@ -78,8 +91,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not create feedback form because feedback form is not inserted in database" in new WithTestApplication {
       val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]}"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val questions = List(Question("How good is knolx portal?", List("1", "2", "3", "4", "5")))
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
@@ -96,8 +112,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not create feedback form because of malformed data" in new WithTestApplication {
       val payload = """[{"questions":"","options":["1","2","3","4","5"]}]"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -110,8 +129,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not create feedback form because name is empty" in new WithTestApplication {
       val payload = """{"name":"","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -124,8 +146,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not create feedback form because question value is empty" in new WithTestApplication {
       val payload = """{"name":"Test Form","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -138,8 +163,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not create feedback form because options value is empty" in new WithTestApplication {
       val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["","2","3","4","5"]}]}"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -152,8 +180,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "not create feedback form because options are not present" in new WithTestApplication {
       val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":[]}]}"""
 
-      val request = FakeRequest(POST, "/feedbackform/create").withBody(Json.parse(payload))
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(POST, "/feedbackform/create")
+          .withBody(Json.parse(payload))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -171,7 +202,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       feedbackFormsRepository.paginate(1) returns Future.successful(feedbackForms)
       feedbackFormsRepository.activeCount returns Future.successful(1)
 
-      val response = controller.manageFeedbackForm(1)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.manageFeedbackForm(1)(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
 
       status(response) must be equalTo OK
       contentAsString(response) must contain("""feedback-div-outer""")
@@ -184,8 +218,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
 
       status(response) must be equalTo SEE_OTHER
     }
@@ -194,8 +230,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
 
       status(response) must be equalTo SEE_OTHER
     }
@@ -205,8 +243,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val response = controller.update("5943cdd60900000900409b26")(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.update("5943cdd60900000900409b26")(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
 
       status(response) must be equalTo OK
     }
@@ -216,12 +256,13 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val response = controller.update("5943cdd60900000900409b26")(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.update("5943cdd60900000900409b26")(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
 
       status(response) must be equalTo SEE_OTHER
     }
-
 
     "update feedback form" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
@@ -234,6 +275,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
 
@@ -249,6 +291,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """[{"question":"question?","options":["option","option"]}]""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
 
@@ -264,6 +307,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"test","questions":[{"question":"question?","options":[]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
 
@@ -279,6 +323,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
 
@@ -294,6 +339,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
 
@@ -309,6 +355,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
 
@@ -327,6 +374,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
           .withBody(Json.parse(
             """{"id":"","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.updateFeedbackForm()(request)
       status(response) must be equalTo INTERNAL_SERVER_ERROR
@@ -336,7 +384,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "build json from case class" in new WithTestApplication {
       val questions = Question("how is knolx portal?", List("awesome", "i can do it better"))
       val feedbackForm = FeedbackForm("test", List(questions), active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+
       val result = controller.jsonCountBuilder(feedbackForm)
+
       result must be equalTo """{"0":"2"}"""
     }
 
@@ -345,8 +395,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
-      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
       status(response) must be equalTo OK
@@ -360,8 +412,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 
-      val request = FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+      val request =
+        FakeRequest(GET, "/feedbackform/preview?id=5943cdd60900000900409b26")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
 
       val response = controller.getFeedbackFormPreview("5943cdd60900000900409b26")(request)
       status(response) must be equalTo NOT_FOUND

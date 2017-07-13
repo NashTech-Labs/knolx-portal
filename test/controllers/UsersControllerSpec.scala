@@ -1,14 +1,13 @@
 package controllers
 
-import com.typesafe.config.ConfigFactory
-import models.{UserInfo, UsersRepository}
+import models.UserInfo
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
+import play.api.Application
 import play.api.mvc.Results
 import play.api.test.CSRFTokenHelper._
 import play.api.test._
-import play.api.{Application, Configuration}
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.BSONObjectID
 

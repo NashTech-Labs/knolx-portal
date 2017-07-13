@@ -158,3 +158,8 @@
     letter-spacing: 2px;
     font-weight: bold;
 }
+
+.manage-user-alerts{
+    text-align: center;
+    font-size: 18px;
+}

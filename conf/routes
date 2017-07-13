@@ -10,8 +10,10 @@ GET         /logout                             controllers.UsersController.logo
 
 GET         /register                           controllers.UsersController.register
 POST        /register                           controllers.UsersController.createUser
+
 GET         /users/manage                       controllers.UsersController.manageUser
 POST        /users/search                       controllers.UsersController.searchUser
+POST        /users/update                       controllers.UsersController.updateUser
 
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int)

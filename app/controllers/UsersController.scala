@@ -2,14 +2,13 @@ package controllers
 
 import javax.inject._
 
-import models.UsersRepository
+import models.{UpdatedUserInfo, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
-import reactivemongo.bson.BSONObjectID
 import utilities.{EncryptionUtility, PasswordUtility}
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -23,7 +22,9 @@ case class LoginInformation(email: String, password: String)
 
 case class UserEmailInformation(email: String)
 
-case class ManageUserInfo(email: String, active: Boolean, _id: BSONObjectID)
+case class ManageUserInfo(email: String, active: Boolean, _id: String)
+
+case class UpdateUserInfo(id: String, active: Boolean, password: Option[String])
 
 @Singleton
 class UsersController @Inject()(val messagesApi: MessagesApi,
@@ -53,6 +54,14 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     mapping(
       "email" -> email
     )(UserEmailInformation.apply)(UserEmailInformation.unapply)
+  )
+
+  val updateUserForm = Form(
+    mapping(
+      "id" -> nonEmptyText,
+      "active" -> boolean,
+      "password" -> optional(nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8))
+    )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
   )
 
   def register: Action[AnyContent] = Action { implicit request =>
@@ -150,10 +159,31 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
           .getByEmail(userInfo.email.toLowerCase)
           .flatMap {
             case Some(user) =>
-              val foundUser = ManageUserInfo(user.email, user.active, user._id)
+              val foundUser = ManageUserInfo(user.email, user.active, user._id.stringify)
               Future.successful(Ok(Json.toJson(foundUser).toString))
             case None =>
               Future.successful(NotFound("404! User not found"))
+          }
+      })
+  }
+
+  def updateUser: Action[AnyContent] = AdminAction.async { implicit request =>
+    updateUserForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for user manage $formWithErrors")
+        val errors = for(error <- formWithErrors.errors) yield error.message
+        Future.successful(BadRequest(errors.mkString(" ")))
+      },
+      userInfo => {
+        usersRepository.update(UpdatedUserInfo(userInfo.id, userInfo.active, userInfo.password))
+          .flatMap { result =>
+            if (result.ok) {
+              Logger.info(s"User details successfully updated for ${userInfo.id}")
+              Future.successful(Ok("User details successfully updated"))
+            }
+            else {
+              Future.successful(InternalServerError("Something went wrong!"))
+            }
           }
       })
   }

@@ -7,8 +7,7 @@
             <div class="col-md-12 login-first test feedback-top-banner manage-user-custom-margin"></div>
             <div class="col-md-2"></div>
             <div class="col-md-8 search-bar" id="search-bar">
-                <input class="search-text" name="email" id="search-text" placeholder="Search user by email"/>
-                <div class="search-button" onclick="slide()"><i class="fa fa-search" aria-hidden="true"></i></div>
+                <input class="search-text" onkeyup="slide(this.value)" autocomplete="off" name="email" id="search-text" placeholder="Search user by email"/>
             </div>
             <div class="col-md-2"></div>
             <div class="col-md-12" id="found-user-details">

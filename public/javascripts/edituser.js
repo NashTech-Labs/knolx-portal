@@ -1,7 +1,7 @@
-function slide() {
+function slide(keyword) {
     $('#search-bar').animate({marginTop: '30px'}, 500);
 
-    var email = document.getElementById('search-text').value;
+    var email = keyword;
 
     var errorCommon = "<div class='col-md-3'></div>" +
         "<div class='col-md-6'>" +

@@ -193,7 +193,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
     s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
   }
 
-
   def updateFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>
     request.body.validate[UpdateFeedbackFormInformation].asOpt.fold {
       Logger.error(s"Received a bad request while updating feedback form, ${request.body}")

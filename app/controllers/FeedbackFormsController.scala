@@ -162,27 +162,24 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
-      .sessions
+      .activeSessions
       .flatMap { sessions =>
-        val activeSessions = sessionsRepository.activeSessions
-        activeSessions.flatMap(sessions =>
-          if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
-            Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("info" -> "cant edit its active"))
-          }
-          else {
-            feedbackRepository
-              .getByFeedbackFormId(id)
-              .map {
-                case Some(feedForm: FeedbackForm)
-                =>
+        if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
+          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("info" -> "cant edit its active"))
+        }
+        else {
+          feedbackRepository
+            .getByFeedbackFormId(id)
+            .map {
+              case Some(feedForm: FeedbackForm)
+              =>
                 Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-                case None =>
-                  Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
-              }
-          })
+              case None =>
+                Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
+            }
+        }
       }
   }
-
 
 
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
@@ -197,7 +194,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
     s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
   }
-
 
 
   def updateFeedbackForm: Action[JsValue] = AdminAction.async(parse.json) { implicit request =>

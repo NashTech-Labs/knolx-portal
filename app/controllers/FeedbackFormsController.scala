@@ -201,26 +201,35 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       Logger.error(s"Received a bad request while updating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
-      val validatedForm =
-        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse
-          feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+      sessionsRepository
+        .activeSessions
+        .flatMap { sessions =>
+          if (sessions.foldLeft(false)(_ || _.feedbackFormId == feedbackFormInformation.id)) {
+            Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("info" -> "cant edit its active"))
+          }
+          else {
+            val validatedForm =
+              feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse
+                feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
-      validatedForm.fold {
-        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+            validatedForm.fold {
+              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
 
-        feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
-          if (result.ok) {
-            Logger.info(s"Feedback form successfully updated")
-            Ok("Feedback form successfully updated!")
-          } else {
-            Logger.error(s"Something went wrong when updated a feedback")
-            InternalServerError("Something went wrong!")
+              feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
+                if (result.ok) {
+                  Logger.info(s"Feedback form successfully updated")
+                  Ok("Feedback form successfully updated!")
+                } else {
+                  Logger.error(s"Something went wrong when updated a feedback")
+                  InternalServerError("Something went wrong!")
+                }
+              }
+            } { errorMessage =>
+              Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
+              Future.successful(BadRequest(errorMessage))
+            }
           }
         }
-      } { errorMessage =>
-        Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
-        Future.successful(BadRequest(errorMessage))
-      }
     }
   }
 

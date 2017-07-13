@@ -1,23 +1,19 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.ZoneId
 import java.util.Date
 
 import akka.actor.ActorRef
 import com.google.inject.name.Names
-import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
-import org.specs2.matcher.ShouldThrownExpectations
-import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
+import play.api.mvc.Results
 import play.api.test._
-import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
@@ -25,7 +21,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
+class SessionsControllerSpec extends PlaySpecification with Results {
 
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
@@ -33,31 +29,32 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
-  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
-    with Scope with ShouldThrownExpectations with Mockito {
-
-    val sessionsScheduler =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
+  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+    lazy val app: Application = fakeApp
 
     val sessionsRepository = mock[SessionsRepository]
     val usersRepository = mock[UsersRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
-    val config = Configuration(ConfigFactory.load("application.conf"))
 
-    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
     val testDateTimeUtility = new DateTimeUtility
 
-    val controller =
+    val sessionsScheduler =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
+
+    lazy val controller =
       new SessionsController(
-        messages,
+        knolxControllerComponent.messagesApi,
         usersRepository,
         sessionsRepository,
         feedbackFormsRepository,
-        dateTimeUtility,
+        testDateTimeUtility,
+        knolxControllerComponent,
         sessionsScheduler)
-
-    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
   }
 
   "Session Controller" should {

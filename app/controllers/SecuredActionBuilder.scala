@@ -14,8 +14,13 @@ case class UserSession(id: String, email: String, admin: Boolean)
 
 case class SecuredRequest[A](user: UserSession, request: Request[A]) extends WrappedRequest(request)
 
-class UserActionBuilder @Inject() (val parser: BodyParsers.Default, usersRepository: UsersRepository)(implicit val executionContext: ExecutionContext)
+class UserActionBuilder(val parser: BodyParser[AnyContent], usersRepository: UsersRepository)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SecuredRequest, AnyContent] {
+
+  @Inject
+  def this(parser: BodyParsers.Default, usersRepository: UsersRepository)(implicit ec: ExecutionContext) =
+    this(parser: BodyParser[AnyContent], usersRepository)
+
   val unauthorized = new Results.Status(UNAUTHORIZED)
 
   def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
@@ -38,8 +43,13 @@ class UserActionBuilder @Inject() (val parser: BodyParsers.Default, usersReposit
 
 }
 
-class AdminActionBuilder @Inject() (val parser: BodyParsers.Default, usersRepository: UsersRepository)(implicit val executionContext: ExecutionContext)
+class AdminActionBuilder(val parser: BodyParser[AnyContent], usersRepository: UsersRepository)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SecuredRequest, AnyContent] {
+
+  @Inject
+  def this(parser: BodyParsers.Default, usersRepository: UsersRepository)(implicit ec: ExecutionContext) =
+    this(parser: BodyParser[AnyContent], usersRepository)
+
   val unauthorized = new Results.Status(UNAUTHORIZED)
 
   def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {

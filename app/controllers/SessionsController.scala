@@ -11,7 +11,7 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
 import schedulers.SessionsScheduler._
 import utilities.DateTimeUtility

@@ -3,11 +3,12 @@ package controllers
 import javax.inject._
 
 import models.UsersRepository
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
+import play.filters.csrf.CSRF
 import utilities.{EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,6 +21,7 @@ case class LoginInformation(email: String, password: String)
 @Singleton
 class UsersController @Inject()(messagesApi: MessagesApi,
                                 usersRepository: UsersRepository,
+                                configuration: Configuration,
                                 controllerComponents: KnolxControllerComponents
                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
@@ -40,11 +42,13 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )(LoginInformation.apply)(LoginInformation.unapply)
   )
 
-  def register: Action[AnyContent] = Action { implicit request =>
+  def register: Action[AnyContent] = action { implicit request =>
     Ok(views.html.users.register(userForm))
   }
 
-  def createUser: Action[AnyContent] = Action.async { implicit request =>
+  def createUser: Action[AnyContent] = action.async { implicit request =>
+    val username = configuration.get[String]("session.username")
+
     userForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user registration $formWithErrors")
@@ -61,7 +65,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")
                   Redirect(routes.HomeController.index())
-                    .withSession(Security.username -> EncryptionUtility.encrypt(userInfo.email.toLowerCase))
+                    .withSession(username -> EncryptionUtility.encrypt(userInfo.email.toLowerCase))
                 } else {
                   Logger.error(s"Something went wrong while creating a new user ${userInfo.email}")
                   Redirect(routes.HomeController.index()).flashing("message" -> "Something went wrong!")
@@ -80,6 +84,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def loginUser: Action[AnyContent] = action.async { implicit request =>
+    val username = configuration.get[String]("session.username")
+
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))
@@ -99,12 +105,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               if (admin) {
                 Redirect(routes.HomeController.index())
                   .withSession(
-                    Security.username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase),
+                    username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase),
                     "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                   .flashing("message" -> "Welcome back!")
               } else {
                 Redirect(routes.HomeController.index())
-                  .withSession(Security.username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase))
+                  .withSession(username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase))
                   .flashing("message" -> "Welcome back!")
               }
             } else {

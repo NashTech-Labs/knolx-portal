@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import models.UsersRepository
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.http.Status._
 import play.api.mvc._
 import utilities.EncryptionUtility
@@ -14,19 +14,22 @@ case class UserSession(id: String, email: String, admin: Boolean)
 
 case class SecuredRequest[A](user: UserSession, request: Request[A]) extends WrappedRequest(request)
 
-class UserActionBuilder(val parser: BodyParser[AnyContent], usersRepository: UsersRepository)(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[SecuredRequest, AnyContent] {
+case class UserActionBuilder(val parser: BodyParser[AnyContent],
+                             usersRepository: UsersRepository,
+                             configuration: Configuration
+                            )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] {
 
   @Inject
-  def this(parser: BodyParsers.Default, usersRepository: UsersRepository)(implicit ec: ExecutionContext) =
-    this(parser: BodyParser[AnyContent], usersRepository)
+  def this(parser: BodyParsers.Default, usersRepository: UsersRepository, configuration: Configuration)(implicit ec: ExecutionContext) =
+    this(parser: BodyParser[AnyContent], usersRepository, configuration)
 
   val unauthorized = new Results.Status(UNAUTHORIZED)
 
   def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
     implicit val req = request
 
-    val emailFromSession = EncryptionUtility.decrypt(request.session.get(Security.username).getOrElse(""))
+    val username = configuration.get[String]("session.username")
+    val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
 
     usersRepository
       .getByEmail(emailFromSession)
@@ -43,19 +46,22 @@ class UserActionBuilder(val parser: BodyParser[AnyContent], usersRepository: Use
 
 }
 
-class AdminActionBuilder(val parser: BodyParser[AnyContent], usersRepository: UsersRepository)(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[SecuredRequest, AnyContent] {
+case class AdminActionBuilder(val parser: BodyParser[AnyContent],
+                              usersRepository: UsersRepository,
+                              configuration: Configuration
+                             )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] {
 
   @Inject
-  def this(parser: BodyParsers.Default, usersRepository: UsersRepository)(implicit ec: ExecutionContext) =
-    this(parser: BodyParser[AnyContent], usersRepository)
+  def this(parser: BodyParsers.Default, usersRepository: UsersRepository, configuration: Configuration)(implicit ec: ExecutionContext) =
+    this(parser: BodyParser[AnyContent], usersRepository, configuration)
 
   val unauthorized = new Results.Status(UNAUTHORIZED)
 
   def invokeBlock[A](request: Request[A], block: (SecuredRequest[A]) => Future[Result]): Future[Result] = {
     implicit val req = request
 
-    val emailFromSession = EncryptionUtility.decrypt(request.session.get(Security.username).getOrElse(""))
+    val username = configuration.get[String]("session.username")
+    val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
 
     usersRepository
       .getByEmail(emailFromSession)

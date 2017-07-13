@@ -5,11 +5,12 @@ import java.util.Date
 
 import akka.actor.ActorRef
 import com.google.inject.name.Names
+import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.{Configuration, Application}
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
 import play.api.mvc.Results
@@ -37,6 +38,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
 
+    val config = Configuration(ConfigFactory.load("application.conf"))
     val testDateTimeUtility = new DateTimeUtility
 
     val sessionsScheduler =
@@ -54,6 +56,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         feedbackFormsRepository,
         testDateTimeUtility,
         knolxControllerComponent,
+        config,
         sessionsScheduler)
   }
 

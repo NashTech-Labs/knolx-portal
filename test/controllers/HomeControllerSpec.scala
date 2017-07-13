@@ -12,7 +12,6 @@ class HomeControllerSpec extends PlaySpecification with Results {
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
-    val usersRepository: UsersRepository = mock[UsersRepository]
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))

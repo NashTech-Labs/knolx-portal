@@ -156,7 +156,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
-        case None => NotFound("404! feedback form not found")
+        case None               => NotFound("404! feedback form not found")
       }
   }
 
@@ -165,29 +165,27 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .activeSessions
       .flatMap { sessions =>
         if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
-          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("info" -> "cant edit its active"))
-        }
-        else {
+          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
+            .flashing("info" -> "Cannot edit feedback form as it is was already used for capturing responses for one of the session!"))
+        } else {
           feedbackRepository
             .getByFeedbackFormId(id)
             .map {
-              case Some(feedForm: FeedbackForm)
-              =>
+              case Some(feedForm: FeedbackForm) =>
                 Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-              case None =>
+              case None                         =>
                 Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
             }
         }
       }
   }
 
-
   def jsonCountBuilder(feedForm: FeedbackForm): String = {
 
     @tailrec
     def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
       questions match {
-        case Nil => json
+        case Nil          => json
         case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
       }
     }
@@ -234,27 +232,6 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
         Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
         Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
       })
-  }
-
-  private def getActiveSessions(sessions: List[SessionInfo]): List[SessionInfo] = {
-    val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeUtility.nowMillis), dateTimeUtility.ISTZoneId)
-
-    @tailrec
-    def check(sessions: List[SessionInfo], active: List[SessionInfo]): List[SessionInfo] = {
-      sessions match {
-        case Nil => active
-        case session :: rest =>
-          val expiredDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(session.expirationDate.value), dateTimeUtility.ISTZoneId)
-          if (currentDate.isAfter(expiredDate)) {
-            check(rest, active)
-          }
-          else {
-            check(rest, active :+ session)
-          }
-      }
-    }
-
-    check(sessions, Nil)
   }
 
 }

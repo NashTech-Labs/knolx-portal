@@ -8,7 +8,7 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   jdbc,
-  cache,
+  ehcache,
   ws,
   guice,
   "org.scalastyle" %% "scalastyle" % "0.8.0",

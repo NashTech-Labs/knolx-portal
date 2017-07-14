@@ -93,3 +93,7 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
     font-family: 'gothic';
     font-size: 17px;
 }
+
+.feedback-form-restricted {
+    text-align: center;
+}

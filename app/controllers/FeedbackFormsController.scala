@@ -1,5 +1,6 @@
 package controllers
 
+import java.time.{Instant, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -162,11 +163,22 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
   }
 
   def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
-    feedbackRepository
-      .getByFeedbackFormId(id)
-      .map {
-        case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+    sessionsRepository
+      .activeSessions
+      .flatMap { sessions =>
+        if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
+          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
+            .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
+        } else {
+          feedbackRepository
+            .getByFeedbackFormId(id)
+            .map {
+              case Some(feedForm: FeedbackForm) =>
+                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+              case None                         =>
+                Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
+            }
+        }
       }
   }
 
@@ -188,26 +200,36 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received a bad request while updating feedback form, ${request.body}")
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
-      val validatedForm =
-        feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse
-          feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
-
-      validatedForm.fold {
-        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
-
-        feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
-          if (result.ok) {
-            Logger.info(s"Feedback form successfully updated")
-            Ok("Feedback form successfully updated!")
+      sessionsRepository
+        .activeSessions
+        .flatMap { sessions =>
+          if (sessions.foldLeft(false)(_ || _.feedbackFormId == feedbackFormInformation.id)) {
+            Future.successful(
+              Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
+                .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
           } else {
-            Logger.error(s"Something went wrong when updated a feedback")
-            InternalServerError("Something went wrong!")
+            val validatedForm =
+              feedbackFormInformation.validateForm orElse feedbackFormInformation.validateName orElse
+                feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
+
+            validatedForm.fold {
+              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+
+              feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
+                if (result.ok) {
+                  Logger.info(s"Feedback form successfully updated")
+                  Ok("Feedback form successfully updated!")
+                } else {
+                  Logger.error(s"Something went wrong when updated a feedback")
+                  InternalServerError("Something went wrong!")
+                }
+              }
+            } { errorMessage =>
+              Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
+              Future.successful(BadRequest(errorMessage))
+            }
           }
         }
-      } { errorMessage =>
-        Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
-        Future.successful(BadRequest(errorMessage))
-      }
     }
   }
 

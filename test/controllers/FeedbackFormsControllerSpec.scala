@@ -1,5 +1,9 @@
 package controllers
 
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+
+import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
@@ -10,7 +14,7 @@ import play.api.libs.mailer.MailerClient
 import play.api.test.CSRFTokenHelper._
 import play.api.test.{FakeRequest, _}
 import reactivemongo.api.commands.DefaultWriteResult
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,6 +27,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
@@ -222,6 +230,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "not delete feedback form because of some error at database layer" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.delete("5943cdd60900000900409b26") returns Future.successful(None)
 
       val response = controller.deleteFeedbackForm("5943cdd60900000900409b26")(
@@ -232,8 +241,8 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo SEE_OTHER
     }
 
-    "send form asked to update to feedback update page" in new WithTestApplication {
-
+    "render feedback form update page" in new WithTestApplication {
+      sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
 
@@ -246,7 +255,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not update Feedback Form as not found" in new WithTestApplication {
-
+      sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
 
@@ -263,6 +272,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+      sessionsRepository.activeSessions returns sessionObject
 
       val request =
         FakeRequest(POST, "/feedbackform/update")
@@ -295,6 +305,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "not update feedback form due to malformed data with options missing" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns sessionObject
 
       val request =
         FakeRequest(POST, "/feedbackform/update")
@@ -311,6 +322,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "not update feedback form due to malformed data when name is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns sessionObject
 
       val request =
         FakeRequest(POST, "/feedbackform/update")
@@ -327,6 +339,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "not update feedback form due to malformed data when question is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns sessionObject
 
       val request =
         FakeRequest(POST, "/feedbackform/update")
@@ -343,6 +356,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
     "not update feedback form due to malformed data when option value is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns sessionObject
 
       val request =
         FakeRequest(POST, "/feedbackform/update")
@@ -362,6 +376,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+      sessionsRepository.activeSessions returns sessionObject
 
       val request =
         FakeRequest(POST, "/feedbackform/update")

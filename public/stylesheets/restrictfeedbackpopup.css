@@ -1,0 +1,37 @@
+.update-warning-sign {
+    color: #EC7063;
+    font-size: 50px;
+    margin-right: 3px;
+}
+
+.update-warning-title {
+    text-align: center;
+}
+
+.update-warning-title-message {
+    font-size: 20px;
+    font-family: gothic;
+    letter-spacing: 3px;
+    color: #EC7063;
+}
+
+.update-warning-message {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 18px;
+    color: #5D6D7E;
+}
+
+.update-warning_message {
+    margin-top: 10px;
+}
+
+.update-warning-close-btn {
+    margin: 30px 0px;
+}
+
+.update-warning-outer {
+    background-image: url(../images/mesh.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}

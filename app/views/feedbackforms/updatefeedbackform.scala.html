@@ -6,7 +6,7 @@
         <div class="col-md-3" ></div>
 
         <div class="col-md-6" >
-            <div class="container-fluid" style="margin-top: 90px ;"></div>
+            <div class="container-fluid top-container"></div>
             <div id="response"></div>
 
             <form id="feedbackform">
@@ -123,7 +123,7 @@
                                     </div>
 
                                     <br>
-                                    <div id="parent" style="width: 100% ; text-align:center ;"><div>
+                                    <div id="parent" class="add-option-parent"><div>
                                         <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-@questionCount-@{
                                             editableQuestions(questionCount - 1).options.size - 1
                                         }"></i>
@@ -137,7 +137,7 @@
                 </div>
             </form>
 
-            <div id='parent' style='width: 100% ;'>
+            <div id="parent" class="add-question-parent">
                 <div class="add-question-button" onclick="addQuestion()">
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>

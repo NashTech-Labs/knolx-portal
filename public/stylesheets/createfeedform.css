@@ -213,3 +213,12 @@ a.fa.fa-trash.delete-form:hover {
 .text-alignment {
     padding-top: 15px;
 }
+
+.add-option-parent {
+    width: 100%;
+    text-align: center;
+}
+
+.add-question-parent {
+    width: 100%;
+}

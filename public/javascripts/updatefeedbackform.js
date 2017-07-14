@@ -1,5 +1,3 @@
-var csrfToken = document.getElementById('csrfToken').value;
-
 document.getElementById("feedbackFormUpdate").addEventListener("click", updateForm);
 
 class FeedbackForm {
@@ -74,6 +72,8 @@ function updateForm() {
             contentType: 'application/json',
             data: JSON.stringify(feedbackForm),
             beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {

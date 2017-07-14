@@ -95,8 +95,6 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
 
   trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory with StubBodyParserFactory with StubMessagesFactory {
 
-    Helpers.stubControllerComponents()
-
     def stubControllerComponents: KnolxControllerComponents = {
       val bodyParser = stubBodyParser(AnyContentAsEmpty)
       val executionContext = ExecutionContext.global

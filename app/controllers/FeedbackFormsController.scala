@@ -168,7 +168,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .flatMap { sessions =>
         if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
           Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
-            .flashing("info" -> "Cannot edit feedback form as it is was already used for capturing responses for one of the session!"))
+            .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
         } else {
           feedbackRepository
             .getByFeedbackFormId(id)

@@ -105,7 +105,7 @@ function addOption(addElem) {
         '   </div>' +
         '   <div class="col-md-1" ></div>' +
         '</div>' +
-        '<div id="parent" style="width: 100%; text-align:center;"><div>' +
+        '<div id="parent" class="add-option-parent"><div>' +
         '<i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
         '</div>' +
         '</div>'
@@ -153,7 +153,7 @@ function addQuestion() {
         '       </div>' +
         '   </div>' +
         '   <br>' +
-        '   <div id="parent" style="width: 100%; text-align:center;"><div>' +
+        '   <div id="parent" class="add-option-parent"><div>' +
         '   <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
         '   </div></div>' +
         '</div>');

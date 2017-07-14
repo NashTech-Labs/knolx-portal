@@ -11,7 +11,7 @@
 
             <form id="feedbackform">
 
-                @helper.CSRF.formField
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
                 <div id="questions">
                     <div class ="question-card first-question-card">
@@ -142,7 +142,7 @@
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>
             </div>
-            <button type="button" onclick="updateForm()" class="btn btn-primary btn-lg create-feedback-button">Update</button>
+            <button id="feedbackFormUpdate" type="button" class="btn btn-primary btn-lg create-feedback-button">Update</button>
         </div>
 
         <div class="col-md-3" ></div>

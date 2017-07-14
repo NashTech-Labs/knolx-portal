@@ -1,3 +1,7 @@
+var csrfToken = document.getElementById('csrfToken').value;
+
+document.getElementById("feedbackFormUpdate").addEventListener("click", updateForm);
+
 class FeedbackForm {
     constructor(id, name, questions) {
         this.id = id;
@@ -69,6 +73,9 @@ function updateForm() {
             processData: false,
             contentType: 'application/json',
             data: JSON.stringify(feedbackForm),
+            beforeSend: function (request) {
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 window.location = "/feedbackform/manage?pageNumber=1";
                 alert("Form Successfully Updated !")
@@ -117,7 +124,7 @@ function addOption(addElem) {
         '   </div>' +
         '   <div class="col-md-1" ></div>' +
         '</div>' +
-        '<div id="parent" style="width: 100%; text-align:center;"><div>' +
+        '<div id="parent" class="add-option-parent"><div>' +
         '<i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
         '</div>' +
         '</div>'
@@ -165,7 +172,7 @@ function addQuestion() {
         '       </div>' +
         '   </div>' +
         '   <br>' +
-        '   <div id="parent" style="width: 100%; text-align:center;"><div>' +
+        '   <div id="parent" class="add-question-parent"><div>' +
         '   <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
         '   </div></div>' +
         '</div>');

@@ -1,54 +1,52 @@
 @(updateFeedbackFormInformation: List[UpdateFeedbackFormInformation], pageNumber: Int, pages: Int)(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    @main("Manage Sessions") {
-        <div class="row">
-            <div class="col-md-2" ></div>
-            <div class="col-md-8 feedback-form-container" >
-                <div class="col-md-12 login-first test feedback-top-banner">
-                    <div class="col-md-8 info-feedback" ></div>
-                    <div class="col-md-4 text-right new-feedback-button" >
-                        <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed">
-                            <i class="fa fa-plus" aria-hidden="true"></i> New
-                        </a>
-                    </div>
+@main("Manage Sessions") {
+    <div class="row">
+        <div class="col-md-2" ></div>
+        <div class="col-md-8 feedback-form-container" >
+            <div class="col-md-12 login-first test feedback-top-banner">
+                <div class="col-md-8 info-feedback" ></div>
+                <div class="col-md-4 text-right new-feedback-button" >
+                    <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed">
+                        <i class="fa fa-plus" aria-hidden="true"></i> New
+                    </a>
                 </div>
-                @if(!flash.isEmpty) {
-                    @if(!flash.get("message").fold("")(identity).isEmpty) {
-                        <div class="alert alert-success  alert-dismissable fade in" style="margin-top: 20px ;
-                        font-family: 'gothic' ;
-                        font-size: 17px ;
-                        ">
-                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            <strong>Success!</strong> @flash.get("message").fold("")(identity)
-                        </div>
-                    }
-                    @if(!flash.get("errormessage").fold("")(identity).isEmpty) {
-                        <div class="alert alert-danger  alert-dismissable fade in" style="margin-top: 20px ;
-                        font-family: 'gothic' ;
-                        font-size: 17px ;
-                        ">
-                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            <strong>Error!</strong> @flash.get("errormessage").fold("")(identity)
-                        </div>
-                    }
+            </div>
+            @if(!flash.isEmpty) {
+                @if(!flash.get("message").fold("")(identity).isEmpty) {
+                    <div class="alert alert-success alert-dismissable flash-success fade in">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>Success!</strong> @flash.get("message").fold("")(identity)
+                    </div>
                 }
+                @if(!flash.get("errormessage").fold("")(identity).isEmpty) {
+                    <div class="alert alert-danger alert-dismissable flash-failure fade in">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>Error!</strong> @flash.get("errormessage").fold("")(identity)
+                    </div>
+                }
+            }
 
-                @updateFeedbackFormInformation.map { feedbackFormInformation =>
-                    <div class="col-md-4 feedback-div-outer">
-                        <div class="feedback-form" onclick="window.location='@routes.FeedbackFormsController.update(feedbackFormInformation.id)'">
+            @updateFeedbackFormInformation.map { feedbackFormInformation =>
+                <div class="col-md-4 feedback-div-outer">
+
+                    <a href="@routes.FeedbackFormsController.update(feedbackFormInformation.id)">
+                        <div class="feedback-form">
                             <div class="feedback-form-upper"></div>
 
                             <div class="feedback-form-lower">
                             @feedbackFormInformation.name
                             </div>
                         </div>
-                    </div>
-                }
+                    </a>
 
-                <div class="col-md-4 feedback-div-outer" ></div>
-                <div class="col-md-4 feedback-div-outer" ></div>
-                <div class="col-md-12 feedback-footer"> </div>
-            </div>
-            <div class="col-md-2" ></div>
+                </div>
+            }
+
+            <div class="col-md-4 feedback-div-outer" ></div>
+            <div class="col-md-4 feedback-div-outer" ></div>
+            <div class="col-md-12 feedback-footer"> </div>
         </div>
-    }
+        <div class="col-md-2" ></div>
+    </div>
+}

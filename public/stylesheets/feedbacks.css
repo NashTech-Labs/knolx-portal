@@ -318,3 +318,12 @@
     color: #fff;
     border: 2px solid #fff
 }
+
+.feedback-response-submit {
+    width: 100%;
+    text-align: center;
+}
+
+.feedback-response-sessions {
+    width: 100%;
+}

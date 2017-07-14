@@ -11,7 +11,7 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
 import schedulers.SessionsScheduler._
 import utilities.DateTimeUtility
@@ -52,13 +52,14 @@ object SessionValues {
 }
 
 @Singleton
-class SessionsController @Inject()(val messagesApi: MessagesApi,
+class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
-                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef) extends Controller
-  with SecuredImplicit with I18nSupport {
+                                   controllerComponents: KnolxControllerComponents,
+                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef
+                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
 
@@ -89,7 +90,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions(pageNumber: Int = 1): Action[AnyContent] = Action.async { implicit request =>
+  def sessions(pageNumber: Int = 1): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionInfo =>
@@ -114,7 +115,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def manageSessions(pageNumber: Int = 1): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageSessions(pageNumber: Int = 1): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsInfo =>
@@ -153,7 +154,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def create: Action[AnyContent] = UserAction.async { implicit request =>
+  def create: Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .map { feedbackForms =>
@@ -163,7 +164,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def createSession: Action[AnyContent] = UserAction.async { implicit request =>
+  def createSession: Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -212,7 +213,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
       .flatMap(_.fold {
@@ -235,7 +236,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       })
   }
 
-  def update(id: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .getById(id)
       .flatMap {
@@ -254,7 +255,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def updateSession(): Action[AnyContent] = AdminAction.async { implicit request =>
+  def updateSession(): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -264,28 +265,28 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             Logger.error(s"Received a bad request for update session $formWithErrors")
             Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
           },
-          sessionUpdateInfo => {
-            val expirationMillis = sessionExpirationMillis(sessionUpdateInfo.date, sessionUpdateInfo.feedbackExpirationDays)
-            val updatedSession = UpdateSessionInfo(sessionUpdateInfo, BSONDateTime(expirationMillis))
+          updateSessionInfo => {
+            val expirationMillis = sessionExpirationMillis(updateSessionInfo.date, updateSessionInfo.feedbackExpirationDays)
+            val updatedSession = UpdateSessionInfo(updateSessionInfo, BSONDateTime(expirationMillis))
 
             sessionsRepository
               .update(updatedSession)
               .flatMap { result =>
                 if (result.ok) {
-                  Logger.info(s"Successfully updated session ${sessionUpdateInfo.id}")
+                  Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
 
                   (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
                     case ScheduledSessionsRefreshed    =>
                       Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
                     case ScheduledSessionsNotRefreshed =>
-                      Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo.id}")
+                      Logger.error(s"Cannot refresh feedback form schedulers while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                     case msg                           =>
-                      Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${sessionUpdateInfo.id}")
+                      Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                   }
                 } else {
-                  Logger.error(s"Something went wrong when updating a new Knolx session for user  ${sessionUpdateInfo.id}")
+                  Logger.error(s"Something went wrong when updating a new Knolx session for user  ${updateSessionInfo.id}")
                   Future.successful(InternalServerError("Something went wrong!"))
                 }
               }
@@ -293,7 +294,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def cancelScheduledSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
+  def cancelScheduledSession(sessionId: String): Action[AnyContent] = action.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1))
@@ -304,7 +305,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def scheduleSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
+  def scheduleSession(sessionId: String): Action[AnyContent] = action.async { implicit request =>
     (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1))

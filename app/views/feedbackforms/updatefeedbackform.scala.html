@@ -6,10 +6,13 @@
         <div class="col-md-3" ></div>
 
         <div class="col-md-6" >
-            <div class="container-fluid" style="margin-top: 90px ;"></div>
+            <div class="container-fluid top-container"></div>
             <div id="response"></div>
 
             <form id="feedbackform">
+
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+
                 <div id="questions">
                     <div class ="question-card first-question-card">
                         <div class="col-md-12 feedback-title" >
@@ -51,7 +54,7 @@
                                                     <p class="checkbox-text">
                                                         <input id="optionValue-0-@option" value="@readOnlyQuestion.options(option)" class="card-options" placeholder="Option" type="text"/>
                                                     </p>
-                                                    <a class="fa fa-times-circle delete-option-button" id="deleteOption-0-@option" onclick="deleteOption(this)"></a>
+                                                    <a class="fa fa-times-circle delete-option-button" id="deleteOption-0-@option"></a>
                                                 </label>
                                             </div>
                                             <div class="col-md-1" ></div>
@@ -61,10 +64,10 @@
 
                                     </div>
 
-                                    <div id="parent" style="width: 100% ; text-align:center ;">
+                                    <div id="parent" class="add-option-parent">
                                         <div>
-                                            <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-0-@{
-                                                feedbackForm.questions.size - 1
+                                            <i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-0-@{
+                                                readOnlyQuestion.options.size - 1
                                             }"></i>
                                         </div>
                                     </div>
@@ -81,7 +84,7 @@
                                 <div class="question-card" id="question-@questionCount">
                                     <label class="card-questions-label">
                                         <input id="questionValue-@questionCount" class="card-questions-other" value="@editableQuestions(questionCount - 1).question" placeholder="Question ?" type="text">
-                                        <i id="deleteQuestion-@questionCount" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i>
+                                        <i id="deleteQuestion-@questionCount" class="fa fa-trash-o delQuestion"></i>
                                     </label>
 
                                     <div id="options-@questionCount">
@@ -109,7 +112,7 @@
                                                     <p class="checkbox-text">
                                                         <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
                                                     </p>
-                                                    <a class="fa fa-times-circle delete-option-button" id="deleteOption-@questionCount-@option" onclick="deleteOption(this)"></a>
+                                                    <a class="fa fa-times-circle delete-option-button" id="deleteOption-@questionCount-@option"></a>
                                                 </label>
                                             </div>
                                             <div class="col-md-1" ></div>
@@ -120,8 +123,8 @@
                                     </div>
 
                                     <br>
-                                    <div id="parent" style="width: 100% ; text-align:center ;"><div>
-                                        <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-@questionCount-@{
+                                    <div id="parent" class="add-option-parent"><div>
+                                        <i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-@questionCount-@{
                                             editableQuestions(questionCount - 1).options.size - 1
                                         }"></i>
                                     </div>
@@ -134,12 +137,12 @@
                 </div>
             </form>
 
-            <div id='parent' style='width: 100% ;'>
-                <div class="add-question-button" onclick="addQuestion()">
+            <div id="parent" class="add-question-parent">
+                <div id="addQuestionButton" class="add-question-button">
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>
             </div>
-            <button type="button" onclick="updateForm()" class="btn btn-primary btn-lg create-feedback-button">Update</button>
+            <button id="feedbackFormUpdate" type="button" class="btn btn-primary btn-lg create-feedback-button">Update</button>
         </div>
 
         <div class="col-md-3" ></div>

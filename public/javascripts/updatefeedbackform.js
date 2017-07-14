@@ -179,7 +179,7 @@ function addQuestion() {
         '       </div>' +
         '   </div>' +
         '   <br>' +
-        '   <div id="parent" class="add-question-parent"><div>' +
+        '   <div id="parent" class="add-option-parent"><div>' +
         '   <i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
         '   </div></div>' +
         '</div>');

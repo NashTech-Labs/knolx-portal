@@ -1,19 +1,19 @@
 @()(implicit request: Request[_])
 
-<script src="@routes.Assets.versioned("javascripts/feedbackform.js")" type="text/javascript"></script>
-
 @main("Create Feedback Form") {
     <div class="row">
         <div class="col-md-3" >
 
         </div>
         <div class="col-md-6" >
-            <div class="container-fluid" style="margin-top: 90px ;">
+            <div class="container-fluid top-container">
             </div>
 
             <div id="response">
             </div>
             <form id="feedbackform">
+
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
                 <div id="questions">
                     <div class ="question-card first-question-card">
@@ -43,9 +43,9 @@
                                 </div>
                             </div>
 
-                            <div id="parent" style="width: 100% ;">
-                                <div class="add-option" onclick="">
-                                    <i class="fa fa-plus-circle" aria-hidden="true" onclick="addOption(this)" id="addOption-0-0" ></i>
+                            <div id="parent" class="add-option-parent">
+                                <div class="add-option">
+                                    <i id="addOption-0-0" class="fa fa-plus-circle" aria-hidden="true"></i>
                                 </div>
                             </div>
 
@@ -54,14 +54,16 @@
                 </div>
             </form>
 
-            <div id='parent' style='width: 100% ;'>
-                <div class="add-question-button text-alignment" onclick="addQuestion()">
+            <div id="parent" class="add-question-parent">
+                <div id="addQuestionButton" class="add-question-button text-alignment">
                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                 </div>
             </div>
-            <button type="button" onclick="createForm()" class="btn btn-primary btn-lg create-feedback-button">Create</button>
+            <button id="feedbackFormCreate" type="button" class="btn btn-primary btn-lg create-feedback-button">Create</button>
         </div>
 
         <div class="col-md-3" ></div>
     </div>
 }
+
+<script src="@routes.Assets.versioned("javascripts/feedbackform.js")" type="text/javascript"></script>

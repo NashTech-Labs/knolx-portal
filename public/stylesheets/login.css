@@ -1,5 +1,5 @@
 .login-outer {
-    height: 440px;
+    height: 470px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
     -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
@@ -17,6 +17,10 @@
     background-color: rgb(125, 158, 192);
     box-shadow: 0 9px 8px -5px #a8a8a8;
     border-bottom: 1px solid #fff;
+}
+
+.top-container {
+    margin-top: 90px;
 }
 
 .login-second {

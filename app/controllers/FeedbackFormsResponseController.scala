@@ -8,7 +8,7 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.libs.mailer.MailerClient
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,19 +32,21 @@ case class FeedbackForms(name: String,
                          active: Boolean = true,
                          id: String)
 
-class FeedbackFormsResponseController @Inject()(val messagesApi: MessagesApi,
+class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
                                                 usersRepository: UsersRepository,
                                                 feedbackRepository: FeedbackFormsRepository,
                                                 sessionsRepository: SessionsRepository,
-                                                dateTimeUtility: DateTimeUtility) extends Controller with SecuredImplicit with I18nSupport {
+                                                dateTimeUtility: DateTimeUtility,
+                                                controllerComponents: KnolxControllerComponents
+                                               ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
 
   val usersRepo: UsersRepository = usersRepository
 
-  def getFeedbackFormsForToday: Action[AnyContent] = UserAction.async { implicit request =>
+  def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository
       .activeSessions
       .flatMap { activeSessions =>

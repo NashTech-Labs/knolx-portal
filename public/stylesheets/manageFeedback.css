@@ -81,3 +81,19 @@
 a.btn.btn-sm.btn-primary.btn-create-feed:hover {
     background-color: rgb(125, 158, 192);
 }
+
+.flash-success {
+    margin-top: 20px;
+    font-family: 'gothic';
+    font-size: 17px;
+}
+
+.flash-failure {
+    margin-top: 20px;
+    font-family: 'gothic';
+    font-size: 17px;
+}
+
+.feedback-form-restricted {
+    text-align: center;
+}

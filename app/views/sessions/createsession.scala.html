@@ -5,9 +5,12 @@
     <div class="row">
         <div class="col-md-4"></div>
 
-        <div class="col-md-4  create-outer" style="margin-top: 90px ;">
+        <div class="col-md-4 create-outer top-container">
             <div class="col-md-12 login-first top"></div>
             <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
+
+                @helper.CSRF.formField
+
                 <div class="col-md-12">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
@@ -68,7 +71,7 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-10 feedback-duration">
                         <div class="col-md-12 duration-title">Feedback form expiration duration</div>
-                        <div class="col-md-6" style="padding-top:8px ;" >
+                        <div class="col-md-6 feedback-expiration">
                             <label class="radio-button default-radio">
                                 <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0' checked="checked"/>
                                 <span class="lab_text"></span>

@@ -1,3 +1,6 @@
+document.getElementById("feedbackFormUpdate").addEventListener("click", updateForm);
+document.getElementById("addQuestionButton").addEventListener("click", addQuestion);
+
 class FeedbackForm {
     constructor(id, name, questions) {
         this.id = id;
@@ -69,6 +72,11 @@ function updateForm() {
             processData: false,
             contentType: 'application/json',
             data: JSON.stringify(feedbackForm),
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 window.location = "/feedbackform/manage?pageNumber=1";
                 alert("Form Successfully Updated !")
@@ -94,7 +102,6 @@ function deleteOption(deleteElem) {
     });
 }
 
-
 function addOption(addElem) {
     var splitIds = addElem.id.split("-");
     var questionCountId = parseInt(splitIds[1]);
@@ -112,16 +119,23 @@ function addOption(addElem) {
         '           <p class="checkbox-text">' +
         '               <input id="optionValue-' + questionCountId + '-' + optionCountId + '" class="card-options" placeholder="Option" type="text"/>' +
         '           </p>' +
-        '           <a class="fa fa-times-circle delete-option-button" id="deleteOption-' + questionCountId + '-' + optionCountId + '" onclick="deleteOption(this)"></a>' +
+        '           <a class="fa fa-times-circle delete-option-button" id="deleteOption-' + questionCountId + '-' + optionCountId + '"></a>' +
         '       </label>' +
         '   </div>' +
         '   <div class="col-md-1" ></div>' +
         '</div>' +
-        '<div id="parent" style="width: 100%; text-align:center;"><div>' +
-        '<i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
+        '<div id="parent" class="add-option-parent"><div>' +
+        '<i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-' + questionCountId + '-' + optionCountId + '"></i>' +
         '</div>' +
         '</div>'
     );
+
+    document.getElementById("addOption-" + questionCountId + '-' + optionCountId).addEventListener("click", function () {
+        addOption(this)
+    });
+    document.getElementById("deleteOption-" + questionCountId + '-' + optionCountId).addEventListener("click", function () {
+        deleteOption(this)
+    });
 
     $('#addOption-' + questionCountId + '-' + (optionCountId - 1)).remove();
 }
@@ -147,7 +161,7 @@ function addQuestion() {
         '<div class="question-card" id="question-' + questionCount + '">' +
         '   <label class="card-questions-label">' +
         '       <input id="questionValue-' + questionCount + '" class="card-questions-other" placeholder="Question ?" type="text">' +
-        '       <i id="deleteQuestion-' + questionCount + '" onclick="deleteQuestion(this)" class="fa fa-trash-o delQuestion"></i>' +
+        '       <i id="deleteQuestion-' + questionCount + '" class="fa fa-trash-o delQuestion"></i>' +
         '   </label>' +
         '   <div id="options-' + questionCount + '">' +
         '       <div class="row" id="option-' + questionCount + '-' + optionsCount + '">' +
@@ -165,10 +179,38 @@ function addQuestion() {
         '       </div>' +
         '   </div>' +
         '   <br>' +
-        '   <div id="parent" style="width: 100%; text-align:center;"><div>' +
-        '   <i class="fa fa-plus-circle add-option" aria-hidden="true" onclick="addOption(this)" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
+        '   <div id="parent" class="add-option-parent"><div>' +
+        '   <i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-' + questionCount + '-' + optionsCount + '"></i>' +
         '   </div></div>' +
         '</div>');
 
+    document.getElementById("addOption-" + questionCount + '-' + optionsCount).addEventListener("click", function () {
+        addOption(this)
+    });
+    document.getElementById("deleteQuestion-" + questionCount).addEventListener("click", function () {
+        deleteQuestion(this)
+    });
+
     window.scrollTo(0, document.body.scrollHeight);
 }
+
+$(document).ready(function () {
+    questions.forEach(function (options, question, obj) {
+            for (var option = 1; option <= options.length - 1; option++) {
+                document.getElementById("deleteOption-" + question + '-' + option).addEventListener("click", function () {
+                    deleteOption(this)
+                });
+            }
+
+            if (question != 0) {
+                document.getElementById("deleteQuestion-" + question).addEventListener("click", function () {
+                    deleteQuestion(this)
+                });
+            }
+
+            document.getElementById("addOption-" + question + '-' + (options.length - 1)).addEventListener("click", function () {
+                addOption(this)
+            });
+        }
+    );
+});

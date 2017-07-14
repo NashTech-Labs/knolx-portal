@@ -141,7 +141,6 @@ function deleteQuestion(questionElem) {
 
     $('#question-' + questionCountId).fadeOut('slow', function () {
         $(this).remove();
-
     });
 }
 

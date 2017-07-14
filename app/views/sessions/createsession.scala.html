@@ -5,101 +5,136 @@
     <div class="row">
         <div class="col-md-4"></div>
 
-        <div class="col-md-4 profile">
-            <div class="container-fluid" style="margin-top: 90px ;"></div>
+        <div class="col-md-4 create-outer top-container">
+            <div class="col-md-12 login-first top"></div>
+            <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
 
-            <div class="create-outer">
-                <div class="col-md-12 login-one top"></div>
+                @helper.CSRF.formField
 
-                <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
-                    <div class="col-md-12">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-                            <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
-                            placeholder="Email" required class="updateField reg createemail"/>
-                        </div>
-                        <div class="col-md-1"></div>
-                    </div>
-
-                    <div class="col-md-12">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-                            <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
-                            placeholder="Date" required class="updateField reg"/>
-                        </div>
-                        <div class="col-md-1"></div>
-                    </div>
-
-                    <div class="col-md-12 login-two login-three updatetwo">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-                            <select name="session" id="session" class="updateField login-two">
-                            @for((value, key) <- SessionValues.Sessions) {
-                                <option value="@value">@key</option>
-                            }
-                            </select>
-                        </div>
-                        <div class="col-md-1"></div>
+                <div class="col-md-12">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
+                        placeholder="Email" required class="update-field reg create-email"/>
                     </div>
                     <div class="col-md-1"></div>
+                </div>
 
-                    <div class="col-md-12 login-two login-three updatetwo">
-                        <div class="col-md-1"></div>
+                <div class="col-md-12">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
+                        placeholder="Date" required class="update-field reg"/>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
 
-                        <div class="col-md-8">
-                            <select name="feedbackFormId" id="feedbackFormId" class="updateField login-two">
+                <div class="col-md-12 login-second login-third update-second">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <select name="session" id="session" class="update-field login-second">
+                        @for((value, key) <- SessionValues.Sessions) {
+                            <option value="@value">@key</option>
+                        }
+                        </select>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+                <div class="col-md-1"></div>
+
+                <div class="col-md-12 login-second login-third update-second">
+                    <div class="col-md-1"></div>
+
+                    <div class="col-md-8">
+                        <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
+                            <option selected value="">! Select Please</option>
                             @for((value, key) <- feedbackForms) {
                                 <option value="@value">@key</option>
                             }
-                            </select>
-                        </div>
-                        <div class="col-md-2"><i class="fa fa-eye preview"  onclick="generatePreview()" ></i></div>
-                        <div class="col-md-1"></div>
+                        </select>
                     </div>
+                    <div class="col-md-2"><i class="fa fa-eye preview" onclick="generatePreview()" ></i></div>
+                    <div class="col-md-1"></div>
+                </div>
 
-                    <div class="col-md-12 login-three updatetwo">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-                            <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
-                            placeholder="Topic" required class="updateField"/>
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
+                        placeholder="Topic" required class="update-field"/>
 
-                        </div>
-                        <div class="col-md-1"></div>
                     </div>
+                    <div class="col-md-1"></div>
+                </div>
 
-                    <div class="col-md-12 login-three">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-
-                            <label class="testy">
-                                <input type='checkbox' name='meetup' id='meetup' class='ckb' value='true'/>
-
-                                <span class="label_text"></span>
-                                <p class="checkbox-text">Is Meetup ?</p>
+                <div class="col-md-12 ">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 feedback-duration">
+                        <div class="col-md-12 duration-title">Feedback form expiration duration</div>
+                        <div class="col-md-6 feedback-expiration">
+                            <label class="radio-button default-radio">
+                                <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0' checked="checked"/>
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style">Default</p>
                             </label>
                         </div>
-                        <div class="col-md-1"></div>
-                    </div>
+                        <div class="col-md-6 days-outer" >
+                            <label class="radio-button">
+                            @if(createSessionForm.data.get("feedbackExpirationDays").nonEmpty && !createSessionForm.data.get("feedbackExpirationDays").contains("0")) {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style-days">
+                                    <input type="number" min="1" max="31" value="@createSessionForm.data.get("feedbackExpirationDays")" class="days" id="days">
+                                    day/s
+                                </p>
+                            } else {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1'/>
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style-days">
+                                    <input type="number" disabled min="1" max="32" value="1" class="days" id="days" >
+                                    day/s
+                                </p>
+                            }
 
-                    <div class="col-md-12 update-two login-four">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10 ">
-                            <input type="submit" value="Create" class="inputField updateButton"/>
+                            </label>
                         </div>
-                        <div class="col-md-1"></div>
                     </div>
-                </form>
-            </div>
+                    <div class="col-md-1"></div>
+                </div>
+
+                <div class="col-md-12 login-third">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+
+                        <label class="checkbox-outer">
+                            <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'/>
+
+                            <span class="label_text"></span>
+                            <p class="checkbox-text">Is Meetup ?</p>
+                        </label>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+
+                <div class="col-md-12 update-second-field login-four">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="submit" value="Create" class="input-field update-button"/>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+            </form>
+            <div class="col-md-12 create-footer"></div>
         </div>
         <div class="col-md-4"></div>
     </div>
 
-    <div class="row regError">
+    <div class="row registration-error">
         <div class="col-md-4"></div>
         <div class="col-md-4">
         @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
                 createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
-                createSessionForm("feedbackFormId").hasErrors || !flash.isEmpty) {
+                createSessionForm("feedbackFormId").hasErrors || createSessionForm("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
             <div class="alert alert-danger fade in ">
                 <ul>
                     @if(createSessionForm.hasGlobalErrors) {
@@ -117,6 +152,9 @@
                     @if(createSessionForm("feedbackFormId").hasErrors) {
                         <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
                     }
+                    @if(createSessionForm("feedbackExpirationDays").hasErrors) {
+                        <li>@createSessionForm("feedbackExpirationDays").error.map(error => messages(error.message))</li>
+                    }
                     @if(!flash.isEmpty) {
                         <li>@flash.get("message").fold("")(message => message)</li>
                     }
@@ -130,4 +168,5 @@
 
     @feedbackforms.feedbackformpreview()
 
+    <script src="@routes.Assets.versioned("javascripts/expirationdays.js")" type="text/javascript"></script>
 }

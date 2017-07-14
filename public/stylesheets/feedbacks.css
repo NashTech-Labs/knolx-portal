@@ -1,0 +1,329 @@
+.feedback-form-display-container {
+    color: #000;
+    margin: 100px 0px;
+    background-color: #fff;
+    box-shadow: 0 4px 7px -5px #333;
+    padding: 0px 0px 0px 0px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 2s; /* Firefox < 16 */
+    -ms-animation: fadein 2s; /* Internet Explorer */
+    -o-animation: fadein 2s; /* Opera < 12.1 */
+    animation: fadein 2s;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.feedback-top-banner {
+    margin-bottom: 80px;
+    background-color: rgb(125, 158, 192);
+    box-shadow: 0 9px 8px -5px #a8a8a8;
+    border-bottom: 1px solid #fff;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+
+}
+
+.feedback-footer {
+    height: 30px;
+    background-color: #dcdcdc;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    margin-top: 10px;
+}
+
+.feedback-display {
+
+}
+
+.card-body {
+    width: 100%;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    text-align: center;
+    line-height: 60px;
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0px 6px #999;
+    background-color: #dcdcdc;
+    box-shadow: 0 6px 4px -5px #333;
+}
+
+.stick-out {
+    position: relative;
+    top: -40px;
+    padding-top: 13px;
+    border: 3px dotted #fff;
+}
+
+.feedback-card-head {
+    width: 80px;
+    height: 80px;
+    background-color: #dcdcdc;
+    border-radius: 50%;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 60px;
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0px 6px #999;
+}
+
+.feedback-display-logo {
+    font-size: 40px;
+    text-shadow: none;
+    color: #639593;;
+}
+
+.feedback-card-button {
+    border-radius: 0;
+    width: 80%;
+    margin-bottom: 20px;
+    border: 2px solid #dcdcdc;
+    letter-spacing: 2px;
+    background-color: #639593;
+    outline: none !important;
+    padding: 12px 0px;
+    font-size: 18px;
+    color: #fff;
+    position: relative;
+    top: -40px;
+}
+
+.feedback-card-button:hover {
+    background-color: #5D8D8C;
+    border: 2px solid #dcdcdc;
+    outline: none !important;
+    color: #fff;
+}
+
+.feedback-card-button:active {
+    background-color: #5D8D8C;
+    border: 2px solid #dcdcdc;
+    outline: none !important;
+    color: #fff;
+}
+
+.feedback-card-button:focus {
+    outline: none !important;
+    color: #fff;
+}
+
+.feedback-card-topic {
+    font-size: 20px;
+    word-wrap: break-word;
+    line-height: 1.2em;
+    margin: 0.2em 0;
+    top: -30px;
+    color: #fff;
+    text-shadow: none;
+    background-color: rgb(125, 158, 192);
+    padding: 8px 3px 3px 3px;
+    box-shadow: 0 9px 8px -5px #a8a8a8;
+}
+
+.session-details {
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: none;
+}
+
+.session-details > tr > td:first-child {
+    color: #566573;
+    text-shadow: none;
+    font-weight: bold;
+    font-family: 'headerfont';
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding-top: 10px;
+    text-align: left;
+}
+
+.session-table {
+    table-layout: fixed;
+    word-wrap: break-word;
+    box-shadow: 0 4px 10px -5px #a8a8a8;
+    margin-bottom: 0px;
+}
+
+.session-card-values {
+    font-size: 22px;
+    color: #F1948A;
+}
+
+.feedback-card-details {
+    position: relative;
+}
+
+.feedback-card-expire-button {
+    border-radius: 0;
+    width: 80%;
+    margin-bottom: 20px;
+    border: 2px solid #dcdcdc;
+    letter-spacing: 2px;
+    background-color: #639593;
+    outline: none !important;
+    padding: 12px 0px;
+    font-size: 18px;
+    color: #fff;
+    position: relative;
+    top: -40px;
+}
+
+.expired {
+    background-color: #a8a8a8;
+    box-shadow: none;
+    color: #fff;
+}
+
+.expired-details-button {
+    background-color: #a8a8a8;
+    color: #fff;
+}
+
+.feedback-card-expire-button:hover {
+    background-color: #a8a8a8;
+    color: #fff;
+}
+
+.feedback-card-expire-button:active {
+    background-color: #a8a8a8;
+    color: #fff;
+}
+
+.feedback-card-expire-button:focus {
+    background-color: #a8a8a8;
+    color: #fff;
+}
+
+.session-table > tbody > tr > td {
+    padding: 8px;
+    line-height: 1.42857143;
+    vertical-align: top;
+    border: none;
+}
+
+.session-information-modal {
+    padding-bottom: 0px;
+
+}
+
+.session-modal-title {
+    box-shadow: 0 8px 10px -5px #a8a8a8;
+    background-color: #639593;
+    text-align: center;
+}
+
+#session-topic {
+    color: #fff;
+    font-size: 22px;
+    font-family: 'sans-serif';
+}
+
+.session-modal-footer {
+    border: none;
+    text-align: center;
+}
+
+.session-modal-footer-btn {
+    background: #639593;
+    color: #fff;
+    font-size: 15px;
+    font-family: 'sans-serif';
+    padding: 10px 60px 10px 60px;
+    border-radius: 0px;
+}
+
+.feedback-card-by {
+    font-size: 15px;
+    padding: 0px 0px;
+    top: -40px;
+    color: #a8a8a8;
+    text-shadow: none;
+    font-weight: bold;
+}
+
+.feedback-card-author {
+    font-size: 16px;
+    top: -50px;
+    color: #5D8D8C;
+    text-shadow: none;
+    font-weight: bold;
+    word-wrap: break-word;
+    line-height: 1.2em;
+    margin: 0.2em 0;
+    padding: 0px 15px 0px 15px;
+}
+
+.more {
+    color: #EC7063;
+    cursor: pointer;
+}
+
+.expire-color {
+    color: #a8a8a8;
+}
+
+.feedback-response-details {
+    background-color: #fff;
+}
+
+.feedback-response-form {
+    background-color: transparent;
+}
+
+.feedback-response-outer {
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
+}
+
+.form-session-information-modal {
+    margin-bottom: 20px;
+}
+
+.form-card-options {
+    line-height: 40px;
+    border: none;
+    width: 90%;
+    outline: none;
+    font-size: 18px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    color: #7F8C8D;
+    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 2s; /* Firefox < 16 */
+    -ms-animation: fadein 2s; /* Internet Explorer */
+    -o-animation: fadein 2s; /* Opera < 12.1 */
+    animation: fadein 2s;
+}
+
+.form-question-card {
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin-top: 0px;
+    margin-bottom: 15px;
+}
+
+.submit-form-button {
+    border-radius: 0px;
+}
+
+.submit-form-button:hover {
+    background-color: #639593;
+    color: #fff;
+    border: 2px solid #fff
+}
+
+.feedback-response-submit {
+    width: 100%;
+    text-align: center;
+}
+
+.feedback-response-sessions {
+    width: 100%;
+}

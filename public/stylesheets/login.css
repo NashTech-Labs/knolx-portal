@@ -1,5 +1,5 @@
 .login-outer {
-    height: 440px;
+    height: 470px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
     -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
@@ -11,7 +11,7 @@
     border-bottom-right-radius: 20px;
 }
 
-.login-one {
+.login-first {
     height: 80px;
     padding: 0px 0px;
     background-color: rgb(125, 158, 192);
@@ -19,12 +19,16 @@
     border-bottom: 1px solid #fff;
 }
 
-.login-two {
+.top-container {
+    margin-top: 90px;
+}
+
+.login-second {
     line-height: 50px;
     padding-top: 50px;
 }
 
-.inputField {
+.input-field {
     width: 100%;
     text-align: center;
     border: none;
@@ -34,18 +38,18 @@
     color: #566573;
 }
 
-.login-three {
+.login-third {
     padding-top: 30px;
 }
 
-.logbtn {
+.login-button {
     background-color: #45B39D;
     color: #fff;
     border: None;
     outline: none;
 }
 
-input.inputField.loge:focus {
+input.input-field.loge:focus {
     outline: none;
     border-bottom: 2px solid #45B39D;
 }
@@ -56,7 +60,7 @@ input.inputField.loge:focus {
     text-align: center;
 }
 
-.loginError {
+.login-error {
     margin-top: 20px;
     text-align: center;
     font-size: 16px;

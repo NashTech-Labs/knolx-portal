@@ -1,24 +1,27 @@
-.feedbackformcontainer {
+.feedback-form-container {
     background-color: #fff;
     color: #000;
     margin-top: 100px;
     background-color: #FFF;
     box-shadow: 0 4px 6px -5px #333;
     padding: 0px 0px;
-   // padding-bottom: 50px;
+/ / padding-bottom: 50 px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
     border-radius: 30px;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
-.feedouters {
+.feedback-div-outer {
     padding: 30px 0px 30px 0px;
 }
 
-.feedform {
+.feedback-form {
 
     width: 12em;
     height: 12em;
@@ -27,7 +30,7 @@
     cursor: pointer;
 }
 
-.feedformupper {
+.feedback-form-upper {
     width: 70%;
     height: 70%;
     float: none;
@@ -41,7 +44,7 @@
     background-size: contain;
 }
 
-.feedformlower {
+.feedback-form-lower {
     width: 100%;
     float: none;
     margin: 0 auto;
@@ -52,22 +55,22 @@
     color: #27AE60;
 }
 
-.feedform:hover {
+.feedback-form:hover {
     box-shadow: 0 4px 6px -5px #333;
 }
 
-.newfeedbtn {
+.new-feedback-button {
     height: 80px;
     line-height: 75px;
 }
 
-.infofeed {
+.info-feedback {
     height: 80px;
 }
 
 .btn-create-feed {
     padding: 5px 15px 5px 15px;
-    background-color:rgb(125, 158, 192);
+    background-color: rgb(125, 158, 192);
     border: 2px solid #fff;
     font-size: 15px;
     color: #fff;
@@ -79,4 +82,18 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
     background-color: rgb(125, 158, 192);
 }
 
+.flash-success {
+    margin-top: 20px;
+    font-family: 'gothic';
+    font-size: 17px;
+}
 
+.flash-failure {
+    margin-top: 20px;
+    font-family: 'gothic';
+    font-size: 17px;
+}
+
+.feedback-form-restricted {
+    text-align: center;
+}

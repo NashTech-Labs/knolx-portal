@@ -2,7 +2,7 @@
 
     @main(message) {
         <p class="information">
-        @flash.get("message").fold("")(message => message)
+        @flash.get("message").fold("")(identity)
         </p>
 
         <h3>Welcome</h3>

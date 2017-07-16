@@ -11,8 +11,8 @@ GET         /register                           controllers.UsersController.regi
 POST        /register                           controllers.UsersController.createUser
 GET         /users/manage/:pageNumber           controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
 POST        /users/search                       controllers.UsersController.searchUser
-POST        /users/update                       controllers.UsersController.updateUser
-GET         /users/load/:email                  controllers.UsersController.loadUser(email: String)
+GET         /user/update                        controllers.UsersController.update(email: String)
+POST        /user/updateInformation             controllers.UsersController.updateUser
 
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
@@ -24,6 +24,7 @@ POST        /session/update                     controllers.SessionsController.u
 GET         /session/update                     controllers.SessionsController.update(id: String)
 GET         /session/:sessionId/cancel          controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule        controllers.SessionsController.scheduleSession(sessionId: String)
+POST        /session/search                     controllers.SessionsController.searchSession
 
 # Feedback
 GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int, keyword: Option[String])

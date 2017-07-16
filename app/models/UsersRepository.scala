@@ -23,7 +23,7 @@ case class UserInfo(email: String,
                     admin: Boolean,
                     _id: BSONObjectID = BSONObjectID.generate)
 
-case class UpdatedUserInfo(id: String, active: Boolean, password: Option[String])
+case class UpdatedUserInfo(email: String, active: Boolean, password: Option[String])
 
 object UserJsonFormats {
 
@@ -48,15 +48,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
-  def getBySubString(substring: String)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(Json.obj("email" -> Json.obj("$regex" -> (".*" + substring.toLowerCase + ".*"))))
-          .cursor[UserInfo](ReadPreference.Primary)
-          .collect[List](100, FailOnError[List[UserInfo]]()))
-  }
-
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -64,7 +55,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .insert(user))
 
   def update(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.id))
+    val selector = BSONDocument("email" -> updatedRecord.email)
     val modifier = updatedRecord.password match {
       case Some(password) => BSONDocument(
         "$set" -> BSONDocument(
@@ -85,7 +76,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
 
     val condition = keyword match {
-      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.toLowerCase + ".*")))
+      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")))
       case None => Json.obj()
     }
     collection
@@ -99,7 +90,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def userCountWithKeyword(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
     val condition = keyword match {
-      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.toLowerCase + ".*"))))
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))))
       case None => None
     }
 

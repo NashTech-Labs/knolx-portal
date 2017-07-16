@@ -11,6 +11,7 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Controller}
 import reactivemongo.bson.BSONDateTime
 import schedulers.SessionsScheduler._
@@ -45,7 +46,13 @@ case class KnolxSession(id: String,
                         meetup: Boolean,
                         cancelled: Boolean,
                         rating: String,
-                        feedbackFormScheduled: Boolean = false)
+                        feedbackFormScheduled: Boolean = false,
+                        dateString : String = "",
+                        completed : Boolean = false)
+
+case class SessionEmailInformation(email: Option[String], page: Int)
+
+case class SessionSearchResult(sessions: List[KnolxSession], pages: Int, page: Int, keyword: String)
 
 object SessionValues {
   val Sessions = Seq("session 1" -> "Session 1", "session 2" -> "Session 2")
@@ -61,6 +68,15 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   with SecuredImplicit with I18nSupport {
 
   val usersRepo: UsersRepository = usersRepository
+  implicit val KnolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
+  implicit val SessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+
+  val sessionSearchForm = Form(
+    mapping(
+      "email" -> optional(nonEmptyText),
+      "page" -> number
+    )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
+  )
 
   val createSessionForm = Form(
     mapping(
@@ -87,9 +103,9 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions(pageNumber: Int = 1, keyword: Option[String]): Action[AnyContent] = Action.async { implicit request =>
+  def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = Action.async { implicit request =>
     sessionsRepository
-      .paginate(pageNumber)
+      .paginate(pageNumber,keyword)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map (session =>
           KnolxSession(session._id.stringify,
@@ -103,7 +119,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             session.rating))
 
         sessionsRepository
-          .activeCount
+          .activeCount(keyword)
           .map { count =>
             val pages = Math.ceil(count / 10D).toInt
 
@@ -112,7 +128,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def manageSessions(pageNumber: Int = 1, keyword: Option[String]): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsInfo =>
@@ -141,7 +157,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
         eventualKnolxSessions flatMap { sessions =>
           sessionsRepository
-            .activeCount
+            .activeCount(keyword)
             .map { count =>
               val pages = Math.ceil(count / 10D).toInt
 
@@ -149,6 +165,53 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
             }
         }
       }
+  }
+
+  def searchSession: Action[AnyContent] = AdminAction.async { implicit request =>
+    sessionSearchForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
+        Future.successful(Ok("{}"))
+      },
+      sessionInformation => {
+        sessionsRepository
+          .paginate(sessionInformation.page, sessionInformation.email)
+          .flatMap { sessionInfo =>
+            val knolxSessions = sessionInfo map (sessionInfo =>
+              KnolxSession(sessionInfo._id.stringify,
+                sessionInfo.userId,
+                new Date(sessionInfo.date.value),
+                sessionInfo.session,
+                sessionInfo.topic,
+                sessionInfo.email,
+                sessionInfo.meetup,
+                sessionInfo.cancelled,
+                sessionInfo.rating,
+                dateString = new Date(sessionInfo.date.value).toString,
+                completed = new Date(sessionInfo.date.value).before(new java.util.Date(System.currentTimeMillis))
+                ))
+
+            val eventualScheduledFeedbackForms =
+              (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
+
+            val eventualKnolxSessions = eventualScheduledFeedbackForms map { scheduledFeedbackForms =>
+              knolxSessions map { session =>
+                val scheduled = scheduledFeedbackForms.sessionIds.contains(session.id)
+                session.copy(feedbackFormScheduled = scheduled)
+              }
+            }
+            eventualKnolxSessions flatMap { sessions =>
+              sessionsRepository
+                .activeCount(sessionInformation.email)
+                .map { count =>
+                  val pages = Math.ceil(count / 10D).toInt
+
+                  Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
+                }
+            }
+          }
+      }
+    )
   }
 
   def create: Action[AnyContent] = UserAction.async { implicit request =>
@@ -222,7 +285,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
         (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
           case ScheduledSessionsRefreshed    =>
-            Redirect(routes.SessionsController.manageSessions(pageNumber, None)).flashing("message" -> "Session successfully Deleted!")
+            Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!")
           case ScheduledSessionsNotRefreshed =>
             Logger.error(s"Cannot refresh feedback form schedulers while deleting session $id")
             InternalServerError("Something went wrong!")

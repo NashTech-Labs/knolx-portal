@@ -10,6 +10,8 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
 import utilities.{EncryptionUtility, PasswordUtility}
+
+import scala.concurrent.Future
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
@@ -17,16 +19,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class UserInformation(email: String, password: String, confirmPassword: String)
-
 case class LoginInformation(email: String, password: String)
-
 case class UserEmailInformation(email: Option[String], page: Int)
-
-case class ManageUserInfo(email: String, active: Boolean, _id: String)
-
-case class UpdateUserInfo(id: String, active: Boolean, password: Option[String])
-
-case class userSearchResult(users: List[ManageUserInfo], pages: Int, page: Int, keyword: String)
+case class ManageUserInfo(email: String, active: Boolean, id: String)
+case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
+case class UserSearchResult(users: List[ManageUserInfo], pages: Int, page: Int, keyword: String)
 
 @Singleton
 class UsersController @Inject()(val messagesApi: MessagesApi,
@@ -34,7 +31,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
   val usersRepo: UsersRepository = usersRepository
 
   implicit val ManageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
-  implicit val userSearchResultInfoFormat: OFormat[userSearchResult] = Json.format[userSearchResult]
+  implicit val userSearchResultInfoFormat: OFormat[UserSearchResult] = Json.format[UserSearchResult]
 
   val userForm = Form(
     mapping(
@@ -62,7 +59,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
 
   val updateUserForm = Form(
     mapping(
-      "id" -> nonEmptyText,
+      "email" -> email,
       "active" -> boolean,
       "password" -> optional(nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8))
     )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
@@ -183,26 +180,26 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
               .map { count =>
                 val pages = Math.ceil(count / 10D).toInt
 
-                Ok(Json.toJson(userSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""))).toString)
+                Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""))).toString)
               }
           }
       }
     )
   }
 
-  def updateUser: Action[AnyContent] = AdminAction.async { implicit request =>
+  def updateUser(): Action[AnyContent] = AdminAction.async { implicit request =>
     updateUserForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage $formWithErrors")
-        val errors = for (error <- formWithErrors.errors) yield error.message
-        Future.successful(BadRequest(errors.mkString(" ")))
+        Future.successful(BadRequest(views.html.users.updateuser(formWithErrors)))
       },
       userInfo => {
-        usersRepository.update(UpdatedUserInfo(userInfo.id, userInfo.active, userInfo.password))
+        usersRepository.update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
-              Logger.info(s"User details successfully updated for ${userInfo.id}")
-              Future.successful(Ok("User details successfully updated"))
+              Logger.info(s"User details successfully updated for ${userInfo.email}")
+              Future.successful(Redirect(routes.UsersController.manageUser(1,None))
+                .flashing("message" -> s"Details successfully updated for ${userInfo.email}"))
             }
             else {
               Future.successful(InternalServerError("Something went wrong!"))
@@ -211,8 +208,15 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
       })
   }
 
-  def loadUser(email: String): Action[AnyContent] = AdminAction.async { implicit request =>
-    Future.successful(Ok(views.html.users.updateuser()))
+  def update(email: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    usersRepository
+        .getByEmail(email)
+      .flatMap {
+        case Some(userInformation) =>
+              val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email,userInformation.active,None))
+                Future.successful(Ok(views.html.users.updateuser(filledForm)))
+        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+      }
   }
 
 }

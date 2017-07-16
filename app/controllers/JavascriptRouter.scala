@@ -11,7 +11,7 @@ class JavascriptRouter extends Controller {
       controllers.routes.javascript.FeedbackFormsController.updateFeedbackForm,
       controllers.routes.javascript.FeedbackFormsController.getFeedbackFormPreview,
       controllers.routes.javascript.UsersController.searchUser,
-      controllers.routes.javascript.UsersController.updateUser
+      controllers.routes.javascript.SessionsController.searchSession
     )).as("text/javascript")
   }
 

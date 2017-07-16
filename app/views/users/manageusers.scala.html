@@ -1,4 +1,4 @@
-@(users: List[ManageUserInfo], pages: Int, pageNumber: Int, keyword : Option[String])(implicit request: Request[_])
+@(users: List[ManageUserInfo], pages: Int, pageNumber: Int, keyword : Option[String])(implicit request: Request[_], messages: Messages, flash: Flash)
 
     @main("Manage User"){
     <div class="row">
@@ -9,6 +9,13 @@
                 <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search user by email"/>
             </div>
             <div class="col-md-3"></div>
+            @if(!flash.isEmpty) {
+                <div class="alert alert-success  alert-dismissable user-updated-message">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    @flash.get("message").fold("")(identity)
+                </div>
+            }
+
             <div class="col-md-12 all-users">
                 <div class="col-md-12" id="found-user-details"></div>
                    <div class="table-responsive manage-user-custom-table-margin">
@@ -25,10 +32,10 @@
                         @for(user <- users) {
                             <tr>
                                 <td align="center">
-                                    <a href="" class="btn btn-default">
+                                    <a  href="@routes.UsersController.update(user.email)" class="btn btn-default ">
                                         <em class="fa fa-pencil"></em>
                                     </a>
-                                    <a href="" class="btn btn-danger">
+                                    <a href="" class="btn btn-danger delete">
                                         <em class="fa fa-trash"></em>
                                     </a>
                                 </td>

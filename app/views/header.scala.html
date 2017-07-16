@@ -22,8 +22,8 @@
         <a href="#" class="pull-left logo"><img src='@routes.Assets.versioned("images/logo.png")'></a>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
-                <li class="@activeLink(routes.SessionsController.sessions(1).url) alignLinks">
-                    <a href="@routes.SessionsController.sessions(1)">Home</a>
+                <li class="@activeLink(routes.SessionsController.sessions(1, None).url) alignLinks">
+                    <a href="@routes.SessionsController.sessions(1, None)">Home</a>
                 </li>
 
                     @if(SessionHelper.isAdmin) {
@@ -35,13 +35,13 @@
 
                             <ul class="dropdown-menu">
                                 <li class="alignLinks">
-                                    <a href="@routes.SessionsController.manageSessions(1)">Sessions</a>
+                                    <a href="@routes.SessionsController.manageSessions(1, None)">Sessions</a>
                                 </li>
                                 <li class="alignLinks">
-                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Feedback Forms</a>
+                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1, None)">Feedback Forms</a>
                                 </li>
                                 <li class="alignLinks">
-                                    <a href="@routes.UsersController.manageUser()">Users</a>
+                                    <a href="@routes.UsersController.manageUser(1,None)">Users</a>
                                 </li>
                             </ul>
                         </li>

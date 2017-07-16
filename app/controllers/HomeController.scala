@@ -8,7 +8,7 @@ import play.api.mvc._
 class HomeController @Inject() extends Controller {
 
   def index: Action[AnyContent] = Action { implicit request =>
-    Redirect(routes.SessionsController.sessions(1))
+    Redirect(routes.SessionsController.sessions(1, None))
   }
 
 }

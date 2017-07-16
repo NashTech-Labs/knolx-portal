@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 
-import models.{UpdatedUserInfo, UsersRepository}
+import models.{UpdatedUserInfo, UserInfo, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -20,11 +20,13 @@ case class UserInformation(email: String, password: String, confirmPassword: Str
 
 case class LoginInformation(email: String, password: String)
 
-case class UserEmailInformation(email: String)
+case class UserEmailInformation(email: Option[String], page: Int)
 
 case class ManageUserInfo(email: String, active: Boolean, _id: String)
 
 case class UpdateUserInfo(id: String, active: Boolean, password: Option[String])
+
+case class userSearchResult(users: List[ManageUserInfo], pages: Int, page: Int, keyword: String)
 
 @Singleton
 class UsersController @Inject()(val messagesApi: MessagesApi,
@@ -32,6 +34,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
   val usersRepo: UsersRepository = usersRepository
 
   implicit val ManageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
+  implicit val userSearchResultInfoFormat: OFormat[userSearchResult] = Json.format[userSearchResult]
 
   val userForm = Form(
     mapping(
@@ -52,7 +55,8 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
 
   val emailForm = Form(
     mapping(
-      "email" -> email
+      "email" -> optional(nonEmptyText),
+      "page" -> number
     )(UserEmailInformation.apply)(UserEmailInformation.unapply)
   )
 
@@ -91,7 +95,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
                   Redirect(routes.HomeController.index()).flashing("message" -> "Something went wrong!")
                 }
               }
-          } { user =>
+          } { _ =>
             Logger.info(s"User with email ${userInfo.email.toLowerCase} already exists")
             Future.successful(Redirect(routes.UsersController.register()).flashing("message" -> "User already exists!"))
           })
@@ -144,34 +148,53 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     Redirect(routes.HomeController.index()).withNewSession
   }
 
-  def manageUser: Action[AnyContent] = AdminAction { implicit request =>
-    Ok(views.html.users.manageusers())
+  def manageUser(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = AdminAction.async { implicit request =>
+    usersRepository
+      .paginate(pageNumber, keyword)
+      .flatMap { userInfo =>
+        val users = userInfo map (user =>
+          ManageUserInfo(user.email, user.active, user._id.stringify))
+
+        usersRepository
+          .userCountWithKeyword(keyword)
+          .map { count =>
+            val pages = Math.ceil(count / 10D).toInt
+
+            Ok(views.html.users.manageusers(users, pages, pageNumber, keyword))
+          }
+      }
   }
 
   def searchUser: Action[AnyContent] = AdminAction.async { implicit request =>
     emailForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.error(s"Received a bad request for user manage $formWithErrors")
-        Future.successful(BadRequest("Invalid email"))
+        Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
+        Future.successful(Ok("{}"))
       },
-      userInfo => {
+      userInformation => {
         usersRepository
-          .getByEmail(userInfo.email.toLowerCase)
-          .flatMap {
-            case Some(user) =>
-              val foundUser = ManageUserInfo(user.email, user.active, user._id.stringify)
-              Future.successful(Ok(Json.toJson(foundUser).toString))
-            case None =>
-              Future.successful(NotFound("404! User not found"))
+          .paginate(userInformation.page, userInformation.email)
+          .flatMap { userInfo =>
+            val users = userInfo map (user =>
+              ManageUserInfo(user.email, user.active, user._id.stringify))
+
+            usersRepository
+              .userCountWithKeyword(userInformation.email)
+              .map { count =>
+                val pages = Math.ceil(count / 10D).toInt
+
+                Ok(Json.toJson(userSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""))).toString)
+              }
           }
-      })
+      }
+    )
   }
 
   def updateUser: Action[AnyContent] = AdminAction.async { implicit request =>
     updateUserForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage $formWithErrors")
-        val errors = for(error <- formWithErrors.errors) yield error.message
+        val errors = for (error <- formWithErrors.errors) yield error.message
         Future.successful(BadRequest(errors.mkString(" ")))
       },
       userInfo => {
@@ -186,6 +209,10 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
             }
           }
       })
+  }
+
+  def loadUser(email: String): Action[AnyContent] = AdminAction.async { implicit request =>
+    Future.successful(Ok(views.html.users.updateuser()))
   }
 
 }

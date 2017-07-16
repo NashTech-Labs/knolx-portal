@@ -1,0 +1,80 @@
+@()(implicit request: Request[_])
+
+@main("Update User") {
+
+
+    <div class="row">
+        <div class="col-md-4" >
+
+        </div>
+        <div class="col-md-4 profile" >
+            <div class="container-fluid" style="margin-top: 90px ;">
+            </div>
+            <div class="login-outer">
+                <div class="col-md-12 login-first" > </div>
+
+
+                <div class='col-md-3'></div>
+                <div class='col-md-6'>
+                <div class='col-md-12'>
+                <div id='parent' style='width: 100% ;'>
+                <div class='card-body custom-manage-user-body custom-fadein'>
+                <div class='feedback-card-head stick-out manage-user-custom-stick-out'> &#9650</div>
+                <div class='col-md-12 feedback-card-author manage-user-container-email'><p>userInfo[0].email</p></div>
+                <input type='hidden' id='id' value='" + userInfo[0]._id + "'/>
+                <div class='col-md-12 suspend-ckb-outer'>
+                <label class='checkbox-outer'>
+                <p class='manage-user-checkbox-text'>Suspend</p>
+
+                var payloadTail = "<span class='manage-user-label_text'></span>
+                </label>
+                </div>
+                <div class='col-md-12'>
+                <div class='col-md-2'></div>
+                <div class='col-md-8 password-bar'>
+                <input type='password' id='password-text' class='password-text'  placeholder='New Password'/>
+                </div>
+                <div class='col-md-2'></div>
+                </div>
+                <button type='button' onclick='updateDetails()' class='btn  feedback-card-button  manage-user-container-custom-btn' >Save</button>
+                </div>
+                </div>
+                <div id='successmsg'></div>
+                <div id='errmsg'></div>
+                </div>
+                </div>
+                <div class='col-md-3'></div>"
+
+@*                var finalPayLoad = "";
+                if (userInfo[0].active == true) {
+                finalPayLoad += payloadHead + "<input type='checkbox' checked name='suspend' id='suspend' class='custom-checkbox' />" + payloadTail;
+                }
+                else {
+                finalPayLoad += payloadHead + "<input type='checkbox' name='suspend' id='suspend' class='custom-checkbox' value='false'/>" + payloadTail;
+
+                }
+
+                $('#found-user-details').html(finalPayLoad);*@
+
+
+            </div>
+        </div>
+
+        <div class="col-md-4" ></div>
+    </div>
+
+@*    <div class="row login-error">
+        <div class="col-md-4" ></div>
+        <div class="col-md-4" >
+        @if(loginForm.hasGlobalErrors || loginForm("email").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                @flash.get("message").fold("")(message => message)
+                @loginForm("email").error.map(error => messages(error.message))
+                @loginForm.globalError.map(_.message)
+            </div>
+        }
+        </div>
+        <div class="col-md-4" ></div>
+    </div>*@
+
+}

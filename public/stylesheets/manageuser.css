@@ -3,9 +3,9 @@
 }
 
 .search-bar {
-    height: 60px;
+    height: 50px;
     border: 1px solid #dcdcdc;
-    margin-top: 200px;
+    margin-top: -20px;
     margin-bottom: 30px;
     box-shadow: 0 4px 6px -5px #333;
     border-radius: 4px;
@@ -18,11 +18,11 @@
     background-color: transparent;
     outline: none;
     font-family: 'gothic';
-    font-size: 22px;
+    font-size: 18px;
     text-align: center;
     letter-spacing: 2px;
     padding-left: 40px;
-    color: #EC7063;
+    color: #fff;
     float: left;
 }
 
@@ -56,7 +56,8 @@
 
 .manage-user-container-custom-margin {
     margin-bottom: 100px;
-    height: 600px;
+    background-color: transparent;
+    background-image: none;
 }
 
 .manage-user-container-custom-btn {
@@ -117,7 +118,7 @@
 
 .custom-manage-user-body-error {
     text-shadow: none;
-    height: 200px;
+    box-shadow: 0 3px 4px #666;
 }
 
 .suspend-ckb-outer {
@@ -159,7 +160,137 @@
     font-weight: bold;
 }
 
-.manage-user-alerts{
+.manage-user-alerts {
     text-align: center;
     font-size: 18px;
+}
+
+.users-onkeystrokes {
+    width: 100%;
+    font-size: 20px;
+    color: #EC7063;
+    font-family: 'gothic';
+    text-shadow: none;
+    letter-spacing: 2px;
+    font-weight: bold;
+    line-height: 1em;
+    position: relative;
+    top: -40px;
+    text-align: left;
+    padding: 0px 20px 30px 20px;
+    background-color: #dcdcdc;
+
+}
+
+.users-onkeystrokes_email {
+    width: 80%;
+    white-space: normal;
+    display: inline;
+    position: relative;
+}
+
+.users-onkeystrokes_edit-btn {
+    width: 20%;
+    display: inline;
+    position: relative;
+}
+
+.users-found-table {
+    top: -41px;
+    table-layout: fixed;
+    word-wrap: break-word;
+    box-shadow: 0 4px 10px -5px #a8a8a8;
+    position: relative;
+    margin-bottom: 0px;
+}
+
+.users-found-edit {
+    color: #EC7063;
+    font-size: 25px;
+    text-align: right;
+    cursor: pointer;
+}
+
+.user-found-email {
+    color: #666;
+}
+
+.user-info-details > tr > td:first-child {
+    color: #639593;
+    text-shadow: none;
+    font-weight: bold;
+    font-family: 'headerfont';
+    font-size: 20px;
+    letter-spacing: 1px;
+    padding-top: 20px;
+    padding-left: 20px;
+    text-align: left;
+}
+
+.all-users {
+    position: relative;
+    background-color: transparent;
+}
+
+#found-user-details {
+    position: absolute;
+    z-index: 555;
+    right: 0;
+    left: 0;
+}
+
+.all-users-table > tbody > tr > td:first-child, .all-users-table > tbody > tr > td:nth-child(2) {
+    text-align: center;
+    font-family: 'gothic';
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: #666;
+}
+
+.manage-user-custom-table-margin {
+    margin-bottom: 0px;
+}
+
+.search-text::-webkit-input-placeholder { /* Chrome */
+    color: #fff;
+}
+
+.search-text:-ms-input-placeholder { /* IE 10+ */
+    color: #fff;
+}
+
+.search-text::-moz-placeholder { /* Firefox 19+ */
+    color: #fff;
+    opacity: 1;
+}
+
+.search-text:-moz-placeholder { /* Firefox 4 - 18 */
+    color: #fff;
+    opacity: 1;
+}
+
+.all-users-table > thead > tr > th {
+    padding-top: 10px;
+}
+
+.all-users-table > tbody > tr > td:last-child {
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.active-status {
+    color: #45B39D;
+}
+
+.suspended {
+    color: #EC7063;
+}
+
+.edit-popup {
+    margin-right: 50px;
+    margin-left: 10%;
+}
+
+.inactive {
+    cursor: pointer;
 }

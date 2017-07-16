@@ -87,7 +87,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  def sessions(pageNumber: Int = 1): Action[AnyContent] = Action.async { implicit request =>
+  def sessions(pageNumber: Int = 1, keyword: Option[String]): Action[AnyContent] = Action.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionInfo =>
@@ -112,7 +112,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def manageSessions(pageNumber: Int = 1): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageSessions(pageNumber: Int = 1, keyword: Option[String]): Action[AnyContent] = AdminAction.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsInfo =>
@@ -192,7 +192,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
                     (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
                       case ScheduledSessionsRefreshed    =>
-                        Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully created!")
+                        Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!")
                       case ScheduledSessionsNotRefreshed =>
                         Logger.error(s"Cannot refresh feedback form schedulers while creating session ${createSessionInfo.topic}")
                         InternalServerError("Something went wrong!")
@@ -222,7 +222,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
         (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
           case ScheduledSessionsRefreshed    =>
-            Redirect(routes.SessionsController.manageSessions(pageNumber)).flashing("message" -> "Session successfully Deleted!")
+            Redirect(routes.SessionsController.manageSessions(pageNumber, None)).flashing("message" -> "Session successfully Deleted!")
           case ScheduledSessionsNotRefreshed =>
             Logger.error(s"Cannot refresh feedback form schedulers while deleting session $id")
             InternalServerError("Something went wrong!")
@@ -248,7 +248,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 
-        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!"))
+        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
       }
   }
 
@@ -274,7 +274,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
 
                   (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
                     case ScheduledSessionsRefreshed    =>
-                      Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Session successfully updated")
+                      Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated")
                     case ScheduledSessionsNotRefreshed =>
                       Logger.error(s"Cannot refresh feedback form schedulers while updating session ${sessionUpdateInfo.id}")
                       InternalServerError("Something went wrong!")
@@ -294,10 +294,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
-        Redirect(routes.SessionsController.manageSessions(1))
+        Redirect(routes.SessionsController.manageSessions(1, None))
           .flashing("message" -> "Scheduled feedback form successfully cancelled!")
       case false =>
-        Redirect(routes.SessionsController.manageSessions(1))
+        Redirect(routes.SessionsController.manageSessions(1, None))
           .flashing("message" -> "Either feedback form was already sent or Something went wrong while removing scheduled feedback form!")
     }
   }
@@ -305,10 +305,10 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
   def scheduleSession(sessionId: String): Action[AnyContent] = Action.async { implicit request =>
     (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
-        Redirect(routes.SessionsController.manageSessions(1))
+        Redirect(routes.SessionsController.manageSessions(1, None))
           .flashing("message" -> "Feedback form successfully scheduled!")
       case false =>
-        Redirect(routes.SessionsController.manageSessions(1))
+        Redirect(routes.SessionsController.manageSessions(1, None))
           .flashing("message" -> "Something went wrong while scheduling feedback form!")
     }
   }

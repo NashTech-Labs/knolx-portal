@@ -97,7 +97,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
 
   val usersRepo: UsersRepository = usersRepository
 
-  def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageFeedbackForm(pageNumber: Int, keyword: Option[String]): Action[AnyContent] = AdminAction.async { implicit request =>
     feedbackRepository
       .paginate(pageNumber)
       .flatMap { feedbackForms =>
@@ -164,7 +164,7 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedForm: FeedbackForm) => Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
-        case None                         => Redirect(routes.SessionsController.manageSessions(1)).flashing("message" -> "Something went wrong!")
+        case None                         => Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!")
       }
   }
 
@@ -214,10 +214,10 @@ class FeedbackFormsController @Inject()(val messagesApi: MessagesApi,
       .delete(id)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete knolx feedback form with id $id")
-        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("errormessage" -> "Something went wrong!"))
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None)).flashing("errormessage" -> "Something went wrong!"))
       } { _ =>
         Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
-        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None)).flashing("message" -> "Feedback form successfully deleted!"))
       })
   }
 

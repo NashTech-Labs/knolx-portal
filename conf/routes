@@ -7,17 +7,16 @@ GET         /                                   controllers.HomeController.index
 GET         /login                              controllers.UsersController.login
 POST        /login                              controllers.UsersController.loginUser
 GET         /logout                             controllers.UsersController.logout
-
 GET         /register                           controllers.UsersController.register
 POST        /register                           controllers.UsersController.createUser
-
-GET         /users/manage                       controllers.UsersController.manageUser
+GET         /users/manage/:pageNumber           controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
 POST        /users/search                       controllers.UsersController.searchUser
 POST        /users/update                       controllers.UsersController.updateUser
+GET         /users/load/:email                  controllers.UsersController.loadUser(email: String)
 
 # Session
-GET         /session                            controllers.SessionsController.sessions(pageNumber: Int)
-GET         /session/manage                     controllers.SessionsController.manageSessions(pageNumber:Int)
+GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
+GET         /session/manage                     controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
 GET         /session/create                     controllers.SessionsController.create
 POST        /session/create                     controllers.SessionsController.createSession
 GET         /session/delete                     controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
@@ -27,7 +26,7 @@ GET         /session/:sessionId/cancel          controllers.SessionsController.c
 GET         /session/:sessionId/schedule        controllers.SessionsController.scheduleSession(sessionId: String)
 
 # Feedback
-GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
+GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int, keyword: Option[String])
 GET         /feedbackform/create                controllers.FeedbackFormsController.feedbackForm
 POST        /feedbackform/create                controllers.FeedbackFormsController.createFeedbackForm
 GET         /feedbackform/update                controllers.FeedbackFormsController.update(id: String)

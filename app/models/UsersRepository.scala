@@ -6,7 +6,7 @@ import models.UserJsonFormats._
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -29,6 +29,8 @@ object UserJsonFormats {
 
   import play.api.libs.json.Json
 
+  val pageSize = 10
+
   implicit val userFormat = Json.format[UserInfo]
 }
 
@@ -45,6 +47,15 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
+
+  def getBySubString(substring: String)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("email" -> Json.obj("$regex" -> (".*" + substring.toLowerCase + ".*"))))
+          .cursor[UserInfo](ReadPreference.Primary)
+          .collect[List](100, FailOnError[List[UserInfo]]()))
+  }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
@@ -67,6 +78,34 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     }
     collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
+  }
+
+  def paginate(pageNumber: Int, keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+    val skipN = (pageNumber - 1) * pageSize
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+
+    val condition = keyword match {
+      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.toLowerCase + ".*")))
+      case None => Json.obj()
+    }
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .options(queryOptions)
+          .cursor[UserInfo](ReadPreference.Primary)
+          .collect[List](pageSize, FailOnError[List[UserInfo]]()))
+  }
+
+  def userCountWithKeyword(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
+    val condition = keyword match {
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.toLowerCase + ".*"))))
+      case None => None
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(condition))
   }
 
 }

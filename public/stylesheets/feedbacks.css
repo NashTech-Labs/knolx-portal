@@ -302,8 +302,7 @@
 }
 
 .form-question-card {
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
+    background: url('../images/mesh.svg') no-repeat;
     background-size: cover;
     margin-top: 0px;
     margin-bottom: 15px;

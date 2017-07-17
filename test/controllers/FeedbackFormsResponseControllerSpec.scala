@@ -25,6 +25,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
+  private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject = Future.successful(Some(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
@@ -79,6 +80,18 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with TestEnv
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
+
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(response) must be equalTo OK
+    }
+
+    "render feedback form for today with immidiate expored sessions if no active sessions found" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns noActiveSessionObject
+      sessionsRepository.immediatePreviousExpiredSessions returns sessionObject
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))

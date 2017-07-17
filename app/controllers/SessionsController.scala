@@ -132,7 +132,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     sessionSearchForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
-        Future.successful(Ok("{}"))
+        Future.successful(BadRequest(" OOps! Invalid value encountered !"))
       },
       sessionInformation => {
         sessionsRepository
@@ -204,7 +204,7 @@ class SessionsController @Inject()(val messagesApi: MessagesApi,
     sessionSearchForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
-        Future.successful(Ok("{}"))
+        Future.successful(BadRequest(" OOps! Invalid value encountered !"))
       },
       sessionInformation => {
         sessionsRepository

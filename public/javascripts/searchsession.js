@@ -2,7 +2,6 @@ $(function(){
     $('#search-text').keyup(function() {
         slide(this.value,1);
     });
-
 });
 
 function slide(keyword, pageNumber) {
@@ -74,13 +73,10 @@ function slide(keyword, pageNumber) {
             },
 
             error: function (er) {
-                alert("failure");
-                if (er.status == 400) {
-                    $('#found-user-details').html("");
-                }
-                else {
-                    $('#found-user-details').html("");
-                }
+                $('#user-found').html(
+                    "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>"+er.responseText+"</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                );
+                $('.pagination').html("");
 
             }
         });

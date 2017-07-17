@@ -64,13 +64,10 @@ function slide(keyword, pageNumber) {
             },
 
             error: function (er) {
-                alert("failure");
-                if (er.status == 400) {
-                    $('#found-user-details').html("");
-                }
-                else {
-                    $('#found-user-details').html("");
-                }
+                $('#user-found').html(
+                    "<tr><td align='center'></td><td align='center'>"+er.responseText+"</td><td align='center'></td></tr>"
+                );
+                $('.pagination').html("");
 
             }
         });

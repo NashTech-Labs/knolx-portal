@@ -166,7 +166,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     emailForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
-        Future.successful(Ok("{}"))
+        Future.successful(BadRequest(" OOps! Invalid value encountered !"))
       },
       userInformation => {
         usersRepository

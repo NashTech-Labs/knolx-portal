@@ -466,11 +466,19 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "schedule session by session id" in new WithTestApplication {
-      val result = controller.scheduleSession(_id.stringify)(FakeRequest())
+    "through a bad request when encountered a invalid value from form" in new WithTestApplication {
 
-      status(result) must be equalTo SEE_OTHER
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.searchSessions()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "invalid value"))
+
+      status(result) must be equalTo BAD_REQUEST
     }
+
+
 
   }
 

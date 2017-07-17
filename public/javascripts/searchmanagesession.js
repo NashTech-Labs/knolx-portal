@@ -12,7 +12,7 @@ function slide(keyword, pageNumber) {
     formData.append("email", email);
     formData.append("page", pageNumber);
 
-    jsRoutes.controllers.SessionsController.searchSessions().ajax(
+    jsRoutes.controllers.SessionsController.searchManageSession().ajax(
         {
             type: 'POST',
             processData: false,
@@ -26,7 +26,14 @@ function slide(keyword, pageNumber) {
                 var usersFound = "";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
-                        usersFound += "<tr>"+
+                        usersFound += "<tr><td align='center'>" +
+                            "<a href='/session/update?id="+sessions[session].id+"' class='btn btn-default'>" +
+                            "<em class='fa fa-pencil'></em>" +
+                            "</a> " +
+                            "<a href='/session/delete?id="+sessions[session].id+"&pageNumber="+sessionInfo['page']+"' class='btn btn-danger delete'>" +
+                            "<em class='fa fa-trash'></em>" +
+                            "</a>" +
+                            "</td>" +
                             "<td>"+sessions[session].dateString+"</td>"+
                             "<td>"+sessions[session].session+"</td>"+
                             "<td>"+sessions[session].topic+"</td>"+
@@ -45,10 +52,29 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td class='suspended'>No</td>";
                         }
                         if (sessions[session].rating == "") {
-                            usersFound += "<td class='active-status'>N/A</td></tr>";
+                            usersFound += "<td class='active-status'>N/A</td>";
                         }
                         else {
-                            usersFound += "<td class='suspended'>"+sessions[session].rating+"</td></tr>";
+                            usersFound += "<td class='suspended'>"+sessions[session].rating+"</td>";
+                        }
+
+                        if (sessions[session].completed) {
+                            usersFound += "<td><div><span>Completed</span></div><td></tr>";
+                        }
+                        else {
+                            if(sessions[session].feedbackFormScheduled){
+
+                                usersFound += "<td><div><span>Scheduled</span><br/>"+
+                                              "<a href='/session/"+sessions[session].id+"/cancel'>"+
+                                              "Cancel</a>"+
+                                              "</div><td></tr>";
+                            }
+                            else{
+                                usersFound += "<td><div><span>Pending</span><br/>"+
+                                    "<a href='/session/"+sessions[session].id+"/schedule'>"+
+                                    "Schedule</a>"+
+                                    "</div><td></tr>";
+                            }
                         }
                     }
                     $('#user-found').html(
@@ -67,7 +93,7 @@ function slide(keyword, pageNumber) {
                 }
                 else{
                     $('#user-found').html(
-                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>Oops! No Record Found</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                        "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
                     );
                     $('.pagination').html("");
                 }

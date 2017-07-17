@@ -7,7 +7,7 @@
         <div class="col-md-10 feedback-form-container manage-user-container-custom-margin">
             <div class="col-md-3"></div>
             <div class="col-md-6 search-bar" id="search-bar">
-                <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search user by email"/>
+                <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search Knolx by email"/>
             </div>
             <div class="col-md-3"></div>
             @if(!flash.isEmpty) {
@@ -108,7 +108,7 @@
     </div>
 
     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
-    <script src="@routes.Assets.versioned("javascripts/searchsession.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/searchmanagesession.js")" type="text/javascript"></script>
     @pagination(pageNumber, pages, routes.SessionsController.manageSessions)
 
     }

@@ -122,7 +122,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
     val condition = keyword match {
-      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + "a".replaceAll("\\s", "").toLowerCase + ".*")),"active" -> true))
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),"active" -> true))
       case None => None
     }
 

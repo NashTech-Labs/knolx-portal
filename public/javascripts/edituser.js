@@ -30,7 +30,7 @@ function slide(keyword, pageNumber) {
                             "<a href='/user/update?email="+users[user].email+"' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='' class='btn btn-danger delete'>" +
+                            "<a href='/user/delete?email="+users[user].email+"' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +
@@ -45,7 +45,7 @@ function slide(keyword, pageNumber) {
                     $('#user-found').html(
                         usersFound
                     );
-                    paginate(page, pages);
+                    paginate(page, pages)
 
                     var paginationLinks = document.querySelectorAll('.paginate');
                     for (var i = 0; i < paginationLinks.length; i++) {
@@ -55,6 +55,12 @@ function slide(keyword, pageNumber) {
                         });
                     }
 
+                }
+                else{
+                    $('#user-found').html(
+                        "<tr><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td></tr>"
+                    );
+                    $('.pagination').html("");
                 }
             },
 

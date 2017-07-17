@@ -71,6 +71,17 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       jsonCollection.update(selector, modifier))
   }
 
+  def delete(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .findAndUpdate(
+            BSONDocument("email" -> email),
+            BSONDocument("$set" -> BSONDocument("active" -> false)),
+            fetchNewObject = true,
+            upsert = false)
+          .map(_.result[UserInfo]))
+
   def paginate(pageNumber: Int, keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)

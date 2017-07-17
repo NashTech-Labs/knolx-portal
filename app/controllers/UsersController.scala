@@ -219,4 +219,16 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
+  def deleteUser(email:String): Action[AnyContent] = AdminAction.async { implicit request =>
+    usersRepository
+      .delete(email)
+      .flatMap(_.fold {
+        Logger.error(s"Failed to delete user with email $email")
+        Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("errormessage" -> "Something went wrong!"))
+      } { user =>
+        Logger.info(s"user with email:  $email has been successfully deleted")
+        Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("message" -> s"User with email ${user.email} has been successfully deleted!"))
+      })
+  }
+
 }

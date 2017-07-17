@@ -85,7 +85,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get active sessions count" in new TestScope {
-      val count = await(sessionsRepository.activeCount)
+      val count = await(sessionsRepository.activeCount(None))
 
       count must beEqualTo(1)
     }

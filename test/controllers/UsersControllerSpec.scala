@@ -30,7 +30,10 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     val controller = new UsersController(messages, usersRepository)
   }
 
+  private val emptyEmailObject = Future.successful(None)
   private val _id: BSONObjectID = BSONObjectID.generate
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
   "Users Controller" should {
 
@@ -55,11 +58,10 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "create user" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      usersRepository.getByEmail("usertest@example.com") returns emailObject
+      usersRepository.getByEmail("usertest@example.com") returns emptyEmailObject
       usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
 
       val result = controller.createUser(FakeRequest(POST, "create")
@@ -72,11 +74,10 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create user due to some error" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
-      usersRepository.getByEmail("usertest@example.com") returns emailObject
+      usersRepository.getByEmail("usertest@example.com") returns emptyEmailObject
       usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
 
       val result = controller.createUser(FakeRequest(POST, "create")
@@ -89,8 +90,6 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create user when email already exists" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -104,8 +103,6 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create user due to BadFormRequest" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", active = true, admin = false, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.createUser(FakeRequest(POST, "create")
@@ -118,8 +115,6 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create user when password length is less than 8" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", active = true, admin = false, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.createUser(FakeRequest(POST, "create")
@@ -132,8 +127,6 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create user when password and confirm password does not match" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com", "$2a$10$", "BCrypt", active = true, admin = false, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.createUser(FakeRequest(POST, "create")
@@ -146,8 +139,6 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "login user when he is an admin" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -162,8 +153,6 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "login user when he is not an admin" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
@@ -176,8 +165,8 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not login when user is not found" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
-      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
 
       val result = controller.loginUser(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -188,15 +177,12 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not login user when credentials are invalid" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("usertest@example.com",
-        "$2a$10$RdgzSPeWFo/jvadX3ykvGes1Y8OrY8HBqNExxeEoORoEEHEFeUnUG", "BCrypt", active = true, admin = false, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.loginUser(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "12345678"))
+          "password" -> "1234567"))
 
       status(result) must be equalTo UNAUTHORIZED
     }

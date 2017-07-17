@@ -2,7 +2,6 @@ $(function(){
     $('#search-text').keyup(function() {
         slide(this.value,1);
     });
-
 });
 
 function slide(keyword, pageNumber) {

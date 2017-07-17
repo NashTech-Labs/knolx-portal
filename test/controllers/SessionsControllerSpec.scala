@@ -33,6 +33,12 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+
+  private val emptyEmailObject = Future.successful(None)
+
   abstract class WithTestApplication(val app: Application = fakeApp) extends Around
     with Scope with ShouldThrownExpectations with Mockito {
 
@@ -63,8 +69,9 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
   "Session Controller" should {
 
     "display sessions page" in new WithTestApplication {
-      sessionsRepository.paginate(1) returns sessionObject
-      sessionsRepository.activeCount returns Future.successful(1)
+
+      sessionsRepository.paginate(1,None) returns sessionObject
+      sessionsRepository.activeCount(None) returns Future.successful(1)
 
       val result = controller.sessions(1)(FakeRequest())
 
@@ -73,12 +80,10 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "display manage sessions page" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.paginate(1) returns sessionObject
-      sessionsRepository.activeCount returns Future.successful(1)
+      sessionsRepository.activeCount(None) returns Future.successful(1)
 
       val result = controller.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
@@ -88,9 +93,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not open manage sessions page when wrong username is specified" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
 
-      usersRepository.getByEmail("") returns emailObject
+      usersRepository.getByEmail("") returns emptyEmailObject
       sessionsRepository.sessions returns sessionObject
 
       val result = controller.manageSessions(1)(FakeRequest())
@@ -100,13 +104,10 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not open manage sessions page when user is not admin" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject.map(userInfo => userInfo.map(_.copy(admin = false)))
       sessionsRepository.sessions returns sessionObject
 
-      val result = controller.manageSessions(1)(FakeRequest()
+      val result = controller.manageSessions(1,None)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       contentAsString(result) must be contain ""
@@ -114,8 +115,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not open manage sessions page when unauthorized access is performed" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
-      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
 
       val result = controller.manageSessions(1)(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
@@ -131,9 +132,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "Meetup" -> JsString("meetup"), "Cancelled" -> JsString("cancelled"),
           "Rating" -> JsString("rating"), "Active" -> JsBoolean(true), "_id" -> JsString(_id.stringify)))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete(_id.stringify) returns objectToDelete
 
@@ -145,9 +143,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
     "not delete session when wrong id is specified" in new WithTestApplication {
       val objectToDelete = Future.successful(None)
-
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete("1") returns objectToDelete
@@ -165,10 +160,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
           "Meetup" -> JsString("meetup"), "Cancelled" -> JsString("cancelled"),
           "Rating" -> JsString("rating"), "Active" -> JsBoolean(true)))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject.map(userInfo => userInfo.map(_.copy(admin = false)))
       sessionsRepository.delete("123") returns objectToDelete
 
       val result = controller.deleteSession("123", 1)(FakeRequest()
@@ -178,8 +170,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "render create session form" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
@@ -199,8 +189,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
@@ -230,8 +218,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
@@ -254,8 +240,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create session due to BadFormRequest" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
@@ -279,14 +263,12 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
-      usersRepository.getByEmail("test2@example.com") returns Future.successful(Nil)
+      usersRepository.getByEmail("test2@example.com") returns Future.successful(None)
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
       val result = controller.createSession(FakeRequest(POST, "create")
@@ -302,11 +284,10 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not create session due to unauthorized access" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
@@ -331,9 +312,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", BSONDateTime(date.getTime), "session 1",
         "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
@@ -350,9 +328,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     "redirect to manage sessions page when session is not found" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       val sessionInfo = Future.successful(None)
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -365,9 +340,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not render update session form/manage session form due to unauthorized access" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
@@ -388,8 +362,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
         "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
@@ -421,8 +393,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
         "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498501799000L))
@@ -452,8 +422,6 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
@@ -472,9 +440,8 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
     }
 
     "not update session due to unauthorized access" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
       val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")

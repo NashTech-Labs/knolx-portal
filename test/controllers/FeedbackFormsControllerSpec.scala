@@ -23,7 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
   private val _id: BSONObjectID = BSONObjectID.generate()
-  private val emailObject = Future.successful(List(UserInfo("test@example.com",
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
@@ -171,7 +171,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       feedbackFormsRepository.paginate(1) returns Future.successful(feedbackForms)
       feedbackFormsRepository.activeCount returns Future.successful(1)
 
-      val response = controller.manageFeedbackForm(1)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.manageFeedbackForm(1,None)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
       contentAsString(response) must contain("""feedback-div-outer""")

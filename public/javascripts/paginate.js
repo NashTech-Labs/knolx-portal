@@ -36,7 +36,7 @@ function paginate(pageNumber, pages) {
                 pagination += "<li class='inactive'><a  class='paginate' id='" + (pages - iterator) + "'>" + (pages - iterator) + "</a></li>";
             }
         }
-        pagination += "<li><a>...</a></li>"
+        pagination += "<li><a>...</a></li>";
 
         if (pageNumber == pages) {
             pagination += "<li class='active'><a  class='paginate' id='" + pages + "'>" + pages + "</a></li>";

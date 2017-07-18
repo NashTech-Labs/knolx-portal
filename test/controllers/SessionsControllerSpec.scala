@@ -466,8 +466,7 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "through a bad request when encountered a invalid value from form" in new WithTestApplication {
-
+    "throw a bad request when encountered a invalid value for search session form" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       val result = controller.searchSessions()(FakeRequest(POST, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -478,7 +477,44 @@ class SessionsControllerSpec extends PlaySpecification with TestEnvironment {
       status(result) must be equalTo BAD_REQUEST
     }
 
+    "return json for the session searched by email" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.paginate(1,Some("test@example.com")) returns sessionObject
+      sessionsRepository.activeCount(Some("test@example.com")) returns Future.successful(1)
 
+      val result = controller.searchSessions()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "1"))
+
+      status(result) must be equalTo OK
+    }
+
+    "throw a bad request when encountered a invalid value from form for manage Sessions" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.searchManageSession()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "invalid value"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "return json for the session to manage when searched by email" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.paginate(1,Some("test@example.com")) returns sessionObject
+      sessionsRepository.activeCount(Some("test@example.com")) returns Future.successful(1)
+
+      val result = controller.searchManageSession()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "1"))
+
+      status(result) must be equalTo OK
+    }
 
   }
 

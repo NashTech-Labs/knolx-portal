@@ -1,7 +1,7 @@
 package controllers
 
 import com.typesafe.config.ConfigFactory
-import models.{UserInfo, UsersRepository}
+import models.{SessionInfo, UpdatedUserInfo, UserInfo, UsersRepository}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.matcher.ShouldThrownExpectations
 import org.specs2.mock.Mockito
@@ -11,7 +11,7 @@ import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
 import play.api.test._
 import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -195,6 +195,126 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
 
       status(result) must be equalTo BAD_REQUEST
     }
+
+    "render manage user page" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.paginate(1,Some("test@example.com")) returns emailObject.map(user => List(user.get))
+      usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
+
+      val result = controller.manageUser(1,Some("test@example.com"))(FakeRequest(GET, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo OK
+    }
+
+    "return json for the user searched by email" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.paginate(1,Some("test@example.com")) returns emailObject.map(user => List(user.get))
+      usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
+
+      val result = controller.searchUser()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "1"))
+
+      status(result) must be equalTo OK
+    }
+
+    "throw a bad request when encountered a invalid value for search user form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.searchUser()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "invalid value"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "throw a bad request when encountered a invalid value for update user form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.updateUser()(FakeRequest(POST, "update")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "active" -> "invalid value",
+          "password" -> "12345678"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "redirect to manage user page on successful submission of form" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.update(UpdatedUserInfo("test@example.com", active = true, Some("12345678"))) returns updateWriteResult
+
+      val result = controller.updateUser()(FakeRequest(POST, "update")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "active" -> "true",
+          "password" -> "12345678"))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "throw internal server error while updating user information to database" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.update(UpdatedUserInfo("test@example.com", active = true, Some("12345678"))) returns updateWriteResult
+
+      val result = controller.updateUser()(FakeRequest(POST, "update")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "active" -> "true",
+          "password" -> "12345678"))
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "render update user page with form " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.update("test@example.com")(FakeRequest(GET, "updatePage")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+        status(result) must be equalTo OK
+    }
+
+    "redirect to manages session page if user to update no found" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("user@example.com") returns Future.successful(None)
+
+      val result = controller.update("user@example.com")(FakeRequest(GET, "updatePage")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+
+    "redirect to manage user on successful delete" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.delete("test@example.com") returns emailObject.map(user => Some(user.get))
+
+      val result = controller.deleteUser("test@example.com")(FakeRequest(GET, "updatePage")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "redirect to manage user on failure during delete, with appropriate message" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.delete("user@example.com") returns Future.successful(None)
+
+      val result = controller.deleteUser("user@example.com")(FakeRequest(GET, "updatePage")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
   }
 
 }

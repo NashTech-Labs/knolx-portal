@@ -1,6 +1,19 @@
-This is your new Play application
+What is a Knolx session ?
 =================================
+Knolx session is a knowledge sharing session wherein all Knolders meet
+at a point of time for a period of 45 minutes to 60 minutes once every
+week during which one of the Knolders presents on a technology to either
+introduce it to other Knolders or to discuss about its pros and cons.
 
-This file will be packaged with your application when using `activator dist`.
 
-There are several demonstration files available in this template.
+What is Knolx Portal ?
+=================================
+Knolx portal is a Knolx management portal which helps in scheduling these
+sessions, getting feedback on scheduled sessions and thereby providing
+meaningful information to the presenter.
+
+
+Framework
+=================================
+Knolx portal is build using Play 2.6.0 which can be packaged using
+`activator dist`.

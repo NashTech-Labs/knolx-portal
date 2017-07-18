@@ -5,22 +5,34 @@ import java.util.concurrent.TimeoutException
 import akka.actor._
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Module}
+import com.typesafe.config.ConfigFactory
 import helpers.BeforeAllAfterAll
-import play.api.Application
+import models.UsersRepository
+import org.specs2.mock.Mockito
+import org.specs2.mutable.SpecificationLike
+import play.api.{Configuration, Application}
+import play.api.http._
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.mvc._
+import play.api.test._
 import schedulers.SessionsScheduler._
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
 
-trait TestEnvironment extends BeforeAllAfterAll {
+trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mockito {
+
   val actorSystem: ActorSystem = ActorSystem("TestEnvironment")
+
+  val usersRepository = mock[UsersRepository]
+  val config = Configuration(ConfigFactory.load("application.conf"))
+  val knolxControllerComponent = TestHelpers.stubControllerComponents
 
   override def afterAll(): Unit = {
     shutdownActorSystem(actorSystem)
   }
 
-  def fakeApp: Application = {
+  protected def fakeApp: Application = {
     val sessionsScheduler = actorSystem.actorOf(Props(new DummySessionsScheduler))
 
     val testModule = Option(new AbstractModule {
@@ -28,6 +40,9 @@ trait TestEnvironment extends BeforeAllAfterAll {
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("SessionsScheduler"))
           .toInstance(sessionsScheduler)
+
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
       }
     })
 
@@ -55,12 +70,46 @@ trait TestEnvironment extends BeforeAllAfterAll {
   }
 
   private class DummySessionsScheduler extends Actor {
+
     def receive: Receive = {
       case RefreshSessionsSchedulers         => sender ! ScheduledSessionsRefreshed
       case GetScheduledSessions              => sender ! ScheduledSessions(List.empty)
       case CancelScheduledSession(sessionId) => sender ! true
       case ScheduleSession(sessionId)        => sender ! true
     }
+
+  }
+
+  object TestHelpers extends PlayRunners
+    with HeaderNames
+    with Status
+    with MimeTypes
+    with HttpProtocol
+    with DefaultAwaitTimeout
+    with ResultExtractors
+    with Writeables
+    with EssentialActionCaller
+    with RouteInvokers
+    with FutureAwaits
+    with TestStubControllerComponentsFactory
+
+  trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory with StubBodyParserFactory with StubMessagesFactory {
+
+    def stubControllerComponents: KnolxControllerComponents = {
+      val bodyParser = stubBodyParser(AnyContentAsEmpty)
+      val executionContext = ExecutionContext.global
+
+      DefaultKnolxControllerComponents(
+        DefaultActionBuilder(bodyParser)(executionContext),
+        UserActionBuilder(bodyParser, usersRepository, config)(executionContext),
+        AdminActionBuilder(bodyParser, usersRepository, config)(executionContext),
+        stubPlayBodyParsers(NoMaterializer),
+        stubMessagesApi(),
+        stubLangs(),
+        new DefaultFileMimeTypes(FileMimeTypesConfiguration()),
+        executionContext)
+    }
+
   }
 
 }

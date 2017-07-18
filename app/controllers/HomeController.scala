@@ -5,10 +5,10 @@ import javax.inject._
 import play.api.mvc._
 
 @Singleton
-class HomeController @Inject() extends Controller {
+class HomeController @Inject()(controllerComponents: KnolxControllerComponents) extends KnolxAbstractController(controllerComponents) {
 
-  def index: Action[AnyContent] = Action { implicit request =>
-    Redirect(routes.SessionsController.sessions(1, None))
+  def index: Action[AnyContent] = action { implicit request =>
+    Redirect(routes.SessionsController.sessions(1,None))
   }
 
 }

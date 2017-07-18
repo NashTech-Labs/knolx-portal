@@ -98,3 +98,7 @@
     border-bottom-right-radius: 20px;
     margin-top: 25px;
 }
+
+.feedback-expiration {
+    padding-top: 8px;
+}

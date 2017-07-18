@@ -2,32 +2,31 @@ package controllers
 
 import com.typesafe.config.ConfigFactory
 import models.{SessionInfo, UpdatedUserInfo, UserInfo, UsersRepository}
+import models.UserInfo
 import org.specs2.execute.{AsResult, Result}
-import org.specs2.matcher.ShouldThrownExpectations
-import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.i18n.{DefaultLangs, DefaultMessagesApi}
+import play.api.Application
+import play.api.mvc.Results
+import play.api.test.CSRFTokenHelper._
 import play.api.test._
-import play.api.{Application, Configuration, Environment}
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class UsersControllerSpec extends PlaySpecification with TestEnvironment {
+class UsersControllerSpec extends PlaySpecification with Results {
 
-  abstract class WithTestApplication(val app: Application = fakeApp) extends Around
-    with Scope with ShouldThrownExpectations with Mockito {
-    override def around[T: AsResult](t: => T): Result = Helpers.running(app)(AsResult.effectively(t))
+  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+    lazy val app: Application = fakeApp
 
-    val config = Configuration(ConfigFactory.load("application.conf"))
-    val messages = new DefaultMessagesApi(Environment.simple(), config, new DefaultLangs(config))
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
 
-    val usersRepository = mock[UsersRepository]
-
-    val controller = new UsersController(messages, usersRepository)
+    lazy val controller =
+      new UsersController(knolxControllerComponent.messagesApi, usersRepository, config, knolxControllerComponent)
   }
 
   private val emptyEmailObject = Future.successful(None)
@@ -38,21 +37,21 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
   "Users Controller" should {
 
     "render register form" in new WithTestApplication {
-      val result = controller.register(FakeRequest())
+      val result = controller.register(FakeRequest().withCSRFToken)
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo OK
     }
 
     "render login form" in new WithTestApplication {
-      val result = controller.login(FakeRequest())
+      val result = controller.login(FakeRequest().withCSRFToken)
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo OK
     }
 
     "logout user" in new WithTestApplication {
-      val result = controller.logout(FakeRequest().withSession("" -> ""))
+      val result = controller.logout(FakeRequest().withSession("" -> "").withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -64,11 +63,13 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
       usersRepository.getByEmail("usertest@example.com") returns emptyEmailObject
       usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
 
-      val result = controller.createUser(FakeRequest(POST, "create")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "usertest@example.com",
-          "password" -> "12345678",
-          "confirmPassword" -> "12345678"))
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "usertest@example.com",
+            "password" -> "12345678",
+            "confirmPassword" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -80,11 +81,13 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
       usersRepository.getByEmail("usertest@example.com") returns emptyEmailObject
       usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
 
-      val result = controller.createUser(FakeRequest(POST, "create")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "usertest@example.com",
-          "password" -> "12345678",
-          "confirmPassword" -> "12345678"))
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "usertest@example.com",
+            "password" -> "12345678",
+            "confirmPassword" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -93,11 +96,13 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.createUser(FakeRequest(POST, "create")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "12345678",
-          "confirmPassword" -> "12345678"))
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "12345678",
+            "confirmPassword" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -105,11 +110,13 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     "not create user due to BadFormRequest" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.createUser(FakeRequest(POST, "create")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test",
-          "password" -> "test@example.com",
-          "confirmPassword" -> "usertest@example.com"))
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test",
+            "password" -> "test@example.com",
+            "confirmPassword" -> "usertest@example.com")
+          .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -117,11 +124,13 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     "not create user when password length is less than 8" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.createUser(FakeRequest(POST, "create")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "test",
-          "confirmPassword" -> "test"))
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "test",
+            "confirmPassword" -> "test")
+          .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -129,11 +138,13 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     "not create user when password and confirm password does not match" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.createUser(FakeRequest(POST, "create")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "test1234",
-          "confirmPassword" -> "test12345"))
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "test1234",
+            "confirmPassword" -> "test12345")
+          .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -142,24 +153,27 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.loginUser(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=",
-          "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "12345678"))
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=",
+            "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
-
     }
 
     "login user when he is not an admin" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.loginUser(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "12345678"))
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -168,10 +182,12 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
 
       usersRepository.getByEmail("test@example.com") returns emptyEmailObject
 
-      val result = controller.loginUser(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "12345678"))
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
@@ -179,19 +195,30 @@ class UsersControllerSpec extends PlaySpecification with TestEnvironment {
     "not login user when credentials are invalid" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
+<<<<<<< HEAD
       val result = controller.loginUser(FakeRequest()
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody("email" -> "test@example.com",
           "password" -> "1234567"))
+=======
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test@example.com",
+            "password" -> "12345678")
+          .withCSRFToken)
+>>>>>>> 3a0b4f66f454105b6ddbc384fd184e426dcd3f80
 
       status(result) must be equalTo UNAUTHORIZED
     }
 
     "not login user due to BadFormRequest" in new WithTestApplication {
-      val result = controller.loginUser(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test",
-          "password" -> "12345678"))
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withFormUrlEncodedBody("email" -> "test",
+            "password" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }

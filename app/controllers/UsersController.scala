@@ -4,11 +4,14 @@ import javax.inject._
 
 import models.{UpdatedUserInfo, UserInfo, UsersRepository}
 import play.api.Logger
+import models.UsersRepository
+import play.api.{Configuration, Logger}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Controller, Security}
+import play.filters.csrf.CSRF
 import utilities.{EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.Future
@@ -26,8 +29,12 @@ case class UpdateUserInfo(email: String, active: Boolean, password: Option[Strin
 case class UserSearchResult(users: List[ManageUserInfo], pages: Int, page: Int, keyword: String)
 
 @Singleton
-class UsersController @Inject()(val messagesApi: MessagesApi,
-                                usersRepository: UsersRepository) extends Controller with SecuredImplicit with I18nSupport {
+class UsersController @Inject()(messagesApi: MessagesApi,
+                                usersRepository: UsersRepository,
+                                configuration: Configuration,
+                                controllerComponents: KnolxControllerComponents
+                               ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+
   val usersRepo: UsersRepository = usersRepository
 
   implicit val ManageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
@@ -65,11 +72,13 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
   )
 
-  def register: Action[AnyContent] = Action { implicit request =>
+  def register: Action[AnyContent] = action { implicit request =>
     Ok(views.html.users.register(userForm))
   }
 
-  def createUser: Action[AnyContent] = Action.async { implicit request =>
+  def createUser: Action[AnyContent] = action.async { implicit request =>
+    val username = configuration.get[String]("session.username")
+
     userForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user registration $formWithErrors")
@@ -86,7 +95,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")
                   Redirect(routes.HomeController.index())
-                    .withSession(Security.username -> EncryptionUtility.encrypt(userInfo.email.toLowerCase))
+                    .withSession(username -> EncryptionUtility.encrypt(userInfo.email.toLowerCase))
                 } else {
                   Logger.error(s"Something went wrong while creating a new user ${userInfo.email}")
                   Redirect(routes.HomeController.index()).flashing("message" -> "Something went wrong!")
@@ -100,11 +109,13 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  def login: Action[AnyContent] = Action { implicit request =>
+  def login: Action[AnyContent] = action { implicit request =>
     Ok(views.html.users.login(loginForm))
   }
 
-  def loginUser: Action[AnyContent] = Action.async { implicit request =>
+  def loginUser: Action[AnyContent] = action.async { implicit request =>
+    val username = configuration.get[String]("session.username")
+
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))
@@ -124,12 +135,12 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
               if (admin) {
                 Redirect(routes.HomeController.index())
                   .withSession(
-                    Security.username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase),
+                    username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase),
                     "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                   .flashing("message" -> "Welcome back!")
               } else {
                 Redirect(routes.HomeController.index())
-                  .withSession(Security.username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase))
+                  .withSession(username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase))
                   .flashing("message" -> "Welcome back!")
               }
             } else {
@@ -141,11 +152,11 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  def logout: Action[AnyContent] = Action { implicit request =>
+  def logout: Action[AnyContent] = action { implicit request =>
     Redirect(routes.HomeController.index()).withNewSession
   }
 
-  def manageUser(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = AdminAction.async { implicit request =>
+  def manageUser(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
       .paginate(pageNumber, keyword)
       .flatMap { userInfo =>
@@ -162,7 +173,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def searchUser: Action[AnyContent] = AdminAction.async { implicit request =>
+  def searchUser: Action[AnyContent] = adminAction.async { implicit request =>
     emailForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
@@ -187,7 +198,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  def updateUser(): Action[AnyContent] = AdminAction.async { implicit request =>
+  def updateUser(): Action[AnyContent] = adminAction.async { implicit request =>
     updateUserForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage $formWithErrors")
@@ -208,7 +219,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
       })
   }
 
-  def update(email: String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def update(email: String): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
         .getByEmail(email)
       .flatMap {
@@ -219,7 +230,7 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
       }
   }
 
-  def deleteUser(email:String): Action[AnyContent] = AdminAction.async { implicit request =>
+  def deleteUser(email:String): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
       .delete(email)
       .flatMap(_.fold {
@@ -227,7 +238,8 @@ class UsersController @Inject()(val messagesApi: MessagesApi,
         Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("errormessage" -> "Something went wrong!"))
       } { user =>
         Logger.info(s"user with email:  $email has been successfully deleted")
-        Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("message" -> s"User with email ${user.email} has been successfully deleted!"))
+        Future.successful(Redirect(routes.UsersController.manageUser(1, None))
+          .flashing("message" -> s"User with email ${user.email} has been successfully deleted!"))
       })
   }
 

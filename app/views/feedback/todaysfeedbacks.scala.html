@@ -9,7 +9,7 @@
                 @for((sessions, feedbackForm) <- active) {
                     <div class="col-md-4">
                         <div class="col-md-12">
-                            <div id='parent' style='width: 100% ;'>
+                            <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
                                 @defining(if(sessions.meetup) "Meetup" else "Knolx") { sessionType =>
                                     <div class="feedback-card-head stick-out"><i class="fa fa-list-alt feedback-display-logo" aria-hidden="true"></i></div>
@@ -30,7 +30,7 @@
                 @for(expiredSession <- expired) {
                     <div class="col-md-4">
                         <div class="col-md-12">
-                            <div id='parent' style='width: 100% ;'>
+                            <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
                                 @defining(if(expiredSession.meetup) "Meetup" else "Knolx") { sessionType =>
                                     <div class="feedback-card-head stick-out  expired-details-button"><i class="fa fa-list-alt feedback-display-logo expired-details-button" aria-hidden="true"></i></div>
@@ -125,7 +125,7 @@
                         </div>
                         <div class="col-md-8 feedback-response-form" >
                             <div id="feedback-response-form"></div>
-                            <div id='parent' style='width: 100% ; text-align: center ;'>
+                            <div id="parent" class="feedback-response-submit">
                                 <button type="button" class="btn btn-primary btn-lg submit-form-button">Submit</button>
                             </div>
                         </div>

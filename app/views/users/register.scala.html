@@ -6,12 +6,15 @@
 
         </div>
         <div class="col-md-4 profile" >
-            <div class="container-fluid" style="margin-top: 90px ;">
+            <div class="container-fluid top-container">
             </div>
-            <div class="login-outer" style="height: 470px ;">
+            <div class="login-outer">
                 <div class="col-md-12 login-first" > </div>
 
                 <form id="registrationForm" action="@routes.UsersController.createUser()" method="POST">
+
+                    @helper.CSRF.formField
+
                     <div class="col-md-12 top-registration-field" >
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >

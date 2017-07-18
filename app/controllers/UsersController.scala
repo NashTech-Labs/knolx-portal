@@ -60,7 +60,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   val emailForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number
+      "page" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31)
     )(UserEmailInformation.apply)(UserEmailInformation.unapply)
   )
 

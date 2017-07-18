@@ -17,6 +17,11 @@ function slide(keyword, pageNumber) {
             processData: false,
             contentType: false,
             data: formData,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 var sessionInfo = JSON.parse(data);
                 var sessions = sessionInfo["sessions"];

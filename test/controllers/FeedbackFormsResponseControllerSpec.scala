@@ -105,7 +105,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       sessionsRepository.immediatePreviousExpiredSessions returns sessionObject
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(response) must be equalTo OK
     }

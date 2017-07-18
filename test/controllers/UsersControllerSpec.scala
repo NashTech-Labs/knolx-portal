@@ -195,19 +195,12 @@ class UsersControllerSpec extends PlaySpecification with Results {
     "not login user when credentials are invalid" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-<<<<<<< HEAD
-      val result = controller.loginUser(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody("email" -> "test@example.com",
-          "password" -> "1234567"))
-=======
       val result = controller.loginUser(
         FakeRequest()
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("email" -> "test@example.com",
-            "password" -> "12345678")
+            "password" -> "123456789")
           .withCSRFToken)
->>>>>>> 3a0b4f66f454105b6ddbc384fd184e426dcd3f80
 
       status(result) must be equalTo UNAUTHORIZED
     }
@@ -229,7 +222,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
 
       val result = controller.manageUser(1,Some("test@example.com"))(FakeRequest(GET, "search")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(result) must be equalTo OK
     }
@@ -254,7 +247,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
-          "page" -> "invalid value"))
+          "page" -> "invalid value").withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -266,7 +259,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
           "active" -> "invalid value",
-          "password" -> "12345678"))
+          "password" -> "12345678").withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -305,7 +298,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val result = controller.update("test@example.com")(FakeRequest(GET, "updatePage")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
         status(result) must be equalTo OK
     }

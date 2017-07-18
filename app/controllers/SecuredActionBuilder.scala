@@ -8,7 +8,8 @@ import play.api.http.Status._
 import play.api.mvc._
 import utilities.EncryptionUtility
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 case class UserSession(id: String, email: String, admin: Boolean)
 

@@ -255,9 +255,11 @@
     line-height: 1.2em;
     margin: 0.2em 0;
     padding: 0px 15px 0px 15px;
+    top:-50px;
 }
 
 .more {
+    top:-55px;
     color: #EC7063;
     cursor: pointer;
 }
@@ -305,6 +307,7 @@
     background-size: cover;
     margin-top: 0px;
     margin-bottom: 15px;
+    background-color: #fff;
 }
 
 .submit-form-button {

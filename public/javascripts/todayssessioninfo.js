@@ -1,3 +1,22 @@
+$(function(){
+    $('#getKnolxDetailsExpired').click(function() {
+        var json = document.getElementById('getKnolxDetailsJson').value;
+        opener(json);
+        expire();
+    });
+    $('#fillFeedback').click(function() {
+        var json = document.getElementById('getKnolxDetailsJson').value;
+        var form = document.getElementById('feedbackform').value;
+        formOpener(json);
+        loadFeedbackForm(form);
+    });
+    $('#getKnolxDetailsActive').click(function() {
+        var json = document.getElementById('getKnolxDetailsJson').value;
+        opener(json);
+    });
+});
+
+
 function opener(value) {
     var details = JSON.parse(value);
     $('#session-topic').html(details.topic);
@@ -25,12 +44,9 @@ function expire() {
 }
 
 function loadFeedbackForm(form) {
-    var formJson = JSON.stringify(form);
-    var values = JSON.parse(formJson);
-
+    var values = JSON.parse(form);
     $('#feedback-response-form').html("");
     var optionsLoaded = "";
-
     var questions = values['questions'];
 
     for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {

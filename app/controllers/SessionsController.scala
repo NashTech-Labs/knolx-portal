@@ -76,7 +76,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   val sessionSearchForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number
+      "page" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 1)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
@@ -132,7 +132,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def searchSessions: Action[AnyContent] = Action.async { implicit request =>
+  def searchSessions: Action[AnyContent] = action.async { implicit request =>
     sessionSearchForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
@@ -165,7 +165,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>
+  def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber)
       .flatMap { sessionsInfo =>
@@ -250,7 +250,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def create: Action[AnyContent] = userAction.async { implicit request =>
+  def create: Action[AnyContent] = adminAction.async { implicit request =>
 
     feedbackFormsRepository
       .getAll
@@ -261,7 +261,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def createSession: Action[AnyContent] = userAction.async { implicit request =>
+  def createSession: Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -391,7 +391,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def cancelScheduledSession(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+  def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1,None))
@@ -402,7 +402,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def scheduleSession(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+  def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
         Redirect(routes.SessionsController.manageSessions(1,None))

@@ -324,7 +324,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
@@ -522,37 +522,46 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "cancel session by session id" in new WithTestApplication {
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest().withCSRFToken)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
 
+
     "throw a bad request when encountered a invalid value for search session form" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.searchSessions()(FakeRequest(POST, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
-          "page" -> "invalid value").withCSRFToken)
+          "page" -> "0").withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
 
     "schedule session by session id" in new WithTestApplication {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.scheduleSession(_id.stringify)(FakeRequest().withCSRFToken)
+      val result = controller.scheduleSession(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withCSRFToken)
 
-      status(result) must be equalTo BAD_REQUEST
+      status(result) must be equalTo SEE_OTHER
     }
 
     "return json for the session searched by email" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.paginate(1, Some("test@example.com")) returns sessionObject
       sessionsRepository.activeCount(Some("test@example.com")) returns Future.successful(1)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.searchSessions()(FakeRequest(POST, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -564,6 +573,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "throw a bad request when encountered a invalid value from form for manage Sessions" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
       usersRepository.getByEmail("test@example.com") returns emailObject
       val result = controller.searchManageSession()(FakeRequest(POST, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -575,6 +586,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "return json for the session to manage when searched by email" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.paginate(1, Some("test@example.com")) returns sessionObject
       sessionsRepository.activeCount(Some("test@example.com")) returns Future.successful(1)

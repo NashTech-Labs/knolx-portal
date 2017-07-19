@@ -175,25 +175,12 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
             .getByFeedbackFormId(id)
             .map {
               case Some(feedForm: FeedbackForm) =>
-                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, FeedbackFormsHelper.jsonCountBuilder(feedForm)))
               case None                         =>
                 Redirect(routes.FeedbackFormsController.manageFeedbackForm(1,None)).flashing("message" -> "Something went wrong!")
             }
         }
       }
-  }
-
-  def jsonCountBuilder(feedForm: FeedbackForm): String = {
-
-    @tailrec
-    def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
-      questions match {
-        case Nil          => json
-        case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
-      }
-    }
-
-    s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
   }
 
   def updateFeedbackForm: Action[JsValue] = adminAction.async(parse.json) { implicit request =>

@@ -1,4 +1,4 @@
-@(active: List[(FeedbackSessions, String)], expired: List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(active: List[(FeedbackSessions, String, String)], expired: List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Feedbacks") {
     <div class="row">
@@ -7,12 +7,13 @@
             <div class="col-md-12 login-first test feedback-top-banner"></div>
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(active.nonEmpty) {
-                @for((sessions, feedbackForm) <- active) {
+                @for((sessions, feedbackForm, feedbackFormQuestionOptionCount) <- active) {
                     <div class="col-md-4">
                         <div class="col-md-12">
                             <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
                                 @defining(if(sessions.meetup) "Meetup" else "Knolx") { sessionType =>
+                                    <input type="hidden" id='existingCounts' value="@feedbackFormQuestionOptionCount"/>
                                     <div class="feedback-card-head stick-out"><i class="fa fa-list-alt feedback-display-logo" aria-hidden="true"></i></div>
                                     <div class="col-md-12 feedback-card-topic"><p>@sessions.topic</p></div>
                                     <div class="col-md-12 feedback-card-by">by</div>
@@ -130,7 +131,7 @@
                         <div class="col-md-8 feedback-response-form" >
                             <div id="feedback-response-form"></div>
                             <div id="parent" class="feedback-response-submit">
-                                <button type="button" class="btn btn-primary btn-lg submit-form-button">Submit</button>
+                                <button type="button" class="btn btn-primary btn-lg submit-form-button" id='submitFeedbackForm' >Submit</button>
                             </div>
                         </div>
 

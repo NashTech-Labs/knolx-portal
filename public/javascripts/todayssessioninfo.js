@@ -14,6 +14,9 @@ $(function(){
         var json = document.getElementById('getKnolxDetailsJson').value;
         opener(json);
     });
+    $('#submitFeedbackForm').click(function() {
+        submitFeedbackForm();
+    });
 });
 
 
@@ -79,3 +82,5 @@ function loadFeedbackForm(form) {
 
     $('#session-form-info').modal('show');
 }
+
+

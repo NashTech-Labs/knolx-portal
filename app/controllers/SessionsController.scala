@@ -126,7 +126,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           .activeCount(keyword)
           .map { count =>
             val pages = Math.ceil(count / 10D).toInt
-
             Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
           }
       }

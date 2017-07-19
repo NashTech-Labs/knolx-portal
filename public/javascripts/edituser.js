@@ -40,10 +40,10 @@ function slide(keyword, pageNumber) {
                             "</td>" +
                             "<td>" + users[user].email + "</td>"
                         if (users[user].active) {
-                            usersFound += "<td class='active-status'>Active</td></tr>"
+                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td></tr>"
                         }
                         else {
-                            usersFound += "<td class='suspended'>Suspended</td></tr>"
+                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td></tr>"
                         }
                     }
                     $('#user-found').html(

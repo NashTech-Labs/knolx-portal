@@ -32,16 +32,10 @@
                                 <td>@knolxSession.session</td>
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
-                                <td>@(if(knolxSession.meetup) {
-                                    "Yes"
-                                } else {
-                                    "No"
-                                })</td>
-                                <td>@(if(knolxSession.cancelled) {
-                                    "Yes"
-                                } else {
-                                    "No"
-                                })</td>
+                                @(if(knolxSession.meetup){<td class='active-status'> Yes</td>}
+                                else {<td class='suspended'> No</td>})
+                                @(if(knolxSession.cancelled) {<td  class='active-status' >Yes</td>}
+                                else {<td class='suspended' >No</td>})
                                 <td>@(if(knolxSession.rating.isEmpty) {
                                     "N/A"
                                 } else {

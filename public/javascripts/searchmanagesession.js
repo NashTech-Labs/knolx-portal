@@ -64,19 +64,19 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].completed) {
-                            usersFound += "<td><div><span>Completed</span></div><td></tr>";
+                            usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
                         }
                         else {
                             if(sessions[session].feedbackFormScheduled){
 
-                                usersFound += "<td><div><span>Scheduled</span><br/>"+
-                                              "<a href='/session/"+sessions[session].id+"/cancel'>"+
+                                usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>"+
+                                              "<a href='/session/"+sessions[session].id+"/cancel' class='cancel-red'>"+
                                               "Cancel</a>"+
                                               "</div><td></tr>";
                             }
                             else{
-                                usersFound += "<td><div><span>Pending</span><br/>"+
-                                    "<a href='/session/"+sessions[session].id+"/schedule'>"+
+                                usersFound += "<td><div><span class='label label-warning' >Pending</span><br/>"+
+                                    "<a href='/session/"+sessions[session].id+"/schedule' class='Schedule-green'>"+
                                     "Schedule</a>"+
                                     "</div><td></tr>";
                             }

@@ -9,11 +9,11 @@
             <div class="container-fluid default-margin-top">
             </div>
             <div class="login-outer">
-                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12 login-first" ></div>
                 <div class='col-md-12 feedback-card-author manage-user-container-email'><p>@userInfo.data.get("email")</p></div>
                 <div class='col-md-12'>
                 <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
+                    @helper.CSRF.formField
                     <input type='hidden' name="email" value="@userInfo.data.get("email")"/>
                     <label class='checkbox-outer'>
                         <p class='manage-user-checkbox-text'>Active</p>

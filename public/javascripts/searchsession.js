@@ -49,10 +49,10 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td class='suspended'>No</td>";
                         }
                         if (sessions[session].rating == "") {
-                            usersFound += "<td class='active-status'>N/A</td></tr>";
+                            usersFound += "<td>N/A</td></tr>";
                         }
                         else {
-                            usersFound += "<td class='suspended'>"+sessions[session].rating+"</td></tr>";
+                            usersFound += "<td>"+sessions[session].rating+"</td></tr>";
                         }
                     }
                     $('#user-found').html(

@@ -56,43 +56,42 @@
                                 <td>@knolxSession.session</td>
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
-                                <td>
+
                                 @(if(knolxSession.meetup) {
-                                    "Yes"
+                                        <td class='active-status'>Yes</td>
                                 } else {
-                                    "No"
+                                        <td class='suspended'>No</td>
                                 })
-                                </td>
-                                <td>
+
                                 @(if(knolxSession.cancelled) {
-                                    "Yes"
+                                        <td class='active-status' >Yes</td>
                                 } else {
-                                    "No"
+                                        <td  class='suspended' >No</td>
                                 })
-                                </td>
+
                                 <td>
-                                @(if(knolxSession.rating.isEmpty) {
-                                    "N/A"
-                                } else {
-                                    knolxSession.rating
-                                })
+                                    @(if(knolxSession.rating.isEmpty) {
+                                        "N/A"
+                                    } else {
+                                        knolxSession.rating
+                                    })
                                 </td>
                                 <td>
                                 @if(knolxSession.date.before(new java.util.Date(System.currentTimeMillis))) {
                                     <div>
-                                        <span>Completed</span>
+                                        <span class="label label-default">Completed</span>
                                     </div>
                                 } else {
                                     @if(knolxSession.feedbackFormScheduled) {
                                         <div>
-                                            <span>Scheduled</span>
-                                            <a href="@routes.SessionsController.cancelScheduledSession(knolxSession.id)">
+                                            <span class="label label-success">Scheduled</span>
+                                            <a href="@routes.SessionsController.cancelScheduledSession(knolxSession.id)" class="cancel-red">
                                                 Cancel</a>
                                         </div>
                                     } else {
                                         <div>
-                                            <span>Pending</span>
-                                            <a href="@routes.SessionsController.scheduleSession(knolxSession.id)">
+                                            <span class="label label-warning">Pending</span>
+                                            <a href="@routes.SessionsController.scheduleSession(knolxSession.id)" class='Schedule-green'>
                                                 Schedule</a>
                                         </div>
                                     }

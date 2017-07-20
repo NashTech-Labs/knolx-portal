@@ -22,10 +22,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class UserInformation(email: String, password: String, confirmPassword: String)
+
 case class LoginInformation(email: String, password: String)
+
 case class UserEmailInformation(email: Option[String], page: Int)
+
 case class ManageUserInfo(email: String, active: Boolean, id: String)
+
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
+
 case class UserSearchResult(users: List[ManageUserInfo], pages: Int, page: Int, keyword: String)
 
 @Singleton
@@ -87,7 +92,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       userInfo => {
         usersRepository
           .getByEmail(userInfo.email.toLowerCase)
-          .flatMap(_.headOption.fold {
+          .flatMap(_.fold {
             usersRepository
               .insert(
                 models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
@@ -123,7 +128,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       loginInfo => {
         usersRepository
           .getByEmail(loginInfo.email.toLowerCase)
-          .map(_.headOption.fold {
+          .map(_.fold {
             Logger.info(s"User ${loginInfo.email.toLowerCase} not found")
             Redirect(routes.HomeController.index()).flashing("message" -> "User not found!")
           } { user =>
@@ -209,7 +214,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for ${userInfo.email}")
-              Future.successful(Redirect(routes.UsersController.manageUser(1,None))
+              Future.successful(Redirect(routes.UsersController.manageUser(1, None))
                 .flashing("message" -> s"Details successfully updated for ${userInfo.email}"))
             }
             else {
@@ -221,16 +226,16 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   def update(email: String): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
-        .getByEmail(email)
+      .getByEmail(email)
       .flatMap {
         case Some(userInformation) =>
-              val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email,userInformation.active,None))
-                Future.successful(Ok(views.html.users.updateuser(filledForm)))
+          val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, None))
+          Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
       }
   }
 
-  def deleteUser(email:String): Action[AnyContent] = adminAction.async { implicit request =>
+  def deleteUser(email: String): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
       .delete(email)
       .flatMap(_.fold {

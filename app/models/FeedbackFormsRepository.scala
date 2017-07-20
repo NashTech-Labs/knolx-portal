@@ -45,8 +45,6 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   val pageSize = 10
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
-
   def insert(feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -64,6 +62,8 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     collection.flatMap(_.update(selector, modifier))
   }
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
     collection

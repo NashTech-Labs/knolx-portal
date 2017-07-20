@@ -158,7 +158,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
-        case None               => NotFound("404! feedback form not found")
+        case None => NotFound("404! feedback form not found")
       }
   }
 
@@ -168,7 +168,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .activeSessions
       .flatMap { sessions =>
         if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
-          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1,None))
+          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None))
             .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
         } else {
           feedbackRepository
@@ -176,8 +176,8 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
             .map {
               case Some(feedForm: FeedbackForm) =>
                 Ok(views.html.feedbackforms.updatefeedbackform(feedForm, FeedbackFormsHelper.jsonCountBuilder(feedForm)))
-              case None                         =>
-                Redirect(routes.FeedbackFormsController.manageFeedbackForm(1,None)).flashing("message" -> "Something went wrong!")
+              case None =>
+                Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None)).flashing("message" -> "Something went wrong!")
             }
         }
       }
@@ -193,7 +193,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
         .flatMap { sessions =>
           if (sessions.foldLeft(false)(_ || _.feedbackFormId == feedbackFormInformation.id)) {
             Future.successful(
-              Redirect(routes.FeedbackFormsController.manageFeedbackForm(1,None))
+              Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None))
                 .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
           } else {
             val validatedForm =

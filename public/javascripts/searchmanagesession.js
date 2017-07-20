@@ -1,6 +1,6 @@
-$(function(){
-    $('#search-text').keyup(function() {
-        slide(this.value,1);
+$(function () {
+    $('#search-text').keyup(function () {
+        slide(this.value, 1);
     });
 
 });
@@ -32,17 +32,17 @@ function slide(keyword, pageNumber) {
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
                         usersFound += "<tr><td align='center'>" +
-                            "<a href='/session/update?id="+sessions[session].id+"' class='btn btn-default'>" +
+                            "<a href='/session/update?id=" + sessions[session].id + "' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='/session/delete?id="+sessions[session].id+"&pageNumber="+sessionInfo['page']+"' class='btn btn-danger delete'>" +
+                            "<a href='/session/delete?id=" + sessions[session].id + "&pageNumber=" + sessionInfo['page'] + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +
-                            "<td>"+sessions[session].dateString+"</td>"+
-                            "<td>"+sessions[session].session+"</td>"+
-                            "<td>"+sessions[session].topic+"</td>"+
-                            "<td>"+sessions[session].email+"</td>";
+                            "<td>" + sessions[session].dateString + "</td>" +
+                            "<td>" + sessions[session].session + "</td>" +
+                            "<td>" + sessions[session].topic + "</td>" +
+                            "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
                             usersFound += "<td class='active-status'>Yes</td>";
@@ -60,24 +60,24 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td class='active-status'>N/A</td>";
                         }
                         else {
-                            usersFound += "<td class='suspended'>"+sessions[session].rating+"</td>";
+                            usersFound += "<td class='suspended'>" + sessions[session].rating + "</td>";
                         }
 
                         if (sessions[session].completed) {
                             usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
                         }
                         else {
-                            if(sessions[session].feedbackFormScheduled){
+                            if (sessions[session].feedbackFormScheduled) {
 
-                                usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>"+
-                                              "<a href='/session/"+sessions[session].id+"/cancel' class='cancel-red'>"+
-                                              "Cancel</a>"+
-                                              "</div><td></tr>";
+                                usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>" +
+                                    "<a href='/session/" + sessions[session].id + "/cancel' class='cancel-red'>" +
+                                    "Cancel</a>" +
+                                    "</div><td></tr>";
                             }
-                            else{
-                                usersFound += "<td><div><span class='label label-warning' >Pending</span><br/>"+
-                                    "<a href='/session/"+sessions[session].id+"/schedule' class='Schedule-green'>"+
-                                    "Schedule</a>"+
+                            else {
+                                usersFound += "<td><div><span class='label label-warning' >Pending</span><br/>" +
+                                    "<a href='/session/" + sessions[session].id + "/schedule' class='Schedule-green'>" +
+                                    "Schedule</a>" +
                                     "</div><td></tr>";
                             }
                         }
@@ -96,7 +96,7 @@ function slide(keyword, pageNumber) {
                     }
 
                 }
-                else{
+                else {
                     $('#user-found').html(
                         "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
                     );
@@ -106,7 +106,7 @@ function slide(keyword, pageNumber) {
 
             error: function (er) {
                 $('#user-found').html(
-                    "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>"+er.responseText+"</td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
+                    "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
                 );
                 $('.pagination').html("");
             }

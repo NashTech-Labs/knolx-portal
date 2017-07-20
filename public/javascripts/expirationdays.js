@@ -1,8 +1,8 @@
-$(function(){
-    $('#disableDays').click(function() {
+$(function () {
+    $('#disableDays').click(function () {
         disableDays();
     });
-    $('#radio-days').click(function() {
+    $('#radio-days').click(function () {
         enableDays();
     });
 });

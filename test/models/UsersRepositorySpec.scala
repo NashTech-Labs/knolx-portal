@@ -34,26 +34,26 @@ class UsersRepositorySpec extends PlaySpecification {
     }
 
     "get paginated user when searched with some string" in {
-      val paginatedUsers = await(usersRepository.paginate(1,Some("test")))
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test")))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "update user with password change " in {
-      val userTOUpdate = UpdatedUserInfo("test@example.com",active = true,Some("12345678"))
+      val userTOUpdate = UpdatedUserInfo("test@example.com", active = true, Some("12345678"))
 
       val result = await(usersRepository.update(userTOUpdate))
 
-      result  must beEqualTo(updateWriteResult)
+      result must beEqualTo(updateWriteResult)
 
     }
 
     "update user with no password change " in {
-      val userTOUpdate = UpdatedUserInfo("test@example.com",active = false,None)
+      val userTOUpdate = UpdatedUserInfo("test@example.com", active = false, None)
 
       val result = await(usersRepository.update(userTOUpdate))
 
-      result  must beEqualTo(updateWriteResult)
+      result must beEqualTo(updateWriteResult)
     }
 
     "get active user count when serched with empty string" in {
@@ -69,11 +69,11 @@ class UsersRepositorySpec extends PlaySpecification {
     }
 
     "delete user by email" in {
-      val expectedOutput = UserInfo("test@example.com","12345678","encryptedpassword",active = false,admin = false)
+      val expectedOutput = UserInfo("test@example.com", "12345678", "encryptedpassword", active = false, admin = false)
 
       val result = await(usersRepository.delete("test@example.com"))
 
-      result.get.email  must beEqualTo("test@example.com")
+      result.get.email must beEqualTo("test@example.com")
     }
 
   }

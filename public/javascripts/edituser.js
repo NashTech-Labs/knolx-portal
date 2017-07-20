@@ -1,6 +1,6 @@
-$(function(){
-    $('#search-text').keyup(function() {
-        slide(this.value,1);
+$(function () {
+    $('#search-text').keyup(function () {
+        slide(this.value, 1);
     });
 });
 
@@ -31,10 +31,10 @@ function slide(keyword, pageNumber) {
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
                         usersFound += "<tr><td align='center'>" +
-                            "<a href='/user/update?email="+users[user].email+"' class='btn btn-default'>" +
+                            "<a href='/user/update?email=" + users[user].email + "' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='/user/delete?email="+users[user].email+"' class='btn btn-danger delete'>" +
+                            "<a href='/user/delete?email=" + users[user].email + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +
@@ -60,7 +60,7 @@ function slide(keyword, pageNumber) {
                     }
 
                 }
-                else{
+                else {
                     $('#user-found').html(
                         "<tr><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td></tr>"
                     );
@@ -70,7 +70,7 @@ function slide(keyword, pageNumber) {
 
             error: function (er) {
                 $('#user-found').html(
-                    "<tr><td align='center'></td><td align='center'>"+er.responseText+"</td><td align='center'></td></tr>"
+                    "<tr><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td></tr>"
                 );
                 $('.pagination').html("");
 

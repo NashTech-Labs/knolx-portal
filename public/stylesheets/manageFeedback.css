@@ -82,14 +82,14 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
     background-color: rgb(125, 158, 192);
 }
 
-
-.custom-fadein{
+.custom-fadein {
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
 }
+
 .flash-success {
     margin-top: 20px;
     font-family: 'gothic';

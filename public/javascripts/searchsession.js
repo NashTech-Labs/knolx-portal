@@ -1,6 +1,6 @@
-$(function(){
-    $('#search-text').keyup(function() {
-        slide(this.value,1);
+$(function () {
+    $('#search-text').keyup(function () {
+        slide(this.value, 1);
     });
 });
 
@@ -30,11 +30,11 @@ function slide(keyword, pageNumber) {
                 var usersFound = "";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
-                        usersFound += "<tr>"+
-                            "<td>"+sessions[session].dateString+"</td>"+
-                            "<td>"+sessions[session].session+"</td>"+
-                            "<td>"+sessions[session].topic+"</td>"+
-                            "<td>"+sessions[session].email+"</td>";
+                        usersFound += "<tr>" +
+                            "<td>" + sessions[session].dateString + "</td>" +
+                            "<td>" + sessions[session].session + "</td>" +
+                            "<td>" + sessions[session].topic + "</td>" +
+                            "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
                             usersFound += "<td class='active-status'>Yes</td>";
@@ -52,7 +52,7 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td>N/A</td></tr>";
                         }
                         else {
-                            usersFound += "<td>"+sessions[session].rating+"</td></tr>";
+                            usersFound += "<td>" + sessions[session].rating + "</td></tr>";
                         }
                     }
                     $('#user-found').html(
@@ -69,7 +69,7 @@ function slide(keyword, pageNumber) {
                     }
 
                 }
-                else{
+                else {
                     $('#user-found').html(
                         "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>Oops! No Record Found</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
@@ -79,7 +79,7 @@ function slide(keyword, pageNumber) {
 
             error: function (er) {
                 $('#user-found').html(
-                    "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>"+er.responseText+"</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                    "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>" + er.responseText + "</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                 );
                 $('.pagination').html("");
 

@@ -63,7 +63,7 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
       val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
       val feedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
 
-      val updated = await(feedbackFormsRepository.update(feedbackFormId.stringify,feedbackForm).map(_.ok))
+      val updated = await(feedbackFormsRepository.update(feedbackFormId.stringify, feedbackForm).map(_.ok))
 
       updated must beEqualTo(true)
     }

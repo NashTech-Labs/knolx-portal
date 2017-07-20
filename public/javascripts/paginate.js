@@ -2,7 +2,7 @@ function paginate(pageNumber, pages) {
 
 
     var pagination = "";
-    if(pages>=pageNumber) {
+    if (pages >= pageNumber) {
         switch (true) {
             case (pages > 5 && pageNumber < 5) : {
                 pagination += reducedFromIterator(1, 5, pageNumber, 0);

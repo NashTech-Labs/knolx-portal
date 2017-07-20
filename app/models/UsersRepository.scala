@@ -46,8 +46,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
-
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -70,6 +68,8 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
   }
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def delete(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] =
     collection

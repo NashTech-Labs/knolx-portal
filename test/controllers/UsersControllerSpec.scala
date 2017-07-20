@@ -18,21 +18,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UsersControllerSpec extends PlaySpecification with Results {
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
-
-    lazy val controller =
-      new UsersController(knolxControllerComponent.messagesApi, usersRepository, config, knolxControllerComponent)
-  }
-
   private val emptyEmailObject = Future.successful(None)
   private val _id: BSONObjectID = BSONObjectID.generate
   private val emailObject = Future.successful(Some(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+    lazy val app: Application = fakeApp
+    lazy val controller =
+      new UsersController(knolxControllerComponent.messagesApi, usersRepository, config, knolxControllerComponent)
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
+  }
 
   "Users Controller" should {
 
@@ -218,10 +217,10 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "render manage user page" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      usersRepository.paginate(1,Some("test@example.com")) returns emailObject.map(user => List(user.get))
+      usersRepository.paginate(1, Some("test@example.com")) returns emailObject.map(user => List(user.get))
       usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
 
-      val result = controller.manageUser(1,Some("test@example.com"))(FakeRequest(GET, "search")
+      val result = controller.manageUser(1, Some("test@example.com"))(FakeRequest(GET, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(result) must be equalTo OK
@@ -229,7 +228,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "return json for the user searched by email" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      usersRepository.paginate(1,Some("test@example.com")) returns emailObject.map(user => List(user.get))
+      usersRepository.paginate(1, Some("test@example.com")) returns emailObject.map(user => List(user.get))
       usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
 
       val result = controller.searchUser()(FakeRequest(POST, "search")
@@ -300,7 +299,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       val result = controller.update("test@example.com")(FakeRequest(GET, "updatePage")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
-        status(result) must be equalTo OK
+      status(result) must be equalTo OK
     }
 
     "redirect to manages session page if user to update no found" in new WithTestApplication {

@@ -34,16 +34,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
-
-    val mailerClient = mock[MailerClient]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsRepository = mock[SessionsRepository]
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
-
     lazy val controller =
       new FeedbackFormsController(
         knolxControllerComponent.messagesApi,
@@ -53,6 +43,14 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
         sessionsRepository,
         dateTimeUtility,
         knolxControllerComponent)
+    val mailerClient = mock[MailerClient]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsRepository = mock[SessionsRepository]
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
   }
 
   "Feedback controller" should {
@@ -204,7 +202,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       feedbackFormsRepository.paginate(1) returns Future.successful(feedbackForms)
       feedbackFormsRepository.activeCount returns Future.successful(1)
 
-      val response = controller.manageFeedbackForm(1,None)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.manageFeedbackForm(1, None)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
       contentAsString(response) must contain("""feedback-div-outer""")
@@ -385,15 +383,6 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.updateFeedbackForm()(request)
       status(response) must be equalTo INTERNAL_SERVER_ERROR
       contentAsString(response) must be equalTo "Something went wrong!"
-    }
-
-    "build json from case class" in new WithTestApplication {
-      val questions = Question("how is knolx portal?", List("awesome", "i can do it better"))
-      val feedbackForm = FeedbackForm("test", List(questions), active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
-
-      val result = controller.jsonCountBuilder(feedbackForm)
-
-      result must be equalTo """{"0":"2"}"""
     }
 
     "get feedback form" in new WithTestApplication {

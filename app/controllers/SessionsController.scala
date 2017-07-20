@@ -377,7 +377,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                     case ScheduledSessionsNotRefreshed =>
                       Logger.error(s"Cannot refresh feedback form schedulers while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
-                    case msg                           =>
+                    case msg =>
                       Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                   }
@@ -388,28 +388,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               }
           })
       }
-  }
-
-  def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
-      case true  =>
-        Redirect(routes.SessionsController.manageSessions(1,None))
-          .flashing("message" -> "Scheduled feedback form successfully cancelled!")
-      case false =>
-        Redirect(routes.SessionsController.manageSessions(1,None))
-          .flashing("message" -> "Either feedback form was already sent or Something went wrong while removing scheduled feedback form!")
-    }
-  }
-
-  def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
-      case true  =>
-        Redirect(routes.SessionsController.manageSessions(1,None))
-          .flashing("message" -> "Feedback form successfully scheduled!")
-      case false =>
-        Redirect(routes.SessionsController.manageSessions(1,None))
-          .flashing("message" -> "Something went wrong while scheduling feedback form!")
-    }
   }
 
   private def sessionExpirationMillis(date: Date, customDays: Int): Long =
@@ -436,6 +414,28 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     val expirationDate = scheduledDate.plusDays(days)
 
     dateTimeUtility.toMillis(expirationDate)
+  }
+
+  def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
+      case true =>
+        Redirect(routes.SessionsController.manageSessions(1, None))
+          .flashing("message" -> "Scheduled feedback form successfully cancelled!")
+      case false =>
+        Redirect(routes.SessionsController.manageSessions(1, None))
+          .flashing("message" -> "Either feedback form was already sent or Something went wrong while removing scheduled feedback form!")
+    }
+  }
+
+  def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
+      case true =>
+        Redirect(routes.SessionsController.manageSessions(1, None))
+          .flashing("message" -> "Feedback form successfully scheduled!")
+      case false =>
+        Redirect(routes.SessionsController.manageSessions(1, None))
+          .flashing("message" -> "Something went wrong while scheduling feedback form!")
+    }
   }
 
 }

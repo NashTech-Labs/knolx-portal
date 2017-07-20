@@ -54,25 +54,25 @@
             }
 
         @incrementIterator(from: Int, till: Int, pageNumber: Int, offset: Int) = {
-            @for(iterator <- from to till) {
-                <li @if(pageNumber == offset + iterator) {
-                    class="active" }>
-                    <a href=@redirectUrl(offset + iterator, keyword)>@{
-                        offset + iterator
-                    }</a>
-                </li>
-            }
+        @for(iterator <- from to till) {
+            <li @if(pageNumber == offset + iterator) {
+                class="active" }>
+                <a href=@redirectUrl(offset + iterator, keyword)>@{
+                    offset + iterator
+                }</a>
+            </li>
+        }
         }
 
         @decrementIterator(from: Int, till: Int, pageNumber: Int, offset: Int) = {
-            @for(iterator <- (from to till).reverse) {
-                <li @if(pageNumber == offset - iterator) {
-                    class="active" }>
-                    <a href=@redirectUrl(offset - iterator, keyword)>@{
-                        offset - iterator
-                    }</a>
-                </li>
-            }
+        @for(iterator <- (from to till).reverse) {
+            <li @if(pageNumber == offset - iterator) {
+                class="active" }>
+                <a href=@redirectUrl(offset - iterator, keyword)>@{
+                    offset - iterator
+                }</a>
+            </li>
+        }
         }
 
         </ul>

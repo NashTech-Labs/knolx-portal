@@ -51,8 +51,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   val pageSize = 10
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
-
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[JsObject]] =
     collection
       .flatMap(jsonCollection =>
@@ -106,7 +104,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
 
     val condition = keyword match {
-      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),"active" -> true)
+      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
       case None => Json.obj("active" -> true)
     }
 
@@ -122,7 +120,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
     val condition = keyword match {
-      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),"active" -> true))
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
       case None => None
     }
 
@@ -175,6 +173,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .map(_.flatten)
       }
   }
+
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
   def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis

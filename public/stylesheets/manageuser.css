@@ -279,8 +279,9 @@
 .active-status {
     color: #45B39D;
 }
-.hold-status{
-    color:#FFF300  ;
+
+.hold-status {
+    color: #FFF300;
 }
 
 .suspended {
@@ -295,20 +296,25 @@
 .inactive {
     cursor: pointer;
 }
-.save-user-changes{
+
+.save-user-changes {
     margin-top: 20px;
 }
-.user-updated-message{
+
+.user-updated-message {
     text-align: center;
     margin-top: 35px;
     font-size: 15px;
 }
-.default-margin-top{
+
+.default-margin-top {
     margin-top: 90px;
 }
-.Schedule-green{
-    color  : #5cb85c;
+
+.Schedule-green {
+    color: #5cb85c;
 }
-.cancel-red{
-    color:#d43f3a;
+
+.cancel-red {
+    color: #d43f3a;
 }

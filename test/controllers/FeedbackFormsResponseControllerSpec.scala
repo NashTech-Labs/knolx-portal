@@ -32,25 +32,26 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
-
-    val mailerClient = mock[MailerClient]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsRepository = mock[SessionsRepository]
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
-
     lazy val controller =
       new FeedbackFormsResponseController(
         knolxControllerComponent.messagesApi,
         mailerClient,
         usersRepository,
         feedbackFormsRepository,
+        feedbackResponseRepository,
         sessionsRepository,
         dateTimeUtility,
         knolxControllerComponent)
+
+    val mailerClient = mock[MailerClient]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsRepository = mock[SessionsRepository]
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
   }
 
   "Feedback Response Controller" should {

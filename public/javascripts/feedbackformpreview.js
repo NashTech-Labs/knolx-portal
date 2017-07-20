@@ -1,9 +1,8 @@
-$(function(){
-    $('#previewId').click(function() {
+$(function () {
+    $('#previewId').click(function () {
         generatePreview();
     });
 });
-
 
 
 function generatePreview() {

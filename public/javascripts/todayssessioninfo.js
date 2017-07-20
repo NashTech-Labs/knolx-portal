@@ -1,21 +1,18 @@
-$(function(){
-    $('#getKnolxDetailsExpired').click(function() {
+$(function () {
+    $('#getKnolxDetailsExpired').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         opener(json);
         expire();
     });
-    $('#fillFeedback').click(function() {
+    $('#fillFeedback').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         var form = document.getElementById('feedbackform').value;
         formOpener(json);
         loadFeedbackForm(form);
     });
-    $('#getKnolxDetailsActive').click(function() {
+    $('#getKnolxDetailsActive').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         opener(json);
-    });
-    $('#submitFeedbackForm').click(function() {
-        submitFeedbackForm();
     });
 });
 
@@ -84,3 +81,17 @@ function loadFeedbackForm(form) {
 }
 
 
+class FeedbackFormResponse {
+    constructor(sessionId, questions) {
+        this.sessionId = sessionId;
+        this.questions = questions;
+    }
+}
+
+class QuestionAndResponseInformation {
+    constructor(question, options, response) {
+        this.question = question;
+        this.options = options;
+        this.response = response;
+    }
+}

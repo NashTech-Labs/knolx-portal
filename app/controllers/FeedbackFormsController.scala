@@ -1,6 +1,5 @@
 package controllers
 
-import java.time.{Instant, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -11,7 +10,6 @@ import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 
-import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -98,9 +96,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackPreviewFormat: OFormat[FeedbackFormPreview] = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat: OFormat[UpdateFeedbackFormInformation] = Json.format[UpdateFeedbackFormInformation]
 
-  val usersRepo: UsersRepository = usersRepository
-
-  def manageFeedbackForm(pageNumber: Int, keyword: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+  def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .paginate(pageNumber)
       .flatMap { feedbackForms =>
@@ -168,7 +164,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .activeSessions
       .flatMap { sessions =>
         if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
-          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None))
+          Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
             .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
         } else {
           feedbackRepository
@@ -177,7 +173,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
               case Some(feedForm: FeedbackForm) =>
                 Ok(views.html.feedbackforms.updatefeedbackform(feedForm, FeedbackFormsHelper.jsonCountBuilder(feedForm)))
               case None =>
-                Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None)).flashing("message" -> "Something went wrong!")
+                Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
             }
         }
       }
@@ -193,7 +189,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
         .flatMap { sessions =>
           if (sessions.foldLeft(false)(_ || _.feedbackFormId == feedbackFormInformation.id)) {
             Future.successful(
-              Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None))
+              Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
                 .flashing("info" -> "Cannot edit feedback form as it has already been attached to a active session!"))
           } else {
             val validatedForm =
@@ -226,10 +222,10 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .delete(id)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete knolx feedback form with id $id")
-        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None)).flashing("errormessage" -> "Something went wrong!"))
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("errormessage" -> "Something went wrong!"))
       } { _ =>
         Logger.info(s"Knolx feedback form with id:  $id has been successfully deleted")
-        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1, None)).flashing("message" -> "Feedback form successfully deleted!"))
+        Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Feedback form successfully deleted!"))
       })
   }
 

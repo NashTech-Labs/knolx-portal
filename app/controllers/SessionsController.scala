@@ -12,7 +12,6 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent, Controller}
 import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
 import schedulers.SessionsScheduler._
@@ -53,7 +52,10 @@ case class KnolxSession(id: String,
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
-case class SessionSearchResult(sessions: List[KnolxSession], pages: Int, page: Int, keyword: String)
+case class SessionSearchResult(sessions: List[KnolxSession],
+                               pages: Int,
+                               page: Int,
+                               keyword: String)
 
 object SessionValues {
   val Sessions = 1 to 5 map (number => (s"session $number", s"Session $number"))
@@ -69,14 +71,13 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  val usersRepo: UsersRepository = usersRepository
-  implicit val KnolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
-  implicit val SessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+  implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
+  implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
 
   val sessionSearchForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 1)
+      "page" -> number.verifying("Invalid feedback form expiration days selected", _ >= 1)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
@@ -274,7 +275,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           createSessionInfo => {
             usersRepository
               .getByEmail(createSessionInfo.email.toLowerCase)
-              .flatMap(_.headOption.fold {
+              .flatMap(_.fold {
                 Future.successful(
                   BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
               } { userJson =>
@@ -358,7 +359,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
         updateSessionForm.bindFromRequest.fold(
           formWithErrors => {
-            Logger.error(s"Received a bad request for update session $formWithErrors")
+            Logger.error(s"Received a bad request for getByEmail session $formWithErrors")
             Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
           },
           updateSessionInfo => {

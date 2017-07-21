@@ -38,11 +38,23 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
 
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
+
   def getByEmail(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj("email" -> email.toLowerCase))
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
+  }
+
+  def getActiveByEmail(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+          "email" -> email.toLowerCase,
+          "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
@@ -68,8 +80,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
   }
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def delete(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] =
     collection

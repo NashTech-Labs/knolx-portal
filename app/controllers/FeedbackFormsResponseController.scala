@@ -84,12 +84,9 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
-  implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-  implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
+  implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
   implicit val QuestionAndResponseInformationFormat: OFormat[QuestionAndResponseInformation] = Json.format[QuestionAndResponseInformation]
-
-
-  val usersRepo: UsersRepository = usersRepository
+  implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository
@@ -165,7 +162,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           feedbackFormResponse.questionsAndResponses.map(responseInformation =>
             QuestionResponse(responseInformation.question, responseInformation.options, responseInformation.response))
 
-        val dateTime = new Date(System.currentTimeMillis).getTime
+        val dateTime = dateTimeUtility.nowMillis
 
         val feedbackResponseData = FeedbackFormsResponse(request.user.id, request.user.email, feedbackFormResponse.sessionId,
           questionAndResponseInformation, BSONDateTime(dateTime))
@@ -173,7 +170,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         feedbackResponseRepository.insert(feedbackResponseData).map { result =>
           if (result.ok) {
             Logger.info(s"Feedback form response successfully stored")
-            Ok("Feedback form response successfully strored!")
+            Ok("Feedback form response successfully stored!")
           } else {
             Logger.error(s"Something Went wrong when storing feedback form" +
               s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")

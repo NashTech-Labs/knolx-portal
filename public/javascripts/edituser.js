@@ -38,7 +38,7 @@ function slide(keyword, pageNumber) {
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +
-                            "<td>" + users[user].email + "</td>"
+                            "<td>" + users[user].email + "</td>";
                         if (users[user].active) {
                             usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td></tr>"
                         }
@@ -49,7 +49,7 @@ function slide(keyword, pageNumber) {
                     $('#user-found').html(
                         usersFound
                     );
-                    paginate(page, pages)
+                    paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');
                     for (var i = 0; i < paginationLinks.length; i++) {
@@ -77,5 +77,3 @@ function slide(keyword, pageNumber) {
             }
         });
 }
-
-

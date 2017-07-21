@@ -59,7 +59,7 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
       deleted.isDefined must beEqualTo(true)
     }
 
-    "update feedback form" in {
+    "getByEmail feedback form" in {
       val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
       val feedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
 

@@ -27,6 +27,13 @@ class UsersRepositorySpec extends PlaySpecification {
 
     }
 
+    "get active users by email" in {
+      val user = await(usersRepository.getActiveByEmail("test@example.com"))
+
+      user must beEqualTo(Some(document))
+
+    }
+
     "get paginated user when searched with empty string" in {
       val paginatedUsers = await(usersRepository.paginate(1))
 
@@ -39,7 +46,7 @@ class UsersRepositorySpec extends PlaySpecification {
       paginatedUsers must beEqualTo(List(document))
     }
 
-    "update user with password change " in {
+    "getByEmail user with password change " in {
       val userTOUpdate = UpdatedUserInfo("test@example.com", active = true, Some("12345678"))
 
       val result = await(usersRepository.update(userTOUpdate))
@@ -48,7 +55,7 @@ class UsersRepositorySpec extends PlaySpecification {
 
     }
 
-    "update user with no password change " in {
+    "getByEmail user with no password change " in {
       val userTOUpdate = UpdatedUserInfo("test@example.com", active = false, None)
 
       val result = await(usersRepository.update(userTOUpdate))

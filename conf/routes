@@ -11,7 +11,7 @@ GET         /register                           controllers.UsersController.regi
 POST        /register                           controllers.UsersController.createUser
 GET         /users/manage/:pageNumber           controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
 POST        /users/search                       controllers.UsersController.searchUser
-GET         /user/update                        controllers.UsersController.update(email: String)
+GET         /user/update                        controllers.UsersController.getByEmail(email: String)
 POST        /user/updateInformation             controllers.UsersController.updateUser
 GET         /user/delete                        controllers.UsersController.deleteUser(email: String)
 
@@ -29,14 +29,14 @@ POST        /session/manage/search              controllers.SessionsController.s
 POST        /session/search                     controllers.SessionsController.searchSessions
 
 # Feedback
-GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int, keyword: Option[String])
+GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
 GET         /feedbackform/create                controllers.FeedbackFormsController.feedbackForm
 POST        /feedbackform/create                controllers.FeedbackFormsController.createFeedbackForm
 GET         /feedbackform/update                controllers.FeedbackFormsController.update(id: String)
 POST        /feedbackform/update                controllers.FeedbackFormsController.updateFeedbackForm
 GET         /feedbackform/delete                controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
 GET         /feedbackform/preview               controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
-GET         /feedbackform/for/today             controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
+GET         /feedbackform/response              controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
 GET         /jsRoutes                           controllers.JavascriptRouter.jsRoutes
 
 # Map static resources from the /public folder to the /assets URL path

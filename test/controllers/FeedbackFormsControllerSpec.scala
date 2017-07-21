@@ -1,9 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.ZoneId
 
-import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
@@ -202,7 +200,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       feedbackFormsRepository.paginate(1) returns Future.successful(feedbackForms)
       feedbackFormsRepository.activeCount returns Future.successful(1)
 
-      val response = controller.manageFeedbackForm(1, None)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+      val response = controller.manageFeedbackForm(1)(FakeRequest().withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
       contentAsString(response) must contain("""feedback-div-outer""")
@@ -236,7 +234,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo SEE_OTHER
     }
 
-    "render feedback form update page" in new WithTestApplication {
+    "render feedback form getByEmail page" in new WithTestApplication {
       sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(Some(feedbackForms))
@@ -249,7 +247,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo OK
     }
 
-    "not update Feedback Form as not found" in new WithTestApplication {
+    "not getByEmail Feedback Form as not found" in new WithTestApplication {
       sessionsRepository.activeSessions returns sessionObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
@@ -262,7 +260,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       status(response) must be equalTo SEE_OTHER
     }
 
-    "update feedback form" in new WithTestApplication {
+    "getByEmail feedback form" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -270,7 +268,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       sessionsRepository.activeSessions returns sessionObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -282,11 +280,11 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Feedback form successfully updated!"
     }
 
-    "not update feedback form due to malformed data" in new WithTestApplication {
+    "not getByEmail feedback form due to malformed data" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """[{"question":"question?","options":["option","option"]}]""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -298,12 +296,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Malformed data!"
     }
 
-    "not update feedback form due to malformed data with options missing" in new WithTestApplication {
+    "not getByEmail feedback form due to malformed data with options missing" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions returns sessionObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"test","questions":[{"question":"question?","options":[]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -315,12 +313,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Question must require at least 1 option!"
     }
 
-    "not update feedback form due to malformed data when name is empty" in new WithTestApplication {
+    "not getByEmail feedback form due to malformed data when name is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions returns sessionObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -332,12 +330,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Form name must not be empty!"
     }
 
-    "not update feedback form due to malformed data when question is empty" in new WithTestApplication {
+    "not getByEmail feedback form due to malformed data when question is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions returns sessionObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -349,12 +347,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Question must not be empty!"
     }
 
-    "not update feedback form due to malformed data when option value is empty" in new WithTestApplication {
+    "not getByEmail feedback form due to malformed data when option value is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions returns sessionObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -366,7 +364,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       contentAsString(response) must be equalTo "Options must not be empty!"
     }
 
-    "not update feedback form and yield internal server error" in new WithTestApplication {
+    "not getByEmail feedback form and yield internal server error" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -374,7 +372,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       sessionsRepository.activeSessions returns sessionObject
 
       val request =
-        FakeRequest(POST, "/feedbackform/update")
+        FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
             """{"id":"","name":"title","questions":[{"question":"question?","options":["option","option"]}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")

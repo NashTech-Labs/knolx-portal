@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormat._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
@@ -45,6 +45,8 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   val pageSize = 10
 
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
+
   def insert(feedbackData: FeedbackForm)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -62,8 +64,6 @@ class FeedbackFormsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     collection.flatMap(_.update(selector, modifier))
   }
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackforms"))
 
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[FeedbackForm]] =
     collection

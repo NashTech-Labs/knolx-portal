@@ -51,6 +51,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   val pageSize = 10
 
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
+
   def delete(id: String)(implicit ex: ExecutionContext): Future[Option[JsObject]] =
     collection
       .flatMap(jsonCollection =>
@@ -173,8 +175,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .map(_.flatten)
       }
   }
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessions"))
 
   def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis

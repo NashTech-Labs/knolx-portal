@@ -44,13 +44,13 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
 
   import play.modules.reactivemongo.json._
 
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackformsresponse"))
+
   def insert(feedbackResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .insert(feedbackResponse))
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackformsresponse"))
 
   def update(id: String, feedbackFormsResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))

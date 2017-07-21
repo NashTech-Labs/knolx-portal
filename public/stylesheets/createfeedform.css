@@ -189,6 +189,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
     color: #EC7063;
     font-weight: bold;
     margin-left: 10%;
+
 }
 
 i.fa.fa-trash-o.delQuestion {
@@ -211,6 +212,7 @@ a.fa.fa-trash.delete-form:hover {
 }
 
 .text-alignment {
+
 }
 
 .add-option-parent {
@@ -221,3 +223,56 @@ a.fa.fa-trash.delete-form:hover {
 .add-question-parent {
     width: 100%;
 }
+
+.add-type-tooltip{
+    width: 100px;
+    height: 100px;
+
+}
+.adjacent{
+    width:200px;
+    height: 65px;
+    background-color:#eee;
+    margin: 0 auto;
+    margin-bottom: 100px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.notch{
+    font-size: 30px;
+    top: -30px;
+    position:absolute;
+    width: 100%;
+    text-align: center;
+    color:#eee;
+}
+.add-type-option-common{
+    width:99px;
+    height:80px;
+    float:left;
+    color: rgb(125, 158, 192);
+    font-size: 30px;
+    text-align: center;
+    cursor: pointer;
+}
+.add-type-option-mcq{
+    padding-top: 5px;
+}
+.add-type-option-comment{
+    padding-top: 2px;
+    font-size: 32px;
+}
+.type-partition{
+    height:25px;
+    float:left;
+    border-left: 1px solid #a8a8a8;
+    margin: 20px 0px;
+}
+.add-type-option-common_text{
+    font-size: 15px;
+    color:#888;
+    margin-top:-9px;
+}
+
+

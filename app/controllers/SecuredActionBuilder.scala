@@ -66,7 +66,7 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
 
     usersRepository
       .getByEmail(emailFromSession)
-      .flatMap(_.headOption.fold {
+      .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
         Future.successful(unauthorized("Unauthorized access!"))
       } { userInfo =>

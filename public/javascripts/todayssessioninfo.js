@@ -14,6 +14,9 @@ $(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         opener(json);
     });
+    $('#submitFeedbackForm').click(function () {
+         submittedFeedbackForm();
+    });
 });
 
 
@@ -57,7 +60,7 @@ function loadFeedbackForm(form) {
                 "<div class='col-md-1'></div>" +
                 "<div class='col-md-10'>" +
                 "<label class='radio-button'>" +
-                "<input type='radio'  name='radio-" + questionNumber + "' id='' class='custom-checkbox' value='true'/>" +
+                "<input type='radio'  name='option-" + questionNumber + "' id='' class='custom-checkbox' value='"+options[optionNumber]+"'/>" +
                 "<span class='lab_text'></span>" +
                 "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
                 "</p>" +
@@ -67,9 +70,9 @@ function loadFeedbackForm(form) {
         }
 
         $('#feedback-response-form').append(
-            "<div class='question-card form-question-card' id='question'>" +
+            "<div class='question-card form-question-card' id='question-outer-"+questionNumber+"'>" +
             "<label class='card-questions-label'>" +
-            "<p id='questionValue' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
+            "<p id='question-"+questionNumber+"' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
             "</label>" + optionsLoaded + "</div>"
         );
 
@@ -82,9 +85,9 @@ function loadFeedbackForm(form) {
 
 
 class FeedbackFormResponse {
-    constructor(sessionId, questions) {
+    constructor(sessionId, questionsAndResponses) {
         this.sessionId = sessionId;
-        this.questions = questions;
+        this.questionsAndResponses = questionsAndResponses;
     }
 }
 
@@ -94,4 +97,51 @@ class QuestionAndResponseInformation {
         this.options = options;
         this.response = response;
     }
+}
+
+function submittedFeedbackForm(){
+
+    var feedbackForm =  JSON.parse(document.getElementById('feedbackform').value);
+    var questions = feedbackForm['questions'];
+    var questionCount = Object.keys(questions);
+    var questionOptionInformation =[];
+    var sessionId = document.getElementById("sessionId").value;
+
+    for(var questionNumber =0 ;questionNumber < questionCount.length ; questionNumber++ ){
+        var question =  questions[questionNumber]['question'];
+        var options  =  questions[questionNumber]['options'];
+        var responseName = "option-"+questionNumber;
+        var response =  getResponse(responseName);
+        questionOptionInformation.push(new QuestionAndResponseInformation(question,options,response))
+    }
+    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId,questionOptionInformation);
+   alert(JSON.stringify(feedbackFormWithResponse));
+    jsRoutes.controllers.FeedbackFormsResponseController.storeFeedbackFormResponse().ajax(
+        {
+            type: "POST",
+            processData: false,
+            contentType: 'application/json',
+            data: JSON.stringify(feedbackFormWithResponse),
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
+            success: function (data) {
+                alert("success")
+            },
+            error: function (er) {
+               alert(er.responseText);
+alert("failure")
+            }
+        })
+}
+
+function getResponse(name) {
+    var group = document.getElementsByName(name);
+    for (var i=0;i<group.length;i++) {
+        if (group[i].checked) {
+            return group[i].value;
+        }
+    }
+    return '';
 }

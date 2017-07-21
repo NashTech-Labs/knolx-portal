@@ -73,7 +73,7 @@ function createForm() {
             error: function (er) {
                 $('#response').html(
                     "<div class='alert alert-danger alert-dismissable fade in'>" +
-                    "   <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText +
+                    "<a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>" + er.responseText +
                     "</div>"
                 )
             }

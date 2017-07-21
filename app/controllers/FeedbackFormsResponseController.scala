@@ -85,9 +85,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-  implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
   implicit val QuestionAndResponseInformationFormat: OFormat[QuestionAndResponseInformation] = Json.format[QuestionAndResponseInformation]
-
+  implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   val usersRepo: UsersRepository = usersRepository
 
@@ -114,9 +113,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     new Date(session.expirationDate.value).toString)
                 val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
-                val feedbackFormQuestionOptionCount = FeedbackFormsHelper.jsonCountBuilder(form)
 
-                Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString, feedbackFormQuestionOptionCount))
+                Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
               case None =>
                 Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                 None

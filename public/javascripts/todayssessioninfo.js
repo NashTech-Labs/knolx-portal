@@ -83,7 +83,6 @@ function loadFeedbackForm(form) {
     $('#session-form-info').modal('show');
 }
 
-
 class FeedbackFormResponse {
     constructor(sessionId, questions) {
         this.sessionId = sessionId;

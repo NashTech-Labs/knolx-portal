@@ -81,7 +81,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
     "display manage sessions page" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.paginate(1) returns sessionObject
+      sessionsRepository.paginate(1,None) returns sessionObject
       sessionsRepository.activeCount(None) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 

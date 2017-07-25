@@ -203,7 +203,7 @@ function addComment() {
     questions.set(questionCount, [0]);
 
     $('#questions').append(
-        "<div class ='question-card question-card-comment' id='question-"+ questionCount+"'>"+
+        "<div class ='question-card' id='question-"+ questionCount+"'>"+
         "<div>"+
         "<div class='col-md-12'>"+
         "<input class='card-questions-other' id='questionCommentValue-" + questionCount +"' placeholder='Question ?' type='text'>"+
@@ -220,16 +220,17 @@ function addComment() {
         "</div>"+
         "</div>"+
         "</div>"+
+
         '<div id="parent" class="add-option-parent"><div>' +
-
-
         '<label class="checkbox-outer">'+
         "<input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'/>"+
-        '<span class="label_text"></span>'+
-        '<p class="checkbox-text">Mendetory?</p>'+
+        '<span class="pin_text"></span>'+
+        '<p class="pin-checkbox-text">Mendetory</p>'+
         '</label>'+
         '</div>' +
         '</div>'+
+
+
         "</div>"
 );
 

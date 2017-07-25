@@ -191,6 +191,9 @@ a.fa.fa-times-circle.delete-option-button:hover {
     margin-left: 10%;
 
 }
+.comment-question{
+    margin-left: 0px;
+}
 
 i.fa.fa-trash-o.delQuestion {
     font-size: 30px;

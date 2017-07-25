@@ -251,7 +251,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def create: Action[AnyContent] = adminAction.async { implicit request =>
-
     feedbackFormsRepository
       .getAll
       .map { feedbackForms =>
@@ -315,7 +314,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .delete(id)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete Knolx session with id $id")
-
         Future.successful(InternalServerError("Something went wrong!"))
       } { _ =>
         Logger.info(s"Knolx session $id successfully deleted")

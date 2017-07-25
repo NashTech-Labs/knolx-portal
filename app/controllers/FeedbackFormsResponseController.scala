@@ -6,9 +6,10 @@ import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent}
+import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,19 +33,60 @@ case class FeedbackForms(name: String,
                          active: Boolean = true,
                          id: String)
 
+case class QuestionAndResponseInformation(question: String, options: List[String], response: String)
+
+case class FeedbackResponse(sessionId: String, questionsAndResponses: List[QuestionAndResponseInformation]) {
+
+  def validateSessionId: Option[String] =
+    if (sessionId.nonEmpty) {
+      None
+    } else {
+      Some("Session id must not be empty!")
+    }
+
+  def validateForm: Option[String] =
+    if (questionsAndResponses.flatMap(_.options).nonEmpty) {
+      None
+    } else {
+      Some("Question must require at least 1 option!")
+    }
+
+  def validateQuestion: Option[String] =
+    if (!questionsAndResponses.map(_.question).contains("")) {
+      None
+    } else {
+      Some("Question must not be empty!")
+    }
+
+  def validateOptions: Option[String] =
+    if (!questionsAndResponses.flatMap(_.options).contains("")) {
+      None
+    } else {
+      Some("Options must not be empty!")
+    }
+
+  def validateFormResponse: Option[String] =
+    if (questionsAndResponses.flatMap(_.response).nonEmpty) {
+      None
+    } else {
+      Some("Response must not be empty!")
+    }
+}
+
 class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
                                                 usersRepository: UsersRepository,
                                                 feedbackRepository: FeedbackFormsRepository,
+                                                feedbackResponseRepository: FeedbackFormsResponseRepository,
                                                 sessionsRepository: SessionsRepository,
                                                 dateTimeUtility: DateTimeUtility,
                                                 controllerComponents: KnolxControllerComponents
                                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
-  implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-
-  val usersRepo: UsersRepository = usersRepository
+  implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
+  implicit val questionAndResponseInformationFormat: OFormat[QuestionAndResponseInformation] = Json.format[QuestionAndResponseInformation]
+  implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository
@@ -69,8 +111,9 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     new Date(session.expirationDate.value).toString)
                 val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
+                val feedbackFormQuestionOptionCount = FeedbackFormsHelper.jsonCountBuilder(form)
 
-                Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
+                Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString, feedbackFormQuestionOptionCount))
               case None       =>
                 Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                 None
@@ -103,5 +146,43 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             session._id.stringify,
             new Date(session.expirationDate.value).toString))
       }
+
+  def storeFeedbackFormResponse: Action[JsValue] = userAction.async(parse.json) { implicit request =>
+    request.body.validate[FeedbackResponse].asOpt.fold {
+      Logger.error(s"Received bad request while storing feedback response, ${request.body}")
+      Future.successful(BadRequest("Malformed Data!"))
+    } { feedbackFormResponse =>
+      val validatedForm =
+        feedbackFormResponse.validateSessionId orElse
+          feedbackFormResponse.validateForm orElse feedbackFormResponse.validateQuestion orElse
+          feedbackFormResponse.validateOptions orElse feedbackFormResponse.validateFormResponse
+
+      validatedForm.fold {
+        val questionAndResponseInformation =
+          feedbackFormResponse.questionsAndResponses.map(responseInformation =>
+            QuestionResponse(responseInformation.question, responseInformation.options, responseInformation.response))
+
+        val dateTime = dateTimeUtility.nowMillis
+
+        val feedbackResponseData = FeedbackFormsResponse(request.user.id, request.user.email, feedbackFormResponse.sessionId,
+          questionAndResponseInformation, BSONDateTime(dateTime))
+
+        feedbackResponseRepository.insert(feedbackResponseData).map { result =>
+          if (result.ok) {
+            Logger.info(s"Feedback form response successfully stored")
+            Ok("Feedback form response successfully stored!")
+          } else {
+            Logger.error(s"Something Went wrong when storing feedback form" +
+              s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+            InternalServerError("Something Went Wrong!")
+          }
+        }
+      } { errorMessage =>
+        Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
+        Future.successful(BadRequest("Malformed Data!"))
+      }
+
+    }
+  }
 
 }

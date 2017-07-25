@@ -1,16 +1,38 @@
+$(function () {
+    $('#getKnolxDetailsExpired').click(function () {
+        var json = document.getElementById('getKnolxDetailsJson').value;
+        opener(json);
+        expire();
+    });
+
+    $('#fillFeedback').click(function () {
+        var json = document.getElementById('getKnolxDetailsJson').value;
+        var form = document.getElementById('feedbackForm').value;
+        formOpener(json);
+        loadFeedbackForm(form);
+    });
+
+    $('#getKnolxDetailsActive').click(function () {
+        var json = document.getElementById('getKnolxDetailsJson').value;
+        opener(json);
+    });
+});
+
 function opener(value) {
     var details = JSON.parse(value);
+
     $('#session-topic').html(details.topic);
     $('#author').html(details.author);
     $('#session').html(details.session);
     $('#scheduled').html(details.scheduled);
     $('#expire').html(details.expire);
     $('#sessiontype').html(details.sessiontype);
-    $('#session-detail-info').modal('show');
+    $('#sessionDetailInfo').modal('show');
 }
 
 function formOpener(value) {
     var details = JSON.parse(value);
+
     $('#form-session-topic').html(details.topic);
     $('#form-author').html(details.author);
     $('#form-session').html(details.session);
@@ -25,12 +47,9 @@ function expire() {
 }
 
 function loadFeedbackForm(form) {
-    var formJson = JSON.stringify(form);
-    var values = JSON.parse(formJson);
-
+    var values = JSON.parse(form);
     $('#feedback-response-form').html("");
     var optionsLoaded = "";
-
     var questions = values['questions'];
 
     for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {
@@ -62,4 +81,19 @@ function loadFeedbackForm(form) {
     }
 
     $('#session-form-info').modal('show');
+}
+
+class FeedbackFormResponse {
+    constructor(sessionId, questions) {
+        this.sessionId = sessionId;
+        this.questions = questions;
+    }
+}
+
+class QuestionAndResponseInformation {
+    constructor(question, options, response) {
+        this.question = question;
+        this.options = options;
+        this.response = response;
+    }
 }

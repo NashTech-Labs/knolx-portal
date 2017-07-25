@@ -1,6 +1,5 @@
 package controllers
 
-import java.time.{Instant, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -11,7 +10,6 @@ import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 
-import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -98,8 +96,6 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackPreviewFormat: OFormat[FeedbackFormPreview] = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat: OFormat[UpdateFeedbackFormInformation] = Json.format[UpdateFeedbackFormInformation]
 
-  val usersRepo: UsersRepository = usersRepository
-
   def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .paginate(pageNumber)
@@ -162,6 +158,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
+
   def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .activeSessions
@@ -174,25 +171,12 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
             .getByFeedbackFormId(id)
             .map {
               case Some(feedForm: FeedbackForm) =>
-                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, FeedbackFormsHelper.jsonCountBuilder(feedForm)))
               case None                         =>
                 Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
             }
         }
       }
-  }
-
-  def jsonCountBuilder(feedForm: FeedbackForm): String = {
-
-    @tailrec
-    def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
-      questions match {
-        case Nil          => json
-        case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
-      }
-    }
-
-    s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
   }
 
   def updateFeedbackForm: Action[JsValue] = adminAction.async(parse.json) { implicit request =>

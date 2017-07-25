@@ -1,3 +1,14 @@
+$(function () {
+    $('#disableDays').click(function () {
+        disableDays();
+    });
+
+    $('#radio-days').click(function () {
+        enableDays();
+    });
+});
+
+
 function enableDays() {
     $('#days').prop('disabled', false);
 }

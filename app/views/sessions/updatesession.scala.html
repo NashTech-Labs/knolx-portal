@@ -54,7 +54,7 @@
 
                         </select>
                     </div>
-                    <div class="col-md-2"><i class="fa fa-eye preview" onclick="generatePreview()" ></i></div>
+                    <div class="col-md-2"><i class="fa fa-eye preview" id="previewId"></i></div>
                     <div class="col-md-1"></div>
                 </div>
 
@@ -72,7 +72,7 @@
                         <div class="col-md-12 duration-title">Feedback form expiration duration</div>
                         <div class="col-md-6 feedback-expiration">
                             <label class="radio-button default-radio">
-                                <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0' checked="checked"/>
+                                <input type='radio' name='feedbackExpirationDays' id='disableDays' class='custom-checkbox' value='0' checked="checked"/>
                                 <span class="lab_text"></span>
                                 <p class="checkbox-text radio-style">Default</p>
                             </label>
@@ -80,14 +80,14 @@
                         <div class="col-md-6 days-outer" >
                             <label class="radio-button">
                             @if(sessionInfo.data.get("feedbackExpirationDays").nonEmpty && !sessionInfo.data.get("feedbackExpirationDays").contains("0")) {
-                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
+                                <input type='radio' name='feedbackExpirationDays' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
                                 <span class="lab_text"></span>
                                 <p class="checkbox-text radio-style-days">
                                     <input type="number" min="1" max="31" value="@sessionInfo.data.get("feedbackExpirationDays")" class="days" id="days">
                                     day/s
                                 </p>
                             } else {
-                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1'/>
+                                <input type='radio' name='feedbackExpirationDays'  id='radio-days' class='custom-checkbox' value='1'/>
                                 <span class="lab_text"></span>
                                 <p class="checkbox-text radio-style-days">
                                     <input type="number" disabled min="1" max="32" value="1" class="days" id="days">

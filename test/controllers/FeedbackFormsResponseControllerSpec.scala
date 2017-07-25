@@ -24,32 +24,34 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
-  private val emailObject = Future.successful(List(UserInfo("test@example.com",
+  private val noActiveSessionObject = Future.successful(Nil)
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"))),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
-
-    val mailerClient = mock[MailerClient]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsRepository = mock[SessionsRepository]
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
-
     lazy val controller =
       new FeedbackFormsResponseController(
         knolxControllerComponent.messagesApi,
         mailerClient,
         usersRepository,
         feedbackFormsRepository,
+        feedbackResponseRepository,
         sessionsRepository,
         dateTimeUtility,
         knolxControllerComponent)
+
+    val mailerClient = mock[MailerClient]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsRepository = mock[SessionsRepository]
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
   }
 
   "Feedback Response Controller" should {
@@ -93,6 +95,18 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         FakeRequest()
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "render feedback form for today with immidiate expored sessions if no active sessions found" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.activeSessions returns noActiveSessionObject
+      sessionsRepository.immediatePreviousExpiredSessions returns sessionObject
+
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(response) must be equalTo OK
     }

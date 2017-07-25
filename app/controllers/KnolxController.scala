@@ -12,9 +12,9 @@ trait KnolxBaseController extends KnolxBaseControllerHelpers {
 
   def action: ActionBuilder[Request, AnyContent] = controllerComponents.actionBuilder
 
-  def userAction: ActionBuilder[Request, AnyContent] = controllerComponents.userActionBuilder
+  def userAction: ActionBuilder[SecuredRequest, AnyContent] = controllerComponents.userActionBuilder
 
-  def adminAction: ActionBuilder[Request, AnyContent] = controllerComponents.adminActionBuilder
+  def adminAction: ActionBuilder[SecuredRequest, AnyContent] = controllerComponents.adminActionBuilder
 
 }
 
@@ -26,9 +26,9 @@ trait KnolxBaseControllerHelpers extends BaseControllerHelpers {
 
 trait KnolxControllerComponents extends ControllerComponents {
 
-  def userActionBuilder: ActionBuilder[Request, AnyContent]
+  def userActionBuilder: ActionBuilder[SecuredRequest, AnyContent]
 
-  def adminActionBuilder: ActionBuilder[Request, AnyContent]
+  def adminActionBuilder: ActionBuilder[SecuredRequest, AnyContent]
 
 }
 

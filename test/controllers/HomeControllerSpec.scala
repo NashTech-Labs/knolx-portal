@@ -12,12 +12,11 @@ class HomeControllerSpec extends PlaySpecification with Results {
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
+    lazy val controller = new HomeController(knolxControllerComponent)
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
     }
-
-    lazy val controller = new HomeController(knolxControllerComponent)
   }
 
   "HomeController" should {

@@ -1,24 +1,28 @@
-@(active: List[(FeedbackSessions, String)], expired: List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(active: List[(FeedbackSessions, String, String)], expired: List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Feedbacks") {
     <div class="row">
         <div class="col-md-2" ></div>
         <div class="col-md-8 feedback-form-display-container">
             <div class="col-md-12 login-first test feedback-top-banner"></div>
+            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(active.nonEmpty) {
-                @for((sessions, feedbackForm) <- active) {
+                @for((sessions, feedbackForm, feedbackFormQuestionOptionCount) <- active) {
                     <div class="col-md-4">
                         <div class="col-md-12">
                             <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
                                 @defining(if(sessions.meetup) "Meetup" else "Knolx") { sessionType =>
+                                    <input type="hidden" id='existingCounts' value="@feedbackFormQuestionOptionCount"/>
                                     <div class="feedback-card-head stick-out"><i class="fa fa-list-alt feedback-display-logo" aria-hidden="true"></i></div>
                                     <div class="col-md-12 feedback-card-topic"><p>@sessions.topic</p></div>
                                     <div class="col-md-12 feedback-card-by">by</div>
                                     <div class="col-md-12 feedback-card-author"><p>@sessions.email</p></div>
-                                    <button type="button" class="btn  feedback-card-button" onclick='formOpener("{\"topic\":\"@sessions.topic\",\"author\":\"@sessions.email\",\"session\":\"@sessions.session\",\"scheduled\":\"@sessions.date\",\"expire\":\"@sessions.expirationDate\",\"sessiontype\":\"@sessionType\"}"); loadFeedbackForm(@feedbackForm)'>
+                                    <button type="button" class="btn  feedback-card-button" id="fillFeedback">
                                         Fill Out</button>
-                                    <div class="col-md-12 feedback-card-author more"><p onclick='opener("{\"topic\":\"@sessions.topic\",\"author\":\"@sessions.email\",\"session\":\"@sessions.session\",\"scheduled\":\"@sessions.date\",\"expire\":\"@sessions.expirationDate\",\"sessiontype\":\"@sessionType\"}")'>
+                                    <input type="hidden" id='getKnolxDetailsJson' value='{"topic":"@sessions.topic","author":"@sessions.email","session":"@sessions.session","scheduled":"@sessions.date","expire":"@sessions.expirationDate","sessiontype":"@sessionType"}'/>
+                                    <input type="hidden" id='feedbackForm' value ='@feedbackForm'>
+                                    <div class="col-md-12 feedback-card-author more" ><p id="getKnolxDetailsActive">
                                         More...</p></div>
                                 </div>
                             </div>
@@ -40,7 +44,8 @@
                                         <div class="col-md-12 feedback-card-author expire-color"><p>@expiredSession.email</p></div>
                                     </div>
                                     <button type="button" class="btn  feedback-card-expire-button expired">Expired</button>
-                                    <div class="col-md-12 feedback-card-author more"><p onclick='opener("{\"topic\":\"@expiredSession.topic\",\"author\":\"@expiredSession.email\",\"session\":\"@expiredSession.session\",\"scheduled\":\"@expiredSession.date\",\"expire\":\"@expiredSession.expirationDate\",\"sessiontype\":\"@sessionType\"}");expire()'>
+                                    <input type="hidden" id='getKnolxDetailsJson' value='{"topic":"@expiredSession.topic","author":"@expiredSession.email","session":"@expiredSession.session","scheduled":"@expiredSession.date","expire":"@expiredSession.expirationDate","sessiontype":"@sessionType"}'/>
+                                    <div class="col-md-12 feedback-card-author more"><p id="getKnolxDetailsExpired">
                                         More...</p></div>
                                 </div>
                             </div>
@@ -54,7 +59,7 @@
         <div class="col-md-2" ></div>
     </div>
 
-    <div class="modal fade" id="session-detail-info" role="dialog">
+    <div class="modal fade" id="sessionDetailInfo" role="dialog">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
                 <div class="modal-header session-modal-title" id="feedback-info-modal-header">
@@ -126,14 +131,12 @@
                         <div class="col-md-8 feedback-response-form" >
                             <div id="feedback-response-form"></div>
                             <div id="parent" class="feedback-response-submit">
-                                <button type="button" class="btn btn-primary btn-lg submit-form-button">Submit</button>
+                                <button type="button" class="btn btn-primary btn-lg submit-form-button" id='submitFeedbackForm' >Submit</button>
                             </div>
                         </div>
 
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>

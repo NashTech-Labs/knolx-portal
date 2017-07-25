@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormat._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}

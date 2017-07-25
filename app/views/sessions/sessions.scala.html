@@ -1,15 +1,18 @@
 @(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_])
 
-    @main("Sessions") {
-        <div class="row">
-            <div class="col-md-1" >
-
+@main("Sessions") {
+    <div class="row">
+        <div class="col-md-1" ></div>
+        <div class="col-md-10 feedback-form-container manage-user-container-custom-margin">
+            <div class="col-md-3"></div>
+            <div class="col-md-6 search-bar" id="search-bar">
+                <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search Knolx by email"/>
             </div>
-            <div class="col-md-10 " >
-
-                <div class="container-fluid top-container">
-                </div>
-                <div class="table-responsive">
+            <div class="col-md-3"></div>
+            <div class="col-md-12 all-users">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="col-md-12" id="found-user-details"></div>
+                <div class="table-responsive manage-user-custom-table-margin">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -22,23 +25,25 @@
                                 <th>Rating</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="user-found">
                         @knolxSessions.map { knolxSession =>
                             <tr>
                                 <td>@knolxSession.date</td>
                                 <td>@knolxSession.session</td>
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
-                                <td>@(if(knolxSession.meetup) {
-                                    "Yes"
-                                } else {
-                                    "No"
-                                })</td>
-                                <td>@(if(knolxSession.cancelled) {
-                                    "Yes"
-                                } else {
-                                    "No"
-                                })</td>
+                                @(if(knolxSession.meetup) {
+                                        <td class='active-status'>Yes</td>
+                                }
+                                else {
+                                        <td class='suspended'>No</td>
+                                })
+                                @(if(knolxSession.cancelled) {
+                                        <td class='active-status'>Yes</td>
+                                }
+                                else {
+                                        <td class='suspended'>No</td>
+                                })
                                 <td>@(if(knolxSession.rating.isEmpty) {
                                     "N/A"
                                 } else {
@@ -49,15 +54,13 @@
                         </tbody>
                     </table>
                 </div>
-
-            </div>
-
-            <div class="col-md-1" >
-
             </div>
         </div>
+        <div class="col-md-1" ></div>
+    </div>
 
+    <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/searchsession.js")" type="text/javascript"></script>
+    @pagination(pageNumber, pages, routes.SessionsController.sessions)
 
-        @pagination(pageNumber, pages, routes.SessionsController.sessions)
-
-    }
+}

@@ -101,24 +101,35 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .insert(session))
 
-  def paginate(pageNumber: Int)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+  def paginate(pageNumber: Int, keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+
+    val condition = keyword match {
+      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
+      case None => Json.obj("active" -> true)
+    }
 
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj("active" -> true))
+          .find(condition)
           .options(queryOptions)
           .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[SessionInfo]]()))
   }
 
-  def activeCount(implicit ex: ExecutionContext): Future[Int] =
+  def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
+    val condition = keyword match {
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
+      case None => None
+    }
+
     collection
       .flatMap(jsonCollection =>
-        jsonCollection.count(Some(Json.obj("active" -> true))))
+        jsonCollection.count(condition))
+  }
 
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
@@ -146,6 +157,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         import jsonCollection.BatchCommands.AggregationFramework.{Ascending, Group, Limit, Match, PushField, Sort}
 
         jsonCollection
+
           .aggregate(
             firstOperator = Match(
               Json.obj(

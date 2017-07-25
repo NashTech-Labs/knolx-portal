@@ -248,7 +248,6 @@
 
 .feedback-card-author {
     font-size: 16px;
-    top: -50px;
     color: #5D8D8C;
     text-shadow: none;
     font-weight: bold;
@@ -259,6 +258,7 @@
 }
 
 .more {
+    top: -55px;
     color: #EC7063;
     cursor: pointer;
 }
@@ -302,11 +302,11 @@
 }
 
 .form-question-card {
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
+    background: url('../images/mesh.svg') no-repeat;
     background-size: cover;
     margin-top: 0px;
     margin-bottom: 15px;
+    background-color: #fff;
 }
 
 .submit-form-button {

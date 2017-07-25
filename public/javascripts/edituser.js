@@ -13,6 +13,7 @@ function slide(keyword, pageNumber) {
 
     jsRoutes.controllers.UsersController.searchUser().ajax(
         {
+
             type: 'POST',
             processData: false,
             contentType: false,
@@ -31,10 +32,10 @@ function slide(keyword, pageNumber) {
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
                         usersFound += "<tr><td align='center'>" +
-                            "<a href='/user/update?email=" + users[user].email + "' class='btn btn-default'>" +
+                            "<a href='" + jsRoutes.controllers.FeedbackFormsController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='/user/delete?email=" + users[user].email + "' class='btn btn-danger delete'>" +
+                            "<a href='" + jsRoutes.controllers.FeedbackFormsController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +

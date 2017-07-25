@@ -67,7 +67,7 @@ function createForm() {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                window.location = "/feedbackform/manage?pageNumber=1";
+                window.location = jsRoutes.controllers.FeedbackFormsController.manageFeedbackForm(1)['url'];
                 alert("Form Successfully Created !")
             },
             error: function (er) {

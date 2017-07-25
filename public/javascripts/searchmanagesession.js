@@ -32,10 +32,10 @@ function slide(keyword, pageNumber) {
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
                         usersFound += "<tr><td align='center'>" +
-                            "<a href='/session/update?id=" + sessions[session].id + "' class='btn btn-default'>" +
+                            "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='/session/delete?id=" + sessions[session].id + "&pageNumber=" + sessionInfo['page'] + "' class='btn btn-danger delete'>" +
+                            "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +

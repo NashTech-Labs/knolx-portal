@@ -54,33 +54,45 @@ function loadFeedbackForm(form) {
 
     for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {
         var options = questions[questionNumber]['options'];
+        var type = questions[questionNumber]['questionType'];
+       if(type=="MCQ") {
+           for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
+               optionsLoaded += "<div class='row'>" +
+                   "<div class='col-md-1'></div>" +
+                   "<div class='col-md-10'>" +
+                   "<label class='radio-button'>" +
+                   "<input type='radio'  name='option-" + questionNumber + "' id='' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
+                   "<span class='lab_text'></span>" +
+                   "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
+                   "</p>" +
+                   "</label>" +
+                   "</div>" +
+                   "</div>";
+           }
+       }
+       else{
+           optionsLoaded += "<div class='row'>" +
+               "<div class='col-md-1'></div>" +
+               "<div class='col-md-10'>" +
+               "​<textarea class='comments' rows='2' name='option-" + questionNumber + "' cols='70' placeholder='Edit Comment Here!'></textarea>"+
+               "</div>" +
+               "</div>";
+       }
 
-        for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-            optionsLoaded += "<div class='row'>" +
-                "<div class='col-md-1'></div>" +
-                "<div class='col-md-10'>" +
-                "<label class='radio-button'>" +
-                "<input type='radio'  name='option-" + questionNumber + "' id='' class='custom-checkbox' value='"+options[optionNumber]+"'/>" +
-                "<span class='lab_text'></span>" +
-                "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
-                "</p>" +
-                "</label>" +
-                "</div>" +
-                "</div>";
-        }
+           $('#feedback-response-form').append(
+               "<div class='question-card form-question-card' id='question-outer-" + questionNumber + "'>" +
+               "<label class='card-questions-label'>" +
+               "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
+               "</label>" + optionsLoaded + "</div>"
+           );
 
-        $('#feedback-response-form').append(
-            "<div class='question-card form-question-card' id='question-outer-"+questionNumber+"'>" +
-            "<label class='card-questions-label'>" +
-            "<p id='question-"+questionNumber+"' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
-            "</label>" + optionsLoaded + "</div>"
-        );
+           optionsLoaded = "";
 
-        optionsLoaded = "";
 
     }
 
     $('#session-form-info').modal('show');
+
 }
 
 
@@ -145,3 +157,4 @@ function getResponse(name) {
     }
     return '';
 }
+

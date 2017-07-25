@@ -195,6 +195,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
 i.fa.fa-trash-o.delQuestion {
     font-size: 30px;
     color: #F1948A;
+    cursor: pointer;
 }
 
 .delete-form {
@@ -222,6 +223,8 @@ a.fa.fa-trash.delete-form:hover {
 
 .add-question-parent {
     width: 100%;
+    position: relative;
+    margin-bottom: 105px;
 }
 
 .add-type-tooltip{
@@ -232,47 +235,85 @@ a.fa.fa-trash.delete-form:hover {
 .adjacent{
     width:200px;
     height: 65px;
-    background-color:#eee;
+    background-color:#5499C7;
     margin: 0 auto;
-    margin-bottom: 100px;
     border-radius: 10px;
-    position: relative;
+    position: absolute;
+    background-image: url(../images/mesh.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    border: 2px solid #fff;
+    display: none;
+    z-index: 999;
+    left: 0;
+    right: 0;
 }
 
 .notch{
     font-size: 30px;
-    top: -30px;
+    top: -32px;
     position:absolute;
     width: 100%;
     text-align: center;
-    color:#eee;
+    color:#fff;
+    text-shadow:0px 0px 10px -5px #fff;
 }
 .add-type-option-common{
-    width:99px;
+    width:97px;
     height:80px;
     float:left;
-    color: rgb(125, 158, 192);
-    font-size: 30px;
+    color: #fff;
+    font-size: 22px;
     text-align: center;
     cursor: pointer;
 }
 .add-type-option-mcq{
-    padding-top: 5px;
+    padding-top: 6px;
 }
 .add-type-option-comment{
-    padding-top: 2px;
-    font-size: 32px;
+    padding-top: 5px;
+    font-size: 24px;
 }
 .type-partition{
     height:25px;
     float:left;
-    border-left: 1px solid #a8a8a8;
+    border-left: 1px solid #2e6da4;
     margin: 20px 0px;
 }
 .add-type-option-common_text{
     font-size: 15px;
-    color:#888;
-    margin-top:-9px;
+    color:#fff;
+    margin-top:-4px;
 }
+textarea{
+    background-color: transparent;
+    width:100%;
+    resize: vertical;
+    text-align:center;
+    border:none;
+    border-top:None;
+    outline: none;
+    box-shadow: 0 4px 6px -5px #333;
+    font-weight: bold;
+    font-family: 'headerfont';
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: #7F8C8D;
+    min-height: 50px;
+    overflow-y: hidden;
+}
+.comment-section{
+    width:100%;
+    text-align:center;
+    border:none;
+    border-bottom: 1px dotted #dcdcdc;
+    outline: none;
+    font-size: 18px;
+    font-family: 'gothic';
+    letter-spacing: 2px;
+    color: #7F8C8D;
+    height: 80px;
+}
+.comment-section:disabled{background-color:#fff;}
 
 

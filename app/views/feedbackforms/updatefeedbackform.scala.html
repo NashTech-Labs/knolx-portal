@@ -81,55 +81,76 @@
                     @feedbackForm.questions match {
                         case readOnlyQuestion :: editableQuestions => {
                             @for(questionCount <- 1 to editableQuestions.size) {
-                                <div class="question-card" id="question-@questionCount">
-                                    <label class="card-questions-label">
-                                        <input id="questionValue-@questionCount" class="card-questions-other" value="@editableQuestions(questionCount - 1).question" placeholder="Question ?" type="text">
-                                        <i id="deleteQuestion-@questionCount" class="fa fa-trash-o delQuestion"></i>
-                                    </label>
+                                @if(editableQuestions(questionCount - 1).questionType == "MCQ") {
+                                    <div class="question-card" id="question-@questionCount">
+                                        <label class="card-questions-label">
+                                            <input id="questionValue-@questionCount" class="card-questions-other" value="@editableQuestions(questionCount - 1).question" placeholder="Question ?" type="text">
+                                            <i id="deleteQuestion-@questionCount" class="fa fa-trash-o delQuestion"></i>
+                                        </label>
 
-                                    <div id="options-@questionCount">
-                                    @for(option <- editableQuestions(questionCount - 1).options.indices) {
-                                        <div class="row" id="option-@questionCount-@option">
-                                        @if(option == 0) {
-                                            <div class="col-md-1" > </div>
-                                            <div class="col-md-10" >
-                                                <label class="radio-button">
-                                                    <input type='radio' disabled name='radopt' id='' class='custom-checkbox' value='true'/>
-                                                    <span class="lab_text"></span>
-                                                    <p class="checkbox-text">
-                                                        <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
-                                                    </p>
-                                                </label>
-                                            </div>
-                                            <div class="col-md-1" ></div>
-                                        } else {
+                                        <div id="options-@questionCount">
+                                        @for(option <- editableQuestions(questionCount - 1).options.indices) {
+                                            <div class="row" id="option-@questionCount-@option">
+                                            @if(option == 0) {
+                                                <div class="col-md-1" > </div>
+                                                <div class="col-md-10" >
+                                                    <label class="radio-button">
+                                                        <input type='radio' disabled name='radopt' id='' class='custom-checkbox' value='true'/>
+                                                        <span class="lab_text"></span>
+                                                        <p class="checkbox-text">
+                                                            <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-1" ></div>
+                                            } else {
 
-                                            <div class="col-md-1"></div>
-                                            <div class="col-md-10">
-                                                <label class="radio-button">
-                                                    <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>
-                                                    <span class="lab_text"></span>
-                                                    <p class="checkbox-text">
-                                                        <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
-                                                    </p>
-                                                    <a class="fa fa-times-circle delete-option-button" id="deleteOption-@questionCount-@option"></a>
-                                                </label>
+                                                <div class="col-md-1"></div>
+                                                <div class="col-md-10">
+                                                    <label class="radio-button">
+                                                        <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>
+                                                        <span class="lab_text"></span>
+                                                        <p class="checkbox-text">
+                                                            <input id="optionValue-@questionCount-@option" value="@editableQuestions(questionCount - 1).options(option)" class="card-options" placeholder="Option" type="text"/>
+                                                        </p>
+                                                        <a class="fa fa-times-circle delete-option-button" id="deleteOption-@questionCount-@option"></a>
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-1" ></div>
+                                            }
                                             </div>
-                                            <div class="col-md-1" ></div>
                                         }
+
                                         </div>
-                                    }
 
+                                        <br>
+                                        <div id="parent" class="add-option-parent"><div>
+                                            <i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-@questionCount-@{
+                                                editableQuestions(questionCount - 1).options.size - 1
+                                            }"></i>
+                                        </div>
+                                        </div>
                                     </div>
-
-                                    <br>
-                                    <div id="parent" class="add-option-parent"><div>
-                                        <i class="fa fa-plus-circle add-option" aria-hidden="true" id="addOption-@questionCount-@{
-                                            editableQuestions(questionCount - 1).options.size - 1
-                                        }"></i>
+                                } else {
+                                    <div class ='question-card question-card-comment' id="question-@questionCount">
+                                        <div>
+                                            <div class='col-md-12'>
+                                                <input class='card-questions-other' id='questionCommentValue-@questionCount'  placeholder='Question ?' value="@editableQuestions(questionCount - 1).question" type='text'>
+                                                <i id = "deleteQuestion-@questionCount" class='fa fa-trash-o delQuestion'></i>
+                                            </div>
+                                            <br>
+                                            <div id='options-@questionCount'>
+                                                <div class='row' id='option-@questionCount-0'>
+                                                    <div class='col-md-1' > </div>
+                                                    <div class='col-md-10' >
+                                                        <input type='text' id="optionValue-@questionCount-0" class='comment-section' value='Comments Goes Here!' disabled/>
+                                                    </div>
+                                                    <div class='col-md-1' ></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    </div>
-                                </div>
+                                }
                             }
                         }
                         case Nil => {""}
@@ -138,9 +159,23 @@
             </form>
 
             <div id="parent" class="add-question-parent">
-                <div id="addQuestionButton" class="add-question-button">
-                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                <div class="text-alignment add-question-button">
+                    <div ><i class="fa fa-plus-circle" aria-hidden="true"></i></div>
                 </div>
+                <div id="" class="text-alignment">
+                    <div id="" class="adjacent"><div class="notch">&#9650;</div>
+                        <div id="addQuestionButton" class='add-type-option-common add-type-option-mcq'>
+                            <i class="fa fa-list-ul"></i>
+                            <p class="add-type-option-common_text">MCQ</p>
+                        </div>
+                        <div class='type-partition'></div>
+                        <div id="addCommentButton" class='add-type-option-common add-type-option-comment'>
+                            <i class="fa fa-comment"></i>
+                            <p class="add-type-option-common_text add-type-option-comment_text">Comment</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <button id="feedbackFormUpdate" type="button" class="btn btn-primary btn-lg create-feedback-button">Update</button>
         </div>

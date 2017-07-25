@@ -66,7 +66,7 @@ case class FeedbackResponse(sessionId: String, questionsAndResponses: List[Quest
     }
 
   def validateFormResponse: Option[String] =
-    if (questionsAndResponses.flatMap(_.response).nonEmpty) {
+    if (!questionsAndResponses.flatMap(_.response).mkString.contains("")) {
       None
     } else {
       Some("Response must not be empty!")
@@ -111,7 +111,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     session.active,
                     session._id.stringify,
                     new Date(session.expirationDate.value).toString)
-                val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options))
+                val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options, questions.questionType))
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
 
                 Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))

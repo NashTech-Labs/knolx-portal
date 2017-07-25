@@ -1,5 +1,6 @@
 document.getElementById("feedbackFormUpdate").addEventListener("click", updateForm);
 document.getElementById("addQuestionButton").addEventListener("click", addQuestion);
+document.getElementById("addCommentButton").addEventListener("click", addComment);
 
 class FeedbackForm {
     constructor(id, name, questions) {
@@ -10,11 +11,13 @@ class FeedbackForm {
 }
 
 class Question {
-    constructor(question, options) {
+    constructor(question, options, questionType) {
         this.question = question;
         this.options = options;
+        this.questionType = questionType;
     }
 }
+
 
 var optionsCount = 0;
 var questionCount = parseInt(document.getElementById('questionCount').value);
@@ -48,16 +51,24 @@ function updateForm() {
     var formId = document.getElementById('formId').value;
 
     questions.forEach(function (options, question, obj) {
-            var questionValue = document.getElementById('questionValue-' + question).value;
+            var questionValueField = document.getElementById('questionValue-' + question);
             var optionValues = [];
+            if (questionValueField != null) {
+                var questionValue = questionValueField.value;
+                var typeValue = 'MCQ';
+                for (var i = 0; i <= options.length - 1; i++) {
+                    var optionValue = document.getElementById('optionValue-' + question + '-' + options[i]).value;
 
-            for (var i = 0; i <= options.length - 1; i++) {
-                var optionValue = document.getElementById('optionValue-' + question + '-' + options[i]).value;
-
+                    optionValues.push(optionValue)
+                }
+            } else {
+                questionValue = document.getElementById('questionCommentValue-' + question).value;
+                typeValue = 'COMMENT';
+                optionValue = document.getElementById('optionValue-' + question + '-' + options[0]).value;
                 optionValues.push(optionValue)
             }
 
-            questionsValues.push(new Question(questionValue, optionValues))
+            questionsValues.push(new Question(questionValue, optionValues, typeValue))
         }
     );
 
@@ -194,6 +205,38 @@ function addQuestion() {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
+function addComment() {
+    questionCount = questionCount + 1;
+    questions.set(questionCount, [0]);
+
+    $('#questions').append(
+        "<div class ='question-card question-card-comment' id='question-" + questionCount + "'>" +
+        "<div>" +
+        "<div class='col-md-12'>" +
+        "<input class='card-questions-other' id='questionCommentValue-" + questionCount + "' placeholder='Question ?' type='text'>" +
+        "<i id='deleteQuestion-" + questionCount + "' class='fa fa-trash-o delQuestion'></i>" +
+        "</div>" +
+        "<br>" +
+        "<div id='options-" + questionCount + "'>" +
+        "<div class='row' id='option-" + questionCount + "-0'>" +
+        "<div class='col-md-1' > </div>" +
+        "<div class='col-md-10' >" +
+        "<input type='text' id='optionValue-" + questionCount + "-" + 0 + "' class='comment-section' value='Comments Goes Here!' disabled/>" +
+        "</div>" +
+        "<div class='col-md-1' ></div>" +
+        "</div>" +
+        "</div>" +
+        "</div>" +
+        "</div>");
+
+    document.getElementById("deleteQuestion-" + questionCount).addEventListener("click", function () {
+        deleteQuestion(this)
+    });
+
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+
 $(document).ready(function () {
     questions.forEach(function (options, question, obj) {
             for (var option = 1; option <= options.length - 1; option++) {
@@ -208,9 +251,31 @@ $(document).ready(function () {
                 });
             }
 
-            document.getElementById("addOption-" + question + '-' + (options.length - 1)).addEventListener("click", function () {
-                addOption(this)
-            });
+            var addOptionButton = document.getElementById("addOption-" + question + '-' + (options.length - 1));
+            if (addOptionButton != null) {
+                addOptionButton.addEventListener("click", function () {
+                    addOption(this)
+                });
+            }
         }
     );
+});
+
+$(function () {
+    $(".add-question-button").click(function () {
+
+            $(".adjacent").fadeIn();
+            $(".add-question-button").css({"color": "#5499C7", "text-shadow": "None"});
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+    );
+});
+
+$(document).mouseup(function (e) {
+    var itself = $(".adjacent");
+    var addBtn = $(".add-question-button");
+    if (!addBtn.is(e.target) && !itself.is(e.target) && addBtn.has(e.target).length === 0) {
+        itself.fadeOut();
+        addBtn.css({"color": "#fff", "text-shadow": "0 0px 6px #999"})
+    }
 });

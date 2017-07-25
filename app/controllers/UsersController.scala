@@ -11,8 +11,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
 import utilities.{EncryptionUtility, PasswordUtility}
-// this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -185,8 +183,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         usersRepository
           .paginate(userInformation.page, userInformation.email)
           .flatMap { userInfo =>
-            val users = userInfo map (user =>
-              ManageUserInfo(user.email, user.active, user._id.stringify))
+            val users = userInfo map (user => ManageUserInfo(user.email, user.active, user._id.stringify))
 
             usersRepository
               .userCountWithKeyword(userInformation.email)
@@ -213,8 +210,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               Logger.info(s"User details successfully updated for ${userInfo.email}")
               Future.successful(Redirect(routes.UsersController.manageUser(1, None))
                 .flashing("message" -> s"Details successfully updated for ${userInfo.email}"))
-            }
-            else {
+            } else {
               Future.successful(InternalServerError("Something went wrong!"))
             }
           }
@@ -228,7 +224,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         case Some(userInformation) =>
           val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
-        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+        case None                  =>
+          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
       }
   }
 

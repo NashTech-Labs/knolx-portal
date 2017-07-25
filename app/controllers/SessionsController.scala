@@ -167,7 +167,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
-      .paginate(pageNumber)
+      .paginate(pageNumber, keyword)
       .flatMap { sessionsInfo =>
         val knolxSessions =
           sessionsInfo map (sessionInfo =>

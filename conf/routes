@@ -17,7 +17,9 @@ GET         /user/delete                        controllers.UsersController.dele
 
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
+POST        /session/search                     controllers.SessionsController.searchSessions
 GET         /session/manage                     controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+POST        /session/manage/search              controllers.SessionsController.searchManageSession
 GET         /session/create                     controllers.SessionsController.create
 POST        /session/create                     controllers.SessionsController.createSession
 GET         /session/delete                     controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
@@ -25,8 +27,6 @@ POST        /session/update                     controllers.SessionsController.u
 GET         /session/update                     controllers.SessionsController.update(id: String)
 GET         /session/:sessionId/cancel          controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule        controllers.SessionsController.scheduleSession(sessionId: String)
-POST        /session/manage/search              controllers.SessionsController.searchManageSession
-POST        /session/search                     controllers.SessionsController.searchSessions
 
 # Feedback
 GET         /feedbackform/manage                controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)

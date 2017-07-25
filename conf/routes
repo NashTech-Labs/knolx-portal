@@ -12,7 +12,7 @@ POST        /register                           controllers.UsersController.crea
 GET         /users/manage/:pageNumber           controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
 POST        /users/search                       controllers.UsersController.searchUser
 GET         /user/update                        controllers.UsersController.getByEmail(email: String)
-POST        /user/updateInformation             controllers.UsersController.updateUser
+POST        /user/update                        controllers.UsersController.updateUser
 GET         /user/delete                        controllers.UsersController.deleteUser(email: String)
 
 # Session

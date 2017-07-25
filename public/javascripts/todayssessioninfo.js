@@ -6,7 +6,7 @@ $(function () {
     });
     $('#fillFeedback').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
-        var form = document.getElementById('feedbackform').value;
+        var form = document.getElementById('feedbackForm').value;
         formOpener(json);
         loadFeedbackForm(form);
     });
@@ -25,7 +25,7 @@ function opener(value) {
     $('#scheduled').html(details.scheduled);
     $('#expire').html(details.expire);
     $('#sessiontype').html(details.sessiontype);
-    $('#session-detail-info').modal('show');
+    $('#sessionDetailInfo').modal('show');
 }
 
 function formOpener(value) {

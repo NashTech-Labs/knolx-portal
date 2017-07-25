@@ -4,21 +4,23 @@ $(function () {
         opener(json);
         expire();
     });
+
     $('#fillFeedback').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         var form = document.getElementById('feedbackform').value;
         formOpener(json);
         loadFeedbackForm(form);
     });
+
     $('#getKnolxDetailsActive').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         opener(json);
     });
 });
 
-
 function opener(value) {
     var details = JSON.parse(value);
+
     $('#session-topic').html(details.topic);
     $('#author').html(details.author);
     $('#session').html(details.session);
@@ -30,6 +32,7 @@ function opener(value) {
 
 function formOpener(value) {
     var details = JSON.parse(value);
+
     $('#form-session-topic').html(details.topic);
     $('#form-author').html(details.author);
     $('#form-session').html(details.session);

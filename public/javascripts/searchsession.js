@@ -38,53 +38,47 @@ function slide(keyword, pageNumber) {
 
                         if (sessions[session].meetup) {
                             usersFound += "<td class='active-status'>Yes</td>";
-                        }
-                        else {
+                        } else {
                             usersFound += "<td class='suspended'>No</td>";
                         }
+
                         if (sessions[session].cancelled) {
                             usersFound += "<td class='active-status'>Yes</td>";
-                        }
-                        else {
+                        } else {
                             usersFound += "<td class='suspended'>No</td>";
                         }
+
                         if (sessions[session].rating == "") {
                             usersFound += "<td>N/A</td></tr>";
-                        }
-                        else {
+                        } else {
                             usersFound += "<td>" + sessions[session].rating + "</td></tr>";
                         }
                     }
-                    $('#user-found').html(
-                        usersFound
-                    );
+
+                    $('#user-found').html(usersFound);
+
                     paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');
+
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
                             slide(keyword, this.id);
                         });
                     }
-
-                }
-                else {
+                } else {
                     $('#user-found').html(
                         "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>Oops! No Record Found</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
                     $('.pagination').html("");
                 }
             },
-
             error: function (er) {
                 $('#user-found').html(
                     "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>" + er.responseText + "</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                 );
                 $('.pagination').html("");
-
             }
         });
 }
-
-

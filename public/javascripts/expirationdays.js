@@ -2,6 +2,7 @@ $(function () {
     $('#disableDays').click(function () {
         disableDays();
     });
+
     $('#radio-days').click(function () {
         enableDays();
     });

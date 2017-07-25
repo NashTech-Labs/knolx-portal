@@ -115,13 +115,13 @@
     font-family: 'headerfont';
     color: #888888;
     margin: 0px;
-    margin-top: 15px;
+    margin-top: 10px;
     letter-spacing: 2px;
     margin-left: 10px;
 }
 
 .pin_text:before {
-    margin-top: 3px;
+    margin-top: 5px;
     content: "\f00d";
     font-family: "FontAwesome";
     display: inline-block;
@@ -138,7 +138,6 @@
     content: "\f00c";
     font-family: "FontAwesome";
     display: inline-block;
-    text-shadow: 1px 1px 3px #888888;
     animation: tick 150ms ease-in;
     font-size: 20px;
 }

@@ -140,6 +140,7 @@
     display: inline-block;
     animation: tick 150ms ease-in;
     font-size: 20px;
+    color:#16A085;
 }
 
 @keyframes tick {

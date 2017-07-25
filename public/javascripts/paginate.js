@@ -1,7 +1,6 @@
 function paginate(pageNumber, pages) {
-
-
     var pagination = "";
+
     if (pages >= pageNumber) {
         switch (true) {
             case (pages > 5 && pageNumber < 5) : {
@@ -44,24 +43,29 @@ function paginate(pageNumber, pages) {
             }
         }
     }
+
     $('.pagination').html(pagination);
 }
 
 function activeList(value) {
     return "<li class='active'><a  class='paginate' id='" + value + "'>" + value + "</a></li>"
 }
+
 function inActiveList(value) {
     return "<li class='inactive'><a  class='paginate' id='" + value + "'>" + value + "</a></li>"
 }
+
 function dots() {
     return "<li class='inactive'><a>...</a></li>";
 }
 
 function reverseIterator(from, till, pageNumber, compareWith) {
     var pagination = "";
+
     for (var iterator = from; iterator >= till; iterator--) {
         pagination += pageNumber == (compareWith - iterator) ? activeList((compareWith - iterator)) : inActiveList((compareWith - iterator));
     }
+
     return pagination;
 }
 
@@ -73,8 +77,10 @@ function fromIterator(pageNumber, compareWith) {
 
 function reducedFromIterator(from, till, pageNumber, offset) {
     var pagination = "";
+
     for (var iterator = from; iterator <= till; iterator++) {
         pagination += fromIterator(pageNumber, (offset + iterator));
     }
+
     return pagination;
 }

@@ -48,15 +48,12 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
-  def getActiveByEmail(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+  def getActiveByEmail(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj(
-          "email" -> email.toLowerCase,
-          "active" -> true))
+          .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
-  }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
@@ -67,18 +64,15 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def update(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("email" -> updatedRecord.email)
     val modifier = updatedRecord.password match {
-      case Some(password) => BSONDocument(
-        "$set" -> BSONDocument(
-          "active" -> updatedRecord.active,
-          "password" -> PasswordUtility.encrypt(password))
-      )
-      case None => BSONDocument(
-        "$set" -> BSONDocument(
-          "active" -> updatedRecord.active
-        ))
+      case Some(password) =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password)))
+      case None           =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active))
     }
-    collection.flatMap(jsonCollection =>
-      jsonCollection.update(selector, modifier))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
   }
 
   def delete(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] =
@@ -98,8 +92,9 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     val condition = keyword match {
       case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")))
-      case None => Json.obj()
+      case None      => Json.obj()
     }
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
@@ -112,7 +107,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def userCountWithKeyword(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
     val condition = keyword match {
       case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))))
-      case None => None
+      case None      => None
     }
 
     collection

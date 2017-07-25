@@ -15,7 +15,7 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
                         <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
-                        placeholder="Email" required class="getByEmail-field reg create-email"/>
+                        placeholder="Email" required class="update-field reg create-email"/>
                     </div>
                     <div class="col-md-1"></div>
                 </div>
@@ -24,15 +24,15 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
                         <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
-                        placeholder="Date" required class="getByEmail-field reg"/>
+                        placeholder="Date" required class="update-field reg"/>
                     </div>
                     <div class="col-md-1"></div>
                 </div>
 
-                <div class="col-md-12 login-second login-third getByEmail-second">
+                <div class="col-md-12 login-second login-third update-second">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
-                        <select name="session" id="session" class="getByEmail-field login-second">
+                        <select name="session" id="session" class="update-field login-second">
                         @for((value, key) <- SessionValues.Sessions) {
                             <option value="@value">@key</option>
                         }
@@ -42,11 +42,11 @@
                 </div>
                 <div class="col-md-1"></div>
 
-                <div class="col-md-12 login-second login-third getByEmail-second">
+                <div class="col-md-12 login-second login-third update-second">
                     <div class="col-md-1"></div>
 
                     <div class="col-md-8">
-                        <select name="feedbackFormId" id="feedbackFormId" class="getByEmail-field login-second">
+                        <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
                             <option selected value="">! Select Please</option>
                             @for((value, key) <- feedbackForms) {
                                 <option value="@value">@key</option>
@@ -57,11 +57,11 @@
                     <div class="col-md-1"></div>
                 </div>
 
-                <div class="col-md-12 login-third getByEmail-second">
+                <div class="col-md-12 login-third update-second">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
                         <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
-                        placeholder="Topic" required class="getByEmail-field"/>
+                        placeholder="Topic" required class="update-field"/>
 
                     </div>
                     <div class="col-md-1"></div>
@@ -116,10 +116,10 @@
                     <div class="col-md-1"></div>
                 </div>
 
-                <div class="col-md-12 getByEmail-second-field login-four">
+                <div class="col-md-12 update-second-field login-four">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
-                        <input type="submit" value="Create" class="input-field getByEmail-button"/>
+                        <input type="submit" value="Create" class="input-field update-button"/>
                     </div>
                     <div class="col-md-1"></div>
                 </div>

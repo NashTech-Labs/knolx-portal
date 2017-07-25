@@ -154,7 +154,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
-        case None => NotFound("404! feedback form not found")
+        case None               => NotFound("404! feedback form not found")
       }
   }
 
@@ -172,7 +172,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
             .map {
               case Some(feedForm: FeedbackForm) =>
                 Ok(views.html.feedbackforms.updatefeedbackform(feedForm, FeedbackFormsHelper.jsonCountBuilder(feedForm)))
-              case None =>
+              case None                         =>
                 Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
             }
         }

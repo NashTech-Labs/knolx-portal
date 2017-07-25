@@ -85,7 +85,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-  implicit val QuestionAndResponseInformationFormat: OFormat[QuestionAndResponseInformation] = Json.format[QuestionAndResponseInformation]
+  implicit val questionAndResponseInformationFormat: OFormat[QuestionAndResponseInformation] = Json.format[QuestionAndResponseInformation]
   implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
@@ -114,7 +114,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                 val feedbackFormQuestionOptionCount = FeedbackFormsHelper.jsonCountBuilder(form)
 
                 Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString, feedbackFormQuestionOptionCount))
-              case None =>
+              case None       =>
                 Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                 None
             }

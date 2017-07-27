@@ -3,7 +3,9 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormsResponseFormat._
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -61,5 +63,13 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
+
+  def getByUsersSession(userId:String,SessionId:String): Future[Option[FeedbackFormsResponse]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("userId" -> userId, "sessionId" -> SessionId))
+          .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
+
 
 }

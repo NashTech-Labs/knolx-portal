@@ -9,7 +9,8 @@ $(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         var form = document.getElementById('feedbackForm').value;
         formOpener(json);
-        loadFeedbackForm(form);
+        // loadFeedbackForm(form);
+        fetchResponse();
     });
 
     $('#getKnolxDetailsActive').click(function () {
@@ -20,6 +21,32 @@ $(function () {
         submittedFeedbackForm();
     });
 });
+
+function fetchResponse(){
+
+    var sessionId = document.getElementById("sessionId").value;
+
+    var formData = new FormData();
+    formData.append("sessionId", sessionId);
+
+    jsRoutes.controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse().ajax(
+        {
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
+            success: function (data) {
+                alert("success")
+            },
+            error: function (er) {
+                alert(er.responseText);
+            }
+        });
+}
 
 function opener(value) {
     var details = JSON.parse(value);

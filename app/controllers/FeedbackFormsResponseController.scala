@@ -5,6 +5,8 @@ import javax.inject.Inject
 
 import models._
 import play.api.Logger
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.MailerClient
@@ -57,6 +59,8 @@ case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses
     }
 }
 
+case class FetchedResponses(question: String, options: List[String], response: String, questionType: String, mandatory:Boolean)
+
 class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
                                                 usersRepository: UsersRepository,
@@ -68,8 +72,17 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
-  implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-  implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
+  implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
+  implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
+  implicit val fetchedResponsesFormat: OFormat[FetchedResponses] = Json.format[FetchedResponses]
+
+
+
+  val fetchFeedbackResponseForm = Form(
+    single(
+      "sessionId" -> nonEmptyText
+    )
+  )
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository
@@ -131,6 +144,27 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             session._id.stringify,
             new Date(session.expirationDate.value).toString))
       }
+
+  def fetchFeedbackFormResponse: Action[AnyContent] = userAction.async{ implicit request =>
+    fetchFeedbackResponseForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request while checking for responses ==> $formWithErrors")
+        Future.successful(BadRequest(" OOps! Invalid value encountered !"))
+      },
+      sessionId => {
+        feedbackResponseRepository.getByUsersSession(request.user.id,sessionId).map{ response =>
+          response.fold{
+
+          }{ (response: FeedbackFormsResponse) =>
+
+            Ok()
+          }
+
+        }
+
+        Future.successful(BadRequest("successo"))
+      })
+  }
 
   def storeFeedbackFormResponse: Action[JsValue] = userAction.async(parse.json) { implicit request =>
     request.body.validate[FeedbackResponse].asOpt.fold {

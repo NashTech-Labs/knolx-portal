@@ -68,8 +68,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
-  implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-  implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
+  implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
+  implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository

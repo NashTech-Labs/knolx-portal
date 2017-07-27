@@ -169,7 +169,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[List[QuestionResponse]]] = {
+  private def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[List[QuestionResponse]]] = {
     sessionsRepository.getActiveById(userResponse.sessionId).flatMap { session =>
       session.fold {
         val badResponse: Option[List[QuestionResponse]] = None
@@ -194,8 +194,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-
-  def sanitizeResponses(questions: Seq[Question], responses: List[String]): Seq[Option[QuestionResponse]] = {
+  private def sanitizeResponses(questions: Seq[Question], responses: List[String]): Seq[Option[QuestionResponse]] = {
     for ((question, response) <- questions zip responses) yield {
 
       (question.questionType, question.mandatory) match {

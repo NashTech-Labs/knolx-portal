@@ -7,9 +7,7 @@ $(function () {
 
     $('#fillFeedback').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
-        var form = document.getElementById('feedbackForm').value;
         formOpener(json);
-        // loadFeedbackForm(form);
         fetchResponse();
     });
 
@@ -25,7 +23,8 @@ $(function () {
 function fetchResponse(){
 
     var sessionId = document.getElementById("sessionId").value;
-
+    var form = document.getElementById('feedbackForm').value;
+    var feedbackForm = JSON.parse(form);
     var formData = new FormData();
     formData.append("sessionId", sessionId);
 
@@ -40,12 +39,34 @@ function fetchResponse(){
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                alert("success")
+                var responses = JSON.parse(data);
+                loadFeedbackForm(feedbackForm);
+                fillFeedbackResponses(responses);
             },
             error: function (er) {
-                alert(er.responseText);
+
+                loadFeedbackForm(feedbackForm);
             }
         });
+}
+
+function fillFeedbackResponses(responses){
+    for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {
+        var type = questions[questionNumber]['questionType'];
+        if (type == "MCQ") {
+            var options = questions[questionNumber]['options'];
+            for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
+                if(responses[questionNumber] === options[optionNumber]){
+                    document.getElementById("option-" + optionNumber + "-"+questionNumber).checked = true;
+                }
+
+            }
+        }
+        else {
+            document.getElementById("option-" + questionNumber).value = responses[questionNumber];
+        }
+    }
+
 }
 
 function opener(value) {
@@ -80,8 +101,8 @@ var mandatoryelements = [];
 var questions = [];
 var feedbackFormId = "";
 
-function loadFeedbackForm(form) {
-    var values = JSON.parse(form);
+function loadFeedbackForm(values) {
+
     $('#feedback-response-form').html("");
     var optionsLoaded = "";
     questions = values['questions'];
@@ -99,7 +120,7 @@ function loadFeedbackForm(form) {
                     "<div class='col-md-1'></div>" +
                     "<div class='col-md-10'>" +
                     "<label class='radio-button'>" +
-                    "<input type='radio'  name='option-" + questionNumber + "' id='' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
+                    "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-"+questionNumber+"' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
                     "<span class='lab_text'></span>" +
                     "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
                     "</p>" +
@@ -152,7 +173,6 @@ class FeedbackFormResponse {
 }
 
 function submittedFeedbackForm() {
-
     var feedbackForm = JSON.parse(document.getElementById('feedbackForm').value);
     var questions = feedbackForm['questions'];
     var questionCount = Object.keys(questions);

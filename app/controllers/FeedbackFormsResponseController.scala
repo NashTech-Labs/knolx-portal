@@ -59,7 +59,7 @@ case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses
     }
 }
 
-case class FetchedResponses(question: String, options: List[String], response: String, questionType: String, mandatory:Boolean)
+case class FetchedResponses(responses: List[String])
 
 class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
@@ -149,20 +149,17 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     fetchFeedbackResponseForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request while checking for responses ==> $formWithErrors")
-        Future.successful(BadRequest(" OOps! Invalid value encountered !"))
+        Future.successful(BadRequest("OOps! Invalid value encountered !"))
       },
       sessionId => {
         feedbackResponseRepository.getByUsersSession(request.user.id,sessionId).map{ response =>
           response.fold{
-
+            NotFound("fresh feedback")
           }{ (response: FeedbackFormsResponse) =>
-
-            Ok()
+            val allResponses= response.feedbackResponse.map(responseInfo => responseInfo.response)
+            Ok(Json.toJson(allResponses).toString())
           }
-
         }
-
-        Future.successful(BadRequest("successo"))
       })
   }
 

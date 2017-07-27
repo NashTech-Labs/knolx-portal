@@ -90,7 +90,7 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
     if (questions.map(_.mandatory) == true || questions.map(_.mandatory) == false) {
       None
     } else {
-      Some("can understand, its mendatory or not?")
+      Some("Server couldn't understand this request")
     }
 
 }

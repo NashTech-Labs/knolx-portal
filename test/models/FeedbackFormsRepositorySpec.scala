@@ -14,7 +14,7 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
   "Feedback forms repository" should {
 
     "create a new feedback form" in {
-      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"),"MCQ", mandatory = true))
       val feedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
 
       val created = await(feedbackFormsRepository.insert(feedbackForm).map(_.ok))
@@ -26,14 +26,14 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
       val forms = await(feedbackFormsRepository.getAll)
 
       forms.map(_.name) must contain("Feedback Form Template 1")
-      forms.flatMap(_.questions) must contain(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      forms.flatMap(_.questions) must contain(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true))
     }
 
     "get feedback forms in paginated format" in {
       val paginatedForms = await(feedbackFormsRepository.paginate(1))
 
       paginatedForms.map(_.name) must contain("Feedback Form Template 1")
-      paginatedForms.flatMap(_.questions) must contain(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      paginatedForms.flatMap(_.questions) must contain(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true))
     }
 
     "get count of all active forms" in {
@@ -45,7 +45,7 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
     "get feedback form by id" in {
       val feedbackForm = await(feedbackFormsRepository.getByFeedbackFormId(feedbackFormId.stringify))
 
-      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true))
       val expectedFeedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
 
       expectedFeedbackForm must beEqualTo(FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId))
@@ -60,7 +60,7 @@ class FeedbackFormsRepositorySpec extends PlaySpecification {
     }
 
     "getByEmail feedback form" in {
-      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5")))
+      val questions = List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true))
       val feedbackForm = FeedbackForm("Feedback Form Template 1", questions, active = true, feedbackFormId)
 
       val updated = await(feedbackFormsRepository.update(feedbackFormId.stringify, feedbackForm).map(_.ok))

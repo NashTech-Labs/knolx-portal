@@ -28,54 +28,53 @@ function slide(keyword, pageNumber) {
                 var page = userInfo["page"];
                 var pages = userInfo["pages"];
                 var usersFound = "";
+
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
                         usersFound += "<tr><td align='center'>" +
-                            "<a href='/user/update?email=" + users[user].email + "' class='btn btn-default'>" +
+                            "<a href='" + jsRoutes.controllers.FeedbackFormsController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='/user/delete?email=" + users[user].email + "' class='btn btn-danger delete'>" +
+                            "<a href='" + jsRoutes.controllers.FeedbackFormsController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +
-                            "<td>" + users[user].email + "</td>"
+                            "<td>" + users[user].email + "</td>";
+
                         if (users[user].active) {
                             usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td></tr>"
-                        }
-                        else {
+                        } else {
                             usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td></tr>"
                         }
                     }
-                    $('#user-found').html(
-                        usersFound
-                    );
-                    paginate(page, pages)
+
+                    $('#user-found').html(usersFound);
+
+                    paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');
+
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
                             slide(keyword, this.id);
                         });
                     }
-
-                }
-                else {
+                } else {
                     $('#user-found').html(
                         "<tr><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td></tr>"
                     );
+
                     $('.pagination').html("");
                 }
             },
-
             error: function (er) {
                 $('#user-found').html(
                     "<tr><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td></tr>"
                 );
+
                 $('.pagination').html("");
 
             }
         });
 }
-
-

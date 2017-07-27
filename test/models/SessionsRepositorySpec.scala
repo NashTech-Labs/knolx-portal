@@ -65,7 +65,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       sessions must beEqualTo(List(sessionInfo))
     }
 
-    "update session" in new TestScope {
+    "getByEmail session" in new TestScope {
       val updatedSession = UpdateSessionInfo(UpdateSessionInformation(sessionId.stringify, currentDate,
         "updatedSession", "feedbackFormId", "updatedTopic", 1), BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
 

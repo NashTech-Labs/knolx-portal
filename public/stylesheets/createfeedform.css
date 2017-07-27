@@ -215,10 +215,6 @@ a.fa.fa-trash.delete-form:hover {
     color: #F1948A;
 }
 
-.text-alignment {
-
-}
-
 .add-option-parent {
     width: 100%;
     text-align: center;
@@ -317,6 +313,6 @@ textarea{
     color: #7F8C8D;
     height: 80px;
 }
-.comment-section:disabled{background-color:#fff;}
-
-
+.comment-section:disabled{
+    background-color:#fff;
+}

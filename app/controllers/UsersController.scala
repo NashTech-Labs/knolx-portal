@@ -2,21 +2,15 @@ package controllers
 
 import javax.inject._
 
-import models.{UpdatedUserInfo, UserInfo, UsersRepository}
-import play.api.Logger
+import models.UpdatedUserInfo
 import models.UsersRepository
 import play.api.{Configuration, Logger}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent, Controller, Security}
-import play.filters.csrf.CSRF
+import play.api.mvc.{Action, AnyContent}
 import utilities.{EncryptionUtility, PasswordUtility}
-
-import scala.concurrent.Future
-// this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -31,7 +25,10 @@ case class ManageUserInfo(email: String, active: Boolean, id: String)
 
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
 
-case class UserSearchResult(users: List[ManageUserInfo], pages: Int, page: Int, keyword: String)
+case class UserSearchResult(users: List[ManageUserInfo],
+                            pages: Int,
+                            page: Int,
+                            keyword: String)
 
 @Singleton
 class UsersController @Inject()(messagesApi: MessagesApi,
@@ -40,9 +37,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                                 controllerComponents: KnolxControllerComponents
                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  val usersRepo: UsersRepository = usersRepository
-
-  implicit val ManageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
+  implicit val manageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
   implicit val userSearchResultInfoFormat: OFormat[UserSearchResult] = Json.format[UserSearchResult]
 
   val userForm = Form(
@@ -127,7 +122,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       loginInfo => {
         usersRepository
-          .getByEmail(loginInfo.email.toLowerCase)
+          .getActiveByEmail(loginInfo.email.toLowerCase)
           .map(_.fold {
             Logger.info(s"User ${loginInfo.email.toLowerCase} not found")
             Redirect(routes.HomeController.index()).flashing("message" -> "User not found!")
@@ -188,8 +183,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         usersRepository
           .paginate(userInformation.page, userInformation.email)
           .flatMap { userInfo =>
-            val users = userInfo map (user =>
-              ManageUserInfo(user.email, user.active, user._id.stringify))
+            val users = userInfo map (user => ManageUserInfo(user.email, user.active, user._id.stringify))
 
             usersRepository
               .userCountWithKeyword(userInformation.email)
@@ -216,22 +210,22 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               Logger.info(s"User details successfully updated for ${userInfo.email}")
               Future.successful(Redirect(routes.UsersController.manageUser(1, None))
                 .flashing("message" -> s"Details successfully updated for ${userInfo.email}"))
-            }
-            else {
+            } else {
               Future.successful(InternalServerError("Something went wrong!"))
             }
           }
       })
   }
 
-  def update(email: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def getByEmail(email: String): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
       .getByEmail(email)
       .flatMap {
         case Some(userInformation) =>
           val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
-        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+        case None                  =>
+          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
       }
   }
 

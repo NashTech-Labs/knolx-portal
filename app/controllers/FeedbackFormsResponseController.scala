@@ -71,8 +71,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
   implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
-  val usersRepo: UsersRepository = usersRepository
-
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository
       .activeSessions

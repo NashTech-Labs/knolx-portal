@@ -4,7 +4,6 @@ $(function () {
     });
 });
 
-
 function generatePreview() {
 
     var id = document.getElementById('feedbackFormId').value;
@@ -59,4 +58,3 @@ function generatePreview() {
         });
 
 }
-

@@ -3,13 +3,12 @@ package controllers
 import javax.inject.Inject
 
 import models.UsersRepository
-import play.api.{Configuration, Logger}
 import play.api.http.Status._
 import play.api.mvc._
+import play.api.{Configuration, Logger}
 import utilities.EncryptionUtility
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 case class UserSession(id: String, email: String, admin: Boolean)
 
@@ -34,7 +33,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
 
     usersRepository
       .getByEmail(emailFromSession)
-      .flatMap(_.headOption.fold {
+      .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
 
         Future.successful(unauthorized("Unauthorized access!"))

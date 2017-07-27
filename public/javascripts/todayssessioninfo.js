@@ -4,12 +4,14 @@ $(function () {
         opener(json);
         expire();
     });
+
     $('#fillFeedback').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
-        var form = document.getElementById('feedbackform').value;
+        var form = document.getElementById('feedbackForm').value;
         formOpener(json);
         loadFeedbackForm(form);
     });
+
     $('#getKnolxDetailsActive').click(function () {
         var json = document.getElementById('getKnolxDetailsJson').value;
         opener(json);
@@ -19,20 +21,21 @@ $(function () {
     });
 });
 
-
 function opener(value) {
     var details = JSON.parse(value);
+
     $('#session-topic').html(details.topic);
     $('#author').html(details.author);
     $('#session').html(details.session);
     $('#scheduled').html(details.scheduled);
     $('#expire').html(details.expire);
     $('#sessiontype').html(details.sessiontype);
-    $('#session-detail-info').modal('show');
+    $('#sessionDetailInfo').modal('show');
 }
 
 function formOpener(value) {
     var details = JSON.parse(value);
+
     $('#form-session-topic').html(details.topic);
     $('#form-author').html(details.author);
     $('#form-session').html(details.session);
@@ -113,7 +116,6 @@ function loadFeedbackForm(form) {
     $('#session-form-info').modal('show');
 }
 
-
 class FeedbackFormResponse {
     constructor(sessionId, feedbackFormId, responses) {
         this.sessionId = sessionId;
@@ -124,7 +126,7 @@ class FeedbackFormResponse {
 
 function submittedFeedbackForm() {
 
-    var feedbackForm = JSON.parse(document.getElementById('feedbackform').value);
+    var feedbackForm = JSON.parse(document.getElementById('feedbackForm').value);
     var questions = feedbackForm['questions'];
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];

@@ -81,7 +81,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
     "display manage sessions page" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.paginate(1) returns sessionObject
+      sessionsRepository.paginate(1,None) returns sessionObject
       sessionsRepository.activeCount(None) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -346,7 +346,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "render update session form" in new WithTestApplication {
+    "render getByEmail session form" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
@@ -385,7 +385,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not render update session form/manage session form due to unauthorized access" in new WithTestApplication {
+    "not render getByEmail session form/manage session form due to unauthorized access" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -402,7 +402,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "update session" in new WithTestApplication {
+    "getByEmail session" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
@@ -423,7 +423,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.updateSession()(
-        FakeRequest(POST, "update")
+        FakeRequest(POST, "getByEmail")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
@@ -437,7 +437,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not update session when result is false" in new WithTestApplication {
+    "not getByEmail session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
@@ -458,7 +458,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.updateSession()(
-        FakeRequest(POST, "update")
+        FakeRequest(POST, "getByEmail")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
@@ -472,7 +472,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "not update session due to BadFormRequest" in new WithTestApplication {
+    "not getByEmail session due to BadFormRequest" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
@@ -484,7 +484,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.updateSession()(
-        FakeRequest(POST, "update")
+        FakeRequest(POST, "getByEmail")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-21T16:00",
@@ -497,7 +497,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "not update session due to unauthorized access" in new WithTestApplication {
+    "not getByEmail session due to unauthorized access" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone

@@ -1,6 +1,6 @@
-@(users: List[ManageUserInfo], pages: Int, pageNumber: Int, keyword : Option[String])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(users: List[ManageUserInfo], pages: Int, pageNumber: Int, keyword: Option[String])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-    @main("Manage User"){
+@main("Manage User") {
     <div class="row">
         <div class="col-md-1" ></div>
         <div class="col-md-10 feedback-form-container manage-user-container-custom-margin">
@@ -19,21 +19,21 @@
             <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
-                   <div class="table-responsive manage-user-custom-table-margin">
+                <div class="table-responsive manage-user-custom-table-margin">
                     <table class="table table-striped all-users-table">
-                    <thead>
-                        <tr>
-                            <th class='col col-xs-4'>Edit</th>
-                            <th class='col col-xs-4'>Email</th>
-                            <th class='col col-xs-4'>Active Status</th>
+                        <thead>
+                            <tr>
+                                <th class='col col-xs-4'>Edit</th>
+                                <th class='col col-xs-4'>Email</th>
+                                <th class='col col-xs-4'>Active Status</th>
 
-                        </tr>
-                    </thead>
-                    <tbody id="user-found">
+                            </tr>
+                        </thead>
+                        <tbody id="user-found">
                         @for(user <- users) {
                             <tr>
                                 <td align="center">
-                                    <a  href="@routes.UsersController.update(user.email)" class="btn btn-default ">
+                                    <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
                                         <em class="fa fa-pencil"></em>
                                     </a>
                                     <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
@@ -41,21 +41,21 @@
                                     </a>
                                 </td>
                                 <td>@user.email</td>
-                                @if(user.active){
+                                @if(user.active) {
                                     <td class="active-status"><span class="label label-success">Active</span></td>
-                                }else{
+                                } else {
                                     <td class="suspended"><span class="label label-danger">Suspended</span></td>
                                 }
                             </tr>
                         }
-                    </tbody>
-                </table>
-                    </div>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <div class="col-md-1" ></div>
     </div>
     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/edituser.js")" type="text/javascript"></script>
-    @pagination(pageNumber, pages, routes.UsersController.manageUser,keyword)
-    }
+    @pagination(pageNumber, pages, routes.UsersController.manageUser, keyword)
+}

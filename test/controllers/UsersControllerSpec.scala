@@ -150,7 +150,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "login user when he is an admin" in new WithTestApplication {
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
 
       val result = controller.loginUser(
         FakeRequest()
@@ -165,7 +165,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "login user when he is not an admin" in new WithTestApplication {
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
 
       val result = controller.loginUser(
         FakeRequest()
@@ -179,7 +179,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "not login when user is not found" in new WithTestApplication {
 
-      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emptyEmailObject
 
       val result = controller.loginUser(
         FakeRequest()
@@ -192,7 +192,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "not login user when credentials are invalid" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
 
       val result = controller.loginUser(
         FakeRequest()
@@ -251,9 +251,9 @@ class UsersControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "throw a bad request when encountered a invalid value for update user form" in new WithTestApplication {
+    "throw a bad request when encountered a invalid value for getByEmail user form" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      val result = controller.updateUser()(FakeRequest(POST, "update")
+      val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
@@ -268,7 +268,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@example.com") returns emailObject
       usersRepository.update(UpdatedUserInfo("test@example.com", active = true, Some("12345678"))) returns updateWriteResult
 
-      val result = controller.updateUser()(FakeRequest(POST, "update")
+      val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
@@ -283,7 +283,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@example.com") returns emailObject
       usersRepository.update(UpdatedUserInfo("test@example.com", active = true, Some("12345678"))) returns updateWriteResult
 
-      val result = controller.updateUser()(FakeRequest(POST, "update")
+      val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
@@ -293,21 +293,21 @@ class UsersControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "render update user page with form " in new WithTestApplication {
+    "render getByEmail user page with form " in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.update("test@example.com")(FakeRequest(GET, "updatePage")
+      val result = controller.getByEmail("test@example.com")(FakeRequest(GET, "updatePage")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(result) must be equalTo OK
     }
 
-    "redirect to manages session page if user to update no found" in new WithTestApplication {
+    "redirect to manages session page if user to getByEmail no found" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       usersRepository.getByEmail("user@example.com") returns Future.successful(None)
 
-      val result = controller.update("user@example.com")(FakeRequest(GET, "updatePage")
+      val result = controller.getByEmail("user@example.com")(FakeRequest(GET, "updatePage")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(result) must be equalTo SEE_OTHER

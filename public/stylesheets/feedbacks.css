@@ -35,10 +35,6 @@
     margin-top: 10px;
 }
 
-.feedback-display {
-
-}
-
 .card-body {
     width: 100%;
     margin: 0 auto;
@@ -327,9 +323,10 @@
 .feedback-response-sessions {
     width: 100%;
 }
-#question-outer-1{
-    //border-bottom:6px solid #EC7063;
-    //box-sizing: border-box;
+
+#question-outer-1 {
+/ / border-bottom: 6 px solid #EC7063;
+/ / box-sizing: border-box;
 }
 
 .comments::-webkit-input-placeholder { /* Chrome */
@@ -348,4 +345,9 @@
 .comments:-moz-placeholder { /* Firefox 4 - 18 */
     color: #d5d5d5;
     opacity: 1;
+}
+
+#mandatory-warning {
+    display: none;
+    text-align: center;
 }

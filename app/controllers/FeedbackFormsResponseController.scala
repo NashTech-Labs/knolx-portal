@@ -33,9 +33,7 @@ case class FeedbackForms(name: String,
                          active: Boolean = true,
                          id: String)
 
-case class QuestionAndResponseInformation(question: String, options: List[String], response: String)
-
-case class FeedbackResponse(sessionId: String, questionsAndResponses: List[QuestionAndResponseInformation]) {
+case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String]) {
 
   def validateSessionId: Option[String] =
     if (sessionId.nonEmpty) {
@@ -44,32 +42,18 @@ case class FeedbackResponse(sessionId: String, questionsAndResponses: List[Quest
       Some("Session id must not be empty!")
     }
 
-  def validateForm: Option[String] =
-    if (questionsAndResponses.flatMap(_.options).nonEmpty) {
+  def validateFeedbackFormId: Option[String] =
+    if (feedbackFormId.nonEmpty) {
       None
     } else {
-      Some("Question must require at least 1 option!")
-    }
-
-  def validateQuestion: Option[String] =
-    if (!questionsAndResponses.map(_.question).contains("")) {
-      None
-    } else {
-      Some("Question must not be empty!")
-    }
-
-  def validateOptions: Option[String] =
-    if (!questionsAndResponses.flatMap(_.options).contains("")) {
-      None
-    } else {
-      Some("Options must not be empty!")
+      Some("feedback form id must not be empty!")
     }
 
   def validateFormResponse: Option[String] =
-    if (!questionsAndResponses.flatMap(_.response).mkString.contains("")) {
+    if (responses.nonEmpty) {
       None
     } else {
-      Some("Response must not be empty!")
+      Some("Invalid form submitted")
     }
 }
 
@@ -85,7 +69,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val FeedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
-  implicit val QuestionAndResponseInformationFormat: OFormat[QuestionAndResponseInformation] = Json.format[QuestionAndResponseInformation]
   implicit val FeedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   val usersRepo: UsersRepository = usersRepository
@@ -111,11 +94,14 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     session.active,
                     session._id.stringify,
                     new Date(session.expirationDate.value).toString)
-                val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options, questions.questionType))
+                val questions = form.questions.map(questions => QuestionInformation(questions.question,
+                  questions.options,
+                  questions.questionType,
+                  questions.mandatory))
                 val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
 
                 Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
-              case None =>
+              case None       =>
                 Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                 None
             }
@@ -153,29 +139,28 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received bad request while storing feedback response, ${request.body}")
       Future.successful(BadRequest("Malformed Data!"))
     } { feedbackFormResponse =>
+
       val validatedForm =
         feedbackFormResponse.validateSessionId orElse
-          feedbackFormResponse.validateForm orElse feedbackFormResponse.validateQuestion orElse
-          feedbackFormResponse.validateOptions orElse feedbackFormResponse.validateFormResponse
-
+          feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
       validatedForm.fold {
-        val questionAndResponseInformation =
-          feedbackFormResponse.questionsAndResponses.map(responseInformation =>
-            QuestionResponse(responseInformation.question, responseInformation.options, responseInformation.response))
-
-        val dateTime = new Date(System.currentTimeMillis).getTime
-
-        val feedbackResponseData = FeedbackFormsResponse(request.user.id, request.user.email, feedbackFormResponse.sessionId,
-          questionAndResponseInformation, BSONDateTime(dateTime))
-
-        feedbackResponseRepository.insert(feedbackResponseData).map { result =>
-          if (result.ok) {
-            Logger.info(s"Feedback form response successfully stored")
-            Ok("Feedback form response successfully strored!")
-          } else {
-            Logger.error(s"Something Went wrong when storing feedback form" +
-              s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-            InternalServerError("Something Went Wrong!")
+        deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
+          feedbackResponse.fold {
+            Future.successful(BadRequest("Malformed Data!"))
+          } { response =>
+            val timeStamp = dateTimeUtility.nowMillis
+            val feedbackResponseData = FeedbackFormsResponse(request.user.email, request.user.id, feedbackFormResponse.sessionId,
+              response, BSONDateTime(timeStamp))
+            feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
+              if (result.ok) {
+                Logger.info(s"Feedback form response successfully stored")
+                Ok("Feedback form response successfully stored!")
+              } else {
+                Logger.error(s"Something Went wrong when storing feedback form" +
+                  s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+                InternalServerError("Something Went Wrong!")
+              }
+            }
           }
         }
       } { errorMessage =>
@@ -183,6 +168,55 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest("Malformed Data!"))
       }
 
+    }
+  }
+
+  def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[List[QuestionResponse]]] = {
+    sessionsRepository.getActiveById(userResponse.sessionId).flatMap { session =>
+      session.fold {
+        val badResponse: Option[List[QuestionResponse]] = None
+        Future.successful(badResponse)
+      } { _ =>
+        feedbackRepository.getByFeedbackFormId(userResponse.feedbackFormId).map {
+          case Some(feedbackForm) =>
+            val questions = feedbackForm.questions
+            if (questions.size == userResponse.responses.size) {
+              val sanitizedResponses = sanitizeResponses(questions, userResponse.responses).toList.flatten
+              if (questions.size == sanitizedResponses.size) {
+                Some(sanitizedResponses)
+              } else {
+                None
+              }
+            } else {
+              None
+            }
+          case None               => None
+        }
+      }
+    }
+  }
+
+
+  def sanitizeResponses(questions: Seq[Question], responses: List[String]): Seq[Option[QuestionResponse]] = {
+    for ((question, response) <- questions zip responses) yield {
+
+      (question.questionType, question.mandatory) match {
+        case ("MCQ", true)      => if (question.options.contains(response) && response.nonEmpty) {
+          Some(QuestionResponse(question.question, question.options, response))
+        }
+        else {
+          None
+        }
+        case ("COMMENT", true)  => if (response.nonEmpty) {
+          Some(QuestionResponse(question.question, question.options, response))
+        } else {
+          None
+        }
+        case ("MCQ", false)     => None
+        case ("COMMENT", false) => Some(QuestionResponse(question.question, question.options, response))
+        case _                  => None
+
+      }
     }
   }
 

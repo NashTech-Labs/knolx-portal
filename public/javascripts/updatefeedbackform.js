@@ -11,10 +11,11 @@ class FeedbackForm {
 }
 
 class Question {
-    constructor(question, options, questionType) {
+    constructor(question, options, questionType, mandatory) {
         this.question = question;
         this.options = options;
         this.questionType = questionType;
+        this.mandatory = mandatory;
     }
 }
 
@@ -53,12 +54,13 @@ function updateForm() {
     questions.forEach(function (options, question, obj) {
             var questionValueField = document.getElementById('questionValue-' + question);
             var optionValues = [];
+            var mandatory = true;
+
             if (questionValueField != null) {
                 var questionValue = questionValueField.value;
                 var typeValue = 'MCQ';
                 for (var i = 0; i <= options.length - 1; i++) {
                     var optionValue = document.getElementById('optionValue-' + question + '-' + options[i]).value;
-
                     optionValues.push(optionValue)
                 }
             } else {
@@ -66,9 +68,12 @@ function updateForm() {
                 typeValue = 'COMMENT';
                 optionValue = document.getElementById('optionValue-' + question + '-' + options[0]).value;
                 optionValues.push(optionValue)
+                if (!document.getElementById("questionMandatoryValue-" + question).checked) {
+                    mandatory = false;
+                }
             }
 
-            questionsValues.push(new Question(questionValue, optionValues, typeValue))
+            questionsValues.push(new Question(questionValue, optionValues, typeValue, mandatory))
         }
     );
 
@@ -227,6 +232,16 @@ function addComment() {
         "</div>" +
         "</div>" +
         "</div>" +
+
+        '<div id="parent" class="add-option-parent"><div>' +
+        '<label class="checkbox-outer">' +
+        "<input type='checkbox' id='questionMandatoryValue-" + questionCount + "' class='custom-checkbox'/>" +
+        '<span class="pin_text"></span>' +
+        '<p class="pin-checkbox-text">Mandatory</p>' +
+        '</label>' +
+        '</div>' +
+        '</div>' +
+
         "</div>");
 
     document.getElementById("deleteQuestion-" + questionCount).addEventListener("click", function () {

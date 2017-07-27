@@ -13,10 +13,11 @@ class FeedbackForm {
 }
 
 class Question {
-    constructor(question, options, questionType) {
+    constructor(question, options, questionType, mandatory) {
         this.question = question;
         this.options = options;
         this.questionType = questionType;
+        this.mandatory = mandatory;
     }
 }
 
@@ -43,22 +44,28 @@ function createForm() {
             var questionValueField = document.getElementById('questionValue-' + question);
 
             var optionValues = [];
+            var mandatory = true;
 
-            if(questionValueField!=null){
+            if (questionValueField != null) {
                 var questionValue = questionValueField.value;
                 var typeValue = 'MCQ';
                 for (var i = 0; i <= options.length - 1; i++) {
                     var optionValue = document.getElementById('optionValue-' + question + '-' + options[i]).value;
                     optionValues.push(optionValue)
+
                 }
-            } else{
+            } else {
                 questionValue = document.getElementById('questionCommentValue-' + question).value;
                 typeValue = 'COMMENT';
                 optionValue = document.getElementById('optionValue-' + question + '-' + options[0]).value;
-                optionValues.push(optionValue)
+                optionValues.push(optionValue);
+                if (!document.getElementById("questionMandatoryValue-" + question).checked) {
+                    mandatory = false;
+                }
+
             }
 
-            questionsValues.push(new Question(questionValue, optionValues, typeValue))
+            questionsValues.push(new Question(questionValue, optionValues, typeValue, mandatory))
         }
     );
 
@@ -67,7 +74,9 @@ function createForm() {
     $('#errorMessage').remove();
     $('#successMessage').remove();
 
-   jsRoutes.controllers.FeedbackFormsController.createFeedbackForm().ajax(
+    alert(JSON.stringify(feedbackForm));
+
+    jsRoutes.controllers.FeedbackFormsController.createFeedbackForm().ajax(
         {
             type: "POST",
             processData: false,
@@ -89,7 +98,7 @@ function createForm() {
                     "</div>"
                 )
             }
-        })
+        });
 }
 
 function deleteOption(deleteElem) {
@@ -203,36 +212,36 @@ function addComment() {
     questions.set(questionCount, [0]);
 
     $('#questions').append(
-        "<div class ='question-card' id='question-"+ questionCount+"'>"+
-        "<div>"+
-        "<div class='col-md-12'>"+
-        "<input class='card-questions-other' id='questionCommentValue-" + questionCount +"' placeholder='Question ?' type='text'>"+
-        "<i id='deleteQuestion-"+questionCount+"' class='fa fa-trash-o delQuestion'></i>"+
-        "</div>"+
-        "<br>"+
-        "<div id='options-" + questionCount +"'>"+
-        "<div class='row' id='option-"+questionCount+"-0'>"+
-        "<div class='col-md-1' > </div>"+
-        "<div class='col-md-10' >"+
-        "<input type='text' id='optionValue-"+questionCount+"-"+0+"' class='comment-section' value='Comments Goes Here!' disabled/>"+
-        "</div>"+
-        "<div class='col-md-1' ></div>"+
-        "</div>"+
-        "</div>"+
-        "</div>"+
+        "<div class ='question-card' id='question-" + questionCount + "'>" +
+        "<div>" +
+        "<div class='col-md-12'>" +
+        "<input class='card-questions-other' id='questionCommentValue-" + questionCount + "' placeholder='Question ?' type='text'>" +
+        "<i id='deleteQuestion-" + questionCount + "' class='fa fa-trash-o delQuestion'></i>" +
+        "</div>" +
+        "<br>" +
+        "<div id='options-" + questionCount + "'>" +
+        "<div class='row' id='option-" + questionCount + "-0'>" +
+        "<div class='col-md-1' > </div>" +
+        "<div class='col-md-10' >" +
+        "<input type='text' id='optionValue-" + questionCount + "-" + 0 + "' class='comment-section' value='Comments Goes Here!' disabled/>" +
+        "</div>" +
+        "<div class='col-md-1' ></div>" +
+        "</div>" +
+        "</div>" +
+        "</div>" +
 
         '<div id="parent" class="add-option-parent"><div>' +
-        '<label class="checkbox-outer">'+
-        "<input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'/>"+
-        '<span class="pin_text"></span>'+
-        '<p class="pin-checkbox-text">Mendetory</p>'+
-        '</label>'+
+        '<label class="checkbox-outer">' +
+        "<input type='checkbox' id='questionMandatoryValue-" + questionCount + "' class='custom-checkbox'/>" +
+        '<span class="pin_text"></span>' +
+        '<p class="pin-checkbox-text">Mandatory</p>' +
+        '</label>' +
         '</div>' +
-        '</div>'+
+        '</div>' +
 
 
         "</div>"
-);
+    );
 
     document.getElementById("deleteQuestion-" + questionCount).addEventListener("click", function () {
         deleteQuestion(this)
@@ -241,24 +250,22 @@ function addComment() {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
-$(function(){
-    $(".add-question-button").click(function(){
+$(function () {
+    $(".add-question-button").click(function () {
 
             $(".adjacent").fadeIn();
-        $(".add-question-button").css({"color":"#5499C7","text-shadow":"None"});
-        window.scrollTo(0, document.body.scrollHeight);
+            $(".add-question-button").css({"color": "#5499C7", "text-shadow": "None"});
+            window.scrollTo(0, document.body.scrollHeight);
         }
     );
 });
 
-$(document).mouseup(function(e)
-{
+$(document).mouseup(function (e) {
     var itself = $(".adjacent");
-    var  addBtn = $(".add-question-button");
-    if (!addBtn.is(e.target) && !itself.is(e.target) && addBtn.has(e.target).length === 0)
-    {
+    var addBtn = $(".add-question-button");
+    if (!addBtn.is(e.target) && !itself.is(e.target) && addBtn.has(e.target).length === 0) {
         itself.fadeOut();
-        addBtn.css({"color":"#fff","text-shadow":"0 0px 6px #999"})
+        addBtn.css({"color": "#fff", "text-shadow": "0 0px 6px #999"})
     }
 });
 

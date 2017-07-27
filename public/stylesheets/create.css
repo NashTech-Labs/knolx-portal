@@ -127,10 +127,36 @@
     display: inline-block;
     width: 10px;
     color: #F1948A;
-    font-size:20px;
+    font-size: 20px;
     margin-right: 10px;
-    margin-left: 30px;
+    margin-left: 50px;
     position: relative;
+}
+
+.mendatory_text:before {
+    margin-top: 15px;
+    content: "\f0d9";
+    font-family: "FontAwesome";
+    display: inline-block;
+    width: 10px;
+    color: #5499C7;
+    font-size: 20px;
+    margin-left: 50px;
+    position: relative;
+}
+
+.mandatory-text {
+    font-size: 17px;
+    font-family: 'headerfont';
+    color: #fff;
+    margin: 0px;
+    margin-top: 10px;
+    letter-spacing: 2px;
+    margin-left: 0px;
+    background-color: #5499C7;
+    padding: 6px 20px;
+    border: none;
+    border-radius: 4px;
 }
 
 .custom-checkbox:checked + .pin_text:before {
@@ -140,7 +166,7 @@
     display: inline-block;
     animation: tick 150ms ease-in;
     font-size: 20px;
-    color:#16A085;
+    color: #16A085;
 }
 
 @keyframes tick {

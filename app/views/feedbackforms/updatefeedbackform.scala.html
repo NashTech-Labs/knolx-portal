@@ -149,6 +149,16 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div id="parent" class="add-option-parent"><div>
+                                        <label class="checkbox-outer">
+                                        <input type='checkbox' id='questionMandatoryValue-@questionCount' class='custom-checkbox'@if(editableQuestions(questionCount - 1).mandatory) {checked = "checked"}/>
+                                        <span class="pin_text"></span>
+                                        <p class="pin-checkbox-text">Mandatory</p>
+                                        </label>
+                                        </div>
+                                        </div>
+
                                     </div>
                                 }
                             }

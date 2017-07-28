@@ -32,10 +32,10 @@ function slide(keyword, pageNumber) {
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
                         usersFound += "<tr><td align='center'>" +
-                            "<a href='" + jsRoutes.controllers.FeedbackFormsController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
+                            "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='" + jsRoutes.controllers.FeedbackFormsController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
+                            "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a>" +
                             "</td>" +

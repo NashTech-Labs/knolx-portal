@@ -76,8 +76,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
   implicit val fetchedResponsesFormat: OFormat[FetchedResponses] = Json.format[FetchedResponses]
 
-
-
   val fetchFeedbackResponseForm = Form(
     single(
       "sessionId" -> nonEmptyText

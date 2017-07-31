@@ -1,29 +1,43 @@
 $(function () {
-    $('#getKnolxDetailsExpired').click(function () {
-        var json = document.getElementById('getKnolxDetailsJson').value;
+    $('.getKnolxDetailsExpired').click(function () {
+        var id = this.id;
+        var sessionId = id.split('-');
+        var json = document.getElementById(sessionId[1]).value;
         opener(json);
         expire();
     });
 
-    $('#fillFeedback').click(function () {
-        var json = document.getElementById('getKnolxDetailsJson').value;
-        formOpener(json);
-        fetchResponse();
+    $('.fillFeedback').click(function () {
+        document.getElementById('display-feed-form').style.display = 'block';
+        currentFeedbackProfile = this.value;
+        $('#feed-message').html("");
+        formOpener(this.value);
+        fetchResponse(this.id);
     });
 
-    $('#getKnolxDetailsActive').click(function () {
-        var json = document.getElementById('getKnolxDetailsJson').value;
+    $('.getKnolxDetailsActive').click(function () {
+        var id = this.id;
+        var sessionId = id.split('-');
+        var json = document.getElementById(sessionId[1]).value;
         opener(json);
     });
-    $('#submitFeedbackForm').click(function () {
+
+    $('.submitFeedbackForm').click(function () {
         submittedFeedbackForm();
     });
+
+    $('body').on('click', '#success_text_color-background-color', function () {
+        $('#session-form-info').modal('hide');
+    });
+
+    $('body').on('click', '#failure_text_color-background-color', function () {
+        window.location.reload();
+    });
+
 });
 
-function fetchResponse(){
-
-    var sessionId = document.getElementById("sessionId").value;
-    var form = document.getElementById('feedbackForm').value;
+function fetchResponse(sessionId) {
+    var form = document.getElementById(sessionId + "-form").value;
     var feedbackForm = JSON.parse(form);
     var formData = new FormData();
     formData.append("sessionId", sessionId);
@@ -40,24 +54,23 @@ function fetchResponse(){
             },
             success: function (data) {
                 var responses = JSON.parse(data);
-                loadFeedbackForm(feedbackForm);
+                loadFeedbackForm(feedbackForm, sessionId);
                 fillFeedbackResponses(responses);
             },
             error: function (er) {
-
-                loadFeedbackForm(feedbackForm);
+                loadFeedbackForm(feedbackForm, sessionId);
             }
         });
 }
 
-function fillFeedbackResponses(responses){
+function fillFeedbackResponses(responses) {
     for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {
         var type = questions[questionNumber]['questionType'];
         if (type == "MCQ") {
             var options = questions[questionNumber]['options'];
             for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-                if(responses[questionNumber] === options[optionNumber]){
-                    document.getElementById("option-" + optionNumber + "-"+questionNumber).checked = true;
+                if (responses[questionNumber] === options[optionNumber]) {
+                    document.getElementById("option-" + optionNumber + "-" + questionNumber).checked = true;
                 }
 
             }
@@ -100,9 +113,11 @@ function expire() {
 var mandatoryelements = [];
 var questions = [];
 var feedbackFormId = "";
+var currentFeedbackProfile = "";
 
-function loadFeedbackForm(values) {
+function loadFeedbackForm(values, sessionId) {
 
+    $('#mandatory-warning').css("display", "none");
     $('#feedback-response-form').html("");
     var optionsLoaded = "";
     questions = values['questions'];
@@ -120,7 +135,7 @@ function loadFeedbackForm(values) {
                     "<div class='col-md-1'></div>" +
                     "<div class='col-md-10'>" +
                     "<label class='radio-button'>" +
-                    "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-"+questionNumber+"' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
+                    "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
                     "<span class='lab_text'></span>" +
                     "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
                     "</p>" +
@@ -158,6 +173,9 @@ function loadFeedbackForm(values) {
             "</label>" + optionsLoaded + "</div>"
         );
 
+        document.getElementById('current-form').value = JSON.stringify(values);
+        document.getElementById('current-session').value = sessionId;
+
         optionsLoaded = "";
     }
 
@@ -173,11 +191,11 @@ class FeedbackFormResponse {
 }
 
 function submittedFeedbackForm() {
-    var feedbackForm = JSON.parse(document.getElementById('feedbackForm').value);
+    var feedbackForm = JSON.parse(document.getElementById('current-form').value);
     var questions = feedbackForm['questions'];
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];
-    var sessionId = document.getElementById("sessionId").value;
+    var sessionId = document.getElementById("current-session").value;
 
     for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
         var responseName = "option-" + questionNumber;
@@ -204,10 +222,11 @@ function submittedFeedbackForm() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (data) {
-                    alert("success")
+                    var currentFeedback = JSON.parse(currentFeedbackProfile);
+                    ackMessage("success_text", "Thankyou!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
                 },
                 error: function (er) {
-                    alert(er.responseText);
+                    ackMessage("failure_text", "Oops!", "Something went wrong", 'We are unable to process your request, refreshing this page may fix this issue, in case it keeps occurring please contact the administrator', "Refresh", 'failure_text_color', 'failure_text_color-background-color');
                 }
             })
     }
@@ -240,4 +259,37 @@ function isFormResponseValid(filledForm) {
     }
 
     return result;
+}
+
+
+function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bgColorClass) {
+    var message = '<div class="col-md-12 acknowledgement-message">' +
+        '<div class="col-md-2 acknowledgement-icon">' +
+        '<label class="radio-button">' +
+        '<input type="radio"  class="custom-checkbox" checked="checked"/>' +
+        '<span class="' + icon + ' ' + colorClass + '"></span>' +
+        '</label>' +
+        '</div>' +
+        '<div class="col-md-10 acknowledgement-text">' +
+        '<div class="col-md-2"></div>' +
+        '<div class="col-md-5 ' + colorClass + '">' + greeting + '' +
+        '<p class="acknowledgement-text_tag">' + tagline + '</p>' +
+        '</div>' +
+        '<div class="col-md-2"></div>' +
+        '</div>' +
+        '<div class="col-md-12">' +
+        '<div class="col-md-2"></div>' +
+        '<div class="col-md-8 acknowledgement-custom-message">' + ackMessage + '</div>' +
+        '<div class="col-md-2"></div>' +
+        '</div>' +
+        '<div class="col-md-12">' +
+        '<div class="col-md-2"></div>' +
+        '<div class="col-md-8 acknowledgement-custom-message"><button type="button" id="' + bgColorClass + '" class="btn btn-default btn-lg submission-success-okay-btn">' + btnText + '</button></div>' +
+        '<div class="col-md-2"></div>' +
+        '</div>' +
+        '</div>';
+
+    document.getElementById('display-feed-form').style.display = 'none';
+    $('#feed-message').html(message)
+
 }

@@ -22,6 +22,7 @@ case class QuestionResponse(question: String, options: List[String], response: S
 case class FeedbackFormsResponse(email: String,
                                  userId: String,
                                  sessionId: String,
+                                 sessionTopic: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
                                  _id: BSONObjectID = BSONObjectID.generate)
@@ -56,6 +57,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
         "$set" -> BSONDocument(
           "email" -> feedbackFormsResponse.email,
           "userId" -> feedbackFormsResponse.userId,
+          "sessionTopic" -> feedbackFormsResponse.sessionTopic,
           "sessionId" -> feedbackFormsResponse.sessionId,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
           "responseDate" -> feedbackFormsResponse.responseDate
@@ -64,7 +66,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def getByUsersSession(userId:String,SessionId:String): Future[Option[FeedbackFormsResponse]] =
+  def getByUsersSession(userId: String, SessionId: String): Future[Option[FeedbackFormsResponse]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection

@@ -29,6 +29,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
     implicit val req = request
 
     val username = configuration.get[String]("session.username")
+
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
 
     usersRepository

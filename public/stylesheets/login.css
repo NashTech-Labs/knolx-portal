@@ -11,12 +11,22 @@
     border-bottom-right-radius: 20px;
 }
 
+.forgot-password-outer {
+    height: 350px;
+
+}
+
 .login-first {
     height: 80px;
     padding: 0px 0px;
     background-color: rgb(125, 158, 192);
     box-shadow: 0 9px 8px -5px #a8a8a8;
     border-bottom: 1px solid #fff;
+}
+
+.forget-password{
+    text-align: center;
+    padding-top: 10px!important;
 }
 
 .top-container {

@@ -1,16 +1,17 @@
 package controllers
 
+import java.util.UUID
 import javax.inject._
 
-import models.UpdatedUserInfo
-import models.UsersRepository
+import models.{ForgotPasswordRepository, PasswordChangeRequestInfo, UpdatedUserInfo, UsersRepository}
 import play.api.{Configuration, Logger}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
-import utilities.{EncryptionUtility, PasswordUtility}
+import reactivemongo.bson.BSONDateTime
+import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -33,7 +34,9 @@ case class UserSearchResult(users: List[ManageUserInfo],
 @Singleton
 class UsersController @Inject()(messagesApi: MessagesApi,
                                 usersRepository: UsersRepository,
+                                forgotPasswordRepository: ForgotPasswordRepository,
                                 configuration: Configuration,
+                                dateTimeUtility: DateTimeUtility,
                                 controllerComponents: KnolxControllerComponents
                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
@@ -70,6 +73,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       "active" -> boolean,
       "password" -> optional(nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8))
     )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
+  )
+
+  val requestPasswordChangeForm = Form(
+    single(
+      "email" -> email
+    )
   )
 
   def register: Action[AnyContent] = action { implicit request =>
@@ -240,6 +249,30 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(Redirect(routes.UsersController.manageUser(1, None))
           .flashing("message" -> s"User with email ${user.email} has been successfully deleted!"))
       })
+  }
+
+  def forgotPassword: Action[AnyContent] = action.async { implicit request =>
+    Future.successful(Ok(views.html.users.forgotpassword(requestPasswordChangeForm)))
+  }
+
+  def requestPasswordChange: Action[AnyContent] = action.async { implicit request =>
+    requestPasswordChangeForm.bindFromRequest.fold(
+      formWithErrors => {
+        Future.successful(BadRequest(views.html.users.forgotpassword(formWithErrors)))
+      },
+      email => {
+        usersRepository
+          .getActiveByEmail(email.toLowerCase).map{ user => user.fold{
+          Redirect(routes.UsersController.forgotPassword()).flashing("message" -> "User not found, consider registering such user instead!")
+          }{ foundUser =>
+          val validTill =   dateTimeUtility.localDateTimeIST.plusDays(1)
+          val requestInfo = PasswordChangeRequestInfo(foundUser.email,UUID.randomUUID.toString,BSONDateTime(dateTimeUtility.toMillis(validTill)))
+          forgotPasswordRepository.upsert(requestInfo)
+          Ok(views.html.users.forgotpassword(requestPasswordChangeForm))
+          }
+        }
+      }
+    )
   }
 
 }

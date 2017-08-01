@@ -14,7 +14,8 @@ POST        /users/search                       controllers.UsersController.sear
 GET         /user/update                        controllers.UsersController.getByEmail(email: String)
 POST        /user/update                        controllers.UsersController.updateUser
 GET         /user/delete                        controllers.UsersController.deleteUser(email: String)
-
+GET         /user/forgotPassword                controllers.UsersController.forgotPassword
+POST        /user/requestPassword               controllers.UsersController.requestPasswordChange
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
 POST        /session/search                     controllers.SessionsController.searchSessions

@@ -22,6 +22,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results {
 
+  val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+  val writeResultfalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
@@ -39,8 +41,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
     _id)
-  val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
-  val writeResultfalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
 

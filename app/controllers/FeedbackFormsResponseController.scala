@@ -180,7 +180,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             val (response, sessionTopic) = sanitizedResponse
             val timeStamp = dateTimeUtility.nowMillis
             val feedbackResponseData = FeedbackFormsResponse(request.user.email, request.user.id, feedbackFormResponse.sessionId,
-
               sessionTopic, response, BSONDateTime(timeStamp))
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
               if (result.ok) {

@@ -2,12 +2,14 @@ package models
 
 import javax.inject.Inject
 
-import play.api.libs.json.OFormat
-import models.ForgotPasswordJsonFormats._
+import models.passwordChangeRequestJsonFormats._
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.play.json.collection.JSONCollection
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,17 +18,18 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class PasswordChangeRequestInfo(email: String,
                                      token: String,
-                                     activeTill: BSONDateTime)
+                                     activeTill: BSONDateTime,
+                                     active: Boolean = true)
 
-object ForgotPasswordJsonFormats {
+object passwordChangeRequestJsonFormats {
 
   import play.api.libs.json.Json
 
-  implicit val passwordChangeRequestInfoFormat: OFormat[PasswordChangeRequestInfo] = Json.format[PasswordChangeRequestInfo]
+  implicit val passwordChangeRequestInfoFormat = Json.format[PasswordChangeRequestInfo]
 
 }
 
-class ForgotPasswordRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+class ForgotPasswordRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
 
   import play.modules.reactivemongo.json._
 
@@ -41,11 +44,31 @@ class ForgotPasswordRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         "$set" -> BSONDocument(
           "email" -> passwordChangeRequest.email,
           "token" -> passwordChangeRequest.token,
-          "activeTill" -> passwordChangeRequest.activeTill
+          "activeTill" -> passwordChangeRequest.activeTill,
+          "active" -> passwordChangeRequest.active
         ))
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
 
+  }
+
+  def getPasswordChangeRequest(token: String, email: Option[String])(implicit ex: ExecutionContext): Future[Option[PasswordChangeRequestInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+    val condition = email match {
+      case Some(emailId) => Json.obj("token" -> token,
+        "email" -> emailId,
+        "activeTill" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+        "active" -> true)
+
+      case None => Json.obj("token" -> token, "activeTill" -> BSONDocument("$gt" -> BSONDateTime(millis)), "active" -> true)
+    }
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .cursor[PasswordChangeRequestInfo](ReadPreference.Primary)
+          .headOption)
   }
 
 }

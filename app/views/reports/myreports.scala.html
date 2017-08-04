@@ -1,0 +1,14 @@
+@(sessionIds : List[(String,String)])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@main("Feedbacks") {
+    <div class="row">
+        <div class="col-md-2" ></div>
+        <div class="col-md-8 feedback-form-display-container">
+            <div class="col-md-12 login-first test feedback-top-banner"></div>
+            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+            <h1>@sessionIds.size</h1>
+            <div class="col-md-12 feedback-footer"></div>
+        </div>
+        <div class="col-md-2" ></div>
+    </div>
+}

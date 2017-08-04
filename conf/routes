@@ -41,5 +41,8 @@ GET         /feedbackform/response              controllers.FeedbackFormsRespons
 POST        /feedbackresponse/fetch             controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse
 GET         /jsRoutes                           controllers.JavascriptRouter.jsRoutes
 
+# Reports
+GET         /reports/fetch                      controllers.FeedbackReportsController.fetchReports
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                       controllers.Assets.versioned(path="/public", file: Asset)

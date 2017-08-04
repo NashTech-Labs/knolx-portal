@@ -278,7 +278,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
               } { userJson =>
                 val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
-
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
                   BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
@@ -388,7 +387,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           updateSessionInfo => {
             val expirationMillis = sessionExpirationMillis(updateSessionInfo.date, updateSessionInfo.feedbackExpirationDays)
             val updatedSession = UpdateSessionInfo(updateSessionInfo, BSONDateTime(expirationMillis))
-
             sessionsRepository
               .update(updatedSession)
               .flatMap { result =>

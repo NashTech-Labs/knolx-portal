@@ -1,5 +1,6 @@
 package models
 
+import java.util.Date
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
@@ -150,7 +151,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
-
+    println("== update date=>"+dateTimeUtility.toLocalDateTime(updatedRecord.sessionUpdateFormData.date.getTime))
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "date" -> BSONDateTime(updatedRecord.sessionUpdateFormData.date.getTime),
@@ -166,9 +167,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       jsonCollection.update(selector, modifier))
   }
 
-  def activeSessions: Future[List[SessionInfo]] = {
+/*  def activeSessions: Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis
-
     collection
       .flatMap { jsonCollection =>
         import jsonCollection.BatchCommands.AggregationFramework.{Ascending, Group, Limit, Match, PushField, Sort}
@@ -191,6 +191,24 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
           .map(_.flatten)
       }
+  }*/
+
+
+  def activeSessions: Future[List[SessionInfo]] = {
+
+    val millis = dateTimeUtility.nowMillis
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+            "active" -> true,
+            "cancelled" -> false,
+            "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+            "date" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+          .cursor[SessionInfo](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+
   }
 
   def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {

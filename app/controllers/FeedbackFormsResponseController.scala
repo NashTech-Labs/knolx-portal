@@ -177,9 +177,9 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           feedbackResponse.fold {
             Future.successful(BadRequest("Malformed Data!"))
           } { sanitizedResponse =>
-            val (response, sessionTopic) = sanitizedResponse
+            val (response, sessionTopic, presenter) = sanitizedResponse
             val timeStamp = dateTimeUtility.nowMillis
-            val feedbackResponseData = FeedbackFormsResponse(request.user.email, request.user.id, feedbackFormResponse.sessionId,
+            val feedbackResponseData = FeedbackFormsResponse(request.user.email, presenter, request.user.id, feedbackFormResponse.sessionId,
 
               sessionTopic, response, BSONDateTime(timeStamp))
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
@@ -202,10 +202,10 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  private def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[(List[QuestionResponse], String)]] = {
+  private def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[(List[QuestionResponse], String, String)]] = {
     sessionsRepository.getActiveById(userResponse.sessionId).flatMap { session =>
       session.fold {
-        val badResponse: Option[(List[QuestionResponse], String)] = None
+        val badResponse: Option[(List[QuestionResponse], String, String)] = None
         Future.successful(badResponse)
       } { session =>
         feedbackRepository.getByFeedbackFormId(userResponse.feedbackFormId).map {
@@ -214,7 +214,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             if (questions.size == userResponse.responses.size) {
               val sanitizedResponses = sanitizeResponses(questions, userResponse.responses).toList.flatten
               if (questions.size == sanitizedResponses.size) {
-                Some((sanitizedResponses, session.topic))
+                Some((sanitizedResponses, session.topic, session.email))
               } else {
                 None
               }

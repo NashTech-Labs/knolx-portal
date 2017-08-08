@@ -197,7 +197,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             .activeCount(keyword)
             .map { count =>
               val pages = Math.ceil(count / 10D).toInt
-
               Ok(views.html.sessions.managesessions(sessions, pages, pageNumber))
             }
         }
@@ -309,6 +308,32 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
+  private def sessionExpirationMillis(date: Date, customDays: Int): Long =
+    if (customDays > 0) {
+      customSessionExpirationMillis(date, customDays)
+    } else {
+      defaultSessionExpirationMillis(date)
+    }
+
+  private def defaultSessionExpirationMillis(date: Date): Long = {
+    val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
+
+    val expirationDate = scheduledDate.getDayOfWeek match {
+      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(3)
+      case DayOfWeek.SATURDAY => scheduledDate.plusDays(2)
+      case _: DayOfWeek       => scheduledDate.plusDays(1)
+    }
+
+    dateTimeUtility.toMillis(expirationDate)
+  }
+
+  private def customSessionExpirationMillis(date: Date, days: Int): Long = {
+    val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
+    val expirationDate = scheduledDate.plusDays(days)
+
+    dateTimeUtility.toMillis(expirationDate)
+  }
+
   def deleteSession(id: String, pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .delete(id)
@@ -387,32 +412,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               }
           })
       }
-  }
-
-  private def sessionExpirationMillis(date: Date, customDays: Int): Long =
-    if (customDays > 0) {
-      customSessionExpirationMillis(date, customDays)
-    } else {
-      defaultSessionExpirationMillis(date)
-    }
-
-  private def defaultSessionExpirationMillis(date: Date): Long = {
-    val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
-
-    val expirationDate = scheduledDate.getDayOfWeek match {
-      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(3)
-      case DayOfWeek.SATURDAY => scheduledDate.plusDays(2)
-      case _: DayOfWeek       => scheduledDate.plusDays(1)
-    }
-
-    dateTimeUtility.toMillis(expirationDate)
-  }
-
-  private def customSessionExpirationMillis(date: Date, days: Int): Long = {
-    val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
-    val expirationDate = scheduledDate.plusDays(days)
-
-    dateTimeUtility.toMillis(expirationDate)
   }
 
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>

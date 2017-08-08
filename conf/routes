@@ -38,6 +38,7 @@ GET         /feedbackform/delete                controllers.FeedbackFormsControl
 GET         /feedbackform/preview               controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
 POST        /feedbackform/submit                controllers.FeedbackFormsResponseController.storeFeedbackFormResponse
 GET         /feedbackform/response              controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
+POST        /feedbackresponse/fetch             controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse
 GET         /jsRoutes                           controllers.JavascriptRouter.jsRoutes
 
 # Map static resources from the /public folder to the /assets URL path

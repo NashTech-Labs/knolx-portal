@@ -19,6 +19,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.searchManageSession,
       controllers.routes.javascript.SessionsController.searchSessions,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
+      controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
+      controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession
     )).as("text/javascript")

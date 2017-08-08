@@ -59,7 +59,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     val maybeFeedbackForm =
       Option(FeedbackForm(
         name = "Feedback Form Template 1",
-        questions = List(Question(question = "How good is the Knolx portal ?", options = List("1", "2", "3", "4", "5"))),
+        questions = List(Question(question = "How good is the Knolx portal ?", options = List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)),
         active = true,
         _id = feedbackFormId))
 

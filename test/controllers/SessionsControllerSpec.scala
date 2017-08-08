@@ -191,7 +191,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "render create session form" in new WithTestApplication {
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -213,7 +213,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -246,7 +246,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -271,7 +271,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "not create session due to BadFormRequest" in new WithTestApplication {
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -298,7 +298,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -321,7 +321,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "not create session due to unauthorized access" in new WithTestApplication {
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emptyEmailObject
@@ -349,7 +349,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     "render getByEmail session form" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", BSONDateTime(date.getTime), "session 1",
@@ -408,7 +408,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
@@ -443,7 +443,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
@@ -475,7 +475,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     "not getByEmail session due to BadFormRequest" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       usersRepository.getByEmail("test@example.com") returns emailObject

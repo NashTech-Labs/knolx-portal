@@ -24,7 +24,6 @@
     background-image: url('../images/mesh.svg');
     background-repeat: no-repeat;
     background-size: cover;
-
 }
 
 .feedback-footer {
@@ -35,21 +34,18 @@
     margin-top: 10px;
 }
 
-.feedback-display {
-
-}
-
 .card-body {
     width: 100%;
     margin: 0 auto;
     margin-bottom: 50px;
+    padding-bottom: 50px;
     text-align: center;
     line-height: 60px;
     font-size: 30px;
     color: #fff;
     text-shadow: 0 0px 6px #999;
     background-color: #dcdcdc;
-    box-shadow: 0 6px 4px -5px #333;
+    box-shadow: 0 6px 20px #a8a8a8;
 }
 
 .stick-out {
@@ -90,7 +86,7 @@
     font-size: 18px;
     color: #fff;
     position: relative;
-    top: -40px;
+    margin-top: 25px;
 }
 
 .feedback-card-button:hover {
@@ -116,13 +112,16 @@
     font-size: 20px;
     word-wrap: break-word;
     line-height: 1.2em;
-    margin: 0.2em 0;
-    top: -30px;
     color: #fff;
     text-shadow: none;
     background-color: rgb(125, 158, 192);
-    padding: 8px 3px 3px 3px;
-    box-shadow: 0 9px 8px -5px #a8a8a8;
+    padding: 40px 10px 40px 10px;
+    background-image: url(../images/mesh.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    -moz-box-shadow: inset 0 -10px 10px -10px #888;
+    -webkit-box-shadow: inset 0 -10px 10px -10px #888;
+    box-shadow: inset 0 -10px 10px -10px #888;
 }
 
 .session-details {
@@ -170,7 +169,8 @@
     font-size: 18px;
     color: #fff;
     position: relative;
-    top: -40px;
+    margin-top: 25px;
+    cursor: not-allowed;
 }
 
 .expired {
@@ -240,7 +240,6 @@
 .feedback-card-by {
     font-size: 15px;
     padding: 0px 0px;
-    top: -40px;
     color: #a8a8a8;
     text-shadow: none;
     font-weight: bold;
@@ -250,15 +249,12 @@
     font-size: 16px;
     color: #5D8D8C;
     text-shadow: none;
-    font-weight: bold;
     word-wrap: break-word;
     line-height: 1.2em;
-    margin: 0.2em 0;
     padding: 0px 15px 0px 15px;
 }
 
 .more {
-    top: -55px;
     color: #EC7063;
     cursor: pointer;
 }
@@ -326,4 +322,139 @@
 
 .feedback-response-sessions {
     width: 100%;
+}
+
+#question-outer-1 {
+/ / border-bottom: 6 px solid #EC7063;
+/ / box-sizing: border-box;
+}
+
+.comments::-webkit-input-placeholder { /* Chrome */
+    color: #d5d5d5;
+}
+
+.comments:-ms-input-placeholder { /* IE 10+ */
+    color: #d5d5d5;
+}
+
+.comments::-moz-placeholder { /* Firefox 19+ */
+    color: #d5d5d5;
+    opacity: 1;
+}
+
+.comments:-moz-placeholder { /* Firefox 4 - 18 */
+    color: #d5d5d5;
+    opacity: 1;
+}
+
+#mandatory-warning {
+    display: none;
+    text-align: center;
+}
+
+.acknowledgement-message {
+    min-height: 400px;
+    background-color: #fff;
+    border-radius: 5px;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding-bottom: 50px;
+    -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 0.5s; /* Firefox < 16 */
+    -ms-animation: fadein 0.5s; /* Internet Explorer */
+    -o-animation: fadein 0.5s; /* Opera < 12.1 */
+    animation: fadein 0.5s;
+}
+
+.custom-checkbox:checked + .success_text:before {
+    margin-top: 0px;
+    content: "\f058";
+    font-family: "FontAwesome";
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: success-tick 500ms ease-in;
+    font-size: 80px;
+}
+
+.custom-checkbox:checked + .failure_text:before {
+    margin-top: 0px;
+    content: "\f134";
+    font-family: "FontAwesome";
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: success-tick 500ms ease-in;
+    font-size: 80px;
+}
+
+.success_text_color {
+    color: #45B39D;
+}
+
+#success_text_color-background-color {
+    background-color: #45B39D;
+}
+
+.failure_text_color {
+    color: #EC7063;
+}
+
+#failure_text_color-background-color {
+    background-color: #EC7063;
+}
+
+@keyframes success-tick {
+    0% {
+        transform: scale(0);
+    }
+
+    90% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.acknowledgement-text {
+    color: #85929E;
+    text-shadow: none;
+    font-weight: bold;
+    font-family: 'headerfont';
+    font-size: 35px;
+    letter-spacing: 1px;
+    padding: 40px 0 0 10px;
+    text-align: center;
+}
+
+.acknowledgement-text_tag {
+
+    color: #85929E;
+    text-shadow: none;
+    font-family: 'gothic';
+    font-size: 18px;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 0px 0px;
+
+}
+
+.acknowledgement-custom-message {
+    margin-top: 30px;
+    color: #639593;
+    text-shadow: none;
+    font-family: 'gothic';
+    font-size: 22px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.submission-success-okay-btn {
+    text-shadow: none;
+    font-family: 'gothic';
+    font-size: 18px;
+    letter-spacing: 1px;
+    text-align: center;
+    color: #fff;
 }

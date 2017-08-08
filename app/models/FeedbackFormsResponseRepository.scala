@@ -3,7 +3,9 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormsResponseFormat._
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -20,6 +22,7 @@ case class QuestionResponse(question: String, options: List[String], response: S
 case class FeedbackFormsResponse(email: String,
                                  userId: String,
                                  sessionId: String,
+                                 sessionTopic: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
                                  _id: BSONObjectID = BSONObjectID.generate)
@@ -46,20 +49,29 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackformsresponse"))
 
-  def insert(feedbackResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .insert(feedbackResponse))
+  def upsert(feedbackFormsResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("userId" -> feedbackFormsResponse.userId, "sessionId" -> feedbackFormsResponse.sessionId)
 
-  def update(id: String, feedbackFormsResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
     val modifier =
       BSONDocument(
         "$set" -> BSONDocument(
+          "email" -> feedbackFormsResponse.email,
+          "userId" -> feedbackFormsResponse.userId,
+          "sessionTopic" -> feedbackFormsResponse.sessionTopic,
+          "sessionId" -> feedbackFormsResponse.sessionId,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
-          "responseDate" -> feedbackFormsResponse.responseDate))
+          "responseDate" -> feedbackFormsResponse.responseDate
+        ))
 
-    collection.flatMap(_.update(selector, modifier))
+    collection.flatMap(_.update(selector, modifier, upsert = true))
   }
+
+  def getByUsersSession(userId: String, SessionId: String): Future[Option[FeedbackFormsResponse]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("userId" -> userId, "sessionId" -> SessionId))
+          .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
+
+
 }

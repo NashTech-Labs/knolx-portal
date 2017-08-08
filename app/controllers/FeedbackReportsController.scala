@@ -1,5 +1,6 @@
 package controllers
 
+import java.util.Date
 import javax.inject.Inject
 
 import models._
@@ -8,9 +9,12 @@ import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 
-import scala.concurrent.Future
+import scala.collection.immutable.::
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
+case class FeedbackReportHeader(sessionId: String, topic: String, active: Boolean, session: String, meetUp: Boolean, date: String)
+case class FeedbackReport(info:FeedbackReportHeader, questionAndResponse: List[List[QuestionResponse]])
 
 class FeedbackReportsController @Inject()(messagesApi: MessagesApi,
                                           mailerClient: MailerClient,
@@ -22,66 +26,62 @@ class FeedbackReportsController @Inject()(messagesApi: MessagesApi,
                                           controllerComponents: KnolxControllerComponents
                                          ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  def fetchReports: Action[AnyContent] = userAction.async { implicit request =>
+  def renderMyFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsResponseRepository
-      .allDistinctSessions(request.user.email).flatMap { sessionIds =>
-      sessionIds.toList match{
-        case first::rest => one(first +: rest,request.user.email)
-        case Nil => Future.successful(Seq(None))
+      .userDistinctSessionsIds(request.user.email).flatMap { myReportIds =>
+      generateSessionFeedbackReport(myReportIds, request.user.email).map { reportInfo =>
+        Ok(views.html.reports.myreports(reportInfo.flatten))
       }
-
     }
   }
 
-  private def one(sessionIds: List[String],presenter: String): Seq[Future[Object]] = {
-    sessionIds.map { id =>
-        feedbackFormsResponseRepository.mySessions(presenter, id).flatMap {
-          case _::_ =>
-            sessionsRepository.activeSessions.flatMap {
-              case first::rest => Future.successful(two(first +: rest, id))
-              case Nil => Future.successful(Seq(None))
+  private def generateSessionFeedbackReport(sessionIds: List[String], presenter: String): Future[List[Option[FeedbackReportHeader]]] = {
+
+    val myActiveSessions = sessionsRepository.activeSessions(Some(presenter))
+
+    myActiveSessions.flatMap {
+      case first :: rest =>
+        val myActiveSessionIds = (first +: rest).map(session => session._id.stringify -> session).toMap
+        val myFeedbackReportIds = (myActiveSessionIds.keySet.toList ::: sessionIds).distinct
+
+        Future.sequence(
+          myFeedbackReportIds.map { reportId =>
+            if (myActiveSessionIds.keySet.contains(reportId)) {
+              val session = myActiveSessionIds(reportId)
+              Future.successful(Some(FeedbackReportHeader(reportId, session.topic, active = true,
+                session.session, session.meetup, new Date(session.date.value).toString)))
+            } else {
+              generateInactiveSessionReport(reportId, presenter)
             }
-          case Nil    => Future.successful(Seq(None))
-        }
-      }
-  }
+          })
 
-  private def two(activeSessions : List[SessionInfo], sessionId: String): Seq[Some[(String, String)]] ={
-    activeSessions.map {
-      case sessionInfo if sessionInfo._id.stringify == sessionId => Some((sessionId, "ACTIVE"))
-      case _                                                     => Some((sessionId, "EXPIRED"))
+      case Nil => Future.sequence(sessionIds.map(sessionId => generateInactiveSessionReport(sessionId, presenter)))
     }
-
   }
 
+  private def generateInactiveSessionReport(sessionId: String, presenter: String): Future[Option[FeedbackReportHeader]] = {
+    feedbackFormsResponseRepository.mySessions(presenter, sessionId).flatMap { response =>
+      response.fold {
+        val emptyResponse: Option[controllers.FeedbackReportHeader] = None
+        Future.successful(emptyResponse)
+      } { responseFound =>
+        Future.successful(Some(FeedbackReportHeader(sessionId, responseFound.sessionTopic, active = false,
+          responseFound.session, responseFound.meetup, new Date(responseFound.sessiondate.value).toString)))
+      }
+    }
+  }
+
+  def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
+    feedbackFormsResponseRepository.allResponsesBySesion(request.user.email, id).map { responses =>
+
+      val response :: _ = responses
+      val header =  FeedbackReportHeader(response.sessionId,response.sessionTopic,
+        active = false,response.session, response.meetup, new Date(response.sessiondate.value).toString)
+
+      val questionAndResponses = responses.map(_.feedbackResponse)
+
+      Ok(views.html.reports.report(FeedbackReport(header, questionAndResponses)))
+    }
+  }
 
 }
-
-
-
-/*
-
-      val mySessions =
-        Future.sequence(sessionIds.toList.map { id =>
-          feedbackFormsResponseRepository.mySessions(request.user.email, id).flatMap {
-            case _ :: _ => {
-              sessionsRepository.activeSessions.map { activeSessions =>
-                //if(activeSessions.nonEmpty){
-                activeSessions.map {
-                  case sessionInfo if sessionInfo._id.stringify == id => Some((id, "ACTIVE"))
-                  case _                                              => Some((id, "EXPIRED"))
-                  //}
-                  //}else{
-                  //List(Some((id,"EXPIRED")))
-                }
-              }
-            }
-            case Nil    => Future.successful(List(None))
-          }
-        })
-        mySessions.map{mySessionsIds =>
-          Ok(views.html.reports.myreports(mySessionsIds.flatten.flatten))
-        }
-
-
- */

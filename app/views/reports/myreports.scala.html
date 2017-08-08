@@ -1,4 +1,4 @@
-@(sessionIds : List[(String,String)])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionIds : List[FeedbackReportHeader])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Feedbacks") {
     <div class="row">
@@ -6,7 +6,64 @@
         <div class="col-md-8 feedback-form-display-container">
             <div class="col-md-12 login-first test feedback-top-banner"></div>
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <h1>@sessionIds.size</h1>
+            @if(sessionIds.nonEmpty) {
+                @for(session <- sessionIds) {
+                    @if(session.active){
+                    <div class="col-md-4">
+                        <div class="col-md-12">
+                            <div id="parent" class="feedback-response-sessions custom-position">
+                                <div class="card-body card-custom-padding">
+                                    <div class="fold">
+                                        <div class="accepting-response"><span class="label label-danger live">Live</span></div>
+                                    </div>
+                                    @defining("Knolx") { sessionType =>
+                                    <div class="col-md-12 feedback-card-topic custom-position">
+                                        <div class="session-type"><span class="label @if(sessionType == "Knolx"){
+                                            label-warning
+                                        }else{
+                                            label-success
+                                        } custom-label-type">@sessionType</span></div>
+                                        <p>@session.topic</p></div>
+                                    <div class="col-md-12 feedback-card-by">held on</div>
+                                    <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
+                                    <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
+                                        <a href="@routes.FeedbackReportsController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
+                                            view</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                }else{
+                        <div class="col-md-4">
+                            <div class="col-md-12">
+                                <div id="parent" class="feedback-response-sessions custom-position">
+                                    <div class="card-body card-custom-padding">
+                                        @defining("Knolx") { sessionType =>
+                                            <div class="col-md-12 feedback-card-topic custom-position">
+                                                <div class="session-type"><span class="label @if(sessionType == "Knolx"){
+                                                    label-warning
+                                                }else{
+                                                    label-success
+                                                } custom-label-type">@sessionType</span></div>
+                                                <p>@session.topic</p></div>
+                                            <div class="col-md-12 feedback-card-by">held on</div>
+                                            <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
+                                            <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
+                                            <a href="@routes.FeedbackReportsController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
+                                                view</a>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    }
+                }
+            }else{
+
+
+
+            }
             <div class="col-md-12 feedback-footer"></div>
         </div>
         <div class="col-md-2" ></div>

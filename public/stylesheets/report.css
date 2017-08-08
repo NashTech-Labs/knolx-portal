@@ -1,0 +1,43 @@
+.report-head > tr > th{
+
+    color:#fff;
+
+}
+
+.report-info{
+    padding: 20px 0;
+    border-radius: 0px;
+    margin-bottom: 0px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+    background-color: #639593;
+}
+.report-content-outer{
+    margin-top: 0px;
+    border-radius: 0px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+    background-color: rgb(125, 158, 192);
+}
+.badge-report{
+    background-color: #fff;
+    color: #337ab7;
+    margin-bottom: 10px;
+}
+.total-responses{
+    padding: 10px 10px;
+    border-radius: 0px;
+    font-size: 15px;
+}
+.report-other-info{
+    width:100%;
+    text-align: center;
+    color:#fff;
+    font-size: 30px;
+}
+.report-type{
+    font-size: 15px;
+    margin-left: 5px;
+    margin-bottom: 10px;
+}
+.report-session-date{
+    font-size: 15px;
+}

@@ -25,6 +25,9 @@ case class FeedbackFormsResponse(email: String,
                                  userId: String,
                                  sessionId: String,
                                  sessionTopic: String,
+                                 meetup: Boolean,
+                                 sessiondate: BSONDateTime,
+                                 session: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
                                  _id: BSONObjectID = BSONObjectID.generate)
@@ -60,8 +63,11 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           "email" -> feedbackFormsResponse.email,
           "presenter" -> feedbackFormsResponse.presenter,
           "userId" -> feedbackFormsResponse.userId,
-          "sessionTopic" -> feedbackFormsResponse.sessionTopic,
           "sessionId" -> feedbackFormsResponse.sessionId,
+          "sessionTopic" -> feedbackFormsResponse.sessionTopic,
+          "meetup" -> feedbackFormsResponse.meetup,
+          "sessiondate" -> feedbackFormsResponse.sessiondate,
+          "session" -> feedbackFormsResponse.session,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
           "responseDate" -> feedbackFormsResponse.responseDate
         ))
@@ -77,20 +83,31 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
 
 
-    def allDistinctSessions(presentersEmail : String): Future[Set[String]] = {
+  def userDistinctSessionsIds(presentersEmail : String): Future[List[String]] = {
+    val query = Json.obj("presenter" -> presentersEmail)
     collection
-        .flatMap(jsonCollection =>
-          jsonCollection
-            .distinct[String, Set]("sessionId"))
-   }
-  def mySessions(presentersEmail : String , SessionId : String): Future[List[FeedbackFormsResponse]] = {
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .distinct[String, List]("sessionId",Some(query)))
+  }
+  def mySessions(presentersEmail : String , SessionId : String): Future[Option[FeedbackFormsResponse]] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj(
             "presenter" -> presentersEmail,
             "sessionId" -> SessionId))
-          .cursor[FeedbackFormsResponse](ReadPreference.primary)
+            .one[FeedbackFormsResponse])
+  }
+
+  def allResponsesBySesion(presentersEmail : String , SessionId : String): Future[List[FeedbackFormsResponse]] = {
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+            "presenter" -> presentersEmail,
+            "sessionId" -> SessionId))
+          .cursor[FeedbackFormsResponse](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
   }
 

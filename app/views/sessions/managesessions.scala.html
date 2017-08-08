@@ -35,7 +35,7 @@
                                 <th>Session</th>
                                 <th>Topic</th>
                                 <th>Email</th>
-                                <th>Meetup</th>
+                                <th>Type</th>
                                 <th>Cancelled</th>
                                 <th>Rating</th>
                                 <th>Scheduled Status</th>
@@ -57,11 +57,11 @@
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
 
-                                @(if(knolxSession.meetup) {
-                                        <td class='active-status'>Yes</td>
-                                } else {
-                                        <td class='suspended'>No</td>
-                                })
+                                <td><span class="label @if(knolxSession.meetup){
+                                    label-success ">Meetup</span></td>
+                                }else{
+                                label-warning ">Knolx</span></td>
+                            }
 
                                 @(if(knolxSession.cancelled) {
                                         <td class='active-status' >Yes</td>

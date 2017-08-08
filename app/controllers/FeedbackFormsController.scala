@@ -1,6 +1,5 @@
 package controllers
 
-import java.time.{Instant, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 
 import models._
@@ -11,11 +10,10 @@ import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 
-import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class QuestionInformation(question: String, options: List[String])
+case class QuestionInformation(question: String, options: List[String], questionType: String, mandatory: Boolean)
 
 case class FeedbackFormPreview(name: String, questions: List[QuestionInformation])
 
@@ -81,6 +79,20 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
       Some("Options must not be empty!")
     }
 
+  def validateType: Option[String] =
+    if (questions.flatMap(_.questionType).contains("MCQ") || questions.flatMap(_.questionType).contains("COMMENT")) {
+      None
+    } else {
+      Some("Server couldn't understand this request")
+    }
+
+  def validateMandatory: Option[String] =
+    if (questions.map(_.mandatory) == true || questions.map(_.mandatory) == false) {
+      None
+    } else {
+      Some("Server couldn't understand this request")
+    }
+
 }
 
 @Singleton
@@ -98,14 +110,12 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackPreviewFormat: OFormat[FeedbackFormPreview] = Json.format[FeedbackFormPreview]
   implicit val updateFeedbackFormInformationFormat: OFormat[UpdateFeedbackFormInformation] = Json.format[UpdateFeedbackFormInformation]
 
-  val usersRepo: UsersRepository = usersRepository
-
   def manageFeedbackForm(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackRepository
       .paginate(pageNumber)
       .flatMap { feedbackForms =>
         val updateFormInformation = feedbackForms map { feedbackForm =>
-          val questionInformation = feedbackForm.questions.map(question => QuestionInformation(question.question, question.options))
+          val questionInformation = feedbackForm.questions.map(question => QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
 
           UpdateFeedbackFormInformation(feedbackForm._id.stringify, feedbackForm.name, questionInformation)
         }
@@ -131,7 +141,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
         feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
       formValid.fold {
-        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
 
         feedbackRepository.insert(FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
           if (result.ok) {
@@ -154,13 +164,14 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedbackForm) =>
-          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options))
+          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
         case None               => NotFound("404! feedback form not found")
       }
   }
+
 
   def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
@@ -174,25 +185,12 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
             .getByFeedbackFormId(id)
             .map {
               case Some(feedForm: FeedbackForm) =>
-                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, jsonCountBuilder(feedForm)))
+                Ok(views.html.feedbackforms.updatefeedbackform(feedForm, FeedbackFormsHelper.jsonCountBuilder(feedForm)))
               case None                         =>
                 Redirect(routes.FeedbackFormsController.manageFeedbackForm(1)).flashing("message" -> "Something went wrong!")
             }
         }
       }
-  }
-
-  def jsonCountBuilder(feedForm: FeedbackForm): String = {
-
-    @tailrec
-    def builder(questions: List[Question], json: List[String], count: Int): List[String] = {
-      questions match {
-        case Nil          => json
-        case head :: tail => builder(tail, json :+ s""""$count":"${head.options.size}"""", count + 1)
-      }
-    }
-
-    s"{${builder(feedForm.questions, Nil, 0).mkString(",")}}"
   }
 
   def updateFeedbackForm: Action[JsValue] = adminAction.async(parse.json) { implicit request =>
@@ -213,7 +211,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
                 feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
             validatedForm.fold {
-              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
 
               feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
                 if (result.ok) {

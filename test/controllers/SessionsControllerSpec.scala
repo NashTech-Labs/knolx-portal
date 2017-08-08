@@ -31,25 +31,20 @@ class SessionsControllerSpec extends PlaySpecification with Results {
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
-  
+
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
 
+
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+
+
+  private val emptyEmailObject = Future.successful(None)
+
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
-
-    val sessionsRepository = mock[SessionsRepository]
-    val feedbackFormsRepository = mock[FeedbackFormsRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-
-    val sessionsScheduler =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
-
     lazy val controller =
       new SessionsController(
         knolxControllerComponent.messagesApi,
@@ -59,31 +54,38 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler)
+    val sessionsRepository = mock[SessionsRepository]
+    val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsScheduler =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
   }
 
   "Session Controller" should {
 
     "display sessions page" in new WithTestApplication {
-      sessionsRepository.paginate(1) returns sessionObject
-      sessionsRepository.activeCount returns Future.successful(1)
+
+      sessionsRepository.paginate(1, None) returns sessionObject
+      sessionsRepository.activeCount(None) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.sessions(1)(FakeRequest().withCSRFToken)
+      val result = controller.sessions(1, None)(FakeRequest().withCSRFToken)
 
       contentAsString(result) must be contain "<th>Topic</th>"
       status(result) must be equalTo OK
     }
 
     "display manage sessions page" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.paginate(1) returns sessionObject
-      sessionsRepository.activeCount returns Future.successful(1)
+      sessionsRepository.paginate(1,None) returns sessionObject
+      sessionsRepository.activeCount(None) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.manageSessions(1)(
+      val result = controller.manageSessions(1, None)(
         FakeRequest()
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken)
@@ -93,27 +95,23 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "not open manage sessions page when wrong username is specified" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
 
-      usersRepository.getByEmail("") returns emailObject
+      usersRepository.getByEmail("") returns emptyEmailObject
       sessionsRepository.sessions returns sessionObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.manageSessions(1)(FakeRequest().withCSRFToken)
+      val result = controller.manageSessions(1, None)(FakeRequest().withCSRFToken)
 
       contentAsString(result) must be contain ""
       status(result) must be equalTo UNAUTHORIZED
     }
 
     "not open manage sessions page when user is not admin" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject.map(userInfo => userInfo.map(_.copy(admin = false)))
       sessionsRepository.sessions returns sessionObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.manageSessions(1)(
+      val result = controller.manageSessions(1, None)(
         FakeRequest()
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken)
@@ -123,10 +121,12 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "not open manage sessions page when unauthorized access is performed" in new WithTestApplication {
+
       val emailObject = Future.successful(List.empty)
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
 
       val result = controller.manageSessions(1)(
         FakeRequest()
@@ -144,9 +144,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           "Meetup" -> JsString("meetup"), "Cancelled" -> JsString("cancelled"),
           "Rating" -> JsString("rating"), "Active" -> JsBoolean(true), "_id" -> JsString(_id.stringify)))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete(_id.stringify) returns objectToDelete
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -161,9 +158,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
     "not delete session when wrong id is specified" in new WithTestApplication {
       val objectToDelete = Future.successful(None)
-
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.delete("1") returns objectToDelete
@@ -184,10 +178,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           "Meetup" -> JsString("meetup"), "Cancelled" -> JsString("cancelled"),
           "Rating" -> JsString("rating"), "Active" -> JsBoolean(true)))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emailObject.map(userInfo => userInfo.map(_.copy(admin = false)))
       sessionsRepository.delete("123") returns objectToDelete
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -200,9 +191,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "render create session form" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -224,9 +213,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -259,9 +246,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -286,9 +271,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "not create session due to BadFormRequest" in new WithTestApplication {
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -314,14 +297,12 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, _id)))
 
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@example.com") returns emailObject
-      usersRepository.getByEmail("test2@example.com") returns Future.successful(Nil)
+      usersRepository.getByEmail("test2@example.com") returns Future.successful(None)
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -340,11 +321,10 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "not create session due to unauthorized access" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
-      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3")))))
+      val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
@@ -366,14 +346,11 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "render update session form" in new WithTestApplication {
+    "render getByEmail session form" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@example.com", BSONDateTime(date.getTime), "session 1",
         "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
@@ -394,9 +371,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     "redirect to manage sessions page when session is not found" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
-
       val sessionInfo = Future.successful(None)
 
       usersRepository.getByEmail("test@example.com") returns emailObject
@@ -411,10 +385,9 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not render update session form/manage session form due to unauthorized access" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
+    "not render getByEmail session form/manage session form due to unauthorized access" in new WithTestApplication {
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
@@ -429,17 +402,15 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "update session" in new WithTestApplication {
+    "getByEmail session" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
         "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
@@ -452,7 +423,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.updateSession()(
-        FakeRequest(POST, "update")
+        FakeRequest(POST, "getByEmail")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
@@ -466,16 +437,14 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not update session when result is false" in new WithTestApplication {
+    "not getByEmail session when result is false" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
         "feedbackFormId", "topic", 1, meetup = true), BSONDateTime(1498415399000L))
@@ -489,7 +458,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.updateSession()(
-        FakeRequest(POST, "update")
+        FakeRequest(POST, "getByEmail")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
@@ -503,13 +472,11 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "not update session due to BadFormRequest" in new WithTestApplication {
+    "not getByEmail session due to BadFormRequest" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
 
-      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"))
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-      val emailObject = Future.successful(List(UserInfo("test@example.com",
-        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
@@ -517,7 +484,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.updateSession()(
-        FakeRequest(POST, "update")
+        FakeRequest(POST, "getByEmail")
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-21T16:00",
@@ -530,10 +497,9 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "not update session due to unauthorized access" in new WithTestApplication {
-      val emailObject = Future.successful(List.empty)
+    "not getByEmail session due to unauthorized access" in new WithTestApplication {
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@example.com") returns emptyEmailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val sessionDate = new Date(System.currentTimeMillis + 24 * 60 * 60 * 1000)
@@ -556,21 +522,85 @@ class SessionsControllerSpec extends PlaySpecification with Results {
     }
 
     "cancel session by session id" in new WithTestApplication {
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest().withCSRFToken)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
+    }
+
+
+    "throw a bad request when encountered a invalid value for search session form" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.searchSessions()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "0").withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "schedule session by session id" in new WithTestApplication {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
-      val result = controller.scheduleSession(_id.stringify)(FakeRequest().withCSRFToken)
+      val result = controller.scheduleSession(_id.stringify)(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
 
-  }
+    "return json for the session searched by email" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.paginate(1, Some("test@example.com")) returns sessionObject
+      sessionsRepository.activeCount(Some("test@example.com")) returns Future.successful(1)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
+      val result = controller.searchSessions()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "1"))
+
+      status(result) must be equalTo OK
+    }
+
+    "throw a bad request when encountered a invalid value from form for manage Sessions" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.searchManageSession()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "invalid value"))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "return json for the session to manage when searched by email" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      sessionsRepository.paginate(1, Some("test@example.com")) returns sessionObject
+      sessionsRepository.activeCount(Some("test@example.com")) returns Future.successful(1)
+
+      val result = controller.searchManageSession()(FakeRequest(POST, "search")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@example.com",
+          "page" -> "1"))
+
+      status(result) must be equalTo OK
+    }
+
+  }
 }
+

@@ -1,0 +1,65 @@
+@(userInfo: Form[UpdateUserInfo])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@main("Update User") {
+
+    <div class="row">
+        <div class="col-md-4" >
+        </div>
+        <div class="col-md-4 profile" >
+            <div class="container-fluid default-margin-top">
+            </div>
+            <div class="login-outer">
+                <div class="col-md-12 login-first" ></div>
+                <div class='col-md-12 feedback-card-author manage-user-container-email'><p>@userInfo.data.get("email")</p></div>
+                <div class='col-md-12'>
+                <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
+                    @helper.CSRF.formField
+                    <input type='hidden' name="email" value="@userInfo.data.get("email")"/>
+                    <label class='checkbox-outer'>
+                        <p class='manage-user-checkbox-text'>Active</p>
+                    <input type='checkbox' @if(userInfo.data.get("active").contains("true")){ checked } name='active' id='suspend' class='custom-checkbox' value='true' />
+                     <span class='manage-user-label_text'></span>
+                    </label>
+
+                    <div class="col-md-12 login-third update-second">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 password-bar">
+                            <input type='password' name='password' id='password-text' placeholder="New Password"  class="update-field password-text"/>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+
+                    <div class="col-md-12 update-second-field login-four save-user-changes">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10 ">
+                            <input type="submit" value="Save" class="input-field update-button"/>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row login-error">
+        <div class="col-md-4" ></div>
+        <div class="col-md-4" >
+        @if(userInfo.hasGlobalErrors || userInfo("email").hasErrors || userInfo("active").hasErrors || userInfo("password").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                @flash.get("message").fold("")(message => message)
+                @userInfo("email").error.map(error => messages(error.message))
+                @if(userInfo("active").hasErrors){
+                 invalid value for 'Active'
+                }
+                @userInfo("password").error.map(error => messages(error.message))
+                @userInfo.globalError.map(_.message)
+            </div>
+        }
+        </div>
+        <div class="col-md-4" ></div>
+    </div>
+
+}

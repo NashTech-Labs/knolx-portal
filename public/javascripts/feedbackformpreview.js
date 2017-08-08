@@ -1,3 +1,9 @@
+$(function () {
+    $('#previewId').click(function () {
+        generatePreview();
+    });
+});
+
 function generatePreview() {
 
     var id = document.getElementById('feedbackFormId').value;
@@ -20,9 +26,14 @@ function generatePreview() {
                 for (var questionNumber = 0; questionNumber < questions.length; questionNumber++) {
                     var options = questions[questionNumber]['options'];
 
-                    for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-                        optionsLoaded += "<div class='col-md-12'><label class='preview-options'><i class='fa fa-circle-o' aria-hidden='true'></i> " + options[optionNumber] + "</label></div>"
-
+/*                   questions[questionNumber]['questionType']*/
+                    if(questions[questionNumber]['questionType'] == 'MCQ') {
+                        for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
+                            optionsLoaded += "<div class='col-md-12'><label class='preview-options'><i class='fa fa-circle-o' aria-hidden='true'></i> " + options[optionNumber] + "</label></div>"
+                        }
+                    }
+                    else{
+                        optionsLoaded += "<div class='col-md-12'><label class='preview-options preview-comment'>comment</label></div>"
                     }
 
                     $('#formData').append(
@@ -47,4 +58,3 @@ function generatePreview() {
         });
 
 }
-

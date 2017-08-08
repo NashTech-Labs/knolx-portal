@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormat._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
-case class Question(question: String, options: List[String])
+case class Question(question: String, options: List[String], questionType: String, mandatory: Boolean)
 
 case class FeedbackForm(name: String,
                         questions: List[Question],
@@ -34,7 +34,9 @@ object FeedbackFormat {
   implicit object QuestionWriter extends BSONDocumentWriter[Question] {
     def write(ques: Question): BSONDocument = BSONDocument(
       "question" -> ques.question,
-      "options" -> ques.options)
+      "options" -> ques.options,
+      "questionType" -> ques.questionType,
+      "mandatory" -> ques.mandatory)
   }
 
 }

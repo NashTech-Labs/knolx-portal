@@ -95,6 +95,23 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .cursor[SessionInfo](ReadPreference.Primary)
           .headOption)
 
+  def getActiveById(id: String)(implicit ex: ExecutionContext): Future[Option[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(BSONDocument(
+            "_id" -> BSONDocument("$oid" -> id),
+            "active" -> true,
+            "cancelled" -> false,
+            "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+            "date" -> BSONDocument("$lt" -> BSONDateTime(millis))
+          ))
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .headOption)
+  }
+
   def insert(session: SessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -107,7 +124,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
     val condition = keyword match {
       case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
-      case None => Json.obj("active" -> true)
+      case None      => Json.obj("active" -> true)
     }
 
     collection
@@ -123,7 +140,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
     val condition = keyword match {
       case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
-      case None => None
+      case None      => None
     }
 
     collection

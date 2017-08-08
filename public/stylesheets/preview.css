@@ -41,6 +41,12 @@
     letter-spacing: 2px;
     color: #7F8C8D;
 }
+.preview-comment {
+    font-size: 12px;
+    border: 2px dotted #a8a8a8;
+    margin-left:4%;
+    width: 60%;
+}
 
 .modal-body {
     border: none;

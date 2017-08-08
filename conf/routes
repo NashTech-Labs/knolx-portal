@@ -36,6 +36,7 @@ GET         /feedbackform/update                controllers.FeedbackFormsControl
 POST        /feedbackform/update                controllers.FeedbackFormsController.updateFeedbackForm
 GET         /feedbackform/delete                controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
 GET         /feedbackform/preview               controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
+POST        /feedbackform/submit                controllers.FeedbackFormsResponseController.storeFeedbackFormResponse
 GET         /feedbackform/response              controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
 GET         /jsRoutes                           controllers.JavascriptRouter.jsRoutes
 

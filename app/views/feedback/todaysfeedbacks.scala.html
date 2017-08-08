@@ -1,4 +1,4 @@
-@(active: List[(FeedbackSessions, String, String)], expired: List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(active: List[(FeedbackSessions, String)], expired: List[FeedbackSessions])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Feedbacks") {
     <div class="row">
@@ -7,21 +7,21 @@
             <div class="col-md-12 login-first test feedback-top-banner"></div>
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(active.nonEmpty) {
-                @for((sessions, feedbackForm, feedbackFormQuestionOptionCount) <- active) {
+                @for((session, feedbackForm) <- active) {
                     <div class="col-md-4">
                         <div class="col-md-12">
                             <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
-                                @defining(if(sessions.meetup) "Meetup" else "Knolx") { sessionType =>
-                                    <input type="hidden" id='existingCounts' value="@feedbackFormQuestionOptionCount"/>
+                                @defining(if(session.meetup) "Meetup" else "Knolx") { sessionType =>
                                     <div class="feedback-card-head stick-out"><i class="fa fa-list-alt feedback-display-logo" aria-hidden="true"></i></div>
-                                    <div class="col-md-12 feedback-card-topic"><p>@sessions.topic</p></div>
+                                    <div class="col-md-12 feedback-card-topic"><p>@session.topic</p></div>
                                     <div class="col-md-12 feedback-card-by">by</div>
-                                    <div class="col-md-12 feedback-card-author"><p>@sessions.email</p></div>
+                                    <div class="col-md-12 feedback-card-author"><p>@session.email</p></div>
                                     <button type="button" class="btn  feedback-card-button" id="fillFeedback">
                                         Fill Out</button>
-                                    <input type="hidden" id='getKnolxDetailsJson' value='{"topic":"@sessions.topic","author":"@sessions.email","session":"@sessions.session","scheduled":"@sessions.date","expire":"@sessions.expirationDate","sessiontype":"@sessionType"}'/>
+                                    <input type="hidden" id='getKnolxDetailsJson' value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'/>
                                     <input type="hidden" id='feedbackForm' value ='@feedbackForm'>
+                                    <input type="hidden" id='sessionId' value ='@session.id'>
                                     <div class="col-md-12 feedback-card-author more" ><p id="getKnolxDetailsActive">
                                         More...</p></div>
                                 </div>
@@ -130,8 +130,12 @@
                         </div>
                         <div class="col-md-8 feedback-response-form" >
                             <div id="feedback-response-form"></div>
+                            <div class="alert alert-danger" id="mandatory-warning">
+                                Please Respond to All Mandatory questions.
+                            </div>
                             <div id="parent" class="feedback-response-submit">
-                                <button type="button" class="btn btn-primary btn-lg submit-form-button" id='submitFeedbackForm' >Submit</button>
+                                <button type="button" class="btn btn-primary btn-lg submit-form-button" id='submitFeedbackForm' >
+                                    Submit</button>
                             </div>
                         </div>
 

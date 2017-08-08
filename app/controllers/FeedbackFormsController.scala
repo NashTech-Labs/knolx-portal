@@ -13,7 +13,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class QuestionInformation(question: String, options: List[String])
+case class QuestionInformation(question: String, options: List[String], questionType: String, mandatory: Boolean)
 
 case class FeedbackFormPreview(name: String, questions: List[QuestionInformation])
 
@@ -79,6 +79,20 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
       Some("Options must not be empty!")
     }
 
+  def validateType: Option[String] =
+    if (questions.flatMap(_.questionType).contains("MCQ") || questions.flatMap(_.questionType).contains("COMMENT")) {
+      None
+    } else {
+      Some("Server couldn't understand this request")
+    }
+
+  def validateMandatory: Option[String] =
+    if (questions.map(_.mandatory) == true || questions.map(_.mandatory) == false) {
+      None
+    } else {
+      Some("Server couldn't understand this request")
+    }
+
 }
 
 @Singleton
@@ -101,7 +115,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber)
       .flatMap { feedbackForms =>
         val updateFormInformation = feedbackForms map { feedbackForm =>
-          val questionInformation = feedbackForm.questions.map(question => QuestionInformation(question.question, question.options))
+          val questionInformation = feedbackForm.questions.map(question => QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
 
           UpdateFeedbackFormInformation(feedbackForm._id.stringify, feedbackForm.name, questionInformation)
         }
@@ -127,7 +141,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
         feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
       formValid.fold {
-        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
 
         feedbackRepository.insert(FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
           if (result.ok) {
@@ -150,7 +164,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedbackForm) =>
-          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options))
+          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
@@ -197,7 +211,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
                 feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
             validatedForm.fold {
-              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options))
+              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
 
               feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
                 if (result.ok) {

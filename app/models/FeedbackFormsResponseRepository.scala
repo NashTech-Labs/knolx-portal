@@ -46,20 +46,20 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("feedbackformsresponse"))
 
-  def insert(feedbackResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .insert(feedbackResponse))
+  def upsert(feedbackFormsResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("userId" -> feedbackFormsResponse.userId, "sessionId" -> feedbackFormsResponse.sessionId)
 
-  def update(id: String, feedbackFormsResponse: FeedbackFormsResponse)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
     val modifier =
       BSONDocument(
         "$set" -> BSONDocument(
+          "email" -> feedbackFormsResponse.email,
+          "userId" -> feedbackFormsResponse.userId,
+          "sessionId" -> feedbackFormsResponse.sessionId,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
-          "responseDate" -> feedbackFormsResponse.responseDate))
+          "responseDate" -> feedbackFormsResponse.responseDate
+        ))
 
-    collection.flatMap(_.update(selector, modifier))
+    collection.flatMap(_.update(selector, modifier, upsert = true))
   }
+
 }

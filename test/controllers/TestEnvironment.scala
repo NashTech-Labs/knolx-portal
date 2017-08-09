@@ -3,6 +3,7 @@ package controllers
 import java.util.concurrent.TimeoutException
 
 import akka.actor._
+import akka.stream.Materializer
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Module}
 import com.typesafe.config.ConfigFactory
@@ -10,10 +11,11 @@ import helpers.BeforeAllAfterAll
 import models.UsersRepository
 import org.specs2.mock.Mockito
 import org.specs2.mutable.SpecificationLike
-import play.api.{Configuration, Application}
+import play.api.{Application, Configuration}
 import play.api.http._
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import play.api.mvc._
+import play.api.libs.streams.Accumulator
+import play.api.mvc.{BodyParser, _}
 import play.api.test._
 import schedulers.SessionsScheduler._
 
@@ -51,6 +53,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
       .disable[Module]
       .build
   }
+
 
   protected def shutdownActorSystem(actorSystem: ActorSystem,
                                     duration: Duration = 10.seconds,
@@ -93,7 +96,13 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     with FutureAwaits
     with TestStubControllerComponentsFactory
 
+
+
   trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory with StubBodyParserFactory with StubMessagesFactory {
+
+   override def stubBodyParser[T](content: T = AnyContentAsEmpty): BodyParser[T] = {
+      BodyParser(_ => Accumulator.done(Right(content)))
+    }
 
     def stubControllerComponents: KnolxControllerComponents = {
       val bodyParser = stubBodyParser(AnyContentAsEmpty)

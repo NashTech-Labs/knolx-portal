@@ -184,7 +184,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             val timeStamp = dateTimeUtility.nowMillis
             val feedbackResponseData = FeedbackFormsResponse(request.user.email, header.email, request.user.id, feedbackFormResponse.sessionId,
               header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
-
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
               if (result.ok) {
                 Logger.info(s"Feedback form response successfully stored")

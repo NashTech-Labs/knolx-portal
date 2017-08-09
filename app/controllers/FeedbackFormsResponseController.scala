@@ -59,7 +59,11 @@ case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses
     }
 }
 
-case class FetchedResponses(responses: List[String])
+case class ResponseHeader(topic: String,
+                          email: String,
+                          date: BSONDateTime,
+                          session: String,
+                          meetUp: Boolean)
 
 class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
@@ -74,17 +78,10 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
   implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
-  implicit val fetchedResponsesFormat: OFormat[FetchedResponses] = Json.format[FetchedResponses]
-
-  val fetchFeedbackResponseForm = Form(
-    single(
-      "sessionId" -> nonEmptyText
-    )
-  )
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     sessionsRepository
-      .activeSessions
+      .activeSessions()
       .flatMap { activeSessions =>
         if (activeSessions.nonEmpty) {
           val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
@@ -143,22 +140,15 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             new Date(session.expirationDate.value).toString))
       }
 
-  def fetchFeedbackFormResponse: Action[AnyContent] = userAction.async { implicit request =>
-    fetchFeedbackResponseForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request while checking for responses ==> $formWithErrors")
-        Future.successful(BadRequest("OOps! Invalid value encountered !"))
-      },
-      sessionId => {
-        feedbackResponseRepository.getByUsersSession(request.user.id, sessionId).map { response =>
-          response.fold {
-            NotFound("fresh feedback")
-          } { (response: FeedbackFormsResponse) =>
-            val allResponses = response.feedbackResponse.map(responseInfo => responseInfo.response)
-            Ok(Json.toJson(allResponses).toString())
-          }
-        }
-      })
+  def fetchFeedbackFormResponse(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
+    feedbackResponseRepository.getByUsersSession(request.user.id, sessionId).map { response =>
+      response.fold {
+        NotFound("fresh feedback")
+      } { (response: FeedbackFormsResponse) =>
+        val allResponses = response.feedbackResponse.map(responseInfo => responseInfo.response)
+        Ok(Json.toJson(allResponses).toString())
+      }
+    }
   }
 
   def storeFeedbackFormResponse: Action[JsValue] = userAction.async(parse.json) { implicit request =>
@@ -177,10 +167,10 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           feedbackResponse.fold {
             Future.successful(BadRequest("Malformed Data!"))
           } { sanitizedResponse =>
-            val (response, sessionTopic) = sanitizedResponse
+            val (header, response) = sanitizedResponse
             val timeStamp = dateTimeUtility.nowMillis
-            val feedbackResponseData = FeedbackFormsResponse(request.user.email, request.user.id, feedbackFormResponse.sessionId,
-              sessionTopic, response, BSONDateTime(timeStamp))
+            val feedbackResponseData = FeedbackFormsResponse(request.user.email, header.email, request.user.id, feedbackFormResponse.sessionId,
+              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
               if (result.ok) {
                 Logger.info(s"Feedback form response successfully stored")
@@ -201,10 +191,10 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  private def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[(List[QuestionResponse], String)]] = {
+  private def deepValidatedFeedbackResponses(userResponse: FeedbackResponse): Future[Option[(ResponseHeader, List[QuestionResponse])]] = {
     sessionsRepository.getActiveById(userResponse.sessionId).flatMap { session =>
       session.fold {
-        val badResponse: Option[(List[QuestionResponse], String)] = None
+        val badResponse: Option[(ResponseHeader, List[QuestionResponse])] = None
         Future.successful(badResponse)
       } { session =>
         feedbackRepository.getByFeedbackFormId(userResponse.feedbackFormId).map {
@@ -213,7 +203,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             if (questions.size == userResponse.responses.size) {
               val sanitizedResponses = sanitizeResponses(questions, userResponse.responses).toList.flatten
               if (questions.size == sanitizedResponses.size) {
-                Some((sanitizedResponses, session.topic))
+                Some((ResponseHeader(session.topic, session.email, session.date, session.session, session.meetup), sanitizedResponses))
               } else {
                 None
               }

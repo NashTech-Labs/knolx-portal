@@ -13,7 +13,13 @@
                             <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
                                 @defining(if(session.meetup) "Meetup" else "Knolx") { sessionType =>
-                                    <div class="col-md-12 feedback-card-topic"><p>@session.topic</p></div>
+                                    <div class="col-md-12 feedback-card-topic custom-position">
+                                        <div class="session-type"><span class="label @if(sessionType == "Knolx"){
+                                            label-warning
+                                        }else{
+                                            label-success
+                                        } custom-label-type">@sessionType</span></div>
+                                        <p>@session.topic</p></div>
                                     <div class="col-md-12 feedback-card-by">from</div>
                                     <div class="col-md-12 feedback-card-author"><p>@session.email</p></div>
                                     <button type="button" id='@session.id' class="btn feedback-card-button fillFeedback" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>
@@ -35,7 +41,9 @@
                                 <div class="card-body">
                                 @defining(if(expiredSession.meetup) "Meetup" else "Knolx") { sessionType =>
                                     <div class="session-content">
-                                        <div class="col-md-12 feedback-card-topic expired"><p>@expiredSession.topic</p></div>
+                                        <div class="col-md-12 feedback-card-topic custom-position expired">
+                                            <div class="session-type"><span class="label label-default custom-label-type">@sessionType</span></div>
+                                            <p>@expiredSession.topic</p></div>
                                         <div class="col-md-12 feedback-card-by">by</div>
                                         <div class="col-md-12 feedback-card-author expire-color"><p>@expiredSession.email</p></div>
                                     </div>

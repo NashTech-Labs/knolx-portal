@@ -2,7 +2,6 @@ package controllers
 
 import java.text.SimpleDateFormat
 
-import akka.stream.Materializer
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
@@ -10,7 +9,7 @@ import org.specs2.specification.Scope
 import play.api.Application
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
-import play.api.mvc.{AnyContentAsJson, Results}
+import play.api.mvc.Results
 import play.api.test.CSRFTokenHelper._
 import play.api.test.{FakeRequest, _}
 import reactivemongo.api.commands.DefaultWriteResult
@@ -36,8 +35,11 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
     active = true, _id)
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@example.com", _id.stringify, _id.stringify,
+  private val feedbackResponse = FeedbackFormsResponse("test@example.com", "presenter@example.com", _id.stringify, _id.stringify,
     "topic",
+    meetup = false,
+    BSONDateTime(date.getTime),
+    "session1",
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
     _id)
@@ -72,7 +74,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
     "not render feedback form for today if session associated feedback form not found" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.activeSessions returns sessionObject
+      sessionsRepository.activeSessions() returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
 
       val response = controller.getFeedbackFormsForToday(
@@ -89,7 +91,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
           1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.activeSessions returns sessionObjectWithCurrentDate
+      sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
 
       val response = controller.getFeedbackFormsForToday(
@@ -102,7 +104,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
     "render feedback form for today if session associated feedback form exists and session has expired expired" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.activeSessions returns sessionObject
+      sessionsRepository.activeSessions() returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
 
       val response = controller.getFeedbackFormsForToday(
@@ -116,7 +118,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     "render feedback form for today with immidiate explored sessions if no active sessions found" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
-      sessionsRepository.activeSessions returns noActiveSessionObject
+      sessionsRepository.activeSessions() returns noActiveSessionObject
       sessionsRepository.immediatePreviousExpiredSessions returns sessionObject
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()

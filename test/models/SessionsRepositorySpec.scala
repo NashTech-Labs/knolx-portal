@@ -119,7 +119,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       dateTimeUtility.nowMillis returns greaterThanSessionMillis
 
-      val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions)
+      val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions())
 
       activeSessions must beEqualTo(List(sessionInfo))
     }

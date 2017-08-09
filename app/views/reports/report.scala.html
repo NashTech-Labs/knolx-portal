@@ -1,44 +1,57 @@
 @(report: FeedbackReport)(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Feedbacks") {
-    <div class="row">
-        @report.questionAndResponse match{
-            case first::rest =>{
-        <div class="col-md-12 feedback-form-display-container report-info">
-            <span class="label label-primary total-responses">Total <span class="badge badge-report">@{report.questionAndResponse.size}</span></span>
-            <span ><div class="report-other-info">@report.info.topic<sup><span class="label label-warning report-type">Knolx</span></sup><p class="report-session-date">@report.info.date</p></div></span>
-        </div>
-        <div class="col-md-12 feedback-form-display-container report-content-outer">
-                    <div class="table-responsive manage-user-custom-table-margin report-content-outer">
-                        <table class="table table-striped">
-                            <thead class="report-head">
-                                <tr>
-                                    <th>Sno.</th>
-                                    @for(question <- first){
-                                        <th>@question.question</th>
-                                    }
+@main("Reports") {
 
-                                </tr>
-                            </thead>
-                            <tbody id="user-found">
-                            @for(response <- report.questionAndResponse.indices){
-                                <tr>
-                                    <td>@{response+1}</td>
-                                @for(question <- report.questionAndResponse(response)){
-                                    <td>@question.response</td>
-                                }
-                                </tr>
-                            }
-                            </tbody>
-                        </table>
+    @report.report.fold {
+
+    } { report =>
+        <div class="row">
+            @report._2 match {
+                case first :: rest => {
+                    <div class="col-md-12 feedback-form-display-container report-info">
+                        <span class="label label-primary total-responses">Total <span class="badge badge-report">@{
+                            report._2.size
+                        }</span></span>
+                        <span ><div class="report-other-info">@report._1.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
+                        <p class="report-session-date">@report._1.date</p></div>
+                        </span>
                     </div>
+                    <div class="col-md-12 feedback-form-display-container report-content-outer">
+                        <div class="table-responsive manage-user-custom-table-margin report-content-outer">
+                            <table class="table table-striped">
+                                <thead class="report-head">
+                                    <tr>
+                                        <th>Sno.</th>
+                                        @for(question <- first) {
+                                            <th>@question.question</th>
+                                        }
+
+                                    </tr>
+                                </thead>
+                                <tbody id="user-found">
+                                @for(response <- report._2.indices) {
+                                    <tr>
+                                        <td>@{
+                                            response + 1
+                                        }</td>
+                                        @for(question <- report._2(response)) {
+                                            <td>@question.response</td>
+                                        }
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
 
 
-                }
-                case _ =>{}
+                        }
+                case _ => {}
 
             }
 
         </div>
-    </div>
+        </div>
+    }
+
+
 }

@@ -130,7 +130,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       feedbackFormsResponseRepository
-        .allResponsesBySesion("test@example.com", _id.stringify) returns Future.successful(List(feedbackResponse))
+        .allResponsesBySession("test@example.com", _id.stringify) returns Future.successful(List(feedbackResponse))
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
         FakeRequest()

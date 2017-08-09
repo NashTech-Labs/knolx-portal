@@ -100,7 +100,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
             .one[FeedbackFormsResponse])
   }
 
-  def allResponsesBySesion(presentersEmail : String , SessionId : String): Future[List[FeedbackFormsResponse]] = {
+  def allResponsesBySession(presentersEmail : String, SessionId : String): Future[List[FeedbackFormsResponse]] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection

@@ -14,17 +14,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class FeedbackReportHeader(sessionId: String, topic: String, active: Boolean, session: String, meetUp: Boolean, date: String)
-case class FeedbackReport(info:FeedbackReportHeader, questionAndResponse: List[List[QuestionResponse]])
 
-class FeedbackReportsController @Inject()(messagesApi: MessagesApi,
-                                          mailerClient: MailerClient,
-                                          usersRepository: UsersRepository,
-                                          feedbackRepository: FeedbackFormsRepository,
-                                          feedbackFormsResponseRepository: FeedbackFormsResponseRepository,
-                                          sessionsRepository: SessionsRepository,
-                                          dateTimeUtility: DateTimeUtility,
-                                          controllerComponents: KnolxControllerComponents
-                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+case class FeedbackReport(info: FeedbackReportHeader, questionAndResponse: List[List[QuestionResponse]])
+
+class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
+                                              mailerClient: MailerClient,
+                                              usersRepository: UsersRepository,
+                                              feedbackRepository: FeedbackFormsRepository,
+                                              feedbackFormsResponseRepository: FeedbackFormsResponseRepository,
+                                              sessionsRepository: SessionsRepository,
+                                              dateTimeUtility: DateTimeUtility,
+                                              controllerComponents: KnolxControllerComponents
+                                             ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   def renderMyFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsResponseRepository
@@ -75,8 +76,8 @@ class FeedbackReportsController @Inject()(messagesApi: MessagesApi,
     feedbackFormsResponseRepository.allResponsesBySesion(request.user.email, id).map { responses =>
 
       val response :: _ = responses
-      val header =  FeedbackReportHeader(response.sessionId,response.sessionTopic,
-        active = false,response.session, response.meetup, new Date(response.sessiondate.value).toString)
+      val header = FeedbackReportHeader(response.sessionId, response.sessionTopic,
+        active = false, response.session, response.meetup, new Date(response.sessiondate.value).toString)
 
       val questionAndResponses = responses.map(_.feedbackResponse)
 

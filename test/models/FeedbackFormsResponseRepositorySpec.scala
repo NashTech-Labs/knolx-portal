@@ -57,4 +57,5 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
     }
 
   }
+
 }

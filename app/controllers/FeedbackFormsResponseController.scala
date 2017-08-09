@@ -59,10 +59,10 @@ case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses
     }
 }
 
-case class responseHeader(topic:String,
+case class responseHeader(topic: String,
                           email: String,
                           date: BSONDateTime,
-                          session : String,
+                          session: String,
                           meetUp: Boolean)
 
 class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,

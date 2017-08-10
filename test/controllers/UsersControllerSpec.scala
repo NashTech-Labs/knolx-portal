@@ -1,17 +1,17 @@
 package controllers
 
-import com.typesafe.config.ConfigFactory
-import models.{SessionInfo, UpdatedUserInfo, UserInfo, UsersRepository}
-import models.UserInfo
+import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.Application
+import play.api.libs.mailer.MailerClient
 import play.api.mvc.Results
 import play.api.test.CSRFTokenHelper._
 import play.api.test._
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{BSONDateTime, BSONObjectID}
+import reactivemongo.bson.BSONObjectID
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,8 +25,11 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp
+    val forgotPasswordRepository = mock[ForgotPasswordRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val mailerClient = mock[MailerClient]
     lazy val controller =
-      new UsersController(knolxControllerComponent.messagesApi, usersRepository, config, knolxControllerComponent)
+      new UsersController(knolxControllerComponent.messagesApi, usersRepository, forgotPasswordRepository, config, dateTimeUtility, knolxControllerComponent, mailerClient)
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))

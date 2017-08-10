@@ -26,7 +26,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   private val endOfDayDate = formatter.parse(endOfDayDateString)
   private val endOfDayMillis = endOfDayDate.getTime
 
-  //Do not auto format with intellij, It will shift the variable at top causing suspicious forward reference which result in failure of test cases.
+  //Do not auto format with intellij, It will shift the variable at top causing suspicious forward reference.
   val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "feedbackFormId", "topic1",
     1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
 

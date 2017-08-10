@@ -20,7 +20,10 @@ import scala.util.{Failure, Success, Try}
 
 case class UserInformation(email: String, password: String, confirmPassword: String)
 
-case class ResetPasswordInformation(token: String, email: String, password: String, confirmPassword: String)
+case class ResetPasswordInformation(token: String,
+                                    email: String,
+                                    password: String,
+                                    confirmPassword: String)
 
 case class LoginInformation(email: String, password: String)
 

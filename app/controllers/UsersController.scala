@@ -3,6 +3,7 @@ package controllers
 import java.util.UUID
 import javax.inject._
 
+import actors.EmailActor
 import akka.actor.ActorRef
 import models.{ForgotPasswordRepository, PasswordChangeRequestInfo, UpdatedUserInfo, UsersRepository}
 import play.api.data.Forms.{nonEmptyText, _}
@@ -12,7 +13,6 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
-import actors.EmailActor
 import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -295,6 +295,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val url = routes.UsersController.changePassword(token).url
               val changePasswordUrl = s"""http://${request.host}$url"""
 
+              // todo get from config
+              val from = ""
               val subject = "Knolx portal password change request."
               val body =
                 s"""
@@ -303,7 +305,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                    |<strong><p>If you are not the one who has initiated this request kindly ignore this mail</p></strong>
                 """.stripMargin
 
-              emailManager ! EmailActor.SendEmail(List(foundUser.email), subject, body)
+              emailManager ! EmailActor.SendEmail(List(foundUser.email), from, subject, body)
 
               Redirect(routes.UsersController.login())
                 .flashing("successMessage" -> "An email with password reset link has been initiated to your registered account")

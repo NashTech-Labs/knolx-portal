@@ -127,28 +127,14 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       status(response) must be equalTo OK
     }
 
-    "not fetch response" in new WithTestApplication {
-
-      usersRepository.getByEmail("test@example.com") returns emailObject
-
-      val response = controller.fetchFeedbackFormResponse()(FakeRequest(POST, "fetch")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody(
-          "sessionId" -> ""))
-
-      status(response) must be equalTo BAD_REQUEST
-
-    }
 
     "Not fetch response as no stored response found" in new WithTestApplication {
 
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(None)
 
-      val response = controller.fetchFeedbackFormResponse()(FakeRequest(POST, "fetch")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody(
-          "sessionId" -> _id.stringify))
+      val response = controller.fetchFeedbackFormResponse(_id.stringify)(FakeRequest(GET, "fetch")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo NOT_FOUND
 
@@ -159,10 +145,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(Some(feedbackResponse))
 
-      val response = controller.fetchFeedbackFormResponse()(FakeRequest(POST, "fetch")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
-        .withFormUrlEncodedBody(
-          "sessionId" -> _id.stringify))
+      val response = controller.fetchFeedbackFormResponse(_id.stringify)(FakeRequest(GET, "fetch")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
 
       status(response) must be equalTo OK
 

@@ -74,6 +74,11 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       updated must beEqualTo(true)
     }
 
+    "get active session by id" in new TestScope {
+      val response = await(sessionsRepository.getActiveById(sessionId.stringify))
+
+      response contains sessionInfo
+    }
 
     "get paginated sessions when serched with empty string" in new TestScope {
       val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1))
@@ -122,6 +127,23 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions())
 
       activeSessions must beEqualTo(List(sessionInfo))
+    }
+
+    "get active sessions by email" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
+        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val greaterThanSessionMillis: Long = currentMillis + 2 * 60 * 60 * 1000
+
+      dateTimeUtility.nowMillis returns greaterThanSessionMillis
+
+      val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions(Some("test@example.com")))
+
+      activeSessions must contain(List(sessionInfo).head)
     }
 
     "get immediate previous expired sessions" in new TestScope {

@@ -13,7 +13,12 @@ import scala.collection.immutable.::
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class FeedbackReportHeader(sessionId: String, topic: String, active: Boolean, session: String, meetUp: Boolean, date: String)
+case class FeedbackReportHeader(sessionId: String,
+                                topic: String,
+                                active: Boolean,
+                                session: String,
+                                meetUp: Boolean,
+                                date: String)
 
 case class FeedbackReport(report: Option[(FeedbackReportHeader, List[List[QuestionResponse]])])
 
@@ -27,16 +32,13 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                                               controllerComponents: KnolxControllerComponents
                                              ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  def renderMyFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
-    feedbackFormsResponseRepository
-      .userDistinctSessionsIds(request.user.email).flatMap { myReportIds =>
-      generateSessionFeedbackReport(myReportIds, request.user.email).map { reportInfo =>
+  def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
+      generateSessionFeedbackReport(request.user.email).map { reportInfo =>
         Ok(views.html.reports.myreports(reportInfo))
       }
-    }
   }
 
-  private def generateSessionFeedbackReport(sessionIds: List[String], presenter: String): Future[List[FeedbackReportHeader]] = {
+  private def generateSessionFeedbackReport( presenter: String): Future[List[FeedbackReportHeader]] = {
     val myActiveSessions = sessionsRepository.activeSessions(Some(presenter))
     val presentersSessionTillNow = sessionsRepository.UserSessionsTillNow(presenter)
 

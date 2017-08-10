@@ -3,20 +3,20 @@ package controllers
 import java.util.UUID
 import javax.inject._
 
+import akka.actor.ActorRef
 import models.{ForgotPasswordRepository, PasswordChangeRequestInfo, UpdatedUserInfo, UsersRepository}
 import play.api.data.Forms.{nonEmptyText, _}
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
+import schedulers.EmailActor
 import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 case class UserInformation(email: String, password: String, confirmPassword: String)
 
@@ -45,7 +45,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                                 configuration: Configuration,
                                 dateTimeUtility: DateTimeUtility,
                                 controllerComponents: KnolxControllerComponents,
-                                mailerClient: MailerClient
+                                @Named("EmailManager") emailManager: ActorRef
                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val manageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
@@ -281,40 +281,34 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       email => {
         usersRepository
-          .getActiveByEmail(email.toLowerCase).map { user =>
-          user.fold {
-            Redirect(routes.UsersController.forgotPassword()).flashing("message" -> "User not found, consider registering such user instead!")
-          } { foundUser =>
-            val validTill = dateTimeUtility.localDateTimeIST.plusDays(1)
-            val token = UUID.randomUUID.toString
-            val requestInfo = PasswordChangeRequestInfo(foundUser.email, token, BSONDateTime(dateTimeUtility.toMillis(validTill)))
-            forgotPasswordRepository.upsert(requestInfo)
+          .getActiveByEmail(email.toLowerCase)
+          .map { user =>
+            user.fold {
+              Redirect(routes.UsersController.forgotPassword())
+                .flashing("message" -> "User not found, consider registering such user instead!")
+            } { foundUser =>
+              val validTill = dateTimeUtility.localDateTimeIST.plusDays(1)
+              val token = UUID.randomUUID.toString
+              val requestInfo = PasswordChangeRequestInfo(foundUser.email, token, BSONDateTime(dateTimeUtility.toMillis(validTill)))
+              forgotPasswordRepository.upsert(requestInfo)
 
-            val url = routes.UsersController.changePassword(token).url
-            val changePasswordUrl = s"""http://${request.host}$url"""
-            val email =
-              Email(subject = s"Knolx portal password change request.",
-                from = configuration.getString("play.mailer.user").getOrElse(""),
-                to = List(foundUser.email),
-                bodyHtml = Some(
-                  s"""
-                     |<p>Hi,</p>
-                     |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
-                     |<strong><p>If you are not the one who has initiated this request kindly ignore this mail</p></strong>
-                """.stripMargin),
-                bodyText = None, replyTo = None)
-            Try {
-              mailerClient.send(email)
-            } match {
-              case Success(_) => Redirect(routes.UsersController.login())
+              val url = routes.UsersController.changePassword(token).url
+              val changePasswordUrl = s"""http://${request.host}$url"""
+
+              val subject = "Knolx portal password change request."
+              val body =
+                s"""
+                   |<p>Hi,</p>
+                   |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
+                   |<strong><p>If you are not the one who has initiated this request kindly ignore this mail</p></strong>
+                """.stripMargin
+
+              emailManager ! EmailActor.SendEmail(List(foundUser.email), subject, body)
+
+              Redirect(routes.UsersController.login())
                 .flashing("successMessage" -> "An email with password reset link has been initiated to your registered account")
-              case Failure(_) =>
-                Redirect(routes.UsersController.login())
-                  .flashing("message" -> "Sorry! Sending reset link email failed, please check your internet connection and try again!")
             }
-
           }
-        }
       }
     )
   }

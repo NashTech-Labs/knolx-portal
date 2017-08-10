@@ -17,7 +17,7 @@ import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{BodyParser, _}
 import play.api.test._
-import schedulers.SessionsScheduler._
+import actors.SessionsScheduler._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}

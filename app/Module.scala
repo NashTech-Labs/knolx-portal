@@ -8,7 +8,7 @@ import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.libs.Akka
-import schedulers.{ConfiguredEmailActor, EmailActor, EmailManager, SessionsScheduler}
+import actors.{ConfiguredEmailActor, EmailActor, EmailManager, SessionsScheduler}
 
 class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 

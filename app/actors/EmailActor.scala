@@ -1,10 +1,10 @@
-package schedulers
+package actors
 
 import javax.inject.Inject
 
 import akka.actor.{Actor, ActorLogging}
 import play.api.libs.mailer.{Email, MailerClient}
-import schedulers.EmailActor._
+import actors.EmailActor._
 
 object ConfiguredEmailActor {
 

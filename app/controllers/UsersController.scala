@@ -12,7 +12,7 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
-import schedulers.EmailActor
+import actors.EmailActor
 import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global

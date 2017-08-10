@@ -1,4 +1,4 @@
-package schedulers
+package actors
 
 import akka.actor.{ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
@@ -11,7 +11,7 @@ import org.specs2.specification.Scope
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import schedulers.SessionsScheduler._
+import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -96,7 +96,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       expectMsg(1)
     }
 
-    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
+    "start sessions actors for Knolx sessions scheduled today" in new TestScope {
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
       val schedulersSize = sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsScheduledToday))
@@ -104,7 +104,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       expectMsg(1)
     }
 
-    "refresh sessions schedulers" in new TestScope {
+    "refresh sessions actors" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = true
 
@@ -138,7 +138,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
 
-    "not refresh sessions schedulers because of empty feedback forms" in new TestScope {
+    "not refresh sessions actors because of empty feedback forms" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = false
 

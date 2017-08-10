@@ -1,4 +1,4 @@
-package schedulers
+package actors
 
 import javax.inject.Inject
 

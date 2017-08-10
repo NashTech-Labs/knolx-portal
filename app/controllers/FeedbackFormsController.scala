@@ -175,7 +175,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
 
   def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
-      .activeSessions
+      .activeSessions()
       .flatMap { sessions =>
         if (sessions.foldLeft(false)(_ || _.feedbackFormId == id)) {
           Future.successful(Redirect(routes.FeedbackFormsController.manageFeedbackForm(1))
@@ -199,7 +199,7 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       Future.successful(BadRequest("Malformed data!"))
     } { feedbackFormInformation =>
       sessionsRepository
-        .activeSessions
+        .activeSessions()
         .flatMap { sessions =>
           if (sessions.foldLeft(false)(_ || _.feedbackFormId == feedbackFormInformation.id)) {
             Future.successful(

@@ -246,7 +246,8 @@
 }
 
 .manage-user-custom-table-margin {
-    margin-bottom: 0px;
+    margin: 0 2%;
+
 }
 
 .search-text::-webkit-input-placeholder { /* Chrome */

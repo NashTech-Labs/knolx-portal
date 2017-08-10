@@ -47,6 +47,9 @@
     background-color: #dcdcdc;
     box-shadow: 0 6px 20px #a8a8a8;
 }
+.card-custom-padding{
+    padding-bottom: 20px;
+}
 
 .stick-out {
     position: relative;
@@ -122,6 +125,61 @@
     -moz-box-shadow: inset 0 -10px 10px -10px #888;
     -webkit-box-shadow: inset 0 -10px 10px -10px #888;
     box-shadow: inset 0 -10px 10px -10px #888;
+
+}
+
+.accepting-response{
+    width: 80px;
+    height: 80px;
+    background-image: url(../images/ripple.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
+.live{
+    position: absolute;
+    top:3px;
+    left: 3px;
+    border-radius: 0px;
+}
+.custom-position{
+    position: relative;
+ }
+.custom-fold{
+    border-top-right-radius: 35px;
+}
+
+.fold{
+    width:100%;
+    height: 50%;
+    background-color: transparent;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 888;
+    opacity: 0.8;
+    font-size: 15px;
+}
+.session-type{
+    position: absolute;
+    top: -2px;
+    right: 0;
+    z-index: 777;
+    border-radius: 0px;
+    margin: 0;
+}
+
+.custom-label-type{
+    border-radius: 0px;
+    margin: 0px;
+}
+
+.accepting-response-text{
+    position: absolute;
+    bottom:-5px;
+    left:0;
+    width: 100%;
+    text-align: center;
 }
 
 .session-details {

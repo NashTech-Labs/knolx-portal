@@ -1,5 +1,6 @@
 package models
 
+import java.util.Date
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
@@ -150,7 +151,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
-
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "date" -> BSONDateTime(updatedRecord.sessionUpdateFormData.date.getTime),
@@ -166,31 +166,52 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       jsonCollection.update(selector, modifier))
   }
 
-  def activeSessions: Future[List[SessionInfo]] = {
+  def activeSessions(email: Option[String] = None): Future[List[SessionInfo]] = {
+
     val millis = dateTimeUtility.nowMillis
 
+    val condition = email.fold {
+      Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+        "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+
+    } { email =>
+      Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "email" -> email,
+        "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
+        "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+    }
+
     collection
-      .flatMap { jsonCollection =>
-        import jsonCollection.BatchCommands.AggregationFramework.{Ascending, Group, Limit, Match, PushField, Sort}
-
+      .flatMap(jsonCollection =>
         jsonCollection
+          .find(condition)
+          .cursor[SessionInfo](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
-          .aggregate(
-            firstOperator = Match(
-              Json.obj(
-                "active" -> true,
-                "cancelled" -> false,
-                "expirationDate" -> BSONDocument("$gt" -> BSONDateTime(millis)),
-                "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
-            ),
-            otherOperators = List(
-              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m-%d", "date" -> "$date")))("sessions" -> PushField("$ROOT")),
-              Sort(Ascending("_id")),
-              Limit(1)
-            ))
-          .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
-          .map(_.flatten)
-      }
+  }
+
+  def UserSessionsTillNow(email: String): Future[List[SessionInfo]] = {
+
+    val millis = dateTimeUtility.nowMillis
+
+      val condition = Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "email" -> email,
+        "date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .cursor[SessionInfo](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+
   }
 
   def immediatePreviousExpiredSessions: Future[List[SessionInfo]] = {

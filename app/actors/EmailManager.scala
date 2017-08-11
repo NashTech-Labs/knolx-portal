@@ -15,10 +15,7 @@ class EmailManager @Inject()(
                             ) extends Actor with ActorLogging with InjectedActorSupport {
 
   override val supervisorStrategy: OneForOneStrategy =
-    OneForOneStrategy(
-      maxNrOfRetries = 3,
-      withinTimeRange = 1.minute
-    ) {
+    OneForOneStrategy(maxNrOfRetries = 3, withinTimeRange = 1.minute) {
       case ex: EmailException =>
         log.error(s"Got an EmailException while sending email, $ex")
         Restart

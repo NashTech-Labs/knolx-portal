@@ -37,7 +37,7 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
   }
 
   abstract class IntegrationTestScope extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp
+    lazy val app: Application = fakeApp(_system)
     lazy val configuredEmailFactory = app.injector.instanceOf(BindingKey(classOf[ConfiguredEmailActor.Factory]))
     lazy val emailManager = TestActorRef(new EmailManager(configuredEmailFactory))
 
@@ -52,7 +52,7 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
   "Email manager" should {
 
-    "send email" in new UnitTestScope {
+    "forward request to email actor" in new UnitTestScope {
       val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
 
       emailManager ! request

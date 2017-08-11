@@ -38,7 +38,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     _id)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp
+    lazy val app: Application = fakeApp()
     lazy val controller =
       new FeedbackFormsReportController(
         knolxControllerComponent.messagesApi,

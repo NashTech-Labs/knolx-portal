@@ -46,7 +46,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
 
-    lazy val app: Application = fakeApp
+    lazy val app: Application = fakeApp()
 
     lazy val controller =
       new FeedbackFormsResponseController(

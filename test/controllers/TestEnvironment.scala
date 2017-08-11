@@ -26,7 +26,7 @@ import scala.concurrent.{Await, ExecutionContext}
 
 trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mockito {
 
-  val actorSystem: ActorSystem = ActorSystem("TestEnvironment")
+  private val actorSystem: ActorSystem = ActorSystem("TestEnvironment")
 
   val usersRepository = mock[UsersRepository]
   val config = Configuration(ConfigFactory.load("application.conf"))
@@ -36,8 +36,8 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     shutdownActorSystem(actorSystem)
   }
 
-  protected def fakeApp: Application = {
-    val sessionsScheduler = actorSystem.actorOf(Props(new DummySessionsScheduler))
+  protected def fakeApp(system: ActorSystem = actorSystem): Application = {
+    val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
 
     val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {

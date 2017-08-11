@@ -33,14 +33,14 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                                              ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
-      generateSessionFeedbackReport(request.user.email).map { reportInfo =>
-        Ok(views.html.reports.myreports(reportInfo))
-      }
+    generateSessionFeedbackReport(request.user.email).map { reportInfo =>
+      Ok(views.html.reports.myreports(reportInfo))
+    }
   }
 
-  private def generateSessionFeedbackReport( presenter: String): Future[List[FeedbackReportHeader]] = {
+  private def generateSessionFeedbackReport(presenter: String): Future[List[FeedbackReportHeader]] = {
     val myActiveSessions = sessionsRepository.activeSessions(Some(presenter))
-    val presentersSessionTillNow = sessionsRepository.UserSessionsTillNow(presenter)
+    val presentersSessionTillNow = sessionsRepository.userSessionsTillNow(presenter)
 
     myActiveSessions.flatMap {
       case _ :: _ =>
@@ -55,7 +55,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                 }
               }
             }
-          case Nil                             => Future.successful(List())
+          case Nil                             => Future.successful(List.empty)
         }
       case Nil    => presentersSessionTillNow.map {
         case first :: rest => (first +: rest).map(session => generateSessionReportHeader(session, active = false))

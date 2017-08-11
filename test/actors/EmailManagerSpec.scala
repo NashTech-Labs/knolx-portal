@@ -76,7 +76,7 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
       val supervisorAction = strategy(new EmailException)
 
-      supervisorAction.mustEqual(Restart)
+      supervisorAction mustEqual Restart
     }
 
     // =================================================================================================================

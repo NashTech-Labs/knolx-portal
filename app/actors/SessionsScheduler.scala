@@ -17,27 +17,18 @@ import scala.concurrent.duration.{FiniteDuration, _}
 object SessionsScheduler {
 
   case object RefreshSessionsSchedulers
-
   case object GetScheduledSessions
-
   case class CancelScheduledSession(sessionId: String)
-
   case class ScheduleSession(sessionId: String)
 
   private[actors] case class ScheduleSessionsForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
-
   private[actors] case class ScheduleSessions(originalSender: ActorRef)
-
   private[actors] case class StartSessionsScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
-
   private[actors] case class SendSessionFeedbackForm(session: SessionInfo, feedbackForm: FeedbackForm)
 
   sealed trait SessionsSchedulerResponse
-
   case object ScheduledSessionsRefreshed extends SessionsSchedulerResponse
-
   case object ScheduledSessionsNotRefreshed extends SessionsSchedulerResponse
-
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
   val ToEmail = "sidharth@knoldus.com"
@@ -93,7 +84,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def schedulingHandler: Receive = {
     case ScheduleSessions(originalSender) =>
-      Logger.info(s"Starting actors for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
+      Logger.info(s"Starting schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsScheduledToday(dateTimeUtility.nowMillis)
       val eventualScheduledSessions = scheduleSessions(eventualSessions)
 
@@ -127,7 +118,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def reconfiguringHandler: Receive = {
     case RefreshSessionsSchedulers         =>
       Logger.info(s"Scheduled sessions in memory before refreshing $scheduledSessions")
-      Logger.info(s"Refreshing actors for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
+      Logger.info(s"Refreshing schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
       val cancelled = scheduledSessions.forall { case (_, cancellable) => cancellable.cancel }
 
       if (scheduledSessions.isEmpty || (scheduledSessions.nonEmpty && cancelled)) {

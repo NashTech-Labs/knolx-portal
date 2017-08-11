@@ -66,7 +66,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@example.com")) returns sessionObject
-      sessionsRepository.UserSessionsTillNow("test@example.com") returns sessionObject
+      sessionsRepository.userSessionsTillNow("test@example.com") returns sessionObject
 
 
       val response = controller.renderUserFeedbackReports()(
@@ -81,7 +81,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@example.com")) returns Future.successful(List())
-      sessionsRepository.UserSessionsTillNow("test@example.com") returns Future.successful(List())
+      sessionsRepository.userSessionsTillNow("test@example.com") returns Future.successful(List())
 
 
       val response = controller.renderUserFeedbackReports()(
@@ -96,7 +96,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@example.com")) returns sessionObject
-      sessionsRepository.UserSessionsTillNow("test@example.com") returns sessionObject.map(_.map(_.copy(_id = BSONObjectID.generate())))
+      sessionsRepository.userSessionsTillNow("test@example.com") returns sessionObject.map(_.map(_.copy(_id = BSONObjectID.generate())))
 
 
       val response = controller.renderUserFeedbackReports()(
@@ -111,7 +111,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@example.com")) returns Future.successful(List())
-      sessionsRepository.UserSessionsTillNow("test@example.com") returns sessionObject
+      sessionsRepository.userSessionsTillNow("test@example.com") returns sessionObject
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
@@ -126,7 +126,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@example.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@example.com")) returns sessionObject
-      sessionsRepository.UserSessionsTillNow("test@example.com") returns Future.successful(List())
+      sessionsRepository.userSessionsTillNow("test@example.com") returns Future.successful(List())
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()

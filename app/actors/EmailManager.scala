@@ -14,14 +14,6 @@ class EmailManager @Inject()(
                               emailChildFactory: ConfiguredEmailActor.Factory
                             ) extends Actor with ActorLogging with InjectedActorSupport {
 
-  /*override def preStart(): Unit = {
-    emailActor =
-      injectedChild(
-        emailChildFactory(),
-        "EmailActor",
-        p => p.withRouter(RoundRobinPool(5, supervisorStrategy = OneForOneStrategy() { case _ => Escalate })))
-  }*/
-
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy(
       maxNrOfRetries = 3,
@@ -30,7 +22,7 @@ class EmailManager @Inject()(
       case ex: EmailException =>
         log.error(s"Got an EmailException while sending email, $ex")
         Restart
-      case ex: Exception =>
+      case ex: Exception      =>
         log.error(s"Got an unknown exception while sending email, $ex")
         Escalate
     }

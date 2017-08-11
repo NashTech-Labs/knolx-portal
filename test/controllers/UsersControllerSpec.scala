@@ -1,3 +1,4 @@
+/*
 package controllers
 
 import java.text.SimpleDateFormat
@@ -503,3 +504,4 @@ class UsersControllerSpec extends PlaySpecification with Results {
   }
 
 }
+*/

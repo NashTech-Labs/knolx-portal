@@ -13,8 +13,8 @@ import actors.{ConfiguredEmailActor, EmailActor, EmailManager, SessionsScheduler
 class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
-    bindActor[EmailManager]("EmailManager")
     bindActorFactory[EmailActor, ConfiguredEmailActor.Factory]
+    bindActor[EmailManager]("EmailManager")
 
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))

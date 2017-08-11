@@ -2,10 +2,14 @@ package actors
 
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import org.apache.commons.mail.EmailException
+import controllers.{TestEmailActor, TestEnvironment}
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
+import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
+import org.specs2.mutable.Around
 import org.specs2.specification.Scope
+import play.api.Application
+import play.api.inject.BindingKey
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
@@ -17,20 +21,29 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
   object TestEmailActorFactory extends actors.ConfiguredEmailActor.Factory {
     def apply(): Actor = {
-      val actorRef = TestActorRef[TestActor]
+      val actorRef = TestActorRef[TestEmailActor]
       actorRef.underlyingActor
     }
   }
 
-  trait TestScope extends Scope {
-
+  trait UnitTestScope extends Scope {
     sealed trait TestInjectedActorSupport extends InjectedActorSupport {
       override def injectedChild(create: => Actor, name: String, props: Props => Props = identity)(implicit context: ActorContext): ActorRef = {
-        TestActorRef[TestActor]
+        TestActorRef[TestEmailActor]
       }
     }
 
     val emailManager = TestActorRef(new EmailManager(TestEmailActorFactory) with TestInjectedActorSupport)
+  }
+
+  abstract class IntegrationTestScope extends Around with Scope with TestEnvironment {
+    lazy val app: Application = fakeApp
+    lazy val configuredEmailFactory = app.injector.instanceOf(BindingKey(classOf[ConfiguredEmailActor.Factory]))
+    lazy val emailManager = TestActorRef(new EmailManager(configuredEmailFactory))
+
+    override def around[T: AsResult](t: => T): Result = {
+      TestHelpers.running(app)(AsResult.effectively(t))
+    }
   }
 
   override def afterAll() {
@@ -39,7 +52,7 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
   "Email manager" should {
 
-    "send email" in new TestScope {
+    "send email" in new UnitTestScope {
       val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
 
       emailManager ! request
@@ -47,13 +60,13 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
       expectMsg(request)
     }
 
-    "send message to dead letters for unhandled message" in new TestScope {
+    "send message to dead letters for unhandled message" in new UnitTestScope {
       emailManager ! "blah!"
 
       expectNoMsg
     }
 
-    "restart email manager" in new TestScope {
+    "restart email actor" in new IntegrationTestScope {
       val badRequest = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "crash", "Hello World!")
       val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
 
@@ -64,15 +77,9 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
       emailManager ! request
 
       expectMsg(request)
+
     }
 
   }
 
-}
-
-class TestActor extends Actor {
-  def receive: Receive = {
-    case EmailActor.SendEmail(_, _, subject, _) if subject == "crash" => throw new EmailException
-    case request: EmailActor.SendEmail                                => sender ! request
-  }
 }

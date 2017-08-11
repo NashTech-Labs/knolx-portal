@@ -285,7 +285,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .map { user =>
             user.fold {
               Redirect(routes.UsersController.forgotPassword())
-                .flashing("message" -> "User not found, consider registering such user instead!")
+                .flashing("message" -> "User not found!")
             } { foundUser =>
               val validTill = dateTimeUtility.localDateTimeIST.plusDays(1)
               val token = UUID.randomUUID.toString
@@ -295,7 +295,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val url = routes.UsersController.changePassword(token).url
               val changePasswordUrl = s"""http://${request.host}$url"""
 
-              val from = configuration.getString("play.mailer.user").getOrElse("")
+              val from = configuration.getOptional[String]("play.mailer.user").getOrElse("")
               val subject = "Knolx portal password change request."
               val body =
                 s"""
@@ -307,7 +307,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               emailManager ! EmailActor.SendEmail(List(foundUser.email), from, subject, body)
 
               Redirect(routes.UsersController.login())
-                .flashing("successMessage" -> "An email with password reset link has been initiated to your registered account")
+                .flashing("successMessage" -> "An email with password reset link has been sent to your registered account!")
             }
           }
       }
@@ -315,13 +315,16 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def changePassword(token: String): Action[AnyContent] = action.async { implicit request =>
-    forgotPasswordRepository.getPasswordChangeRequest(token, None).map { passwordChangeInfo =>
-      passwordChangeInfo.fold {
-        Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, Your password change request is invalid or expired, consider generating new")))
-      } { _ =>
-        Ok(views.html.users.resetpassword(resetPasswordForm.fill(ResetPasswordInformation(token, "", "", ""))))
+    forgotPasswordRepository
+      .getPasswordChangeRequest(token, None)
+      .map { passwordChangeInfo =>
+        passwordChangeInfo.fold {
+          Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, Your password change request is invalid " +
+            "or expired, consider generating a new request!")))
+        } { _ =>
+          Ok(views.html.users.resetpassword(resetPasswordForm.fill(ResetPasswordInformation(token, "", "", ""))))
+        }
       }
-    }
   }
 
   def resetPassword: Action[AnyContent] = action.async { implicit request =>
@@ -331,34 +334,37 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.resetpassword(formWithErrors)))
       },
       resetPasswordInfo => {
-        forgotPasswordRepository.getPasswordChangeRequest(resetPasswordInfo.token, Some(resetPasswordInfo.email.toLowerCase)).flatMap(resetRequest =>
+        forgotPasswordRepository
+          .getPasswordChangeRequest(resetPasswordInfo.token, Some(resetPasswordInfo.email.toLowerCase))
+          .flatMap(resetRequest =>
+            resetRequest.fold {
+              Future.successful(Unauthorized(views.html.users.resetpassword(resetPasswordForm.fill(resetPasswordInfo)
+                .withGlobalError("Sorry, no password reset request found for this user"))))
+            } { requestFound =>
+              usersRepository
+                .getActiveByEmail(requestFound.email.toLowerCase)
+                .flatMap { user =>
+                  user.fold {
+                    Future.successful(Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, No user found with email provided"))))
+                  } { userFound =>
+                    val updatedRecord = UpdatedUserInfo(userFound.email, userFound.active, Some(resetPasswordInfo.password))
 
-          resetRequest.fold {
-            Future.successful(Unauthorized(views.html.users.resetpassword(resetPasswordForm.fill(resetPasswordInfo)
-              .withGlobalError("Sorry, no password reset request found for this user"))))
-          } { requestFound =>
-            usersRepository
-              .getActiveByEmail(requestFound.email.toLowerCase).flatMap { user =>
-
-              user.fold {
-                Future.successful(Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, No user found with email provided"))))
-              } { userFound =>
-                val updatedRecord = UpdatedUserInfo(userFound.email, userFound.active, Some(resetPasswordInfo.password))
-                usersRepository.update(updatedRecord)
-                  .map { result =>
-                    if (result.ok) {
-                      forgotPasswordRepository.upsert(requestFound.copy(active = false))
-                      Logger.info(s"Password successfully updated for ${updatedRecord.email}")
-                      Redirect(routes.UsersController.login())
-                        .flashing("successMessage" -> s"Password successfully updated for ${updatedRecord.email}")
-                    } else {
-                      InternalServerError("Something went wrong!")
-                    }
+                    usersRepository
+                      .update(updatedRecord)
+                      .map { result =>
+                        if (result.ok) {
+                          forgotPasswordRepository.upsert(requestFound.copy(active = false))
+                          Logger.info(s"Password successfully updated for ${updatedRecord.email}")
+                          Redirect(routes.UsersController.login())
+                            .flashing("successMessage" -> s"Password successfully updated for ${updatedRecord.email}")
+                        } else {
+                          InternalServerError("Something went wrong!")
+                        }
+                      }
                   }
-              }
+                }
             }
-          }
-        )
+          )
       })
   }
 

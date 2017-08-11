@@ -83,7 +83,6 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       sessionsRepository.activeSessions(Some("test@example.com")) returns Future.successful(List())
       sessionsRepository.userSessionsTillNow("test@example.com") returns Future.successful(List())
 
-
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")

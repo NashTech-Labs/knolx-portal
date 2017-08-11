@@ -63,6 +63,7 @@ class ForgotPasswordRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dat
 
       case None => Json.obj("token" -> token, "activeTill" -> BSONDocument("$gt" -> BSONDateTime(millis)), "active" -> true)
     }
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection

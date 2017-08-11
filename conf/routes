@@ -14,10 +14,10 @@ POST        /users/search                       controllers.UsersController.sear
 GET         /user/update                        controllers.UsersController.getByEmail(email: String)
 POST        /user/update                        controllers.UsersController.updateUser
 GET         /user/delete                        controllers.UsersController.deleteUser(email: String)
-GET         /user/forgotPassword                controllers.UsersController.forgotPassword
-POST        /user/requestPassword               controllers.UsersController.requestPasswordChange
-GET         /user/change/password               controllers.UsersController.changePassword(id:String)
-POST        /user/reset/password                controllers.UsersController.resetPassword
+GET         /user/forgotpassword                controllers.UsersController.forgotPassword
+POST        /user/requestpassword               controllers.UsersController.requestPasswordChange
+GET         /user/changepassword                controllers.UsersController.changePassword(id: String)
+POST        /user/resetpassword                 controllers.UsersController.resetPassword
 
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])

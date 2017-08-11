@@ -82,15 +82,14 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .find(Json.obj("userId" -> userId, "sessionId" -> SessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
 
-  def allResponsesBySession(presentersEmail: String, SessionId: String): Future[List[FeedbackFormsResponse]] = {
+  def allResponsesBySession(presentersEmail: String, sessionId: String): Future[List[FeedbackFormsResponse]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj(
             "presenter" -> presentersEmail,
-            "sessionId" -> SessionId))
+            "sessionId" -> sessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
-  }
 
 }

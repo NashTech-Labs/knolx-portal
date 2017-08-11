@@ -21,7 +21,7 @@ class EmailActorSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   trait TestScope extends Scope {
     val mailerClient = mock[MailerClient]
 
-    val sessionsScheduler =
+    val emailActor =
       TestActorRef(new EmailActor(mailerClient))
   }
 
@@ -32,13 +32,13 @@ class EmailActorSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
 
       mailerClient.send(email) returns "emailId"
 
-      sessionsScheduler ! EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
+      emailActor ! EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
 
       expectMsg(Some("emailId"))
     }
 
     "send message to dead letters for unhandled message" in new TestScope {
-      sessionsScheduler ! "blah!"
+      emailActor ! "blah!"
 
       expectNoMsg
     }

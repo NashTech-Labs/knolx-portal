@@ -54,6 +54,9 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
   "Email manager" should {
 
+    // =================================================================================================================
+    // Unit tests
+    // =================================================================================================================
     "forward request to email actor" in new UnitTestScope {
       val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
 
@@ -76,6 +79,17 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
       supervisorAction.mustEqual(Restart)
     }
 
+    // =================================================================================================================
+    // Integration tests
+    // =================================================================================================================
+    "send email" in new IntegrationTestScope {
+      val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
+
+      emailManager ! request
+
+      expectMsg(request)
+    }
+
     "restart email actor" in new IntegrationTestScope {
       val badRequest = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "crash", "Hello World!")
       val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
@@ -88,7 +102,6 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
       expectMsg(request)
     }
-
   }
 
 }

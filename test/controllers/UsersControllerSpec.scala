@@ -38,7 +38,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val passwordChangeRequest = PasswordChangeRequestInfo("test@example.com", "token", BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp
+    lazy val app: Application = fakeApp()
     lazy val controller =
       new UsersController(knolxControllerComponent.messagesApi,
         usersRepository,

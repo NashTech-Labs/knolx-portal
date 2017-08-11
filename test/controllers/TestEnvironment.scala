@@ -43,6 +43,10 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
           .annotatedWith(Names.named("SessionsScheduler"))
           .toInstance(sessionsScheduler)
 
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("EmailManager"))
+          .toInstance(sessionsScheduler)
+
         bind(classOf[KnolxControllerComponents])
           .toInstance(knolxControllerComponent)
       }

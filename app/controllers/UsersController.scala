@@ -295,8 +295,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val url = routes.UsersController.changePassword(token).url
               val changePasswordUrl = s"""http://${request.host}$url"""
 
-              // todo get from config
-              val from = ""
+              val from = configuration.getString("play.mailer.user").getOrElse("")
               val subject = "Knolx portal password change request."
               val body =
                 s"""

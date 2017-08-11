@@ -195,15 +195,14 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   }
 
-  def UserSessionsTillNow(email: String): Future[List[SessionInfo]] = {
-
+  def userSessionsTillNow(email: String): Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis
 
-      val condition = Json.obj(
-        "active" -> true,
-        "cancelled" -> false,
-        "email" -> email,
-        "date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+    val condition = Json.obj(
+      "active" -> true,
+      "cancelled" -> false,
+      "email" -> email,
+      "date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
 
     collection
       .flatMap(jsonCollection =>

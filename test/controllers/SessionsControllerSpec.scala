@@ -44,7 +44,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
   private val emptyEmailObject = Future.successful(None)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp
+    lazy val app: Application = fakeApp()
     lazy val controller =
       new SessionsController(
         knolxControllerComponent.messagesApi,

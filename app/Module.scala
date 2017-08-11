@@ -6,12 +6,16 @@ import com.google.inject.name.Names
 import com.google.inject.util.Providers
 import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.libs.Akka
-import schedulers.SessionsScheduler
+import actors.{ConfiguredEmailActor, EmailActor, EmailManager, SessionsScheduler}
 
-class Module extends AbstractModule with ScalaModule {
+class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
   override def configure(): Unit = {
+    bindActorFactory[EmailActor, ConfiguredEmailActor.Factory]
+    bindActor[EmailManager]("EmailManager")
+
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))
       .toProvider(Providers.guicify(Akka.providerOf(classOf[SessionsScheduler], "SessionsScheduler", Function.identity())))

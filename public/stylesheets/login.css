@@ -11,12 +11,25 @@
     border-bottom-right-radius: 20px;
 }
 
+.forgot-password-outer {
+    height: 350px;
+}
+
+.reset-password-outer {
+    height: 480px;
+}
+
 .login-first {
     height: 80px;
     padding: 0px 0px;
     background-color: rgb(125, 158, 192);
     box-shadow: 0 9px 8px -5px #a8a8a8;
     border-bottom: 1px solid #fff;
+}
+
+.forget-password {
+    text-align: center;
+    padding-top: 10px !important;
 }
 
 .top-container {
@@ -26,6 +39,11 @@
 .login-second {
     line-height: 50px;
     padding-top: 50px;
+}
+
+.custom-textbox-alignment {
+    line-height: 50px;
+    padding-top: 20px;
 }
 
 .input-field {
@@ -49,7 +67,7 @@
     outline: none;
 }
 
-input.input-field.loge:focus {
+input.input-field.logo:focus {
     outline: none;
     border-bottom: 2px solid #45B39D;
 }

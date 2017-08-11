@@ -1,4 +1,4 @@
-package schedulers
+package actors
 
 import akka.actor.{ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
@@ -11,7 +11,7 @@ import org.specs2.specification.Scope
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import schedulers.SessionsScheduler._
+import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global

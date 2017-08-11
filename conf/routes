@@ -14,6 +14,10 @@ POST        /users/search                       controllers.UsersController.sear
 GET         /user/update                        controllers.UsersController.getByEmail(email: String)
 POST        /user/update                        controllers.UsersController.updateUser
 GET         /user/delete                        controllers.UsersController.deleteUser(email: String)
+GET         /user/forgotpassword                controllers.UsersController.forgotPassword
+POST        /user/requestpassword               controllers.UsersController.requestPasswordChange
+GET         /user/changepassword                controllers.UsersController.changePassword(id: String)
+POST        /user/resetpassword                 controllers.UsersController.resetPassword
 
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
@@ -42,7 +46,7 @@ GET         /feedbackresponse/fetch             controllers.FeedbackFormsRespons
 GET         /jsRoutes                           controllers.JavascriptRouter.jsRoutes
 
 # Reports
-GET         /reports/all                        controllers.FeedbackFormsReportController.renderMyFeedbackReports
+GET         /reports/all                        controllers.FeedbackFormsReportController.renderUserFeedbackReports
 GET         /reports/response                   controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
 
 # Map static resources from the /public folder to the /assets URL path

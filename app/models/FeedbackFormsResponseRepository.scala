@@ -21,7 +21,7 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class QuestionResponse(question: String, options: List[String], response: String)
 
 case class FeedbackFormsResponse(email: String,
-                                 presenter : String,
+                                 presenter: String,
                                  userId: String,
                                  sessionId: String,
                                  sessionTopic: String,
@@ -82,33 +82,14 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .find(Json.obj("userId" -> userId, "sessionId" -> SessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
 
-
-  def userDistinctSessionsIds(presentersEmail : String): Future[List[String]] = {
-    val query = Json.obj("presenter" -> presentersEmail)
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .distinct[String, List]("sessionId",Some(query)))
-  }
-  def mySessions(presentersEmail : String , SessionId : String): Future[Option[FeedbackFormsResponse]] = {
+  def allResponsesBySession(presentersEmail: String, sessionId: String): Future[List[FeedbackFormsResponse]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj(
             "presenter" -> presentersEmail,
-            "sessionId" -> SessionId))
-            .one[FeedbackFormsResponse])
-  }
-
-  def allResponsesBySession(presentersEmail : String, SessionId : String): Future[List[FeedbackFormsResponse]] = {
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(Json.obj(
-            "presenter" -> presentersEmail,
-            "sessionId" -> SessionId))
+            "sessionId" -> sessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
-  }
 
 }

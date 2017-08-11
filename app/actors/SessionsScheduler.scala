@@ -1,4 +1,4 @@
-package schedulers
+package actors
 
 import java.util.Date
 import javax.inject.Inject
@@ -7,7 +7,7 @@ import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
 import models.{FeedbackForm, FeedbackFormsRepository, SessionInfo, SessionsRepository}
 import play.api.Logger
 import play.api.libs.mailer.{Email, MailerClient}
-import schedulers.SessionsScheduler._
+import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,27 +17,18 @@ import scala.concurrent.duration.{FiniteDuration, _}
 object SessionsScheduler {
 
   case object RefreshSessionsSchedulers
-
   case object GetScheduledSessions
-
   case class CancelScheduledSession(sessionId: String)
-
   case class ScheduleSession(sessionId: String)
 
-  private[schedulers] case class ScheduleSessionsForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
-
-  private[schedulers] case class ScheduleSessions(originalSender: ActorRef)
-
-  private[schedulers] case class StartSessionsScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
-
-  private[schedulers] case class SendSessionFeedbackForm(session: SessionInfo, feedbackForm: FeedbackForm)
+  private[actors] case class ScheduleSessionsForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
+  private[actors] case class ScheduleSessions(originalSender: ActorRef)
+  private[actors] case class StartSessionsScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
+  private[actors] case class SendSessionFeedbackForm(session: SessionInfo, feedbackForm: FeedbackForm)
 
   sealed trait SessionsSchedulerResponse
-
   case object ScheduledSessionsRefreshed extends SessionsSchedulerResponse
-
   case object ScheduledSessionsNotRefreshed extends SessionsSchedulerResponse
-
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
   val ToEmail = "sidharth@knoldus.com"

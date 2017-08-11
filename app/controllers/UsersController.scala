@@ -298,10 +298,9 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val from = configuration.getOptional[String]("play.mailer.user").getOrElse("")
               val subject = "Knolx portal password change request."
               val body =
-                s"""
-                   |<p>Hi,</p>
+                s"""<p>Hi,</p>
                    |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
-                   |<strong><p>If you are not the one who has initiated this request kindly ignore this mail</p></strong>
+                   |<strong><p>If you are not the one who initiated this request kindly ignore this mail.</p></strong>
                 """.stripMargin
 
               emailManager ! EmailActor.SendEmail(List(foundUser.email), from, subject, body)

@@ -1,8 +1,10 @@
 package actors
 
+import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import controllers.{TestEmailActor, TestEnvironment}
+import org.apache.commons.mail.EmailException
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
@@ -66,6 +68,14 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
       expectNoMsg
     }
 
+    "test supervision strategy" in new UnitTestScope {
+      val strategy = emailManager.underlyingActor.supervisorStrategy.decider
+
+      val supervisorAction = strategy(new EmailException)
+
+      supervisorAction.mustEqual(Restart)
+    }
+
     "restart email actor" in new IntegrationTestScope {
       val badRequest = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "crash", "Hello World!")
       val request = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Hello World", "Hello World!")
@@ -77,7 +87,6 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
       emailManager ! request
 
       expectMsg(request)
-
     }
 
   }

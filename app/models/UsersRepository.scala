@@ -80,7 +80,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .findAndUpdate(
-            BSONDocument("email" -> email),
+            BSONDocument("email" -> email, "admin" -> false),
             BSONDocument("$set" -> BSONDocument("active" -> false)),
             fetchNewObject = true,
             upsert = false)

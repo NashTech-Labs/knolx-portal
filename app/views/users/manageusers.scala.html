@@ -9,13 +9,18 @@
                 <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search user by email"/>
             </div>
             <div class="col-md-3"></div>
-            @if(!flash.isEmpty) {
+            @if(flash.get("success").fold("")(identity).nonEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    @flash.get("message").fold("")(identity)
+                    @flash.get("success").fold("")(identity)
                 </div>
             }
-
+            @if(flash.get("error").fold("")(identity).nonEmpty) {
+                <div class="alert alert-danger  alert-dismissable user-updated-message">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    @flash.get("error").fold("")(identity)
+                </div>
+            }
             <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
@@ -26,21 +31,24 @@
                                 <th class='col col-xs-4'>Edit</th>
                                 <th class='col col-xs-4'>Email</th>
                                 <th class='col col-xs-4'>Active Status</th>
-
                             </tr>
                         </thead>
                         <tbody id="user-found">
                         @for(user <- users) {
                             <tr>
-                                <td align="center">
-                                    <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
-                                        <em class="fa fa-pencil"></em>
-                                    </a>
-                                    <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
-                                        <em class="fa fa-trash"></em>
-                                    </a>
-                                </td>
-                                <td>@user.email</td>
+                                @if(user.admin) {
+                                    <td class="active-status"><span class="label label-warning">Admin</span></td>
+                                } else {
+                                    <td align="center">
+                                        <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
+                                            <em class="fa fa-pencil"></em>
+                                        </a>
+                                        <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
+                                            <em class="fa fa-trash"></em>
+                                        </a>
+                                    </td>
+                                }
+                            <td>@user.email</td>
                                 @if(user.active) {
                                     <td class="active-status"><span class="label label-success">Active</span></td>
                                 } else {

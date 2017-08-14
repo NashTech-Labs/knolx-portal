@@ -29,7 +29,10 @@ case class LoginInformation(email: String, password: String)
 
 case class UserEmailInformation(email: Option[String], page: Int)
 
-case class ManageUserInfo(email: String, active: Boolean, id: String)
+case class ManageUserInfo(email: String,
+                          active: Boolean,
+                          id: String,
+                          admin: Boolean = false)
 
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
 
@@ -189,7 +192,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber, keyword)
       .flatMap { userInfo =>
         val users = userInfo map (user =>
-          ManageUserInfo(user.email, user.active, user._id.stringify))
+          ManageUserInfo(user.email, user.active, user._id.stringify, user.admin))
 
         usersRepository
           .userCountWithKeyword(keyword)
@@ -211,7 +214,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         usersRepository
           .paginate(userInformation.page, userInformation.email)
           .flatMap { userInfo =>
-            val users = userInfo map (user => ManageUserInfo(user.email, user.active, user._id.stringify))
+            val users = userInfo map (user => ManageUserInfo(user.email, user.active, user._id.stringify, user.admin))
 
             usersRepository
               .userCountWithKeyword(userInformation.email)
@@ -262,11 +265,11 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .delete(email)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete user with email $email")
-        Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("errormessage" -> "Something went wrong!"))
+        Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("error" -> "Something went wrong!"))
       } { user =>
         Logger.info(s"user with email:  $email has been successfully deleted")
         Future.successful(Redirect(routes.UsersController.manageUser(1, None))
-          .flashing("message" -> s"User with email ${user.email} has been successfully deleted!"))
+          .flashing("success" -> s"User with email ${user.email} has been successfully deleted!"))
       })
   }
 

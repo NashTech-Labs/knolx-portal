@@ -3,7 +3,8 @@ package actors
 import javax.inject.Inject
 
 import actors.EmailActor._
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.Actor
+import play.api.Logger
 import play.api.libs.mailer.{Email, MailerClient}
 
 object ConfiguredEmailActor {
@@ -23,11 +24,11 @@ object EmailActor {
 
 }
 
-class EmailActor @Inject()(mailerClient: MailerClient) extends Actor with ActorLogging {
+class EmailActor @Inject()(mailerClient: MailerClient) extends Actor {
 
   override def receive: Receive = {
     case SendEmail(to, from, subject, body) =>
-      log.info(s"Got a request to send email $to")
+      Logger.info(s"Got a request in $self to send email $to from $from with subject $subject")
 
       val email = Email(subject, from, to, bodyHtml = Some(body))
       val response = Option(mailerClient.send(email))
@@ -35,7 +36,7 @@ class EmailActor @Inject()(mailerClient: MailerClient) extends Actor with ActorL
       sender ! response
 
       context stop self
-    case msg                                => log.warning(s"Got an unhandled message $msg")
+    case msg                                => Logger.warn(s"Got an unhandled message $msg")
   }
 
 }

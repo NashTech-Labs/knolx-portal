@@ -36,24 +36,24 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
   trait TestScope extends Scope {
 
     lazy val app: Application = fakeApp()
-    val mockedScheduler = mock[Scheduler]
-    val sessionsRepository = mock[SessionsRepository]
-    val feedbackFormsRepository = mock[FeedbackFormsRepository]
-    val mailerClient = mock[MailerClient]
-    val dateTimeUtility = mock[DateTimeUtility]
+    val mockedScheduler: Scheduler = mock[Scheduler]
+    val sessionsRepository: SessionsRepository = mock[SessionsRepository]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val mailerClient: MailerClient = mock[MailerClient]
+    val dateTimeUtility: DateTimeUtility = mock[DateTimeUtility]
 
-    val nowMillis = System.currentTimeMillis
+    val nowMillis: Long = System.currentTimeMillis
 
-    val knolxSessionDateTime = nowMillis + 24 * 60 * 60 * 1000
+    val knolxSessionDateTime: Long = nowMillis + 24 * 60 * 60 * 1000
 
-    val sessionId = BSONObjectID.generate
-    val feedbackFormId = BSONObjectID.generate
+    val sessionId: BSONObjectID = BSONObjectID.generate
+    val feedbackFormId: BSONObjectID = BSONObjectID.generate
 
-    val emailManager =
+    val emailManager: ActorRef =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
-    val ISTZoneId = ZoneId.of("Asia/Kolkata")
-    val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
+    val ISTZoneId: ZoneId = ZoneId.of("Asia/Kolkata")
+    val ISTTimeZone: TimeZone = TimeZone.getTimeZone("Asia/Kolkata")
 
     val sessionsForToday =
       List(SessionInfo(
@@ -89,8 +89,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
   "Sessions scheduler" should {
 
     "start sessions scheduler" in new TestScope {
-      val initialDelay = 1.minute
-      val interval = 1.minute
+      val initialDelay: FiniteDuration = 1.minute
+      val interval: FiniteDuration = 1.minute
 
       sessionsScheduler ! StartSessionsScheduler(initialDelay, interval)
 
@@ -102,8 +102,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     }
 
     "start feedback reminder mail Scheduler" in new TestScope {
-      val initialDelay = 1.minute
-      val interval = 1.minute
+      val initialDelay: FiniteDuration = 1.minute
+      val interval: FiniteDuration = 1.minute
 
       sessionsScheduler ! StartFeedbackReminderMailScheduler(initialDelay, interval)
 
@@ -132,14 +132,14 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
 
-      val schedulersSize = sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsForToday))
+      sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsForToday))
 
       expectMsg(1)
     }
 
     "start sessions reminders schedulers for Knolx sessions expiring today" in new TestScope {
       dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      val schedulersSize = sessionsScheduler ! SendReminderMailForToday(self, Future.successful(sessionsForToday))
+      sessionsScheduler ! SendReminderMailForToday(self, Future.successful(sessionsForToday))
 
       expectMsg(1)
     }
@@ -158,7 +158,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
+      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
 
       result mustEqual ScheduledSessionsRefreshed
     }
@@ -175,7 +175,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
+      val result: ScheduledSessions = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
 
       result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
@@ -192,7 +192,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
+      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
 
       result mustEqual ScheduledSessionsNotRefreshed
     }
@@ -253,6 +253,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       expectMsg(true)
       sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
     }
+
   }
 
 }

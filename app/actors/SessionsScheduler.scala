@@ -6,7 +6,7 @@ import javax.inject.{Inject, Named}
 import actors.SessionsScheduler._
 import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
 import controllers.EmailComposer._
-import models.SessionJsonFormats.{ExpiringNext, Scheduled, SchedulingNext}
+import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
 import models.{FeedbackFormsRepository, SessionInfo, SessionsRepository, UsersRepository}
 import play.api.{Configuration, Logger}
 import utilities.DateTimeUtility

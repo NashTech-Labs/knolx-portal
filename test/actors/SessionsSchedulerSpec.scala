@@ -1,32 +1,31 @@
 package actors
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime, ZoneId}
-import java.util.{Date, TimeZone}
+import java.time.{LocalDateTime, ZoneId}
+import java.util.TimeZone
 
+import actors.SessionsScheduler._
 import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import com.google.inject.name.Names
+import controllers.TestEnvironment
+import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
 import models._
 import org.mockito.Mockito.verify
 import org.specs2.specification.Scope
+import play.api.Application
+import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import actors.SessionsScheduler._
-import com.google.inject.name.Names
-import controllers.TestEnvironment
-import play.api.Application
-import play.api.inject.{BindingKey, QualifierInstance}
 import utilities.DateTimeUtility
-import models.SessionJsonFormats.{ExpiringNext, Scheduled, SchedulingNext}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
-  with DefaultAwaitTimeout with FutureAwaits with ImplicitSender with TestEnvironment{
+  with DefaultAwaitTimeout with FutureAwaits with ImplicitSender with TestEnvironment {
 
   def this() = this(ActorSystem("MySpec"))
 
@@ -34,7 +33,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     TestKit.shutdownActorSystem(system)
   }
 
-  trait TestScope extends Scope{
+  trait TestScope extends Scope {
 
     lazy val app: Application = fakeApp()
     val mockedScheduler = mock[Scheduler]

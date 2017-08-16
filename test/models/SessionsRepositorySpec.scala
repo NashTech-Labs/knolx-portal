@@ -3,7 +3,7 @@ package models
 import java.text.SimpleDateFormat
 
 import controllers.UpdateSessionInformation
-import models.SessionJsonFormats.SchedulingNext
+import models.SessionJsonFormats.{ExpiringNext, Scheduled, SchedulingNext}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.libs.json.{JsBoolean, JsObject}
@@ -27,7 +27,6 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   private val endOfDayDate = formatter.parse(endOfDayDateString)
   private val endOfDayMillis = endOfDayDate.getTime
 
-  //Do not auto format with intellij, It will shift the variable at top causing suspicious forward reference.
   val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "feedbackFormId", "topic1",
     1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
 
@@ -57,11 +56,29 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       maybeSession contains sessionInfo
     }
 
-    "get sessions scheduled today" in new TestScope {
-      dateTimeUtility.startOfDayMillis returns startOfDayMillis
+    "get sessions scheduled next" in new TestScope {
+      dateTimeUtility.nowMillis returns currentMillis
       dateTimeUtility.endOfDayMillis returns endOfDayMillis
 
       val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(SchedulingNext))
+
+      sessions must beEqualTo(List(sessionInfo))
+    }
+
+    "get sessions expiring next" in new TestScope {
+      dateTimeUtility.startOfDayMillis returns currentMillis
+      dateTimeUtility.endOfDayMillis returns endOfDayMillis
+
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(ExpiringNext))
+
+      sessions must beEqualTo(List(Nil))
+    }
+
+    "get all sessions for  today" in new TestScope {
+      dateTimeUtility.startOfDayMillis returns startOfDayMillis
+      dateTimeUtility.endOfDayMillis returns endOfDayMillis
+
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(Scheduled))
 
       sessions must beEqualTo(List(sessionInfo))
     }

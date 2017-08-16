@@ -1,6 +1,6 @@
 package actors
 
-import akka.actor.SupervisorStrategy.Restart
+import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import controllers.{TestEmailActor, TestEnvironment}
@@ -76,7 +76,7 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
       val supervisorAction = strategy(new EmailException)
 
-      supervisorAction mustEqual Restart
+      supervisorAction mustEqual Stop
     }
 
     // =================================================================================================================

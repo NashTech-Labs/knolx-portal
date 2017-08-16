@@ -3,6 +3,7 @@ package models
 import java.text.SimpleDateFormat
 
 import controllers.UpdateSessionInformation
+import models.SessionJsonFormats.SchedulingNext
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.libs.json.{JsBoolean, JsObject}
@@ -60,7 +61,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       dateTimeUtility.startOfDayMillis returns startOfDayMillis
       dateTimeUtility.endOfDayMillis returns endOfDayMillis
 
-      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsScheduledToday)
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(SchedulingNext))
 
       sessions must beEqualTo(List(sessionInfo))
     }

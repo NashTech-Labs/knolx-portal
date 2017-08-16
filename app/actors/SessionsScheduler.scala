@@ -194,11 +194,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       recipients collect {
         case emails if emails.nonEmpty =>
           if (reminder) {
-            emailManager ! EmailActor.SendEmail(List("platoonhead@gmail.com"), fromEmail, "Feedback reminder", reminderMailBody(sessions))
+            emailManager ! EmailActor.SendEmail(emails, fromEmail, "Feedback reminder", reminderMailBody(sessions))
             Logger.info(s"Reminder Email for session sent")
             scheduledEmails = scheduledEmails - dateTimeUtility.toLocalDate(sessions.head.date.value).toString
           } else {
-            emailManager ! EmailActor.SendEmail(List("platoonhead@gmail.com"), fromEmail, s"${sessions.head.topic} Feedback Form", feedbackMailBody(sessions))
+            emailManager ! EmailActor.SendEmail(emails, fromEmail, s"${sessions.head.topic} Feedback Form", feedbackMailBody(sessions))
             Logger.info(s"Email for session ${sessions.head.session} sent, removing feedback form scheduler now")
             scheduledEmails = scheduledEmails - sessions.head._id.stringify
           }

@@ -31,7 +31,6 @@ class EmailActor @Inject()(mailerClient: MailerClient) extends Actor with ActorL
 
       val email = Email(subject, from, to, bodyHtml = Some(body))
       val response = Option(mailerClient.send(email))
-
       sender ! response
 
       context stop self

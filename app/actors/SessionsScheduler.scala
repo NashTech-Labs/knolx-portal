@@ -157,17 +157,14 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.info(s"Scheduled sessions in memory before refreshing $scheduledEmails")
       Logger.info(s"Refreshing schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
       val cancelled = scheduledEmails.forall { case (_, cancellable) => cancellable.cancel }
-
       Logger.info(s"Scheduled sessions in memory after refreshing $scheduledEmails")
       if (scheduledEmails.isEmpty || (scheduledEmails.nonEmpty && cancelled)) {
-        val eventualSessions = sessionsRepository.sessionsForToday(Scheduled)
+        val eventualSessions = sessionsRepository.sessionsForToday(SchedulingNext)
         val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
         eventualScheduledSessions foreach { feedbackSchedulers => scheduledEmails = feedbackSchedulers }
-
         val expiringSession = sessionsRepository.sessionsForToday(ExpiringNext)
         val eventualScheduledReminders = scheduleEmails(expiringSession, reminder = true)
         eventualScheduledReminders foreach { feedbackSchedulers => scheduledEmails = feedbackSchedulers }
-
         sender ! ScheduledSessionsRefreshed
       } else {
         sender ! ScheduledSessionsNotRefreshed

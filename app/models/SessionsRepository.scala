@@ -1,6 +1,5 @@
 package models
 
-import java.util.Date
 import javax.inject.Inject
 
 import controllers.UpdateSessionInformation
@@ -18,8 +17,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class SessionInfo(userId: String,
                        email: String,
@@ -44,6 +41,11 @@ object SessionJsonFormats {
 
   implicit val sessionFormat = Json.format[SessionInfo]
 
+  sealed trait SessionState
+  case object ExpiringNext extends SessionState
+  case object SchedulingNext extends SessionState
+  case object Scheduled extends SessionState
+
 }
 
 class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
@@ -65,19 +67,31 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
             upsert = false)
           .map(_.value))
 
-  def sessionsScheduledToday(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
+  def sessionsForToday(sessionState: SessionState)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+    val startOfTheday = dateTimeUtility.startOfDayMillis
+    val endOfTheDay = dateTimeUtility.endOfDayMillis
+
+    val condition = sessionState match {
+      case SchedulingNext =>
+        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(millis),
+          "$lte" -> BSONDateTime(endOfTheDay)))
+      case ExpiringNext   =>
+        Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
+          "$lte" -> BSONDateTime(endOfTheDay)))
+      case Scheduled      =>
+        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(startOfTheday),
+          "$lte" -> BSONDateTime(endOfTheDay)))
+    }
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj(
-            "cancelled" -> false,
-            "active" -> true,
-            "date" -> BSONDocument(
-              "$gte" -> BSONDateTime(dateTimeUtility.startOfDayMillis),
-              "$lte" -> BSONDateTime(dateTimeUtility.endOfDayMillis))))
+          .find(condition)
           .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
+  }
 
   def sessions(implicit ex: ExecutionContext): Future[List[SessionInfo]] =
     collection
@@ -218,7 +232,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
     collection
       .flatMap { jsonCollection =>
-        import jsonCollection.BatchCommands.AggregationFramework.{Descending, Group, Limit, Match, PushField, Sort}
+        import jsonCollection.BatchCommands.AggregationFramework._
 
         jsonCollection
           .aggregate(

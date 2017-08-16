@@ -55,6 +55,13 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
+  def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] ={
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+        .distinct[String,List]("email"))
+  }
+
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>

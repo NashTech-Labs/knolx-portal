@@ -111,7 +111,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = false
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
@@ -128,7 +128,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
@@ -145,7 +145,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
@@ -177,7 +177,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
@@ -194,7 +194,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler ! ScheduleSession(sessionId.stringify)
 
       expectMsg(true)
-      sessionsScheduler.underlyingActor.scheduledSessions.keys must contain(sessionId.stringify)
+      sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
     }
   }
 

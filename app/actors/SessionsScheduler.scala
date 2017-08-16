@@ -1,11 +1,12 @@
 package actors
 
 import java.time.LocalDateTime
+import java.util.Date
 import javax.inject.{Inject, Named}
 
 import actors.SessionsScheduler._
 import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
-import controllers.EmailComposer._
+import controllers.routes
 import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
 import models.{FeedbackFormsRepository, SessionInfo, SessionsRepository, UsersRepository}
 import play.api.{Configuration, Logger}
@@ -34,8 +35,9 @@ object SessionsScheduler {
   case object ScheduledSessionsRefreshed extends SessionsSchedulerResponse
   case object ScheduledSessionsNotRefreshed extends SessionsSchedulerResponse
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
-
 }
+
+case class EmailInfo(topic: String, presenter: String, date: String)
 
 class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   usersRepository: UsersRepository,
@@ -44,7 +46,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   @Named("EmailManager") emailManager: ActorRef,
                                   dateTimeUtility: DateTimeUtility) extends Actor {
 
-  val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val host: String = configuration.getOptional[String]("play.host.name").getOrElse("")
+  val url: String = routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url
+  val link = s"http://$host$url"
+
   var scheduledEmails: Map[String, Cancellable] = Map.empty
 
   override def preStart(): Unit = {
@@ -187,15 +193,17 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def emailHandler: Receive = {
     case SendEmail(sessions, reminder) if sessions.nonEmpty =>
       val recipients = usersRepository.getAllActiveEmails
-
+      val emailInfo = sessions.map(session => EmailInfo(session.topic, session.email, new Date(session.date.value).toString))
       recipients collect {
         case emails if emails.nonEmpty =>
           if (reminder) {
-            emailManager ! EmailActor.SendEmail(emails, fromEmail, "Feedback reminder", reminderMailBody(sessions))
+            emailManager ! EmailActor.SendEmail(
+              emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, link).toString)
             Logger.info(s"Reminder Email for session sent")
             scheduledEmails = scheduledEmails - dateTimeUtility.toLocalDate(sessions.head.date.value).toString
           } else {
-            emailManager ! EmailActor.SendEmail(emails, fromEmail, s"${sessions.head.topic} Feedback Form", feedbackMailBody(sessions))
+            emailManager ! EmailActor.SendEmail(
+              emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, link).toString)
             Logger.info(s"Email for session ${sessions.head.session} sent, removing feedback form scheduler now")
             scheduledEmails = scheduledEmails - sessions.head._id.stringify
           }

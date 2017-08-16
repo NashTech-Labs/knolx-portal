@@ -1,0 +1,16 @@
+@import actors._
+
+@(emailsInfo: List[EmailInfo], link: String)
+
+<p>Hi</p>
+<p>Please share your feedback regarding following session</p>
+<ul><li><strong>@{
+    emailsInfo.head.topic
+}</strong> by @{
+    emailsInfo.head.presenter
+} held on @{
+    emailsInfo.head.date
+}</li></ul>
+<p>Your feedback is valuable for us, you can access it here <a href="@link">here.</a></p>
+<p>Thanks</p>
+<p>Admin</p>

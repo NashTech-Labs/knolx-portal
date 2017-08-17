@@ -60,7 +60,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
-  def getAllActiveEmails(implicit ex: ExecutionContext)={
+  def getAllActiveEmails(implicit ex: ExecutionContext) = {
     val query = BSONDocument("active" -> true)
     val projection = BSONDocument("email" -> 1)
 

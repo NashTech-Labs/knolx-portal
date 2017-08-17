@@ -18,19 +18,22 @@ import scala.concurrent.duration.{FiniteDuration, _}
 
 object SessionsScheduler {
 
+  // messages used for reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
   case object GetScheduledSessions
   case class CancelScheduledSession(sessionId: String)
   case class ScheduleSession(sessionId: String)
 
-  private[actors] case class ScheduleSessionsForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
-  private[actors] case class ScheduleSessions(originalSender: ActorRef)
-  private[actors] case class SendReminderMailForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
-  private[actors] case class ScheduleRemainder(originalSender: ActorRef)
-  private[actors] case class StartSessionsScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
-  private[actors] case class StartFeedbackReminderMailScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
+  // messages used internally for starting session schedulers/emails
+  private[actors] case class ScheduleFeedbackEmailsStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
+  private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
+  private[actors] case class ScheduleFeedbackEmailsStartingTomorrow(originalSender: ActorRef)
+  private[actors] case class ScheduleFeedbackRemindersStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
+  private[actors] case class ScheduleFeedbackRemindersStartingTomorrow(originalSender: ActorRef)
+  private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class SendEmail(session: List[SessionInfo], reminder: Boolean)
 
+  // messages used for responding back with current schedulers state
   sealed trait SessionsSchedulerResponse
   case object ScheduledSessionsRefreshed extends SessionsSchedulerResponse
   case object ScheduledSessionsNotRefreshed extends SessionsSchedulerResponse
@@ -61,11 +64,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     val reminderTime: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - millis).plusHours(10)
     val reminderInitialDelay = dateTimeUtility.toMillis(reminderTime).milliseconds
 
-    self ! ScheduleSessionsForToday(self, sessionsScheduledToday)
-    self ! StartSessionsScheduler(initialDelay, 1.day)
+    self ! ScheduleFeedbackEmailsStartingToday(self, sessionsScheduledToday)
+    self ! InitiateFeedbackEmailsStartingTomorrow(initialDelay, 1.day)
 
-    self ! SendReminderMailForToday(self, sessionsExpiringToday)
-    self ! StartFeedbackReminderMailScheduler(reminderInitialDelay, 1.day)
+    self ! ScheduleFeedbackRemindersStartingToday(self, sessionsExpiringToday)
+    self ! InitialFeedbackRemindersStartingTomorrow(reminderInitialDelay, 1.day)
   }
 
   def scheduler: Scheduler = context.system.scheduler
@@ -78,26 +81,26 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       defaultHandler
 
   def initializingHandler: Receive = {
-    case StartSessionsScheduler(initialDelay, interval)             =>
-      Logger.info(s"Configuring sessions scheduler to run every day")
+    case InitiateFeedbackEmailsStartingTomorrow(initialDelay, interval)           =>
+      Logger.info(s"Initiating feedback emails schedulers to run everyday. These would be scheduled starting tomorrow.")
 
       scheduler.schedule(
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleSessions
+        message = ScheduleFeedbackEmailsStartingTomorrow
       )(context.dispatcher)
-    case StartFeedbackReminderMailScheduler(initialDelay, interval) =>
-      Logger.info(s"Configuring sessions reminder scheduler to run every day")
+    case InitialFeedbackRemindersStartingTomorrow(initialDelay, interval)         =>
+      Logger.info(s"Initiating feedback reminder schedulers to run everyday. These would be scheduled starting tomorrow.")
 
       scheduler.schedule(
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleRemainder
+        message = ScheduleFeedbackRemindersStartingTomorrow
       )(context.dispatcher)
-    case ScheduleSessionsForToday(originalSender, eventualSessions) =>
-      Logger.info(s"Scheduling today's sessions")
+    case ScheduleFeedbackEmailsStartingToday(originalSender, eventualSessions)    =>
+      Logger.info(s"Scheduling feedback form emails to be sent for all sessions scheduled for today. This would run only once.")
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
 
       eventualScheduledSessions foreach { schedulers =>
@@ -105,8 +108,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
         originalSender ! scheduledEmails.size
       }
-    case SendReminderMailForToday(originalSender, expiringSessions) =>
-      Logger.info(s"Scheduling today's reminders")
+    case ScheduleFeedbackRemindersStartingToday(originalSender, expiringSessions) =>
+      Logger.info(s"Scheduling feedback form reminder email to be sent for expiring sessions. This would run only once for " +
+        s"all sessions scheduled today.")
       val eventualExpiringSessionsReminder = scheduleEmails(expiringSessions, reminder = true)
 
       eventualExpiringSessionsReminder foreach { reminder =>
@@ -117,8 +121,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def schedulingHandler: Receive = {
-    case ScheduleSessions(originalSender)  =>
-      Logger.info(s"Starting schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
+    case ScheduleFeedbackEmailsStartingTomorrow(originalSender)    =>
+      Logger.info(s"Starting feedback emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsScheduledToday
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
 
@@ -127,8 +131,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
         originalSender ! scheduledEmails.size
       }
-    case ScheduleRemainder(originalSender) =>
-      Logger.info(s"Starting schedulers for Knolx session reminder on ${dateTimeUtility.localDateIST}")
+    case ScheduleFeedbackRemindersStartingTomorrow(originalSender) =>
+      Logger.info(s"Starting feedback reminder schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsExpiringToday
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = true)
 
@@ -137,11 +141,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
         originalSender ! scheduledEmails.size
       }
-    case GetScheduledSessions              =>
+    case GetScheduledSessions                                      =>
       Logger.info(s"Following sessions are scheduled ${scheduledEmails.keys}")
 
       sender ! ScheduledSessions(scheduledEmails.keys.toList)
-    case ScheduleSession(sessionId)        =>
+    case ScheduleSession(sessionId)                                =>
       val originalSender = sender
 
       Logger.info(s"Rescheduling session $sessionId")
@@ -160,12 +164,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def reconfiguringHandler: Receive = {
     case RefreshSessionsSchedulers         =>
-      Logger.info(s"Scheduled sessions in memory before refreshing $scheduledEmails")
-      Logger.info(s"Refreshing schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
+      Logger.info(s"Scheduled feedback emails before refreshing $scheduledEmails, now rescheduling at ${dateTimeUtility.localDateIST}")
 
       val cancelled = scheduledEmails.forall { case (_, cancellable) => cancellable.cancel }
 
-      Logger.info(s"Scheduled sessions in memory after refreshing $scheduledEmails")
+      Logger.info(s"Scheduled feedback emails after refreshing $scheduledEmails")
 
       if (scheduledEmails.isEmpty || (scheduledEmails.nonEmpty && cancelled)) {
         val eventualSessions = sessionsRepository.sessionsForToday(SchedulingNext)
@@ -181,16 +184,16 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         sender ! ScheduledSessionsNotRefreshed
       }
     case CancelScheduledSession(sessionId) =>
-      Logger.info(s"Removing scheduler for session $sessionId")
+      Logger.info(s"Removing feedback emails scheduled for session $sessionId")
 
       scheduledEmails.get(sessionId).exists(_.cancel) match {
-        case true  => Logger.info(s"Scheduled session $sessionId successfully cancelled")
-        case false => Logger.info(s"Scheduled session $sessionId was already cancelled")
+        case true  => Logger.info(s"Scheduled session $sessionId feedback email successfully cancelled")
+        case false => Logger.info(s"Scheduled session $sessionId feedback email was already cancelled")
       }
 
       scheduledEmails = scheduledEmails - sessionId
 
-      Logger.info(s"All scheduled sessions in memory after removing $sessionId are ${scheduledEmails.keys}")
+      Logger.info(s"All scheduled feedback emails after removing $sessionId are ${scheduledEmails.keys}")
 
       sender ! scheduledEmails.get(sessionId).isEmpty
   }
@@ -209,7 +212,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
           } else {
             emailManager ! EmailActor.SendEmail(
               emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
-            Logger.info(s"Email for session ${sessions.head.session} sent, removing feedback form scheduler now")
+            Logger.info(s"Feedback email for session ${sessions.head.session} sent, removing feedback form scheduler now")
             scheduledEmails = scheduledEmails - sessions.head._id.stringify
           }
       }

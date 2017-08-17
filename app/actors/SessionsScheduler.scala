@@ -18,7 +18,7 @@ import scala.concurrent.duration.{FiniteDuration, _}
 
 object SessionsScheduler {
 
-  // messages used for reconfiguring schedulers/scheduled-emails
+  // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
   case object GetScheduledSessions
   case class CancelScheduledSession(sessionId: String)

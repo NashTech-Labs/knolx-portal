@@ -71,7 +71,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(ExpiringNext))
 
-      sessions must beEqualTo(List(Nil))
+      sessions must beEqualTo(Nil)
     }
 
     "get all sessions for  today" in new TestScope {

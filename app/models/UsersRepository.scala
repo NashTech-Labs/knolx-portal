@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models.UserJsonFormats._
 import play.api.libs.json._
-import reactivemongo.play.json.BSONFormats._
+import reactivemongo.play.json.BSONFormats.BSONDocumentFormat
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
@@ -60,17 +60,17 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
-  def getAllActiveEmails(implicit ex: ExecutionContext) = {
-    val query = BSONDocument("active" -> true)
-    val projection = BSONDocument("email" -> 1)
+  def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] = {
+    val query = Json.obj("active" -> true)
+    val projection = Json.obj("email" -> 1)
 
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(query, projection)
-          .cursor[BSONDocument]()
-          .collect[List](-1, FailOnError[List[BSONDocument]]())
-      ).map(_.map(_.getAs[String]("email")).flatten)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.map(_ ("email").asOpt[String]).flatten)
   }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =

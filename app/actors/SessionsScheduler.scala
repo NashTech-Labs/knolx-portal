@@ -25,16 +25,17 @@ object SessionsScheduler {
 
   private[actors] case class ScheduleSessionsForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class ScheduleSessions(originalSender: ActorRef)
+  private[actors] case class SendReminderMailForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class ScheduleRemainder(originalSender: ActorRef)
   private[actors] case class StartSessionsScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class StartFeedbackReminderMailScheduler(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class SendEmail(session: List[SessionInfo], reminder: Boolean)
-  private[actors] case class SendReminderMailForToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
 
   sealed trait SessionsSchedulerResponse
   case object ScheduledSessionsRefreshed extends SessionsSchedulerResponse
   case object ScheduledSessionsNotRefreshed extends SessionsSchedulerResponse
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
+
 }
 
 case class EmailInfo(topic: String, presenter: String, date: String)
@@ -46,10 +47,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   @Named("EmailManager") emailManager: ActorRef,
                                   dateTimeUtility: DateTimeUtility) extends Actor {
 
-  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
-  lazy val host: String = configuration.getOptional[String]("play.host.name").getOrElse("")
-  val url: String = routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url
-  val link = s"http://$host$url"
+  lazy val fromEmail = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val host = configuration.getOptional[String]("play.host.name").getOrElse("")
+  val feedbackUrl = s"$host${routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url}"
 
   var scheduledEmails: Map[String, Cancellable] = Map.empty
 
@@ -162,15 +162,20 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     case RefreshSessionsSchedulers         =>
       Logger.info(s"Scheduled sessions in memory before refreshing $scheduledEmails")
       Logger.info(s"Refreshing schedulers for Knolx sessions scheduled on ${dateTimeUtility.localDateIST}")
+
       val cancelled = scheduledEmails.forall { case (_, cancellable) => cancellable.cancel }
+
       Logger.info(s"Scheduled sessions in memory after refreshing $scheduledEmails")
+
       if (scheduledEmails.isEmpty || (scheduledEmails.nonEmpty && cancelled)) {
         val eventualSessions = sessionsRepository.sessionsForToday(SchedulingNext)
         val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
         eventualScheduledSessions foreach { feedbackSchedulers => scheduledEmails = feedbackSchedulers }
+
         val expiringSession = sessionsRepository.sessionsForToday(ExpiringNext)
         val eventualScheduledReminders = scheduleEmails(expiringSession, reminder = true)
         eventualScheduledReminders foreach { feedbackSchedulers => scheduledEmails = feedbackSchedulers }
+
         sender ! ScheduledSessionsRefreshed
       } else {
         sender ! ScheduledSessionsNotRefreshed
@@ -198,12 +203,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         case emails if emails.nonEmpty =>
           if (reminder) {
             emailManager ! EmailActor.SendEmail(
-              emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, link).toString)
+              emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
             Logger.info(s"Reminder Email for session sent")
             scheduledEmails = scheduledEmails - dateTimeUtility.toLocalDate(sessions.head.date.value).toString
           } else {
             emailManager ! EmailActor.SendEmail(
-              emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, link).toString)
+              emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
             Logger.info(s"Email for session ${sessions.head.session} sent, removing feedback form scheduler now")
             scheduledEmails = scheduledEmails - sessions.head._id.stringify
           }

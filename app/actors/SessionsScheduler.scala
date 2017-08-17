@@ -29,8 +29,8 @@ object SessionsScheduler {
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class ScheduleFeedbackEmailsStartingTomorrow(originalSender: ActorRef)
   private[actors] case class ScheduleFeedbackRemindersStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
-  private[actors] case class ScheduleFeedbackRemindersStartingTomorrow(originalSender: ActorRef)
   private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
+  private[actors] case class ScheduleFeedbackRemindersStartingTomorrow(originalSender: ActorRef)
   private[actors] case class SendEmail(session: List[SessionInfo], reminder: Boolean)
 
   // messages used for responding back with current schedulers state

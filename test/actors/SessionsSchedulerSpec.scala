@@ -92,31 +92,31 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       val initialDelay: FiniteDuration = 1.minute
       val interval: FiniteDuration = 1.minute
 
-      sessionsScheduler ! StartSessionsScheduler(initialDelay, interval)
+      sessionsScheduler ! InitiateFeedbackEmailsStartingTomorrow(initialDelay, interval)
 
       verify(sessionsScheduler.underlyingActor.scheduler)
         .schedule(
           initialDelay,
           interval,
-          sessionsScheduler, ScheduleSessions)(sessionsScheduler.underlyingActor.context.dispatcher)
+          sessionsScheduler, ScheduleFeedbackEmailsStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "start feedback reminder mail Scheduler" in new TestScope {
       val initialDelay: FiniteDuration = 1.minute
       val interval: FiniteDuration = 1.minute
 
-      sessionsScheduler ! StartFeedbackReminderMailScheduler(initialDelay, interval)
+      sessionsScheduler ! InitialFeedbackRemindersStartingTomorrow(initialDelay, interval)
 
       verify(sessionsScheduler.underlyingActor.scheduler)
         .schedule(
           initialDelay,
           interval,
-          sessionsScheduler, ScheduleSessions)(sessionsScheduler.underlyingActor.context.dispatcher)
+          sessionsScheduler, ScheduleFeedbackEmailsStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "schedule sessions" in new TestScope {
       sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      sessionsScheduler ! ScheduleSessions(self)
+      sessionsScheduler ! ScheduleFeedbackEmailsStartingTomorrow(self)
 
       expectMsg(1)
     }
@@ -125,21 +125,21 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
       dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      sessionsScheduler ! ScheduleRemainder(self)
+      sessionsScheduler ! ScheduleFeedbackRemindersStartingTomorrow(self)
 
       expectMsg(1)
     }
 
     "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
 
-      sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsForToday))
+      sessionsScheduler ! ScheduleFeedbackEmailsStartingToday(self, Future.successful(sessionsForToday))
 
       expectMsg(1)
     }
 
     "start sessions reminders schedulers for Knolx sessions expiring today" in new TestScope {
       dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      sessionsScheduler ! SendReminderMailForToday(self, Future.successful(sessionsForToday))
+      sessionsScheduler ! ScheduleFeedbackRemindersStartingToday(self, Future.successful(sessionsForToday))
 
       expectMsg(1)
     }

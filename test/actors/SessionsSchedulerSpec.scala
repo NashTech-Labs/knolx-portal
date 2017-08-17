@@ -1,17 +1,23 @@
 package actors
 
-import akka.actor.{ActorSystem, Cancellable, Scheduler}
+import java.time.{LocalDateTime, ZoneId}
+import java.util.TimeZone
+
+import actors.SessionsScheduler._
+import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
+import com.google.inject.name.Names
+import controllers.TestEnvironment
+import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
 import models._
 import org.mockito.Mockito.verify
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
-import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
+import play.api.Application
+import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
-import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,8 +25,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
-  with WordSpecLike with DefaultAwaitTimeout with FutureAwaits with MustMatchers
-  with Mockito with ImplicitSender with BeforeAndAfterAll {
+  with DefaultAwaitTimeout with FutureAwaits with ImplicitSender with TestEnvironment {
+
   def this() = this(ActorSystem("MySpec"))
 
   override def afterAll() {
@@ -28,20 +34,28 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
   }
 
   trait TestScope extends Scope {
-    val mockedScheduler = mock[Scheduler]
-    val sessionsRepository = mock[SessionsRepository]
-    val feedbackFormsRepository = mock[FeedbackFormsRepository]
-    val mailerClient = mock[MailerClient]
-    val dateTimeUtility = mock[DateTimeUtility]
 
-    val nowMillis = System.currentTimeMillis
+    lazy val app: Application = fakeApp()
+    val mockedScheduler: Scheduler = mock[Scheduler]
+    val sessionsRepository: SessionsRepository = mock[SessionsRepository]
+    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val mailerClient: MailerClient = mock[MailerClient]
+    val dateTimeUtility: DateTimeUtility = mock[DateTimeUtility]
 
-    val knolxSessionDateTime = nowMillis + 24 * 60 * 60 * 1000
+    val nowMillis: Long = System.currentTimeMillis
 
-    val sessionId = BSONObjectID.generate
-    val feedbackFormId = BSONObjectID.generate
+    val knolxSessionDateTime: Long = nowMillis + 24 * 60 * 60 * 1000
 
-    val sessionsScheduledToday =
+    val sessionId: BSONObjectID = BSONObjectID.generate
+    val feedbackFormId: BSONObjectID = BSONObjectID.generate
+
+    val emailManager: ActorRef =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+
+    val ISTZoneId: ZoneId = ZoneId.of("Asia/Kolkata")
+    val ISTTimeZone: TimeZone = TimeZone.getTimeZone("Asia/Kolkata")
+
+    val sessionsForToday =
       List(SessionInfo(
         userId = "userId",
         email = "test@example.com",
@@ -65,7 +79,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     val sessionsScheduler =
       TestActorRef(
-        new SessionsScheduler(sessionsRepository, feedbackFormsRepository, mailerClient, dateTimeUtility) {
+        new SessionsScheduler(sessionsRepository, usersRepository, feedbackFormsRepository, config, emailManager, dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def scheduler: Scheduler = mockedScheduler
@@ -75,8 +89,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
   "Sessions scheduler" should {
 
     "start sessions scheduler" in new TestScope {
-      val initialDelay = 1.minute
-      val interval = 1.minute
+      val initialDelay: FiniteDuration = 1.minute
+      val interval: FiniteDuration = 1.minute
 
       sessionsScheduler ! StartSessionsScheduler(initialDelay, interval)
 
@@ -87,19 +101,45 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           sessionsScheduler, ScheduleSessions)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
-    "schedule sessions" in new TestScope {
-      sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
+    "start feedback reminder mail Scheduler" in new TestScope {
+      val initialDelay: FiniteDuration = 1.minute
+      val interval: FiniteDuration = 1.minute
 
+      sessionsScheduler ! StartFeedbackReminderMailScheduler(initialDelay, interval)
+
+      verify(sessionsScheduler.underlyingActor.scheduler)
+        .schedule(
+          initialDelay,
+          interval,
+          sessionsScheduler, ScheduleSessions)(sessionsScheduler.underlyingActor.context.dispatcher)
+    }
+
+    "schedule sessions" in new TestScope {
+      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       sessionsScheduler ! ScheduleSessions(self)
 
       expectMsg(1)
     }
 
-    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
+    "schedule reminders" in new TestScope {
 
-      val schedulersSize = sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsScheduledToday))
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
+      dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
+      sessionsScheduler ! ScheduleRemainder(self)
+
+      expectMsg(1)
+    }
+
+    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
+
+      sessionsScheduler ! ScheduleSessionsForToday(self, Future.successful(sessionsForToday))
+
+      expectMsg(1)
+    }
+
+    "start sessions reminders schedulers for Knolx sessions expiring today" in new TestScope {
+      dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
+      sessionsScheduler ! SendReminderMailForToday(self, Future.successful(sessionsForToday))
 
       expectMsg(1)
     }
@@ -111,12 +151,14 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = false
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
-      sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
+      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
+
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
+      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
 
       result mustEqual ScheduledSessionsRefreshed
     }
@@ -128,12 +170,12 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
-      sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
+      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
+      val result: ScheduledSessions = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
 
       result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
@@ -145,29 +187,44 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
-      sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
+      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
+      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
 
       result mustEqual ScheduledSessionsNotRefreshed
     }
 
     "send feedback form" in new TestScope {
       val feedbackFormEmail =
-        Email(subject = s"${sessionsScheduledToday.head.topic} Feedback Form",
-          from = "sidharth@knoldus.com",
-          to = List("sidharth@knoldus.com"),
+        Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
+          from = "test@example.com",
+          to = List("test@example.com"),
           bodyHtml = None,
           bodyText = Some("Hello World"), replyTo = None)
 
-      mailerClient.send(feedbackFormEmail) returns "sent"
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
 
-      sessionsScheduler ! SendSessionFeedbackForm(sessionsScheduledToday.head, maybeFeedbackForm.get)
+      sessionsScheduler ! SendEmail(sessionsForToday, reminder = false)
 
-      verify(mailerClient).send(feedbackFormEmail)
+      sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(sessionId.stringify))
+    }
+
+    "send reminder form" in new TestScope {
+      val feedbackFormEmail =
+        Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
+          from = "test@example.com",
+          to = List("test@example.com"),
+          bodyHtml = None,
+          bodyText = Some(" knolx reminder"), replyTo = None)
+
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
+
+      sessionsScheduler ! SendEmail(sessionsForToday, reminder = true)
+
+      sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
     }
 
     "cancel a scheduled session" in new TestScope {
@@ -177,9 +234,9 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
 
-      sessionsScheduler.underlyingActor.scheduledSessions = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
-      sessionsRepository.sessionsScheduledToday returns Future.successful(sessionsScheduledToday)
+      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
       sessionsScheduler ! CancelScheduledSession(sessionId.stringify)
@@ -188,14 +245,15 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     }
 
     "schedule a session" in new TestScope {
-      sessionsRepository.getById(sessionId.stringify) returns Future.successful(sessionsScheduledToday.headOption)
+      sessionsRepository.getById(sessionId.stringify) returns Future.successful(sessionsForToday.headOption)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
       sessionsScheduler ! ScheduleSession(sessionId.stringify)
 
       expectMsg(true)
-      sessionsScheduler.underlyingActor.scheduledSessions.keys must contain(sessionId.stringify)
+      sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
     }
+
   }
 
 }

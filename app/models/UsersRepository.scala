@@ -16,6 +16,10 @@ import utilities.PasswordUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+
 case class UserInfo(email: String,
                     password: String,
                     algorithm: String,
@@ -54,6 +58,13 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
+
+  def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] ={
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+        .distinct[String,List]("email"))
+  }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection

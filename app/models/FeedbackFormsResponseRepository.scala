@@ -5,9 +5,10 @@ import javax.inject.Inject
 import models.FeedbackFormsResponseFormat._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentWriter, BSONObjectID}
+import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONDocumentWriter, BSONObjectID, BSONString}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,9 +21,13 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class QuestionResponse(question: String, options: List[String], response: String)
 
 case class FeedbackFormsResponse(email: String,
+                                 presenter: String,
                                  userId: String,
                                  sessionId: String,
                                  sessionTopic: String,
+                                 meetup: Boolean,
+                                 sessiondate: BSONDateTime,
+                                 session: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
                                  _id: BSONObjectID = BSONObjectID.generate)
@@ -56,9 +61,13 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
       BSONDocument(
         "$set" -> BSONDocument(
           "email" -> feedbackFormsResponse.email,
+          "presenter" -> feedbackFormsResponse.presenter,
           "userId" -> feedbackFormsResponse.userId,
-          "sessionTopic" -> feedbackFormsResponse.sessionTopic,
           "sessionId" -> feedbackFormsResponse.sessionId,
+          "sessionTopic" -> feedbackFormsResponse.sessionTopic,
+          "meetup" -> feedbackFormsResponse.meetup,
+          "sessiondate" -> feedbackFormsResponse.sessiondate,
+          "session" -> feedbackFormsResponse.session,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
           "responseDate" -> feedbackFormsResponse.responseDate
         ))
@@ -73,5 +82,14 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .find(Json.obj("userId" -> userId, "sessionId" -> SessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
 
+  def allResponsesBySession(presentersEmail: String, sessionId: String): Future[List[FeedbackFormsResponse]] =
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj(
+            "presenter" -> presentersEmail,
+            "sessionId" -> sessionId))
+          .cursor[FeedbackFormsResponse](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
 
 }

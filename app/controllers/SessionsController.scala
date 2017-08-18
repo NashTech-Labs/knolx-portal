@@ -14,7 +14,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
-import schedulers.SessionsScheduler._
+import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -278,7 +278,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
               } { userJson =>
                 val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
-
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
                   BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
@@ -292,10 +291,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                       case ScheduledSessionsRefreshed    =>
                         Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!")
                       case ScheduledSessionsNotRefreshed =>
-                        Logger.error(s"Cannot refresh feedback form schedulers while creating session ${createSessionInfo.topic}")
+                        Logger.error(s"Cannot refresh feedback form actors while creating session ${createSessionInfo.topic}")
                         InternalServerError("Something went wrong!")
                       case msg                           =>
-                        Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while creating session ${createSessionInfo.topic}")
+                        Logger.error(s"Something went wrong when refreshing feedback form actors $msg while creating session ${createSessionInfo.topic}")
                         InternalServerError("Something went wrong!")
                     }
                   } else {
@@ -347,10 +346,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           case ScheduledSessionsRefreshed    =>
             Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!")
           case ScheduledSessionsNotRefreshed =>
-            Logger.error(s"Cannot refresh feedback form schedulers while deleting session $id")
+            Logger.error(s"Cannot refresh feedback form actors while deleting session $id")
             InternalServerError("Something went wrong!")
           case msg                           =>
-            Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while deleting session $id")
+            Logger.error(s"Something went wrong when refreshing feedback form actors $msg while deleting session $id")
             InternalServerError("Something went wrong!")
         }
       })
@@ -388,7 +387,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           updateSessionInfo => {
             val expirationMillis = sessionExpirationMillis(updateSessionInfo.date, updateSessionInfo.feedbackExpirationDays)
             val updatedSession = UpdateSessionInfo(updateSessionInfo, BSONDateTime(expirationMillis))
-
             sessionsRepository
               .update(updatedSession)
               .flatMap { result =>
@@ -399,10 +397,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                     case ScheduledSessionsRefreshed    =>
                       Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated")
                     case ScheduledSessionsNotRefreshed =>
-                      Logger.error(s"Cannot refresh feedback form schedulers while updating session ${updateSessionInfo.id}")
+                      Logger.error(s"Cannot refresh feedback form actors while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                     case msg                           =>
-                      Logger.error(s"Something went wrong when refreshing feedback form schedulers $msg while updating session ${updateSessionInfo.id}")
+                      Logger.error(s"Something went wrong when refreshing feedback form actors $msg while updating session ${updateSessionInfo.id}")
                       InternalServerError("Something went wrong!")
                   }
                 } else {

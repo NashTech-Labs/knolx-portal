@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import models.UserJsonFormats._
 import play.api.libs.json._
+import reactivemongo.play.json.BSONFormats.BSONDocumentFormat
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
@@ -15,6 +16,10 @@ import utilities.PasswordUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class UserInfo(email: String,
                     password: String,
@@ -55,6 +60,19 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
+  def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] = {
+    val query = Json.obj("active" -> true)
+    val projection = Json.obj("email" -> 1)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(query, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.map(_ ("email").asOpt[String]).flatten)
+  }
+
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
     collection
       .flatMap(jsonCollection =>
@@ -80,7 +98,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .findAndUpdate(
-            BSONDocument("email" -> email),
+            BSONDocument("email" -> email, "admin" -> false),
             BSONDocument("$set" -> BSONDocument("active" -> false)),
             fetchNewObject = true,
             upsert = false)

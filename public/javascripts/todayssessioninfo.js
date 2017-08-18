@@ -39,15 +39,11 @@ $(function () {
 function fetchResponse(sessionId) {
     var form = document.getElementById(sessionId + "-form").value;
     var feedbackForm = JSON.parse(form);
-    var formData = new FormData();
-    formData.append("sessionId", sessionId);
 
-    jsRoutes.controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse().ajax(
+    jsRoutes.controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse(sessionId).ajax(
         {
-            type: 'POST',
+            type: 'GET',
             processData: false,
-            contentType: false,
-            data: formData,
             beforeSend: function (request) {
                 var csrfToken = document.getElementById('csrfToken').value;
                 return request.setRequestHeader('CSRF-Token', csrfToken);

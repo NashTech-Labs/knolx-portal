@@ -3,6 +3,7 @@ package models
 import java.text.SimpleDateFormat
 
 import controllers.UpdateSessionInformation
+import models.SessionJsonFormats.{ExpiringNext, Scheduled, SchedulingNext}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.libs.json.{JsBoolean, JsObject}
@@ -26,7 +27,6 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   private val endOfDayDate = formatter.parse(endOfDayDateString)
   private val endOfDayMillis = endOfDayDate.getTime
 
-  //Do not auto format with intellij, It will shift the variable at top causing suspicious forward reference which result in failure of test cases.
   val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "feedbackFormId", "topic1",
     1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
 
@@ -56,11 +56,29 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       maybeSession contains sessionInfo
     }
 
-    "get sessions scheduled today" in new TestScope {
+    "get sessions scheduled next" in new TestScope {
+      dateTimeUtility.nowMillis returns currentMillis
+      dateTimeUtility.endOfDayMillis returns endOfDayMillis
+
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(SchedulingNext))
+
+      sessions must beEqualTo(List(sessionInfo))
+    }
+
+    "get sessions expiring next" in new TestScope {
+      dateTimeUtility.startOfDayMillis returns currentMillis
+      dateTimeUtility.endOfDayMillis returns endOfDayMillis
+
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(ExpiringNext))
+
+      sessions must beEqualTo(Nil)
+    }
+
+    "get all sessions for  today" in new TestScope {
       dateTimeUtility.startOfDayMillis returns startOfDayMillis
       dateTimeUtility.endOfDayMillis returns endOfDayMillis
 
-      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsScheduledToday)
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(Scheduled))
 
       sessions must beEqualTo(List(sessionInfo))
     }
@@ -74,6 +92,11 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       updated must beEqualTo(true)
     }
 
+    "get active session by id" in new TestScope {
+      val response = await(sessionsRepository.getActiveById(sessionId.stringify))
+
+      response contains sessionInfo
+    }
 
     "get paginated sessions when serched with empty string" in new TestScope {
       val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1))
@@ -119,9 +142,26 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       dateTimeUtility.nowMillis returns greaterThanSessionMillis
 
-      val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions)
+      val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions())
 
       activeSessions must beEqualTo(List(sessionInfo))
+    }
+
+    "get active sessions by email" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
+        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val greaterThanSessionMillis: Long = currentMillis + 2 * 60 * 60 * 1000
+
+      dateTimeUtility.nowMillis returns greaterThanSessionMillis
+
+      val activeSessions: List[SessionInfo] = await(sessionsRepository.activeSessions(Some("test@example.com")))
+
+      activeSessions must contain(List(sessionInfo).head)
     }
 
     "get immediate previous expired sessions" in new TestScope {

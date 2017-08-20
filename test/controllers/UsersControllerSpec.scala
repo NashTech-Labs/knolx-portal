@@ -27,8 +27,6 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
   private val emptyEmailObject = Future.successful(None)
   private val _id: BSONObjectID = BSONObjectID.generate
-  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
@@ -36,6 +34,8 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val currentDate = formatter.parse(currentDateString)
   private val currentMillis = currentDate.getTime
   private val passwordChangeRequest = PasswordChangeRequestInfo("test@example.com", "token", BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(currentMillis), 0, _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()

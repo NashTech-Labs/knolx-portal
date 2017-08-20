@@ -1,16 +1,25 @@
 package models
 
+import java.text.SimpleDateFormat
+
+import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.BSONDateTime
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UsersRepositorySpec extends PlaySpecification {
+class UsersRepositorySpec extends PlaySpecification with Mockito {
 
-  val usersRepository = new UsersRepository(TestDb.reactiveMongoApi)
+  val dateTimeUtility: DateTimeUtility = mock[DateTimeUtility]
+  val usersRepository = new UsersRepository(TestDb.reactiveMongoApi, dateTimeUtility)
+  private val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+  private val currentDateString = "2017-07-12T14:30:00"
+  private val currentDate = formatter.parse(currentDateString)
+  private val currentMillis = currentDate.getTime
   val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
-  val document = UserInfo("test@example.com", "password", "encryptedpassword", active = true, admin = false)
+  val document = UserInfo("test@example.com", "password", "encryptedpassword", active = true, admin = false, BSONDateTime(currentMillis))
 
   "Users Repository" should {
 
@@ -63,21 +72,19 @@ class UsersRepositorySpec extends PlaySpecification {
       result must beEqualTo(updateWriteResult)
     }
 
-    "get active user count when serched with empty string" in {
+    "get active user count when searched with empty string" in {
       val count = await(usersRepository.userCountWithKeyword(None))
 
       count must beEqualTo(1)
     }
 
-    "get active user count when serched with some string" in {
+    "get active user count when searched with some string" in {
       val count = await(usersRepository.userCountWithKeyword(Some("test")))
 
       count must beEqualTo(1)
     }
 
     "delete user by email" in {
-      val expectedOutput = UserInfo("test@example.com", "12345678", "encryptedpassword", active = false, admin = false)
-
       val result = await(usersRepository.delete("test@example.com"))
 
       result.get.email must beEqualTo("test@example.com")

@@ -38,7 +38,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
 
   private val emailObject = Future.successful(Some(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
 
 
   private val emptyEmailObject = Future.successful(None)
@@ -53,13 +53,15 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         feedbackFormsRepository,
         dateTimeUtility,
         knolxControllerComponent,
-        sessionsScheduler)
+        sessionsScheduler,
+        usersBanScheduler)
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
-
+    val usersBanScheduler =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
     }
@@ -603,4 +605,3 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
   }
 }
-

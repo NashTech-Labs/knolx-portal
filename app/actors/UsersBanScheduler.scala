@@ -18,17 +18,15 @@ case class EmailBodyInfo(topic: String, presenter: String, date: String)
 
 object UsersBanScheduler {
 
-  // messages used for getting/reconfiguring schedulers/scheduled-emails
-  case object RefreshSessionsBanSchedulers
-
+  // messages used for responding back with current schedulers state
+  sealed trait SessionBanSchedulerResponse
   // messages used internally for starting session schedulers/emails
   private[actors] case class InitiateBanEmails(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class ScheduleBanEmails(originalSender: ActorRef)
   private[actors] case class SendEmail(session: EmailContent)
   private[actors] case class EmailContent(to: String, body: List[EmailBodyInfo])
-
-  // messages used for responding back with current schedulers state
-  sealed trait SessionBanSchedulerResponse
+  // messages used for getting/reconfiguring schedulers/scheduled-emails
+  case object RefreshSessionsBanSchedulers
   case object ScheduledBanSessionsRefreshed extends SessionBanSchedulerResponse
   case object ScheduledBanSessionsNotRefreshed extends SessionBanSchedulerResponse
 }
@@ -40,18 +38,20 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   @Named("EmailManager") emailManager: ActorRef,
                                   dateTimeUtility: DateTimeUtility) extends Actor {
 
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
   var scheduledBanEmails: Map[String, Cancellable] = Map.empty
 
-  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
-
   override def preStart(): Unit = {
-    self ! InitiateBanEmails(Duration.Zero, Duration.Zero)
+    self ! InitiateBanEmails(Duration.Zero, 1.day)
     Logger.info(s"ban scheduler started immediately")
   }
 
   def scheduler: Scheduler = context.system.scheduler
 
-  def receive: Receive = initializingHandler orElse schedulingHandler orElse emailHandler orElse
+  def receive: Receive = initializingHandler orElse
+    schedulingHandler orElse
+    reconfiguringHandler orElse
+    emailHandler orElse
     defaultHandler
 
   def initializingHandler: Receive = {
@@ -71,14 +71,13 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       val eventuallyExpiringSession = sessionsExpiringToday
       val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
 
+      Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
+
       eventualScheduledBanEmails foreach { schedulers =>
         scheduledBanEmails = scheduledBanEmails ++ schedulers
 
         originalSender ! scheduledBanEmails.size
       }
-
-      Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-
   }
 
   def emailHandler: Receive = {

@@ -1,6 +1,6 @@
 package controllers
 
-import java.util.UUID
+import java.util.{Date, UUID}
 import javax.inject._
 
 import actors.EmailActor
@@ -32,7 +32,8 @@ case class UserEmailInformation(email: Option[String], page: Int)
 case class ManageUserInfo(email: String,
                           active: Boolean,
                           id: String,
-                          admin: Boolean = false)
+                          admin: Boolean = false,
+                          banTill: String)
 
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
 
@@ -121,7 +122,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap(_.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
+                models.UserInfo(userInfo.email,
+                  PasswordUtility.encrypt(userInfo.password),
+                  PasswordUtility.BCrypt,
+                  active = true,
+                  admin = false,
+                  BSONDateTime(dateTimeUtility.nowMillis)))
               .map { result =>
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")
@@ -192,7 +198,11 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber, keyword)
       .flatMap { userInfo =>
         val users = userInfo map (user =>
-          ManageUserInfo(user.email, user.active, user._id.stringify, user.admin))
+          ManageUserInfo(user.email,
+            user.active,
+            user._id.stringify,
+            user.admin,
+            new Date(user.banTill.value).toString))
 
         usersRepository
           .userCountWithKeyword(keyword)
@@ -214,7 +224,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         usersRepository
           .paginate(userInformation.page, userInformation.email)
           .flatMap { userInfo =>
-            val users = userInfo map (user => ManageUserInfo(user.email, user.active, user._id.stringify, user.admin))
+            val users = userInfo map (user =>
+              ManageUserInfo(user.email,
+                user.active,
+                user._id.stringify,
+                user.admin,
+                new Date(user.banTill.value).toString))
 
             usersRepository
               .userCountWithKeyword(userInformation.email)

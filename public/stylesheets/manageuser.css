@@ -281,6 +281,11 @@
     color: #45B39D;
 }
 
+.fonts{
+    font-size: 12px!important;
+    letter-spacing: 0px;
+    }
+
 .hold-status {
     color: #FFF300;
 }

@@ -16,7 +16,7 @@ POST        /user/update                         controllers.UsersController.upd
 GET         /user/delete                         controllers.UsersController.deleteUser(email: String)
 GET         /user/forgotpassword                 controllers.UsersController.renderForgotPassword
 POST        /user/forgotpassword                 controllers.UsersController.generateForgotPasswordToken
-GET         /user/forgotpassword/validate        controllers.UsersController.validateForgotPasswordToken(id: String)
+GET         /user/forgotpassword/validate        controllers.UsersController.validateForgotPasswordToken(token: String)
 POST        /user/forgotpassword/reset           controllers.UsersController.resetPassword
 GET         /user/changepassword                 controllers.UsersController.renderChangePassword
 POST        /user/changepassword                 controllers.UsersController.changePassword

@@ -98,7 +98,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         .schedule(
           initialDelay,
           interval,
-          sessionsScheduler, ScheduleFeedbackEmailsStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
+          sessionsScheduler,
+          ScheduleFeedbackEmailsStartingTomorrow(sessionsScheduler.underlyingActor.context.self))(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "start feedback reminder mail Scheduler" in new TestScope {
@@ -111,7 +112,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         .schedule(
           initialDelay,
           interval,
-          sessionsScheduler, ScheduleFeedbackEmailsStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
+          sessionsScheduler,
+          ScheduleFeedbackRemindersStartingTomorrow(sessionsScheduler.underlyingActor.context.self))(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "schedule sessions" in new TestScope {

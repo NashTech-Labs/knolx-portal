@@ -1,0 +1,16 @@
+@import actors._
+
+@(emailsInfo: List[EmailBodyInfo])
+
+
+<p>Hi</p>
+<p>This is to inform you that, you have been BANNED to attend and share your feedback for knolx sesssion</p>
+<p> due to not providing feedback for following sessions</p>
+<ul>@for(info <- emailsInfo) {
+    <li>@info.topic by @info.presenter held on @info.date</li>
+}</ul>
+
+<p>Banning more then 3 times can affect your appraisal</p>
+<p>Thanks</p>
+<p>Admin</p>
+

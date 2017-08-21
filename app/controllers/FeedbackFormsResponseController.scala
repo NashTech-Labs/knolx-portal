@@ -80,45 +80,51 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
-    sessionsRepository
-      .activeSessions()
-      .flatMap { activeSessions =>
-        if (activeSessions.nonEmpty) {
-          val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
-            feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
-              case Some(form) =>
-                val sessionInformation =
-                  FeedbackSessions(session.userId,
-                    session.email,
-                    new Date(session.date.value),
-                    session.session,
-                    session.feedbackFormId,
-                    session.topic,
-                    session.meetup,
-                    session.rating,
-                    session.cancelled,
-                    session.active,
-                    session._id.stringify,
-                    new Date(session.expirationDate.value).toString)
-                val questions = form.questions.map(questions => QuestionInformation(questions.question,
-                  questions.options,
-                  questions.questionType,
-                  questions.mandatory))
-                val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
+    usersRepository.getActiveAndUnbanned(request.user.email.toLowerCase).flatMap {
+      _.fold {
+        Future.successful(Unauthorized("You are banned, can't access this page!"))
+      } { _ =>
+        sessionsRepository
+          .activeSessions()
+          .flatMap { activeSessions =>
+            if (activeSessions.nonEmpty) {
+              val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
+                feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
+                  case Some(form) =>
+                    val sessionInformation =
+                      FeedbackSessions(session.userId,
+                        session.email,
+                        new Date(session.date.value),
+                        session.session,
+                        session.feedbackFormId,
+                        session.topic,
+                        session.meetup,
+                        session.rating,
+                        session.cancelled,
+                        session.active,
+                        session._id.stringify,
+                        new Date(session.expirationDate.value).toString)
+                    val questions = form.questions.map(questions => QuestionInformation(questions.question,
+                      questions.options,
+                      questions.questionType,
+                      questions.mandatory))
+                    val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
 
-                Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
-              case None       =>
-                Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
-                None
+                    Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
+                  case None       =>
+                    Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
+                    None
+                }
+              })
+
+              sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten, Nil)))
+            } else {
+              Logger.info("No active sessions found")
+              immediatePreviousSessions.map(sessions => Ok(views.html.feedback.todaysfeedbacks(Nil, sessions)))
             }
-          })
-
-          sessionFeedbackMappings.map(mappings => Ok(views.html.feedback.todaysfeedbacks(mappings.flatten, Nil)))
-        } else {
-          Logger.info("No active sessions found")
-          immediatePreviousSessions.map(sessions => Ok(views.html.feedback.todaysfeedbacks(Nil, sessions)))
-        }
+          }
       }
+    }
   }
 
   private def immediatePreviousSessions: Future[List[FeedbackSessions]] =

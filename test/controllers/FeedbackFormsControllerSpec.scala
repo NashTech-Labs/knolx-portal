@@ -21,11 +21,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment {
 
   private val _id: BSONObjectID = BSONObjectID.generate()
+  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val emailObject = Future.successful(Some(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
-  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
@@ -66,7 +66,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "create feedback form" in new WithTestApplication {
-      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["1","2","3","4","5"],"questionType":"MCQ","mandatory":true}]}"""
+      val payload =
+        """{"name":"Test Form","questions":
+          |[{"question":"How good is knolx portal?","options":
+          |["1","2","3","4","5"],"questionType":"MCQ","mandatory":true}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -87,7 +90,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not create feedback form because feedback form is not inserted in database" in new WithTestApplication {
-      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["1","2","3","4","5"],"questionType":"MCQ","mandatory":true}]}"""
+      val payload =
+        """{"name":"Test Form","questions":[{"question":
+          |"How good is knolx portal?","options":["1","2","3","4","5"],
+          |"questionType":"MCQ","mandatory":true}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -125,7 +131,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not create feedback form because name is empty" in new WithTestApplication {
-      val payload = """{"name":"","questions":[{"question":"","options":["1","2","3","4","5"]}]}"""
+      val payload =
+        """{"name":"","questions":
+          |[{"question":"","options":["1","2","3","4","5"]}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -142,7 +150,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not create feedback form because question value is empty" in new WithTestApplication {
-      val payload = """{"name":"Test Form","questions":[{"question":"","options":["1","2","3","4","5"],"questionType":"MCQ","mandatory":true}]}"""
+      val payload =
+        """{"name":"Test Form","questions":
+          |[{"question":"","options":["1","2","3","4","5"],
+          |"questionType":"MCQ","mandatory":true}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -159,7 +170,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not create feedback form because options value is empty" in new WithTestApplication {
-      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":["","2","3","4","5"],"questionType":"MCQ","mandatory":true}]}"""
+      val payload =
+        """{"name":"Test Form","questions":
+          |[{"question":"How good is knolx portal?","options":
+          |["","2","3","4","5"],"questionType":"MCQ","mandatory":true}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -176,7 +190,10 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     }
 
     "not create feedback form because options are not present" in new WithTestApplication {
-      val payload = """{"name":"Test Form","questions":[{"question":"How good is knolx portal?","options":[],"questionType":"MCQ","mandatory":true}]}"""
+      val payload =
+        """{"name":"Test Form","questions":
+          |[{"question":"How good is knolx portal?","options":[],
+          |"questionType":"MCQ","mandatory":true}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -270,7 +287,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request =
         FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
-            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"question?","options":["option","option"],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":
+              |[{"question":"question?","options":["option","option"],
+              |"questionType":"MCQ","mandatory":true}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken
 
@@ -303,7 +322,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request =
         FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
-            """{"id":"5943cdd60900000900409b26","name":"test","questions":[{"question":"question?","options":[],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+            """{"id":"5943cdd60900000900409b26","name":"test","questions":
+              |[{"question":"question?","options":[],
+              |"questionType":"MCQ","mandatory":true}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken
 
@@ -320,7 +341,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request =
         FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
-            """{"id":"5943cdd60900000900409b26","name":"","questions":[{"question":"question?","options":["option","option"],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+            """{"id":"5943cdd60900000900409b26","name":"","questions":
+              |[{"question":"question?","options":["option","option"],
+              |"questionType":"MCQ","mandatory":true}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken
 
@@ -337,7 +360,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request =
         FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
-            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["option","option"],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":
+              |[{"question":"","options":["option","option"],"questionType":
+              |"MCQ","mandatory":true}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken
 
@@ -354,7 +379,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request =
         FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
-            """{"id":"5943cdd60900000900409b26","name":"title","questions":[{"question":"","options":["","option"],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+            """{"id":"5943cdd60900000900409b26","name":"title","questions":
+              |[{"question":"","options":["","option"],
+              |"questionType":"MCQ","mandatory":true}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken
 
@@ -374,7 +401,9 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val request =
         FakeRequest(POST, "/feedbackform/getByEmail")
           .withBody(Json.parse(
-            """{"id":"","name":"title","questions":[{"question":"question?","options":["option","option"],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+            """{"id":"","name":"title","questions":
+              |[{"question":"question?","options":
+              |["option","option"],"questionType":"MCQ","mandatory":true}]}""".stripMargin))
           .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
           .withCSRFToken
 

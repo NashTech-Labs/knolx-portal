@@ -1,5 +1,6 @@
 package models
 
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 import models.UserJsonFormats._
@@ -9,10 +10,10 @@ import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-import utilities.PasswordUtility
+import utilities.{DateTimeUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,6 +27,8 @@ case class UserInfo(email: String,
                     algorithm: String,
                     active: Boolean,
                     admin: Boolean,
+                    banTill: BSONDateTime,
+                    banCount: Int = 0,
                     _id: BSONObjectID = BSONObjectID.generate)
 
 case class UpdatedUserInfo(email: String, active: Boolean, password: Option[String])
@@ -35,11 +38,12 @@ object UserJsonFormats {
   import play.api.libs.json.Json
 
   val pageSize = 10
+  val banPeriod = 30
 
   implicit val userFormat = Json.format[UserInfo]
 }
 
-class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
 
   import play.modules.reactivemongo.json._
 
@@ -60,8 +64,20 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
+  def getActiveAndUnbanned(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("email" -> email.toLowerCase,
+            "active" -> true,
+            "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
+  }
+
   def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] = {
-    val query = Json.obj("active" -> true)
+    val millis = dateTimeUtility.nowMillis
+    val query = Json.obj("active" -> true, "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
     val projection = Json.obj("email" -> 1)
 
     collection
@@ -70,7 +86,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(query, projection)
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
-      ).map(_.map(_ ("email").asOpt[String]).flatten)
+      ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
@@ -87,6 +103,19 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       case None           =>
         BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active))
     }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def ban(email: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val banTill: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.nowMillis).plusDays(banPeriod)
+
+    val duration = BSONDateTime(dateTimeUtility.toMillis(banTill))
+
+    val selector = BSONDocument("email" -> email)
+    val modifier = BSONDocument("$set" -> BSONDocument("banTill" -> duration), "$inc" -> BSONDocument("banCount" -> 1))
 
     collection
       .flatMap(jsonCollection =>

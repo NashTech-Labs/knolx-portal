@@ -4,6 +4,8 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.SessionsScheduler._
+import actors.UsersBanScheduler.{RefreshSessionsBanSchedulers, ScheduledBanSessionsNotRefreshed, ScheduledBanSessionsRefreshed, SessionBanSchedulerResponse}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import models.{FeedbackFormsRepository, SessionsRepository, UpdateSessionInfo, UsersRepository}
@@ -14,7 +16,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
-import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -68,7 +69,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
-                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef
+                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef,
+                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
@@ -392,7 +394,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
-
+                  (usersBanScheduler ? RefreshSessionsBanSchedulers) (5.seconds).mapTo[SessionBanSchedulerResponse] map {
+                    case ScheduledBanSessionsRefreshed    =>
+                      Logger.error(s"Refreshed Ban schedulers while updating session ${updateSessionInfo.id}")
+                    case ScheduledBanSessionsNotRefreshed =>
+                      Logger.error(s"Cannot refresh ban schedulers while updating session ${updateSessionInfo.id}")
+                    case msg                              =>
+                      Logger.error(s"Something went wrong when refreshing ban schedulers form actors $msg while updating session ${updateSessionInfo.id}")
+                  }
                   (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
                     case ScheduledSessionsRefreshed    =>
                       Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated")

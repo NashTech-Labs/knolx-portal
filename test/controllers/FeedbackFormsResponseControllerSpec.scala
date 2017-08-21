@@ -30,7 +30,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject = Future.successful(Some(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
     Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
     active = true, _id)
@@ -73,6 +73,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   "Feedback Response Controller" should {
 
     "not render feedback form for today if session associated feedback form not found" in new WithTestApplication {
+      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
@@ -86,6 +87,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "render feedback form for today if session associated feedback form exists and session has not expired" in new WithTestApplication {
+      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
           1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
@@ -103,6 +105,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "render feedback form for today if session associated feedback form exists and session has expired expired" in new WithTestApplication {
+      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
@@ -116,7 +119,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "render feedback form for today with immidiate explored sessions if no active sessions found" in new WithTestApplication {
-
+      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.activeSessions() returns noActiveSessionObject
       sessionsRepository.immediatePreviousExpiredSessions returns sessionObject
@@ -127,9 +130,17 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       status(response) must be equalTo OK
     }
 
+    "not render feedback form for today if user is blocked" in new WithTestApplication {
+      usersRepository.getActiveAndUnbanned("test@example.com") returns Future.successful(None)
+      usersRepository.getByEmail("test@example.com") returns emailObject
 
-    "Not fetch response as no stored response found" in new WithTestApplication {
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
 
+      status(response) must be equalTo UNAUTHORIZED
+    }
+
+    "not fetch response as no stored response found" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(None)
 
@@ -141,7 +152,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "fetch response" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(Some(feedbackResponse))
 
@@ -153,9 +163,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "throw a bad request as submit response form with invalid field submitted" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
-
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withBody(Json.parse("""{"feedbackFormId":"", "responses":[]}""")))
@@ -164,7 +172,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "throw a bad request if there is no feedback form id submitted" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -174,7 +181,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "throw a bad request if there is no session id submitted" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
@@ -194,7 +200,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "throw a bad request if there is no active session available with the session id submitted by form" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns Future.successful(None)
 
@@ -207,7 +212,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
     "throw a bad request if there is active session available but no feedback form available with feedback form  " +
       "id submitted by form" in new WithTestApplication {
-
       usersRepository.getByEmail("test@example.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(None)
@@ -257,7 +261,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
 
       status(response) must be equalTo INTERNAL_SERVER_ERROR
-
     }
 
     "throw a bad request if there is responses which are not present as multiple choices in feedback form" in new WithTestApplication {
@@ -285,7 +288,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "throw a bad request if there a mcq question and its not mandatory" in new WithTestApplication {
-
       val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = false),
         Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
         active = true, _id)
@@ -302,7 +304,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "store feedback form response for comment type is false" in new WithTestApplication {
-
       val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
         Question("How is the UI?", List("1"), "COMMENT", mandatory = false)),
         active = true, _id)
@@ -321,7 +322,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     }
 
     "throw a bad request if question type or mandatory type is invalid" in new WithTestApplication {
-
       val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = false),
         Question("How is the UI?", List("1"), "Some other type", mandatory = false)),
         active = true, _id)

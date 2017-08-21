@@ -88,7 +88,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleFeedbackEmailsStartingTomorrow
+        message = ScheduleFeedbackEmailsStartingTomorrow(self)
       )(context.dispatcher)
     case InitialFeedbackRemindersStartingTomorrow(initialDelay, interval)         =>
       Logger.info(s"Initiating feedback reminder schedulers to run everyday. These would be scheduled starting tomorrow.")
@@ -97,7 +97,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleFeedbackRemindersStartingTomorrow
+        message = ScheduleFeedbackRemindersStartingTomorrow(self)
       )(context.dispatcher)
     case ScheduleFeedbackEmailsStartingToday(originalSender, eventualSessions)    =>
       Logger.info(s"Scheduling feedback form emails to be sent for all sessions scheduled for today. This would run only once.")

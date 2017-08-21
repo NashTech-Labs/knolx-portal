@@ -25,6 +25,8 @@ case class ResetPasswordInformation(token: String,
                                     password: String,
                                     confirmPassword: String)
 
+case class ResetPasswordWhileLoggedInInformation(currentPassword: String, newPassword: String, confirmPassword: String)
+
 case class LoginInformation(email: String, password: String)
 
 case class UserEmailInformation(email: Option[String], page: Int)
@@ -73,6 +75,16 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )(ResetPasswordInformation.apply)(ResetPasswordInformation.unapply)
       verifying(
       "Password and confirm password miss match!", user => user.password.toLowerCase == user.confirmPassword.toLowerCase)
+  )
+
+  val resetPasswordWhileLoggedInForm = Form(
+    mapping(
+      "currentPassword" -> nonEmptyText,
+      "newPassword" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
+      "confirmPassword" -> nonEmptyText.verifying("Confirm Password must be at least 8 character long!", password => password.length >= 8)
+    )(ResetPasswordWhileLoggedInInformation.apply)(ResetPasswordWhileLoggedInInformation.unapply)
+      verifying(
+      "Password and confirm password miss match!", user => user.newPassword.toLowerCase == user.confirmPassword.toLowerCase)
   )
 
   val loginForm = Form(
@@ -332,7 +344,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   def resetPassword: Action[AnyContent] = action.async { implicit request =>
     resetPasswordForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.error(s"Received a bad request for reseting password $formWithErrors")
+        Logger.error(s"Received a bad request for resetting password $formWithErrors")
         Future.successful(BadRequest(views.html.users.resetpassword(formWithErrors)))
       },
       resetPasswordInfo => {
@@ -367,6 +379,36 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 }
             }
           )
+      })
+  }
+
+  def renderResetPasswordWhileLoggedIn: Action[AnyContent] = userAction.async { implicit request =>
+    Future.successful(Ok(views.html.users.resetpasswordwhileloggedin(resetPasswordWhileLoggedInForm
+      .fill(ResetPasswordWhileLoggedInInformation("", "", "")))))
+  }
+
+  def resetPasswordWhileLoggedIn: Action[AnyContent] = userAction.async { implicit request =>
+    resetPasswordWhileLoggedInForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for resetting password $formWithErrors")
+        Future.successful(BadRequest(views.html.users.resetpasswordwhileloggedin(formWithErrors)))
+      },
+      resetPasswordInfo => {
+        usersRepository
+          .getActiveByEmail(request.user.email.toLowerCase)
+          .map(_.fold {
+            Logger.info(s"User ${request.user.email.toLowerCase} not found")
+            Redirect(routes.UsersController.renderResetPasswordWhileLoggedIn()).flashing("message" -> "User not found!")
+          } { user =>
+            val password = user.password
+            if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, password)) {
+              usersRepository.update(UpdatedUserInfo(request.user.email.toLowerCase, user.active, Some(resetPasswordInfo.newPassword)))
+              Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successful")
+            }
+            else {
+              Redirect(routes.UsersController.renderResetPasswordWhileLoggedIn()).flashing("message" -> "Invalid current password")
+            }
+          })
       })
   }
 

@@ -18,6 +18,8 @@ GET         /user/forgotpassword                controllers.UsersController.forg
 POST        /user/requestpassword               controllers.UsersController.requestPasswordChange
 GET         /user/changepassword                controllers.UsersController.changePassword(id: String)
 POST        /user/resetpassword                 controllers.UsersController.resetPassword
+POST        /user/loggedin/resetpassword        controllers.UsersController.resetPasswordWhileLoggedIn
+GET         /user/render/resetpassword          controllers.UsersController.renderResetPasswordWhileLoggedIn
 
 # Session
 GET         /session                            controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])

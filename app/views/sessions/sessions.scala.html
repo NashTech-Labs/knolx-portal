@@ -1,4 +1,4 @@
-@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_])
+@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_], flash: Flash)
 
 @main("Sessions") {
     <div class="row">
@@ -10,6 +10,12 @@
             </div>
             <div class="col-md-3"></div>
             <div class="col-md-12 all-users">
+                @if(!flash.isEmpty) {
+                    <div class="alert alert-success  alert-dismissable user-updated-message">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @flash.get("message").fold("")(identity)
+                    </div>
+                }
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="table-responsive manage-user-custom-table-margin">
@@ -32,11 +38,11 @@
                                 <td>@knolxSession.session</td>
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
-                            <td><span class="label @if(knolxSession.meetup){
+                                <td><span class="label @if(knolxSession.meetup) {
                                     label-success ">Meetup</span></td>
                                 }else{
-                                    label-warning ">Knolx</span></td>
-                                }
+                                label-warning ">Knolx</span> </td>
+                            }
 
                                 @(if(knolxSession.cancelled) {
                                         <td class='active-status'>Yes</td>

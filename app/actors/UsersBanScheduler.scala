@@ -13,6 +13,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
+import akka.pattern.pipe
 
 case class EmailBodyInfo(topic: String, presenter: String, date: String)
 
@@ -20,13 +21,13 @@ object UsersBanScheduler {
 
   // messages used internally for starting session schedulers/emails
   private[actors] case class InitiateBanEmails(initialDelay: FiniteDuration, interval: FiniteDuration)
-  private[actors] case class ScheduleBanEmails(originalSender: ActorRef)
   private[actors] case class SendEmail(session: EmailContent)
   private[actors] case class EmailContent(to: String, body: List[EmailBodyInfo])
+  private[actors] case class EventualScheduledEmails(schedule: Map[String, Cancellable])
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsBanSchedulers
-
+  case object ScheduleBanEmails
   // messages used for responding back with current schedulers state
   sealed trait SessionBanSchedulerResponse
   case object ScheduledBanSessionsRefreshed extends SessionBanSchedulerResponse
@@ -64,22 +65,20 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleBanEmails(self)
+        message = ScheduleBanEmails
       )(context.dispatcher)
   }
 
   def schedulingHandler: Receive = {
-    case ScheduleBanEmails(originalSender) =>
+    case ScheduleBanEmails                 =>
       val eventuallyExpiringSession = sessionsExpiringToday
       val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
-
-      eventualScheduledBanEmails foreach { schedulers =>
-        Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-
-        scheduledBanEmails = scheduledBanEmails ++ schedulers
-
-        originalSender ! scheduledBanEmails.size
-      }
+      Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
+      eventualScheduledBanEmails.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
+    case EventualScheduledEmails(schedule) => {
+      scheduledBanEmails = scheduledBanEmails ++ schedule
+      Logger.info(s"All scheduled sessions in memory are ${scheduledBanEmails.keys}")
+    }
   }
 
   def emailHandler: Receive = {

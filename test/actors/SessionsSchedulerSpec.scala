@@ -99,7 +99,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           initialDelay,
           interval,
           sessionsScheduler,
-          ScheduleFeedbackEmailsStartingTomorrow(sessionsScheduler.underlyingActor.context.self))(sessionsScheduler.underlyingActor.context.dispatcher)
+          ScheduleFeedbackEmailsStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "start feedback reminder mail Scheduler" in new TestScope {
@@ -113,23 +113,23 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           initialDelay,
           interval,
           sessionsScheduler,
-          ScheduleFeedbackRemindersStartingTomorrow(sessionsScheduler.underlyingActor.context.self))(sessionsScheduler.underlyingActor.context.dispatcher)
+          ScheduleFeedbackRemindersStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "schedule sessions" in new TestScope {
       sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      sessionsScheduler ! ScheduleFeedbackEmailsStartingTomorrow(self)
+      sessionsScheduler ! ScheduleFeedbackEmailsStartingTomorrow
 
-      expectMsg(1)
+      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
     }
 
     "schedule reminders" in new TestScope {
 
       sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
       dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      sessionsScheduler ! ScheduleFeedbackRemindersStartingTomorrow(self)
+      sessionsScheduler ! ScheduleFeedbackRemindersStartingTomorrow
 
-      expectMsg(1)
+      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
     }
 
     "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
@@ -252,7 +252,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       sessionsScheduler ! ScheduleSession(sessionId.stringify)
 
-      expectMsg(true)
       sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
     }
 

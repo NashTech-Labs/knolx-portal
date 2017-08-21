@@ -15,11 +15,14 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
+import akka.pattern.pipe
 
 object SessionsScheduler {
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
+  case object ScheduleFeedbackEmailsStartingTomorrow
+  case object ScheduleFeedbackRemindersStartingTomorrow
   case object GetScheduledSessions
   case class CancelScheduledSession(sessionId: String)
   case class ScheduleSession(sessionId: String)
@@ -27,10 +30,9 @@ object SessionsScheduler {
   // messages used internally for starting session schedulers/emails
   private[actors] case class ScheduleFeedbackEmailsStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
-  private[actors] case class ScheduleFeedbackEmailsStartingTomorrow(originalSender: ActorRef)
   private[actors] case class ScheduleFeedbackRemindersStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
-  private[actors] case class ScheduleFeedbackRemindersStartingTomorrow(originalSender: ActorRef)
+  private[actors] case class EventualScheduledEmails(schedule: Map[String, Cancellable])
   private[actors] case class SendEmail(session: List[SessionInfo], reminder: Boolean)
 
   // messages used for responding back with current schedulers state
@@ -88,7 +90,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleFeedbackEmailsStartingTomorrow(self)
+        message = ScheduleFeedbackEmailsStartingTomorrow
       )(context.dispatcher)
     case InitialFeedbackRemindersStartingTomorrow(initialDelay, interval)         =>
       Logger.info(s"Initiating feedback reminder schedulers to run everyday. These would be scheduled starting tomorrow.")
@@ -97,7 +99,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         initialDelay = initialDelay,
         interval = interval,
         receiver = self,
-        message = ScheduleFeedbackRemindersStartingTomorrow(self)
+        message = ScheduleFeedbackRemindersStartingTomorrow
       )(context.dispatcher)
     case ScheduleFeedbackEmailsStartingToday(originalSender, eventualSessions)    =>
       Logger.info(s"Scheduling feedback form emails to be sent for all sessions scheduled for today. This would run only once.")
@@ -121,45 +123,28 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def schedulingHandler: Receive = {
-    case ScheduleFeedbackEmailsStartingTomorrow(originalSender)    =>
+    case ScheduleFeedbackEmailsStartingTomorrow    =>
       Logger.info(s"Starting feedback emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsScheduledToday
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
-
-      eventualScheduledSessions foreach { schedulers =>
-        scheduledEmails = scheduledEmails ++ schedulers
-
-        originalSender ! scheduledEmails.size
-      }
-    case ScheduleFeedbackRemindersStartingTomorrow(originalSender) =>
+      eventualScheduledSessions.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
+    case EventualScheduledEmails(schedule)         =>
+      scheduledEmails = scheduledEmails ++ schedule
+      Logger.info(s"All scheduled sessions in memory are ${scheduledEmails.keys}")
+    case ScheduleFeedbackRemindersStartingTomorrow =>
       Logger.info(s"Starting feedback reminder schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsExpiringToday
-      val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = true)
-
-      eventualScheduledSessions foreach { reminder =>
-        scheduledEmails = scheduledEmails ++ reminder
-
-        originalSender ! scheduledEmails.size
-      }
-    case GetScheduledSessions                                      =>
+      val eventualScheduledReminders = scheduleEmails(eventualSessions, reminder = true)
+      eventualScheduledReminders.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
+    case GetScheduledSessions                      =>
       Logger.info(s"Following sessions are scheduled ${scheduledEmails.keys}")
-
       sender ! ScheduledSessions(scheduledEmails.keys.toList)
-    case ScheduleSession(sessionId)                                =>
-      val originalSender = sender
-
+    case ScheduleSession(sessionId)                =>
       Logger.info(s"Rescheduling session $sessionId")
 
       val eventualSessions = sessionsRepository.getById(sessionId) map (_.toList)
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
-
-      eventualScheduledSessions foreach { schedulers =>
-        scheduledEmails = scheduledEmails ++ schedulers
-
-        Logger.info(s"All scheduled sessions in memory after adding $sessionId are ${scheduledEmails.keys}")
-
-        originalSender ! scheduledEmails.get(sessionId).isDefined
-      }
+      eventualScheduledSessions.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
   }
 
   def reconfiguringHandler: Receive = {

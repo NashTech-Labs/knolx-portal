@@ -220,7 +220,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def defaultHandler: Receive = {
     case msg: Any =>
-      Logger.info(s"Received a message $msg in Sessions Scheduler which cannot be handled")
+      Logger.error(s"Received a message $msg in Sessions Scheduler which cannot be handled")
   }
 
   def scheduleEmails(eventualSessions: Future[List[SessionInfo]], reminder: Boolean): Future[Map[String, Cancellable]] =

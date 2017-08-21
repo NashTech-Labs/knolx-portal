@@ -20,6 +20,7 @@ case class EmailBodyInfo(topic: String, presenter: String, date: String)
 object UsersBanScheduler {
 
   // messages used internally for starting session schedulers/emails
+  case object ScheduleBanEmails
   private[actors] case class InitiateBanEmails(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class SendEmail(session: EmailContent)
   private[actors] case class EmailContent(to: String, body: List[EmailBodyInfo])
@@ -27,7 +28,6 @@ object UsersBanScheduler {
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsBanSchedulers
-  case object ScheduleBanEmails
 
   // messages used for responding back with current schedulers state
   sealed trait SessionBanSchedulerResponse

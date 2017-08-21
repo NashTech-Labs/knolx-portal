@@ -314,8 +314,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val subject = "Knolx portal password change request."
               val body =
                 s"""<p>Hi,</p>
-                   |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
-                   |<strong><p>If you are not the one who initiated this request kindly ignore this mail.</p></strong>
+                    |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
+                    |<strong><p>If you are not the one who initiated this request kindly ignore this mail.</p></strong>
                 """.stripMargin
 
               emailManager ! EmailActor.SendEmail(List(foundUser.email), from, subject, body)
@@ -400,13 +400,11 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             Logger.info(s"User ${request.user.email.toLowerCase} not found")
             Redirect(routes.UsersController.renderResetPasswordWhileLoggedIn()).flashing("message" -> "User not found!")
           } { user =>
-            val password = user.password
-            if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, password)) {
+            if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, user.password)) {
               usersRepository.update(UpdatedUserInfo(request.user.email.toLowerCase, user.active, Some(resetPasswordInfo.newPassword)))
-              Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successful")
-            }
-            else {
-              Redirect(routes.UsersController.renderResetPasswordWhileLoggedIn()).flashing("message" -> "Invalid current password")
+              Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
+            } else {
+              Redirect(routes.UsersController.renderResetPasswordWhileLoggedIn()).flashing("message" -> "Current password invalid!")
             }
           })
       })

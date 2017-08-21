@@ -103,6 +103,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     }
 
   }
+
   object TestHelpers extends PlayRunners
     with HeaderNames
     with Status

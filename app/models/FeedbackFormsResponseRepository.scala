@@ -93,7 +93,6 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
 
   def getAllResponseEmailsPerSession(sessionId: String)(implicit ex: ExecutionContext): Future[List[String]] = {
-
     val query = Json.obj("sessionId" -> sessionId)
     val projection = Json.obj("email" -> 1)
 
@@ -103,7 +102,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .find(query, projection)
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
-      ).map(_.map(_ ("email").asOpt[String]).flatten)
+      ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
 }

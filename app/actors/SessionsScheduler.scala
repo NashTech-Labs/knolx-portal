@@ -21,12 +21,12 @@ object SessionsScheduler {
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
-  case object ScheduleFeedbackEmailsStartingTomorrow
-  case object ScheduleFeedbackRemindersStartingTomorrow
   case object GetScheduledSessions
   case class CancelScheduledSession(sessionId: String)
 
   // messages used internally for starting session schedulers/emails
+  case object ScheduleFeedbackEmailsStartingTomorrow
+  case object ScheduleFeedbackRemindersStartingTomorrow
   private[actors] case class ScheduleSession(sessionId: String)
   private[actors] case class ScheduleFeedbackEmailsStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)

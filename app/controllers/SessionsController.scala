@@ -433,14 +433,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
-      case true  =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> "Feedback form successfully scheduled!")
-      case false =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> "Something went wrong while scheduling feedback form!")
-    }
+    sessionsScheduler ! ScheduleSession(sessionId)
+    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
+      .flashing("message" -> "Feedback form schedule initiated"))
   }
 
 }

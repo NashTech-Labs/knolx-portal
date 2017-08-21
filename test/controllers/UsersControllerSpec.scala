@@ -500,6 +500,71 @@ class UsersControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
+    "render to password reset page while logged in " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.renderResetPasswordWhileLoggedIn(FakeRequest(GET, "/ChangePassword")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "throw a bad request for password reset while logged in " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.resetPasswordWhileLoggedIn()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "",
+          "newPassword" -> "",
+          "confirmPassword" -> "")
+        .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "redirect as email in request not exist" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns Future.successful(None)
+      val result = controller.resetPasswordWhileLoggedIn()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "12345678",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "redirect as email in request exist but current password mismatch" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
+      val result = controller.resetPasswordWhileLoggedIn()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "123456",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "reset password while user is logged " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
+      val result = controller.resetPasswordWhileLoggedIn()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "12345678",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
   }
 
 }

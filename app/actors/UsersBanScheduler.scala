@@ -18,15 +18,17 @@ case class EmailBodyInfo(topic: String, presenter: String, date: String)
 
 object UsersBanScheduler {
 
-  // messages used for responding back with current schedulers state
-  sealed trait SessionBanSchedulerResponse
   // messages used internally for starting session schedulers/emails
   private[actors] case class InitiateBanEmails(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class ScheduleBanEmails(originalSender: ActorRef)
   private[actors] case class SendEmail(session: EmailContent)
   private[actors] case class EmailContent(to: String, body: List[EmailBodyInfo])
+
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsBanSchedulers
+
+  // messages used for responding back with current schedulers state
+  sealed trait SessionBanSchedulerResponse
   case object ScheduledBanSessionsRefreshed extends SessionBanSchedulerResponse
   case object ScheduledBanSessionsNotRefreshed extends SessionBanSchedulerResponse
 }
@@ -43,7 +45,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   override def preStart(): Unit = {
     self ! InitiateBanEmails(Duration.Zero, 1.day)
-    Logger.info(s"ban scheduler started immediately")
+    Logger.info(s"Ban scheduler started immediately")
   }
 
   def scheduler: Scheduler = context.system.scheduler
@@ -71,9 +73,9 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       val eventuallyExpiringSession = sessionsExpiringToday
       val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
 
-      Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-
       eventualScheduledBanEmails foreach { schedulers =>
+        Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
+
         scheduledBanEmails = scheduledBanEmails ++ schedulers
 
         originalSender ! scheduledBanEmails.size
@@ -82,7 +84,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def emailHandler: Receive = {
     case SendEmail(emailContent) =>
-      usersRepository.ban(emailContent.to).map(_.ok).collect { case result if result =>
+      usersRepository.ban(emailContent.to).map(_.ok).collect { case banned if banned =>
         emailManager ! EmailActor.SendEmail(
           List(emailContent.to), fromEmail, s"BAN FROM KNOLX", views.html.emails.ban(emailContent.body).toString)
         scheduledBanEmails = scheduledBanEmails - emailContent.to
@@ -100,7 +102,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       if (scheduledBanEmails.isEmpty || (scheduledBanEmails.nonEmpty && cancelled)) {
         val eventuallyExpiringSession = sessionsExpiringToday
         val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
-        eventualScheduledBanEmails foreach { BanScheduler => scheduledBanEmails = BanScheduler }
+        eventualScheduledBanEmails foreach { banScheduler => scheduledBanEmails = banScheduler }
         sender ! ScheduledBanSessionsRefreshed
       } else {
         sender ! ScheduledBanSessionsNotRefreshed
@@ -109,7 +111,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def getBanInfo(sessions: List[SessionInfo], emails: List[String]): Future[List[EmailContent]] = {
     Future.sequence(sessions.map { session =>
-      Logger.info(s"collecting response emails for session id ${session._id.stringify}")
+      Logger.info(s"Collecting response emails for session id ${session._id.stringify}")
       feedbackFormsResponseRepository.getAllResponseEmailsPerSession(session._id.stringify)
         .map { responseEmails =>
           val bannedBySession = emails.filter(_ != session.email) diff responseEmails
@@ -118,10 +120,9 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
     }).map { banned =>
       val banInfo = banned.flatten.toMap
       val bannedEmails = banInfo.values.toList.flatten.distinct
-      bannedEmails collect {
-        case email =>
-          val sessionBannedOn = banInfo.keys.collect { case sessionTopic if banInfo(sessionTopic).contains(email) => sessionTopic }.toList
-          EmailContent(email, sessionBannedOn)
+      bannedEmails map { email =>
+        val sessionBannedOn = banInfo.keys.collect { case sessionTopic if banInfo(sessionTopic).contains(email) => sessionTopic }.toList
+        EmailContent(email, sessionBannedOn)
       }
     }
   }
@@ -137,9 +138,9 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       recipients.flatMap { emails =>
         getBanInfo(sessions, emails)
           .map {
-            _.map { emailInfo =>
+            _.map { emailContent =>
               val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
-              emailInfo.to -> scheduler.scheduleOnce(initialDelay, self, SendEmail(emailInfo))
+              emailContent.to -> scheduler.scheduleOnce(initialDelay, self, SendEmail(emailContent))
             }.toMap
           }
       }

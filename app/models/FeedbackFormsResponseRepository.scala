@@ -102,7 +102,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .find(query, projection)
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
-      ).map(_.map(_ ("email").asOpt[String]).flatten)
+      ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
 }

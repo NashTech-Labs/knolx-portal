@@ -76,7 +76,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
   }
 
   def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] = {
-
     val millis = dateTimeUtility.nowMillis
     val query = Json.obj("active" -> true, "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
     val projection = Json.obj("email" -> 1)
@@ -87,7 +86,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .find(query, projection)
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
-      ).map(_.map(_ ("email").asOpt[String]).flatten)
+      ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
   def insert(user: UserInfo)(implicit ex: ExecutionContext): Future[WriteResult] =

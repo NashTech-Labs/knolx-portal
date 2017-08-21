@@ -22,7 +22,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
-case class UserInfo (email: String,
+case class UserInfo(email: String,
                     password: String,
                     algorithm: String,
                     active: Boolean,
@@ -111,7 +111,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
   }
 
   def ban(email: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
-
     val banTill: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.nowMillis).plusDays(banPeriod)
 
     val duration = BSONDateTime(dateTimeUtility.toMillis(banTill))

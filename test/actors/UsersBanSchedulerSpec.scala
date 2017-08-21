@@ -93,7 +93,7 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         .schedule(
           initialDelay,
           interval,
-          usersBanScheduler, ScheduleBanEmails(usersBanScheduler.underlyingActor.context.self))(usersBanScheduler.underlyingActor.context.dispatcher)
+          usersBanScheduler, ScheduleBanEmails)(usersBanScheduler.underlyingActor.context.dispatcher)
     }
 
     "schedule Ban emails with banning user" in new TestScope {
@@ -102,9 +102,9 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       usersRepository.getAllActiveEmails returns Future.successful(List("testother@example.com"))
       dateTimeUtility.endOfDayMillis returns knolxSessionDateTime
       dateTimeUtility.nowMillis returns knolxSessionDateTime
-      usersBanScheduler ! ScheduleBanEmails(self)
+      usersBanScheduler ! ScheduleBanEmails
 
-      expectMsg(1)
+      usersBanScheduler.underlyingActor.scheduledBanEmails.size must_=== 1
     }
 
     "refresh ban users schedulers" in new TestScope {

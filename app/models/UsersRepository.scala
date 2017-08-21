@@ -64,10 +64,21 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
+  def getActiveAndUnbanned(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("email" -> email.toLowerCase,
+            "active" -> true,
+            "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
+  }
+
   def getAllActiveEmails(implicit ex: ExecutionContext): Future[List[String]] = {
 
     val millis = dateTimeUtility.nowMillis
-    val query = Json.obj("active" -> true, "banTill" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+    val query = Json.obj("active" -> true, "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
     val projection = Json.obj("email" -> 1)
 
     collection

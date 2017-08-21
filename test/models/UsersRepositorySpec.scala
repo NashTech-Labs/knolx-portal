@@ -15,11 +15,12 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
   val dateTimeUtility: DateTimeUtility = mock[DateTimeUtility]
   val usersRepository = new UsersRepository(TestDb.reactiveMongoApi, dateTimeUtility)
   private val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-  private val currentDateString = "2017-07-12T14:30:00"
-  private val currentDate = formatter.parse(currentDateString)
-  private val currentMillis = currentDate.getTime
+  private val dateString = "2016-07-12T14:30:00"
+  private val date = formatter.parse(dateString)
+  private val millis = date.getTime
+  private val currentMillis = formatter.parse("2017-07-12T14:30:00").getTime
   val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
-  val document = UserInfo("test@example.com", "password", "encryptedpassword", active = true, admin = false, BSONDateTime(currentMillis))
+  val document = UserInfo("test@example.com", "password", "encryptedpassword", active = true, admin = false, BSONDateTime(millis))
 
   "Users Repository" should {
 
@@ -33,14 +34,20 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       val user = await(usersRepository.getByEmail("test@example.com"))
 
       user must beEqualTo(Some(document))
-
     }
 
-    "get active users by email" in {
+    "get active user by email" in {
+      dateTimeUtility.nowMillis returns currentMillis
       val user = await(usersRepository.getActiveByEmail("test@example.com"))
 
       user must beEqualTo(Some(document))
+    }
 
+    "get active and unbanned users by email" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val user = await(usersRepository.getActiveAndUnbanned("test@example.com"))
+
+      user must beEqualTo(Some(document))
     }
 
     "get paginated user when searched with empty string" in {
@@ -61,7 +68,6 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       val result = await(usersRepository.update(userTOUpdate))
 
       result must beEqualTo(updateWriteResult)
-
     }
 
     "getByEmail user with no password change " in {

@@ -25,14 +25,14 @@ object SessionsScheduler {
   case object ScheduleFeedbackRemindersStartingTomorrow
   case object GetScheduledSessions
   case class CancelScheduledSession(sessionId: String)
-  case class ScheduleSession(sessionId: String)
 
   // messages used internally for starting session schedulers/emails
+  private[actors] case class ScheduleSession(sessionId: String)
   private[actors] case class ScheduleFeedbackEmailsStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class ScheduleFeedbackRemindersStartingToday(originalSender: ActorRef, eventualSessions: Future[List[SessionInfo]])
   private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
-  private[actors] case class EventualScheduledEmails(schedule: Map[String, Cancellable])
+  private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
   private[actors] case class SendEmail(session: List[SessionInfo], reminder: Boolean)
 
   // messages used for responding back with current schedulers state
@@ -127,15 +127,15 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.info(s"Starting feedback emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsScheduledToday
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
-      eventualScheduledSessions.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
-    case EventualScheduledEmails(schedule)         =>
-      scheduledEmails = scheduledEmails ++ schedule
+      eventualScheduledSessions.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
+    case EventualScheduledEmails(scheduledMails)         =>
+      scheduledEmails = scheduledEmails ++ scheduledMails
       Logger.info(s"All scheduled sessions in memory are ${scheduledEmails.keys}")
     case ScheduleFeedbackRemindersStartingTomorrow =>
       Logger.info(s"Starting feedback reminder schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
       val eventualSessions = sessionsExpiringToday
       val eventualScheduledReminders = scheduleEmails(eventualSessions, reminder = true)
-      eventualScheduledReminders.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
+      eventualScheduledReminders.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
     case GetScheduledSessions                      =>
       Logger.info(s"Following sessions are scheduled ${scheduledEmails.keys}")
       sender ! ScheduledSessions(scheduledEmails.keys.toList)

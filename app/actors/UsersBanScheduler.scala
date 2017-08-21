@@ -23,11 +23,12 @@ object UsersBanScheduler {
   private[actors] case class InitiateBanEmails(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class SendEmail(session: EmailContent)
   private[actors] case class EmailContent(to: String, body: List[EmailBodyInfo])
-  private[actors] case class EventualScheduledEmails(schedule: Map[String, Cancellable])
+  private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsBanSchedulers
   case object ScheduleBanEmails
+
   // messages used for responding back with current schedulers state
   sealed trait SessionBanSchedulerResponse
   case object ScheduledBanSessionsRefreshed extends SessionBanSchedulerResponse
@@ -74,11 +75,11 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       val eventuallyExpiringSession = sessionsExpiringToday
       val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
       Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-      eventualScheduledBanEmails.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
-    case EventualScheduledEmails(schedule) => {
-      scheduledBanEmails = scheduledBanEmails ++ schedule
+      eventualScheduledBanEmails.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
+    case EventualScheduledEmails(scheduledMails) =>
+      scheduledBanEmails = scheduledBanEmails ++ scheduledMails
       Logger.info(s"All scheduled sessions in memory are ${scheduledBanEmails.keys}")
-    }
+
   }
 
   def emailHandler: Receive = {

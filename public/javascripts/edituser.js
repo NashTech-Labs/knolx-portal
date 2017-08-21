@@ -42,9 +42,9 @@ function slide(keyword, pageNumber) {
                             "<td>" + users[user].email + "</td>";
 
                         if (users[user].active) {
-                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td></tr>"
+                            usersFound += "<td class='active-status'><span class='label label-info'>Subscribed</span></td></tr>"
                         } else {
-                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td></tr>"
+                            usersFound += "<td class='suspended'><span class='label label-danger'>unsubscribed</span></td></tr>"
                         }
                     }
 

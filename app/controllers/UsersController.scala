@@ -100,7 +100,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       "email" -> optional(nonEmptyText),
       "page" -> number.verifying("Invalid page number", number => number >= 0),
       "filter" -> nonEmptyText.verifying("Invalid filter",
-        filter => filter == "all" || filter == "banned" || filter == "unbanned" || filter == "active" || filter == "suspended")
+        filter => filter == "all" || filter == "banned" || filter == "allowed" || filter == "active" || filter == "suspended")
     )(SearchUserByEmailInformation.apply)(SearchUserByEmailInformation.unapply)
   )
 

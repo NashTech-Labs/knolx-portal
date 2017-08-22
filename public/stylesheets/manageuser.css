@@ -319,7 +319,8 @@
 .cancel-red {
     color: #d43f3a;
 }
-.filters{
+
+.filters {
     box-shadow: none;
 }
 
@@ -367,9 +368,10 @@
     animation: tick 150ms ease-in;
 }
 
-.filter-padding-left{
+.filter-padding-left {
     padding-left: 0px;
 }
-.rest{
+
+.rest {
     padding-left: 0px;
 }

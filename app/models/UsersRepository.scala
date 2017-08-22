@@ -141,14 +141,15 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     val condition = (keyword, filter) match {
       case (Some(key), "all")       => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")))
       case (Some(key), "banned")    => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis)))
-      case (Some(key), "unbanned")  => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+      case (Some(key), "allowed")   => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
       case (Some(key), "active")    => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
       case (Some(key), "suspended") => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> false)
       case (None, "all")            => Json.obj()
       case (None, "banned")         => Json.obj("banTill" -> BSONDocument("$gte" -> BSONDateTime(millis)))
-      case (None, "unbanned")       => Json.obj("banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+      case (None, "allowed")        => Json.obj("banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
       case (None, "active")         => Json.obj("active" -> true)
       case (None, "suspended")      => Json.obj("active" -> false)
+      case _                        => Json.obj()
     }
 
     collection
@@ -166,14 +167,15 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     val condition = (keyword, filter) match {
       case (Some(key), "all")       => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))))
       case (Some(key), "banned")    => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
-      case (Some(key), "unbanned")  => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+      case (Some(key), "allowed")   => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
       case (Some(key), "active")    => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
       case (Some(key), "suspended") => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> false))
       case (None, "all")            => None
       case (None, "banned")         => Some(Json.obj("banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
-      case (None, "unbanned")       => Some(Json.obj("banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+      case (None, "allowed")        => Some(Json.obj("banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
       case (None, "active")         => Some(Json.obj("active" -> true))
       case (None, "suspended")      => Some(Json.obj("active" -> false))
+      case _                        => None
     }
 
     collection

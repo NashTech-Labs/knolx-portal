@@ -39,9 +39,9 @@ function slide(keyword, pageNumber, filter) {
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
 
-                        if(users[user].admin){
+                        if (users[user].admin) {
                             usersFound += "<tr><td class='active-status'><span class='label label-warning'>Admin</span></td>"
-                        }else{
+                        } else {
                             usersFound += "<tr><td align='center'>" +
                                 "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
                                 "<em class='fa fa-pencil'></em>" +

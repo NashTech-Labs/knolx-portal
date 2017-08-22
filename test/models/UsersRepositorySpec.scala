@@ -183,7 +183,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
 
     "get active user count when searched with some string and `all` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val count = await(usersRepository.userCountWithKeyword(Some("test"), "all"))
+      val count = await(usersRepository.userCountWithKeyword(Some("test")))
 
       count must beEqualTo(1)
     }

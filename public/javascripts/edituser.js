@@ -68,7 +68,8 @@ function slide(keyword, pageNumber, filter) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id);
+                            var filter = $('input[name="user-filter"]:checked').val();
+                            slide(keyword, this.id, filter);
                         });
                     }
                 } else {

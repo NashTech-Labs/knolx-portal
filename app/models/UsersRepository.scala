@@ -133,13 +133,22 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
             upsert = false)
           .map(_.result[UserInfo]))
 
-  def paginate(pageNumber: Int, keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+  def paginate(pageNumber: Int, keyword: Option[String] = None, filter: String = "all")(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+    val millis = dateTimeUtility.nowMillis
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
 
-    val condition = keyword match {
-      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")))
-      case None      => Json.obj()
+    val condition = (keyword, filter) match {
+      case (Some(key), "all")       => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")))
+      case (Some(key), "banned")    => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis)))
+      case (Some(key), "unbanned")  => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+      case (Some(key), "active")    => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
+      case (Some(key), "suspended") => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> false)
+      case (None, "all")            => Json.obj()
+      case (None, "banned")         => Json.obj("banTill" -> BSONDocument("$gte" -> BSONDateTime(millis)))
+      case (None, "unbanned")       => Json.obj("banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+      case (None, "active")         => Json.obj("active" -> true)
+      case (None, "suspended")      => Json.obj("active" -> false)
     }
 
     collection
@@ -151,10 +160,20 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .collect[List](pageSize, FailOnError[List[UserInfo]]()))
   }
 
-  def userCountWithKeyword(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
-    val condition = keyword match {
-      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))))
-      case None      => None
+  def userCountWithKeyword(keyword: Option[String] = None, filter: String = "all")(implicit ex: ExecutionContext): Future[Int] = {
+
+    val millis = dateTimeUtility.nowMillis
+    val condition = (keyword, filter) match {
+      case (Some(key), "all")       => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))))
+      case (Some(key), "banned")    => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
+      case (Some(key), "unbanned")  => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+      case (Some(key), "active")    => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
+      case (Some(key), "suspended") => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> false))
+      case (None, "all")            => None
+      case (None, "banned")         => Some(Json.obj("banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
+      case (None, "unbanned")       => Some(Json.obj("banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+      case (None, "active")         => Some(Json.obj("active" -> true))
+      case (None, "suspended")      => Some(Json.obj("active" -> false))
     }
 
     collection

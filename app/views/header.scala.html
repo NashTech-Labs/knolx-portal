@@ -3,7 +3,7 @@
 @activeLink(currentPath: String) = @{
     if(request.path.equals(currentPath)) "active"
 }
-
+<div id ="parallex-layer"></div>
 <div class="container-fluid">
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
@@ -76,9 +76,6 @@
                             </li>
                             <li class="alignLinks">
                                 <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">My session reports</a>
-                            </li>
-                            <li class="alignLinks">
-                                <a href="@routes.UsersController.renderChangePassword()">Reset Password</a>
                             </li>
                             <li class="alignLinks">
                                 <a href="@routes.UsersController.logout()">Logout</a>

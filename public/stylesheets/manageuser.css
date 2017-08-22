@@ -319,3 +319,57 @@
 .cancel-red {
     color: #d43f3a;
 }
+.filters{
+    box-shadow: none;
+}
+
+.custom-checkbox {
+    display: none;
+}
+
+.checkbox-outer {
+    display: flex;
+}
+
+.filter-label_text {
+    font-family: 'headerfont';
+    color: #888888;
+    align-self: center;
+
+}
+
+.filter-checkbox-text {
+    font-size: 14px;
+    font-family: 'headerfont';
+    color: #fff;
+    margin: 0px;
+    margin-top: 15px;
+    letter-spacing: 2px;
+}
+
+.filter-label_text:before {
+    margin-top: 3px;
+    content: "\f096";
+    font-family: "FontAwesome";
+    display: inline-block;
+    width: 10px;
+    color: #fff;
+    font-size: 25px;
+    margin-right: 25px;
+}
+
+.custom-checkbox:checked + .filter-label_text:before {
+    margin-top: 3px;
+    content: "\f14a";
+    font-family: "FontAwesome";
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: tick 150ms ease-in;
+}
+
+.filter-padding-left{
+    padding-left: 0px;
+}
+.rest{
+    padding-left: 0px;
+}

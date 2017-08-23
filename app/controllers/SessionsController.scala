@@ -187,19 +187,25 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
 
         val eventualKnolxSessions = eventualScheduledFeedbackForms map { scheduledFeedbackForms =>
-          knolxSessions map { session =>
-            val scheduled = scheduledFeedbackForms.sessionIds.contains(session.id)
+          println("===============>"+ scheduledFeedbackForms.sessionIds)
+          val reminders = scheduledFeedbackForms.sessionIds.count(_ == dateTimeUtility.localDateIST.toString)
+          val feedbacks = scheduledFeedbackForms.sessionIds.size - reminders
 
+          val sessions = knolxSessions map { session =>
+            val scheduled = scheduledFeedbackForms.sessionIds.contains(session.id)
             session.copy(feedbackFormScheduled = scheduled)
           }
+
+          (sessions,reminders,feedbacks)
         }
 
-        eventualKnolxSessions flatMap { sessions =>
+        eventualKnolxSessions flatMap { eventualSessions =>
+          val(sessions, reminderCount, feedbackCount) = eventualSessions
           sessionsRepository
             .activeCount(keyword)
             .map { count =>
               val pages = Math.ceil(count / 10D).toInt
-              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber))
+              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber, 0, feedbackCount, reminderCount, 0 ))
             }
         }
       }

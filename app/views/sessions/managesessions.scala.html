@@ -1,14 +1,32 @@
-@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_], flash: Flash)
+@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int, notificationCount: Int, feedbackCount: Int, remindersCount: Int, banCount: Int )(implicit request: Request[_], flash: Flash)
 
     @main("Manage Sessions") {
 
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
             <div class="col-md-3"></div>
-            <div class="col-md-6 search-bar" id="search-bar">
+            <div class="col-md-6 search-bar session-custom-search-bar" id="search-bar">
                 <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search Knolx by email"/>
             </div>
             <div class="col-md-3"></div>
+            <div class="col-md-12">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 reminders-manager">
+                <div class="col-md-8 reminders-manager_info">
+                    <div class="email-stats"><span class="reminder-count">@notificationCount</span><span class='reminder-count-text'><p>Notifications</p></span></div>
+                    <div class="email-stats"><span class="reminder-count">@feedbackCount</span><span class='reminder-count-text'><p>Feedback</p></span></div>
+                    <div class="email-stats"><span class="reminder-count">@remindersCount</span><span class='reminder-count-text'><p>Reminders</p></span></div>
+                    <div class="email-stats"><span class="reminder-count">@banCount</span><span class='reminder-count-text'><p>Ban</p></span></div>
+                </div>
+                <div class="col-md-3 reminders-manager_controls">
+                    <button type="button" class="btn btn-success">Reschedule</button>
+                    <button type="button" class="btn btn-danger">Cancel</button>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+            <div class="col-md-2"></div>
+            </div>
+
             @if(!flash.isEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>

@@ -76,9 +76,10 @@
                     <table class="table table-striped all-users-table">
                         <thead>
                             <tr>
-                                <th class='col col-xs-4'>Edit</th>
-                                <th class='col col-xs-4'>Email</th>
-                                <th class='col col-xs-4'>Active Status</th>
+                                <th class='col col-xs-3'>Edit</th>
+                                <th class='col col-xs-3'>Email</th>
+                                <th class='col col-xs-3'>Active Status</th>
+                                <th class='col col-xs-3'>Ban Status</th>
                             </tr>
                         </thead>
                         <tbody id="user-found">
@@ -101,6 +102,11 @@
                                     <td class="active-status"><span class="label label-success">Active</span></td>
                                 } else {
                                     <td class="suspended"><span class="label label-danger">Suspended</span></td>
+                                }
+                                @if(user.ban) {
+                                    <td class="active-status"><span class="label label-danger">Banned</span></td>
+                                } else {
+                                    <td class="suspended"><span class="label label-info">Allowed</span></td>
                                 }
                             </tr>
                         }

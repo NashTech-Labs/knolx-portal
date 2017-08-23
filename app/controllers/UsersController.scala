@@ -34,8 +34,9 @@ case class SearchUserByEmailInformation(email: Option[String], page: Int, filter
 case class ManageUserInfo(email: String,
                           active: Boolean,
                           id: String,
+                          banTill: String,
                           admin: Boolean = false,
-                          banTill: String)
+                          ban: Boolean = false)
 
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
 
@@ -215,8 +216,9 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           ManageUserInfo(user.email,
             user.active,
             user._id.stringify,
+            new Date(user.banTill.value).toString,
             user.admin,
-            new Date(user.banTill.value).toString))
+            new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
         usersRepository
           .userCountWithKeyword(keyword)
@@ -242,8 +244,9 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               ManageUserInfo(user.email,
                 user.active,
                 user._id.stringify,
+                new Date(user.banTill.value).toString,
                 user.admin,
-                new Date(user.banTill.value).toString))
+                new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
             usersRepository
               .userCountWithKeyword(userInformation.email, userInformation.filter)

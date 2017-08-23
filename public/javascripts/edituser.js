@@ -53,9 +53,14 @@ function slide(keyword, pageNumber, filter) {
                         }
                         usersFound += "<td>" + users[user].email + "</td>";
                         if (users[user].active) {
-                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td></tr>"
+                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td>"
                         } else {
-                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td></tr>"
+                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td>"
+                        }
+                        if (users[user].ban) {
+                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p>"+users[user].banTill+"</p></td></tr>"
+                        } else {
+                            usersFound += "<td class='suspended'><span class='label label-info'>Allowed</span></td></tr>"
                         }
                     }
 

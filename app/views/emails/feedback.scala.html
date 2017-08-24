@@ -1,4 +1,4 @@
-@import actors.EmailInfo
+@import actors._
 
 @(emailsInfo: List[EmailInfo], link: String)
 
@@ -9,7 +9,6 @@
     <strong>@emailsInfo.head.topic</strong> by @emailsInfo.head.presenter held on @emailsInfo.head.date
     <br>
     Please submit your valuable feedback here: <a href="@link">Click Here</a>
-
 </p>
 
 <br>

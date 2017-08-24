@@ -50,16 +50,81 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       user must beEqualTo(Some(document))
     }
 
-    "get paginated user when searched with empty string" in {
-      val paginatedUsers = await(usersRepository.paginate(1))
+    "get paginated user when searched with empty string and `all` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, None))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
-    "get paginated user when searched with some string" in {
+    "get paginated user when searched with empty string and `banned` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, None, "banned"))
+
+      paginatedUsers must beEqualTo(Nil)
+    }
+
+    "get paginated user when searched with empty string and `allowed` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, None, "allowed"))
+
+      paginatedUsers must beEqualTo(List(document))
+    }
+
+    "get paginated user when searched with empty string and `active` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, None, "active"))
+
+      paginatedUsers must beEqualTo(List(document))
+    }
+
+    "get paginated user when searched with empty string and `suspended` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, None, "suspended"))
+
+      paginatedUsers must beEqualTo(Nil)
+    }
+
+    "get all paginated user when searched with empty string and invalid filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, None, "invalid"))
+
+      paginatedUsers must beEqualTo(List(document))
+    }
+
+    "get paginated user when searched with some string and `all` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
       val paginatedUsers = await(usersRepository.paginate(1, Some("test")))
 
       paginatedUsers must beEqualTo(List(document))
+    }
+
+    "get paginated user when searched with some string and `banned` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "banned"))
+
+      paginatedUsers must beEqualTo(Nil)
+    }
+
+    "get paginated user when searched with some string and `allowed` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "allowed"))
+
+      paginatedUsers must beEqualTo(List(document))
+    }
+
+    "get paginated user when searched with some string and `active` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "active"))
+
+      paginatedUsers must beEqualTo(List(document))
+    }
+
+    "get paginated user when searched with some string and `suspended` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "suspended"))
+
+      paginatedUsers must beEqualTo(Nil)
     }
 
     "getByEmail user with password change " in {
@@ -78,13 +143,85 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       result must beEqualTo(updateWriteResult)
     }
 
-    "get active user count when searched with empty string" in {
+    "get user count when searched with empty string and `all` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
       val count = await(usersRepository.userCountWithKeyword(None))
 
       count must beEqualTo(1)
     }
 
+    "get user count when searched with empty string and `banned` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(None, "banned"))
+
+      count must beEqualTo(0)
+    }
+
+    "get user count when searched with empty string and `allowed` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(None, "allowed"))
+
+      count must beEqualTo(1)
+    }
+
+    "get user count when searched with empty string and `active` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(None, "active"))
+
+      count must beEqualTo(0)
+    }
+
+    "get user count when searched with empty string and `suspended` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(None, "suspended"))
+
+      count must beEqualTo(1)
+    }
+
+    "get all user count when searched with empty string and an invalid filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(None, "invalid"))
+
+      count must beEqualTo(1)
+    }
+
+    "get active user count when searched with some string and `all` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(Some("test")))
+
+      count must beEqualTo(1)
+    }
+
+    "get active user count when searched with some string and `banned` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(Some("test"), "banned"))
+
+      count must beEqualTo(0)
+    }
+
+    "get active user count when searched with some string and `allowed` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(Some("test"), "allowed"))
+
+      count must beEqualTo(1)
+    }
+
+    "get active user count when searched with some string and `active` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(Some("test"), "active"))
+
+      count must beEqualTo(0)
+    }
+
+    "get active user count when searched with some string and `suspended` filter" in {
+      dateTimeUtility.nowMillis returns currentMillis
+      val count = await(usersRepository.userCountWithKeyword(Some("test"), "suspended"))
+
+      count must beEqualTo(1)
+    }
+
     "get active user count when searched with some string" in {
+      dateTimeUtility.nowMillis returns currentMillis
       val count = await(usersRepository.userCountWithKeyword(Some("test")))
 
       count must beEqualTo(1)

@@ -251,14 +251,15 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "return json for the user searched by email" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      usersRepository.paginate(1, Some("test@example.com")) returns emailObject.map(user => List(user.get))
-      usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
+      usersRepository.paginate(1, Some("test@example.com"), "banned") returns emailObject.map(user => List(user.get))
+      usersRepository.userCountWithKeyword(Some("test@example.com"), "banned") returns Future.successful(1)
 
       val result = controller.searchUser()(FakeRequest(POST, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
-          "page" -> "1"))
+          "page" -> "1",
+          "filter" -> "banned"))
 
       status(result) must be equalTo OK
     }

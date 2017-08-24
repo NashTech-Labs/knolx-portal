@@ -29,13 +29,14 @@ case class ChangePasswordInformation(currentPassword: String, newPassword: Strin
 
 case class LoginInformation(email: String, password: String)
 
-case class UserEmailInformation(email: Option[String], page: Int)
+case class SearchUserByEmailInformation(email: Option[String], page: Int, filter: String)
 
 case class ManageUserInfo(email: String,
                           active: Boolean,
                           id: String,
+                          banTill: String,
                           admin: Boolean = false,
-                          banTill: String)
+                          ban: Boolean = false)
 
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
 
@@ -95,11 +96,13 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )(LoginInformation.apply)(LoginInformation.unapply)
   )
 
-  val emailForm = Form(
+  val searchUserByEmailForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31)
-    )(UserEmailInformation.apply)(UserEmailInformation.unapply)
+      "page" -> number.verifying("Invalid page number", number => number >= 0),
+      "filter" -> nonEmptyText.verifying("Invalid filter",
+        filter => filter == "all" || filter == "banned" || filter == "allowed" || filter == "active" || filter == "suspended")
+    )(SearchUserByEmailInformation.apply)(SearchUserByEmailInformation.unapply)
   )
 
   val updateUserForm = Form(
@@ -213,8 +216,9 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           ManageUserInfo(user.email,
             user.active,
             user._id.stringify,
+            new Date(user.banTill.value).toString,
             user.admin,
-            new Date(user.banTill.value).toString))
+            new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
         usersRepository
           .userCountWithKeyword(keyword)
@@ -227,24 +231,25 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def searchUser: Action[AnyContent] = adminAction.async { implicit request =>
-    emailForm.bindFromRequest.fold(
+    searchUserByEmailForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
         Future.successful(BadRequest(" OOps! Invalid value encountered !"))
       },
       userInformation => {
         usersRepository
-          .paginate(userInformation.page, userInformation.email)
+          .paginate(userInformation.page, userInformation.email, userInformation.filter)
           .flatMap { userInfo =>
             val users = userInfo map (user =>
               ManageUserInfo(user.email,
                 user.active,
                 user._id.stringify,
+                new Date(user.banTill.value).toString,
                 user.admin,
-                new Date(user.banTill.value).toString))
+                new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
             usersRepository
-              .userCountWithKeyword(userInformation.email)
+              .userCountWithKeyword(userInformation.email, userInformation.filter)
               .map { count =>
                 val pages = Math.ceil(count / 10D).toInt
 
@@ -329,8 +334,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val subject = "Knolx portal password change request."
               val body =
                 s"""<p>Hi,</p>
-                    |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
-                    |<strong><p>If you are not the one who initiated this request kindly ignore this mail.</p></strong>
+                   |<p>Please click <a href="$changePasswordUrl">here</a> to reset your <strong>knolx portal</strong> password.</p></br></br>
+                   |<strong><p>If you are not the one who initiated this request kindly ignore this mail.</p></strong>
                 """.stripMargin
 
               emailManager ! EmailActor.SendEmail(List(foundUser.email), from, subject, body)

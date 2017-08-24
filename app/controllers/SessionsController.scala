@@ -8,6 +8,7 @@ import actors.SessionsScheduler._
 import actors.UsersBanScheduler.{RefreshSessionsBanSchedulers, ScheduledBanSessionsNotRefreshed, ScheduledBanSessionsRefreshed, SessionBanSchedulerResponse}
 import akka.actor.ActorRef
 import akka.pattern.ask
+import controllers.EmailHelper._
 import models.{FeedbackFormsRepository, SessionsRepository, UpdateSessionInfo, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
@@ -85,7 +86,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   val createSessionForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone)
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",

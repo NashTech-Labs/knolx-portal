@@ -1,16 +1,30 @@
-@import actors._
+@import actors.EmailInfo
 
 @(emailsInfo: List[EmailInfo], link: String)
 
-<p>Hi</p>
-<p>Please share your feedback regarding following session</p>
-<ul><li><strong>@{
-    emailsInfo.head.topic
-}</strong> by @{
-    emailsInfo.head.presenter
-} held on @{
-    emailsInfo.head.date
-}</li></ul>
-<p>Your feedback is valuable for us, you can access it here <a href="@link">here.</a></p>
-<p>Thanks</p>
-<p>Admin</p>
+<p>Hi Knolders,</p>
+<p>
+    Hope you enjoyed the following Knolx session:
+    <br>
+    <strong>@emailsInfo.head.topic</strong> by @emailsInfo.head.presenter held on @emailsInfo.head.date
+    <br>
+    Please submit your valuable feedback here: <a href="@link">Click Here</a>
+
+</p>
+
+<br>
+<strong>Important Note</strong>
+<ul>
+    <li>It is mandatory for everyone to respond to the feedback form. If you have not attended the session, kindly fill "Did not attend" option with relevant reason.</li>
+    <li>You would be banned from the Knolx for a month if you are not responding to the feedback form for both sessions. You would neither be allowed to attend or present the session.</li>
+    <li>If you are banned you will also not be eligible for Knolx weightage of appraisal year (2017-18).</li>
+    <li>Your feedback is valuable, so think through and provide relevant feedback, as it is anonymous to the presenters. Do mention the comments if there are any improvement areas for the presenter.</li>
+</ul>
+
+<p>Kindly submit your feedback before feedback form expires.</p>
+
+<p>
+    Thanks,
+    <br>
+    Admin
+</p>

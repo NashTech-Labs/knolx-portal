@@ -10,36 +10,35 @@ a.btn.btn-sm.btn-primary.btn-create {
     box-shadow: 0 4px 5px -5px #333;
 }
 
-.session-custom-search-bar{
-    margin-bottom: 0!important;
+.session-custom-search-bar {
+    margin-bottom: 0 !important;
 }
 
-.reminders-manager_info{
+.reminders-manager_info {
     height: 50px;
-    color:#fff;
+    color: #fff;
     text-align: center;
-    //background-color: red;
 }
 
-.reminders-manager_controls{
+.reminders-manager_controls {
     height: 50px;
     padding-top: 8px;
     text-align: center;
     margin-bottom: 2%;
-    //background-color: blue;
 }
 
-.reminders-manager{
+.reminders-manager {
     margin-top: 10px;
     height: 20%;
 }
-.reminder-count{
-  font-size: 20px;
-    color:#fff;
+
+.reminder-count {
+    font-size: 20px;
+    color: #fff;
     float: left;
 }
-.email-stats{
-float: left;
+
+.email-stats {
+    float: left;
     margin-left: 10%;
 }
-

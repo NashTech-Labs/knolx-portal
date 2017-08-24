@@ -2,23 +2,30 @@
 
 @(emailsInfo: List[EmailInfo], link: String)
 
-<p>Hi All,</p>
-<p>A gentle reminder, please share your feedback regarding the following session(s) latest by the <strong>
-    end of the day</strong>.</p>
+<p>Hi Knolders,</p>
+
+<p>
+    A gentle reminder to please share your feedback for the following session(s) latest by the
+    <strong> end of the day</strong>.</p>
+
 <ul>
     @for(info <- emailsInfo) {
-        <li><strong>@{
-            info.topic
-        }</strong>
-            by @{
-            info.presenter
-        } held on @{
-                info.date
-            }
+        <li>
+            <strong>@info.topic</strong> by @info.presenter held on @info.date
         </li>
     }
 </ul>
-<p>Your feedback is valuable for us, so please cooperate and share your feedback <a href="@link">here.</a></p>
-<p><Strong>If you have already shared the feedback kindly ignore this mail.</strong></p>
-<p>Thanks</p>
-<p>Admin</p>
+
+<p>
+    Your feedback is valuable for the presenter, <a href="@link">Click Here</a> to submit your feedback.
+</p>
+
+<p>
+    <strong>If you already shared your feedback kindly ignore this mail.</strong>
+</p>
+
+<p>
+    Thanks,
+    <br>
+    Admin
+</p>

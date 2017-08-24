@@ -5,6 +5,7 @@ import javax.inject._
 
 import actors.EmailActor
 import akka.actor.ActorRef
+import controllers.EmailHelper._
 import models.{ForgotPasswordRepository, PasswordChangeRequestInfo, UpdatedUserInfo, UsersRepository}
 import play.api.data.Forms.{nonEmptyText, _}
 import play.api.data._
@@ -60,7 +61,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   val userForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "password" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
       "confirmPassword" -> nonEmptyText.verifying("Confirm Password must be at least 8 character long!", password => password.length >= 8)
     )(UserInformation.apply)(UserInformation.unapply)
@@ -71,7 +72,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   val forgotPasswordForm = Form(
     mapping(
       "token" -> nonEmptyText,
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "password" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
       "confirmPassword" -> nonEmptyText.verifying("Confirm Password must be at least 8 character long!", password => password.length >= 8)
     )(ResetPasswordInformation.apply)(ResetPasswordInformation.unapply)
@@ -91,7 +92,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   val loginForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "password" -> nonEmptyText
     )(LoginInformation.apply)(LoginInformation.unapply)
   )
@@ -107,7 +108,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   val updateUserForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "active" -> boolean,
       "password" -> optional(nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8))
     )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
@@ -115,7 +116,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   val requestPasswordChangeForm = Form(
     single(
-      "email" -> email
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email))
     )
   )
 

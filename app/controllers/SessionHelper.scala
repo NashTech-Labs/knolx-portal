@@ -15,3 +15,9 @@ object SessionHelper {
     EncryptionUtility.decrypt(request.session.get("admin").getOrElse("")) == EncryptionUtility.AdminKey
 
 }
+
+object EmailHelper {
+
+  def isValidEmail(email: String): Boolean = """([\w\.]+)@(\w+)\.(\w+)""".r.unapplySeq(email).isDefined
+
+}

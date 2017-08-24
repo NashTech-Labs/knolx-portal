@@ -31,10 +31,6 @@ object UsersBanScheduler {
   case object GetScheduledBannedUsers
   case object CancelAllBannedEmails
 
-  // messages used for responding back with current schedulers state
-  sealed trait SessionBanSchedulerResponse
-  case object ScheduledBanSessionsRefreshed extends SessionBanSchedulerResponse
-  case object ScheduledBanSessionsNotRefreshed extends SessionBanSchedulerResponse
 }
 
 class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
@@ -48,8 +44,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   var scheduledBanEmails: Map[String, Cancellable] = Map.empty
 
   override def preStart(): Unit = {
-    val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
-    self ! InitiateBanEmails(initialDelay, 1.day)
+    self ! InitiateBanEmails(Duration.Zero, 1.day)
     Logger.info(s"Ban scheduler started immediately")
   }
 
@@ -74,7 +69,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def schedulingHandler: Receive = {
-    case ScheduleBanEmails                 =>
+    case ScheduleBanEmails                       =>
       val eventuallyExpiringSession = sessionsExpiringToday
       val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
       Logger.info(s"Starting ban emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
@@ -82,7 +77,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
     case EventualScheduledEmails(scheduledMails) =>
       scheduledBanEmails = scheduledBanEmails ++ scheduledMails
       Logger.info(s"All scheduled sessions in memory are ${scheduledBanEmails.keys}")
-    case GetScheduledBannedUsers                      =>
+    case GetScheduledBannedUsers                 =>
       Logger.info(s"Following bans are scheduled ${scheduledBanEmails.keys}")
       sender ! scheduledBanEmails.keys.toList
   }
@@ -99,22 +94,21 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   def reconfiguringHandler: Receive = {
     case RefreshSessionsBanSchedulers =>
       Logger.info(s"Scheduled ban emails before refreshing $scheduledBanEmails, now rescheduling at ${dateTimeUtility.localDateIST}")
-      scheduledBanEmails.forall { case (_, cancellable) => cancellable.cancel }
-      scheduledBanEmails.foreach { case (scheduler, cancellable) =>
-        cancellable.cancel
-        scheduledBanEmails = scheduledBanEmails - scheduler
-      }
-      Logger.info(s"Scheduled ban emails after refreshing $scheduledBanEmails")
 
-      if (scheduledBanEmails.isEmpty){
-        val eventuallyExpiringSession = sessionsExpiringToday
-        val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
-        eventualScheduledBanEmails foreach { banScheduler => scheduledBanEmails = banScheduler }
-        sender ! ScheduledBanSessionsRefreshed
+      if (scheduledBanEmails.nonEmpty) {
+        scheduledBanEmails.foreach { case (scheduler, cancellable) =>
+          cancellable.cancel
+          scheduledBanEmails = scheduledBanEmails - scheduler
+        }
       } else {
-        sender ! ScheduledBanSessionsNotRefreshed
+        Logger.info(s"No scheduled ban emails found")
       }
-    case CancelAllBannedEmails          =>
+
+      val eventuallyExpiringSession = sessionsExpiringToday
+      val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
+      eventualScheduledBanEmails foreach { banScheduler => scheduledBanEmails = banScheduler }
+      Logger.info(s"Scheduled ban emails after refreshing $scheduledBanEmails")
+    case CancelAllBannedEmails        =>
       Logger.info(s"Removing all banned emails scheduled")
       scheduledBanEmails.foreach { case (scheduler, cancellable) =>
         cancellable.cancel
@@ -154,7 +148,8 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
         getBanInfo(sessions, emails)
           .map {
             _.map { emailContent =>
-              emailContent.to -> scheduler.scheduleOnce(Duration.Zero, self, SendEmail(emailContent))
+              val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
+              emailContent.to -> scheduler.scheduleOnce(initialDelay, self, SendEmail(emailContent))
             }.toMap
           }
       }

@@ -298,18 +298,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
-
-                    (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-                      case ScheduledSessionsRefreshed    =>
-                        Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!")
-                      case ScheduledSessionsNotRefreshed =>
-                        Logger.error(s"Cannot refresh feedback form actors while creating session ${createSessionInfo.topic}")
-                        InternalServerError("Something went wrong!")
-                      case msg                           =>
-                        Logger.error(s"Something went wrong when refreshing feedback form actors $msg while creating session ${createSessionInfo.topic}")
-                        InternalServerError("Something went wrong!")
+                    usersBanScheduler ! RefreshSessionsBanSchedulers
+                    sessionsScheduler ! RefreshSessionsSchedulers
+                    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
                     }
-                  } else {
+                   else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     Future.successful(InternalServerError("Something went wrong!"))
                   }
@@ -354,16 +347,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       } { _ =>
         Logger.info(s"Knolx session $id successfully deleted")
 
-        (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-          case ScheduledSessionsRefreshed    =>
-            Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!")
-          case ScheduledSessionsNotRefreshed =>
-            Logger.error(s"Cannot refresh feedback form actors while deleting session $id")
-            InternalServerError("Something went wrong!")
-          case msg                           =>
-            Logger.error(s"Something went wrong when refreshing feedback form actors $msg while deleting session $id")
-            InternalServerError("Something went wrong!")
-        }
+        sessionsScheduler ! RefreshSessionsSchedulers
+        usersBanScheduler ! RefreshSessionsBanSchedulers
+        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!"))
       })
   }
 
@@ -404,16 +390,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
-                  val banSchedulerResponse = (usersBanScheduler ? RefreshSessionsBanSchedulers) (5.seconds).mapTo[SessionBanSchedulerResponse]
-                  val sessionsSchedulerResponse = (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse]
-
-                  val refreshedEmailsResponse = for {
-                    bannedEmailResult <- banSchedulerResponse
-                    sessionEmailsResult <- sessionsSchedulerResponse
-                  } yield (bannedEmailResult, sessionEmailsResult)
-
-                  handelSchedulerResponse(refreshedEmailsResponse, updateSessionInfo)
-
+                   usersBanScheduler ! RefreshSessionsBanSchedulers
+                   sessionsScheduler ! RefreshSessionsSchedulers
+                  Logger.error(s"Refreshed all schedulers while updating session ${updateSessionInfo.id}")
+                  Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
+                    .flashing("message" -> s"Refreshed all schedulers while updating session ${updateSessionInfo.id}"))
                 } else {
                   Logger.error(s"Something went wrong when updating a new Knolx session for user  ${updateSessionInfo.id}")
                   Future.successful(InternalServerError("Something went wrong!"))
@@ -421,28 +402,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               }
           })
       }
-  }
-
-  private def handelSchedulerResponse(refreshedEmailsResponse: Future[(SessionBanSchedulerResponse, SessionsSchedulerResponse)],
-                                      updateSessionInfo: UpdateSessionInformation): Future[Result] = {
-    refreshedEmailsResponse.map {
-      case (ScheduledBanSessionsRefreshed, ScheduledSessionsRefreshed)       =>
-        Logger.error(s"Refreshed all schedulers while updating session ${updateSessionInfo.id}")
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> s"Refreshed all schedulers while updating session ${updateSessionInfo.id}")
-      case (ScheduledBanSessionsRefreshed, ScheduledSessionsNotRefreshed)    =>
-        Logger.error(s"Refreshed ban schedulers but session scheduler not refreshed while updating session ${updateSessionInfo.id}")
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> s"Refreshed ban schedulers but session scheduler not refreshed while updating session ${updateSessionInfo.id}")
-      case (ScheduledBanSessionsNotRefreshed, ScheduledSessionsRefreshed)    =>
-        Logger.error(s"Refreshed session schedulers but ban scheduler not refreshed while updating session ${updateSessionInfo.id} ${updateSessionInfo.id}")
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> s"Refreshed session schedulers but ban scheduler not refreshed while updating session ${updateSessionInfo.id} ${updateSessionInfo.id}")
-      case (ScheduledBanSessionsNotRefreshed, ScheduledSessionsNotRefreshed) =>
-        Logger.error(s"Unable to refresh both session and ban scheduler while updating session ${updateSessionInfo.id} ${updateSessionInfo.id}")
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> s"Unable to refresh both session and ban scheduler while updating session ${updateSessionInfo.id} ${updateSessionInfo.id}")
-    }
   }
 
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>

@@ -18,6 +18,6 @@ object SessionHelper {
 
 object EmailHelper {
 
-  def isValidEmail(email: String): Boolean = """(\w+)@([\w\.]+)""".r.unapplySeq(email).isDefined
+  def isValidEmail(email: String): Boolean = """([\w\.]+)@(\w+)\.(\w+)""".r.unapplySeq(email).isDefined
 
 }

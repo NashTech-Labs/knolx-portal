@@ -3,7 +3,7 @@ package actors
 import java.time.{LocalDateTime, ZoneId}
 import java.util.TimeZone
 
-import actors.SessionsScheduler._
+import actors.SessionsScheduler.{CancelAllScheduledEmails, ScheduleSessionNotificationStartingTomorrow, _}
 import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
@@ -116,6 +116,20 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           ScheduleFeedbackRemindersStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
+    "start session notification mail Scheduler" in new TestScope {
+      val initialDelay: FiniteDuration = 1.minute
+      val interval: FiniteDuration = 1.minute
+
+      sessionsScheduler ! InitialSessionNotificationsStartingTomorrow(initialDelay, interval)
+
+      verify(sessionsScheduler.underlyingActor.scheduler)
+        .schedule(
+          initialDelay,
+          interval,
+          sessionsScheduler,
+          ScheduleSessionNotificationStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
+    }
+
     "schedule sessions" in new TestScope {
       sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
       sessionsScheduler ! ScheduleFeedbackEmailsStartingTomorrow
@@ -132,8 +146,22 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
     }
 
-    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
+    "schedule notifications" in new TestScope {
 
+      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
+      dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
+      sessionsScheduler ! ScheduleSessionNotificationStartingTomorrow
+
+      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
+    }
+
+    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
+      val cancellable = new Cancellable {
+        def cancel(): Boolean = true
+
+        def isCancelled: Boolean = false
+      }
+      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
       sessionsScheduler ! ScheduleFeedbackEmailsStartingToday(Future.successful(sessionsForToday))
 
       sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
@@ -142,6 +170,13 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     "start sessions reminders schedulers for Knolx sessions expiring today" in new TestScope {
       dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
       sessionsScheduler ! ScheduleFeedbackRemindersStartingToday(Future.successful(sessionsForToday))
+
+      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
+    }
+
+    "start notification schedulers for Knolx sessions starting today" in new TestScope {
+      dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
+      sessionsScheduler ! ScheduleSessionNotificationsStartingToday(Future.successful(sessionsForToday))
 
       sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
     }
@@ -160,9 +195,10 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
-      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
+      sessionsScheduler ! RefreshSessionsSchedulers
 
-      result mustEqual ScheduledSessionsRefreshed
+      val result: ScheduledSessions = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
+      result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
 
     "get all scheduled sessions" in new TestScope {
@@ -236,6 +272,12 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler ! ScheduleSession(sessionId.stringify)
 
       sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
+    }
+
+    "cancel all scheduled sessions" in new TestScope {
+      val result: Boolean = await((sessionsScheduler ? CancelAllScheduledEmails) (5.seconds).mapTo[Boolean])
+
+      result mustEqual true
     }
 
   }

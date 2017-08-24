@@ -110,9 +110,13 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.info(s"Scheduled ban emails after refreshing $scheduledBanEmails")
     case CancelAllBannedEmails        =>
       Logger.info(s"Removing all banned emails scheduled")
-      scheduledBanEmails.foreach { case (scheduler, cancellable) =>
-        cancellable.cancel
-        scheduledBanEmails = scheduledBanEmails - scheduler
+      if (scheduledBanEmails.nonEmpty) {
+        scheduledBanEmails.foreach { case (scheduler, cancellable) =>
+          cancellable.cancel
+          scheduledBanEmails = scheduledBanEmails - scheduler
+        }
+      } else {
+        Logger.info(s"No scheduled ban emails found")
       }
       Logger.info(s"All scheduled  banned emails after removing all ${scheduledBanEmails.keys}")
       sender ! scheduledBanEmails.isEmpty

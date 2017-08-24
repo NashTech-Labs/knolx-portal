@@ -208,9 +208,13 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       sender ! scheduledEmails.get(sessionId).isEmpty
     case CancelAllScheduledEmails          =>
       Logger.info(s"Removing all notification, feedback and reminder emails scheduled")
-      scheduledEmails.foreach { case (scheduler, cancellable) =>
-        cancellable.cancel
-        scheduledEmails = scheduledEmails - scheduler
+      if (scheduledEmails.nonEmpty) {
+        scheduledEmails.foreach { case (scheduler, cancellable) =>
+          cancellable.cancel
+          scheduledEmails = scheduledEmails - scheduler
+        }
+      } else {
+        Logger.info(s"No scheduled emails found")
       }
       Logger.info(s"All scheduled  emails after removing all ${scheduledEmails.keys}")
       sender ! scheduledEmails.isEmpty
@@ -253,7 +257,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         case Reminder     =>
           //with 10 min delay
           Map(dateTimeUtility.toLocalDate(sessions.head.date.value).toString ->
-          scheduler.scheduleOnce(600000.milliseconds, self, SendEmail(sessions, Reminder)))
+            scheduler.scheduleOnce(600000.milliseconds, self, SendEmail(sessions, Reminder)))
         case Feedback     => sessions.map { session =>
           val delay = (session.date.value - dateTimeUtility.nowMillis).milliseconds
           session._id.stringify -> scheduler.scheduleOnce(delay, self, SendEmail(List(session), Feedback))
@@ -261,7 +265,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         case Notification =>
           //with 10 min delay
           Map(s"notify${dateTimeUtility.toLocalDate(sessions.head.date.value).toString}" ->
-          scheduler.scheduleOnce(600000.milliseconds, self, SendEmail(sessions, Notification)))
+            scheduler.scheduleOnce(600000.milliseconds, self, SendEmail(sessions, Notification)))
       }
     }
 

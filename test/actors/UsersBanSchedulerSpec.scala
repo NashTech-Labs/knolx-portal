@@ -3,7 +3,7 @@ package actors
 import java.time.ZoneId
 import java.util.TimeZone
 
-import actors.UsersBanScheduler.{SendEmail, _}
+import actors.UsersBanScheduler.{EventualScheduledEmails, SendEmail, _}
 import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
@@ -86,7 +86,7 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     "start sessions scheduler" in new TestScope {
       val initialDelay: FiniteDuration = 1.minute
       val interval: FiniteDuration = 1.minute
-
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
       usersBanScheduler ! InitiateBanEmails(initialDelay, interval)
 
       verify(usersBanScheduler.underlyingActor.scheduler)
@@ -121,9 +121,9 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       dateTimeUtility.endOfDayMillis returns knolxSessionDateTime
       dateTimeUtility.nowMillis returns knolxSessionDateTime
 
-      val result: SessionBanSchedulerResponse = await((usersBanScheduler ? RefreshSessionsBanSchedulers) (5.seconds).mapTo[SessionBanSchedulerResponse])
+      usersBanScheduler ! RefreshSessionsBanSchedulers
 
-      result mustEqual ScheduledBanSessionsRefreshed
+      usersBanScheduler.underlyingActor.scheduledBanEmails.size must_=== 1
     }
 
     "not refresh users ban schedulers because of empty scheduled bans" in new TestScope {
@@ -133,10 +133,10 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
       usersBanScheduler.underlyingActor.scheduledBanEmails = Map(sessionId.stringify -> cancellable)
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
+      usersBanScheduler ? RefreshSessionsBanSchedulers
 
-      val result: SessionBanSchedulerResponse = await((usersBanScheduler ? RefreshSessionsBanSchedulers) (5.seconds).mapTo[SessionBanSchedulerResponse])
-
-      result mustEqual ScheduledBanSessionsNotRefreshed
+      usersBanScheduler.underlyingActor.scheduledBanEmails.size must_=== 0
     }
 
     "send ban email" in new TestScope {
@@ -148,9 +148,38 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           bodyText = Some("Hello World"), replyTo = None)
 
       usersRepository.ban("test@example.com") returns Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
       usersBanScheduler ! SendEmail(EmailContent("test@example.com", List(EmailBodyInfo("topic", "presenter", "date"))))
 
       usersBanScheduler.underlyingActor.scheduledBanEmails.keys must not(contain("test@example.com"))
+    }
+
+    "add scheduled emails to the actor state `scheduledBanEmails`" in new TestScope {
+      val cancellable = new Cancellable {
+        def cancel(): Boolean = true
+
+        def isCancelled: Boolean = false
+      }
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
+      usersBanScheduler ! EventualScheduledEmails(Map(sessionId.stringify -> cancellable))
+
+      usersBanScheduler.underlyingActor.scheduledBanEmails.size must_=== 1
+    }
+
+    "cancel all scheduled emails" in new TestScope {
+
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
+      val result: Boolean = await((usersBanScheduler ? CancelAllBannedEmails) (5.seconds).mapTo[Boolean])
+
+      result mustEqual true
+    }
+
+    "get all scheduled emails" in new TestScope {
+
+      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
+      val result: List[String] = await((usersBanScheduler ? GetScheduledBannedUsers) (5.seconds).mapTo[List[String]])
+
+      result mustEqual true
     }
 
   }

@@ -134,16 +134,16 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
 
-      sessionsScheduler ! ScheduleFeedbackEmailsStartingToday(self, Future.successful(sessionsForToday))
+      sessionsScheduler ! ScheduleFeedbackEmailsStartingToday(Future.successful(sessionsForToday))
 
-      expectMsg(1)
+      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
     }
 
     "start sessions reminders schedulers for Knolx sessions expiring today" in new TestScope {
       dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      sessionsScheduler ! ScheduleFeedbackRemindersStartingToday(self, Future.successful(sessionsForToday))
+      sessionsScheduler ! ScheduleFeedbackRemindersStartingToday(Future.successful(sessionsForToday))
 
-      expectMsg(1)
+      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
     }
 
     "refresh sessions schedulers" in new TestScope {
@@ -182,23 +182,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
 
-    "not refresh sessions schedulers because of empty feedback forms" in new TestScope {
-      val cancellable = new Cancellable {
-        def cancel(): Boolean = false
-
-        def isCancelled: Boolean = true
-      }
-
-      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
-
-      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
-
-      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
-
-      result mustEqual ScheduledSessionsNotRefreshed
-    }
-
     "send feedback form" in new TestScope {
       val feedbackFormEmail =
         Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
@@ -209,7 +192,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
 
-      sessionsScheduler ! SendEmail(sessionsForToday, reminder = false)
+      sessionsScheduler ! SendEmail(sessionsForToday, Feedback)
 
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(sessionId.stringify))
     }
@@ -224,7 +207,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
 
-      sessionsScheduler ! SendEmail(sessionsForToday, reminder = true)
+      sessionsScheduler ! SendEmail(sessionsForToday, Reminder)
 
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
     }

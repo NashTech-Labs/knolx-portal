@@ -70,7 +70,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
       session.session, session.meetup, new Date(session.date.value).toString)
   }
 
-  def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = userAction.async { implicit request =>
     feedbackFormsResponseRepository.allResponsesBySession(request.user.email, id).map { responses =>
       if (responses.nonEmpty) {
         val response :: _ = responses

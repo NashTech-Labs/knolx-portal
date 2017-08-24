@@ -56,24 +56,28 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
 
       paginatedUsers must beEqualTo(List(document))
     }
+
     "get paginated user when searched with empty string and `banned` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
       val paginatedUsers = await(usersRepository.paginate(1, None, "banned"))
 
       paginatedUsers must beEqualTo(Nil)
     }
+
     "get paginated user when searched with empty string and `allowed` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
       val paginatedUsers = await(usersRepository.paginate(1, None, "allowed"))
 
       paginatedUsers must beEqualTo(List(document))
     }
+
     "get paginated user when searched with empty string and `active` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
       val paginatedUsers = await(usersRepository.paginate(1, None, "active"))
 
       paginatedUsers must beEqualTo(List(document))
     }
+
     "get paginated user when searched with empty string and `suspended` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
       val paginatedUsers = await(usersRepository.paginate(1, None, "suspended"))

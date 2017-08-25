@@ -37,7 +37,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
       .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
 
-        Future.successful(unauthorized("Unauthorized access!"))
+        Future.successful(unauthorized("Please login before accessing this page!"))
       } { userInfo =>
         val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
 

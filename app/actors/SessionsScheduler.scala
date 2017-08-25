@@ -212,7 +212,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     eventualSessions collect { case sessions if sessions.nonEmpty =>
       if (reminder) {
         Map(dateTimeUtility.toLocalDate(sessions.head.date.value).toString ->
-          scheduler.scheduleOnce(1200000.milliseconds, self, SendEmail(sessions, reminder)))
+          scheduler.scheduleOnce(0.milliseconds, self, SendEmail(sessions, reminder)))
       } else {
         sessions.map { session =>
           val delay = (session.date.value - dateTimeUtility.nowMillis).milliseconds

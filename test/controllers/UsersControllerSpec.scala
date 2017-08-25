@@ -27,8 +27,6 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
   private val emptyEmailObject = Future.successful(None)
   private val _id: BSONObjectID = BSONObjectID.generate
-  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, _id)))
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
@@ -36,6 +34,8 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val currentDate = formatter.parse(currentDateString)
   private val currentMillis = currentDate.getTime
   private val passwordChangeRequest = PasswordChangeRequestInfo("test@example.com", "token", BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
+  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(currentMillis), 0, _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -251,14 +251,15 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "return json for the user searched by email" in new WithTestApplication {
       usersRepository.getByEmail("test@example.com") returns emailObject
-      usersRepository.paginate(1, Some("test@example.com")) returns emailObject.map(user => List(user.get))
-      usersRepository.userCountWithKeyword(Some("test@example.com")) returns Future.successful(1)
+      usersRepository.paginate(1, Some("test@example.com"), "banned") returns emailObject.map(user => List(user.get))
+      usersRepository.userCountWithKeyword(Some("test@example.com"), "banned") returns Future.successful(1)
 
       val result = controller.searchUser()(FakeRequest(POST, "search")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com",
-          "page" -> "1"))
+          "page" -> "1",
+          "filter" -> "banned"))
 
       status(result) must be equalTo OK
     }
@@ -359,7 +360,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "render forgot password page" in new WithTestApplication {
 
-      val result = controller.forgotPassword(FakeRequest().withCSRFToken)
+      val result = controller.renderForgotPassword(FakeRequest().withCSRFToken)
 
       status(result) must be equalTo OK
     }
@@ -368,7 +369,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
       usersRepository.getActiveByEmail("test@example.com") returns emptyEmailObject
 
-      val result = controller.requestPasswordChange()(FakeRequest(POST, "password/change")
+      val result = controller.generateForgotPasswordToken()(FakeRequest(POST, "password/change")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "").withCSRFToken)
@@ -381,7 +382,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
       usersRepository.getActiveByEmail("test@example.com") returns emptyEmailObject
 
-      val result = controller.requestPasswordChange()(FakeRequest(POST, "password/change")
+      val result = controller.generateForgotPasswordToken()(FakeRequest(POST, "password/change")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com").withCSRFToken)
@@ -395,7 +396,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
       dateTimeUtility.localDateTimeIST returns localDateTime
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
-      val result = controller.requestPasswordChange()(FakeRequest(POST, "password/change")
+      val result = controller.generateForgotPasswordToken()(FakeRequest(POST, "password/change")
         .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
         .withFormUrlEncodedBody(
           "email" -> "test@example.com").withCSRFToken)
@@ -405,7 +406,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "throw unauthorised status as no password change request found" in new WithTestApplication {
       forgotPasswordRepository.getPasswordChangeRequest("token", None) returns Future.successful(None)
-      val result = controller.changePassword("token")(FakeRequest(GET, "/ChangePassword").withCSRFToken)
+      val result = controller.validateForgotPasswordToken("token")(FakeRequest(GET, "/ChangePassword").withCSRFToken)
 
       status(result) must be equalTo UNAUTHORIZED
     }
@@ -413,7 +414,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     "redirect to password reset page as password change request found" in new WithTestApplication {
       forgotPasswordRepository.getPasswordChangeRequest("token", None) returns Future.successful(Some(passwordChangeRequest))
 
-      val result = controller.changePassword("token")(FakeRequest(GET, "/ChangePassword").withCSRFToken)
+      val result = controller.validateForgotPasswordToken("token")(FakeRequest(GET, "/ChangePassword").withCSRFToken)
 
       status(result) must be equalTo OK
     }
@@ -498,6 +499,71 @@ class UsersControllerSpec extends PlaySpecification with Results {
           "confirmPassword" -> "12345678").withCSRFToken)
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "render to password reset page while logged in " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      val result = controller.renderChangePassword(FakeRequest(GET, "/ChangePassword")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "throw a bad request for password reset while logged in " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+
+      val result = controller.changePassword()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "",
+          "newPassword" -> "",
+          "confirmPassword" -> "")
+        .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "redirect as email in request not exist" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns Future.successful(None)
+      val result = controller.changePassword()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "12345678",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "redirect as email in request exist but current password mismatch" in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
+      val result = controller.changePassword()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "123456",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "reset password while user is logged " in new WithTestApplication {
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveByEmail("test@example.com") returns emailObject
+      val result = controller.changePassword()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "12345678",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
     }
 
   }

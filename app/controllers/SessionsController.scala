@@ -4,8 +4,11 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.SessionsScheduler._
+import actors.UsersBanScheduler.{RefreshSessionsBanSchedulers, ScheduledBanSessionsNotRefreshed, ScheduledBanSessionsRefreshed, SessionBanSchedulerResponse}
 import akka.actor.ActorRef
 import akka.pattern.ask
+import controllers.EmailHelper._
 import models.{FeedbackFormsRepository, SessionsRepository, UpdateSessionInfo, UsersRepository}
 import play.api.Logger
 import play.api.data.Forms._
@@ -14,7 +17,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
-import actors.SessionsScheduler._
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -68,7 +70,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
-                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef
+                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef,
+                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
@@ -83,7 +86,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   val createSessionForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone)
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
@@ -392,7 +395,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
-
+                  (usersBanScheduler ? RefreshSessionsBanSchedulers) (5.seconds).mapTo[SessionBanSchedulerResponse] map {
+                    case ScheduledBanSessionsRefreshed    =>
+                      Logger.error(s"Refreshed Ban schedulers while updating session ${updateSessionInfo.id}")
+                    case ScheduledBanSessionsNotRefreshed =>
+                      Logger.error(s"Cannot refresh ban schedulers while updating session ${updateSessionInfo.id}")
+                    case msg                              =>
+                      Logger.error(s"Something went wrong when refreshing ban schedulers form actors $msg while updating session ${updateSessionInfo.id}")
+                  }
                   (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
                     case ScheduledSessionsRefreshed    =>
                       Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated")
@@ -424,14 +434,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (sessionsScheduler ? ScheduleSession(sessionId)) (5.seconds).mapTo[Boolean] map {
-      case true  =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> "Feedback form successfully scheduled!")
-      case false =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
-          .flashing("message" -> "Something went wrong while scheduling feedback form!")
-    }
+    sessionsScheduler ! ScheduleSession(sessionId)
+    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
+      .flashing("message" -> "Feedback form schedule initiated"))
   }
 
 }

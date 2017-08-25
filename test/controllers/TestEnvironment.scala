@@ -3,7 +3,8 @@ package controllers
 import java.util.concurrent.TimeoutException
 
 import actors.SessionsScheduler._
-import actors.{EmailManager, ConfiguredEmailActor, EmailActor}
+import actors.UsersBanScheduler.ScheduledBanSessionsRefreshed
+import actors.{ConfiguredEmailActor, EmailActor, EmailManager}
 import akka.actor._
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Module}
@@ -26,39 +27,14 @@ import scala.concurrent.{Await, ExecutionContext}
 
 trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mockito {
 
-  private val actorSystem: ActorSystem = ActorSystem("TestEnvironment")
-
-  val usersRepository = mock[UsersRepository]
+  val usersRepository: UsersRepository = mock[UsersRepository]
   val config = Configuration(ConfigFactory.load("application.conf"))
-  val knolxControllerComponent = TestHelpers.stubControllerComponents
+  val knolxControllerComponent: KnolxControllerComponents = TestHelpers.stubControllerComponents
+  private val actorSystem: ActorSystem = ActorSystem("TestEnvironment")
 
   override def afterAll(): Unit = {
     shutdownActorSystem(actorSystem)
   }
-
-  protected def fakeApp(system: ActorSystem = actorSystem): Application = {
-    val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
-
-    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
-      override def configure(): Unit = {
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("SessionsScheduler"))
-          .toInstance(sessionsScheduler)
-
-        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
-        bindActor[EmailManager]("EmailManager")
-
-        bind(classOf[KnolxControllerComponents])
-          .toInstance(knolxControllerComponent)
-      }
-    })
-
-    new GuiceApplicationBuilder()
-      .overrides(testModule.map(GuiceableModule.guiceable).toSeq: _*)
-      .disable[Module]
-      .build
-  }
-
 
   protected def shutdownActorSystem(actorSystem: ActorSystem,
                                     duration: Duration = 10.seconds,
@@ -77,25 +53,35 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     }
   }
 
-  object TestHelpers extends PlayRunners
-    with HeaderNames
-    with Status
-    with MimeTypes
-    with HttpProtocol
-    with DefaultAwaitTimeout
-    with ResultExtractors
-    with Writeables
-    with EssentialActionCaller
-    with RouteInvokers
-    with FutureAwaits
-    with TestStubControllerComponentsFactory
+  protected def fakeApp(system: ActorSystem = actorSystem): Application = {
+    val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
+    val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
 
+    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+      override def configure(): Unit = {
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("SessionsScheduler"))
+          .toInstance(sessionsScheduler)
+
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("UsersBanScheduler"))
+          .toInstance(usersBanScheduler)
+
+        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
+        bindActor[EmailManager]("EmailManager")
+
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
+      }
+    })
+
+    new GuiceApplicationBuilder()
+      .overrides(testModule.map(GuiceableModule.guiceable).toSeq: _*)
+      .disable[Module]
+      .build
+  }
 
   trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory with StubBodyParserFactory with StubMessagesFactory {
-
-    override def stubBodyParser[T](content: T = AnyContentAsEmpty): BodyParser[T] = {
-      BodyParser(_ => Accumulator.done(Right(content)))
-    }
 
     def stubControllerComponents: KnolxControllerComponents = {
       val bodyParser = stubBodyParser(AnyContentAsEmpty)
@@ -112,7 +98,24 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
         executionContext)
     }
 
+    override def stubBodyParser[T](content: T = AnyContentAsEmpty): BodyParser[T] = {
+      BodyParser(_ => Accumulator.done(Right(content)))
+    }
+
   }
+
+  object TestHelpers extends PlayRunners
+    with HeaderNames
+    with Status
+    with MimeTypes
+    with HttpProtocol
+    with DefaultAwaitTimeout
+    with ResultExtractors
+    with Writeables
+    with EssentialActionCaller
+    with RouteInvokers
+    with FutureAwaits
+    with TestStubControllerComponentsFactory
 
 }
 
@@ -123,6 +126,14 @@ class DummySessionsScheduler extends Actor {
     case GetScheduledSessions              => sender ! ScheduledSessions(List.empty)
     case CancelScheduledSession(sessionId) => sender ! true
     case ScheduleSession(sessionId)        => sender ! true
+  }
+
+}
+
+class DummyUsersBanScheduler extends Actor {
+
+  def receive: Receive = {
+    case RefreshSessionsSchedulers => sender ! ScheduledBanSessionsRefreshed
   }
 
 }

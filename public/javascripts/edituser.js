@@ -1,15 +1,22 @@
 $(function () {
     $('#search-text').keyup(function () {
-        slide(this.value, 1);
+        var filter = $('input[name="user-filter"]:checked').val();
+        slide(this.value, 1, filter);
+    });
+
+    $('.custom-checkbox').click(function () {
+        var filter = $('input[name="user-filter"]:checked').val();
+        slide($('#search-text').val(), 1, filter);
     });
 });
 
-function slide(keyword, pageNumber) {
+function slide(keyword, pageNumber, filter) {
     var email = keyword;
 
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
+    formData.append("filter", filter);
 
     jsRoutes.controllers.UsersController.searchUser().ajax(
         {
@@ -31,20 +38,29 @@ function slide(keyword, pageNumber) {
 
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
-                        usersFound += "<tr><td align='center'>" +
-                            "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
-                            "<em class='fa fa-pencil'></em>" +
-                            "</a> " +
-                            "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
-                            "<em class='fa fa-trash'></em>" +
-                            "</a>" +
-                            "</td>" +
-                            "<td>" + users[user].email + "</td>";
 
-                        if (users[user].active) {
-                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td></tr>"
+                        if (users[user].admin) {
+                            usersFound += "<tr><td class='active-status'><span class='label label-warning'>Admin</span></td>"
                         } else {
-                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td></tr>"
+                            usersFound += "<tr><td align='center'>" +
+                                "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
+                                "<em class='fa fa-pencil'></em>" +
+                                "</a> " +
+                                "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
+                                "<em class='fa fa-trash'></em>" +
+                                "</a>" +
+                                "</td>"
+                        }
+                        usersFound += "<td>" + users[user].email + "</td>";
+                        if (users[user].active) {
+                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td>"
+                        } else {
+                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td>"
+                        }
+                        if (users[user].ban) {
+                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p>"+users[user].banTill+"</p></td></tr>"
+                        } else {
+                            usersFound += "<td class='suspended'><span class='label label-info'>Allowed</span></td></tr>"
                         }
                     }
 
@@ -57,7 +73,8 @@ function slide(keyword, pageNumber) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id);
+                            var filter = $('input[name="user-filter"]:checked').val();
+                            slide(keyword, this.id, filter);
                         });
                     }
                 } else {

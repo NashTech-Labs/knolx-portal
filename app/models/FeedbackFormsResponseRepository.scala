@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import models.FeedbackFormsResponseFormat._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
@@ -91,5 +91,18 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
             "sessionId" -> sessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
+
+  def getAllResponseEmailsPerSession(sessionId: String)(implicit ex: ExecutionContext): Future[List[String]] = {
+    val query = Json.obj("sessionId" -> sessionId)
+    val projection = Json.obj("email" -> 1)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(query, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("email").asOpt[String]))
+  }
 
 }

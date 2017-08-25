@@ -1,10 +1,11 @@
 package controllers
 
-import java.util.UUID
+import java.util.{Date, UUID}
 import javax.inject._
 
 import actors.EmailActor
 import akka.actor.ActorRef
+import controllers.EmailHelper._
 import models.{ForgotPasswordRepository, PasswordChangeRequestInfo, UpdatedUserInfo, UsersRepository}
 import play.api.data.Forms.{nonEmptyText, _}
 import play.api.data._
@@ -25,14 +26,18 @@ case class ResetPasswordInformation(token: String,
                                     password: String,
                                     confirmPassword: String)
 
+case class ChangePasswordInformation(currentPassword: String, newPassword: String, confirmPassword: String)
+
 case class LoginInformation(email: String, password: String)
 
-case class UserEmailInformation(email: Option[String], page: Int)
+case class SearchUserByEmailInformation(email: Option[String], page: Int, filter: String)
 
 case class ManageUserInfo(email: String,
                           active: Boolean,
                           id: String,
-                          admin: Boolean = false)
+                          banTill: String,
+                          admin: Boolean = false,
+                          ban: Boolean = false)
 
 case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
 
@@ -56,7 +61,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   val userForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "password" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
       "confirmPassword" -> nonEmptyText.verifying("Confirm Password must be at least 8 character long!", password => password.length >= 8)
     )(UserInformation.apply)(UserInformation.unapply)
@@ -64,10 +69,10 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       "Password and confirm password miss match!", user => user.password.toLowerCase == user.confirmPassword.toLowerCase)
   )
 
-  val resetPasswordForm = Form(
+  val forgotPasswordForm = Form(
     mapping(
       "token" -> nonEmptyText,
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "password" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
       "confirmPassword" -> nonEmptyText.verifying("Confirm Password must be at least 8 character long!", password => password.length >= 8)
     )(ResetPasswordInformation.apply)(ResetPasswordInformation.unapply)
@@ -75,23 +80,35 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       "Password and confirm password miss match!", user => user.password.toLowerCase == user.confirmPassword.toLowerCase)
   )
 
+  val changePasswordForm = Form(
+    mapping(
+      "currentPassword" -> nonEmptyText,
+      "newPassword" -> nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8),
+      "confirmPassword" -> nonEmptyText.verifying("Confirm Password must be at least 8 character long!", password => password.length >= 8)
+    )(ChangePasswordInformation.apply)(ChangePasswordInformation.unapply)
+      verifying(
+      "Password and confirm password miss match!", user => user.newPassword.toLowerCase == user.confirmPassword.toLowerCase)
+  )
+
   val loginForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "password" -> nonEmptyText
     )(LoginInformation.apply)(LoginInformation.unapply)
   )
 
-  val emailForm = Form(
+  val searchUserByEmailForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31)
-    )(UserEmailInformation.apply)(UserEmailInformation.unapply)
+      "page" -> number.verifying("Invalid page number", number => number >= 0),
+      "filter" -> nonEmptyText.verifying("Invalid filter",
+        filter => filter == "all" || filter == "banned" || filter == "allowed" || filter == "active" || filter == "suspended")
+    )(SearchUserByEmailInformation.apply)(SearchUserByEmailInformation.unapply)
   )
 
   val updateUserForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "active" -> boolean,
       "password" -> optional(nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8))
     )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
@@ -99,7 +116,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   val requestPasswordChangeForm = Form(
     single(
-      "email" -> email
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email))
     )
   )
 
@@ -121,7 +138,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap(_.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email, PasswordUtility.encrypt(userInfo.password), PasswordUtility.BCrypt, active = true, admin = false))
+                models.UserInfo(userInfo.email,
+                  PasswordUtility.encrypt(userInfo.password),
+                  PasswordUtility.BCrypt,
+                  active = true,
+                  admin = false,
+                  BSONDateTime(dateTimeUtility.nowMillis)))
               .map { result =>
                 if (result.ok) {
                   Logger.info(s"User ${userInfo.email} successfully created")
@@ -192,7 +214,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber, keyword)
       .flatMap { userInfo =>
         val users = userInfo map (user =>
-          ManageUserInfo(user.email, user.active, user._id.stringify, user.admin))
+          ManageUserInfo(user.email,
+            user.active,
+            user._id.stringify,
+            new Date(user.banTill.value).toString,
+            user.admin,
+            new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
         usersRepository
           .userCountWithKeyword(keyword)
@@ -205,19 +232,25 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def searchUser: Action[AnyContent] = adminAction.async { implicit request =>
-    emailForm.bindFromRequest.fold(
+    searchUserByEmailForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
         Future.successful(BadRequest(" OOps! Invalid value encountered !"))
       },
       userInformation => {
         usersRepository
-          .paginate(userInformation.page, userInformation.email)
+          .paginate(userInformation.page, userInformation.email, userInformation.filter)
           .flatMap { userInfo =>
-            val users = userInfo map (user => ManageUserInfo(user.email, user.active, user._id.stringify, user.admin))
+            val users = userInfo map (user =>
+              ManageUserInfo(user.email,
+                user.active,
+                user._id.stringify,
+                new Date(user.banTill.value).toString,
+                user.admin,
+                new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
             usersRepository
-              .userCountWithKeyword(userInformation.email)
+              .userCountWithKeyword(userInformation.email, userInformation.filter)
               .map { count =>
                 val pages = Math.ceil(count / 10D).toInt
 
@@ -273,11 +306,11 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def forgotPassword: Action[AnyContent] = action.async { implicit request =>
+  def renderForgotPassword: Action[AnyContent] = action.async { implicit request =>
     Future.successful(Ok(views.html.users.forgotpassword(requestPasswordChangeForm)))
   }
 
-  def requestPasswordChange: Action[AnyContent] = action.async { implicit request =>
+  def generateForgotPasswordToken: Action[AnyContent] = action.async { implicit request =>
     requestPasswordChangeForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.forgotpassword(formWithErrors)))
@@ -287,7 +320,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .getActiveByEmail(email.toLowerCase)
           .map { user =>
             user.fold {
-              Redirect(routes.UsersController.forgotPassword())
+              Redirect(routes.UsersController.renderForgotPassword())
                 .flashing("message" -> "User not found!")
             } { foundUser =>
               val validTill = dateTimeUtility.localDateTimeIST.plusDays(1)
@@ -295,7 +328,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               val requestInfo = PasswordChangeRequestInfo(foundUser.email, token, BSONDateTime(dateTimeUtility.toMillis(validTill)))
               forgotPasswordRepository.upsert(requestInfo)
 
-              val url = routes.UsersController.changePassword(token).url
+              val url = routes.UsersController.validateForgotPasswordToken(token).url
               val changePasswordUrl = s"""http://${request.host}$url"""
 
               val from = configuration.getOptional[String]("play.mailer.user").getOrElse("")
@@ -316,7 +349,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def changePassword(token: String): Action[AnyContent] = action.async { implicit request =>
+  def validateForgotPasswordToken(token: String): Action[AnyContent] = action.async { implicit request =>
     forgotPasswordRepository
       .getPasswordChangeRequest(token, None)
       .map { passwordChangeInfo =>
@@ -324,15 +357,15 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, Your password change request is invalid " +
             "or expired, consider generating a new request!")))
         } { _ =>
-          Ok(views.html.users.resetpassword(resetPasswordForm.fill(ResetPasswordInformation(token, "", "", ""))))
+          Ok(views.html.users.resetpassword(forgotPasswordForm.fill(ResetPasswordInformation(token, "", "", ""))))
         }
       }
   }
 
   def resetPassword: Action[AnyContent] = action.async { implicit request =>
-    resetPasswordForm.bindFromRequest.fold(
+    forgotPasswordForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.error(s"Received a bad request for reseting password $formWithErrors")
+        Logger.error(s"Received a bad request for resetting password $formWithErrors")
         Future.successful(BadRequest(views.html.users.resetpassword(formWithErrors)))
       },
       resetPasswordInfo => {
@@ -340,7 +373,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .getPasswordChangeRequest(resetPasswordInfo.token, Some(resetPasswordInfo.email.toLowerCase))
           .flatMap(resetRequest =>
             resetRequest.fold {
-              Future.successful(Unauthorized(views.html.users.resetpassword(resetPasswordForm.fill(resetPasswordInfo)
+              Future.successful(Unauthorized(views.html.users.resetpassword(forgotPasswordForm.fill(resetPasswordInfo)
                 .withGlobalError("Sorry, no password reset request found for this user"))))
             } { requestFound =>
               usersRepository
@@ -367,6 +400,34 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 }
             }
           )
+      })
+  }
+
+  def renderChangePassword: Action[AnyContent] = userAction.async { implicit request =>
+    Future.successful(Ok(views.html.users.changepassword(changePasswordForm
+      .fill(ChangePasswordInformation("", "", "")))))
+  }
+
+  def changePassword: Action[AnyContent] = userAction.async { implicit request =>
+    changePasswordForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for resetting password $formWithErrors")
+        Future.successful(BadRequest(views.html.users.changepassword(formWithErrors)))
+      },
+      resetPasswordInfo => {
+        usersRepository
+          .getActiveByEmail(request.user.email.toLowerCase)
+          .map(_.fold {
+            Logger.info(s"User ${request.user.email.toLowerCase} not found")
+            Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "User not found!")
+          } { user =>
+            if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, user.password)) {
+              usersRepository.update(UpdatedUserInfo(request.user.email.toLowerCase, user.active, Some(resetPasswordInfo.newPassword)))
+              Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
+            } else {
+              Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "Current password invalid!")
+            }
+          })
       })
   }
 

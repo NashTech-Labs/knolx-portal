@@ -1,0 +1,27 @@
+@import actors._
+
+@(emailsInfo: List[EmailBodyInfo])
+
+<p>Hi,</p>
+
+<p>
+    You're banned from attending and presenting Knolx sessions for <strong>1 month</strong> as you did not submit
+    feedback for the following session(s):
+</p>
+<ul>
+    @for(info <- emailsInfo) {
+        <li>@info.topic by @info.presenter held on @info.date</li>
+    }
+</ul>
+
+<p>
+    Getting banned more than 3 times would result in a permanent ban.
+    <br>
+    If you think this is an error please contact Knolx Admin Team.
+</p>
+
+<p>
+    Thanks,
+    <br>
+    Admin
+</p>

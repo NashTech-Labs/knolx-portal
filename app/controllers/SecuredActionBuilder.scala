@@ -17,7 +17,7 @@ case class SecuredRequest[A](user: UserSession, request: Request[A]) extends Wra
 case class UserActionBuilder(val parser: BodyParser[AnyContent],
                              usersRepository: UsersRepository,
                              configuration: Configuration
-                            )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] {
+                            )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] with Results {
 
   @Inject
   def this(parser: BodyParsers.Default, usersRepository: UsersRepository, configuration: Configuration)(implicit ec: ExecutionContext) =
@@ -37,7 +37,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
       .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
 
-        Future.successful(unauthorized("Unauthorized access!"))
+        Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
       } { userInfo =>
         val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
 
@@ -50,7 +50,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
 case class AdminActionBuilder(val parser: BodyParser[AnyContent],
                               usersRepository: UsersRepository,
                               configuration: Configuration
-                             )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] {
+                             )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] with Results {
 
   @Inject
   def this(parser: BodyParsers.Default, usersRepository: UsersRepository, configuration: Configuration)(implicit ec: ExecutionContext) =
@@ -68,7 +68,7 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
       .getByEmail(emailFromSession)
       .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
-        Future.successful(unauthorized("Unauthorized access!"))
+        Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
       } { userInfo =>
         if (userInfo.admin) {
           val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
@@ -77,7 +77,7 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
         } else {
           Logger.info(s"Unauthorized access for email $emailFromSession")
 
-          Future.successful(unauthorized("Unauthorized access!"))
+          Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
         }
       })
   }

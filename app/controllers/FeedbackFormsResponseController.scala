@@ -82,7 +82,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
     usersRepository.getActiveAndUnbanned(request.user.email.toLowerCase).flatMap {
       _.fold {
-        Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
+        Future.successful(Unauthorized("You are banned, can't access this page!"))
       } { _ =>
         sessionsRepository
           .activeSessions()

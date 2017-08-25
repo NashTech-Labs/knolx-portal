@@ -44,7 +44,8 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   var scheduledBanEmails: Map[String, Cancellable] = Map.empty
 
   override def preStart(): Unit = {
-    self ! InitiateBanEmails(Duration.Zero, 1.day)
+    val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
+    self ! InitiateBanEmails(initialDelay, 1.day)
     Logger.info(s"Ban scheduler started immediately")
   }
 
@@ -152,8 +153,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
         getBanInfo(sessions, emails)
           .map {
             _.map { emailContent =>
-              val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
-              emailContent.to -> scheduler.scheduleOnce(initialDelay, self, SendEmail(emailContent))
+              emailContent.to -> scheduler.scheduleOnce(Duration.Zero, self, SendEmail(emailContent))
             }.toMap
           }
       }

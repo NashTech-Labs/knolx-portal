@@ -96,36 +96,6 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           usersBanScheduler, ScheduleBanEmails)(usersBanScheduler.underlyingActor.context.dispatcher)
     }
 
-    "schedule Ban emails with banning user" in new TestScope {
-      feedbackFormsResponseRepository.getAllResponseEmailsPerSession(sessionId.stringify) returns Future.successful(List("test@example.com"))
-      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
-      usersRepository.getAllActiveEmails returns Future.successful(List("testother@example.com"))
-      dateTimeUtility.endOfDayMillis returns knolxSessionDateTime
-      dateTimeUtility.nowMillis returns knolxSessionDateTime
-      usersBanScheduler ! ScheduleBanEmails
-
-      usersBanScheduler.underlyingActor.scheduledBanEmails.size must_=== 1
-    }
-
-    "refresh ban users schedulers" in new TestScope {
-      val cancellable = new Cancellable {
-        def cancel(): Boolean = true
-
-        def isCancelled: Boolean = false
-      }
-
-      usersBanScheduler.underlyingActor.scheduledBanEmails = Map(sessionId.stringify -> cancellable)
-      feedbackFormsResponseRepository.getAllResponseEmailsPerSession(sessionId.stringify) returns Future.successful(List("test@example.com"))
-      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
-      usersRepository.getAllActiveEmails returns Future.successful(List("testother@example.com"))
-      dateTimeUtility.endOfDayMillis returns knolxSessionDateTime
-      dateTimeUtility.nowMillis returns knolxSessionDateTime
-
-      usersBanScheduler ! RefreshSessionsBanSchedulers
-
-      usersBanScheduler.underlyingActor.scheduledBanEmails.size must_=== 1
-    }
-
     "not refresh users ban schedulers because of empty scheduled bans" in new TestScope {
       val cancellable = new Cancellable {
         def cancel(): Boolean = false
@@ -179,7 +149,7 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
       val result: List[String] = await((usersBanScheduler ? GetScheduledBannedUsers) (5.seconds).mapTo[List[String]])
 
-      result mustEqual true
+      result mustEqual Nil
     }
 
   }

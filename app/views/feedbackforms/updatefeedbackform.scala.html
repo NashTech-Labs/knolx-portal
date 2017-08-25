@@ -135,7 +135,7 @@
                                     <div class ='question-card question-card-comment' id="question-@questionCount">
                                         <div>
                                             <div class='col-md-12'>
-                                                <input class='card-questions-other' id='questionCommentValue-@questionCount'  placeholder='Question ?' value="@editableQuestions(questionCount - 1).question" type='text'>
+                                                <input class='card-questions-other' id='questionCommentValue-@questionCount' placeholder='Question ?' value="@editableQuestions(questionCount - 1).question" type='text'>
                                                 <i id = "deleteQuestion-@questionCount" class='fa fa-trash-o delQuestion'></i>
                                             </div>
                                             <br>
@@ -151,11 +151,11 @@
                                         </div>
 
                                         <div id="parent" class="add-option-parent"><div>
-                                        <label class="checkbox-outer">
-                                        <input type='checkbox' id='questionMandatoryValue-@questionCount' class='custom-checkbox'@if(editableQuestions(questionCount - 1).mandatory) {checked = "checked"}/>
-                                        <span class="pin_text"></span>
-                                        <p class="pin-checkbox-text">Mandatory</p>
-                                        </label>
+                                            <label class="checkbox-outer">
+                                                <input type='checkbox' id='questionMandatoryValue-@questionCount' class='custom-checkbox'@if(editableQuestions(questionCount - 1).mandatory) {checked = "checked"}/>
+                                                <span class="pin_text"></span>
+                                                <p class="pin-checkbox-text">Mandatory</p>
+                                            </label>
                                         </div>
                                         </div>
 

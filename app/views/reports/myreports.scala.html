@@ -1,4 +1,4 @@
-@(sessionIds : List[FeedbackReportHeader])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionIds: List[FeedbackReportHeader])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("All reports") {
     <div class="row">
@@ -8,42 +8,20 @@
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {
-                    @if(session.active){
-                    <div class="col-md-4">
-                        <div class="col-md-12">
-                            <div id="parent" class="feedback-response-sessions custom-position">
-                                <div class="card-body card-custom-padding">
-                                    <div class="fold">
-                                        <div class="accepting-response"><span class="label label-danger live">Live</span></div>
-                                    </div>
-                                    @defining("Knolx") { sessionType =>
-                                    <div class="col-md-12 feedback-card-topic custom-position">
-                                        <div class="session-type"><span class="label @if(sessionType == "Knolx"){
-                                            label-warning
-                                        }else{
-                                            label-success
-                                        } custom-label-type">@sessionType</span></div>
-                                        <p>@session.topic</p></div>
-                                    <div class="col-md-12 feedback-card-by">held on</div>
-                                    <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
-                                    <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
-                                        <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
-                                            view</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-                }else{
+                    @if(session.active) {
                         <div class="col-md-4">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
+                                        <div class="fold">
+                                            <div class="accepting-response"><span class="label label-danger live">
+                                                Live</span></div>
+                                        </div>
                                         @defining("Knolx") { sessionType =>
                                             <div class="col-md-12 feedback-card-topic custom-position">
-                                                <div class="session-type"><span class="label @if(sessionType == "Knolx"){
+                                                <div class="session-type"><span class="label @if(sessionType == "Knolx") {
                                                     label-warning
-                                                }else{
+                                                } else {
                                                     label-success
                                                 } custom-label-type">@sessionType</span></div>
                                                 <p>@session.topic</p></div>
@@ -57,12 +35,35 @@
                             </div>
                         </div>
                     }
+                    } else {
+                        <div class="col-md-4">
+                            <div class="col-md-12">
+                                <div id="parent" class="feedback-response-sessions custom-position">
+                                    <div class="card-body card-custom-padding">
+                                    @defining("Knolx") { sessionType =>
+                                        <div class="col-md-12 feedback-card-topic custom-position">
+                                            <div class="session-type"><span class="label @if(sessionType == "Knolx") {
+                                                label-warning
+                                            } else {
+                                                label-success
+                                            } custom-label-type">@sessionType</span></div>
+                                            <p>@session.topic</p></div>
+                                        <div class="col-md-12 feedback-card-by">held on</div>
+                                        <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
+                                        <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
+                                        <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
+                                            view</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     }
                 }
-            }else{
-
-
-
+            } else {
+                <div class="empty-reports"><i class="fa fa-folder-open" aria-hidden="true"></i>
+                    <p class="empty-reports_text">No feedback reports found!</p>
+                </div>
             }
             <div class="col-md-12 feedback-footer"></div>
         </div>

@@ -178,7 +178,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .getActiveByEmail(loginInfo.email.toLowerCase)
           .map(_.fold {
             Logger.info(s"User ${loginInfo.email.toLowerCase} not found")
-            Redirect(routes.HomeController.index()).flashing("message" -> "User not found!")
+            Unauthorized(views.html.users.login(loginForm.fill(loginInfo).withGlobalError("User not found!")))
           } { user =>
             val admin = user.admin
             val password = user.password

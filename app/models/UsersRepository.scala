@@ -71,7 +71,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
         jsonCollection
           .find(Json.obj("email" -> email.toLowerCase,
             "active" -> true,
-            "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+            "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 

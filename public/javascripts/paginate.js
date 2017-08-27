@@ -5,7 +5,7 @@ function paginate(pageNumber, pages) {
         switch (true) {
             case (pages > 5 && pageNumber < 5) : {
                 pagination += reducedFromIterator(1, 5, pageNumber, 0);
-                pagination += dots;
+                pagination += dots();
                 pagination += inActiveList(pages);
                 break;
             }
@@ -14,7 +14,7 @@ function paginate(pageNumber, pages) {
                 break;
             case (pages > 5 && pageNumber >= 5 && pages == pageNumber) : {
                 pagination += reverseIterator(5, 1, pageNumber, pages);
-                pagination += dots;
+                pagination += dots();
                 pagination += pageNumber == pages ? activeList(pages) : inActiveList(pages);
                 break;
             }
@@ -24,20 +24,20 @@ function paginate(pageNumber, pages) {
                     pagination += fromIterator(pageNumber, (pageNumber + iterator));
                 }
                 pagination += reducedFromIterator(1, 2, pageNumber, pageNumber);
-                pagination += dots;
+                pagination += dots();
                 pagination += inActiveList(pages);
                 break;
             }
             case (pages > 5 && pageNumber >= 5 && pageNumber == pages - 2)      : {
                 pagination += reverseIterator(3, 0, pageNumber, pageNumber);
                 pagination += pageNumber == (pageNumber + 1) ? activeList((pageNumber + 1)) : inActiveList((pageNumber + 1));
-                pagination += dots;
+                pagination += dots();
                 pagination += inActiveList(pages);
                 break;
             }
             case (pages > 5 && pageNumber >= 5 && pageNumber > pages - 2 && pageNumber != pages) : {
                 pagination += reverseIterator(4, 0, pageNumber, pageNumber);
-                pagination += dots;
+                pagination += dots();
                 pagination += inActiveList(pages);
                 break;
             }

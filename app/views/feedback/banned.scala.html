@@ -1,0 +1,40 @@
+@(banInfo: BannedUser)(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@main("Banned") {
+    <div class="row">
+        <div class="col-md-2" ></div>
+        <div class="col-md-8 banned-warning">
+            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+            <div class="col-md-2 acknowledgement-icon">
+
+                <div class="ban-outer">
+                    <span class="ban_text">@banInfo.bannedDaysLeft</span><hr/>
+                    <div class="ban_text-title">Days to unban</div>
+                </div>
+
+            </div>
+            <div class="col-md-10 acknowledgement-text">
+                <div class="col-md-2"></div>
+                <div class="col-md-5">Banned !
+                    <p class="acknowledgement-text_tag-till">till</p>
+                    <p class="acknowledgement-text_tag custom-ban-tag">@banInfo.bannedTill</p>
+                </div>
+                <div class="col-md-2"></div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-1"></div>
+                <div class="col-md-10 acknowledgement-custom-message ban-custom-message">You're banned from <strong>
+                    attending</strong> and <strong>presenting</strong> Knolx sessions for
+                    <strong class="ban-period">1 month</strong>
+                    as you did not submitted feedback for previous session(s).
+                    Also getting banned more than 3 times would result in a <strong>permanent ban</strong>.</div>
+                <div class="col-md-1"></div>
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-2"></div>
+                <div class="col-md-8 permanent-warn">You shouldn't get banned ? contact admin team!</div>
+                <div class="col-md-2"></div>
+            </div>
+        </div>
+    </div>
+}

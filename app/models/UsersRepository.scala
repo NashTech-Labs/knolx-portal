@@ -64,7 +64,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
-  def getActiveAndUnbanned(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+  def getActiveAndBanned(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
     val millis = dateTimeUtility.nowMillis
     collection
       .flatMap(jsonCollection =>

@@ -83,7 +83,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
-    usersRepository.getActiveAndUnbanned(request.user.email.toLowerCase).flatMap {
+    usersRepository.getActiveAndBanned(request.user.email.toLowerCase).flatMap {
       _.fold {
         sessionsRepository
           .activeSessions()
@@ -128,7 +128,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         val bantill = dateTimeUtility.toLocalDate(bannedUser.banTill.value)
         val today = dateTimeUtility.localDateIST
         val daysLeft = today.until(bantill, ChronoUnit.DAYS);
-        Future.successful(Ok(views.html.feedback.banned(BannedUser(daysLeft, new Date(bannedUser.banTill.value).toString))))
+        Future.successful(Unauthorized(views.html.feedback.banned(BannedUser(daysLeft, new Date(bannedUser.banTill.value).toString))))
       }
     }
   }

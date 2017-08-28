@@ -128,7 +128,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with password change " in {
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, Some("12345678"))
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))
 
       val result = await(usersRepository.update(userTOUpdate))
 
@@ -136,7 +136,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with no password change " in {
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, None)
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, ban = false, None)
 
       val result = await(usersRepository.update(userTOUpdate))
 

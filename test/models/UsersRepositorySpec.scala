@@ -20,7 +20,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
   private val millis = date.getTime
   private val currentMillis = formatter.parse("2017-07-12T14:30:00").getTime
   val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
-  val document = UserInfo("test@example.com", "password", "encryptedpassword", active = true, admin = false, BSONDateTime(millis))
+  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false, BSONDateTime(millis))
 
   "Users Repository" should {
 
@@ -31,23 +31,23 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get user by email" in {
-      val user = await(usersRepository.getByEmail("test@example.com"))
+      val user = await(usersRepository.getByEmail("test@knoldus.com"))
 
       user must beEqualTo(Some(document))
     }
 
     "get active user by email" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val user = await(usersRepository.getActiveByEmail("test@example.com"))
+      val user = await(usersRepository.getActiveByEmail("test@knoldus.com"))
 
       user must beEqualTo(Some(document))
     }
 
     "get active and unbanned users by email" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val user = await(usersRepository.getActiveAndUnbanned("test@example.com"))
+      val user = await(usersRepository.getActiveAndBanned("test@knoldus.com"))
 
-      user must beEqualTo(Some(document))
+      user must beEqualTo(None)
     }
 
     "get paginated user when searched with empty string and `all` filter" in {
@@ -128,7 +128,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with password change " in {
-      val userTOUpdate = UpdatedUserInfo("test@example.com", active = true, Some("12345678"))
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, Some("12345678"))
 
       val result = await(usersRepository.update(userTOUpdate))
 
@@ -136,7 +136,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with no password change " in {
-      val userTOUpdate = UpdatedUserInfo("test@example.com", active = false, None)
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, None)
 
       val result = await(usersRepository.update(userTOUpdate))
 
@@ -228,9 +228,9 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "delete user by email" in {
-      val result = await(usersRepository.delete("test@example.com"))
+      val result = await(usersRepository.delete("test@knoldus.com"))
 
-      result.get.email must beEqualTo("test@example.com")
+      result.get.email must beEqualTo("test@knoldus.com")
     }
 
   }

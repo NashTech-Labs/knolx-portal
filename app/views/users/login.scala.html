@@ -10,6 +10,11 @@
                     <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
                 </div>
             }
+            @if(flash.get("error").nonEmpty) {
+                <div class="alert alert-danger login-error">
+                    <strong>Error!</strong> @flash.get("error").fold("")(message => message)
+                </div>
+            }
             <div class="login-outer">
                 <div class="col-md-12 login-first" > </div>
 

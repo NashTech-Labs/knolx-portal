@@ -37,7 +37,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
       .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
 
-        Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
+        Future.successful(Redirect(routes.UsersController.login()).flashing("error" -> "Please login before accessing the page."))
       } { userInfo =>
         val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
 
@@ -68,7 +68,7 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
       .getByEmail(emailFromSession)
       .flatMap(_.fold {
         Logger.info(s"Unauthorized access for email $emailFromSession")
-        Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
+        Future.successful(Redirect(routes.UsersController.login()).flashing("error" -> "Please login before accessing the page."))
       } { userInfo =>
         if (userInfo.admin) {
           val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin)
@@ -77,7 +77,7 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
         } else {
           Logger.info(s"Unauthorized access for email $emailFromSession")
 
-          Future.successful(Redirect(routes.SessionsController.sessions(1, None)))
+          Future.successful(Redirect(routes.UsersController.login()).flashing("error" -> "Please login before accessing the page."))
         }
       })
   }

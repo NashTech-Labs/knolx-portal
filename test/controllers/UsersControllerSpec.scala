@@ -468,9 +468,11 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "reset password for the user requested" in new WithTestApplication {
-      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      dateTimeUtility.nowMillis returns date.getTime
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
       usersRepository.update(updateUserInfo) returns updateWriteResult
@@ -485,9 +487,11 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "throw internal server error" in new WithTestApplication {
-      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      dateTimeUtility.nowMillis returns date.getTime
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
       usersRepository.update(updateUserInfo) returns updateWriteResult

@@ -41,9 +41,6 @@ ul > li > a {
 
 body {
     background-color: #eee;
-    background-image: url('../images/bg.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 @font-face {
@@ -134,3 +131,4 @@ i.fa.fa-user:active {
 .fa-comments {
     color: #fff;
 }
+

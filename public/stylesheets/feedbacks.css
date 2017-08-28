@@ -47,7 +47,8 @@
     background-color: #dcdcdc;
     box-shadow: 0 6px 20px #a8a8a8;
 }
-.card-custom-padding{
+
+.card-custom-padding {
     padding-bottom: 20px;
 }
 
@@ -128,7 +129,7 @@
 
 }
 
-.accepting-response{
+.accepting-response {
     width: 80px;
     height: 80px;
     background-image: url(../images/ripple.svg);
@@ -136,21 +137,24 @@
     background-size: cover;
     position: relative;
 }
-.live{
+
+.live {
     position: absolute;
-    top:3px;
+    top: 3px;
     left: 3px;
     border-radius: 0px;
 }
-.custom-position{
+
+.custom-position {
     position: relative;
- }
-.custom-fold{
+}
+
+.custom-fold {
     border-top-right-radius: 35px;
 }
 
-.fold{
-    width:100%;
+.fold {
+    width: 100%;
     height: 50%;
     background-color: transparent;
     position: absolute;
@@ -160,7 +164,8 @@
     opacity: 0.8;
     font-size: 15px;
 }
-.session-type{
+
+.session-type {
     position: absolute;
     top: -2px;
     right: 0;
@@ -169,15 +174,15 @@
     margin: 0;
 }
 
-.custom-label-type{
+.custom-label-type {
     border-radius: 0px;
     margin: 0px;
 }
 
-.accepting-response-text{
+.accepting-response-text {
     position: absolute;
-    bottom:-5px;
-    left:0;
+    bottom: -5px;
+    left: 0;
     width: 100%;
     text-align: center;
 }
@@ -515,4 +520,64 @@
     letter-spacing: 1px;
     text-align: center;
     color: #fff;
+}
+
+.banned-warning {
+    margin: 100px 0px;
+    background-color: #fff;
+    box-shadow: 0 4px 7px -5px #333;
+    padding: 10px 50px 80px 30px;
+    border-radius: 20px;
+    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation: fadein 2s; /* Firefox < 16 */
+    -ms-animation: fadein 2s; /* Internet Explorer */
+    -o-animation: fadein 2s; /* Opera < 12.1 */
+    animation: fadein 2s;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.ban_text {
+    margin-top: 0px;
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: success-tick 500ms ease-in;
+    font-size: 60px;
+    color: #EC7063;
+    font-weight: bold;
+}
+
+.ban-outer {
+    text-align: center;
+}
+
+.ban_text-title {
+    color: #a8a8a8;
+    font-family: 'gothic';
+    margin-top: 10px;
+    font-weight: bolder;
+}
+
+.ban-period {
+    color: #EC7063;
+    font-weight: bold;
+}
+
+.permanent-warn {
+    text-align: center;
+    margin-top: 30px;
+    color: #a8a8a8;
+}
+
+.ban-custom-message {
+    font-size: 19px;
+}
+
+.acknowledgement-text_tag-till {
+    font-size: 14px;
+}
+
+.custom-ban-tag {
+    font-size: 16px;
 }

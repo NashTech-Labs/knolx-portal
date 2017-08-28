@@ -37,9 +37,9 @@ function slide(keyword, pageNumber) {
                             "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
-                            usersFound += "<td class='active-status'>Yes</td>";
+                            usersFound +=  '<td><span class="label label-success ">Meetup</span></td>';
                         } else {
-                            usersFound += "<td class='suspended'>No</td>";
+                            usersFound +=  '<td><span class="label label-warning ">Knolx</span></td>';
                         }
 
                         if (sessions[session].cancelled) {

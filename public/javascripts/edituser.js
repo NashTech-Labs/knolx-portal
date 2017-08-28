@@ -79,7 +79,7 @@ function slide(keyword, pageNumber, filter) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td></tr>"
+                        "<tr><td align='center'></td><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td></tr>"
                     );
 
                     $('.pagination').html("");

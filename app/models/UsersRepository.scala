@@ -31,7 +31,10 @@ case class UserInfo(email: String,
                     banCount: Int = 0,
                     _id: BSONObjectID = BSONObjectID.generate)
 
-case class UpdatedUserInfo(email: String, active: Boolean, password: Option[String])
+case class UpdatedUserInfo(email: String,
+                           active: Boolean,
+                           ban: Boolean,
+                           password: Option[String])
 
 object UserJsonFormats {
 
@@ -64,14 +67,14 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .find(Json.obj("email" -> email.toLowerCase, "active" -> true))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
 
-  def getActiveAndUnbanned(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+  def getActiveAndBanned(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
     val millis = dateTimeUtility.nowMillis
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj("email" -> email.toLowerCase,
             "active" -> true,
-            "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+            "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
           .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
@@ -96,12 +99,21 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .insert(user))
 
   def update(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+
+    val banTill: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.nowMillis).plusDays(banPeriod)
+    val duration = BSONDateTime(dateTimeUtility.toMillis(banTill))
+    val unban = BSONDateTime(dateTimeUtility.nowMillis)
+
     val selector = BSONDocument("email" -> updatedRecord.email)
-    val modifier = updatedRecord.password match {
-      case Some(password) =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password)))
-      case None           =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active))
+    val modifier = (updatedRecord.password, updatedRecord.ban) match {
+      case (Some(password), true)  =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration))
+      case (Some(password), false) =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban))
+      case (None, true)            =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration))
+      case (None, false)           =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban))
     }
 
     collection

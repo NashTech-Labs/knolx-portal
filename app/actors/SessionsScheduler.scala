@@ -80,11 +80,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     self ! ScheduleFeedbackEmailsStartingToday(sessionsScheduledToday)
     self ! InitiateFeedbackEmailsStartingTomorrow(initialDelay, 1.day)
 
-    self ! ScheduleFeedbackRemindersStartingToday(sessionsExpiringToday)
+/*    self ! ScheduleFeedbackRemindersStartingToday(sessionsExpiringToday)
     self ! InitialFeedbackRemindersStartingTomorrow(reminderInitialDelay, 1.day)
 
     self ! ScheduleSessionNotificationsStartingToday(sessionsScheduledToday)
-    self ! InitialSessionNotificationsStartingTomorrow(initialDelay, 1.day)
+    self ! InitialSessionNotificationsStartingTomorrow(initialDelay, 1.day)*/
+
   }
 
   def scheduler: Scheduler = context.system.scheduler
@@ -186,12 +187,13 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       val eventualScheduledSessions = scheduleEmails(eventualSessions, Feedback)
       eventualScheduledSessions.map(scheduler => EventualScheduledEmails(scheduler)) pipeTo self
 
-      val expiringSession = sessionsRepository.sessionsForToday(ExpiringNext)
+/*      val expiringSession = sessionsRepository.sessionsForToday(ExpiringNext)
       val eventualScheduledReminders = scheduleEmails(expiringSession, Reminder)
       eventualScheduledReminders.map(scheduler => EventualScheduledEmails(scheduler)) pipeTo self
 
       val eventualScheduledNotifications = scheduleEmails(eventualSessions, Notification)
-      eventualScheduledNotifications.map(scheduler => EventualScheduledEmails(scheduler)) pipeTo self
+      eventualScheduledNotifications.map(scheduler => EventualScheduledEmails(scheduler)) pipeTo self*/
+
       Logger.info(s"Scheduled sessions emails after refreshing $scheduledEmails")
     case CancelScheduledSession(sessionId) =>
       Logger.info(s"Removing feedback emails scheduled for session $sessionId")

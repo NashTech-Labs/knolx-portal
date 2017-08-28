@@ -14,9 +14,9 @@
                                 <div class="card-body">
                                 @defining(if(session.meetup) "Meetup" else "Knolx") { sessionType =>
                                     <div class="col-md-12 feedback-card-topic custom-position">
-                                        <div class="session-type"><span class="label @if(sessionType == "Knolx"){
+                                        <div class="session-type"><span class="label @if(sessionType == "Knolx") {
                                             label-warning
-                                        }else{
+                                        } else {
                                             label-success
                                         } custom-label-type">@sessionType</span></div>
                                         <p>@session.topic</p></div>
@@ -34,28 +34,35 @@
                 }
                 }
             } else {
-                @for(expiredSession <- expired) {
-                    <div class="col-md-4">
-                        <div class="col-md-12">
-                            <div id="parent" class="feedback-response-sessions">
-                                <div class="card-body">
-                                @defining(if(expiredSession.meetup) "Meetup" else "Knolx") { sessionType =>
-                                    <div class="session-content">
-                                        <div class="col-md-12 feedback-card-topic custom-position expired">
-                                            <div class="session-type"><span class="label label-default custom-label-type">@sessionType</span></div>
-                                            <p>@expiredSession.topic</p></div>
-                                        <div class="col-md-12 feedback-card-by">by</div>
-                                        <div class="col-md-12 feedback-card-author expire-color"><p>@expiredSession.email</p></div>
+                @if(expired.nonEmpty) {
+                    @for(expiredSession <- expired) {
+                        <div class="col-md-4">
+                            <div class="col-md-12">
+                                <div id="parent" class="feedback-response-sessions">
+                                    <div class="card-body">
+                                    @defining(if(expiredSession.meetup) "Meetup" else "Knolx") { sessionType =>
+                                        <div class="session-content">
+                                            <div class="col-md-12 feedback-card-topic custom-position expired">
+                                                <div class="session-type"><span class="label label-default custom-label-type">@sessionType</span></div>
+                                                <p>@expiredSession.topic</p></div>
+                                            <div class="col-md-12 feedback-card-by">by</div>
+                                            <div class="col-md-12 feedback-card-author expire-color"><p>@expiredSession.email</p></div>
+                                        </div>
+                                        <button type="button" class="btn  feedback-card-expire-button expired">
+                                            Expired</button>
+                                        <input type="hidden" id='@expiredSession.id' value='{"topic":"@expiredSession.topic","author":"@expiredSession.email","session":"@expiredSession.session","scheduled":"@expiredSession.date","expire":"@expiredSession.expirationDate","sessiontype":"@sessionType"}'/>
+                                        <div class="col-md-12 feedback-card-author more"><p id='details-@expiredSession.id' class="getKnolxDetailsExpired">
+                                            More...</p></div>
                                     </div>
-                                    <button type="button" class="btn  feedback-card-expire-button expired">Expired</button>
-                                    <input type="hidden" id='@expiredSession.id' value='{"topic":"@expiredSession.topic","author":"@expiredSession.email","session":"@expiredSession.session","scheduled":"@expiredSession.date","expire":"@expiredSession.expirationDate","sessiontype":"@sessionType"}'/>
-                                    <div class="col-md-12 feedback-card-author more"><p id='details-@expiredSession.id' class="getKnolxDetailsExpired">
-                                        More...</p></div>
                                 </div>
                             </div>
                         </div>
+                    }
+                    }
+                } else {
+                    <div class="empty-reports"><i class="fa fa-comments feedback-notfound-color" aria-hidden="true"></i>
+                        <p class="empty-reports_text">No feedback available to fill!</p>
                     </div>
-                }
                 }
             }
             <div class="col-md-12 feedback-footer"></div>
@@ -107,7 +114,7 @@
             <div class="modal-content feedback-response-outer">
                 <div class="modal-body" id='feedback-form-space'>
                     <div class="row" id="display-feed-form">
-                     <div class="col-md-4 feedback-response-details" >
+                        <div class="col-md-4 feedback-response-details" >
                             <div class="modal-body session-information-modal form-session-information-modal">
                                 <table class="table table-striped session-table">
                                     <tbody class="session-details">

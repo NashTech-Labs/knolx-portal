@@ -15,15 +15,15 @@ import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
 import akka.pattern.pipe
 
-case class EmailBodyInfo(topic: String, presenter: String, date: String)
-
 object UsersBanScheduler {
 
+  case class EmailBodyInfo(topic: String, presenter: String, date: String)
+  case class EmailContent(to: String, body: List[EmailBodyInfo])
+
   // messages used internally for starting session schedulers/emails
-  case object ScheduleBanEmails
+  private[actors] case object ScheduleBanEmails
   private[actors] case class InitiateBanEmails(initialDelay: FiniteDuration, interval: FiniteDuration)
   private[actors] case class SendEmail(session: EmailContent)
-  private[actors] case class EmailContent(to: String, body: List[EmailBodyInfo])
   private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
@@ -46,7 +46,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   override def preStart(): Unit = {
     val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
     self ! InitiateBanEmails(initialDelay, 1.day)
-    Logger.info(s"Ban scheduler started immediately")
+    Logger.info(s"Ban scheduler will start after initial delay of " + initialDelay)
   }
 
   def scheduler: Scheduler = context.system.scheduler

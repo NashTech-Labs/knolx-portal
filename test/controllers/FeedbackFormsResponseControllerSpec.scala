@@ -1,6 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 
 import models._
 import org.specs2.execute.{AsResult, Result}
@@ -29,13 +30,13 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
   private val noActiveSessionObject = Future.successful(Nil)
-  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+  private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
     Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
     active = true, _id)
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@example.com", "presenter@example.com", _id.stringify, _id.stringify,
+  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com", "presenter@example.com", _id.stringify, _id.stringify,
     "topic",
     meetup = false,
     BSONDateTime(date.getTime),
@@ -73,117 +74,118 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   "Feedback Response Controller" should {
 
     "not render feedback form for today if session associated feedback form not found" in new WithTestApplication {
-      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
 
       val response = controller.getFeedbackFormsForToday(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render feedback form for today if session associated feedback form exists and session has not expired" in new WithTestApplication {
-      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
           1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
 
       val response = controller.getFeedbackFormsForToday(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render feedback form for today if session associated feedback form exists and session has expired expired" in new WithTestApplication {
-      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
 
       val response = controller.getFeedbackFormsForToday(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render feedback form for today with immidiate explored sessions if no active sessions found" in new WithTestApplication {
-      usersRepository.getActiveAndUnbanned("test@example.com") returns emailObject
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns noActiveSessionObject
       sessionsRepository.immediatePreviousExpiredSessions returns sessionObject
 
       val response = controller.getFeedbackFormsForToday(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "not render feedback form for today if user is blocked" in new WithTestApplication {
-      usersRepository.getActiveAndUnbanned("test@example.com") returns Future.successful(None)
-      usersRepository.getByEmail("test@example.com") returns emailObject
-
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      dateTimeUtility.toLocalDate(date.getTime) returns LocalDate.now
+      dateTimeUtility.localDateIST returns LocalDate.now
       val response = controller.getFeedbackFormsForToday(FakeRequest()
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=").withCSRFToken)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
 
       status(response) must be equalTo UNAUTHORIZED
     }
 
     "not fetch response as no stored response found" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(None)
 
       val response = controller.fetchFeedbackFormResponse(_id.stringify)(FakeRequest(GET, "fetch")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(response) must be equalTo NOT_FOUND
 
     }
 
     "fetch response" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(Some(feedbackResponse))
 
       val response = controller.fetchFeedbackFormResponse(_id.stringify)(FakeRequest(GET, "fetch")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU="))
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(response) must be equalTo OK
 
     }
 
     "throw a bad request as submit response form with invalid field submitted" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse("""{"feedbackFormId":"", "responses":[]}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
 
     "throw a bad request if there is no feedback form id submitted" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"", "responses":["a"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
 
     "throw a bad request if there is no session id submitted" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
@@ -191,20 +193,20 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
     "throw a bad request if there is no feedback form response submitted" in new WithTestApplication {
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":[]}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
 
     "throw a bad request if there is no active session available with the session id submitted by form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns Future.successful(None)
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
@@ -212,76 +214,76 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
     "throw a bad request if there is active session available but no feedback form available with feedback form  " +
       "id submitted by form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(None)
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
 
     "throw a bad request if there is more responses then the questions available in the feedback form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a","b"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
 
     "store feedback form response" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
       dateTimeUtility.nowMillis returns date.getTime
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
 
       status(response) must be equalTo OK
     }
 
     "not store feedback form response due to internal server error" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResultfalse
       dateTimeUtility.nowMillis returns date.getTime
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
 
       status(response) must be equalTo INTERNAL_SERVER_ERROR
     }
 
     "throw a bad request if there is responses which are not present as multiple choices in feedback form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
 
     "throw a bad request if there is responses of mandatory comment which is empty" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""]}""")))
 
       status(response) must be equalTo BAD_REQUEST
@@ -292,12 +294,12 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
         active = true, _id)
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
 
       status(response) must be equalTo BAD_REQUEST
@@ -308,14 +310,14 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         Question("How is the UI?", List("1"), "COMMENT", mandatory = false)),
         active = true, _id)
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
       dateTimeUtility.nowMillis returns date.getTime
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""]}""")))
 
       status(response) must be equalTo OK
@@ -326,12 +328,12 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         Question("How is the UI?", List("1"), "Some other type", mandatory = false)),
         active = true, _id)
 
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
-        .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""]}""")))
 
       status(response) must be equalTo BAD_REQUEST

@@ -1,5 +1,6 @@
 package controllers
 
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import javax.inject.Inject
 
@@ -65,6 +66,8 @@ case class ResponseHeader(topic: String,
                           session: String,
                           meetUp: Boolean)
 
+case class BannedUser(bannedDaysLeft: Long, bannedTill: String)
+
 class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 mailerClient: MailerClient,
                                                 usersRepository: UsersRepository,
@@ -80,10 +83,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackResponseFormat: OFormat[FeedbackResponse] = Json.format[FeedbackResponse]
 
   def getFeedbackFormsForToday: Action[AnyContent] = userAction.async { implicit request =>
-    usersRepository.getActiveAndUnbanned(request.user.email.toLowerCase).flatMap {
+    usersRepository.getActiveAndBanned(request.user.email.toLowerCase).flatMap {
       _.fold {
-        Future.successful(Unauthorized("You are banned, can't access this page!"))
-      } { _ =>
         sessionsRepository
           .activeSessions()
           .flatMap { activeSessions =>
@@ -123,6 +124,11 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
               immediatePreviousSessions.map(sessions => Ok(views.html.feedback.todaysfeedbacks(Nil, sessions)))
             }
           }
+      } { bannedUser =>
+        val bantill = dateTimeUtility.toLocalDate(bannedUser.banTill.value)
+        val today = dateTimeUtility.localDateIST
+        val daysLeft = today.until(bantill, ChronoUnit.DAYS);
+        Future.successful(Unauthorized(views.html.feedback.banned(BannedUser(daysLeft, new Date(bannedUser.banTill.value).toString))))
       }
     }
   }

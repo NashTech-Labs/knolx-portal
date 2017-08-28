@@ -39,7 +39,10 @@ case class ManageUserInfo(email: String,
                           admin: Boolean = false,
                           ban: Boolean = false)
 
-case class UpdateUserInfo(email: String, active: Boolean, password: Option[String])
+case class UpdateUserInfo(email: String,
+                          active: Boolean,
+                          ban: Boolean,
+                          password: Option[String])
 
 case class UserSearchResult(users: List[ManageUserInfo],
                             pages: Int,
@@ -110,6 +113,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     mapping(
       "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "active" -> boolean,
+      "ban" -> boolean,
       "password" -> optional(nonEmptyText.verifying("Password must be at least 8 character long!", password => password.length >= 8))
     )(UpdateUserInfo.apply)(UpdateUserInfo.unapply)
   )
@@ -272,9 +276,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.updateuser(formWithErrors)))
       },
       userInfo => {
-        val email = userInfo.email.toLowerCase.trim
-
-        usersRepository.update(UpdatedUserInfo(email, userInfo.active, userInfo.password))
+        usersRepository.update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
@@ -292,7 +294,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .getByEmail(email.toLowerCase.trim)
       .flatMap {
         case Some(userInformation) =>
-          val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, None))
+          val ban = new Date(userInformation.banTill.value).after(new Date(dateTimeUtility.nowMillis))
+          val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, ban, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None                  =>
           Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
@@ -390,7 +393,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                   user.fold {
                     Future.successful(Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, No user found with email provided"))))
                   } { userFound =>
-                    val updatedRecord = UpdatedUserInfo(userFound.email, userFound.active, Some(resetPasswordInfo.password))
+                    val ban = new Date(userFound.banTill.value).after(new Date(dateTimeUtility.nowMillis))
+                    val updatedRecord = UpdatedUserInfo(userFound.email, userFound.active, ban, Some(resetPasswordInfo.password))
 
                     usersRepository
                       .update(updatedRecord)
@@ -432,7 +436,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "User not found!")
           } { user =>
             if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, user.password)) {
-              usersRepository.update(UpdatedUserInfo(email, user.active, Some(resetPasswordInfo.newPassword)))
+              val ban = new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))
+              usersRepository.update(UpdatedUserInfo(request.user.email.toLowerCase, user.active, ban, Some(resetPasswordInfo.newPassword)))
               Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
             } else {
               Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "Current password invalid!")

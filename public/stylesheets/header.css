@@ -79,7 +79,7 @@ hr {
 
 .fa-user, .caret {
     color: #fff;
-    font-size: 30px;
+    font-size: 25px;
     line-height: 20px;
     -webkit-text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     -moz-text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
@@ -130,5 +130,9 @@ i.fa.fa-user:active {
 
 .fa-comments {
     color: #fff;
+}
+.fa-home{
+    color: #fff;
+    font-size: 23px;
 }
 

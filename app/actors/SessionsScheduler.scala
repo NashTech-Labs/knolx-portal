@@ -69,8 +69,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     self ! ScheduleFeedbackEmailsStartingToday(self, sessionsScheduledToday)
     self ! InitiateFeedbackEmailsStartingTomorrow(initialDelay, 1.day)
 
-    self ! ScheduleFeedbackRemindersStartingToday(self, sessionsExpiringToday)
-    self ! InitialFeedbackRemindersStartingTomorrow(reminderInitialDelay, 1.day)
+/*    self ! ScheduleFeedbackRemindersStartingToday(self, sessionsExpiringToday)
+    self ! InitialFeedbackRemindersStartingTomorrow(reminderInitialDelay, 1.day)*/
   }
 
   def scheduler: Scheduler = context.system.scheduler

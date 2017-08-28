@@ -93,6 +93,10 @@
     margin-left: 30%;
 }
 
+.manage-user-checkbox-ban-text{
+    margin-right: 22%;
+}
+
 .manage-user-label_text:before {
     margin-top: 3px;
     content: "\f096";

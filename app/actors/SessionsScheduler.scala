@@ -160,10 +160,10 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
         eventualScheduledSessions foreach { feedbackSchedulers => scheduledEmails = feedbackSchedulers }
 
-        val expiringSession = sessionsRepository.sessionsForToday(ExpiringNext)
+       /* val expiringSession = sessionsRepository.sessionsForToday(ExpiringNext)
         val eventualScheduledReminders = scheduleEmails(expiringSession, reminder = true)
         eventualScheduledReminders foreach { feedbackSchedulers => scheduledEmails = feedbackSchedulers }
-
+*/
         sender ! ScheduledSessionsRefreshed
       } else {
         sender ! ScheduledSessionsNotRefreshed

@@ -133,12 +133,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.register(formWithErrors)))
       },
       userInfo => {
+        val email = userInfo.email.toLowerCase.trim
+
         usersRepository
-          .getByEmail(userInfo.email.toLowerCase)
+          .getByEmail(email)
           .flatMap(_.fold {
             usersRepository
               .insert(
-                models.UserInfo(userInfo.email,
+                models.UserInfo(email,
                   PasswordUtility.encrypt(userInfo.password),
                   PasswordUtility.BCrypt,
                   active = true,
@@ -146,16 +148,16 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                   BSONDateTime(dateTimeUtility.nowMillis)))
               .map { result =>
                 if (result.ok) {
-                  Logger.info(s"User ${userInfo.email} successfully created")
+                  Logger.info(s"User $email successfully created")
                   Redirect(routes.HomeController.index())
-                    .withSession(username -> EncryptionUtility.encrypt(userInfo.email.toLowerCase))
+                    .withSession(username -> EncryptionUtility.encrypt(email))
                 } else {
-                  Logger.error(s"Something went wrong while creating a new user ${userInfo.email}")
+                  Logger.error(s"Something went wrong while creating a new user $email")
                   Redirect(routes.HomeController.index()).flashing("message" -> "Something went wrong!")
                 }
               }
           } { _ =>
-            Logger.info(s"User with email ${userInfo.email.toLowerCase} already exists")
+            Logger.info(s"User with email $email already exists")
             Future.successful(Redirect(routes.UsersController.register()).flashing("message" -> "User already exists!"))
           })
       }
@@ -174,30 +176,32 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))
       },
       loginInfo => {
+        val email = loginInfo.email.toLowerCase.trim
+
         usersRepository
-          .getActiveByEmail(loginInfo.email.toLowerCase)
+          .getActiveByEmail(email)
           .map(_.fold {
-            Logger.info(s"User ${loginInfo.email.toLowerCase} not found")
+            Logger.info(s"User $email not found")
             Redirect(routes.HomeController.index()).flashing("message" -> "User not found!")
           } { user =>
             val admin = user.admin
             val password = user.password
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, password)) {
-              Logger.info(s"User ${loginInfo.email.toLowerCase} successfully logged in")
+              Logger.info(s"User $email successfully logged in")
               if (admin) {
                 Redirect(routes.HomeController.index())
                   .withSession(
-                    username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase),
+                    username -> EncryptionUtility.encrypt(email),
                     "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                   .flashing("message" -> "Welcome back!")
               } else {
                 Redirect(routes.HomeController.index())
-                  .withSession(username -> EncryptionUtility.encrypt(loginInfo.email.toLowerCase))
+                  .withSession(username -> EncryptionUtility.encrypt(email))
                   .flashing("message" -> "Welcome back!")
               }
             } else {
-              Logger.info(s"Incorrect password for user ${loginInfo.email}")
+              Logger.info(s"Incorrect password for user $email")
               Unauthorized(views.html.users.login(loginForm.fill(loginInfo).withGlobalError("Invalid credentials!")))
             }
           })
@@ -268,12 +272,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.updateuser(formWithErrors)))
       },
       userInfo => {
-        usersRepository.update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.password))
+        val email = userInfo.email.toLowerCase.trim
+
+        usersRepository.update(UpdatedUserInfo(email, userInfo.active, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
-              Logger.info(s"User details successfully updated for ${userInfo.email}")
+              Logger.info(s"User details successfully updated for $email")
               Future.successful(Redirect(routes.UsersController.manageUser(1, None))
-                .flashing("message" -> s"Details successfully updated for ${userInfo.email}"))
+                .flashing("message" -> s"Details successfully updated for $email"))
             } else {
               Future.successful(InternalServerError("Something went wrong!"))
             }
@@ -283,7 +289,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   def getByEmail(email: String): Action[AnyContent] = adminAction.async { implicit request =>
     usersRepository
-      .getByEmail(email)
+      .getByEmail(email.toLowerCase.trim)
       .flatMap {
         case Some(userInformation) =>
           val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, None))
@@ -294,13 +300,15 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def deleteUser(email: String): Action[AnyContent] = adminAction.async { implicit request =>
+    val cleanedEmail = email.toLowerCase.trim
+
     usersRepository
-      .delete(email)
+      .delete(cleanedEmail)
       .flatMap(_.fold {
-        Logger.error(s"Failed to delete user with email $email")
+        Logger.error(s"Failed to delete user with email $cleanedEmail")
         Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("error" -> "Something went wrong!"))
       } { user =>
-        Logger.info(s"user with email:  $email has been successfully deleted")
+        Logger.info(s"user with email: $cleanedEmail has been successfully deleted")
         Future.successful(Redirect(routes.UsersController.manageUser(1, None))
           .flashing("success" -> s"User with email ${user.email} has been successfully deleted!"))
       })
@@ -317,7 +325,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       email => {
         usersRepository
-          .getActiveByEmail(email.toLowerCase)
+          .getActiveByEmail(email.toLowerCase.trim)
           .map { user =>
             user.fold {
               Redirect(routes.UsersController.renderForgotPassword())
@@ -370,14 +378,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       resetPasswordInfo => {
         forgotPasswordRepository
-          .getPasswordChangeRequest(resetPasswordInfo.token, Some(resetPasswordInfo.email.toLowerCase))
+          .getPasswordChangeRequest(resetPasswordInfo.token, Some(resetPasswordInfo.email.toLowerCase.trim))
           .flatMap(resetRequest =>
             resetRequest.fold {
               Future.successful(Unauthorized(views.html.users.resetpassword(forgotPasswordForm.fill(resetPasswordInfo)
                 .withGlobalError("Sorry, no password reset request found for this user"))))
             } { requestFound =>
               usersRepository
-                .getActiveByEmail(requestFound.email.toLowerCase)
+                .getActiveByEmail(requestFound.email.toLowerCase.trim)
                 .flatMap { user =>
                   user.fold {
                     Future.successful(Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, No user found with email provided"))))
@@ -415,14 +423,16 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.changepassword(formWithErrors)))
       },
       resetPasswordInfo => {
+        val email = request.user.email.toLowerCase.trim
+
         usersRepository
-          .getActiveByEmail(request.user.email.toLowerCase)
+          .getActiveByEmail(email)
           .map(_.fold {
-            Logger.info(s"User ${request.user.email.toLowerCase} not found")
+            Logger.info(s"User $email not found")
             Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "User not found!")
           } { user =>
             if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, user.password)) {
-              usersRepository.update(UpdatedUserInfo(request.user.email.toLowerCase, user.active, Some(resetPasswordInfo.newPassword)))
+              usersRepository.update(UpdatedUserInfo(email, user.active, Some(resetPasswordInfo.newPassword)))
               Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
             } else {
               Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "Current password invalid!")

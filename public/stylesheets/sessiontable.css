@@ -35,7 +35,7 @@ thead > tr {
 
 .table-responsive {
     box-shadow: 0 4px 10px -5px #333;
-    border-radius: 0px 0px 20px 20px;
+    border-radius: 0px 0px 30px 30px;
     margin-bottom: 100px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */

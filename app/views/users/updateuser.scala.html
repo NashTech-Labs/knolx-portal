@@ -21,6 +21,18 @@
                      <span class='manage-user-label_text'></span>
                     </label>
 
+                    <label class='checkbox-outer'>
+                        <p class='manage-user-checkbox-text'>Unban</p>
+                        <input type='checkbox' @if(userInfo.data.get("active").contains("true")){ checked } name='active' id='suspend' class='custom-checkbox' value='true' />
+                        <span class='manage-user-label_text'></span>
+                    </label>
+
+                    <label class='checkbox-outer'>
+                        <p class='manage-user-checkbox-text'>Active</p>
+                        <input type='checkbox' @if(userInfo.data.get("active").contains("true")){ checked } name='active' id='suspend' class='custom-checkbox' value='true' />
+                        <span class='manage-user-label_text'></span>
+                    </label>
+
                     <div class="col-md-12 login-third update-second">
                         <div class="col-md-1"></div>
                         <div class="col-md-10 password-bar">

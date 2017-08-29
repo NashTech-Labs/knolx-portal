@@ -194,15 +194,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       expectMsg(true)
     }
 
-    "schedule a session" in new TestScope {
-      sessionsRepository.getById(sessionId.stringify) returns Future.successful(sessionsForToday.headOption)
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
-
-      sessionsScheduler ! ScheduleSession(sessionId.stringify)
-
-      sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
-    }
-
     "cancel all scheduled sessions" in new TestScope {
       val result: Boolean = await((sessionsScheduler ? CancelAllScheduledEmails) (5.seconds).mapTo[Boolean])
 

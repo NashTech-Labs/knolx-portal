@@ -182,7 +182,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       } else {
         Logger.info(s"No scheduled emails found")
       }
-
       val eventualSessions = sessionsRepository.sessionsForToday(SchedulingNext)
       val eventualScheduledSessions = scheduleEmails(eventualSessions, Feedback)
       eventualScheduledSessions.map(scheduler => EventualScheduledEmails(scheduler)) pipeTo self
@@ -195,6 +194,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       eventualScheduledNotifications.map(scheduler => EventualScheduledEmails(scheduler)) pipeTo self*/
 
       Logger.info(s"Scheduled sessions emails after refreshing $scheduledEmails")
+
     case CancelScheduledSession(sessionId) =>
       Logger.info(s"Removing feedback emails scheduled for session $sessionId")
 

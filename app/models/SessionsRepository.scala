@@ -48,10 +48,9 @@ object SessionJsonFormats {
 
   sealed trait SessionState
   case object ExpiringNext extends SessionState
-  case object SchedulingNext extends SessionState
   case object ExpiringNextNotReminded extends SessionState
-  case object ExpiringNextUnNotified extends SessionState
-  case object Scheduled extends SessionState
+  case object SchedulingNext extends SessionState
+  case object SchedulingNextUnNotified extends SessionState
 
 }
 
@@ -80,20 +79,17 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val endOfTheDay = dateTimeUtility.endOfDayMillis
 
     val condition = sessionState match {
-      case SchedulingNext =>
+      case SchedulingNext           =>
         Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)))
-      case ExpiringNext   =>
+      case ExpiringNext             =>
         Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)))
-      case Scheduled      =>
-        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(startOfTheDay),
-          "$lte" -> BSONDateTime(endOfTheDay)))
-      case ExpiringNextNotReminded =>
+      case ExpiringNextNotReminded  =>
         Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)), "reminder" -> false)
-      case ExpiringNextUnNotified =>
-        Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
+      case SchedulingNextUnNotified =>
+        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)), "notification" -> false)
     }
 
@@ -269,9 +265,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> session._id.stringify))
 
     val modifier = emailType match {
-      case Reminder => BSONDocument("$set" -> BSONDocument("reminder" -> true))
+      case Reminder     => BSONDocument("$set" -> BSONDocument("reminder" -> true))
       case Notification => BSONDocument("$set" -> BSONDocument("notification" -> true))
-      case _ => BSONDocument()
+      case _            => BSONDocument()
     }
 
     collection.flatMap(_.update(selector, modifier, upsert = true))

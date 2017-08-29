@@ -299,7 +299,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
-                    usersBanScheduler ! RefreshSessionsBanSchedulers
                     sessionsScheduler ! RefreshSessionsSchedulers
                     Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
                   }
@@ -347,9 +346,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         Future.successful(InternalServerError("Something went wrong!"))
       } { _ =>
         Logger.info(s"Knolx session $id successfully deleted")
-
         sessionsScheduler ! RefreshSessionsSchedulers
-        usersBanScheduler ! RefreshSessionsBanSchedulers
         Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!"))
       })
   }
@@ -422,7 +419,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   def rescheduleAllEmails: Action[AnyContent] = adminAction.async { implicit request =>
     sessionsScheduler ! RefreshSessionsSchedulers
-    usersBanScheduler ! RefreshSessionsBanSchedulers
     Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
       .flashing("message" -> "All emails for today started scheduling"))
   }

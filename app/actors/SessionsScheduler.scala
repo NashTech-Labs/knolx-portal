@@ -128,7 +128,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       val eventualSessions = sessionsScheduledToday
       val eventualScheduledSessions = scheduleEmails(eventualSessions, reminder = false)
       eventualScheduledSessions.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
-    case EventualScheduledEmails(scheduledMails)         =>
+    case EventualScheduledEmails(scheduledMails)   =>
       scheduledEmails = scheduledEmails ++ scheduledMails
       Logger.info(s"All scheduled sessions in memory are ${scheduledEmails.keys}")
     case ScheduleFeedbackRemindersStartingTomorrow =>

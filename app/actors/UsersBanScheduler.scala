@@ -1,5 +1,6 @@
 package actors
 
+import java.time.LocalDateTime
 import java.util.Date
 import javax.inject.{Inject, Named}
 
@@ -44,8 +45,11 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   var scheduledBanEmails: Map[String, Cancellable] = Map.empty
 
   override def preStart(): Unit = {
-    val initialDelay = (dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).milliseconds
+    val executionDelay: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).minusMinutes(30)
+    val initialDelay: FiniteDuration = dateTimeUtility.toMillis(executionDelay).milliseconds
+
     self ! InitiateBanEmails(initialDelay, 1.day)
+
     Logger.info(s"Ban scheduler will start after initial delay of " + initialDelay)
   }
 
@@ -53,16 +57,15 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def receive: Receive = initializingHandler orElse
     schedulingHandler orElse
-    reconfiguringHandler orElse
     emailHandler orElse
     defaultHandler
 
   def initializingHandler: Receive = {
-    case InitiateBanEmails(initialDelay, interval) =>
+    case InitiateBanEmails(delay, interval) =>
       Logger.info(s"Initiating ban emails schedulers to run everyday. These would be scheduled starting end of the day")
 
       scheduler.schedule(
-        initialDelay = initialDelay,
+        initialDelay = delay,
         interval = interval,
         receiver = self,
         message = ScheduleBanEmails
@@ -90,37 +93,6 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
         emailManager ! EmailActor.SendEmail(
           List(emailContent.to), fromEmail, s"BAN FROM KNOLX", views.html.emails.ban(emailContent.body).toString)
       }
-  }
-
-  def reconfiguringHandler: Receive = {
-    case RefreshSessionsBanSchedulers =>
-      Logger.info(s"Scheduled ban emails before refreshing $scheduledBanEmails, now rescheduling at ${dateTimeUtility.localDateIST}")
-
-      if (scheduledBanEmails.nonEmpty) {
-        scheduledBanEmails.foreach { case (scheduler, cancellable) =>
-          cancellable.cancel
-          scheduledBanEmails = scheduledBanEmails - scheduler
-        }
-      } else {
-        Logger.info(s"No scheduled ban emails found")
-      }
-
-      val eventuallyExpiringSession = sessionsExpiringToday
-      val eventualScheduledBanEmails = scheduleBanEmails(eventuallyExpiringSession)
-      eventualScheduledBanEmails foreach { banScheduler => scheduledBanEmails = banScheduler }
-      Logger.info(s"Scheduled ban emails after refreshing $scheduledBanEmails")
-    case CancelAllBannedEmails        =>
-      Logger.info(s"Removing all banned emails scheduled")
-      if (scheduledBanEmails.nonEmpty) {
-        scheduledBanEmails.foreach { case (scheduler, cancellable) =>
-          cancellable.cancel
-          scheduledBanEmails = scheduledBanEmails - scheduler
-        }
-      } else {
-        Logger.info(s"No scheduled ban emails found")
-      }
-      Logger.info(s"All scheduled  banned emails after removing all ${scheduledBanEmails.keys}")
-      sender ! scheduledBanEmails.isEmpty
   }
 
   def getBanInfo(sessions: List[SessionInfo], emails: List[String]): Future[List[EmailContent]] = {

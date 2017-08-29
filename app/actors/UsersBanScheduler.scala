@@ -47,11 +47,12 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
   var scheduledBanEmails: Map[String, Cancellable] = Map.empty
 
-  val executionDelay: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).minusMinutes(30)
-  val initialDelay: FiniteDuration = dateTimeUtility.toMillis(executionDelay).milliseconds
-
   override def preStart(): Unit = {
+    val executionDelay: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).minusMinutes(30)
+    val initialDelay: FiniteDuration = dateTimeUtility.toMillis(executionDelay).milliseconds
+
     self ! InitiateBanEmails(initialDelay, 1.day)
+
     Logger.info(s"Ban scheduler will start after initial delay of " + initialDelay)
   }
 

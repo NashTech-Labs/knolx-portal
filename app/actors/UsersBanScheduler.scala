@@ -82,7 +82,7 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       eventualScheduledBanEmails.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
     case EventualScheduledEmails(scheduledMails) =>
       scheduledBanEmails = scheduledBanEmails ++ scheduledMails
-      Logger.info(s"All scheduled ban sessions in memory are ${scheduledBanEmails.keys}")
+      Logger.info(s"All scheduled ban emails in memory are ${scheduledBanEmails.keys}")
   }
 
   def emailHandler: Receive = {

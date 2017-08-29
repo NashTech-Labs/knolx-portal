@@ -2,6 +2,7 @@ package models
 
 import javax.inject.Inject
 
+import actors.SessionsScheduler.{EmailType, Notification, Reminder}
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
@@ -32,6 +33,8 @@ case class SessionInfo(userId: String,
                        cancelled: Boolean,
                        active: Boolean,
                        expirationDate: BSONDateTime,
+                       reminder: Boolean = false,
+                       notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate)
 
 case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
@@ -46,6 +49,8 @@ object SessionJsonFormats {
   sealed trait SessionState
   case object ExpiringNext extends SessionState
   case object SchedulingNext extends SessionState
+  case object ExpiringNextNotReminded extends SessionState
+  case object ExpiringNextUnNotified extends SessionState
   case object Scheduled extends SessionState
 
 }
@@ -84,6 +89,12 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       case Scheduled      =>
         Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(startOfTheday),
           "$lte" -> BSONDateTime(endOfTheDay)))
+      case ExpiringNextNotReminded =>
+        Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
+          "$lte" -> BSONDateTime(endOfTheDay)), "reminder" -> false)
+      case ExpiringNextUnNotified =>
+        Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
+          "$lte" -> BSONDateTime(endOfTheDay)), "notification" -> false)
     }
 
     collection
@@ -252,6 +263,18 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
           .map(_.flatten)
       }
+  }
+
+  def upsertRecord(session: SessionInfo, emailType: EmailType)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> session._id.stringify))
+
+    val modifier = emailType match {
+      case Reminder => BSONDocument("$set" -> BSONDocument("reminder" -> true))
+      case Notification => BSONDocument("$set" -> BSONDocument("notification" -> true))
+      case _ => BSONDocument()
+    }
+
+    collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
 }

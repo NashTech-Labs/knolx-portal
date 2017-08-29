@@ -7,7 +7,7 @@ import javax.inject.{Inject, Named}
 import actors.SessionsScheduler._
 import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
 import controllers.routes
-import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
+import models.SessionJsonFormats.{ExpiringNextNotReminded, ExpiringNextUnNotified, SchedulingNext, SessionState}
 import models.{FeedbackFormsRepository, SessionInfo, SessionsRepository, UsersRepository}
 import play.api.{Configuration, Logger}
 import utilities.DateTimeUtility
@@ -77,13 +77,13 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     val reminderTime: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - millis).plusHours(10)
     val reminderInitialDelay = dateTimeUtility.toMillis(reminderTime).milliseconds
 
-    self ! ScheduleFeedbackEmailsStartingToday(sessionsScheduledToday)
+    self ! ScheduleFeedbackEmailsStartingToday(sessionsScheduledToday(SchedulingNext))
     self ! InitiateFeedbackEmailsStartingTomorrow(initialDelay, 1.day)
 
-/*    self ! ScheduleFeedbackRemindersStartingToday(sessionsExpiringToday)
+/*    self ! ScheduleFeedbackRemindersStartingToday(sessionsExpiringToday(ExpiringNextNotReminded))
     self ! InitialFeedbackRemindersStartingTomorrow(reminderInitialDelay, 1.day)
 
-    self ! ScheduleSessionNotificationsStartingToday(sessionsScheduledToday)
+    self ! ScheduleSessionNotificationsStartingToday(sessionsScheduledToday(ExpiringNextUnNotified))
     self ! InitialSessionNotificationsStartingTomorrow(initialDelay, 1.day)*/
 
   }
@@ -144,7 +144,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def schedulingHandler: Receive = {
     case ScheduleFeedbackEmailsStartingTomorrow      =>
       Logger.info(s"Starting feedback emails schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-      val eventualSessions = sessionsScheduledToday
+      val eventualSessions = sessionsScheduledToday(SchedulingNext)
       val eventualScheduledSessions = scheduleEmails(eventualSessions, Feedback)
       eventualScheduledSessions.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
     case EventualScheduledEmails(scheduledMails)     =>
@@ -152,12 +152,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.info(s"All scheduled sessions in memory are ${scheduledEmails.keys}")
     case ScheduleFeedbackRemindersStartingTomorrow   =>
       Logger.info(s"Starting feedback reminder schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-      val eventualSessions = sessionsExpiringToday
+      val eventualSessions = sessionsScheduledToday(ExpiringNextNotReminded)
       val eventualScheduledReminders = scheduleEmails(eventualSessions, Reminder)
       eventualScheduledReminders.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
     case ScheduleSessionNotificationStartingTomorrow =>
       Logger.info(s"Starting session Notification schedulers to run everyday. Started at ${dateTimeUtility.localDateIST}")
-      val eventualSessions = sessionsScheduledToday
+      val eventualSessions = sessionsScheduledToday(ExpiringNextUnNotified)
       val eventualScheduledReminders = scheduleEmails(eventualSessions, Notification)
       eventualScheduledReminders.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
     case GetScheduledSessions                        =>
@@ -234,6 +234,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
               emailManager ! EmailActor.SendEmail(
                 emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
               Logger.info(s"Reminder Email for session sent")
+              sessions.map(session => sessionsRepository.upsertRecord(session, Reminder))
             case Feedback     =>
               scheduledEmails = scheduledEmails - sessions.head._id.stringify
               emailManager ! EmailActor.SendEmail(
@@ -244,6 +245,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
               emailManager ! EmailActor.SendEmail(
                 emails, fromEmail, "Knolx/Meetup Sessions", views.html.emails.notification(emailInfo).toString)
               Logger.info(s"Notification Email for session sent")
+              sessions.map(session => sessionsRepository.upsertRecord(session, Notification))
           }
       }
   }
@@ -271,8 +273,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       }
     }
 
-  def sessionsScheduledToday: Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(SchedulingNext)
-
-  def sessionsExpiringToday: Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(ExpiringNext)
+  def sessionsScheduledToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
 
 }

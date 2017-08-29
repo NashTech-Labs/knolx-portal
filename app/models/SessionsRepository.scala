@@ -71,7 +71,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   def sessionsForToday(sessionState: SessionState)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis
-    val startOfTheday = dateTimeUtility.startOfDayMillis
+    val startOfTheDay = dateTimeUtility.startOfDayMillis
     val endOfTheDay = dateTimeUtility.endOfDayMillis
 
     val condition = sessionState match {
@@ -82,7 +82,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)))
       case Scheduled      =>
-        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(startOfTheday),
+        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(startOfTheDay),
           "$lte" -> BSONDateTime(endOfTheDay)))
     }
 

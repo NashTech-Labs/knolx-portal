@@ -1,0 +1,22 @@
+@import actors._
+
+@(emailsInfo: List[EmailInfo])
+
+<p>Hi All,</p>
+<p>Following are the sessions scheduled for today</p>
+<ul>
+    @for(info <- emailsInfo) {
+        <li><strong>@{
+            info.topic
+        }</strong>
+            by @{
+            info.presenter
+        } held on @{
+                info.date
+            }
+        </li>
+    }
+</ul>
+<p><Strong>Please maintain the knolx decorum with keeping knox etiquette in mind</Strong></p>
+<p>Thanks</p>
+<p>Admin</p>

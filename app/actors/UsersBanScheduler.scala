@@ -29,11 +29,8 @@ object UsersBanScheduler {
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsBanSchedulers
-
-  // messages used for responding back with current schedulers state
-  sealed trait SessionBanSchedulerResponse
-  case object ScheduledBanSessionsRefreshed extends SessionBanSchedulerResponse
-  case object ScheduledBanSessionsNotRefreshed extends SessionBanSchedulerResponse
+  case object GetScheduledBannedUsers
+  case object CancelAllBannedEmails
 
 }
 
@@ -83,15 +80,18 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
       eventualScheduledBanEmails.map(scheduledMails => EventualScheduledEmails(scheduledMails)) pipeTo self
     case EventualScheduledEmails(scheduledMails) =>
       scheduledBanEmails = scheduledBanEmails ++ scheduledMails
-      Logger.info(s"All scheduled ban emails in memory are ${scheduledBanEmails.keys}")
+      Logger.info(s"All scheduled sessions in memory are ${scheduledBanEmails.keys}")
+    case GetScheduledBannedUsers                 =>
+      Logger.info(s"Following bans are scheduled ${scheduledBanEmails.keys}")
+      sender ! scheduledBanEmails.keys.toList
   }
 
   def emailHandler: Receive = {
     case SendEmail(emailContent) =>
+      scheduledBanEmails = scheduledBanEmails - emailContent.to
       usersRepository.ban(emailContent.to).map(_.ok).collect { case banned if banned =>
         emailManager ! EmailActor.SendEmail(
           List(emailContent.to), fromEmail, s"BAN FROM KNOLX", views.html.emails.ban(emailContent.body).toString)
-        scheduledBanEmails = scheduledBanEmails - emailContent.to
       }
   }
 

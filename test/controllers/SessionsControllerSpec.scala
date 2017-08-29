@@ -105,7 +105,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val result = controller.manageSessions(1, None)(FakeRequest().withCSRFToken)
 
       contentAsString(result) must be contain ""
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not open manage sessions page when user is not admin" in new WithTestApplication {
@@ -119,7 +119,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withCSRFToken)
 
       contentAsString(result) must be contain ""
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not open manage sessions page when unauthorized access is performed" in new WithTestApplication {
@@ -136,7 +136,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withCSRFToken)
 
       contentAsString(result) must be contain ""
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "delete session" in new WithTestApplication {
@@ -189,7 +189,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "render create session form" in new WithTestApplication {
@@ -345,7 +345,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "meetup" -> "true")
             .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "render getByEmail session form" in new WithTestApplication {
@@ -401,7 +401,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "getByEmail session" in new WithTestApplication {
@@ -520,7 +520,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "meetup" -> "true")
             .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "cancel session by session id" in new WithTestApplication {

@@ -50,7 +50,6 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   val executionDelay: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - dateTimeUtility.nowMillis).minusMinutes(1)
   val initialDelay: FiniteDuration = dateTimeUtility.toMillis(executionDelay).milliseconds
 
-
   override def preStart(): Unit = {
     self ! InitiateBanEmails(initialDelay, 1.day)
     Logger.info(s"Ban scheduler will start after initial delay of " + initialDelay)

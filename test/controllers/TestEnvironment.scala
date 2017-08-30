@@ -3,7 +3,7 @@ package controllers
 import java.util.concurrent.TimeoutException
 
 import actors.SessionsScheduler._
-import actors.UsersBanScheduler.{CancelAllBannedEmails, GetScheduledBannedUsers}
+import actors.UsersBanScheduler.GetScheduledBannedUsers
 import actors.{ConfiguredEmailActor, EmailActor, EmailManager}
 import akka.actor._
 import com.google.inject.name.Names
@@ -133,7 +133,6 @@ class DummyUsersBanScheduler extends Actor {
 
   def receive: Receive = {
     case GetScheduledBannedUsers => sender ! List.empty
-    case CancelAllBannedEmails   => sender ! true
   }
 
 }

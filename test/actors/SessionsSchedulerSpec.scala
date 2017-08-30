@@ -3,13 +3,13 @@ package actors
 import java.time.{LocalDateTime, ZoneId}
 import java.util.TimeZone
 
-import actors.SessionsScheduler.{CancelAllScheduledEmails, ScheduleSessionNotificationStartingTomorrow, _}
+import actors.SessionsScheduler.{ScheduleSessionNotificationStartingTomorrow, _}
 import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.inject.name.Names
 import controllers.TestEnvironment
-import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
+import models.SessionJsonFormats.SchedulingNext
 import models._
 import org.mockito.Mockito.verify
 import org.specs2.specification.Scope
@@ -192,12 +192,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler ! CancelScheduledSession(sessionId.stringify)
 
       expectMsg(true)
-    }
-
-    "cancel all scheduled sessions" in new TestScope {
-      val result: Boolean = await((sessionsScheduler ? CancelAllScheduledEmails) (5.seconds).mapTo[Boolean])
-
-      result mustEqual true
     }
 
   }

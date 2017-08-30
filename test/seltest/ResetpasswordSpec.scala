@@ -12,7 +12,7 @@ import org.scalatest._
   */
 class ResetpasswordSpec extends FlatSpec with ShouldMatchers {
 
-  "The Knolx-Portal Login page" should "have the correct login" in {
+  "The Knolx-Portal Reset password page" should "have the resetpassword form" in {
     System.setProperty("webdriver.chrome.driver", "/home/vimalesh-mishra/Pictures/chromedriver")
     val capabilities = DesiredCapabilities.chrome()
     val driver: WebDriver = new ChromeDriver(capabilities)
@@ -27,7 +27,7 @@ class ResetpasswordSpec extends FlatSpec with ShouldMatchers {
     /*--- Login with valid credentials ---*/
     driver.findElement(By.name("email")).clear()
     driver.findElement(By.name("email")).sendKeys("vimalesh@knoldus.com")
-    driver.findElement(By.name("password")).sendKeys("PY91EO18WZ")
+    driver.findElement(By.name("password")).sendKeys("12345678")
     driver.findElement(By.xpath("//*[@id=\"loginForm\"]/div[3]/div[2]/input")).click()
     Thread.sleep(10000)
     /*--- Reset Password ---*/

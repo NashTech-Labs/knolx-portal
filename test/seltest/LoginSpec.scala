@@ -35,21 +35,23 @@ class LoginSpec extends FlatSpec with ShouldMatchers {
     /*--- Login with invalid credentials ---*/
     driver.findElement(By.name("email")).clear()
     driver.findElement(By.name("email")).sendKeys("vimalesh@knoldus.com")
-    driver.findElement(By.name("password")).sendKeys("12345678")
+    driver.findElement(By.name("password")).sendKeys("12376745678")
     driver.findElement(By.xpath("//*[@id=\"loginForm\"]/div[3]/div[2]/input")).click()
     Thread.sleep(5000)
     /*--- Login with valid credentials ---*/
     driver.findElement(By.name("email")).clear()
     driver.findElement(By.name("email")).sendKeys("vimalesh@knoldus.com")
-    driver.findElement(By.name("password")).sendKeys("PY91EO18WZ")
+    driver.findElement(By.name("password")).sendKeys("12345678")
     driver.findElement(By.xpath("//*[@id=\"loginForm\"]/div[3]/div[2]/input")).click()
     Thread.sleep(10000)
     /*--- Logout ---*/
+
+
     driver.findElement(By.xpath("/html/body/div[2]/nav/div[2]/ul/li[3]/a")).click()
     driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS)
     driver.findElement(By.xpath("/html/body/div[2]/nav/div[2]/ul/li[3]/ul/li[4]/a")).click()
 
-    Thread.sleep(10000)
+    //Thread.sleep(10000)
     driver.close()
 
   }

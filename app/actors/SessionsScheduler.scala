@@ -27,7 +27,6 @@ object SessionsScheduler {
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
   case object GetScheduledSessions
-  case object CancelAllScheduledEmails
   case class CancelScheduledSession(sessionId: String)
   case class ScheduleSession(sessionId: String)
 
@@ -85,7 +84,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
     self ! ScheduleSessionNotificationsStartingToday(sessionsForToday(SchedulingNextUnNotified))
     self ! InitialSessionNotificationsStartingTomorrow(initialDelay, 1.day)
-
   }
 
   def scheduler: Scheduler = context.system.scheduler
@@ -208,18 +206,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       Logger.info(s"All scheduled feedback emails after removing $sessionId are ${scheduledEmails.keys}")
 
       sender ! scheduledEmails.get(sessionId).isEmpty
-    case CancelAllScheduledEmails          =>
-      Logger.info(s"Removing all notification, feedback and reminder emails scheduled")
-      if (scheduledEmails.nonEmpty) {
-        scheduledEmails.foreach { case (scheduler, cancellable) =>
-          cancellable.cancel
-          scheduledEmails = scheduledEmails - scheduler
-        }
-      } else {
-        Logger.info(s"No scheduled emails found")
-      }
-      Logger.info(s"All scheduled  emails after removing all ${scheduledEmails.keys}")
-      sender ! scheduledEmails.isEmpty
   }
 
   def emailHandler: Receive = {

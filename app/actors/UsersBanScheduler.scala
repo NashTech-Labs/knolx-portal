@@ -30,7 +30,6 @@ object UsersBanScheduler {
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsBanSchedulers
   case object GetScheduledBannedUsers
-  case object CancelAllBannedEmails
 
 }
 

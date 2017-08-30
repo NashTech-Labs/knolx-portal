@@ -417,30 +417,4 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .flashing("message" -> "Feedback form schedule initiated"))
   }
 
-  def rescheduleAllEmails: Action[AnyContent] = adminAction.async { implicit request =>
-    sessionsScheduler ! RefreshSessionsSchedulers
-    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
-      .flashing("message" -> "All emails for today started scheduling"))
-  }
-
-  def cancelAllEmails: Action[AnyContent] = adminAction.async { implicit request =>
-    val bannedEmails = (usersBanScheduler ? CancelAllBannedEmails) (5.seconds).mapTo[Boolean]
-    val otherEmails = (sessionsScheduler ? CancelAllScheduledEmails) (5.seconds).mapTo[Boolean]
-
-    val cancelAllEmailsResult = for {
-      bannedEmailCancelResult <- bannedEmails
-      otherEmailsCancelResult <- otherEmails
-    } yield (bannedEmailCancelResult, otherEmailsCancelResult)
-
-    val cancellationUnsuccessful = Redirect(routes.SessionsController.manageSessions(1, None))
-      .flashing("message" -> "Something went wrong while cancelling some or all emails scheduled for today")
-
-    cancelAllEmailsResult.map {
-      case (true, true)   => Redirect(routes.SessionsController.manageSessions(1, None))
-        .flashing("message" -> "Successfully cancelled all emails scheduled for today")
-      case (true, false)  => cancellationUnsuccessful
-      case (false, true)  => cancellationUnsuccessful
-      case (false, false) => cancellationUnsuccessful
-    }
-  }
 }

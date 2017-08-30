@@ -33,8 +33,6 @@ POST        /session/update                      controllers.SessionsController.
 GET         /session/update                      controllers.SessionsController.update(id: String)
 GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
-GET         /session/rescheduleall               controllers.SessionsController.rescheduleAllEmails
-GET         /session/cancelall                   controllers.SessionsController.cancelAllEmails
 
 # Feedback
 GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)

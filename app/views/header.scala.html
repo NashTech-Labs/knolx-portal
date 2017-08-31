@@ -25,33 +25,33 @@
                     <a href="@routes.SessionsController.sessions(1, None)">Home</a>
                 </li>
 
-                    @if(SessionHelper.isAdmin) {
-                        <li class="dropdown alignLinks">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                 Manage
-                                <b class="caret"></b>
-                            </a>
+                @if(SessionHelper.isAdmin) {
+                    <li class="dropdown alignLinks">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Manage
+                            <b class="caret"></b>
+                        </a>
 
-                            <ul class="dropdown-menu">
-                                <li class="alignLinks">
-                                    <a href="@routes.SessionsController.manageSessions(1, None)">Sessions</a>
-                                </li>
-                                <li class="alignLinks">
-                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Feedback Forms</a>
-                                </li>
-                                <li class="alignLinks">
-                                    <a href="@routes.UsersController.manageUser(1,None)">Users</a>
-                                </li>
-                            </ul>
-                        </li>
+                        <ul class="dropdown-menu">
+                            <li class="alignLinks">
+                                <a href="@routes.SessionsController.manageSessions(1, None)">Sessions</a>
+                            </li>
+                            <li class="alignLinks">
+                                <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Feedback Forms</a>
+                            </li>
+                            <li class="alignLinks">
+                                <a href="@routes.UsersController.manageUser(1, None)">Users</a>
+                            </li>
+                        </ul>
+                    </li>
 
-                    }
-                
-                    @if(SessionHelper.isLoggedIn) {
-                        <li class="@activeLink(routes.UsersController.login().url) alignLinks">
-                            <a href="@routes.UsersController.login()">Login</a>
-                        </li>
-                    }
+                }
+
+                @if(SessionHelper.isLoggedIn) {
+                    <li class="@activeLink(routes.UsersController.login().url) alignLinks">
+                        <a href="@routes.UsersController.login()">Login</a>
+                    </li>
+                }
 
                 @if(SessionHelper.isLoggedIn) {
                     <li class="@activeLink(routes.UsersController.register().url) alignLinks">
@@ -75,7 +75,8 @@
                                 <a href="@routes.HomeController.index()">@SessionHelper.email</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">My session reports</a>
+                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
+                                    My session reports</a>
                             </li>
                             <li class="alignLinks">
                                 <a href="@routes.UsersController.renderChangePassword()">Reset Password</a>

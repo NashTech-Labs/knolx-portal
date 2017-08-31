@@ -30,7 +30,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime),reminder = false, notification = false, _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
@@ -105,7 +105,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val result = controller.manageSessions(1, None)(FakeRequest().withCSRFToken)
 
       contentAsString(result) must be contain ""
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not open manage sessions page when user is not admin" in new WithTestApplication {
@@ -119,7 +119,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withCSRFToken)
 
       contentAsString(result) must be contain ""
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not open manage sessions page when unauthorized access is performed" in new WithTestApplication {
@@ -136,7 +136,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withCSRFToken)
 
       contentAsString(result) must be contain ""
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "delete session" in new WithTestApplication {
@@ -189,7 +189,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "render create session form" in new WithTestApplication {
@@ -345,7 +345,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "meetup" -> "true")
             .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "render getByEmail session form" in new WithTestApplication {
@@ -355,7 +355,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1",
-        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
+        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -401,7 +401,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "getByEmail session" in new WithTestApplication {
@@ -520,7 +520,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "meetup" -> "true")
             .withCSRFToken)
 
-      status(result) must be equalTo UNAUTHORIZED
+      status(result) must be equalTo SEE_OTHER
     }
 
     "cancel session by session id" in new WithTestApplication {

@@ -362,7 +362,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   def validateForgotPasswordToken(token: String): Action[AnyContent] = action.async { implicit request =>
     forgotPasswordRepository
-      .getPasswordChangeRequest(token, None)
+    .getPasswordChangeRequest(token, None)
       .map { passwordChangeInfo =>
         passwordChangeInfo.fold {
           Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, Your password change request is invalid " +

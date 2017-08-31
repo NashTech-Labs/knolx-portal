@@ -27,19 +27,19 @@
                     @if(SessionHelper.isAdmin) {
                         <li class="dropdown alignLinks">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                 Manage
+                                <i class="fa fa-wrench" aria-hidden="true"></i> Manage
                                 <b class="caret"></b>
                             </a>
 
                             <ul class="dropdown-menu">
                                 <li class="alignLinks">
-                                    <a href="@routes.SessionsController.manageSessions(1, None)">Sessions</a>
+                                    <a href="@routes.SessionsController.manageSessions(1, None)"><i class="fa fa-hourglass-end" aria-hidden="true"></i> Sessions</a>
                                 </li>
                                 <li class="alignLinks">
-                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Feedback Forms</a>
+                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)"><i class="fa fa-file" aria-hidden="true"></i> Feedback Forms</a>
                                 </li>
                                 <li class="alignLinks">
-                                    <a href="@routes.UsersController.manageUser(1,None)">Users</a>
+                                    <a href="@routes.UsersController.manageUser(1,None)"><i class="fa fa-users" aria-hidden="true"></i> Users</a>
                                 </li>
                             </ul>
                         </li>
@@ -58,7 +58,7 @@
                     </li>
                 } else {
 
-                    <li class="@activeLink(routes.UsersController.register().url) alignLinks">
+                    <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks">
                         <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday"><i class="fa fa-comments"></i>
                             Feedbacks</a>
                     </li>
@@ -71,16 +71,16 @@
 
                         <ul class="dropdown-menu">
                             <li class="alignLinks">
-                                <a href="@routes.HomeController.index()">@SessionHelper.email</a>
+                                <a href="@routes.HomeController.index()"><i class="fa fa-user-circle-o" aria-hidden="true"></i> @SessionHelper.email</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">My session reports</a>
+                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()"><i class="fa fa-table" aria-hidden="true"></i> My session reports</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.renderChangePassword()">Reset Password</a>
+                                <a href="@routes.UsersController.renderChangePassword()"><i class="fa fa-key" aria-hidden="true"></i> Reset Password</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.logout()">Logout</a>
+                                <a href="@routes.UsersController.logout()"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
                             </li>
                         </ul>
                     </li>

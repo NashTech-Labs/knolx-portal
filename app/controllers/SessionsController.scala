@@ -124,7 +124,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             session.email,
             session.meetup,
             session.cancelled,
-            session.rating))
+            session.rating,
+            completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis))))
 
         sessionsRepository
           .activeCount(keyword)
@@ -155,7 +156,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 session.meetup,
                 session.cancelled,
                 session.rating,
-                dateString = new Date(session.date.value).toString))
+                dateString = new Date(session.date.value).toString,
+                completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis))))
 
             sessionsRepository
               .activeCount(sessionInformation.email)

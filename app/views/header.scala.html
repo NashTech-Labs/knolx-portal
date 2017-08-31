@@ -3,7 +3,6 @@
 @activeLink(currentPath: String) = @{
     if(request.path.equals(currentPath)) "active"
 }
-<div id ="parallex-layer"></div>
 <div class="container-fluid">
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
@@ -21,8 +20,8 @@
         <a href="#" class="pull-left logo"><img src='@routes.Assets.versioned("images/logo.png")'></a>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
-                <li class="@activeLink(routes.SessionsController.sessions(1, None).url) alignLinks">
-                    <a href="@routes.SessionsController.sessions(1, None)"><i class="fa fa-home home-icon" aria-hidden="true"></i> Home</a>
+                <li class="@activeLink("/session") alignLinks">
+                    <a href="@routes.SessionsController.sessions(1, None)"><i class="fa fa-home" aria-hidden="true"></i> Home</a>
                 </li>
 
                     @if(SessionHelper.isAdmin) {
@@ -49,13 +48,13 @@
                 
                     @if(SessionHelper.isLoggedIn) {
                         <li class="@activeLink(routes.UsersController.login().url) alignLinks">
-                            <a href="@routes.UsersController.login()">Login</a>
+                            <a href="@routes.UsersController.login()"><i class="fa fa-sign-in" aria-hidden="true"></i>  Login</a>
                         </li>
                     }
 
                 @if(SessionHelper.isLoggedIn) {
                     <li class="@activeLink(routes.UsersController.register().url) alignLinks">
-                        <a href="@routes.UsersController.register()">Register</a>
+                        <a href="@routes.UsersController.register()"><i class="fa fa-user-plus" aria-hidden="true"></i> Register</a>
                     </li>
                 } else {
 

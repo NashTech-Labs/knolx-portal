@@ -39,8 +39,14 @@ ul > li > a {
     border-color: transparent;
 }
 
-body {
+html, body {
+    margin: 0;
+    height: 100%;
     background-color: #eee;
+    background-image: url('../images/plx.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 0px 10px;
 }
 
 @font-face {
@@ -131,8 +137,20 @@ i.fa.fa-user:active {
 .fa-comments {
     color: #fff;
 }
-.fa-home{
+
+.fa-home, .fa-sign-in {
     color: #fff;
     font-size: 23px;
 }
 
+.fa-user-plus {
+    color: #fff;
+    font-size: 20px;
+    margin-top: 3px;
+}
+
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:focus, .navbar-default .navbar-nav > .active > a:hover {
+    background-color: transparent;
+    color: #fff;
+    font-weight: bolder;
+}

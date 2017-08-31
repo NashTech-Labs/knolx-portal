@@ -6,11 +6,7 @@
 
         </div>
         <div class="col-md-4 profile" >
-            <div class="container-fluid top-container">
-            </div>
-            <div class="login-outer">
-                <div class="col-md-12 login-first" > </div>
-
+            <div class="login-outer register-custom-position">
                 <form id="registrationForm" action="@routes.UsersController.createUser()" method="POST">
 
                     @helper.CSRF.formField
@@ -18,7 +14,7 @@
                     <div class="col-md-12 top-registration-field" >
                         <div class="col-md-1" ></div>
                         <div class="col-md-10 " >
-                            <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Email" required class="input-field reg"/>
+                            <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Knoldus Email" required class="input-field reg"/>
                         </div>
                         <div class="col-md-1" ></div>
                     </div>

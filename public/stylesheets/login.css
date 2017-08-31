@@ -1,7 +1,6 @@
 .login-outer {
-    height: 470px;
+    height: 420px;
     background-color: #FFF;
-    box-shadow: 0 4px 6px -5px #333;
     -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 0.5s; /* Firefox < 16 */
     -ms-animation: fadein 0.5s; /* Internet Explorer */
@@ -9,6 +8,18 @@
     animation: fadein 0.5s;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    border-top: 1px solid #fff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-top: 30%;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.register-custom-position {
+    padding-top: 15px;
 }
 
 .forgot-password-outer {
@@ -41,6 +52,10 @@
     padding-top: 50px;
 }
 
+.no-outline {
+    outline: none;
+}
+
 .custom-textbox-alignment {
     line-height: 50px;
     padding-top: 20px;
@@ -49,11 +64,17 @@
 .input-field {
     width: 100%;
     text-align: center;
-    border: none;
-    border-bottom: 2px solid #CACFD2;
     font-family: 'gothic';
     font-size: 18px;
     color: #566573;
+    border: none;
+    border-bottom: 2px dotted #CACFD2;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+input:invalid {
+    box-shadow: None!important;
 }
 
 .login-third {
@@ -65,6 +86,18 @@
     color: #fff;
     border: None;
     outline: none;
+}
+
+.forgot-password{
+    font-size: 20px;
+    margin-right: 5px;
+    margin-top: 20px;
+    color:#EC7063;
+}
+
+.forgot-password-link {
+  text-decoration: none!important;
+    color:#EC7063;
 }
 
 input.input-field.logo:focus {

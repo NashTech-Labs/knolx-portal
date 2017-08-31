@@ -22,6 +22,10 @@
     padding-top: 15px;
 }
 
+.user-manage-outer{
+    height: 500px;
+}
+
 .forgot-password-outer {
     height: 350px;
 }

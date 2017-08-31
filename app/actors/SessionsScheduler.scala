@@ -210,53 +210,15 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def emailHandler: Receive = {
-    case SendEmail(sessions, emailType) if sessions.nonEmpty => val recipients = usersRepository.getAllActiveEmails
+    case SendEmail(sessions, emailType) if sessions.nonEmpty =>
+      val recipients = usersRepository.getAllActiveEmails
       val emailInfo = sessions.map(session => EmailInfo(session.topic, session.email, new Date(session.date.value).toString))
       recipients collect {
         case emails if emails.nonEmpty =>
           emailType match {
-            case Reminder     =>
-              val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
-              scheduledEmails = scheduledEmails - key
-              emailManager ! EmailActor.SendEmail(
-                emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
-              Logger.info(s"Reminder Email for sessions expiring on $key sent")
-              sessions.map {
-                session =>
-                  Logger.info(s"Setting reminder field true after sending reminder email for session ${session._id.stringify}")
-                  sessionsRepository.upsertRecord(session, Reminder)
-              }.map {
-                _.map { result =>
-                  if (result.ok) {
-                    Logger.info(s"Reminder field is set true after reminder email sent")
-                  } else {
-                    Logger.info(s"Something went wrong while setting reminder field after reminder email sent")
-                  }
-                }
-              }
-            case Feedback     =>
-              scheduledEmails = scheduledEmails - sessions.head._id.stringify
-              emailManager ! EmailActor.SendEmail(
-                emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
-              Logger.info(s"Feedback email for session ${sessions.head.session} sent")
-            case Notification =>
-              val key = s"notify${dateTimeUtility.toLocalDate(sessions.head.date.value).toString}"
-              scheduledEmails = scheduledEmails - key
-              emailManager ! EmailActor.SendEmail(
-                emails, fromEmail, "Knolx/Meetup Sessions", views.html.emails.notification(emailInfo).toString)
-              Logger.info(s"Notification Email for sessions held on $key sent")
-              sessions.map { session =>
-                Logger.info(s"Setting notification field true after sending reminder email for session ${session._id.stringify}")
-                sessionsRepository.upsertRecord(session, Notification)
-              }.map {
-                _.map { result =>
-                  if (result.ok) {
-                    Logger.info(s"Notification field is set true after notification email sent")
-                  } else {
-                    Logger.info(s"Something went wrong while setting Notification field after notification email sent")
-                  }
-                }
-              }
+            case Reminder     => reminderEmailHandler(sessions, emailInfo, emails)
+            case Feedback     => feedbackEmailHandler(sessions)
+            case Notification => notificationEmailHandler(sessions, emailInfo, emails)
           }
       }
   }
@@ -264,6 +226,66 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def defaultHandler: Receive = {
     case msg: Any =>
       Logger.error(s"Received a message $msg in Sessions Scheduler which cannot be handled")
+  }
+
+  def reminderEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
+    val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
+
+    scheduledEmails = scheduledEmails - key
+
+    emailManager ! EmailActor.SendEmail(
+      emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
+
+    Logger.info(s"Reminder Email for sessions expiring on $key sent")
+
+    sessions.map {
+      session =>
+        Logger.info(s"Setting reminder field true after sending reminder email for session ${session._id.stringify}")
+        sessionsRepository.upsertRecord(session, Reminder)
+    }.map {
+      _.map { result =>
+        if (result.ok) {
+          Logger.info(s"Reminder field is set true after reminder email sent for session ${sessions.map(_._id.stringify)} on $key")
+        } else {
+          Logger.info(s"Something went wrong while setting reminder field after reminder email sent for session" +
+            s" ${sessions.map(_._id.stringify)} on $key")
+        }
+      }
+    }
+  }
+
+  def notificationEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
+    val key = s"notify${dateTimeUtility.toLocalDate(sessions.head.date.value).toString}"
+
+    scheduledEmails = scheduledEmails - key
+
+    emailManager ! EmailActor.SendEmail(
+      emails, fromEmail, "Knolx/Meetup Sessions", views.html.emails.notification(emailInfo).toString)
+
+    Logger.info(s"Notification Email for sessions held on $key sent")
+
+    sessions.map { session =>
+      Logger.info(s"Setting notification field true after sending reminder email for session ${session._id.stringify}")
+      sessionsRepository.upsertRecord(session, Notification)
+    }.map {
+      _.map { result =>
+        if (result.ok) {
+          Logger.info(s"Notification field is set true after notification email sent for session ${sessions.map(_._id.stringify)} on $key")
+        } else {
+          Logger.info(s"Something went wrong while setting Notification field after notification email sent " +
+            s"for session ${sessions.map(_._id.stringify)} on $key")
+        }
+      }
+    }
+  }
+
+  def feedbackEmailHandler(sessions: List[SessionInfo]): Unit = {
+    scheduledEmails = scheduledEmails - sessions.head._id.stringify
+
+    emailManager ! EmailActor.SendEmail(
+      emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
+
+    Logger.info(s"Feedback email for session ${sessions.head.session} sent")
   }
 
   def scheduleEmails(eventualSessions: Future[List[SessionInfo]], emailType: EmailType): Future[Map[String, Cancellable]] =

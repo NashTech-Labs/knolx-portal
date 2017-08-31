@@ -210,8 +210,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def emailHandler: Receive = {
-    case SendEmail(sessions, emailType) if sessions.nonEmpty =>
-      val recipients = usersRepository.getAllActiveEmails
+    case SendEmail(sessions, emailType) if sessions.nonEmpty => val recipients = usersRepository.getAllActiveEmails
       val emailInfo = sessions.map(session => EmailInfo(session.topic, session.email, new Date(session.date.value).toString))
       recipients collect {
         case emails if emails.nonEmpty =>

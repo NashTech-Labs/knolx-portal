@@ -222,7 +222,10 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
               emailManager ! EmailActor.SendEmail(
                 emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
               Logger.info(s"Reminder Email for sessions expiring on $key sent")
-              sessions.map(session => sessionsRepository.upsertRecord(session, Reminder)).map{_.map{result =>
+              sessions.map{
+                session =>
+                  Logger.info(s"Setting reminder field true after sending reminder email for session ${session._id.stringify}")
+                  sessionsRepository.upsertRecord(session, Reminder)}.map{_.map{result =>
                 if(result.ok){
                   Logger.info(s"Reminder field is set true after reminder email sent${}")
                 }else {
@@ -240,7 +243,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
               emailManager ! EmailActor.SendEmail(
                 emails, fromEmail, "Knolx/Meetup Sessions", views.html.emails.notification(emailInfo).toString)
               Logger.info(s"Notification Email for sessions held on $key sent")
-              sessions.map(session => sessionsRepository.upsertRecord(session, Notification)).map{_.map{result =>
+              sessions.map{session =>
+                Logger.info(s"Setting notification field true after sending reminder email for session ${session._id.stringify}")
+                sessionsRepository.upsertRecord(session, Notification)}.map{_.map{result =>
                 if(result.ok){
                   Logger.info(s"Notification field is set true after notification email sent${}")
                 }else {

@@ -185,32 +185,23 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               sessionInfo.cancelled,
               sessionInfo.rating))
 
-        val eventualScheduledFeedbackForms = (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
-        val eventualBannedUsers = (usersBanScheduler ? GetScheduledBannedUsers) (5.seconds).mapTo[List[String]]
+        val eventualScheduledFeedbackForms =
+          (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
 
-        val eventualKnolxSessions = eventualScheduledFeedbackForms flatMap { scheduledFeedbackForms =>
-          eventualBannedUsers.map { bannedUser =>
+        val eventualKnolxSessions = eventualScheduledFeedbackForms map { scheduledFeedbackForms =>
+          knolxSessions map { session =>
+            val scheduled = scheduledFeedbackForms.sessionIds.contains(session.id)
 
-            val reminderCount = scheduledFeedbackForms.sessionIds.count(_ == dateTimeUtility.localDateIST.toString)
-            val notificationCount = scheduledFeedbackForms.sessionIds.count(_.contains("notify"))
-            val feedbackCount = scheduledFeedbackForms.sessionIds.size - (reminderCount + notificationCount)
-            val bannedUserCount = bannedUser.size
-
-            val sessions = knolxSessions map { session =>
-              val scheduled = scheduledFeedbackForms.sessionIds.contains(session.id)
-              session.copy(feedbackFormScheduled = scheduled)
-            }
-            (sessions, notificationCount, reminderCount, feedbackCount, bannedUserCount)
+            session.copy(feedbackFormScheduled = scheduled)
           }
         }
 
-        eventualKnolxSessions flatMap { eventualSessions =>
-          val (sessions, notificationCount, reminderCount, feedbackCount, bannedUserCount) = eventualSessions
+        eventualKnolxSessions flatMap { sessions =>
           sessionsRepository
             .activeCount(keyword)
             .map { count =>
               val pages = Math.ceil(count / 10D).toInt
-              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber, notificationCount, feedbackCount, reminderCount, bannedUserCount))
+              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber))
             }
         }
       }

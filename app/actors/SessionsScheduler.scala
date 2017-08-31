@@ -20,9 +20,10 @@ import akka.pattern.pipe
 object SessionsScheduler {
 
   sealed trait EmailType
-  case object Reminder extends EmailType
+  sealed trait EmailOnce
+  case object Reminder extends EmailType with EmailOnce
+  case object Notification extends EmailType with EmailOnce
   case object Feedback extends EmailType
-  case object Notification extends EmailType
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
@@ -216,10 +217,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         case emails if emails.nonEmpty =>
           emailType match {
             case Reminder     =>
-              scheduledEmails = scheduledEmails - dateTimeUtility.toLocalDate(sessions.head.date.value).toString
+              val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
+              scheduledEmails = scheduledEmails - key
               emailManager ! EmailActor.SendEmail(
                 emails, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
-              Logger.info(s"Reminder Email for session sent")
+              Logger.info(s"Reminder Email for sessions expiring on $key sent")
               sessions.map(session => sessionsRepository.upsertRecord(session, Reminder))
             case Feedback     =>
               scheduledEmails = scheduledEmails - sessions.head._id.stringify
@@ -227,10 +229,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                 emails, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
               Logger.info(s"Feedback email for session ${sessions.head.session} sent")
             case Notification =>
-              scheduledEmails = scheduledEmails - s"notify${dateTimeUtility.toLocalDate(sessions.head.date.value).toString}"
+              val key = s"notify${dateTimeUtility.toLocalDate(sessions.head.date.value).toString}"
+              scheduledEmails = scheduledEmails - key
               emailManager ! EmailActor.SendEmail(
                 emails, fromEmail, "Knolx/Meetup Sessions", views.html.emails.notification(emailInfo).toString)
-              Logger.info(s"Notification Email for session sent")
+              Logger.info(s"Notification Email for sessions held on $key sent")
               sessions.map(session => sessionsRepository.upsertRecord(session, Notification))
           }
       }

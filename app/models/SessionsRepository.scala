@@ -2,7 +2,7 @@ package models
 
 import javax.inject.Inject
 
-import actors.SessionsScheduler.{EmailType, Notification, Reminder}
+import actors.SessionsScheduler.{EmailType, Notification, Reminder, EmailOnce}
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
@@ -261,13 +261,12 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       }
   }
 
-  def upsertRecord(session: SessionInfo, emailType: EmailType)(implicit ex: ExecutionContext): Future[WriteResult] = {
+  def upsertRecord(session: SessionInfo, emailType: EmailOnce)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> session._id.stringify))
 
     val modifier = emailType match {
       case Reminder     => BSONDocument("$set" -> BSONDocument("reminder" -> true))
       case Notification => BSONDocument("$set" -> BSONDocument("notification" -> true))
-      case _            => BSONDocument()
     }
 
     collection.flatMap(_.update(selector, modifier, upsert = true))

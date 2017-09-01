@@ -3,7 +3,7 @@ package models
 import java.text.SimpleDateFormat
 
 import controllers.UpdateSessionInformation
-import models.SessionJsonFormats.{ExpiringNext, Scheduled, SchedulingNext}
+import models.SessionJsonFormats.{ExpiringNext, ExpiringNextNotReminded, SchedulingNext, SchedulingNextUnNotified}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.libs.json.{JsBoolean, JsObject}
@@ -20,15 +20,12 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   private val currentDateString = "2017-07-12T14:30:00"
   private val currentDate = formatter.parse(currentDateString)
   private val currentMillis = currentDate.getTime
-  private val startOfDayDateString = "2017-07-12T00:00:00"
-  private val startOfDayDate = formatter.parse(startOfDayDateString)
-  private val startOfDayMillis = startOfDayDate.getTime
   private val endOfDayDateString = "2017-07-12T23:59:59"
   private val endOfDayDate = formatter.parse(endOfDayDateString)
   private val endOfDayMillis = endOfDayDate.getTime
 
   val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "feedbackFormId", "topic1",
-    1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
+    1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), reminder = false, notification = false, sessionId)
 
   trait TestScope extends Scope {
     val dateTimeUtility: DateTimeUtility = mock[DateTimeUtility]
@@ -65,6 +62,24 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       sessions must beEqualTo(List(sessionInfo))
     }
 
+    "get sessions expiring next not reminded" in new TestScope {
+      dateTimeUtility.nowMillis returns currentMillis
+      dateTimeUtility.endOfDayMillis returns endOfDayMillis
+
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(ExpiringNextNotReminded))
+
+      sessions must beEqualTo(Nil)
+    }
+
+    "get sessions scheduled next unnotified" in new TestScope {
+      dateTimeUtility.nowMillis returns currentMillis
+      dateTimeUtility.endOfDayMillis returns endOfDayMillis
+
+      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(SchedulingNextUnNotified))
+
+      sessions must beEqualTo(List(sessionInfo))
+    }
+
     "get sessions expiring next" in new TestScope {
       dateTimeUtility.startOfDayMillis returns currentMillis
       dateTimeUtility.endOfDayMillis returns endOfDayMillis
@@ -74,14 +89,6 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       sessions must beEqualTo(Nil)
     }
 
-    "get all sessions for  today" in new TestScope {
-      dateTimeUtility.startOfDayMillis returns startOfDayMillis
-      dateTimeUtility.endOfDayMillis returns endOfDayMillis
-
-      val sessions: List[SessionInfo] = await(sessionsRepository.sessionsForToday(Scheduled))
-
-      sessions must beEqualTo(List(sessionInfo))
-    }
 
     "getByEmail session" in new TestScope {
       val updatedSession = UpdateSessionInfo(UpdateSessionInformation(sessionId.stringify, currentDate,
@@ -116,6 +123,18 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       count must beEqualTo(1)
     }
 
+    "get users session till now for a particular user" in new TestScope {
+      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com")))
+
+      response contains sessionInfo
+    }
+
+    "get users session till now for all users" in new TestScope {
+      val response = await(sessionsRepository.userSessionsTillNow(None))
+
+      response contains sessionInfo
+    }
+
     "get active sessions count when serched with some string" in new TestScope {
       val count: Int = await(sessionsRepository.activeCount(Some("test")))
 
@@ -133,7 +152,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     "get active sessions" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
       val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
-        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
+        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
       created must beEqualTo(true)
@@ -150,7 +169,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     "get active sessions by email" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
       val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
-        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), sessionId)
+        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
       created must beEqualTo(true)
@@ -167,7 +186,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     "get immediate previous expired sessions" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
       val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
-        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), sessionId)
+        1, meetup = true, "", cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
       created must beEqualTo(true)
@@ -180,6 +199,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       expiredSessions must beEqualTo(List(sessionInfo))
     }
+
 
   }
 

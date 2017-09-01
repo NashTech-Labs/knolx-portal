@@ -2,6 +2,7 @@ package models
 
 import javax.inject.Inject
 
+import actors.SessionsScheduler.{EmailType, Notification, Reminder, EmailOnce}
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
@@ -32,6 +33,8 @@ case class SessionInfo(userId: String,
                        cancelled: Boolean,
                        active: Boolean,
                        expirationDate: BSONDateTime,
+                       reminder: Boolean = false,
+                       notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate)
 
 case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
@@ -45,8 +48,9 @@ object SessionJsonFormats {
 
   sealed trait SessionState
   case object ExpiringNext extends SessionState
+  case object ExpiringNextNotReminded extends SessionState
   case object SchedulingNext extends SessionState
-  case object Scheduled extends SessionState
+  case object SchedulingNextUnNotified extends SessionState
 
 }
 
@@ -75,15 +79,18 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val endOfTheDay = dateTimeUtility.endOfDayMillis
 
     val condition = sessionState match {
-      case SchedulingNext =>
+      case SchedulingNext           =>
         Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)))
-      case ExpiringNext   =>
+      case ExpiringNext             =>
         Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)))
-      case Scheduled      =>
-        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(startOfTheDay),
-          "$lte" -> BSONDateTime(endOfTheDay)))
+      case ExpiringNextNotReminded  =>
+        Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
+          "$lte" -> BSONDateTime(endOfTheDay)), "reminder" -> false)
+      case SchedulingNextUnNotified =>
+        Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(millis),
+          "$lte" -> BSONDateTime(endOfTheDay)), "notification" -> false)
     }
 
     collection
@@ -211,14 +218,21 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   }
 
-  def userSessionsTillNow(email: String): Future[List[SessionInfo]] = {
+  def userSessionsTillNow(email: Option[String] = None): Future[List[SessionInfo]] = {
     val millis = dateTimeUtility.nowMillis
 
-    val condition = Json.obj(
-      "active" -> true,
-      "cancelled" -> false,
-      "email" -> email,
-      "date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+    val condition = email.fold {
+      Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+    } { email =>
+      Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "email" -> email,
+        "date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+    }
 
     collection
       .flatMap(jsonCollection =>
@@ -252,6 +266,17 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .map(_.firstBatch.flatMap(_ \\ "sessions").flatMap(_.validateOpt[List[SessionInfo]].getOrElse(None)))
           .map(_.flatten)
       }
+  }
+
+  def upsertRecord(session: SessionInfo, emailType: EmailOnce)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> session._id.stringify))
+
+    val modifier = emailType match {
+      case Reminder     => BSONDocument("$set" -> BSONDocument("reminder" -> true))
+      case Notification => BSONDocument("$set" -> BSONDocument("notification" -> true))
+    }
+
+    collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
 }

@@ -10,3 +10,6 @@ a.btn.btn-sm.btn-primary.btn-create {
     box-shadow: 0 4px 5px -5px #333;
 }
 
+.session-custom-search-bar {
+    margin-bottom: 0 !important;
+}

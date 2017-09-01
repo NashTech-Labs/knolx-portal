@@ -3,7 +3,8 @@
 @main("All reports") {
     <div class="row">
         <div class="col-md-2" ></div>
-        <div class="col-md-8 feedback-form-display-container report-container">
+        <div class="col-md-8 feedback-form-display-container">
+            <div class="col-md-12 login-first test feedback-top-banner"></div>
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {
@@ -50,7 +51,7 @@
                                         <div class="col-md-12 feedback-card-by">held on</div>
                                         <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
                                         <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
-                                        <a href="@routes.FeedbackFormsReportController.fetchUserResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
+                                        <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
                                             view</a>
                                     </div>
                                 </div>

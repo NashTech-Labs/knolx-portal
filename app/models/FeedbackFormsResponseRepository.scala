@@ -82,15 +82,20 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .find(Json.obj("userId" -> userId, "sessionId" -> SessionId))
           .cursor[FeedbackFormsResponse](ReadPreference.Primary).headOption)
 
-  def allResponsesBySession(presentersEmail: String, sessionId: String): Future[List[FeedbackFormsResponse]] =
+  def allResponsesBySession(sessionId: String, presentersEmail: Option[String] = None): Future[List[FeedbackFormsResponse]] = {
+    val condition = presentersEmail.fold {
+      Json.obj("sessionId" -> sessionId)
+    } { email =>
+      Json.obj("presenter" -> email, "sessionId" -> sessionId)
+    }
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj(
-            "presenter" -> presentersEmail,
-            "sessionId" -> sessionId))
+          .find(condition)
           .cursor[FeedbackFormsResponse](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[FeedbackFormsResponse]]()))
+  }
 
   def getAllResponseEmailsPerSession(sessionId: String)(implicit ex: ExecutionContext): Future[List[String]] = {
     val query = Json.obj("sessionId" -> sessionId)

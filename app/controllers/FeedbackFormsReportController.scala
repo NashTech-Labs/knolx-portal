@@ -33,20 +33,36 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                                              ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
-    generateSessionFeedbackReport(request.user.email).map { reportInfo =>
+    generateSessionFeedbackReport(Some(request.user.email)).map { reportInfo =>
       Ok(views.html.reports.myreports(reportInfo))
     }
   }
 
-  private def generateSessionFeedbackReport(presenter: String): Future[List[FeedbackReportHeader]] = {
-    val myActiveSessions = sessionsRepository.activeSessions(Some(presenter))
-    val presentersSessionTillNow = sessionsRepository.userSessionsTillNow(presenter)
+  def renderAllFeedbackReports: Action[AnyContent] = adminAction.async { implicit request =>
+    generateSessionFeedbackReport(None).map { reportInfo =>
+      Ok(views.html.reports.allreports(reportInfo))
+    }
+  }
 
-    myActiveSessions.flatMap {
+  private def generateSessionFeedbackReport(presenter: Option[String]): Future[List[FeedbackReportHeader]] = {
+    presenter.fold {
+      val activeSessions = sessionsRepository.activeSessions(None)
+      val sessionTillNow = sessionsRepository.userSessionsTillNow(None)
+      generateReport(activeSessions, sessionTillNow)
+    } { email =>
+      val presenterActiveSessions = sessionsRepository.activeSessions(Some(email))
+      val presenterSessionTillNow = sessionsRepository.userSessionsTillNow(Some(email))
+      generateReport(presenterActiveSessions, presenterSessionTillNow)
+    }
+  }
+
+  private def generateReport(eventualActiveSessions: Future[List[SessionInfo]],
+                             sessionsTillNow: Future[List[SessionInfo]]): Future[List[FeedbackReportHeader]] = {
+    eventualActiveSessions.flatMap {
       case _ :: _ =>
-        presentersSessionTillNow.flatMap {
+        sessionsTillNow.flatMap {
           case allUserSessionsTillNow@(_ :: _) =>
-            myActiveSessions.map { activeSessions =>
+            eventualActiveSessions.map { activeSessions =>
               allUserSessionsTillNow.map { session =>
                 if (activeSessions.contains(session)) {
                   generateSessionReportHeader(session, active = true)
@@ -57,11 +73,10 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
             }
           case Nil                             => Future.successful(List.empty)
         }
-      case Nil    => presentersSessionTillNow.map {
+      case Nil    => sessionsTillNow.map {
         case first :: rest => (first +: rest).map(session => generateSessionReportHeader(session, active = false))
         case Nil           => List()
       }
-
     }
   }
 
@@ -70,18 +85,33 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
       session.session, session.meetup, new Date(session.date.value).toString)
   }
 
-  def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = userAction.async { implicit request =>
-    feedbackFormsResponseRepository.allResponsesBySession(request.user.email, id).map { responses =>
-      if (responses.nonEmpty) {
-        val response :: _ = responses
+  def fetchUserResponsesBySessionId(id: String): Action[AnyContent] = userAction.async { implicit request =>
+    val responses = feedbackFormsResponseRepository.allResponsesBySession(id, Some(request.user.email))
+
+    renderFetchedResponses(responses).map { report =>
+      Ok(views.html.reports.report(report))
+    }
+  }
+
+  def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
+    val responses = feedbackFormsResponseRepository.allResponsesBySession(id, None)
+
+    renderFetchedResponses(responses).map { report =>
+      Ok(views.html.reports.report(report))
+    }
+  }
+
+  private def renderFetchedResponses(responses: Future[List[FeedbackFormsResponse]]): Future[FeedbackReport] = {
+    responses.map { sessionResponses =>
+      if (sessionResponses.nonEmpty) {
+        val response :: _ = sessionResponses
         val header = FeedbackReportHeader(response.sessionId, response.sessionTopic,
           active = false, response.session, response.meetup, new Date(response.sessiondate.value).toString)
-        val questionAndResponses = responses.map(_.feedbackResponse)
-        Ok(views.html.reports.report(FeedbackReport(Some(header, questionAndResponses))))
+        val questionAndResponses = sessionResponses.map(_.feedbackResponse)
+        FeedbackReport(Some(header, questionAndResponses))
       } else {
-        Ok(views.html.reports.report(FeedbackReport(None)))
+        FeedbackReport(None)
       }
-
     }
   }
 

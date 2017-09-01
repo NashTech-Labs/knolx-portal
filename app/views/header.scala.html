@@ -21,40 +21,49 @@
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
                 <li class="@activeLink("/session") alignLinks">
-                    <a href="@routes.SessionsController.sessions(1, None)"><i class="fa fa-home" aria-hidden="true"></i> Home</a>
+                    <a href="@routes.SessionsController.sessions(1, None)"><i class="fa fa-home" aria-hidden="true"></i>
+                        Home</a>
                 </li>
 
-                    @if(SessionHelper.isAdmin) {
-                        <li class="dropdown alignLinks">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-wrench" aria-hidden="true"></i> Manage
-                                <b class="caret"></b>
-                            </a>
+                @if(SessionHelper.isAdmin) {
+                    <li class="dropdown alignLinks">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-wrench" aria-hidden="true"></i> Manage
+                            <b class="caret"></b>
+                        </a>
 
-                            <ul class="dropdown-menu">
-                                <li class="alignLinks">
-                                    <a href="@routes.SessionsController.manageSessions(1, None)"><i class="fa fa-hourglass-end" aria-hidden="true"></i> Sessions</a>
-                                </li>
-                                <li class="alignLinks">
-                                    <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)"><i class="fa fa-file" aria-hidden="true"></i> Feedback Forms</a>
-                                </li>
-                                <li class="alignLinks">
-                                    <a href="@routes.UsersController.manageUser(1,None)"><i class="fa fa-users" aria-hidden="true"></i> Users</a>
-                                </li>
-                            </ul>
-                        </li>
+                        <ul class="dropdown-menu">
+                            <li class="alignLinks">
+                                <a href="@routes.SessionsController.manageSessions(1, None)"><i class="fa fa-hourglass-end" aria-hidden="true"></i>
+                                    Sessions</a>
+                            </li>
+                            <li class="alignLinks">
+                                <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)"><i class="fa fa-file" aria-hidden="true"></i>
+                                    Feedback Forms</a>
+                            </li>
+                            <li class="alignLinks">
+                                <a href="@routes.UsersController.manageUser(1, None)"><i class="fa fa-users" aria-hidden="true"></i>
+                                    Users</a>
+                            </li>
+                            <li class="alignLinks">
+                                <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()">Reports</a>
+                            </li>
+                        </ul>
+                    </li>
 
-                    }
-                
-                    @if(SessionHelper.isLoggedIn) {
-                        <li class="@activeLink(routes.UsersController.login().url) alignLinks">
-                            <a href="@routes.UsersController.login()"><i class="fa fa-sign-in" aria-hidden="true"></i>  Login</a>
-                        </li>
-                    }
+                }
+
+                @if(SessionHelper.isLoggedIn) {
+                    <li class="@activeLink(routes.UsersController.login().url) alignLinks">
+                        <a href="@routes.UsersController.login()"><i class="fa fa-sign-in" aria-hidden="true"></i>
+                            Login</a>
+                    </li>
+                }
 
                 @if(SessionHelper.isLoggedIn) {
                     <li class="@activeLink(routes.UsersController.register().url) alignLinks">
-                        <a href="@routes.UsersController.register()"><i class="fa fa-user-plus" aria-hidden="true"></i> Register</a>
+                        <a href="@routes.UsersController.register()"><i class="fa fa-user-plus" aria-hidden="true"></i>
+                            Register</a>
                     </li>
                 } else {
 
@@ -74,13 +83,16 @@
                                 <a href="@routes.HomeController.index()"><i class="fa fa-user-circle-o" aria-hidden="true"></i> @SessionHelper.email</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()"><i class="fa fa-table" aria-hidden="true"></i> My session reports</a>
+                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()"><i class="fa fa-table" aria-hidden="true"></i>
+                                    My session reports</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.renderChangePassword()"><i class="fa fa-key" aria-hidden="true"></i> Reset Password</a>
+                                <a href="@routes.UsersController.renderChangePassword()"><i class="fa fa-key" aria-hidden="true"></i>
+                                    Reset Password</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.logout()"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a>
+                                <a href="@routes.UsersController.logout()"><i class="fa fa-sign-out" aria-hidden="true"></i>
+                                    Logout</a>
                             </li>
                         </ul>
                     </li>

@@ -74,8 +74,6 @@ function createForm() {
     $('#errorMessage').remove();
     $('#successMessage').remove();
 
-    alert(JSON.stringify(feedbackForm));
-
     jsRoutes.controllers.FeedbackFormsController.createFeedbackForm().ajax(
         {
             type: "POST",

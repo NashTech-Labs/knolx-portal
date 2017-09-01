@@ -262,7 +262,6 @@
 
 .manage-user-custom-table-margin {
     margin: 0 0;
-
 }
 
 .search-text::-webkit-input-placeholder { /* Chrome */
@@ -319,7 +318,7 @@
 
 .user-updated-message {
     text-align: center;
-    margin-top: 3%;
+    margin-top: 15%;
     font-size: 15px;
 }
 

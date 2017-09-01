@@ -92,7 +92,7 @@ function slide(keyword, pageNumber) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
+                        "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
                     );
 
                     $('.pagination').html("");

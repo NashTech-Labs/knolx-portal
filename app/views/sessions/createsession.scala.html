@@ -6,8 +6,7 @@
         <div class="col-md-4"></div>
 
         <div class="col-md-4 create-outer top-container">
-            <div class="col-md-12 login-first top"></div>
-            <form class="CreateForm" action="@routes.SessionsController.createSession()" method="post">
+            <form class="CreateForm customForm" action="@routes.SessionsController.createSession()" method="post">
 
                 @helper.CSRF.formField
 
@@ -118,7 +117,7 @@
 
                 <div class="col-md-12 update-second-field login-four">
                     <div class="col-md-1"></div>
-                    <div class="col-md-10 ">
+                    <div class="col-md-10 loader-outer">
                         <input type="submit" value="Create" class="input-field update-button"/>
                     </div>
                     <div class="col-md-1"></div>

@@ -113,7 +113,8 @@ ul.pagination.pagination-lg li a {
 }
 
 .pagination li.active a {
-    background-color: #45B39D;
+    background-color: #000;
+    opacity: 0.5;
     color: #fff !important;
     border: 1px solid #eee;
 }

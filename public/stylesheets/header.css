@@ -42,9 +42,12 @@ ul > li > a {
 html, body {
     margin: 0;
     height: 100%;
-    background-color: #eee;
+    background-color: #352C25;
     background-image: url('../images/plx.jpg');
     background-repeat: no-repeat;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
     background-size: cover;
     padding: 0px 10px;
 }
@@ -136,11 +139,13 @@ i.fa.fa-user:active {
 
 .fa-comments {
     color: #fff;
+    text-shadow: 0 0 10px #85929E;
 }
 
 .fa-home, .fa-sign-in, .fa-wrench {
     color: #fff;
     font-size: 23px;
+    text-shadow: 0 0 10px #85929E;
 }
 
 .fa-user-plus {
@@ -155,13 +160,13 @@ i.fa.fa-user:active {
     font-weight: bolder;
 }
 
-.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover {
+.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:focus, .navbar-default .navbar-nav > .open > a:hover {
     background: slategrey;
     color: #fff;
     font-weight: bold;
 }
 
-.dropdown-menu>li>a {
+.dropdown-menu > li > a {
     display: block;
     clear: both;
     font-weight: 400;
@@ -169,7 +174,7 @@ i.fa.fa-user:active {
     color: #555;
 }
 
-.dropdown-menu>li>a {
+.dropdown-menu > li > a {
     display: block;
     clear: both;
     font-weight: 400;
@@ -178,14 +183,47 @@ i.fa.fa-user:active {
     padding: 5px 25px 10px 25px;
 }
 
-.navbar-nav>li>.dropdown-menu{
- padding: 0;
+.navbar-nav > li > .dropdown-menu {
+    padding: 0;
 }
 
-.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+.dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
     text-decoration: none;
 }
 
 .alignLinks {
     margin-left: 0px;
 }
+
+.loader {
+    border: 2px solid #dcdcdc; /* Light grey */
+    border-top: 2px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 0.8s linear infinite;
+    display: table;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.pagination>li>a{
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.42857143;
+    color: #337ab7;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    background-color: transparent;
+}
+

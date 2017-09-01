@@ -33,9 +33,10 @@
 
     <body>
         @header()
-    <div class="container-fluid">
-    @content
-    </div>
+        <div class="container-fluid">
+        @content
+        </div>
+        <script src="@routes.Assets.versioned("javascripts/loader.js")" type="text/javascript"></script>
     </body>
 
 </html>

@@ -9,12 +9,12 @@
             </div>
             <div class="col-md-3"></div>
             <div class="col-md-12 all-users">
-@*                @if(!flash.isEmpty) {*@
-                    <div class="alert alert-success  alert-dismissable user-updated-message">
+               @if(!flash.isEmpty) {
+                    <div class="alert alert-success  alert-dismissable">
                         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                         @flash.get("message").fold("")(identity)
                     </div>
-@*                }*@
+                }
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="table-responsive manage-user-custom-table-margin">

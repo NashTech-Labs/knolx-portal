@@ -217,7 +217,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         case emails if emails.nonEmpty =>
           emailType match {
             case Reminder     => reminderEmailHandler(sessions, emailInfo, emails)
-            case Feedback     => feedbackEmailHandler(sessions)
+            case Feedback     => feedbackEmailHandler(sessions, emailInfo, emails)
             case Notification => notificationEmailHandler(sessions, emailInfo, emails)
           }
       }
@@ -279,7 +279,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     }
   }
 
-  def feedbackEmailHandler(sessions: List[SessionInfo]): Unit = {
+  def feedbackEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
 
     emailManager ! EmailActor.SendEmail(

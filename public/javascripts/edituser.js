@@ -87,7 +87,7 @@ function slide(keyword, pageNumber, filter) {
             },
             error: function (er) {
                 $('#user-found').html(
-                    "<tr><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td></tr>"
+                    "<tr><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td><td align='center'></td></tr>"
                 );
 
                 $('.pagination').html("");

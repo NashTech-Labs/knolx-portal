@@ -16,7 +16,7 @@
                                             <div class="accepting-response"><span class="label label-danger live">
                                                 Live</span></div>
                                         </div>
-                                        @defining("Knolx") { sessionType =>
+                                        @defining(if(session.meetUp) "Meetup" else "Knolx") { sessionType =>
                                             <div class="col-md-12 feedback-card-topic custom-position">
                                                 <div class="session-type"><span class="label @if(sessionType == "Knolx") {
                                                     label-warning
@@ -39,7 +39,7 @@
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
-                                    @defining("Knolx") { sessionType =>
+                                    @defining(if(session.meetUp) "Meetup" else "Knolx") { sessionType =>
                                         <div class="col-md-12 feedback-card-topic custom-position">
                                             <div class="session-type"><span class="label @if(sessionType == "Knolx") {
                                                 label-warning

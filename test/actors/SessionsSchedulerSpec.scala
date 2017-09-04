@@ -3,13 +3,13 @@ package actors
 import java.time.{LocalDateTime, ZoneId}
 import java.util.TimeZone
 
-import actors.SessionsScheduler._
+import actors.SessionsScheduler.{ScheduleSessionNotificationStartingTomorrow, _}
 import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.inject.name.Names
 import controllers.TestEnvironment
-import models.SessionJsonFormats.{ExpiringNext, SchedulingNext}
+import models.SessionJsonFormats.SchedulingNext
 import models._
 import org.mockito.Mockito.verify
 import org.specs2.specification.Scope
@@ -116,53 +116,18 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           ScheduleFeedbackRemindersStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
-    "schedule sessions" in new TestScope {
-      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      sessionsScheduler ! ScheduleFeedbackEmailsStartingTomorrow
+    "start session notification mail Scheduler" in new TestScope {
+      val initialDelay: FiniteDuration = 1.minute
+      val interval: FiniteDuration = 1.minute
 
-      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
-    }
+      sessionsScheduler ! InitialSessionNotificationsStartingTomorrow(initialDelay, interval)
 
-    "schedule reminders" in new TestScope {
-
-      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
-      dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      sessionsScheduler ! ScheduleFeedbackRemindersStartingTomorrow
-
-      sessionsScheduler.underlyingActor.scheduledEmails.size must_=== 1
-    }
-
-    "start sessions schedulers for Knolx sessions scheduled today" in new TestScope {
-
-      sessionsScheduler ! ScheduleFeedbackEmailsStartingToday(self, Future.successful(sessionsForToday))
-
-      expectMsg(1)
-    }
-
-    "start sessions reminders schedulers for Knolx sessions expiring today" in new TestScope {
-      dateTimeUtility.toLocalDate(sessionsForToday.head.date.value) returns LocalDateTime.now(ISTZoneId).toLocalDate
-      sessionsScheduler ! ScheduleFeedbackRemindersStartingToday(self, Future.successful(sessionsForToday))
-
-      expectMsg(1)
-    }
-
-    "refresh sessions schedulers" in new TestScope {
-      val cancellable = new Cancellable {
-        def cancel(): Boolean = true
-
-        def isCancelled: Boolean = false
-      }
-
-      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
-
-      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      sessionsRepository.sessionsForToday(ExpiringNext) returns Future.successful(sessionsForToday)
-
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
-
-      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
-
-      result mustEqual ScheduledSessionsRefreshed
+      verify(sessionsScheduler.underlyingActor.scheduler)
+        .schedule(
+          initialDelay,
+          interval,
+          sessionsScheduler,
+          ScheduleSessionNotificationStartingTomorrow)(sessionsScheduler.underlyingActor.context.dispatcher)
     }
 
     "get all scheduled sessions" in new TestScope {
@@ -182,23 +147,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       result mustEqual ScheduledSessions(List(sessionId.stringify))
     }
 
-    "not refresh sessions schedulers because of empty feedback forms" in new TestScope {
-      val cancellable = new Cancellable {
-        def cancel(): Boolean = false
-
-        def isCancelled: Boolean = true
-      }
-
-      sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
-
-      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
-
-      val result: SessionsSchedulerResponse = await((sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse])
-
-      result mustEqual ScheduledSessionsNotRefreshed
-    }
-
     "send feedback form" in new TestScope {
       val feedbackFormEmail =
         Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
@@ -209,7 +157,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
 
-      sessionsScheduler ! SendEmail(sessionsForToday, reminder = false)
+      sessionsScheduler ! SendEmail(sessionsForToday, Feedback)
 
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(sessionId.stringify))
     }
@@ -224,7 +172,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
 
-      sessionsScheduler ! SendEmail(sessionsForToday, reminder = true)
+      sessionsScheduler ! SendEmail(sessionsForToday, Reminder)
 
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
     }
@@ -244,15 +192,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler ! CancelScheduledSession(sessionId.stringify)
 
       expectMsg(true)
-    }
-
-    "schedule a session" in new TestScope {
-      sessionsRepository.getById(sessionId.stringify) returns Future.successful(sessionsForToday.headOption)
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
-
-      sessionsScheduler ! ScheduleSession(sessionId.stringify)
-
-      sessionsScheduler.underlyingActor.scheduledEmails.keys must contain(sessionId.stringify)
     }
 
   }

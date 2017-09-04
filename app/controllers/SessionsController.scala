@@ -5,6 +5,7 @@ import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.SessionsScheduler._
+import actors.UsersBanScheduler._
 import akka.actor.ActorRef
 import akka.pattern.ask
 import controllers.EmailHelper._
@@ -18,6 +19,7 @@ import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
+import scala.collection.immutable.IndexedSeq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -59,7 +61,7 @@ case class SessionSearchResult(sessions: List[KnolxSession],
                                keyword: String)
 
 object SessionValues {
-  val Sessions = 1 to 5 map (number => (s"session $number", s"Session $number"))
+  val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
 }
 
 @Singleton
@@ -288,18 +290,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
-
-                    (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-                      case ScheduledSessionsRefreshed    =>
-                        Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!")
-                      case ScheduledSessionsNotRefreshed =>
-                        Logger.error(s"Cannot refresh feedback form actors while creating session ${createSessionInfo.topic}")
-                        InternalServerError("Something went wrong!")
-                      case msg                           =>
-                        Logger.error(s"Something went wrong when refreshing feedback form actors $msg while creating session ${createSessionInfo.topic}")
-                        InternalServerError("Something went wrong!")
-                    }
-                  } else {
+                    sessionsScheduler ! RefreshSessionsSchedulers
+                    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
+                  }
+                  else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     Future.successful(InternalServerError("Something went wrong!"))
                   }
@@ -343,17 +337,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         Future.successful(InternalServerError("Something went wrong!"))
       } { _ =>
         Logger.info(s"Knolx session $id successfully deleted")
-
-        (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-          case ScheduledSessionsRefreshed    =>
-            Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!")
-          case ScheduledSessionsNotRefreshed =>
-            Logger.error(s"Cannot refresh feedback form actors while deleting session $id")
-            InternalServerError("Something went wrong!")
-          case msg                           =>
-            Logger.error(s"Something went wrong when refreshing feedback form actors $msg while deleting session $id")
-            InternalServerError("Something went wrong!")
-        }
+        sessionsScheduler ! RefreshSessionsSchedulers
+        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!"))
       })
   }
 
@@ -394,16 +379,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
-                  (sessionsScheduler ? RefreshSessionsSchedulers) (5.seconds).mapTo[SessionsSchedulerResponse] map {
-                    case ScheduledSessionsRefreshed    =>
-                      Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated")
-                    case ScheduledSessionsNotRefreshed =>
-                      Logger.error(s"Cannot refresh feedback form actors while updating session ${updateSessionInfo.id}")
-                      InternalServerError("Something went wrong!")
-                    case msg                           =>
-                      Logger.error(s"Something went wrong when refreshing feedback form actors $msg while updating session ${updateSessionInfo.id}")
-                      InternalServerError("Something went wrong!")
-                  }
+                  sessionsScheduler ! RefreshSessionsSchedulers
+                  Logger.error(s"Cannot refresh feedback form actors while updating session ${updateSessionInfo.id}")
+                  Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated"))
                 } else {
                   Logger.error(s"Something went wrong when updating a new Knolx session for user  ${updateSessionInfo.id}")
                   Future.successful(InternalServerError("Something went wrong!"))

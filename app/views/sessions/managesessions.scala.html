@@ -1,11 +1,11 @@
 @(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_], flash: Flash)
 
-    @main("Manage Sessions") {
+@main("Manage Sessions") {
 
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
             <div class="col-md-3"></div>
-            <div class="col-md-6 search-bar" id="search-bar">
+            <div class="col-md-6 search-bar session-custom-search-bar" id="search-bar">
                 <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search Knolx by email"/>
             </div>
             <div class="col-md-3"></div>
@@ -18,7 +18,7 @@
             <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
-                  <div class="table-responsive manage-user-custom-table-margin">
+                <div class="table-responsive manage-user-custom-table-margin">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -56,24 +56,24 @@
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
 
-                                <td><span class="label @if(knolxSession.meetup){
+                                <td><span class="label @if(knolxSession.meetup) {
                                     label-success ">Meetup</span></td>
                                 }else{
-                                label-warning ">Knolx</span></td>
+                                label-warning ">Knolx</span> </td>
                             }
 
                                 @(if(knolxSession.cancelled) {
-                                        <td class='active-status' >Yes</td>
+                                        <td class='active-status'>Yes</td>
                                 } else {
-                                        <td  class='suspended' >No</td>
+                                        <td class='suspended'>No</td>
                                 })
 
                                 <td>
-                                    @(if(knolxSession.rating.isEmpty) {
-                                        "N/A"
-                                    } else {
-                                        knolxSession.rating
-                                    })
+                                @(if(knolxSession.rating.isEmpty) {
+                                    "N/A"
+                                } else {
+                                    knolxSession.rating
+                                })
                                 </td>
                                 <td>
                                 @if(knolxSession.date.before(new java.util.Date(System.currentTimeMillis))) {
@@ -109,4 +109,4 @@
     <script src="@routes.Assets.versioned("javascripts/searchmanagesession.js")" type="text/javascript"></script>
     @pagination(pageNumber, pages, routes.SessionsController.manageSessions)
 
-    }
+}

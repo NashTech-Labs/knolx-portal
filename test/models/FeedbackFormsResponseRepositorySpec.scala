@@ -41,7 +41,13 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
     }
 
     "fetch all responses for a particular user and session" in {
-      val response = await(feedbackFormsResponseRepository.allResponsesBySession("presenter@example.com", _id.stringify))
+      val response = await(feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("presenter@example.com")))
+      response.size must beEqualTo(1)
+      response.head.feedbackResponse must beEqualTo(List(questionResponseInformation))
+    }
+
+    "fetch all responses for a particular session" in {
+      val response = await(feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None))
       response.size must beEqualTo(1)
       response.head.feedbackResponse must beEqualTo(List(questionResponseInformation))
     }

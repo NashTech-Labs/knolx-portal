@@ -3,7 +3,7 @@ package controllers
 import java.util.concurrent.TimeoutException
 
 import actors.SessionsScheduler._
-import actors.UsersBanScheduler.ScheduledBanSessionsRefreshed
+import actors.UsersBanScheduler.GetScheduledBannedUsers
 import actors.{ConfiguredEmailActor, EmailActor, EmailManager}
 import akka.actor._
 import com.google.inject.name.Names
@@ -122,7 +122,6 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
 class DummySessionsScheduler extends Actor {
 
   def receive: Receive = {
-    case RefreshSessionsSchedulers         => sender ! ScheduledSessionsRefreshed
     case GetScheduledSessions              => sender ! ScheduledSessions(List.empty)
     case CancelScheduledSession(sessionId) => sender ! true
     case ScheduleSession(sessionId)        => sender ! true
@@ -133,7 +132,7 @@ class DummySessionsScheduler extends Actor {
 class DummyUsersBanScheduler extends Actor {
 
   def receive: Receive = {
-    case RefreshSessionsSchedulers => sender ! ScheduledBanSessionsRefreshed
+    case GetScheduledBannedUsers => sender ! List.empty
   }
 
 }

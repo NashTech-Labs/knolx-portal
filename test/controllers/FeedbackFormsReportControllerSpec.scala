@@ -20,13 +20,13 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  private val emailObject = Future.successful(Some(UserInfo("test@example.com",
+  private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), reminder = false, notification = false, _id)))
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@example.com",
+  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com",
     "presenter@example.com",
     _id.stringify, _id.stringify,
     "topic",
@@ -63,58 +63,73 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
   "Feedback forms report controller" should {
 
     "render reports page for a particular user if user has active sessions and also has feedbacks" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@example.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow("test@example.com") returns sessionObject
+      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns sessionObject
 
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "render reports page with all users report, if user is admin" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      sessionsRepository.activeSessions(None) returns sessionObject
+      sessionsRepository.userSessionsTillNow(None) returns sessionObject
+
+
+      val response = controller.renderAllFeedbackReports()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render reports page for a particular user if user no active sessions and also no feedbacks" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@example.com")) returns Future.successful(List())
-      sessionsRepository.userSessionsTillNow("test@example.com") returns Future.successful(List())
+      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns Future.successful(List())
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns Future.successful(List())
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render reports page for a particular user if user has active sessions with no feedback submitted yet" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@example.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow("test@example.com") returns sessionObject.map(_.map(_.copy(_id = BSONObjectID.generate())))
+      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns sessionObject.map(_.map(_.copy(_id = BSONObjectID.generate())))
 
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render reports page for a particular user if  no session is  active for the user but has feedback form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@example.com")) returns Future.successful(List())
-      sessionsRepository.userSessionsTillNow("test@example.com") returns sessionObject
+      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns Future.successful(List())
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns sessionObject
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
@@ -122,40 +137,53 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
 
     "render reports page for a particular user if user has active session and has no feedback form" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@example.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow("test@example.com") returns Future.successful(List())
+      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns Future.successful(List())
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
-    "render report by session id if responses found" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+    "render report by session id if responses found for admin" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      feedbackFormsResponseRepository.allResponsesBySession("test@example.com", _id.stringify) returns Future.successful(List(feedbackResponse))
+      feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List(feedbackResponse))
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "render report by session id if responses found for user" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject.map(user => Some(user.get.copy(admin = false)))
+
+      feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("test@knoldus.com")) returns Future.successful(List(feedbackResponse))
+
+      val response = controller.fetchUserResponsesBySessionId(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK
     }
 
     "render report by session id if no response found" in new WithTestApplication {
-      usersRepository.getByEmail("test@example.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      feedbackFormsResponseRepository.allResponsesBySession("test@example.com", _id.stringify) returns Future.successful(List())
+      feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
         FakeRequest()
-          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(response) must be equalTo OK

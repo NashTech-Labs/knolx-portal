@@ -156,7 +156,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .find(condition)
           .options(queryOptions)
-          .sort(Json.obj("date" -> 1))
+          .sort(Json.obj("date" -> -1))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[SessionInfo]]()))
   }

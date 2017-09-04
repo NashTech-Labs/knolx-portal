@@ -1,8 +1,8 @@
 .feedback-form-display-container {
     color: #000;
     margin: 100px 0px;
+    margin-bottom: 0;
     background-color: #fff;
-    box-shadow: 0 4px 7px -5px #333;
     padding: 0px 0px 0px 0px;
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
@@ -14,16 +14,18 @@
     background-image: url('../images/mesh.svg');
     background-repeat: no-repeat;
     background-size: cover;
+    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    padding-top: 50px;
+    border-top: 1px solid #fff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .feedback-top-banner {
     margin-bottom: 80px;
-    background-color: rgb(125, 158, 192);
     box-shadow: 0 9px 8px -5px #a8a8a8;
     border-bottom: 1px solid #fff;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
+    height: 30px;
 }
 
 .feedback-footer {
@@ -580,4 +582,9 @@
 
 .custom-ban-tag {
     font-size: 16px;
+}
+
+.report-container {
+
+    padding-top: 100px;
 }

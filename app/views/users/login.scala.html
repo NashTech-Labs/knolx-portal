@@ -4,64 +4,59 @@
     <div class="row">
         <div class="col-md-4" ></div>
         <div class="col-md-4 profile">
-            <div class="container-fluid top-container"></div>
-            @if(flash.get("successMessage").nonEmpty) {
-                <div class="alert alert-success login-error">
-                    <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
-                </div>
-            }
-            @if(flash.get("error").nonEmpty) {
-                <div class="alert alert-danger login-error">
-                    <strong>Error!</strong> @flash.get("error").fold("")(message => message)
-                </div>
-            }
-            <div class="login-outer">
-                <div class="col-md-12 login-first" > </div>
-
-                <form id="loginForm" action="@routes.UsersController.loginUser()" method="POST">
-
-                    @helper.CSRF.formField
-
-                    <div class="col-md-12 login-second" >
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="text" name="email" id="email" value='@loginForm.data.get("email")' placeholder="Your Email" required class="input-field loge"/>
-                        </div>
-                        <div class="col-md-1" ></div>
+            <div class="default-top-margin">
+                @if(flash.get("successMessage").nonEmpty) {
+                    <div class="alert alert-success login-error">
+                        <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
                     </div>
+                }
+                <div class="login-outer">
+                    <form id="loginForm" class='customForm' action="@routes.UsersController.loginUser()" method="POST">
 
-                    <div class="col-md-12 login-second login-third">
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="password" name="password" id="password" placeholder="Your Password" required class="input-field loge"/>
+                        @helper.CSRF.formField
+
+                        <div class="col-md-12 login-second" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="text" name="email" id="email" value='@loginForm.data.get("email")' placeholder="Email" required class="input-field no-outline reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
                         </div>
-                        <div class="col-md-1" ></div>
-                    </div>
 
-                    <div class="col-md-12 login-second login-four" >
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="submit" value="Login" class="input-field login-button"/>
+                        <div class="col-md-12 login-second login-third no-outline">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="password" name="password" id="password" placeholder="Password" required class="input-field no-outline reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
                         </div>
-                        <div class="col-md-1" ></div>
-                    </div>
-                </form>
 
-                <div class="col-md-12 login-second forget-password">
-                    <a href="@routes.UsersController.renderForgotPassword()" >Forgot password?</a>
-                    <div>
+                        <div class="col-md-12 login-second login-four" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 loader-outer">
+                                <input type="submit" value="Login" class="input-field login-button"/>
+                            </div>
+                            <div class="col-md-1" ></div>
+                        </div>
+                    </form>
+
+                    <div class="col-md-12 login-second forget-password">
+                        <i class="fa fa-meh-o forgot-password" aria-hidden="true"></i>
+                        <a href="@routes.UsersController.renderForgotPassword()" class="forgot-password-link">
+                            Forgot password?</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4" ></div>
         </div>
+        <div class="col-md-4" ></div>
     </div>
     <div class="row login-error">
         <div class="col-md-4" ></div>
         <div class="col-md-4" >
-        @if(loginForm.hasGlobalErrors || loginForm("email").hasErrors || flash.get("message").nonEmpty) {
+        @if(loginForm.hasGlobalErrors || loginForm("email").hasErrors || flash.get("message").nonEmpty || flash.get("error").nonEmpty) {
             <div class="alert alert-danger fade in ">
                 @flash.get("message").fold("")(message => message)
+                @flash.get("error").fold("")(message => message)
                 @loginForm("email").error.map(error => messages(error.message))
                 @loginForm.globalError.map(_.message)
             </div>

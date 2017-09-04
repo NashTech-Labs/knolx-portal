@@ -5,10 +5,9 @@
 .search-bar {
     height: 50px;
     border: 1px solid #dcdcdc;
-    margin-top: -30px;
-    margin-bottom: 30px;
     box-shadow: 0 4px 6px -5px #333;
     border-radius: 4px;
+    margin-bottom: 50px;
 }
 
 .search-text {
@@ -55,7 +54,6 @@
 }
 
 .manage-user-container-custom-margin {
-    margin-bottom: 100px;
     background-color: transparent;
     background-image: none;
 }
@@ -242,6 +240,18 @@
     left: 0;
 }
 
+.fa-database {
+    color: #a8a8a8;
+    font-size: 30px;
+    margin-right: 10px;
+    margin-left: 30px;
+}
+
+.no-record-found {
+    color: #666;
+    font-size: 16px;
+}
+
 .all-users-table > tbody > tr > td:first-child, .all-users-table > tbody > tr > td:nth-child(2) {
     text-align: center;
     font-family: 'gothic';
@@ -252,7 +262,6 @@
 
 .manage-user-custom-table-margin {
     margin: 0 0;
-
 }
 
 .search-text::-webkit-input-placeholder { /* Chrome */
@@ -309,7 +318,7 @@
 
 .user-updated-message {
     text-align: center;
-    margin-top: 3%;
+    margin-top: 15%;
     font-size: 15px;
 }
 
@@ -379,4 +388,8 @@
 
 .rest {
     padding-left: 0px;
+}
+
+.ban-text {
+    font-size: 13px;
 }

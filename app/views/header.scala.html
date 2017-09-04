@@ -3,7 +3,6 @@
 @activeLink(currentPath: String) = @{
     if(request.path.equals(currentPath)) "active"
 }
-<div id ="parallex-layer"></div>
 <div class="container-fluid">
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 
@@ -21,29 +20,34 @@
         <a href="#" class="pull-left logo"><img src='@routes.Assets.versioned("images/logo.png")'></a>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav">
-                <li class="@activeLink(routes.SessionsController.sessions(1, None).url) alignLinks">
-                    <a href="@routes.SessionsController.sessions(1, None)">Home</a>
+                <li class="@activeLink("/session") alignLinks">
+                    <a href="@routes.SessionsController.sessions(1, None)"><i class="fa fa-home" aria-hidden="true"></i>
+                        Home</a>
                 </li>
 
                 @if(SessionHelper.isAdmin) {
                     <li class="dropdown alignLinks">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            Manage
+                            <i class="fa fa-wrench" aria-hidden="true"></i> Manage
                             <b class="caret"></b>
                         </a>
 
                         <ul class="dropdown-menu">
                             <li class="alignLinks">
-                                <a href="@routes.SessionsController.manageSessions(1, None)">Sessions</a>
+                                <a href="@routes.SessionsController.manageSessions(1, None)"><i class="fa fa-hourglass-end" aria-hidden="true"></i>
+                                    Sessions</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">Feedback Forms</a>
+                                <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)"><i class="fa fa-file" aria-hidden="true"></i>
+                                    Feedback Forms</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.manageUser(1, None)">Users</a>
+                                <a href="@routes.UsersController.manageUser(1, None)"><i class="fa fa-users" aria-hidden="true"></i>
+                                    Users</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()">Reports</a>
+                                <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()"><i class="fa fa-folder-open" aria-hidden="true"></i>
+                                    Reports</a>
                             </li>
                         </ul>
                     </li>
@@ -52,40 +56,40 @@
 
                 @if(SessionHelper.isLoggedIn) {
                     <li class="@activeLink(routes.UsersController.login().url) alignLinks">
-                        <a href="@routes.UsersController.login()">Login</a>
+                        <a href="@routes.UsersController.login()"><i class="fa fa-sign-in" aria-hidden="true"></i>
+                            Login</a>
                     </li>
                 }
 
                 @if(SessionHelper.isLoggedIn) {
                     <li class="@activeLink(routes.UsersController.register().url) alignLinks">
-                        <a href="@routes.UsersController.register()">Register</a>
+                        <a href="@routes.UsersController.register()"><i class="fa fa-user-plus" aria-hidden="true"></i>
+                            Register</a>
                     </li>
                 } else {
 
-                    <li class="@activeLink(routes.UsersController.register().url) alignLinks">
+                    <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks">
                         <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday"><i class="fa fa-comments"></i>
                             Feedbacks</a>
                     </li>
 
                     <li class="dropdown alignLinks">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-user"></i>
+                            <i class="fa fa-user-circle-o"></i> @SessionHelper.email.split("@")(0).split('.')(0)
                             <b class="caret"></b>
                         </a>
-
                         <ul class="dropdown-menu">
                             <li class="alignLinks">
-                                <a href="@routes.HomeController.index()">@SessionHelper.email</a>
-                            </li>
-                            <li class="alignLinks">
-                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
+                                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()"><i class="fa fa-table" aria-hidden="true"></i>
                                     My session reports</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.renderChangePassword()">Reset Password</a>
+                                <a href="@routes.UsersController.renderChangePassword()"><i class="fa fa-key" aria-hidden="true"></i>
+                                    Reset Password</a>
                             </li>
                             <li class="alignLinks">
-                                <a href="@routes.UsersController.logout()">Logout</a>
+                                <a href="@routes.UsersController.logout()"><i class="fa fa-sign-out" aria-hidden="true"></i>
+                                    Logout</a>
                             </li>
                         </ul>
                     </li>

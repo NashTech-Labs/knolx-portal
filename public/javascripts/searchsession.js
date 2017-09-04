@@ -37,9 +37,9 @@ function slide(keyword, pageNumber) {
                             "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
-                            usersFound +=  '<td><span class="label label-success ">Meetup</span></td>';
+                            usersFound += '<td><span class="label label-success ">Meetup</span></td>';
                         } else {
-                            usersFound +=  '<td><span class="label label-warning ">Knolx</span></td>';
+                            usersFound += '<td><span class="label label-warning ">Knolx</span></td>';
                         }
 
                         if (sessions[session].cancelled) {
@@ -49,9 +49,15 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].rating == "") {
-                            usersFound += "<td>N/A</td></tr>";
+                            usersFound += "<td>N/A</td>";
                         } else {
-                            usersFound += "<td>" + sessions[session].rating + "</td></tr>";
+                            usersFound += "<td>" + sessions[session].rating + "</td>";
+                        }
+
+                        if (sessions[session].completed) {
+                            usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
+                        } else {
+                            usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div><td></tr>";
                         }
                     }
 
@@ -69,14 +75,14 @@ function slide(keyword, pageNumber) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>Oops! No Record Found</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
                     $('.pagination').html("");
                 }
             },
             error: function (er) {
                 $('#user-found').html(
-                    "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>" + er.responseText + "</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                    "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>" + er.responseText + "</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                 );
                 $('.pagination').html("");
             }

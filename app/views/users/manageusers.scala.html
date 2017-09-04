@@ -104,7 +104,8 @@
                                     <td class="suspended"><span class="label label-danger">Suspended</span></td>
                                 }
                                 @if(user.ban) {
-                                    <td class="active-status"><span class="label label-danger">Banned</span></td>
+                                    <td class="active-status"><span class="label label-danger">
+                                        Banned</span><p class="ban-text">@user.banTill</p></td>
                                 } else {
                                     <td class="suspended"><span class="label label-info">Allowed</span></td>
                                 }

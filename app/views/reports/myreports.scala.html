@@ -3,8 +3,7 @@
 @main("All reports") {
     <div class="row">
         <div class="col-md-2" ></div>
-        <div class="col-md-8 feedback-form-display-container">
-            <div class="col-md-12 login-first test feedback-top-banner"></div>
+        <div class="col-md-8 feedback-form-display-container report-container">
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {
@@ -17,7 +16,7 @@
                                             <div class="accepting-response"><span class="label label-danger live">
                                                 Live</span></div>
                                         </div>
-                                        @defining("Knolx") { sessionType =>
+                                        @defining(if(session.meetUp) "Meetup" else "Knolx") { sessionType =>
                                             <div class="col-md-12 feedback-card-topic custom-position">
                                                 <div class="session-type"><span class="label @if(sessionType == "Knolx") {
                                                     label-warning
@@ -40,7 +39,7 @@
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
-                                    @defining("Knolx") { sessionType =>
+                                    @defining(if(session.meetUp) "Meetup" else "Knolx") { sessionType =>
                                         <div class="col-md-12 feedback-card-topic custom-position">
                                             <div class="session-type"><span class="label @if(sessionType == "Knolx") {
                                                 label-warning

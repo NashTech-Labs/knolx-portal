@@ -6,47 +6,45 @@
 
         </div>
         <div class="col-md-4 profile" >
-            <div class="container-fluid top-container">
-            </div>
-            <div class="login-outer">
-                <div class="col-md-12 login-first" > </div>
+            <div class="default-top-margin">
+                <div class="login-outer register-custom-position">
+                    <form id="registrationForm" class='customForm' action="@routes.UsersController.createUser()" method="POST">
 
-                <form id="registrationForm" action="@routes.UsersController.createUser()" method="POST">
+                        @helper.CSRF.formField
 
-                    @helper.CSRF.formField
-
-                    <div class="col-md-12 top-registration-field" >
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Email" required class="input-field reg"/>
+                        <div class="col-md-12 top-registration-field" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="text" value='@userForm.data.get("email")' name="email" id="email" placeholder="Knoldus Email" required class="input-field reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
                         </div>
-                        <div class="col-md-1" ></div>
-                    </div>
 
-                    <div class="col-md-12 login-second login-third">
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="password" value='@userForm.data.get("password")' name="password" id="password" placeholder="Choose Password" required class="input-field reg"/>
+                        <div class="col-md-12 login-second login-third">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="password" value='@userForm.data.get("password")' name="password" id="password" placeholder="Choose Password" required class="input-field reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
                         </div>
-                        <div class="col-md-1" ></div>
-                    </div>
 
-                    <div class="col-md-12 login-second login-third">
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="password" value='@userForm.data.get("confirmPassword")' name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required class="input-field reg"/>
+                        <div class="col-md-12 login-second login-third">
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 " >
+                                <input type="password" value='@userForm.data.get("confirmPassword")' name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required class="input-field reg"/>
+                            </div>
+                            <div class="col-md-1" ></div>
                         </div>
-                        <div class="col-md-1" ></div>
-                    </div>
 
-                    <div class="col-md-12 login-second login-four" >
-                        <div class="col-md-1" ></div>
-                        <div class="col-md-10 " >
-                            <input type="submit" value="Register" class="input-field registration-button"/>
+                        <div class="col-md-12 login-second login-four" >
+                            <div class="col-md-1" ></div>
+                            <div class="col-md-10 loader-outer" >
+                                <input type="submit" value="Register" class="input-field registration-button"/>
+                            </div>
+                            <div class="col-md-1" ></div>
                         </div>
-                        <div class="col-md-1" ></div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
 

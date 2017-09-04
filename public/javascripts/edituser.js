@@ -58,7 +58,7 @@ function slide(keyword, pageNumber, filter) {
                             usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td>"
                         }
                         if (users[user].ban) {
-                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p>" + users[user].banTill + "</p></td></tr>"
+                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p class='ban-text'>" + users[user].banTill + "</p></td></tr>"
                         } else {
                             usersFound += "<td class='suspended'><span class='label label-info'>Allowed</span></td></tr>"
                         }

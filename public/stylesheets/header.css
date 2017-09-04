@@ -222,18 +222,12 @@ i.fa.fa-user:active {
     background-color: transparent;
 }
 
-@media only screen and (max-width: 766px) {
-    .collapsing, .in {
-        background-color: #000;
-        opacity: 0.7;
-    }
+.collapsing, .in {
+    background-color: #352C25;
+    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+}
 
-    .collapsing ul li a, .in ul li a {
-        color: #fff !important;
-        text-align: left;
-    }
-
-    .collapsing ul li a:hover, .in ul li a:hover {
-        color: #f1f1f1 !important;
-    }
+.navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
+    background-color: #352C25;
+    color: #fff;
 }

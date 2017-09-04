@@ -24,15 +24,13 @@
 
         <div class="row">
             <div class="col-md-2" ></div>
-            <div class="col-md-8 feedback-form-container" >
-                <div class="col-md-12 login-first test feedback-top-banner">
+            <div class="col-md-8 feedback-form-container custom-attributes" >
                     <div class="col-md-8 info-feedback" ></div>
                     <div class="col-md-4 text-right new-feedback-button" >
                         <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed">
                             <i class="fa fa-plus" aria-hidden="true"></i> New
                         </a>
                     </div>
-                </div>
                 @if(!flash.isEmpty) {
                     @if(!flash.get("message").fold("")(identity).isEmpty) {
                         <div class="alert alert-success alert-dismissable flash-success fade in">

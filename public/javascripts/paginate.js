@@ -18,7 +18,7 @@ function paginate(pageNumber, pages) {
                 pagination += pageNumber == pages ? activeList(pages) : inActiveList(pages);
                 break;
             }
-            case (pages > 5 && pageNumber >= 5 && pageNumber < pages - 2)     : {
+            case (pages > 5 && pageNumber >= 5 && pageNumber < pages - 2)  : {
                 pagination += reverseIterator(2, 0, pageNumber, pageNumber);
                 for (var iterator = 1; iterator <= 2; iterator++) {
                     pagination += fromIterator(pageNumber, (pageNumber + iterator));

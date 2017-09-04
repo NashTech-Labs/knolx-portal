@@ -58,7 +58,7 @@ function slide(keyword, pageNumber, filter) {
                             usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td>"
                         }
                         if (users[user].ban) {
-                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p>" + users[user].banTill + "</p></td></tr>"
+                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p class='ban-text'>" + users[user].banTill + "</p></td></tr>"
                         } else {
                             usersFound += "<td class='suspended'><span class='label label-info'>Allowed</span></td></tr>"
                         }
@@ -79,7 +79,7 @@ function slide(keyword, pageNumber, filter) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center'></td><td align='center'></td><td align='center'>Oops! No Record Found</td><td align='center'></td></tr>"
+                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-2'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-3'></td></tr>"
                     );
 
                     $('.pagination').html("");
@@ -87,7 +87,7 @@ function slide(keyword, pageNumber, filter) {
             },
             error: function (er) {
                 $('#user-found').html(
-                    "<tr><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td></tr>"
+                    "<tr><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td><td align='center'></td></tr>"
                 );
 
                 $('.pagination').html("");

@@ -1,12 +1,13 @@
 .create-outer {
     background-color: #FFF;
-    box-shadow: 0 4px 6px -5px #333;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     position: relative;
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
+    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    border-top: 1px solid #fff;
 }
 
 .col-md-12 {

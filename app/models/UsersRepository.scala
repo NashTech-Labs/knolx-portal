@@ -50,6 +50,8 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
 
   import play.modules.reactivemongo.json._
 
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
+
   def getByEmail(email: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
     collection
       .flatMap(jsonCollection =>
@@ -142,8 +144,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
             fetchNewObject = true,
             upsert = false)
           .map(_.result[UserInfo]))
-
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("users"))
 
   def paginate(pageNumber: Int, keyword: Option[String] = None, filter: String = "all")(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
     val millis = dateTimeUtility.nowMillis

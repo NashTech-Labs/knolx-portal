@@ -7,12 +7,6 @@
     text-align: center;
 }
 
-.navbar-collapse.navbar-ex1-collapse.collapse.in {
-    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
-    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
-    background-color: #F5F5F5;
-}
-
 .container-fluid {
     padding: 0px 0px 0px 0px;
 }
@@ -226,4 +220,20 @@ i.fa.fa-user:active {
     text-decoration: none;
     border: 1px solid #ddd;
     background-color: transparent;
+}
+
+@media only screen and (max-width: 766px) {
+    .collapsing, .in {
+        background-color: #000;
+        opacity: 0.7;
+    }
+
+    .collapsing ul li a, .in ul li a {
+        color: #fff !important;
+        text-align: left;
+    }
+
+    .collapsing ul li a:hover, .in ul li a:hover {
+        color: #f1f1f1 !important;
+    }
 }

@@ -43,7 +43,7 @@ html, body {
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    padding: 0px 1%;
+    padding: 0 1%;
 }
 
 @font-face {

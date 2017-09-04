@@ -23,7 +23,6 @@ function paginate(pageNumber, pages) {
                 for (var iterator = 1; iterator <= 2; iterator++) {
                     pagination += fromIterator(pageNumber, (pageNumber + iterator));
                 }
-                pagination += reducedFromIterator(1, 2, pageNumber, pageNumber);
                 pagination += dots();
                 pagination += inActiveList(pages);
                 break;

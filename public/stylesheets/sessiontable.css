@@ -48,7 +48,6 @@ thead > tr {
     display: table;
     width: 100%;
     bottom: 0;
-    position: fixed;
 }
 
 .v-align {

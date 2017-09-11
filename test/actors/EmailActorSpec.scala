@@ -28,7 +28,7 @@ class EmailActorSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   "Email Actor" should {
 
     "send email" in new TestScope {
-      val email = Email("Hello World", "test@example.com", List("test@example.com"), bodyHtml = Some("Hello World!"))
+      val email = Email("Hello World", "test@example.com", bcc = List("test@example.com"), bodyHtml = Some("Hello World!"))
 
       mailerClient.send(email) returns "emailId"
 

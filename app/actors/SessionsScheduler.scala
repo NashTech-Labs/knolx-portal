@@ -74,17 +74,17 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     val initialDelay = ((dateTimeUtility.endOfDayMillis + 61 * 1000) - millis).milliseconds
     Logger.info(s"Sessions scheduler will start after $initialDelay")
 
-    val reminderTime: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - millis).plusHours(10)
-    val reminderInitialDelay = dateTimeUtility.toMillis(reminderTime).milliseconds
+    val tenHrsDelay: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.endOfDayMillis - millis).plusHours(10)
+    val tenHrsDelayMillis = dateTimeUtility.toMillis(tenHrsDelay).milliseconds
 
     self ! ScheduleFeedbackEmailsStartingToday(sessionsForToday(SchedulingNext))
     self ! InitiateFeedbackEmailsStartingTomorrow(initialDelay, 1.day)
 
     self ! ScheduleFeedbackRemindersStartingToday(sessionsForToday(ExpiringNextNotReminded))
-    self ! InitialFeedbackRemindersStartingTomorrow(reminderInitialDelay, 1.day)
+    self ! InitialFeedbackRemindersStartingTomorrow(tenHrsDelayMillis, 1.day)
 
     self ! ScheduleSessionNotificationsStartingToday(sessionsForToday(SchedulingNextUnNotified))
-    self ! InitialSessionNotificationsStartingTomorrow(initialDelay, 1.day)
+    self ! InitialSessionNotificationsStartingTomorrow(tenHrsDelayMillis, 1.day)
   }
 
   def scheduler: Scheduler = context.system.scheduler

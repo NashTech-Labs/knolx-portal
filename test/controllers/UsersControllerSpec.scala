@@ -442,18 +442,6 @@ class UsersControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    /*"throw a unauthorised status if no password change request found for user" in new WithTestApplication {
-      forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(None)
-      val result = controller.resetPassword()(FakeRequest(POST, "/reset/")
-        .withFormUrlEncodedBody(
-          "token" -> "token",
-          "email" -> "test@knoldus.com",
-          "password" -> "12345678",
-          "confirmPassword" -> "12345678").withCSRFToken)
-
-      status(result) must be equalTo UNAUTHORIZED
-    }*/
-
     "throw a unauthorised status if for password reset request no active user found" in new WithTestApplication {
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns Future.successful(None)

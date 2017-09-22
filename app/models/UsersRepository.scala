@@ -9,7 +9,7 @@ import reactivemongo.play.json.BSONFormats.BSONDocumentFormat
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -119,6 +119,20 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
+  }
+
+  def updatePassword(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+
+    updatedRecord.password match {
+      case Some(password) =>
+        val modifier = BSONDocument("$set" -> BSONDocument("password" -> PasswordUtility.encrypt(password)))
+        collection
+          .flatMap(jsonCollection =>
+            jsonCollection.update(BSONDocument("email" -> updatedRecord.email), modifier))
+      case None         =>
+        Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+    }
+
   }
 
   def ban(email: String)(implicit ex: ExecutionContext): Future[WriteResult] = {

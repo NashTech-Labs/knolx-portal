@@ -1,6 +1,6 @@
 package actors
 
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{Instant, LocalDateTime, ZoneId}
 import java.util.TimeZone
 
 import actors.SessionsScheduler.{ScheduleSessionNotificationStartingTomorrow, _}
@@ -17,6 +17,7 @@ import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
@@ -54,7 +55,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     val ISTZoneId: ZoneId = ZoneId.of("Asia/Kolkata")
     val ISTTimeZone: TimeZone = TimeZone.getTimeZone("Asia/Kolkata")
-
     val sessionsForToday =
       List(SessionInfo(
         userId = "userId",
@@ -69,14 +69,27 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         cancelled = false,
         active = true,
         BSONDateTime(knolxSessionDateTime),
-        _id = sessionId))
+        _id = sessionId),
+        SessionInfo(
+          userId = "userId",
+          email = "test1@example.com",
+          date = BSONDateTime(knolxSessionDateTime),
+          session = "session 1",
+          feedbackFormId = "feedbackFormId",
+          topic = "Play Framework",
+          feedbackExpirationDays = 1,
+          meetup = true,
+          rating = "",
+          cancelled = false,
+          active = true,
+          BSONDateTime(knolxSessionDateTime),
+          _id = sessionId))
     val maybeFeedbackForm =
       Option(FeedbackForm(
         name = "Feedback Form Template 1",
         questions = List(Question(question = "How good is the Knolx portal ?", options = List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)),
         active = true,
         _id = feedbackFormId))
-
     val sessionsScheduler =
       TestActorRef(
         new SessionsScheduler(sessionsRepository, usersRepository, feedbackFormsRepository, config, emailManager, dateTimeUtility) {
@@ -84,6 +97,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
           override def scheduler: Scheduler = mockedScheduler
         })
+    private val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
   }
 
   "Sessions scheduler" should {
@@ -155,7 +169,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           bodyHtml = None,
           bodyText = Some("Hello World"), replyTo = None)
 
-      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com"))
 
       sessionsScheduler ! SendEmail(sessionsForToday, Feedback)
 
@@ -166,13 +180,37 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       val feedbackFormEmail =
         Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
           from = "test@example.com",
+          to = List("test1@example.com"),
+          bodyHtml = None,
+          bodyText = Some(" knolx reminder"), replyTo = None)
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test2@example.com"))
+
+      dateTimeUtility.toLocalDate(knolxSessionDateTime) returns Instant.ofEpochMilli(knolxSessionDateTime).atZone(ISTZoneId).toLocalDate
+
+      sessionsRepository.upsertRecord(sessionsForToday.head, Reminder) returns updateWriteResult
+
+      sessionsRepository.upsertRecord(sessionsForToday(1), Reminder) returns updateWriteResult
+
+      sessionsScheduler ! SendEmail(sessionsForToday, Reminder)
+
+      sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
+    }
+
+    "send reminder form for presenter" in new TestScope {
+      val feedbackFormEmail =
+        Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
+          from = "test@example.com",
           to = List("test@example.com"),
           bodyHtml = None,
           bodyText = Some(" knolx reminder"), replyTo = None)
 
-      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com"))
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com"))
 
       sessionsScheduler ! SendEmail(sessionsForToday, Reminder)
+
+      dateTimeUtility.toLocalDate(knolxSessionDateTime) returns Instant.ofEpochMilli(knolxSessionDateTime).atZone(ISTZoneId).toLocalDate
 
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
     }

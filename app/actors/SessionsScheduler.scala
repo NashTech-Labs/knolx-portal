@@ -6,6 +6,7 @@ import javax.inject.{Inject, Named}
 
 import actors.SessionsScheduler._
 import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
+import akka.pattern.pipe
 import controllers.routes
 import models.SessionJsonFormats.{ExpiringNextNotReminded, SchedulingNext, SchedulingNextUnNotified, SessionState}
 import models.{FeedbackFormsRepository, SessionInfo, SessionsRepository, UsersRepository}
@@ -15,42 +16,55 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
-import akka.pattern.pipe
 
 object SessionsScheduler {
 
   sealed trait EmailType
+
   sealed trait EmailOnce
+
+  // messages used for responding back with current schedulers state
+  sealed trait SessionsSchedulerResponse
+
+  case class CancelScheduledSession(sessionId: String)
+
+  case class ScheduleSession(sessionId: String)
+
+  case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
+
+  private[actors] case class ScheduleFeedbackEmailsStartingToday(eventualSessions: Future[List[SessionInfo]])
+
+  private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
+
+  private[actors] case class ScheduleFeedbackRemindersStartingToday(eventualSessions: Future[List[SessionInfo]])
+
+  private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
+
+  private[actors] case class ScheduleSessionNotificationsStartingToday(eventualSessions: Future[List[SessionInfo]])
+
+  private[actors] case class InitialSessionNotificationsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
+
+  private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
+
+  private[actors] case class SendEmail(session: List[SessionInfo], emailType: EmailType)
+
   case object Reminder extends EmailType with EmailOnce
+
   case object Notification extends EmailType with EmailOnce
+
   case object Feedback extends EmailType
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
+
   case object GetScheduledSessions
-  case class CancelScheduledSession(sessionId: String)
-  case class ScheduleSession(sessionId: String)
 
   // messages used internally for starting session schedulers/emails
   case object ScheduleFeedbackEmailsStartingTomorrow
+
   case object ScheduleFeedbackRemindersStartingTomorrow
+
   case object ScheduleSessionNotificationStartingTomorrow
-
-  private[actors] case class ScheduleFeedbackEmailsStartingToday(eventualSessions: Future[List[SessionInfo]])
-  private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
-
-  private[actors] case class ScheduleFeedbackRemindersStartingToday(eventualSessions: Future[List[SessionInfo]])
-  private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
-
-  private[actors] case class ScheduleSessionNotificationsStartingToday(eventualSessions: Future[List[SessionInfo]])
-  private[actors] case class InitialSessionNotificationsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
-
-  private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
-  private[actors] case class SendEmail(session: List[SessionInfo], emailType: EmailType)
-
-  // messages used for responding back with current schedulers state
-  sealed trait SessionsSchedulerResponse
-  case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
 }
 
@@ -86,6 +100,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     self ! ScheduleSessionNotificationsStartingToday(sessionsForToday(SchedulingNextUnNotified))
     self ! InitialSessionNotificationsStartingTomorrow(tenHrsDelayMillis, 1.day)
   }
+
+  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
 
   def scheduler: Scheduler = context.system.scheduler
 
@@ -229,15 +245,17 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def reminderEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
+
     val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
 
     scheduledEmails = scheduledEmails - key
 
-    sessions.foreach{ session =>
-      val emailsExceptPresenter = emails.filter(email=> email!=session.email)
-      emailManager ! EmailActor.SendEmail(
-        emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
-    }
+    val presenterEmails = sessions.map(session => session.email)
+    val emailsExceptPresenter = emails diff presenterEmails
+
+    emailManager ! EmailActor.SendEmail(
+      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
+
 
     Logger.info(s"Reminder Email for sessions expiring on $key sent")
 
@@ -255,6 +273,19 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         }
       }
     }
+    emailHandlerForPresenter(sessions, emailInfo, emails)
+  }
+
+  def emailHandlerForPresenter(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
+
+    sessions.foreach { session =>
+      val emailPresenter = emails.filter(email => email == session.email)
+      val presenterTopic = emailInfo.filterNot(email => email.presenter == emailPresenter.head)
+      emailManager ! EmailActor.SendEmail(
+        emailPresenter, fromEmail, "Feedback Form", views.html.emails.reminder(presenterTopic, feedbackUrl).toString)
+
+    }
+
   }
 
   def notificationEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
@@ -285,16 +316,24 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def feedbackEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
 
-    sessions.foreach{ session =>
-      val emailsExceptPresenter = emails.filter(email=> email!=session.email)
-      emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
-      fromEmail, s"${session.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
+    val presenterEmails = sessions.map(session => session.email)
+    val emailsExceptPresenter = emails diff presenterEmails
+
+
+    emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
+      fromEmail, s"Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
+
+    Logger.info(s"Feedback email for session ${sessions.head.session} sent")
+
+    //For Sending feedback form to Presenter for other's sessions
+    sessions.foreach { session =>
+      val emailPresenter = emails.filter(email => email == session.email)
+      val presenterTopic = emailInfo.filterNot(email => email.presenter == emailPresenter.head)
+      emailManager ! EmailActor.SendEmail(
+        emailPresenter, fromEmail, "Feedback Form", views.html.emails.feedback(presenterTopic, feedbackUrl).toString)
+
     }
 
-    /*emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
-      fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
-*/
-    Logger.info(s"Feedback email for session ${sessions.head.session} sent")
   }
 
   def scheduleEmails(eventualSessions: Future[List[SessionInfo]], emailType: EmailType): Future[Map[String, Cancellable]] =
@@ -312,7 +351,5 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
             scheduler.scheduleOnce(Duration.Zero, self, SendEmail(sessions, Notification)))
       }
     }
-
-  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
 
 }

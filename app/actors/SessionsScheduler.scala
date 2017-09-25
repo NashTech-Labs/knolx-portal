@@ -230,12 +230,14 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def reminderEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
-    val emailsExceptPresenter = emails.filter(email=> email!=sessions.head.email)
 
     scheduledEmails = scheduledEmails - key
 
-    emailManager ! EmailActor.SendEmail(
-      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
+    sessions.foreach{ session =>
+      val emailsExceptPresenter = emails.filter(email=> email!=session.email)
+      emailManager ! EmailActor.SendEmail(
+        emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
+    }
 
     Logger.info(s"Reminder Email for sessions expiring on $key sent")
 
@@ -282,10 +284,16 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def feedbackEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
-    val emailsExceptPresenter = emails.filter(email=> email!=sessions.head.email)
-    emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
-      fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
 
+    sessions.foreach{ session =>
+      val emailsExceptPresenter = emails.filter(email=> email!=session.email)
+      emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
+      fromEmail, s"${session.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
+    }
+
+    /*emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
+      fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
+*/
     Logger.info(s"Feedback email for session ${sessions.head.session} sent")
   }
 

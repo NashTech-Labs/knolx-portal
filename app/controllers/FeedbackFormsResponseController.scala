@@ -89,7 +89,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           .activeSessions()
           .flatMap { activeSessions =>
             if (activeSessions.nonEmpty) {
-              val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
+              val sessionFeedbackMappings = Future.sequence(activeSessions filter { session => session.email != request.user.email.toLowerCase }
+                map { session =>
                 feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
                   case Some(form) =>
                     val sessionInformation =
@@ -112,7 +113,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
 
                     Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
-                  case None       =>
+                  case None =>
                     Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                     None
                 }
@@ -127,7 +128,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       } { bannedUser =>
         val bantill = dateTimeUtility.toLocalDate(bannedUser.banTill.value)
         val today = dateTimeUtility.localDateIST
-        val daysLeft = today.until(bantill, ChronoUnit.DAYS);
+        val daysLeft = today.until(bantill, ChronoUnit.DAYS)
         Future.successful(Unauthorized(views.html.feedback.banned(BannedUser(daysLeft, new Date(bannedUser.banTill.value).toString))))
       }
     }
@@ -222,7 +223,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             } else {
               None
             }
-          case None               => None
+          case None => None
         }
       }
     }
@@ -232,20 +233,20 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     for ((question, response) <- questions zip responses) yield {
 
       (question.questionType, question.mandatory) match {
-        case ("MCQ", true)      => if (question.options.contains(response) && response.nonEmpty) {
+        case ("MCQ", true) => if (question.options.contains(response) && response.nonEmpty) {
           Some(QuestionResponse(question.question, question.options, response))
         }
         else {
           None
         }
-        case ("COMMENT", true)  => if (response.nonEmpty) {
+        case ("COMMENT", true) => if (response.nonEmpty) {
           Some(QuestionResponse(question.question, question.options, response))
         } else {
           None
         }
-        case ("MCQ", false)     => None
+        case ("MCQ", false) => None
         case ("COMMENT", false) => Some(QuestionResponse(question.question, question.options, response))
-        case _                  => None
+        case _ => None
 
       }
     }

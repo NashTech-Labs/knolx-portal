@@ -89,7 +89,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           .activeSessions()
           .flatMap { activeSessions =>
             if (activeSessions.nonEmpty) {
-              val sessionFeedbackMappings = Future.sequence(activeSessions filter { session => session.email != request.user.email.toLowerCase }
+              val sessionFeedbackMappings = Future.sequence(activeSessions filterNot { session => session.email == request.user.email.toLowerCase }
                 map { session =>
                 feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
                   case Some(form) =>

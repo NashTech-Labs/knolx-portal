@@ -113,6 +113,7 @@ var currentFeedbackProfile = "";
 
 function loadFeedbackForm(values, sessionId) {
 
+
     $('#mandatory-warning').css("display", "none");
     $('#feedback-response-form').html("");
     var optionsLoaded = "";
@@ -127,7 +128,7 @@ function loadFeedbackForm(values, sessionId) {
         }
         if (type == "MCQ") {
             for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-                optionsLoaded += "<div class='row'>" +
+                optionsLoaded += "<div class='row questions-inlining'>" +
                     "<div class='col-md-1'></div>" +
                     "<div class='col-md-10'>" +
                     "<label class='radio-button'>" +
@@ -141,7 +142,7 @@ function loadFeedbackForm(values, sessionId) {
             }
         }
         else {
-            optionsLoaded += "<div class='row'>" +
+            optionsLoaded += "<div class='row option-questions '>" +
                 "<div class='col-md-1'></div>" +
                 "<div class='col-md-10'>" +
                 "​<textarea class='comments' rows='2' id='option-" + questionNumber + "' cols='70' placeholder='Edit Comment Here!'></textarea>" +
@@ -166,7 +167,7 @@ function loadFeedbackForm(values, sessionId) {
             "<div class='question-card form-question-card' id='question-outer-" + questionNumber + "'>" +
             "<label class='card-questions-label'>" +
             "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
-            "</label>" + optionsLoaded + "</div>"
+            "</label><br>" + optionsLoaded + "</div>"
         );
 
         document.getElementById('current-form').value = JSON.stringify(values);

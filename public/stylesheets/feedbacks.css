@@ -28,6 +28,11 @@
     height: 30px;
 }
 
+.questions-inlining{
+     display: inline-block;
+         margin-right: 36px;
+         padding-left: 36px;
+    }
 .feedback-footer {
     height: 30px;
     background-color: #dcdcdc;
@@ -368,6 +373,9 @@
     margin-top: 0px;
     margin-bottom: 15px;
     background-color: #fff;
+    overflow-x:auto;
+    white-space: nowrap;
+    height: 207px;
 }
 
 .submit-form-button {

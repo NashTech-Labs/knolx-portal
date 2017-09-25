@@ -89,7 +89,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           .activeSessions()
           .flatMap { activeSessions =>
             if (activeSessions.nonEmpty) {
-              val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
+              val sessionFeedbackMappings = Future.sequence(activeSessions filterNot { session => session.email == request.user.email.toLowerCase }
+                map { session =>
                 feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
                   case Some(form) =>
                     val sessionInformation =
@@ -127,7 +128,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       } { bannedUser =>
         val bantill = dateTimeUtility.toLocalDate(bannedUser.banTill.value)
         val today = dateTimeUtility.localDateIST
-        val daysLeft = today.until(bantill, ChronoUnit.DAYS);
+        val daysLeft = today.until(bantill, ChronoUnit.DAYS)
         Future.successful(Unauthorized(views.html.feedback.banned(BannedUser(daysLeft, new Date(bannedUser.banTill.value).toString))))
       }
     }

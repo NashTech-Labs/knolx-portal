@@ -251,9 +251,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     scheduledEmails = scheduledEmails - key
 
     val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
-
+    val emailBody = emailInfo.filter(_.presenter == sessions.head.email)
     emailManager ! EmailActor.SendEmail(
-      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
+      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailBody, feedbackUrl).toString)
 
 
     Logger.info(s"Reminder Email for sessions expiring on $key sent")
@@ -304,9 +304,10 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
 
     val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
+    val emailBody = emailInfo.filter(_.presenter == sessions.head.email)
 
     emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
-      fromEmail, s"Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
+      fromEmail, s"Feedback Form", views.html.emails.feedback(emailBody, feedbackUrl).toString)
 
     Logger.info(s"Feedback email for session ${sessions.head.session} sent")
 

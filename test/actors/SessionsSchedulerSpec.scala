@@ -198,22 +198,29 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
     }
 
-    "send reminder form for presenter" in new TestScope {
+    "send notification" in new TestScope {
       val feedbackFormEmail =
         Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
           from = "test@example.com",
-          to = List("test@example.com"),
+          to = List("test@example.com","test2@example.com"),
           bodyHtml = None,
           bodyText = Some(" knolx reminder"), replyTo = None)
 
-      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com"))
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      sessionsScheduler ! SendEmail(sessionsForToday, Reminder)
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test2@example.com"))
 
       dateTimeUtility.toLocalDate(knolxSessionDateTime) returns Instant.ofEpochMilli(knolxSessionDateTime).atZone(ISTZoneId).toLocalDate
 
+      sessionsRepository.upsertRecord(sessionsForToday.head, Notification) returns updateWriteResult
+
+      sessionsRepository.upsertRecord(sessionsForToday(1),Notification) returns updateWriteResult
+
+      sessionsScheduler ! SendEmail(sessionsForToday, Notification)
+
       sessionsScheduler.underlyingActor.scheduledEmails.keys must not(contain(LocalDateTime.now(ISTZoneId).toLocalDate.toString))
     }
+
 
     "cancel a scheduled session" in new TestScope {
       val cancellable = new Cancellable {

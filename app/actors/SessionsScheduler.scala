@@ -250,8 +250,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
     scheduledEmails = scheduledEmails - key
 
-    val presenterEmails = sessions.map(session => session.email)
-    val emailsExceptPresenter = emails diff presenterEmails
+    val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
 
     emailManager ! EmailActor.SendEmail(
       emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
@@ -272,18 +271,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
             s" ${sessions.map(_._id.stringify)} on $key")
         }
       }
-    }
-    emailHandlerForPresenter(sessions, emailInfo, emails)
-  }
-
-  def emailHandlerForPresenter(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
-
-    sessions.foreach { session =>
-      val emailPresenter = emails.filter(email => email == session.email)
-      val presenterTopic = emailInfo.filterNot(email => email.presenter == emailPresenter.head)
-      emailManager ! EmailActor.SendEmail(
-        emailPresenter, fromEmail, "Feedback Form", views.html.emails.reminder(presenterTopic, feedbackUrl).toString)
-
     }
 
   }
@@ -316,23 +303,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def feedbackEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
 
-    val presenterEmails = sessions.map(session => session.email)
-    val emailsExceptPresenter = emails diff presenterEmails
-
+    val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
 
     emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
       fromEmail, s"Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
 
     Logger.info(s"Feedback email for session ${sessions.head.session} sent")
-
-    //For Sending feedback form to Presenter for other's sessions
-    sessions.foreach { session =>
-      val emailPresenter = emails.filter(email => email == session.email)
-      val presenterTopic = emailInfo.filterNot(email => email.presenter == emailPresenter.head)
-      emailManager ! EmailActor.SendEmail(
-        emailPresenter, fromEmail, "Feedback Form", views.html.emails.feedback(presenterTopic, feedbackUrl).toString)
-
-    }
 
   }
 

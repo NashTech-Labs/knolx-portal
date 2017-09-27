@@ -106,9 +106,7 @@ input#form-name:focus {
 
 .radio-button {
     display: flex;
-
 }
-
 .lab_text {
     font-family: 'headerfont';
     color: #888888;
@@ -138,9 +136,12 @@ input#form-name:focus {
     font-size: 25px;
 }
 
-p.checkbox-text {
-    width: 100%;
+.checkbox-text {
+    width:100%;
+
 }
+
+label.radio-button .lab_text {display: inline-block; margin: 0 auto;  }
 
 .delete-option-button {
     margin-top: 24px;
@@ -317,3 +318,31 @@ textarea{
 .comment-section:disabled{
     background-color:#fff;
 }
+
+
+/** New Added styles*/
+.feedback-duration {padding:20px 0}
+.feedback-duration .checkbox-text {
+    width: 70px;
+    display: inline-block;
+}
+
+.feedback-duration .days-outer .days{    width: 40px;
+                                         margin: 0 0 0 -6px;}
+ .feedback-duration .days-outer .checkbox-text { white-space:nowrap}
+
+ .duration-title {
+
+     margin-left: 0;
+     line-height: 22px;
+ }
+
+ .questions-inlining .checkbox-text {
+     white-space: normal;
+     word-wrap: break-word;
+     line-height: 24px;
+     max-width: 200px;
+     width: 100%;
+ }
+
+ .card-questions-label{ display:block}

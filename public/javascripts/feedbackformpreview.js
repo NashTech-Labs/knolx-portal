@@ -29,7 +29,7 @@ function generatePreview() {
 /*                   questions[questionNumber]['questionType']*/
                     if(questions[questionNumber]['questionType'] == 'MCQ') {
                         for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-                            optionsLoaded += "<div class='col-md-4'><label class='preview-options'><i class='fa fa-circle-o' aria-hidden='true'></i> " + options[optionNumber] + "</label></div>"
+                            optionsLoaded += "<div class='col-md-12'><label class='preview-options'><i class='fa fa-circle-o' aria-hidden='true'></i> " + options[optionNumber] + "</label></div>"
                         }
                     }
                     else{

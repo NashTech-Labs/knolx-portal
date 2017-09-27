@@ -28,11 +28,11 @@
     height: 30px;
 }
 
-.questions-inlining{
-     display: inline-block;
-         margin-right: 36px;
-         padding-left: 36px;
-    }
+.questions-inlining {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 0;
+}
 .feedback-footer {
     height: 30px;
     background-color: #dcdcdc;
@@ -365,6 +365,7 @@
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
+    text-align: center;
 }
 
 .form-question-card {
@@ -375,7 +376,7 @@
     background-color: #fff;
     overflow-x:auto;
     white-space: nowrap;
-    height: 207px;
+    height: 240px;
 }
 
 .submit-form-button {
@@ -595,4 +596,25 @@
 .report-container {
 
     padding-top: 100px;
+}
+
+
+.form-question-card {
+    max-height: 260px;
+    height: auto;
+}
+
+#formData .preview-options {
+    padding-left: 40px;
+    line-height: 28px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    position: relative;
+}
+
+#formData .preview-options i.fa {
+    position: absolute;
+    left: 10px;
+    top: 6px;
 }

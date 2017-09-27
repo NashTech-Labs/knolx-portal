@@ -130,12 +130,12 @@ function loadFeedbackForm(values, sessionId) {
             for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
                 optionsLoaded += "<div class='row questions-inlining'>" +
                     "<div class='col-md-1'></div>" +
-                    "<div class='col-md-10'>" +
-                    "<label class='radio-button'>" +
-                    "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
-                    "<span class='lab_text'></span>" +
+                    "<div style='width:auto; text-align:center'>" +
                     "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
-                    "</p>" +
+                                        "</p>"+
+                    "<label class='radio-button'>" +
+                    "<span class='lab_text'></span>" +
+                    "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
                     "</label>" +
                     "</div>" +
                     "</div>";
@@ -166,8 +166,8 @@ function loadFeedbackForm(values, sessionId) {
         $('#feedback-response-form').append(
             "<div class='question-card form-question-card' id='question-outer-" + questionNumber + "'>" +
             "<label class='card-questions-label'>" +
-            "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
-            "</label><br>" + optionsLoaded + "</div>"
+                        "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
+            "</label>" + optionsLoaded + "</div>"
         );
 
         document.getElementById('current-form').value = JSON.stringify(values);

@@ -410,4 +410,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .flashing("message" -> "Feedback form schedule initiated"))
   }
 
+  def shareSession(sessionId : String):Action[AnyContent]= action.async { implicit request =>
+
+    Future.successful(Ok(views.html.sessions.sessioncontent("https://www.youtube.com/watch?v=XKbiIahG6ok",
+      "www.slideshare.net/slideshow/embed_code/key/7leiknuSAOrzWB")))
+
+  }
+
 }

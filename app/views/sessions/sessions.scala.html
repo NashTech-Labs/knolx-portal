@@ -35,7 +35,7 @@
                         @knolxSessions.map { knolxSession =>
 
                         @if(knolxSession.completed) {
-                        <tr class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
+                        <tr style="cursor:pointer;" class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
                         }else {
                         <tr>
                         }

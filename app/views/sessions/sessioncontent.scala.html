@@ -10,7 +10,7 @@
     <div class="row">
     <div class="col-md-6 text-center" >
     @session.slideShareLink.fold{
-    @index("Hello")
+    @index("Slides")
 } { slideShareLink =>
         <iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
 
@@ -33,7 +33,7 @@
     </div>
         <div class="col-md-6 text-center" >
         @session.youtubeLink.fold{
-@index("Hello")
+@sessionNotFound("Video")
 } { youtubeLink =>
 <iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
  }

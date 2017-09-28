@@ -5,10 +5,6 @@
  max-width: 100%;
  width:500px;
  height:400px;
- frameborder="1"
- marginwidth="20"
- marginheight="0"
- scrolling="no"
 }
 
 .topic-name{
@@ -25,6 +21,12 @@ color:grey;
 font-style: italic;
 font-size: 20px;
 font-weight:bold;
+}
+
+.share-style{
+    display: inline-block;
+    vertical-align: top;
+    margin: 5px 4px;
 }
 
 

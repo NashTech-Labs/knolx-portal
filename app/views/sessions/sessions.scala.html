@@ -33,7 +33,12 @@
                         </thead>
                         <tbody id="user-found">
                         @knolxSessions.map { knolxSession =>
-                            <tr class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
+
+                        @if(knolxSession.completed) {
+                        <tr class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
+                        }else {
+                        <tr>
+                        }
 
                                 <td>@knolxSession.date</td>
                                 <td>@knolxSession.session</td>

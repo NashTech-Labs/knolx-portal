@@ -427,11 +427,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .flashing("message" -> "Feedback form schedule initiated"))
   }
 
-  def shareContent(id: String): Action[AnyContent] = userAction.async { implicit request =>
+  def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
     val futureSessionOption: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
     futureSessionOption.flatMap( sessionOption =>
       sessionOption.fold(Future.successful(Ok(views.html.sessionNotFound("Hardcoded message"))))
-      (session => Future.successful(Ok(views.html.trying(session)))))
+      (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
   }
 
 }

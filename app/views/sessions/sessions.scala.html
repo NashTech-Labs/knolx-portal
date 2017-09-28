@@ -33,7 +33,7 @@
                         </thead>
                         <tbody id="user-found">
                         @knolxSessions.map { knolxSession =>
-                            <tr class='clickable-row' data-href='@routes.SessionsController.shareSession(knolxSession.id)'>
+                            <tr class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
 
                                 <td>@knolxSession.date</td>
                                 <td>@knolxSession.session</td>

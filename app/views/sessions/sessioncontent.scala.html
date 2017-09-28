@@ -1,12 +1,89 @@
-@(youtubeLink: String,slideShareLink: String)(implicit request: Request[_], flash: Flash)
+@(session:SessionInfo)(implicit request: Request[_], flash: Flash)
 
-@main("SessionContent") {
+@main("") {
+<br><br><br><br><br>
+    <div class="topic-name">@session.topic</div>
+    <div class="topic-presenter">by @session.email</div>
 
+<hr>
 <br>
-<br>
-<br>
-<br>
-<br>
+<div class="container">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">Presentation</a>
+                </h4>
+            </div>
+            <div id="collapse1" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    @session.slideShareLink.fold{
+                    @index("Hello")
+                    } { slideShareLink =>
+                    <iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
 
-<iframe src="//@slideShareLink" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/AakashJain40/case-class-amp-pattern-matching" title="Case class &amp;amp; pattern matching" target="_blank">Case class &amp;amp; pattern matching</a> </strong> from <strong><a href="https://www.slideshare.net/AakashJain40" target="_blank">Aakash Jain</a></strong> </div>
+                    <div class="fb-share-button" data-href="//@slideShareLink" data-layout="button" data-size="small" data-mobile-iframe="true">
+                        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareLink;src=sdkpreparse">Share
+                        </a>
+                    </div>
+                    <a target="_blank" data-href="//@slideShareLink" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareLink>
+                        Tweet
+                    </a>
+
+                     <script type="IN/Share" data-url="//@slideShareLink"></script>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Video</a>
+                </h4>
+            </div>
+            <div id="collapse2" class="panel-collapse collapse">
+                <div class="panel-body" >
+                    <center>
+                    @session.youtubeLink.fold{
+                    @index("Hello")
+                    } { youtubeLink =>
+                    <iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
+                    }
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="row">
+    <div class="col-md-6">
+    @session.slideShareLink.fold{
+    @index("Hello")
+} { slideShareLink =>
+<iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
+    <br>
+<div>
+        <div class="fb-share-button" data-href="//@slideShareLink" data-layout="button" data-size="small" data-mobile-iframe="true">
+    <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareLink;src=sdkpreparse">Share
+    </a>
+</div>
+    <a target="_blank" data-href="//@slideShareLink" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareLink>
+    Tweet
+    </a>
+        <script type="IN/Share" data-url="//@slideShareLink"></script>
+}
+    </div>
+    </div>
+        <div class="col-md-6">
+        @session.youtubeLink.fold{
+@index("Hello")
+} { youtubeLink =>
+<iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
+ }
+        </div>
+</div>
+
 }

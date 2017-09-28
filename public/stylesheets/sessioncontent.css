@@ -1,0 +1,30 @@
+.frame-panel{
+ border:2px solid #CCC;
+ border-width:2px;
+ margin-bottom:5px;
+ max-width: 100%;
+ width:500px;
+ height:400px;
+ frameborder="1"
+ marginwidth="20"
+ marginheight="0"
+ scrolling="no"
+}
+
+.topic-name{
+font-family: Times New Roman;
+color:blue;
+font-style: italic;
+font-size: 35px;
+font-weight:bold;
+}
+
+.topic-presenter{
+font-family: Times New Roman;
+color:grey;
+font-style: italic;
+font-size: 20px;
+font-weight:bold;
+}
+
+

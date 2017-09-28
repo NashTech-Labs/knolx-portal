@@ -202,7 +202,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       val feedbackFormEmail =
         Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
           from = "test@example.com",
-          to = List("test@example.com","test2@example.com"),
+          to = List("test@example.com", "test2@example.com"),
           bodyHtml = None,
           bodyText = Some(" knolx reminder"), replyTo = None)
 
@@ -214,7 +214,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       sessionsRepository.upsertRecord(sessionsForToday.head, Notification) returns updateWriteResult
 
-      sessionsRepository.upsertRecord(sessionsForToday(1),Notification) returns updateWriteResult
+      sessionsRepository.upsertRecord(sessionsForToday(1), Notification) returns updateWriteResult
 
       sessionsScheduler ! SendEmail(sessionsForToday, Notification)
 

@@ -6,7 +6,6 @@ import javax.inject.{Inject, Named}
 
 import actors.SessionsScheduler._
 import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
-import akka.pattern.pipe
 import controllers.routes
 import models.SessionJsonFormats.{ExpiringNextNotReminded, SchedulingNext, SchedulingNextUnNotified, SessionState}
 import models.{FeedbackFormsRepository, SessionInfo, SessionsRepository, UsersRepository}
@@ -16,6 +15,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
+import akka.pattern.pipe
 
 object SessionsScheduler {
 
@@ -23,14 +23,27 @@ object SessionsScheduler {
 
   sealed trait EmailOnce
 
-  // messages used for responding back with current schedulers state
-  sealed trait SessionsSchedulerResponse
+  case object Reminder extends EmailType with EmailOnce
+
+  case object Notification extends EmailType with EmailOnce
+
+  case object Feedback extends EmailType
+
+  // messages used for getting/reconfiguring schedulers/scheduled-emails
+  case object RefreshSessionsSchedulers
+
+  case object GetScheduledSessions
 
   case class CancelScheduledSession(sessionId: String)
 
   case class ScheduleSession(sessionId: String)
 
-  case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
+  // messages used internally for starting session schedulers/emails
+  case object ScheduleFeedbackEmailsStartingTomorrow
+
+  case object ScheduleFeedbackRemindersStartingTomorrow
+
+  case object ScheduleSessionNotificationStartingTomorrow
 
   private[actors] case class ScheduleFeedbackEmailsStartingToday(eventualSessions: Future[List[SessionInfo]])
 
@@ -48,23 +61,10 @@ object SessionsScheduler {
 
   private[actors] case class SendEmail(session: List[SessionInfo], emailType: EmailType)
 
-  case object Reminder extends EmailType with EmailOnce
+  // messages used for responding back with current schedulers state
+  sealed trait SessionsSchedulerResponse
 
-  case object Notification extends EmailType with EmailOnce
-
-  case object Feedback extends EmailType
-
-  // messages used for getting/reconfiguring schedulers/scheduled-emails
-  case object RefreshSessionsSchedulers
-
-  case object GetScheduledSessions
-
-  // messages used internally for starting session schedulers/emails
-  case object ScheduleFeedbackEmailsStartingTomorrow
-
-  case object ScheduleFeedbackRemindersStartingTomorrow
-
-  case object ScheduleSessionNotificationStartingTomorrow
+  case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
 }
 
@@ -100,8 +100,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     self ! ScheduleSessionNotificationsStartingToday(sessionsForToday(SchedulingNextUnNotified))
     self ! InitialSessionNotificationsStartingTomorrow(tenHrsDelayMillis, 1.day)
   }
-
-  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
 
   def scheduler: Scheduler = context.system.scheduler
 
@@ -245,16 +243,13 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def reminderEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
-
     val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
-
-    scheduledEmails = scheduledEmails - key
-
     val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
     val emailBody = emailInfo.filter(_.presenter == sessions.head.email)
+    scheduledEmails = scheduledEmails - key
+
     emailManager ! EmailActor.SendEmail(
       emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailBody, feedbackUrl).toString)
-
 
     Logger.info(s"Reminder Email for sessions expiring on $key sent")
 
@@ -272,7 +267,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         }
       }
     }
-
   }
 
   def notificationEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
@@ -302,15 +296,13 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def feedbackEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
-
     val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
     val emailBody = emailInfo.filter(_.presenter == sessions.head.email)
 
-    emailManager ! EmailActor.SendEmail(emailsExceptPresenter,
-      fromEmail, s"Feedback Form", views.html.emails.feedback(emailBody, feedbackUrl).toString)
+    emailManager ! EmailActor.SendEmail(
+      emailsExceptPresenter, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailBody, feedbackUrl).toString)
 
     Logger.info(s"Feedback email for session ${sessions.head.session} sent")
-
   }
 
   def scheduleEmails(eventualSessions: Future[List[SessionInfo]], emailType: EmailType): Future[Map[String, Cancellable]] =
@@ -328,5 +320,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
             scheduler.scheduleOnce(Duration.Zero, self, SendEmail(sessions, Notification)))
       }
     }
+
+  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
 
 }

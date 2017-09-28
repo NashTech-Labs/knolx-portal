@@ -63,8 +63,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   @Named("EmailManager") emailManager: ActorRef,
                                   dateTimeUtility: DateTimeUtility) extends Actor {
 
-  lazy val fromEmail = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
-  lazy val host = configuration.getOptional[String]("knolx.url").getOrElse("localhost:9000")
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val host: String = configuration.getOptional[String]("knolx.url").getOrElse("localhost:9000")
   val feedbackUrl = s"$host${routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url}"
 
   var scheduledEmails: Map[String, Cancellable] = Map.empty

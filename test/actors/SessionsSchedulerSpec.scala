@@ -154,6 +154,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
 
       sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
+
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
 
       val result: ScheduledSessions = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])

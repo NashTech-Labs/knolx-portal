@@ -62,7 +62,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         date = BSONDateTime(knolxSessionDateTime),
         session = "session 1",
         feedbackFormId = "feedbackFormId",
-        topic = "Play Framework",
+        topic = "Akka",
         feedbackExpirationDays = 1,
         meetup = true,
         rating = "",
@@ -179,14 +179,14 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     "send reminder form" in new TestScope {
       val feedbackFormEmail =
-        Email(subject = s"${sessionsForToday.head.topic} Feedback Form",
+        Email(subject = s"${sessionsForToday.head.topic} Reminder Feedback Form",
           from = "test@example.com",
           to = List("test1@example.com"),
           bodyHtml = None,
           bodyText = Some(" knolx reminder"), replyTo = None)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test2@example.com"))
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com","test2@example.com"))
 
       dateTimeUtility.toLocalDate(knolxSessionDateTime) returns Instant.ofEpochMilli(knolxSessionDateTime).atZone(ISTZoneId).toLocalDate
 
@@ -209,7 +209,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test2@example.com"))
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com"))
 
       dateTimeUtility.toLocalDate(knolxSessionDateTime) returns Instant.ofEpochMilli(knolxSessionDateTime).atZone(ISTZoneId).toLocalDate
 

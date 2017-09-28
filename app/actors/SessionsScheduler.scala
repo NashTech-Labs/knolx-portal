@@ -63,8 +63,8 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   @Named("EmailManager") emailManager: ActorRef,
                                   dateTimeUtility: DateTimeUtility) extends Actor {
 
-  lazy val fromEmail = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
-  lazy val host = configuration.getOptional[String]("knolx.url").getOrElse("localhost:9000")
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val host: String = configuration.getOptional[String]("knolx.url").getOrElse("localhost:9000")
   val feedbackUrl = s"$host${routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url}"
 
   var scheduledEmails: Map[String, Cancellable] = Map.empty
@@ -230,13 +230,13 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def reminderEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
-    val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
-    val emailBody = emailInfo.filter(_.presenter == sessions.head.email)
+    val presenterEmails = sessions.map(_.email)
+    val emailsExceptPresenter = emails diff presenterEmails
 
     scheduledEmails = scheduledEmails - key
 
     emailManager ! EmailActor.SendEmail(
-      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailBody, feedbackUrl).toString)
+      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
 
     Logger.info(s"Reminder Email for sessions expiring on $key sent")
 
@@ -254,7 +254,20 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         }
       }
     }
+
+    reminderEmailHandlerForPresenter(sessions, emailInfo, presenterEmails)
   }
+
+  def reminderEmailHandlerForPresenter(sessions: List[SessionInfo], emailInfo: List[EmailInfo], presenterEmails: List[String]): Unit = {
+    presenterEmails foreach { presenterEmail =>
+      val presenterOtherTopic = emailInfo.filterNot(_.presenter == presenterEmail)
+      presenterOtherTopic foreach { topic =>
+        emailManager ! EmailActor.SendEmail(
+          List(presenterEmail), fromEmail, "Feedback Reminder", views.html.emails.reminder(List(topic), feedbackUrl).toString)
+      }
+    }
+  }
+
 
   def notificationEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     val key = s"notify${dateTimeUtility.toLocalDate(sessions.head.date.value).toString}"
@@ -284,10 +297,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def feedbackEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
     scheduledEmails = scheduledEmails - sessions.head._id.stringify
     val emailsExceptPresenter = emails.filterNot(_.equals(sessions.head.email))
-    val emailBody = emailInfo.filter(_.presenter == sessions.head.email)
 
     emailManager ! EmailActor.SendEmail(
-      emailsExceptPresenter, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailBody, feedbackUrl).toString)
+      emailsExceptPresenter, fromEmail, s"${sessions.head.topic} Feedback Form", views.html.emails.feedback(emailInfo, feedbackUrl).toString)
 
     Logger.info(s"Feedback email for session ${sessions.head.session} sent")
   }

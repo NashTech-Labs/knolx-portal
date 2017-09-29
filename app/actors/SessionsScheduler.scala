@@ -254,16 +254,18 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
         }
       }
     }
-
     reminderEmailHandlerForPresenter(sessions, emailInfo, presenterEmails)
   }
 
   def reminderEmailHandlerForPresenter(sessions: List[SessionInfo], emailInfo: List[EmailInfo], presenterEmails: List[String]): Unit = {
     presenterEmails foreach { presenterEmail =>
       val presenterOtherTopic = emailInfo.filterNot(_.presenter == presenterEmail)
-      presenterOtherTopic foreach { topic =>
+      if (presenterOtherTopic.nonEmpty) {
         emailManager ! EmailActor.SendEmail(
-          List(presenterEmail), fromEmail, "Feedback Reminder", views.html.emails.reminder(List(topic), feedbackUrl).toString)
+          List(presenterEmail), fromEmail, "Feedback Reminder", views.html.emails.reminder(presenterOtherTopic, feedbackUrl).toString)
+      }
+      else {
+        Logger.error("No other session for Presenter to remind for feedback")
       }
     }
   }

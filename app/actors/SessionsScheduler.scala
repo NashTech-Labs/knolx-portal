@@ -20,36 +20,50 @@ import akka.pattern.pipe
 object SessionsScheduler {
 
   sealed trait EmailType
+
   sealed trait EmailOnce
+
   case object Reminder extends EmailType with EmailOnce
+
   case object Notification extends EmailType with EmailOnce
+
   case object Feedback extends EmailType
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
+
   case object GetScheduledSessions
+
   case class CancelScheduledSession(sessionId: String)
+
   case class ScheduleSession(sessionId: String)
 
   // messages used internally for starting session schedulers/emails
   case object ScheduleFeedbackEmailsStartingTomorrow
+
   case object ScheduleFeedbackRemindersStartingTomorrow
+
   case object ScheduleSessionNotificationStartingTomorrow
 
   private[actors] case class ScheduleFeedbackEmailsStartingToday(eventualSessions: Future[List[SessionInfo]])
+
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class ScheduleFeedbackRemindersStartingToday(eventualSessions: Future[List[SessionInfo]])
+
   private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class ScheduleSessionNotificationsStartingToday(eventualSessions: Future[List[SessionInfo]])
+
   private[actors] case class InitialSessionNotificationsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
+
   private[actors] case class SendEmail(session: List[SessionInfo], emailType: EmailType)
 
   // messages used for responding back with current schedulers state
   sealed trait SessionsSchedulerResponse
+
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
 }
@@ -260,11 +274,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   def reminderEmailHandlerForPresenter(sessions: List[SessionInfo], emailInfo: List[EmailInfo], presenterEmails: List[String]): Unit = {
     presenterEmails foreach { presenterEmail =>
       val presenterOtherTopic = emailInfo.filterNot(_.presenter == presenterEmail)
-      if(presenterOtherTopic.nonEmpty){
+      if (presenterOtherTopic.nonEmpty) {
         emailManager ! EmailActor.SendEmail(
           List(presenterEmail), fromEmail, "Feedback Reminder", views.html.emails.reminder(presenterOtherTopic, feedbackUrl).toString)
       }
-      else{
+      else {
         Logger.error("No other session for Presenter to remind for feedback")
       }
     }

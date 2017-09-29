@@ -120,13 +120,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
-  val sessionLinksForm = Form(
-    mapping(
-      "id" -> nonEmptyText,
-      "youtubeLink" -> optional(nonEmptyText),
-      "slideShareLink" -> optional(nonEmptyText)
-    )(KnolxSessionLinks.apply)(KnolxSessionLinks.unapply)
-  )
 
   def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository

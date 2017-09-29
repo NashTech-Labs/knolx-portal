@@ -8,38 +8,59 @@
     <div class="topic-name ">@session.topic</div>
     <div class="topic-presenter">by @session.email</div>
 
-<hr class="hr-shadow">
+    <hr class="hr-shadow">
     <div class="row" style="padding-top:20px;">
-    <div class="col-md-6 text-center" >
-    @session.slideShareLink.fold{
-    @sessionNotFound("Slides")
-} { slideShareLink =>
-        <iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
+        <div class="col-md-6 text-center">
+            @session.slideShareLink.fold{
+            @sessionNotFound("Slides")
+            } { slideShareLink =>
+            <iframe src="//@slideShareLink" class="frame-panel" allowfullscreen></iframe>
 
-        <div style="display: block;" class="text-center">
-            <div class="fb-share-button share-style" data-href="//@slideShareLink" data-layout="button" data-size="small" data-mobile-iframe="true">
-                <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareLink;src=sdkpreparse">Share
-                </a>
+            <div style="display: block;" class="text-center">
+                <div class="fb-share-button share-style" data-href="//@slideShareLink" data-layout="button"
+                     data-size="small" data-mobile-iframe="true">
+                    <a class="fb-xfbml-parse-ignore" target="_blank"
+                       href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareLink;src=sdkpreparse">Share
+                    </a>
+                </div>
+                <div class="share-style">
+                    <a target="_blank" data-href="//@slideShareLink" class="twitter-share-button"
+                       href=https://twitter.com/intent/tweet?url=https://@slideShareLink>
+                        Tweet
+                    </a>
+                </div>
+                <div class="share-style">
+                    <script type="IN/Share" data-url="//@slideShareLink"></script>
+                </div>
             </div>
-            <div class="share-style">
-                <a target="_blank" data-href="//@slideShareLink" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareLink>
-                    Tweet
-                </a>
-            </div>
-            <div class="share-style">
-                <script type="IN/Share" data-url="//@slideShareLink"></script>
-            </div>
+
+            }
         </div>
+        <div class="col-md-6 text-center">
+            @session.youtubeLink.fold{
+            @sessionNotFound("Video Session")
+            } { youtubeLink =>
+            <iframe src="//@youtubeLink" allowfullscreen class="frame-panel"></iframe>
 
-}
+            <div style="display: block;" class="text-center">
+                <div class="fb-share-button share-style" data-href="//@youtubeLink" data-layout="button"
+                     data-size="small" data-mobile-iframe="true">
+                    <a class="fb-xfbml-parse-ignore" target="_blank"
+                       href="https://www.facebook.com/sharer/sharer.php?u=//@youtubeLink;src=sdkpreparse">Share
+                    </a>
+                </div>
+                <div class="share-style">
+                    <a target="_blank" data-href="//@youtubeLink" class="twitter-share-button"
+                       href=https://twitter.com/intent/tweet?url=https://@youtubeLink>
+                        Tweet
+                    </a>
+                </div>
+                <div class="share-style">
+                    <script type="IN/Share" data-url="//@youtubeLink"></script>
+                </div>
+            </div>
+            }
+        </div>
     </div>
-        <div class="col-md-6 text-center" >
-        @session.youtubeLink.fold{
-@sessionNotFound("Video Session")
-} { youtubeLink =>
-<iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
- }
-        </div>
-</div>
 </div>
 }

@@ -1,16 +1,18 @@
 @(session:SessionInfo)(implicit request: Request[_], flash: Flash)
 
 @main("") {
-<br><br><br><br><br>
-    <div class="topic-name">@session.topic</div>
+
+
+<div class="grad1">
+
+    <div class="topic-name ">@session.topic</div>
     <div class="topic-presenter">by @session.email</div>
 
-<hr>
-<br>
-    <div class="row">
+<hr class="hr-shadow">
+    <div class="row" style="padding-top:20px;">
     <div class="col-md-6 text-center" >
     @session.slideShareLink.fold{
-    @index("Slides")
+    @sessionNotFound("Slides")
 } { slideShareLink =>
         <iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
 
@@ -33,11 +35,11 @@
     </div>
         <div class="col-md-6 text-center" >
         @session.youtubeLink.fold{
-@sessionNotFound("Video")
+@sessionNotFound("Video Session")
 } { youtubeLink =>
 <iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
  }
         </div>
 </div>
-
+</div>
 }

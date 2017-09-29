@@ -29,16 +29,13 @@
                                 <th>Cancelled</th>
                                 <th>Rating</th>
                                 <th>status</th>
+                                <th>More Details</th>
                             </tr>
                         </thead>
                         <tbody id="user-found">
                         @knolxSessions.map { knolxSession =>
 
-                        @if(knolxSession.completed) {
-                        <tr style="cursor:pointer;" class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
-                        }else {
                         <tr>
-                        }
 
                                 <td>@knolxSession.date</td>
                                 <td>@knolxSession.session</td>
@@ -66,7 +63,15 @@
                                 } else {
                                         <span class="label label-warning">Pending</span>
                                 })</td>
-                            </tr>
+
+                            @if(knolxSession.completed && !knolxSession.cancelled) {
+                         <td style="cursor:pointer;" title="Click here for more details" class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
+                            }else {
+                         <td style="cursor:pointer;" title="Wait for session to be completed">
+                            }
+                                <p class="saving" style="font-size:25px"><span>.</span><span>.</span><span>.</span></p>
+                            </td>
+                        </tr>
                         }
                         </tbody>
                     </table>

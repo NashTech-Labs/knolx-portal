@@ -1,11 +1,9 @@
 @(message: String)(implicit flash: Flash, request: Request[_])
 
-@main(message) {
 <p class="information">
     @flash.get("message").fold("")(identity)
 </p>
 
 <h3>@message not available</h3>
-<img src='@routes.Assets.versioned("images/comingsoon.png")'>
+<img src='@routes.Assets.versioned("images/comingsoon.png")' style="padding-bottom:10px;">
 <p></p>
-}

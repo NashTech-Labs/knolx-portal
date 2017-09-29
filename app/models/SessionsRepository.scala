@@ -43,27 +43,16 @@ case class SessionInfo(userId: String,
 case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
                              expirationDate: BSONDateTime)
 
-case class SessionLinks(email: String,
-                        topic: String,
-                        youtubeLink: Option[String],
-                        slideShareLink: Option[String],
-                        _id: BSONObjectID)
-
 object SessionJsonFormats {
 
   import play.api.libs.json.Json
 
   implicit val sessionFormat = Json.format[SessionInfo]
-  implicit val sessionLinksFormat = Json.format[SessionLinks]
 
   sealed trait SessionState
-
   case object ExpiringNext extends SessionState
-
   case object ExpiringNextNotReminded extends SessionState
-
   case object SchedulingNext extends SessionState
-
   case object SchedulingNextUnNotified extends SessionState
 
 }

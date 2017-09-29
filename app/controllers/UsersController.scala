@@ -174,7 +174,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   def loginUser: Action[AnyContent] = action.async { implicit request =>
     val username = configuration.get[String]("session.username")
-
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))

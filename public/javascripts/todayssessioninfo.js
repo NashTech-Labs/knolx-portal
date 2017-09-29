@@ -7,6 +7,7 @@ $(function () {
         expire();
     });
 
+
     $('.fillFeedback').click(function () {
         document.getElementById('display-feed-form').style.display = 'block';
         currentFeedbackProfile = this.value;

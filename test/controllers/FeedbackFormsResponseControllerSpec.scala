@@ -26,6 +26,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   val writeResultfalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObjectWithSameEmail =
+    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))

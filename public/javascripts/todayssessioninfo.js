@@ -8,11 +8,22 @@ $(function () {
     });
 
     $('.fillFeedback').click(function () {
+        $('#feedbackAttendance').modal('show');
+        $('#feed-message').html("");
+        });
+
+    $('.btn-success').click(function () {
+        $('#feedbackAttendance').modal('hide');
         document.getElementById('display-feed-form').style.display = 'block';
         currentFeedbackProfile = this.value;
-        $('#feed-message').html("");
         formOpener(this.value);
         fetchResponse(this.id);
+    });
+
+    $('.btn-danger').click(function () {
+        $('#feedbackAttendance').modal('hide');
+        currentFeedbackProfile = this.value;
+        submittedFeedbackFormForNotAttend(this.id);
     });
 
     $('.getKnolxDetailsActive').click(function () {
@@ -219,7 +230,7 @@ function submittedFeedbackForm() {
                 },
                 success: function (data) {
                     var currentFeedback = JSON.parse(currentFeedbackProfile);
-                    ackMessage("success_text", "Thankyou!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
+                    ackMessage("success_text", "Thank you!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
                 },
                 error: function (er) {
                     ackMessage("failure_text", "Oops!", "Something went wrong", 'We are unable to process your request, refreshing this page may fix this issue, in case it keeps occurring please contact the administrator', "Refresh", 'failure_text_color', 'failure_text_color-background-color');
@@ -259,6 +270,7 @@ function isFormResponseValid(filledForm) {
 
 
 function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bgColorClass) {
+
     var message = '<div class="col-md-12 acknowledgement-message">' +
         '<div class="col-md-2 acknowledgement-icon">' +
         '<label class="radio-button">' +
@@ -286,6 +298,44 @@ function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bg
         '</div>';
 
     document.getElementById('display-feed-form').style.display = 'none';
-    $('#feed-message').html(message)
+    $('#feed-message').html(message);
 
+}
+
+function submittedFeedbackFormForNotAttend(sessionId) {
+var form = document.getElementById(sessionId + "-form").value;
+    var feedbackForm = JSON.parse(form);
+    feedbackFormId = feedbackForm['id'];
+    var questions = feedbackForm['questions'];
+    var questionCount = Object.keys(questions);
+    var questionOptionInformation = [];
+
+
+    for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
+        questionOptionInformation.push("Did not attend")
+    }
+    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation);
+    if (isFormResponseValid(feedbackFormWithResponse)) {
+
+        jsRoutes.controllers.FeedbackFormsResponseController.storeFeedbackFormResponse().ajax(
+            {
+                type: "POST",
+                processData: false,
+                contentType: 'application/json',
+                data: JSON.stringify(feedbackFormWithResponse),
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (data) {
+                    var currentFeedback = JSON.parse(currentFeedbackProfile);
+                    $('#session-form-info').modal('show');
+                    ackMessage("success_text", "Thank you!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
+                },
+                error: function (er) {
+                alert('in error');
+                    ackMessage("failure_text", "Oops!", "Something went wrong", 'We are unable to process your request, refreshing this page may fix this issue, in case it keeps occurring please contact the administrator', "Refresh", 'failure_text_color', 'failure_text_color-background-color');
+                }
+            })
+    }
 }

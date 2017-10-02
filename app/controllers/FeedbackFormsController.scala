@@ -115,7 +115,8 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber)
       .flatMap { feedbackForms =>
         val updateFormInformation = feedbackForms map { feedbackForm =>
-          val questionInformation = feedbackForm.questions.map(question => QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
+          val questionInformation = feedbackForm.questions.map(question =>
+            QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
 
           UpdateFeedbackFormInformation(feedbackForm._id.stringify, feedbackForm.name, questionInformation)
         }
@@ -141,7 +142,8 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
         feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
       formValid.fold {
-        val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
+        val questions = feedbackFormInformation.questions.map(questionInformation =>
+          Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
 
         feedbackRepository.insert(FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
           if (result.ok) {
@@ -164,7 +166,8 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       .getByFeedbackFormId(id)
       .map {
         case Some(feedbackForm) =>
-          val questions = feedbackForm.questions map (question => QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
+          val questions = feedbackForm.questions map (question =>
+            QuestionInformation(question.question, question.options, question.questionType, question.mandatory))
           val feedbackPayload = FeedbackFormPreview(feedbackForm.name, questions)
 
           Ok(Json.toJson(feedbackPayload).toString)
@@ -211,7 +214,8 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
                 feedbackFormInformation.validateOptions orElse feedbackFormInformation.validateQuestion
 
             validatedForm.fold {
-              val questions = feedbackFormInformation.questions.map(questionInformation => Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
+              val questions = feedbackFormInformation.questions.map(questionInformation =>
+                Question(questionInformation.question, questionInformation.options, questionInformation.questionType, questionInformation.mandatory))
 
               feedbackRepository.update(feedbackFormInformation.id, FeedbackForm(feedbackFormInformation.name, questions)) map { result =>
                 if (result.ok) {

@@ -618,3 +618,33 @@
     left: 10px;
     top: 6px;
 }
+.feedbackAttendance-dialog {
+    top: 15%;
+}
+
+#feedbackAttendance-content {
+    background-image: url('../images/mesh.svg');
+}
+
+#feedbackAttendance-body {
+    overflow: auto;
+    font-family: 'gothic';
+    height: 50vh;
+}
+
+#feedbackAttendance-centerBody {
+    margin-top: 10vh;
+}
+
+.feedbackAttendance-button {
+    width: 175px;
+    font-weight: 900;
+}
+
+#session-form-info {
+    overflow-y: auto;
+}
+
+.btn-danger {
+    margin-top: 5vh;
+}

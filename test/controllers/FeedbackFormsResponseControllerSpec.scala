@@ -26,6 +26,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   val writeResultfalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObjectWithSameEmail =
+    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
@@ -105,7 +108,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       status(response) must be equalTo OK
     }
 
-    "render feedback form for today if session associated feedback form exists and session has expired expired" in new WithTestApplication {
+    "render feedback form for today if session associated feedback form exists and session has expired" in new WithTestApplication {
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
@@ -140,6 +143,17 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
 
       status(response) must be equalTo UNAUTHORIZED
+    }
+
+    "not render feedback form for today if the session was given by the user himself" in new WithTestApplication {
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.activeSessions() returns sessionObjectWithSameEmail
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
+
+      status(response) must be equalTo OK
     }
 
     "not fetch response as no stored response found" in new WithTestApplication {

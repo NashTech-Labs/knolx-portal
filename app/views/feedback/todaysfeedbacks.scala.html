@@ -23,6 +23,8 @@
                                     <div class="col-md-12 feedback-card-author"><p>@session.email</p></div>
                                     <button type="button" id='@session.id' class="btn feedback-card-button fillFeedback" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>
                                         Fill Out</button>
+
+
                                         <input type="hidden" id='@session.id-form' value ='@feedbackForm'/>
                                     <div class="col-md-12 feedback-card-author more" ><p id='details-@session.id' class="getKnolxDetailsActive">
                                         More...</p></div>

@@ -66,6 +66,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
     val usersBanScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
+
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
     }
@@ -87,7 +88,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
     "display manage sessions page" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.paginate(1,None) returns sessionObject
+      sessionsRepository.paginate(1, None) returns sessionObject
       sessionsRepository.activeCount(None) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -616,19 +617,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns optionOfSessionObject
-
-      val result = controller.shareContent(_id.stringify)(FakeRequest()
-        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withCSRFToken)
-
-      status(result) must be equalTo OK
-    }
-
-    "render page with links to share content on social media" in new WithTestApplication {
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getById(_id.stringify) returns Future.successful(None)
 
       val result = controller.shareContent(_id.stringify)(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")

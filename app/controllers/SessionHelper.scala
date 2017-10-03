@@ -1,16 +1,25 @@
 package controllers
 
-import play.api.libs.typedmap.TypedKey
+import com.typesafe.config.ConfigFactory
+import play.api.Configuration
 import play.api.mvc.Request
 import utilities.EncryptionUtility
 
 object SessionHelper {
+/*
+  val configuration = ConfigFactory.load()
+  val username=configuration.getString("session.username")
+
+  */
+
+  val configuration = new Configuration(ConfigFactory.load("application.conf"))
+  val username = configuration.get[String]("session.username")
 
   def email(implicit request: Request[_]): String =
-    EncryptionUtility.decrypt(request.attrs.get(Attribute.UserName).getOrElse(""))
+    EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
 
   def isLoggedIn(implicit request: Request[_]): Boolean =
-    request.attrs.get(Attribute.UserName).isEmpty
+    request.session.get(username).isEmpty
 
   def isAdmin(implicit request: Request[_]): Boolean =
     EncryptionUtility.decrypt(request.session.get("admin").getOrElse("")) == EncryptionUtility.AdminKey
@@ -21,8 +30,4 @@ object EmailHelper {
 
   def isValidEmail(email: String): Boolean = """([\w\.]+)@knoldus\.(com|in)""".r.unapplySeq(email).isDefined
 
-}
-
-object Attribute {
-  val UserName: TypedKey[String] = TypedKey("userName")
 }

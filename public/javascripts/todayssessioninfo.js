@@ -271,7 +271,6 @@ function isFormResponseValid(filledForm) {
 
 
 function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bgColorClass) {
-
     var message = '<div class="col-md-12 acknowledgement-message">' +
         '<div class="col-md-2 acknowledgement-icon">' +
         '<label class="radio-button">' +
@@ -300,7 +299,6 @@ function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bg
 
     document.getElementById('display-feed-form').style.display = 'none';
     $('#feed-message').html(message);
-
 }
 
 function submittedFeedbackFormForNotAttend(sessionId) {

@@ -57,13 +57,9 @@ object SessionJsonFormats {
   implicit val sessionLinksFormat = Json.format[SessionLinks]
 
   sealed trait SessionState
-
   case object ExpiringNext extends SessionState
-
   case object ExpiringNextNotReminded extends SessionState
-
   case object SchedulingNext extends SessionState
-
   case object SchedulingNextUnNotified extends SessionState
 
 }

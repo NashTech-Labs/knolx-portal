@@ -39,10 +39,10 @@
                         <div class="modal-body" id="feedbackAttendance-body">
 
                             <div class= "text-center" id="feedbackAttendance-centerBody" >
-                                <button type="attend" id="@session.id" class="btn btn-success feedbackAttendance-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Attend</button>
+                                <button type="attend" id="@session.id" class="btn btn-success feedbackAttendance-button attend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Attend</button>
                                 <br>
                                 <br>
-                                <button type="did not attend" id="@session.id" class="btn btn-danger feedbackAttendance-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Did Not Attend</button>
+                                <button type="did not attend" id="@session.id" class="btn btn-danger feedbackAttendance-button didnotattend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Did Not Attend</button>
                             </div>
 
                         </div>

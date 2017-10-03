@@ -178,6 +178,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
 
           feedbackResponse.fold {
+            Logger.info(s"Feedback form submission unsuccessful due to Malformed data while validating form responses for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
             Future.successful(BadRequest("Malformed Data!"))
           } { sanitizedResponse =>
             val (header, response) = sanitizedResponse
@@ -186,7 +187,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
               header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
               if (result.ok) {
-                Logger.info(s"Feedback form response successfully stored")
+                Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
                 Ok("Feedback form response successfully stored!")
               } else {
                 Logger.error(s"Something Went wrong when storing feedback form" +

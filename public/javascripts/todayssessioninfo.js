@@ -146,8 +146,8 @@ function loadFeedbackForm(values, sessionId) {
                     "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
                                         "</p>"+
                     "<label class='radio-button'>" +
-                    "<span class='lab_text'></span>" +
                     "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
+                    "<span class='lab_text'></span>" +
                     "</label>" +
                     "</div>" +
                     "</div>";

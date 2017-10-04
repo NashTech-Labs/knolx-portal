@@ -2,10 +2,12 @@ package controllers
 
 import java.time.temporal.ChronoUnit
 import java.util.Date
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
+import actors.EmailActor
+import akka.actor.ActorRef
 import models._
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -74,9 +76,14 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 feedbackRepository: FeedbackFormsRepository,
                                                 feedbackResponseRepository: FeedbackFormsResponseRepository,
                                                 sessionsRepository: SessionsRepository,
+                                                configuration: Configuration,
+                                                @Named("EmailManager") emailManager: ActorRef,
                                                 dateTimeUtility: DateTimeUtility,
                                                 controllerComponents: KnolxControllerComponents
                                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val host: String = configuration.getOptional[String]("knolx.url").getOrElse("localhost:9000")
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
@@ -188,6 +195,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
               if (result.ok) {
                 Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+                emailManager ! EmailActor.SendEmail(
+                  List(request.user.email), fromEmail, "Feedback Response", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
                 Ok("Feedback form response successfully stored!")
               } else {
                 Logger.error(s"Something Went wrong when storing feedback form" +

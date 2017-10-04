@@ -423,7 +423,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
     val futureSessionOption: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
     futureSessionOption.flatMap( sessionOption =>
-      sessionOption.fold(Future.successful(Ok(views.html.sessionNotFound("Hardcoded message"))))
+      sessionOption.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message"-> "Session Not Found")))
       (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
   }
 

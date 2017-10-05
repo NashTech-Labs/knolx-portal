@@ -30,11 +30,11 @@ class SessionsControllerSpec extends PlaySpecification with Results {
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val optionOfSessionObject =
     Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
@@ -360,7 +360,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1",
-        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+        "feedbackFormId", "topic", 1, meetup = false, "", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -419,7 +419,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
-        "feedbackFormId", "topic", 1, Some("youtubeLink"), Some("slideShareLink"), meetup = true), BSONDateTime(1498415399000L))
+        "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
@@ -438,8 +438,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
-            "youtubeLink" -> "youtubeLink",
-            "slideShareLink" -> "slideShareLink",
+            "youtubeURL" -> "youtubeURL",
+            "slideShareURL" -> "slideShareURL",
             "meetup" -> "true")
           .withCSRFToken)
 
@@ -456,7 +456,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
-        "feedbackFormId", "topic", 1, Some("youtubeLink"), Some("slideShareLink"), meetup = true), BSONDateTime(1498415399000L))
+        "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
@@ -475,8 +475,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
-            "youtubeLink" -> "youtubeLink",
-            "slideShareLink" -> "slideShareLink",
+            "youtubeURL" -> "youtubeURL",
+            "slideShareURL" -> "slideShareURL",
             "meetup" -> "true")
           .withCSRFToken)
 
@@ -622,6 +622,32 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withCSRFToken)
 
+      status(result) must be equalTo OK
+    }
+
+    "render home page when session not found" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getById(_id.stringify) returns Future.successful(None)
+
+      val result = controller.shareContent(_id.stringify)(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "render home page when session's id is wrong" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.shareContent("abcdef")(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
       status(result) must be equalTo OK
     }
   }

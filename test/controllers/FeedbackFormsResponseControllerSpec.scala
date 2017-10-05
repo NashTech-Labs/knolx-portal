@@ -28,10 +28,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObjectWithSameEmail =
     Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
@@ -94,7 +94,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
-          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate

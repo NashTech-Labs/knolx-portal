@@ -69,6 +69,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         cancelled = false,
         active = true,
         BSONDateTime(knolxSessionDateTime),
+        youtubeURL = Some("youtubeURL"),
+        slideShareURL = Some("slideShareURL"),
         _id = sessionId),
         SessionInfo(
           userId = "userId",
@@ -83,6 +85,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           cancelled = false,
           active = true,
           BSONDateTime(knolxSessionDateTime),
+          youtubeURL = Some("youtubeURL"),
+          slideShareURL = Some("slideShareURL"),
           _id = sessionId))
     val maybeFeedbackForm =
       Option(FeedbackForm(

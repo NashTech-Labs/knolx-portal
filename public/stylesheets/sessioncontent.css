@@ -1,0 +1,49 @@
+.frame-panel {
+     border:2px solid #CCC;
+     border-width:2px;
+     margin-bottom:5px;
+     max-width: 100%;
+     width:500px;
+     height:400px;
+}
+
+.topic-name {
+    font-family: 'headerfont';
+    src: url('font/Capsuula.ttf');
+    font-size: 45px;
+    font-weight:bold;
+    padding-left:10px;
+    color:#000000;
+}
+
+.topic-presenter {
+    font-family: 'headerfont';
+    src: url('font/Capsuula.ttf');
+    font-size: 20px;
+    padding-left:10px;
+    color:#000000;
+}
+
+.share-style {
+    display: inline-block;
+    vertical-align: top;
+    margin: 5px 4px;
+}
+
+.grad1 {
+    height: auto;
+    background: white; /* For browsers that do not support gradients */
+    border: 2px;
+    border-radius: 20px;
+    background-image: url('../images/mesh.svg');
+}
+
+.hr-shadow {
+    border:none;
+    height: 2px;
+ 	width: 100%;
+	Smargin-top: 0;
+	border-bottom: 1px solid #1f1209;
+	box-shadow: 0 20px 20px -20px #333;
+    margin: 0px auto;
+}

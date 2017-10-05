@@ -55,10 +55,6 @@ case class KnolxSession(id: String,
                         dateString: String = "",
                         completed: Boolean = false)
 
-case class KnolxSessionLinks(id: String,
-                             youtubeURL: Option[String],
-                             slideShareURL: Option[String])
-
 case class SessionEmailInformation(email: Option[String], page: Int)
 
 case class SessionSearchResult(sessions: List[KnolxSession],

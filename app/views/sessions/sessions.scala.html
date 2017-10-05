@@ -14,7 +14,7 @@
                         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                         @flash.get("message").fold("")(identity)
                     </div>
-               }
+                }
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="table-responsive manage-user-custom-table-margin">
@@ -40,16 +40,16 @@
                                 <td>@knolxSession.topic</td>
                                 <td>@knolxSession.email</td>
                                 <td><span class="label @if(knolxSession.meetup) {
-                                            label-success ">Meetup</span></td>
+                                    label-success ">Meetup</span></td>
                                 }else{
                                 label-warning ">Knolx</span> </td>
                             }
 
                                 @(if(knolxSession.cancelled) {
-                                <td class='active-status'>Yes</td>
+                                        <td class='active-status'>Yes</td>
                                 }
                                 else {
-                                <td class='suspended'>No</td>
+                                        <td class='suspended'>No</td>
                                 })
                                 <td>@(if(knolxSession.rating.isEmpty) {
                                     "N/A"
@@ -81,6 +81,6 @@
     </div>
 
     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/searchsession.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/searchsession.js")" type="text/javascript"></script>
     @pagination(pageNumber, pages, routes.SessionsController.sessions)
 }

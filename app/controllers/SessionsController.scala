@@ -426,5 +426,4 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
-
 }

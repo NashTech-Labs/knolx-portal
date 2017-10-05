@@ -10,7 +10,7 @@ $(function () {
     $('.fillFeedback').click(function () {
         $('#feedbackAttendance').modal('show');
         $('#feed-message').html("");
-        });
+    });
 
     $('.btn-success').click(function () {
         $('#feedbackAttendance').modal('hide');

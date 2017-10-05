@@ -6,6 +6,25 @@ $(function () {
     $('#radio-days').click(function () {
         enableDays();
     });
+
+    $('#upload-video-button').click(function () {
+        console.log("Inside custom click function");
+        var filePath = $("#browse-file").val();
+        console.log(filePath);
+        jsRoutes.controllers.SessionsController.uploadVideo(filePath).ajax(
+             {
+                 type: 'GET',
+                 processData: false,
+                 success: function (data) {
+                     var responses = JSON.parse(data);
+                     loadFeedbackForm(feedbackForm, sessionId);
+                     fillFeedbackResponses(responses);
+                 },
+                 error: function (er) {
+                     loadFeedbackForm(feedbackForm, sessionId);
+                 }
+             });
+    });
 });
 
 

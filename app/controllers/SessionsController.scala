@@ -4,6 +4,7 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import Services.YoutubeService
 import actors.SessionsScheduler._
 import actors.UsersBanScheduler._
 import akka.actor.ActorRef
@@ -23,6 +24,7 @@ import scala.collection.immutable.IndexedSeq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 case class CreateSessionInformation(email: String,
                                     date: Date,
@@ -38,7 +40,7 @@ case class UpdateSessionInformation(id: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
-                                    youtubeLink: Option[String],
+                                    youtubeURL: Option[String],
                                     slideShareLink: Option[String],
                                     meetup: Boolean = false)
 
@@ -56,7 +58,7 @@ case class KnolxSession(id: String,
                         completed: Boolean = false)
 
 case class KnolxSessionLinks(id: String,
-                             youtubeLink: Option[String],
+                             youtubeURL: Option[String],
                              slideShareLink: Option[String])
 
 case class SessionEmailInformation(email: Option[String], page: Int)
@@ -77,6 +79,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
+                                   youtubeService: YoutubeService,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
                                    @Named("UsersBanScheduler") usersBanScheduler: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
@@ -114,7 +117,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
         "must be in range 1 to 31", number => number >= 0 && number <= 31),
-      "youtubeLink" -> optional(nonEmptyText),
+      "youtubeURL" -> optional(nonEmptyText),
       "slideShareLink" -> optional(nonEmptyText),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
@@ -123,7 +126,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   val sessionLinksForm = Form(
     mapping(
       "id" -> nonEmptyText,
-      "youtubeLink" -> optional(nonEmptyText),
+      "youtubeURL" -> optional(nonEmptyText),
       "slideShareLink" -> optional(nonEmptyText)
     )(KnolxSessionLinks.apply)(KnolxSessionLinks.unapply)
   )
@@ -372,7 +375,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
-                sessionInformation.youtubeLink, sessionInformation.slideShareLink, sessionInformation.meetup))
+                sessionInformation.youtubeURL, sessionInformation.slideShareLink, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 
@@ -432,6 +435,13 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     futureSessionOption.flatMap( sessionOption =>
       sessionOption.fold(Future.successful(Ok(views.html.sessionNotFound("Hardcoded message"))))
       (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+  }
+
+  def uploadVideo(filePath: String): Action[AnyContent] = adminAction.async { implicit request =>
+    Logger.info("Inside uploadVideo function of Sessions Controller")
+    youtubeService.uploadVideo(filePath).map{ _ =>
+      Ok("Video uploaded successfully")
+    }
   }
 
 }

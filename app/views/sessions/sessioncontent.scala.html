@@ -45,10 +45,10 @@
             <div id="collapse2" class="panel-collapse collapse">
                 <div class="panel-body" >
                     <center>
-                    @session.youtubeLink.fold{
+                    @session.youtubeURL.fold{
                     @index("Hello")
-                    } { youtubeLink =>
-                    <iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
+                    } { youtubeURL =>
+                    <iframe src="//@youtubeURL" allowfullscreen class="frame-panel"> </iframe>
                     }
                     </center>
                 </div>
@@ -78,10 +78,10 @@
     </div>
     </div>
         <div class="col-md-6">
-        @session.youtubeLink.fold{
+        @session.youtubeURL.fold{
 @index("Hello")
-} { youtubeLink =>
-<iframe src="//@youtubeLink" allowfullscreen class="frame-panel"> </iframe>
+} { youtubeURL =>
+<iframe src="//@youtubeURL" allowfullscreen class="frame-panel"> </iframe>
  }
         </div>
 </div>

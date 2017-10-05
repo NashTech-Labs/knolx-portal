@@ -33,7 +33,7 @@ case class SessionInfo(userId: String,
                        cancelled: Boolean,
                        active: Boolean,
                        expirationDate: BSONDateTime,
-                       youtubeLink: Option[String],
+                       youtubeURL: Option[String],
                        slideShareLink: Option[String],
                        reminder: Boolean = false,
                        notification: Boolean = false,
@@ -45,7 +45,7 @@ case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
 
 case class SessionLinks(email: String,
                         topic: String,
-                        youtubeLink: Option[String],
+                        youtubeURL: Option[String],
                         slideShareLink: Option[String],
                         _id: BSONObjectID)
 
@@ -193,7 +193,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
         "expirationDate" -> updatedRecord.expirationDate,
-        "youtubeLink" -> updatedRecord.sessionUpdateFormData.youtubeLink,
+        "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
         "slideShareLink" -> updatedRecord.sessionUpdateFormData.slideShareLink)
     )
 

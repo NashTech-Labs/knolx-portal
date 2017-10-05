@@ -196,7 +196,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
               if (result.ok) {
                 Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
                 emailManager ! EmailActor.SendEmail(
-                  List(request.user.email), fromEmail, "Feedback Response", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
+                  List(request.user.email), fromEmail, "Feedback Successfully Registered!", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
                 Ok("Feedback form response successfully stored!")
               } else {
                 Logger.error(s"Something Went wrong when storing feedback form" +

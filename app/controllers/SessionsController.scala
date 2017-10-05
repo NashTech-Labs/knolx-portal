@@ -55,7 +55,6 @@ case class KnolxSession(id: String,
                         dateString: String = "",
                         completed: Boolean = false)
 
-
 case class SessionEmailInformation(email: Option[String], page: Int)
 
 case class SessionSearchResult(sessions: List[KnolxSession],
@@ -115,14 +114,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "slideShareURL" -> optional(nonEmptyText),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
-  )
-
-  val sessionLinksForm = Form(
-    mapping(
-      "id" -> nonEmptyText,
-      "youtubeURL" -> optional(nonEmptyText),
-      "slideShareURL" -> optional(nonEmptyText)
-    )(KnolxSessionLinks.apply)(KnolxSessionLinks.unapply)
   )
 
   def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>

@@ -424,9 +424,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     if (id.length != 24) {
       Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found"))
     } else {
-      val futureSessionOption: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
-      futureSessionOption.flatMap(sessionOption =>
-        sessionOption.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
+      val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
+      eventualMaybeSession.flatMap(maybeSession =>
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }

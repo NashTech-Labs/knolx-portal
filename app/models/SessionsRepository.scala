@@ -35,8 +35,8 @@ case class SessionInfo(userId: String,
                        cancelled: Boolean,
                        active: Boolean,
                        expirationDate: BSONDateTime,
-                       youtubeLink: Option[String],
-                       slideShareLink: Option[String],
+                       youtubeURL: Option[String],
+                       slideShareURL: Option[String],
                        reminder: Boolean = false,
                        notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate
@@ -219,8 +219,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
         "expirationDate" -> updatedRecord.expirationDate,
-        "youtubeLink" -> updatedRecord.sessionUpdateFormData.youtubeLink,
-        "slideShareLink" -> updatedRecord.sessionUpdateFormData.slideShareLink)
+        "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
+        "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL)
     )
 
     collection.flatMap(jsonCollection =>

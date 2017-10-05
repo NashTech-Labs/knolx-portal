@@ -38,8 +38,8 @@ case class UpdateSessionInformation(id: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
-                                    youtubeLink: Option[String],
-                                    slideShareLink: Option[String],
+                                    youtubeURL: Option[String],
+                                    slideShareURL: Option[String],
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
@@ -56,8 +56,8 @@ case class KnolxSession(id: String,
                         completed: Boolean = false)
 
 case class KnolxSessionLinks(id: String,
-                             youtubeLink: Option[String],
-                             slideShareLink: Option[String])
+                             youtubeURL: Option[String],
+                             slideShareURL: Option[String])
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
@@ -114,8 +114,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
         "must be in range 1 to 31", number => number >= 0 && number <= 31),
-      "youtubeLink" -> optional(nonEmptyText),
-      "slideShareLink" -> optional(nonEmptyText),
+      "youtubeURL" -> optional(nonEmptyText),
+      "slideShareURL" -> optional(nonEmptyText),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
@@ -365,7 +365,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
-                sessionInformation.youtubeLink, sessionInformation.slideShareLink, sessionInformation.meetup))
+                sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 

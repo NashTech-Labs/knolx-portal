@@ -235,7 +235,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
 
       (question.questionType, question.mandatory) match {
         case ("MCQ", true)      => if (question.options.contains(response) && response.nonEmpty) {
-          Logger.info(s"The response was -------------------------> " + response)
           Some(QuestionResponse(question.question, question.options, response))
         }
         else {

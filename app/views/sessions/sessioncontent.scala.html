@@ -17,20 +17,20 @@
             </div>
             <div id="collapse1" class="panel-collapse collapse in">
                 <div class="panel-body">
-                    @session.slideShareLink.fold{
+                    @session.slideShareURL.fold{
                     @index("Hello")
-                    } { slideShareLink =>
-                    <iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
+                    } { slideShareURL =>
+                    <iframe src="//@slideShareURL" class="frame-panel" allowfullscreen> </iframe>
 
-                    <div class="fb-share-button" data-href="//@slideShareLink" data-layout="button" data-size="small" data-mobile-iframe="true">
-                        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareLink;src=sdkpreparse">Share
+                    <div class="fb-share-button" data-href="//@slideShareURL" data-layout="button" data-size="small" data-mobile-iframe="true">
+                        <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareURL;src=sdkpreparse">Share
                         </a>
                     </div>
-                    <a target="_blank" data-href="//@slideShareLink" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareLink>
+                    <a target="_blank" data-href="//@slideShareURL" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareURL>
                         Tweet
                     </a>
 
-                     <script type="IN/Share" data-url="//@slideShareLink"></script>
+                     <script type="IN/Share" data-url="//@slideShareURL"></script>
                     </div>
                     }
                 </div>
@@ -60,20 +60,20 @@
 
     <div class="row">
     <div class="col-md-6">
-    @session.slideShareLink.fold{
+    @session.slideShareURL.fold{
     @index("Hello")
-} { slideShareLink =>
-<iframe src="//@slideShareLink" class="frame-panel" allowfullscreen> </iframe>
+} { slideShareURL =>
+<iframe src="//@slideShareURL" class="frame-panel" allowfullscreen> </iframe>
     <br>
 <div>
-        <div class="fb-share-button" data-href="//@slideShareLink" data-layout="button" data-size="small" data-mobile-iframe="true">
-    <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareLink;src=sdkpreparse">Share
+        <div class="fb-share-button" data-href="//@slideShareURL" data-layout="button" data-size="small" data-mobile-iframe="true">
+    <a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=//@slideShareURL;src=sdkpreparse">Share
     </a>
 </div>
-    <a target="_blank" data-href="//@slideShareLink" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareLink>
+    <a target="_blank" data-href="//@slideShareURL" class="twitter-share-button" href=https://twitter.com/intent/tweet?url=https://@session.slideShareURL>
     Tweet
     </a>
-        <script type="IN/Share" data-url="//@slideShareLink"></script>
+        <script type="IN/Share" data-url="//@slideShareURL"></script>
 }
     </div>
     </div>

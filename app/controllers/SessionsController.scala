@@ -4,7 +4,6 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
-import Services.YoutubeService
 import actors.SessionsScheduler._
 import actors.UsersBanScheduler._
 import akka.actor.ActorRef
@@ -24,7 +23,6 @@ import scala.collection.immutable.IndexedSeq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
 
 case class CreateSessionInformation(email: String,
                                     date: Date,
@@ -41,7 +39,7 @@ case class UpdateSessionInformation(id: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
                                     youtubeURL: Option[String],
-                                    slideShareLink: Option[String],
+                                    slideShareURL: Option[String],
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
@@ -57,9 +55,6 @@ case class KnolxSession(id: String,
                         dateString: String = "",
                         completed: Boolean = false)
 
-case class KnolxSessionLinks(id: String,
-                             youtubeURL: Option[String],
-                             slideShareLink: Option[String])
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
@@ -79,7 +74,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
-                                   youtubeService: YoutubeService,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
                                    @Named("UsersBanScheduler") usersBanScheduler: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
@@ -118,7 +112,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
         "must be in range 1 to 31", number => number >= 0 && number <= 31),
       "youtubeURL" -> optional(nonEmptyText),
-      "slideShareLink" -> optional(nonEmptyText),
+      "slideShareURL" -> optional(nonEmptyText),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
@@ -127,7 +121,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     mapping(
       "id" -> nonEmptyText,
       "youtubeURL" -> optional(nonEmptyText),
-      "slideShareLink" -> optional(nonEmptyText)
+      "slideShareURL" -> optional(nonEmptyText)
     )(KnolxSessionLinks.apply)(KnolxSessionLinks.unapply)
   )
 
@@ -375,7 +369,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
-                sessionInformation.youtubeURL, sessionInformation.slideShareLink, sessionInformation.meetup))
+                sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 

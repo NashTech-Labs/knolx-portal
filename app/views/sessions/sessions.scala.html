@@ -29,12 +29,12 @@
                                 <th>Cancelled</th>
                                 <th>Rating</th>
                                 <th>status</th>
+                                <th>More Details</th>
                             </tr>
                         </thead>
                         <tbody id="user-found">
                         @knolxSessions.map { knolxSession =>
-                            <tr class='clickable-row' data-href='@routes.SessionsController.shareContent(knolxSession.id)'>
-
+                            <tr>
                                 <td>@knolxSession.date</td>
                                 <td>@knolxSession.session</td>
                                 <td>@knolxSession.topic</td>
@@ -61,7 +61,17 @@
                                 } else {
                                         <span class="label label-warning">Pending</span>
                                 })</td>
-                            </tr>
+                                @if(knolxSession.completed && !knolxSession.cancelled) {
+                                <td title="Click here for more details" class='clickable-row'>
+                                    <a href='@routes.SessionsController.shareContent(knolxSession.id)'
+                                       style="text-decoration: none;">
+                                } else {
+                                <td title="Wait for session to be completed">
+                                }
+                                    <p class="saving" style="font-size:25px;"><span>.</span><span>.</span><span>.</span></p>
+                                    </a>
+                                </td>
+                        </tr>
                         }
                         </tbody>
                     </table>
@@ -70,9 +80,7 @@
         </div>
     </div>
 
-    <script src="@routes.Assets.versioned("javascripts/sessions.js")" type="text/javascript"></script>
-     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/searchsession.js")" type="text/javascript"></script>
     @pagination(pageNumber, pages, routes.SessionsController.sessions)
-
 }

@@ -5,10 +5,12 @@ import javax.inject.Inject
 import actors.SessionsScheduler.{EmailOnce, EmailType, Notification, Reminder}
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
+import play.api.Logger
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -43,18 +45,11 @@ case class SessionInfo(userId: String,
 case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
                              expirationDate: BSONDateTime)
 
-case class SessionLinks(email: String,
-                        topic: String,
-                        youtubeURL: Option[String],
-                        slideShareURL: Option[String],
-                        _id: BSONObjectID)
-
 object SessionJsonFormats {
 
   import play.api.libs.json.Json
 
   implicit val sessionFormat = Json.format[SessionInfo]
-  implicit val sessionLinksFormat = Json.format[SessionLinks]
 
   sealed trait SessionState
   case object ExpiringNext extends SessionState
@@ -155,9 +150,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def paginate(pageNumber: Int, keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
-
     val condition = keyword match {
-      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "") + ".*")), "active" -> true)
+      case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "") + ".*"), "$options" -> "i"))), "active" -> true)
       case None      => Json.obj("active" -> true)
     }
 

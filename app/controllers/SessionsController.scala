@@ -116,6 +116,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
 
+
   def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository
       .paginate(pageNumber, keyword)
@@ -416,10 +417,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
-    val futureSessionOption: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
-    futureSessionOption.flatMap( sessionOption =>
-      sessionOption.fold(Future.successful(Ok(views.html.sessionNotFound("Hardcoded message"))))
-      (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    if (id.length != 24) {
+      Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found"))
+    } else {
+      val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
+      eventualMaybeSession.flatMap(maybeSession =>
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
+        (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    }
   }
 
 }

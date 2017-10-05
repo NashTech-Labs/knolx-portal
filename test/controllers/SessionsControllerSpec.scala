@@ -624,7 +624,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "render page with links to share content on social media" in new WithTestApplication {
+    "render home page when session not found" in new WithTestApplication {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
@@ -634,7 +634,19 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withCSRFToken)
 
-      status(result) must be equalTo OK
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "render home page when session's id is wrong" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.shareContent("abcdef")(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
     }
   }
 }

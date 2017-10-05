@@ -302,18 +302,17 @@ function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bg
 }
 
 function submittedFeedbackFormForNotAttend(sessionId) {
-var form = document.getElementById(sessionId + "-form").value;
+    var form = document.getElementById(sessionId + "-form").value;
     var feedbackForm = JSON.parse(form);
     feedbackFormId = feedbackForm['id'];
     var questions = feedbackForm['questions'];
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];
-
-
     for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
         questionOptionInformation.push("Did not attend")
     }
     var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation);
+
     if (isFormResponseValid(feedbackFormWithResponse)) {
 
         jsRoutes.controllers.FeedbackFormsResponseController.storeFeedbackFormResponse().ajax(

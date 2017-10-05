@@ -30,23 +30,23 @@
                             </div>
                         </div>
                     </div>
-            <div class="modal fade" id="feedbackAttendance" role="dialog">
-                <div class="modal-dialog modal-sm feedbackAttendance-dialog">
-                    <div class="modal-content" id="feedbackAttendance-content">
-                        <div class="modal-header" id="feedbackAttendance-header">
-                            <button type="button" class="close" data-dismiss="modal" id="feedbackAttendance-close">X</button>
-                        </div>
-                        <div class="modal-body" id="feedbackAttendance-body">
-                            <div class= "text-center" id="feedbackAttendance-centerBody" >
-                                <button type="attend" id="@session.id" class="btn btn-success feedbackAttendance-button attend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Attend</button>
-                                <br>
-                                <br>
-                                <button type="did not attend" id="@session.id" class="btn btn-danger feedbackAttendance-button didnotattend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Did Not Attend</button>
+                    <div class="modal fade" id="feedbackAttendance" role="dialog">
+                        <div class="modal-dialog modal-sm feedbackAttendance-dialog">
+                            <div class="modal-content" id="feedbackAttendance-content">
+                                <div class="modal-header" id="feedbackAttendance-header">
+                                    <button type="button" class="close" data-dismiss="modal" id="feedbackAttendance-close">X</button>
+                                </div>
+                                <div class="modal-body" id="feedbackAttendance-body">
+                                    <div class= "text-center" id="feedbackAttendance-centerBody" >
+                                        <button type="attend" id="@session.id" class="btn btn-success feedbackAttendance-button attend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Attend</button>
+                                        <br>
+                                        <br>
+                                        <button type="did not attend" id="@session.id" class="btn btn-danger feedbackAttendance-button didnotattend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>Did Not Attend</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
                 }
                 }
             } else {

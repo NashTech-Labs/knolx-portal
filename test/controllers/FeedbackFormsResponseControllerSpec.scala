@@ -3,11 +3,14 @@ package controllers
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
+import akka.actor.ActorRef
+import com.google.inject.name.Names
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.Application
+import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.Results
@@ -60,6 +63,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         feedbackFormsRepository,
         feedbackResponseRepository,
         sessionsRepository,
+        config,
+        emailManager,
         dateTimeUtility,
         knolxControllerComponent)
 
@@ -68,6 +73,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsRepository = mock[SessionsRepository]
+    val emailManager: ActorRef =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))

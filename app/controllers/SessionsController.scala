@@ -38,8 +38,8 @@ case class UpdateSessionInformation(id: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
-                                    youtubeLink: Option[String],
-                                    slideShareLink: Option[String],
+                                    youtubeURL: Option[String],
+                                    slideShareURL: Option[String],
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
@@ -54,10 +54,6 @@ case class KnolxSession(id: String,
                         feedbackFormScheduled: Boolean = false,
                         dateString: String = "",
                         completed: Boolean = false)
-
-case class KnolxSessionLinks(id: String,
-                             youtubeLink: Option[String],
-                             slideShareLink: Option[String])
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
@@ -114,8 +110,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
         "must be in range 1 to 31", number => number >= 0 && number <= 31),
-      "youtubeLink" -> optional(nonEmptyText),
-      "slideShareLink" -> optional(nonEmptyText),
+      "youtubeURL" -> optional(nonEmptyText),
+      "slideShareURL" -> optional(nonEmptyText),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
@@ -365,7 +361,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
-                sessionInformation.youtubeLink, sessionInformation.slideShareLink, sessionInformation.meetup))
+                sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 
@@ -421,10 +417,13 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
-    val futureSessionOption: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
-    futureSessionOption.flatMap( sessionOption =>
-      sessionOption.fold(Future.successful(Ok(views.html.sessionNotFound("Hardcoded message"))))
-      (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    if (id.length != 24) {
+      Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found"))
+    } else {
+      val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
+      eventualMaybeSession.flatMap(maybeSession =>
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
+        (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    }
   }
-
 }

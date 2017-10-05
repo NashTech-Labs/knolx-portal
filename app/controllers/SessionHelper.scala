@@ -6,11 +6,6 @@ import play.api.mvc.Request
 import utilities.EncryptionUtility
 
 object SessionHelper {
-/*
-  val configuration = ConfigFactory.load()
-  val username=configuration.getString("session.username")
-
-  */
 
   val configuration = new Configuration(ConfigFactory.load("application.conf"))
   val username = configuration.get[String]("session.username")

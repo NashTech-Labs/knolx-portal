@@ -173,8 +173,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
     if (emailFromSession.isEmpty) {
       Future.successful(Ok(views.html.users.login(loginForm)))
-    }
-    else {
+    } else {
       Future.successful(Redirect(routes.HomeController.index()))
     }
   }
@@ -261,7 +260,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 user._id.stringify,
                 new Date(user.banTill.value).toString,
                 user.admin,
-                new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
+                new Date(user.banTill.value)  .after(new Date(dateTimeUtility.nowMillis))))
 
             usersRepository
               .userCountWithKeyword(userInformation.email, userInformation.filter)

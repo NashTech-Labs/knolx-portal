@@ -437,11 +437,4 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
   }
 
-  def uploadVideo(filePath: String): Action[AnyContent] = adminAction.async { implicit request =>
-    Logger.info("Inside uploadVideo function of Sessions Controller")
-    youtubeService.uploadVideo(filePath).map{ _ =>
-      Ok("Video uploaded successfully")
-    }
-  }
-
 }

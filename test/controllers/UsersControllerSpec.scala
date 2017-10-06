@@ -23,7 +23,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class contoUsersControllerSpec extends PlaySpecification with Results {
+class UsersControllerSpec extends PlaySpecification with Results {
 
   private val emptyEmailObject = Future.successful(None)
   private val _id: BSONObjectID = BSONObjectID.generate

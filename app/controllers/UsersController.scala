@@ -257,7 +257,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 user._id.stringify,
                 new Date(user.banTill.value).toString,
                 user.admin,
-                new Date(user.banTill.value)  .after(new Date(dateTimeUtility.nowMillis))))
+                new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
             usersRepository
               .userCountWithKeyword(userInformation.email, userInformation.filter)

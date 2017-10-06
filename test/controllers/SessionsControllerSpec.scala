@@ -66,7 +66,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
     val usersBanScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
-
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
     }
@@ -88,7 +87,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
     "display manage sessions page" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.paginate(1, None) returns sessionObject
+      sessionsRepository.paginate(1,None) returns sessionObject
       sessionsRepository.activeCount(None) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 

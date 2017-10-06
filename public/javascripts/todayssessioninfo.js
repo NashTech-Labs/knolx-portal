@@ -272,7 +272,6 @@ function isFormResponseValid(filledForm) {
 
 
 function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bgColorClass) {
-
     var message = '<div class="col-md-12 acknowledgement-message">' +
         '<div class="col-md-2 acknowledgement-icon">' +
         '<label class="radio-button">' +

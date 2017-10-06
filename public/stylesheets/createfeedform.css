@@ -309,6 +309,7 @@ textarea{
     min-height: 50px;
     overflow-y: hidden;
 }
+s
 .comment-section{
     width:100%;
     text-align:center;
@@ -321,12 +322,11 @@ textarea{
     color: #7F8C8D;
     height: 80px;
 }
+
 .comment-section:disabled{
     background-color:#fff;
 }
 
-
-/** New Added styles*/
 .feedback-duration{
     padding:20px 0
 }

@@ -168,7 +168,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def login: Action[AnyContent] = action.async { implicit request =>
-    //val username = configuration.get[String]("session.username")
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
     if (emailFromSession.isEmpty) {
       Future.successful(Ok(views.html.users.login(loginForm)))

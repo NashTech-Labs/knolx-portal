@@ -61,6 +61,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   implicit val manageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
   implicit val userSearchResultInfoFormat: OFormat[UserSearchResult] = Json.format[UserSearchResult]
+  val username = configuration.get[String]("session.username")
 
   val userForm = Form(
     mapping(
@@ -129,8 +130,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def createUser: Action[AnyContent] = action.async { implicit request =>
-    val username = configuration.get[String]("session.username")
-
     userForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user registration $formWithErrors")
@@ -169,7 +168,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def login: Action[AnyContent] = action.async { implicit request =>
-    val username = configuration.get[String]("session.username")
+    //val username = configuration.get[String]("session.username")
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
     if (emailFromSession.isEmpty) {
       Future.successful(Ok(views.html.users.login(loginForm)))
@@ -179,7 +178,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def loginUser: Action[AnyContent] = action.async { implicit request =>
-    val username = configuration.get[String]("session.username")
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))

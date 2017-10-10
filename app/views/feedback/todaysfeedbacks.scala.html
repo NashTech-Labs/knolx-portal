@@ -33,14 +33,13 @@
                     <div class="modal fade" id="feedbackAttendance-@session.id" role="dialog">
                         <div class="modal-dialog modal-sm feedbackAttendance-dialog">
                             <div class="modal-content" id="feedbackAttendance-content">
-                                <div class="modal-header" id="feedbackAttendance-header">
-                                    <span class="feedbackAttendance-header-text">Please let us know whether you attended this Knolx session</span>
+                                <div id="feedbackAttendance-header">
                                     <button type="button" class="close" data-dismiss="modal" id="feedbackAttendance-close">X</button>
                                 </div>
                                 <div class="modal-body" id="feedbackAttendance-body">
                                     <div class= "text-center" id="feedbackAttendance-centerBody" >
+                                        <p class="feedbackAttendance-header-text">Please let us know whether you attended this Knolx session</p>
                                         <button type="attend" id="@session.id" class="btn btn-success feedbackAttendance-button attend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>I attended the session</button>
-                                        <br>
                                         <br>
                                         <button type="did not attend" id="@session.id" class="btn btn-danger feedbackAttendance-button didnotattend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>I did not attend the session</button>
                                     </div>

@@ -609,13 +609,11 @@
     height: 50vh;
 }
 
-#feedbackAttendance-centerBody {
-    margin-top: 10vh;
-}
-
 .feedbackAttendance-button {
+    height: 8vh;
     width: 275px;
     font-weight: 900;
+    font-size: 2.5vh;
 }
 
 #session-form-info {
@@ -649,4 +647,10 @@
 .feedbackAttendance-header-text {
     font-weight: 900;
     font-family: 'gothic';
+    margin: 5vh 0;
+    font-size: 2.5vh;
+}
+
+#feedbackAttendance-close {
+    padding: 10px;
 }

@@ -16,6 +16,8 @@ trait KnolxBaseController extends KnolxBaseControllerHelpers {
 
   def adminAction: ActionBuilder[SecuredRequest, AnyContent] = controllerComponents.adminActionBuilder
 
+  def superUserAction: ActionBuilder[SecuredRequest, AnyContent] = controllerComponents.superUserActionBuilder
+
 }
 
 trait KnolxBaseControllerHelpers extends BaseControllerHelpers {
@@ -30,11 +32,14 @@ trait KnolxControllerComponents extends ControllerComponents {
 
   def adminActionBuilder: ActionBuilder[SecuredRequest, AnyContent]
 
+  def superUserActionBuilder: ActionBuilder[SecuredRequest, AnyContent]
+
 }
 
 case class DefaultKnolxControllerComponents @Inject()(actionBuilder: DefaultActionBuilder,
                                                       userActionBuilder: UserActionBuilder,
                                                       adminActionBuilder: AdminActionBuilder,
+                                                      superUserActionBuilder: SuperUserActionBuilder,
                                                       parsers: PlayBodyParsers,
                                                       messagesApi: MessagesApi,
                                                       langs: Langs,

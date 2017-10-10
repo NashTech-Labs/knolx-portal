@@ -594,6 +594,25 @@
     padding-top: 100px;
 }
 
+.form-question-card {
+    max-height: 260px;
+    height: auto;
+}
+
+#formData .preview-options {
+    padding-left: 40px;
+    line-height: 28px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    position: relative;
+}
+
+#formData .preview-options i.fa {
+    position: absolute;
+    left: 10px;
+    top: 6px;
+}
 .feedbackAttendance-dialog {
     top: 15%;
 }

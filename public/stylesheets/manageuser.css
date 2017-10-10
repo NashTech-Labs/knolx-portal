@@ -4,7 +4,7 @@
 
 .search-bar {
     height: 50px;
-    border: 1px solid #dcdcdc;
+    border: 1px solid #9E9E9E;
     box-shadow: 0 4px 6px -5px #333;
     border-radius: 4px;
     margin-bottom: 50px;
@@ -21,18 +21,19 @@
     text-align: center;
     letter-spacing: 2px;
     padding-left: 40px;
-    color: #fff;
+    color: #616161;
+    font-weight: bold;
 }
 
 .search-icon{
     padding-left: 10px;
-    color: white;
+    color: #9E9E9E;
     font-size: 20px;
 }
 
-/*input::placeholder {
-        color:black !important;
-    }*/
+input::placeholder {
+        color:#9E9E9E !important;
+    }
 
 .search-button {
     float: left;

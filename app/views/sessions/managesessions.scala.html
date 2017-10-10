@@ -20,9 +20,9 @@
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="table-responsive manage-user-custom-table-margin">
-                    <table class="table table-striped">
+                    <table class="table">
                         <thead>
-                            <tr>
+                            <tr class="table-header-color">
                                 <th>
                                     <div class="col col-xs-6 text-right">
                                         <a href="@routes.SessionsController.create()" class="btn btn-sm btn-primary btn-create">

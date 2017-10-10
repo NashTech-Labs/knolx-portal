@@ -187,19 +187,6 @@ function addQuestion() {
         '           </div>' +
         '           <div class="col-md-1" > </div>' +
         '       </div>' +
-        '       <div class="row" id="option-' + questionCount + '-' + optionsCount + '">' +
-        '           <div class="col-md-1" ></div>' +
-        '           <div class="col-md-10" >' +
-        '               <label class="radio-button">' +
-        '                   <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>' +
-        '                   <span class="lab_text"></span>' +
-        '                   <p class="checkbox-text">' +
-        '                       <input id="optionValue-' + questionCount + '-' + 1 + '"  class="card-options" placeholder="Option" type="text"/>' +
-        '                   </p>' +
-        '               </label>' +
-        '           </div>' +
-        '           <div class="col-md-1" > </div>' +
-        '       </div>' +
         '   </div>' +
         '   <br>' +
         '   <div id="parent" class="add-option-parent"><div>' +

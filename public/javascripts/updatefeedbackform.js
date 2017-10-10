@@ -20,7 +20,7 @@ class Question {
 }
 
 
-var optionsCount = 0;
+var optionsCount = 1;
 var questionCount = parseInt(document.getElementById('questionCount').value);
 var existingCounts = JSON.parse(document.getElementById('existingCounts').value);
 var questions = new Map([]);
@@ -187,7 +187,7 @@ function addQuestion() {
         '                   <input type="radio" disabled name="radopt" id="" class="custom-checkbox" value="true"/>' +
         '                   <span class="lab_text"></span>' +
         '                   <p class="checkbox-text">' +
-        '                       <input id="optionValue-' + questionCount + '-' + 0 + '"  class="card-options" placeholder="Option" type="text"/>' +
+        '                       <input id="optionValue-' + questionCount + '-' + 0 + '"  class="card-options" type="text" value="Did not attend" readonly/>' +
         '                   </p>' +
         '               </label>' +
         '           </div>' +

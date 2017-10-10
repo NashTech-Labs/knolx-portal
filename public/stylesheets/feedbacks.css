@@ -1,7 +1,6 @@
 .feedback-form-display-container {
     color: #000;
     margin: 100px 0px;
-    margin-bottom: 0;
     background-color: #fff;
     padding: 0px 0px 0px 0px;
     border-bottom-left-radius: 30px;
@@ -33,6 +32,7 @@
     margin: 0 10px;
     padding: 0;
 }
+
 .feedback-footer {
     height: 30px;
     background-color: #dcdcdc;
@@ -133,7 +133,6 @@
     -moz-box-shadow: inset 0 -10px 10px -10px #888;
     -webkit-box-shadow: inset 0 -10px 10px -10px #888;
     box-shadow: inset 0 -10px 10px -10px #888;
-
 }
 
 .accepting-response {
@@ -278,7 +277,6 @@
 
 .session-information-modal {
     padding-bottom: 0px;
-
 }
 
 .session-modal-title {
@@ -503,7 +501,6 @@
 }
 
 .acknowledgement-text_tag {
-
     color: #85929E;
     text-shadow: none;
     font-family: 'gothic';
@@ -511,7 +508,6 @@
     letter-spacing: 1px;
     text-align: center;
     padding: 0px 0px;
-
 }
 
 .acknowledgement-custom-message {
@@ -594,10 +590,8 @@
 }
 
 .report-container {
-
     padding-top: 100px;
 }
-
 
 .form-question-card {
     max-height: 260px;
@@ -617,4 +611,65 @@
     position: absolute;
     left: 10px;
     top: 6px;
+}
+.feedbackAttendance-dialog {
+    top: 15%;
+    width: 40vw;
+    margin: 0 auto;
+}
+
+#feedbackAttendance-content {
+    background-image: url('../images/mesh.svg');
+}
+
+#feedbackAttendance-body {
+    overflow: auto;
+    font-family: 'gothic';
+    height: 50vh;
+}
+
+.feedbackAttendance-button {
+    height: 8vh;
+    width: 275px;
+    font-weight: 900;
+    font-size: 2.5vh;
+}
+
+#session-form-info {
+    overflow-y: auto;
+}
+
+.didnotattend-button {
+    margin-top: 5vh;
+}
+
+.form-question-card {
+    max-height: 260px;
+    height: auto;
+}
+
+#formData .preview-options {
+    padding-left: 40px;
+    line-height: 28px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    position: relative;
+}
+
+#formData .preview-options i.fa {
+    position: absolute;
+    left: 10px;
+    top: 6px;
+}
+
+.feedbackAttendance-header-text {
+    font-weight: 900;
+    font-family: 'gothic';
+    margin: 5vh 0;
+    font-size: 2.5vh;
+}
+
+#feedbackAttendance-close {
+    padding: 10px;
 }

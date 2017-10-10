@@ -193,6 +193,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
     margin-left: 10%;
 
 }
+
 .comment-question{
     margin-left: 0px;
 }
@@ -259,6 +260,7 @@ a.fa.fa-trash.delete-form:hover {
     color:#fff;
     text-shadow:0px 0px 10px -5px #fff;
 }
+
 .add-type-option-common{
     width:97px;
     height:80px;
@@ -268,6 +270,7 @@ a.fa.fa-trash.delete-form:hover {
     text-align: center;
     cursor: pointer;
 }
+
 .add-type-option-mcq{
     padding-top: 6px;
 }
@@ -275,17 +278,20 @@ a.fa.fa-trash.delete-form:hover {
     padding-top: 5px;
     font-size: 24px;
 }
+
 .type-partition{
     height:25px;
     float:left;
     border-left: 1px solid #2e6da4;
     margin: 20px 0px;
 }
+
 .add-type-option-common_text{
     font-size: 15px;
     color:#fff;
     margin-top:-4px;
 }
+
 textarea{
     background-color: transparent;
     width:100%;
@@ -303,6 +309,7 @@ textarea{
     min-height: 50px;
     overflow-y: hidden;
 }
+
 .comment-section{
     width:100%;
     text-align:center;
@@ -315,34 +322,41 @@ textarea{
     color: #7F8C8D;
     height: 80px;
 }
+
 .comment-section:disabled{
     background-color:#fff;
 }
 
-
-/** New Added styles*/
-.feedback-duration {padding:20px 0}
-.feedback-duration .checkbox-text {
+.feedback-duration{
+    padding:20px 0
+}
+.feedback-duration .checkbox-text{
     width: 70px;
     display: inline-block;
 }
 
-.feedback-duration .days-outer .days{    width: 40px;
-                                         margin: 0 0 0 -6px;}
- .feedback-duration .days-outer .checkbox-text { white-space:nowrap}
+.feedback-duration .days-outer .days{
+    width: 40px;
+    margin: 0 0 0 -6px;
+}
 
- .duration-title {
+.feedback-duration .days-outer .checkbox-text{
+    white-space:nowrap
+}
 
-     margin-left: 0;
-     line-height: 22px;
- }
+.duration-title{
+    margin-left: 0;
+    line-height: 22px;
+}
 
- .questions-inlining .checkbox-text {
-     white-space: normal;
-     word-wrap: break-word;
-     line-height: 24px;
-     max-width: 200px;
-     width: 100%;
- }
+.questions-inlining .checkbox-text{
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 24px;
+    max-width: 200px;
+    width: 100%;
+}
 
- .card-questions-label{ display:block}
+.card-questions-label{
+    display:block
+}

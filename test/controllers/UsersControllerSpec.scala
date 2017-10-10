@@ -570,6 +570,23 @@ class UsersControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo SEE_OTHER
     }
 
+    "redirect to homepage when user is already logged in" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      val result = controller.login()(FakeRequest(GET,"/index/")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "redirect to login when user is not logged in" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      val result = controller.login()(FakeRequest(GET,"/login/")
+        .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
   }
 
 }

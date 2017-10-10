@@ -190,7 +190,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           bodyText = Some(" knolx reminder"), replyTo = None)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com","test2@example.com"))
+      usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com", "test2@example.com"))
 
       dateTimeUtility.toLocalDate(knolxSessionDateTime) returns Instant.ofEpochMilli(knolxSessionDateTime).atZone(ISTZoneId).toLocalDate
 

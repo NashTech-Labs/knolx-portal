@@ -11,7 +11,7 @@ $(function () {
     $('.fillFeedback').click(function () {
         $('#feedbackAttendance').modal('show');
         $('#feed-message').html("");
-        });
+    });
 
     $('.btn-success').click(function () {
         $('#feedbackAttendance').modal('hide');
@@ -146,8 +146,8 @@ function loadFeedbackForm(values, sessionId) {
                     "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
                                         "</p>"+
                     "<label class='radio-button'>" +
-                    "<span class='lab_text'></span>" +
                     "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
+                    "<span class='lab_text'></span>" +
                     "</label>" +
                     "</div>" +
                     "</div>";
@@ -300,22 +300,20 @@ function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bg
 
     document.getElementById('display-feed-form').style.display = 'none';
     $('#feed-message').html(message);
-
 }
 
 function submittedFeedbackFormForNotAttend(sessionId) {
-var form = document.getElementById(sessionId + "-form").value;
+    var form = document.getElementById(sessionId + "-form").value;
     var feedbackForm = JSON.parse(form);
     feedbackFormId = feedbackForm['id'];
     var questions = feedbackForm['questions'];
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];
-
-
     for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
         questionOptionInformation.push("Did not attend")
     }
     var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation);
+
     if (isFormResponseValid(feedbackFormWithResponse)) {
 
         jsRoutes.controllers.FeedbackFormsResponseController.storeFeedbackFormResponse().ajax(
@@ -334,7 +332,6 @@ var form = document.getElementById(sessionId + "-form").value;
                     ackMessage("success_text", "Thank you!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
                 },
                 error: function (er) {
-                alert('in error');
                     ackMessage("failure_text", "Oops!", "Something went wrong", 'We are unable to process your request, refreshing this page may fix this issue, in case it keeps occurring please contact the administrator', "Refresh", 'failure_text_color', 'failure_text_color-background-color');
                 }
             })

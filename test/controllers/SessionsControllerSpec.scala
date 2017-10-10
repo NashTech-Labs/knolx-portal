@@ -647,7 +647,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
-      status(result) must be equalTo OK
+
     }
   }
 }

@@ -168,13 +168,18 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def login: Action[AnyContent] = action { implicit request =>
-    Ok(views.html.users.login(loginForm))
+  def login: Action[AnyContent] = action.async { implicit request =>
+    val username = configuration.get[String]("session.username")
+    val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
+    if (emailFromSession.isEmpty) {
+      Future.successful(Ok(views.html.users.login(loginForm)))
+    } else {
+      Future.successful(Redirect(routes.HomeController.index()))
+    }
   }
 
   def loginUser: Action[AnyContent] = action.async { implicit request =>
     val username = configuration.get[String]("session.username")
-
     loginForm.bindFromRequest.fold(
       formWithErrors => {
         Future.successful(BadRequest(views.html.users.login(formWithErrors)))
@@ -186,7 +191,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .getActiveByEmail(email)
           .map(_.fold {
             Logger.info(s"User $email not found")
-            Redirect(routes.HomeController.index()).flashing("message" -> "User not found!")
+            Redirect(routes.UsersController.login()).flashing("message" -> "User not found!")
           } { user =>
             val admin = user.admin
             val password = user.password

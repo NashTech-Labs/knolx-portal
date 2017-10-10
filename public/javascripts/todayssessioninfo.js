@@ -8,12 +8,12 @@ $(function () {
     });
 
     $('.fillFeedback').click(function () {
-        $('#feedbackAttendance').modal('show');
+        $('#feedbackAttendance-' + this.id).modal('show');
         $('#feed-message').html("");
     });
 
     $('.btn-success').click(function () {
-        $('#feedbackAttendance').modal('hide');
+        $('#feedbackAttendance-' + this.id).modal('hide');
         document.getElementById('display-feed-form').style.display = 'block';
         currentFeedbackProfile = this.value;
         formOpener(this.value);
@@ -21,7 +21,7 @@ $(function () {
     });
 
     $('.btn-danger').click(function () {
-        $('#feedbackAttendance').modal('hide');
+        $('#feedbackAttendance-' + this.id).modal('hide');
         currentFeedbackProfile = this.value;
         submittedFeedbackFormForNotAttend(this.id);
     });

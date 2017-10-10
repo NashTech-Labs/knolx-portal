@@ -1,7 +1,6 @@
 .feedback-form-display-container {
     color: #000;
     margin: 100px 0px;
-    margin-bottom: 0;
     background-color: #fff;
     padding: 0px 0px 0px 0px;
     border-bottom-left-radius: 30px;
@@ -615,6 +614,8 @@
 }
 .feedbackAttendance-dialog {
     top: 15%;
+    width: 40vw;
+    margin: 0 auto;
 }
 
 #feedbackAttendance-content {
@@ -627,13 +628,11 @@
     height: 50vh;
 }
 
-#feedbackAttendance-centerBody {
-    margin-top: 10vh;
-}
-
 .feedbackAttendance-button {
-    width: 175px;
+    height: 8vh;
+    width: 275px;
     font-weight: 900;
+    font-size: 2.5vh;
 }
 
 #session-form-info {
@@ -662,4 +661,15 @@
     position: absolute;
     left: 10px;
     top: 6px;
+}
+
+.feedbackAttendance-header-text {
+    font-weight: 900;
+    font-family: 'gothic';
+    margin: 5vh 0;
+    font-size: 2.5vh;
+}
+
+#feedbackAttendance-close {
+    padding: 10px;
 }

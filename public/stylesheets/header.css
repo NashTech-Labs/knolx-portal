@@ -33,17 +33,17 @@ ul > li > a {
     border-color: transparent;
 }
 
-html, body {
+html,body,#particle-js {
     margin: 0;
     height: 100%;
-    background-color: #352C25;
-    background-image: url('../images/plx.jpg');
+    background-color: #3498db;
     background-repeat: no-repeat;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    padding: 0 1%;
+
+
 }
 
 @font-face {
@@ -51,11 +51,13 @@ html, body {
     src: url('font/h3.ttf');
 }
 
+
 nav.navbar {
     -webkit-transition: all 0.5s ease;
     transition: all 0.5s ease;
-    height: 68px;
+    height: 60px;
     padding-top: 5px;
+    background-color: transparent;
 }
 
 nav.navbar.shrink {
@@ -230,4 +232,10 @@ i.fa.fa-user:active {
 .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
     background-color: #352C25;
     color: #fff;
+}
+
+canvas {
+position: absolute;
+  display: block;
+  vertical-align: bottom;
 }

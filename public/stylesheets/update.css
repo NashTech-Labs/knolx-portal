@@ -24,6 +24,8 @@
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
 }
 
 #date {

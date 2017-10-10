@@ -33,6 +33,7 @@
     margin: 0 10px;
     padding: 0;
 }
+
 .feedback-footer {
     height: 30px;
     background-color: #dcdcdc;
@@ -133,7 +134,6 @@
     -moz-box-shadow: inset 0 -10px 10px -10px #888;
     -webkit-box-shadow: inset 0 -10px 10px -10px #888;
     box-shadow: inset 0 -10px 10px -10px #888;
-
 }
 
 .accepting-response {
@@ -278,7 +278,6 @@
 
 .session-information-modal {
     padding-bottom: 0px;
-
 }
 
 .session-modal-title {
@@ -503,7 +502,6 @@
 }
 
 .acknowledgement-text_tag {
-
     color: #85929E;
     text-shadow: none;
     font-family: 'gothic';
@@ -511,7 +509,6 @@
     letter-spacing: 1px;
     text-align: center;
     padding: 0px 0px;
-
 }
 
 .acknowledgement-custom-message {
@@ -594,7 +591,6 @@
 }
 
 .report-container {
-
     padding-top: 100px;
 }
 
@@ -645,6 +641,26 @@
     overflow-y: auto;
 }
 
-.btn-danger {
+.didnotattend-button {
     margin-top: 5vh;
+}
+
+.form-question-card {
+    max-height: 260px;
+    height: auto;
+}
+
+#formData .preview-options {
+    padding-left: 40px;
+    line-height: 28px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    position: relative;
+}
+
+#formData .preview-options i.fa {
+    position: absolute;
+    left: 10px;
+    top: 6px;
 }

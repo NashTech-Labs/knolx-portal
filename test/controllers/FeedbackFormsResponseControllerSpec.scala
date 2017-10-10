@@ -3,11 +3,14 @@ package controllers
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
+import akka.actor.ActorRef
+import com.google.inject.name.Names
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.Application
+import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.Results
@@ -28,10 +31,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObjectWithSameEmail =
     Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
@@ -60,6 +63,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         feedbackFormsRepository,
         feedbackResponseRepository,
         sessionsRepository,
+        config,
+        emailManager,
         dateTimeUtility,
         knolxControllerComponent)
 
@@ -68,6 +73,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsRepository = mock[SessionsRepository]
+    val emailManager: ActorRef =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
@@ -94,7 +102,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
-          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeLink"), Some("slideShareLink"), reminder = false, notification = false, _id)))
+          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate

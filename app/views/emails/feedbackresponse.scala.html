@@ -1,0 +1,17 @@
+@import actors._
+
+@(presenter : String, topic: String, sessionType : Boolean)
+
+<p>Hi Knolder,</p>
+<p><strong> Thank you! for your valuable feedback</strong></p>
+
+<p>We'll let @presenter know your views on the
+    @if(!sessionType) {
+    <strong> Knolx</strong> Session's Topic<strong> @topic</strong>
+} else {
+    <strong> Meetup</strong> Session's Topic <strong>@topic</strong>
+    }anonymously.</p>
+<p>Also you can change your response anytime until this feedback form is active.</p>
+
+<p>Thanks</p>
+<p>Admin</p>

@@ -149,6 +149,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                   PasswordUtility.BCrypt,
                   active = true,
                   admin = false,
+                  coreMember = false,
+                  superUser = false,
                   BSONDateTime(dateTimeUtility.nowMillis)))
               .map { result =>
                 if (result.ok) {

@@ -35,7 +35,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val currentMillis = currentDate.getTime
   private val passwordChangeRequest = PasswordChangeRequestInfo("test@knoldus.com", "token", BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(currentMillis), 0, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true,coreMember = false,superUser = false, BSONDateTime(currentMillis), 0, _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()

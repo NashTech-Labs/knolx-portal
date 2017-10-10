@@ -27,6 +27,8 @@ case class UserInfo(email: String,
                     algorithm: String,
                     active: Boolean,
                     admin: Boolean,
+                    coreMember :Boolean,
+                    superUser :Boolean,
                     banTill: BSONDateTime,
                     banCount: Int = 0,
                     _id: BSONObjectID = BSONObjectID.generate)

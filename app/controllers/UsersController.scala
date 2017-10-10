@@ -173,8 +173,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
     if (emailFromSession.isEmpty) {
       Future.successful(Ok(views.html.users.login(loginForm)))
-    }
-    else {
+    } else {
       Future.successful(Redirect(routes.HomeController.index()))
     }
   }

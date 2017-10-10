@@ -7,7 +7,6 @@ $(function () {
         expire();
     });
 
-
     $('.fillFeedback').click(function () {
         $('#feedbackAttendance').modal('show');
         $('#feed-message').html("");

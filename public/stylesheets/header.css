@@ -225,7 +225,7 @@ i.fa.fa-user:active {
 }
 
 .collapsing, .in {
-    background-color: #352C25;
+    background-color: #eeeeee;
     box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
 }
 

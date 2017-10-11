@@ -359,7 +359,7 @@ input::placeholder {
 
 .filter-label_text {
     font-family: 'headerfont';
-    color: #888888;
+    color: #9E9E9E;
     align-self: center;
 
 }
@@ -367,7 +367,7 @@ input::placeholder {
 .filter-checkbox-text {
     font-size: 14px;
     font-family: 'headerfont';
-    color: #fff;
+    color: #9E9E9E;
     margin: 0px;
     margin-top: 15px;
     letter-spacing: 2px;
@@ -379,7 +379,7 @@ input::placeholder {
     font-family: "FontAwesome";
     display: inline-block;
     width: 10px;
-    color: #fff;
+    color: #9E9E9E;
     font-size: 25px;
     margin-right: 25px;
 }

@@ -1,3 +1,12 @@
+.session-content-display-container {
+    color: #000;
+    background-image: url('../images/mesh.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
 .frame-panel {
      border:2px solid #CCC;
      border-width:2px;

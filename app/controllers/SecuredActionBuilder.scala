@@ -81,7 +81,6 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
         }
       })
   }
-
 }
 
 case class SuperUserActionBuilder(val parser: BodyParser[AnyContent],

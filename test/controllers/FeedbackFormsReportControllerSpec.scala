@@ -191,7 +191,6 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
       status(response) must be equalTo OK
     }
-
   }
 
 }

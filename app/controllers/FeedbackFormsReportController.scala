@@ -8,13 +8,12 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.libs.mailer.MailerClient
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 
 import scala.collection.immutable.::
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.Duration
+import scala.concurrent.Future
 
 case class FeedbackReportHeader(sessionId: String,
                                 topic: String,
@@ -26,8 +25,6 @@ case class FeedbackReportHeader(sessionId: String,
 case class UserFeedbackResponse(coreMember: Boolean, questionResponse: List[QuestionResponse])
 
 case class FeedbackReport(reportHeader: Option[FeedbackReportHeader], response: List[UserFeedbackResponse])
-
-//case class FeedbackReport(report: Option[(FeedbackReportHeader, List[List[QuestionResponse]])])
 
 class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                                               mailerClient: MailerClient,
@@ -135,9 +132,8 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   def searchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     val responses = feedbackFormsResponseRepository.allResponsesBySession(id, None)
     renderFetchedResponses(responses, id).map { report =>
-      Ok(Json.toJson(FeedbackReport(report.reportHeader,report.response)).toString())
+      Ok(Json.toJson(FeedbackReport(report.reportHeader, report.response)).toString())
     }
   }
-
 
 }

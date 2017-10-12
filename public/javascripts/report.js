@@ -14,12 +14,10 @@ function fetchUserResponse(isCoreMember,sessionId) {
             /*contentType: 'application/json',*/
             success: function (data) {
             var values = JSON.parse(data);
-
             var userResponse = ""
             var responses = values["response"];
 
             if (isCoreMember == "all") {
-
                 for(var response = 0;response < responses.length; response++) {
                    userResponse += "<tr><td>"+ (parseInt(response) + 1) + "</td>";
                        for(var question = 0; question < responses[response].questionResponse.length; question++) {
@@ -43,13 +41,9 @@ function fetchUserResponse(isCoreMember,sessionId) {
                 }
              $('#response-size').html(parseInt(sno))
             }
-
             $('#user-response').html(userResponse);
-
           },error: function (er) {
 
                            }
-
         })
-
 }

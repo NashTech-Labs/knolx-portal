@@ -53,5 +53,6 @@ GET         /reports/user                        controllers.FeedbackFormsReport
 GET         /reports/user/responses              controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
 GET         /reports/manage                      controllers.FeedbackFormsReportController.renderAllFeedbackReports
 GET         /reports/manage/responses            controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
+GET         /reports/manage/response             controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                        controllers.Assets.versioned(path="/public", file: Asset)

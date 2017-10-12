@@ -290,7 +290,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     "redirect to manage user page on successful submission of form" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))) returns updateWriteResult
+      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, Some("12345678"))) returns updateWriteResult
 
       val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -305,7 +305,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     "throw internal server error while updating user information to database" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))) returns updateWriteResult
+      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, Some("12345678"))) returns updateWriteResult
 
       val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -468,7 +468,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "reset password for the user requested" in new WithTestApplication {
-      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, Some("12345678"))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
@@ -487,7 +487,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "throw internal server error" in new WithTestApplication {
-      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, Some("12345678"))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")

@@ -87,12 +87,16 @@
     text-shadow: none;
     letter-spacing: 2px;
     margin-top: 15px;
-    margin-right: 15%;
-    margin-left: 30%;
+    margin-right: 34%;
+    margin-left: 20%;
 }
 
 .manage-user-checkbox-ban-text {
-    margin-right: 22%;
+    margin-right: 42%;
+}
+
+.manage-user-checkbox-coreMember-text {
+    margin-right: 15%;
 }
 
 .manage-user-label_text:before {

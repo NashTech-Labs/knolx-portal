@@ -25,8 +25,11 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
       1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+  private val optionOfSessionObject =
+    Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com",
+  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com",false,
     "presenter@example.com",
     _id.stringify, _id.stringify,
     "topic",
@@ -152,7 +155,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
     "render report by session id if responses found for admin" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-
+      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List(feedbackResponse))
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
@@ -165,7 +168,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
     "render report by session id if responses found for user" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject.map(user => Some(user.get.copy(admin = false)))
-
+      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("test@knoldus.com")) returns Future.successful(List(feedbackResponse))
 
       val response = controller.fetchUserResponsesBySessionId(_id.stringify)(
@@ -178,7 +181,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
     "render report by session id if no response found" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-
+      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(

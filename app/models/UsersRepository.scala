@@ -36,6 +36,7 @@ case class UserInfo(email: String,
 case class UpdatedUserInfo(email: String,
                            active: Boolean,
                            ban: Boolean,
+                           coreMember :Boolean,
                            password: Option[String])
 
 object UserJsonFormats {
@@ -107,19 +108,27 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     val unban = BSONDateTime(dateTimeUtility.nowMillis)
 
     val selector = BSONDocument("email" -> updatedRecord.email)
-    val modifier = (updatedRecord.password, updatedRecord.ban) match {
-      case (Some(password), true)  =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration))
-      case (Some(password), false) =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban))
-      case (None, true)            =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration))
-      case (None, false)           =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban))
+    val modifier = (updatedRecord.password, updatedRecord.ban, updatedRecord.coreMember) match {
+      case (Some(password), true, true)  =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration, "coreMember" -> updatedRecord.coreMember))
+      case (Some(password), true, false)  =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration, "coreMember" -> updatedRecord.coreMember))
+      case (Some(password), false, true) =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban, "coreMember" -> updatedRecord.coreMember))
+      case (Some(password), false, false) =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban, "coreMember" -> updatedRecord.coreMember))
+      case (None, true, true)            =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration, "coreMember" -> updatedRecord.coreMember))
+      case (None, true, false)            =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration, "coreMember" -> updatedRecord.coreMember))
+      case (None, false, true)           =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban, "coreMember" -> updatedRecord.coreMember))
+      case (None, false, false)           =>
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban, "coreMember" -> updatedRecord.coreMember))
     }
 
     collection
-      .flatMap(jsonCollection =>
+      .flatMap(jsonCollection  =>
         jsonCollection.update(selector, modifier))
   }
 

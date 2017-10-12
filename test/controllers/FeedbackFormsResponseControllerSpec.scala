@@ -42,7 +42,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
     active = true, _id)
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com", "presenter@example.com", _id.stringify, _id.stringify,
+  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com",false, "presenter@example.com", _id.stringify, _id.stringify,
     "topic",
     meetup = false,
     BSONDateTime(date.getTime),

@@ -2,19 +2,37 @@
 
 @main("Reports") {
 
-    @report.report.fold {
+    @report.reportHeader.fold {
 
-    } { report =>
-        <div class="row">
-            @report._2 match {
+    }{ header =>
+       <div class="row">
+            @report.response match {
                 case first :: rest => {
                     <div class="col-md-12 feedback-form-display-container report-info">
-                        <span class="label label-primary total-responses">Total <span class="badge badge-report">@{
-                            report._2.size
-                        }</span></span>
-                        <span ><div class="report-other-info">@report._1.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
-                        <p class="report-session-date">@report._1.date</p></div>
+                        <span class="label label-primary total-responses">Total <span class="badge badge-report" id="response-size">@{
+                            report.response.size
+                        }</span>
+                        <div class="feedback-responses-button" >
+                            <label class="checkbox-outer">
+                                <input type='radio' id="all-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="all"/>
+
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text" style="margin-top:9px;">All</p>
+                            </label>
+                        </div>
+
+                        <div class="feedback-responses-button" >
+                            <label class="checkbox-outer">
+                                <input type='radio' id="coreMember-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="coreMember"/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text" style="margin-top:9px;">Core Member</p>
+                            </label>
+                        </div>
                         </span>
+                        <span ><div class="report-other-info">@header.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
+                        <p class="report-session-date">@header.date</p></div>
+                        </span>
+
                     </div>
                     <div class="col-md-12 feedback-form-display-container report-content-outer">
                         <div class="table-responsive manage-user-custom-table-margin report-content-outer">
@@ -22,19 +40,19 @@
                                 <thead class="report-head">
                                     <tr>
                                         <th>Sno.</th>
-                                        @for(question <- first) {
+                                        @for(question <- first.questionResponse) {
                                             <th>@question.question</th>
                                         }
 
                                     </tr>
                                 </thead>
-                                <tbody id="user-found">
-                                @for(response <- report._2.indices) {
+                                <tbody id="user-response">
+                                @for(response <- report.response.indices) {
                                     <tr>
                                         <td>@{
                                             response + 1
                                         }</td>
-                                        @for(question <- report._2(response)) {
+                                        @for(question <- report.response(response).questionResponse) {
                                             <td>@question.response</td>
                                         }
                                     </tr>
@@ -52,6 +70,5 @@
         </div>
         </div>
     }
-
-
+<script src="@routes.Assets.versioned("javascripts/report.js")" type="text/javascript"></script>
 }

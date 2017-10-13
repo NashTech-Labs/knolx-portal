@@ -292,7 +292,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
                   BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None)
+                  0,cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
 
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {

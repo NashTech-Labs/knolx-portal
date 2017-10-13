@@ -32,11 +32,13 @@ case class SessionInfo(userId: String,
                        feedbackExpirationDays: Int,
                        meetup: Boolean,
                        rating: String,
+                       score: Double,
                        cancelled: Boolean,
                        active: Boolean,
                        expirationDate: BSONDateTime,
                        youtubeURL: Option[String],
                        slideShareURL: Option[String],
+                       noOfFeedbackResponses: Int,
                        reminder: Boolean = false,
                        notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate
@@ -284,6 +286,30 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     }
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
+  }
+
+  def updateRating(sessionID: String, score: Double): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionID))
+
+    val modifier = BSONDocument("$inc" -> BSONDocument("noOfFeedbackResponses" -> 1))
+
+    collection.flatMap(jsonCollection => jsonCollection.find(selector)
+      .cursor[SessionInfo](ReadPreference.Primary)
+      .collect[List](-1, FailOnError[List[SessionInfo]]())
+      .flatMap(eventualSession => eventualSession.headOption
+          .fold {
+            Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+          } { session =>
+            val noOfFeedbackResponses = session.noOfFeedbackResponses
+            val currentScore = session.score
+            val updatedScore = ((currentScore * noOfFeedbackResponses) + score)/(noOfFeedbackResponses + 1)
+            val updatedRating = updatedScore match {
+              case good if updatedScore > 70.00 => "Good"
+              case average if updatedScore > 40.00 => "Average"
+              case _ => "Bad"
+            }
+            jsonCollection.update(selector, BSONDocument("$set" -> BSONDocument("score" -> updatedScore, "rating" -> updatedRating),"$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
+          }))
   }
 
 }

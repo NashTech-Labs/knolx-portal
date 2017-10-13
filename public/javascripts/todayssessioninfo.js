@@ -191,10 +191,11 @@ function loadFeedbackForm(values, sessionId) {
 }
 
 class FeedbackFormResponse {
-    constructor(sessionId, feedbackFormId, responses) {
+    constructor(sessionId, feedbackFormId, responses, rating) {
         this.sessionId = sessionId;
         this.feedbackFormId = feedbackFormId;
         this.responses = responses;
+        this.rating = rating
     }
 }
 
@@ -204,18 +205,32 @@ function submittedFeedbackForm() {
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];
     var sessionId = document.getElementById("current-session").value;
+    var score = 0;
+    var mcqCount = 0;
 
     for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
         var responseName = "option-" + questionNumber;
         var response = "";
         if (questions[questionNumber]["questionType"] == "MCQ") {
             response = getResponse(responseName);
+            var noOfOptions = getNoOfOptions(responseName) - 1;
+            var receivedScore = (getResponseValue(responseName)/noOfOptions) * 100;
+            //console.log(getResponseValue(responseName));
+            console.log("-------------------------------");
+            console.log("rating = " + score);
+            console.log("mcqCount = " + mcqCount);
+            console.log("value in id = " + getResponseValue(responseName));
+            console.log('Score received is = ' + score);
+            score = ((score*mcqCount) + receivedScore)/(mcqCount + 1);
+            console.log(score);
+            mcqCount++;
         } else {
             response = document.getElementById(responseName).value;
         }
         questionOptionInformation.push(response)
     }
-    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation);
+    console.log(score);
+    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation, score);
 
     if (isFormResponseValid(feedbackFormWithResponse)) {
 
@@ -248,6 +263,20 @@ function getResponse(name) {
         }
     }
     return "";
+}
+
+function getResponseValue(name) {
+    var group = document.getElementsByName(name);
+    for (var i = 0; i < group.length; i++) {
+        if (group[i].checked) {
+            return (parseInt(group[i].id.split("-")[1]));
+        }
+    }
+    return "";
+}
+
+function getNoOfOptions(name) {
+    return document.getElementsByName(name).length;
 }
 
 function isFormResponseValid(filledForm) {
@@ -308,10 +337,11 @@ function submittedFeedbackFormForNotAttend(sessionId) {
     var questions = feedbackForm['questions'];
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];
+    var score = 0;
     for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
         questionOptionInformation.push("Did not attend")
     }
-    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation);
+    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation, score);
 
     if (isFormResponseValid(feedbackFormWithResponse)) {
 

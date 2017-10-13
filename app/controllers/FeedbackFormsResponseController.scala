@@ -38,7 +38,7 @@ case class FeedbackForms(name: String,
                          active: Boolean = true,
                          id: String)
 
-case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String]) {
+case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String], rating: Double) {
 
   def validateSessionId: Option[String] =
     if (sessionId.nonEmpty) {
@@ -176,14 +176,11 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received bad request while storing feedback response, ${request.body}")
       Future.successful(BadRequest("Malformed Data!"))
     } { feedbackFormResponse =>
-
       val validatedForm =
         feedbackFormResponse.validateSessionId orElse
           feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
       validatedForm.fold {
-
         deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
-
           feedbackResponse.fold {
             Logger.info(s"Feedback form submission unsuccessful due to Malformed data while validating form responses for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
             Future.successful(BadRequest("Malformed Data!"))
@@ -191,17 +188,29 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             val (header, response) = sanitizedResponse
             val timeStamp = dateTimeUtility.nowMillis
             val feedbackResponseData = FeedbackFormsResponse(request.user.email, header.email, request.user.id, feedbackFormResponse.sessionId,
-              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
-            feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
-              if (result.ok) {
+              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp), feedbackFormResponse.rating)
+            feedbackResponseRepository.upsert(feedbackResponseData).flatMap { result =>
+              if (result.ok && feedbackFormResponse.rating != 0) {
                 Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+                sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.rating).map { result =>
+                  if (result.ok) {
+                    emailManager ! EmailActor.SendEmail(
+                      List(request.user.email), fromEmail, "Feedback Successfully Registered!", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
+                    Ok("Feedback form response successfully stored!")
+                  } else {
+                    Logger.error(s"Something Went wrong when storing feedback form" +
+                      s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+                    InternalServerError("Something Went Wrong!")
+                  }
+                }
+              } else if (feedbackFormResponse.rating == 0) {
                 emailManager ! EmailActor.SendEmail(
                   List(request.user.email), fromEmail, "Feedback Successfully Registered!", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
-                Ok("Feedback form response successfully stored!")
+                Future.successful(Ok("Feedback form response successfully stored!"))
               } else {
                 Logger.error(s"Something Went wrong when storing feedback form" +
                   s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-                InternalServerError("Something Went Wrong!")
+                Future.successful(InternalServerError("Something Went Wrong!"))
               }
             }
           }
@@ -210,7 +219,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
         Future.successful(BadRequest("Malformed Data!"))
       }
-
     }
   }
 

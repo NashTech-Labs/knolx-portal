@@ -12,26 +12,25 @@
                         <span class="label label-primary total-responses">Total <span class="badge badge-report" id="response-size">@{
                             report.response.size
                         }</span>
-                        <div class="feedback-responses-button" >
-                            <label class="checkbox-outer">
-                                <input type='radio' id="all-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="all"/>
+                            </span>
+                            <label class="checkbox-outer feedback-responses-button">
+                                <input type='radio' id="all-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="all-@SessionHelper.isSuperUser"/>
 
                                 <span class="filter-label_text"></span>
                                 <p class="filter-checkbox-text" style="margin-top:9px;">All</p>
                             </label>
-                        </div>
 
-                        <div class="feedback-responses-button" >
-                            <label class="checkbox-outer">
-                                <input type='radio' id="coreMember-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="coreMember"/>
+                            <label class="checkbox-outer feedback-responses-button">
+                                <input type='radio' id="coreMember-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="coreMember-@SessionHelper.isSuperUser"/>
                                 <span class="filter-label_text"></span>
                                 <p class="filter-checkbox-text" style="margin-top:9px;">Core Member</p>
                             </label>
+
+                        <div class="report-other-info">
+                           <div> @header.topic
+                            <sup><span class="label label-warning report-type">Knolx</span></sup></div>
+                        <p class="report-session-date">@header.date</p>
                         </div>
-                        </span>
-                        <span ><div class="report-other-info">@header.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
-                        <p class="report-session-date">@header.date</p></div>
-                        </span>
 
                     </div>
                     <div class="col-md-12 feedback-form-display-container report-content-outer">
@@ -40,6 +39,9 @@
                                 <thead class="report-head">
                                     <tr>
                                         <th>Sno.</th>
+                                        @if(SessionHelper.isSuperUser) {
+                                        <th>Email</th>
+                                        }
                                         @for(question <- first.questionResponse) {
                                             <th>@question.question</th>
                                         }
@@ -52,8 +54,11 @@
                                         <td>@{
                                             response + 1
                                         }</td>
+                                        @if(SessionHelper.isSuperUser) {
+                                        <td>@report.response(response).email</td>
+                                        }
                                         @for(question <- report.response(response).questionResponse) {
-                                            <td>@question.response</td>
+                                        <td>@question.response</td>
                                         }
                                     </tr>
                                 }

@@ -1,11 +1,13 @@
 $('.custom-checkbox').click(function () {
         var filter = $('input[name="feedback-response-report"]:checked').val();
+        var isCoreMember = filter.split('-')[0];
+        var isSuperUser = filter.split('-')[1];
         var id = this.id;
         var sessionId = id.split('-');
-        fetchUserResponse(filter,sessionId[1]);
+        fetchUserResponse(isCoreMember,isSuperUser,sessionId[1]);
     });
 
-function fetchUserResponse(isCoreMember,sessionId) {
+function fetchUserResponse(isCoreMember,isSuperUser,sessionId) {
 
        jsRoutes.controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(sessionId).ajax(
         {
@@ -20,6 +22,9 @@ function fetchUserResponse(isCoreMember,sessionId) {
             if (isCoreMember == "all") {
                 for(var response = 0;response < responses.length; response++) {
                    userResponse += "<tr><td>"+ (parseInt(response) + 1) + "</td>";
+                   if (isSuperUser) {
+                     userResponse += "<td>"+ responses[response].email +"</td>";
+                     }
                        for(var question = 0; question < responses[response].questionResponse.length; question++) {
                               userResponse += "<td>" + responses[response].questionResponse[question].response
                                        + "</td></tr>";
@@ -33,6 +38,9 @@ function fetchUserResponse(isCoreMember,sessionId) {
                     if (responses[response].coreMember){
                             sno += (parseInt(sno) + 1)
                          userResponse += "<tr><td>"+ parseInt(sno) + "</td>";
+                        if (isSuperUser) {
+                          userResponse += "<td>"+ responses[response].email +"</td>";
+                       }
                              for(var question = 0; question < responses[response].questionResponse.length; question++) {
                                         userResponse += "<td>" + responses[response].questionResponse[question].response
                                                  + "</td></tr>";

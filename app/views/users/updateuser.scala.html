@@ -11,9 +11,22 @@
             <div class="login-outer user-manage-outer">
                 <div class='col-md-12 feedback-card-author manage-user-container-email'><p>@userInfo.data.get("email")</p></div>
                 <div class='col-md-12'>
-                    <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
+                    @if(SessionHelper.isSuperUser){
+                    <form class="CreateForm" action="@routes.UsersController.updateUserByAdmin()" method="post">
+                    } else {
+                        <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
+                            }
                         @helper.CSRF.formField
                         <input type='hidden' name="email" value="@userInfo.data.get("email")"/>
+                        @if(SessionHelper.isSuperUser){
+                        <label class='checkbox-outer'>
+                            <p class='manage-user-checkbox-text '>Admin</p>
+                            <input type='checkbox' @if(userInfo.data.get("admin").contains("true")) {
+                            checked } name='admin' id='suspend' class='custom-checkbox' value='true' />
+                            <span class='manage-user-label_text'></span>
+                        </label>
+                        }
+
                         <label class='checkbox-outer'>
                             <p class='manage-user-checkbox-text'>Active</p>
                             <input type='checkbox' @if(userInfo.data.get("active").contains("true")) {

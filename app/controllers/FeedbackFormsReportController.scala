@@ -22,7 +22,7 @@ case class FeedbackReportHeader(sessionId: String,
                                 meetUp: Boolean,
                                 date: String)
 
-case class UserFeedbackResponse(coreMember: Boolean, questionResponse: List[QuestionResponse])
+case class UserFeedbackResponse(email: String, coreMember: Boolean, questionResponse: List[QuestionResponse])
 
 case class FeedbackReport(reportHeader: Option[FeedbackReportHeader], response: List[UserFeedbackResponse])
 
@@ -119,7 +119,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
       responses.map { sessionResponses =>
         if (sessionResponses.nonEmpty) {
           val questionAndResponses = sessionResponses.map(feedbackResponse =>
-            UserFeedbackResponse(feedbackResponse.coreMember, feedbackResponse.feedbackResponse)
+            UserFeedbackResponse(feedbackResponse.email, feedbackResponse.coreMember, feedbackResponse.feedbackResponse)
           )
           FeedbackReport(Some(header), questionAndResponses)
         } else {

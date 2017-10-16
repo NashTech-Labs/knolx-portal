@@ -28,6 +28,13 @@
                             <span class='manage-user-label_text'></span>
                         </label>
 
+                        <label class='checkbox-outer'>
+                            <p class='manage-user-checkbox-text manage-user-checkbox-coreMember-text'>Core Member</p>
+                            <input type='checkbox' @if(userInfo.data.get("coreMember").contains("true")) {
+                            checked } name='coreMember' id='suspend' class='custom-checkbox' value='true' />
+                            <span class='manage-user-label_text'></span>
+                        </label>
+
                         <div class="col-md-12 login-third update-second">
                             <div class="col-md-1"></div>
                             <div class="col-md-10 password-bar">
@@ -36,7 +43,7 @@
                             <div class="col-md-1"></div>
                         </div>
 
-                        <div class="col-md-12 update-second-field login-four save-user-changes">
+                        <div class="col-md-12 update-second-field login-four">
                             <div class="col-md-1"></div>
                             <div class="col-md-10 ">
                                 <input type="submit" value="Save" class="input-field update-button"/>

@@ -24,7 +24,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val currentMillis = formatter.parse("2017-07-12T14:30:00").getTime
   val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
-  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false, BSONDateTime(millis))
+  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false,coreMember = false,superUser = false, BSONDateTime(millis))
 
   "Users Repository" should {
 
@@ -132,7 +132,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with password change and not banned" in {
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, Some("12345678"))
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
@@ -147,7 +147,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with no password change and not banned" in {
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, ban = false, None)
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, ban = false, coreMember = false, None)
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
@@ -252,7 +252,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with no password change and banned" in {
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, ban = true, None)
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = false, ban = true, coreMember = false, None)
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
@@ -267,7 +267,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "getByEmail user with password change and  banned" in {
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, Some("12345678"))
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime

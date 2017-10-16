@@ -4,7 +4,9 @@ import java.util.Date
 import javax.inject.Inject
 
 import models._
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.{Json, OFormat}
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
@@ -20,7 +22,9 @@ case class FeedbackReportHeader(sessionId: String,
                                 meetUp: Boolean,
                                 date: String)
 
-case class FeedbackReport(report: Option[(FeedbackReportHeader, List[List[QuestionResponse]])])
+case class UserFeedbackResponse(coreMember: Boolean, questionResponse: List[QuestionResponse])
+
+case class FeedbackReport(reportHeader: Option[FeedbackReportHeader], response: List[UserFeedbackResponse])
 
 class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                                               mailerClient: MailerClient,
@@ -31,6 +35,11 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
                                               dateTimeUtility: DateTimeUtility,
                                               controllerComponents: KnolxControllerComponents
                                              ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+
+  implicit val questionResponseFormat: OFormat[QuestionResponse] = Json.format[QuestionResponse]
+  implicit val userFeedbackReportFormat: OFormat[UserFeedbackResponse] = Json.format[UserFeedbackResponse]
+  implicit val feedbackReportHeaderFormat: OFormat[FeedbackReportHeader] = Json.format[FeedbackReportHeader]
+  implicit val feedbackReportFormat: OFormat[FeedbackReport] = Json.format[FeedbackReport]
 
   def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
     generateSessionFeedbackReport(Some(request.user.email)).map { reportInfo =>
@@ -88,30 +97,42 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   def fetchUserResponsesBySessionId(id: String): Action[AnyContent] = userAction.async { implicit request =>
     val responses = feedbackFormsResponseRepository.allResponsesBySession(id, Some(request.user.email))
 
-    renderFetchedResponses(responses).map { report =>
+    renderFetchedResponses(responses, id).map { report =>
       Ok(views.html.reports.report(report))
     }
   }
 
   def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     val responses = feedbackFormsResponseRepository.allResponsesBySession(id, None)
-
-    renderFetchedResponses(responses).map { report =>
+    renderFetchedResponses(responses, id).map { report =>
       Ok(views.html.reports.report(report))
-    }
+      }
   }
 
-  private def renderFetchedResponses(responses: Future[List[FeedbackFormsResponse]]): Future[FeedbackReport] = {
-    responses.map { sessionResponses =>
-      if (sessionResponses.nonEmpty) {
-        val response :: _ = sessionResponses
-        val header = FeedbackReportHeader(response.sessionId, response.sessionTopic,
-          active = false, response.session, response.meetup, new Date(response.sessiondate.value).toString)
-        val questionAndResponses = sessionResponses.map(_.feedbackResponse)
-        FeedbackReport(Some(header, questionAndResponses))
-      } else {
-        FeedbackReport(None)
+  private def renderFetchedResponses(responses: Future[List[FeedbackFormsResponse]], id: String): Future[FeedbackReport] = {
+    sessionsRepository.getById(id).flatMap(_.fold {
+      Logger.error(s" No session found by $id")
+      Future.successful(FeedbackReport(None, Nil))
+    } { sessionInfo =>
+      val header = FeedbackReportHeader(sessionInfo._id.stringify, sessionInfo.topic, active = false,
+        sessionInfo.session, sessionInfo.meetup, new Date(sessionInfo.date.value).toString)
+      responses.map { sessionResponses =>
+        if (sessionResponses.nonEmpty) {
+          val questionAndResponses = sessionResponses.map(feedbackResponse =>
+            UserFeedbackResponse(feedbackResponse.coreMember, feedbackResponse.feedbackResponse)
+          )
+          FeedbackReport(Some(header), questionAndResponses)
+        } else {
+          FeedbackReport(Some(header), Nil)
+        }
       }
+    })
+  }
+
+  def searchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
+    val responses = feedbackFormsResponseRepository.allResponsesBySession(id, None)
+    renderFetchedResponses(responses, id).map { report =>
+      Ok(Json.toJson(FeedbackReport(report.reportHeader, report.response)).toString())
     }
   }
 

@@ -315,7 +315,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def updateUserByAdmin(): Action[AnyContent] = adminAction.async { implicit request =>
+  def updateUserByAdmin(): Action[AnyContent] = superUserAction.async { implicit request =>
     updateUserForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage $formWithErrors")

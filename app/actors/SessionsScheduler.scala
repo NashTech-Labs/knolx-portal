@@ -8,57 +8,74 @@ import actors.SessionsScheduler._
 import akka.actor.{Actor, ActorRef, Cancellable, Scheduler}
 import controllers.routes
 import models.SessionJsonFormats.{ExpiringNextNotReminded, SchedulingNext, SchedulingNextUnNotified, SessionState}
-import models.{FeedbackFormsRepository, SessionInfo, SessionsRepository, UsersRepository}
+import models.{FeedbackFormsRepository, FeedbackFormsResponseRepository, SessionInfo, SessionsRepository, UsersRepository}
 import play.api.{Configuration, Logger}
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{FiniteDuration, _}
 import akka.pattern.pipe
 
 object SessionsScheduler {
 
   sealed trait EmailType
+
   sealed trait EmailOnce
+
   case object Reminder extends EmailType with EmailOnce
+
   case object Notification extends EmailType with EmailOnce
+
   case object Feedback extends EmailType
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
+
   case object GetScheduledSessions
+
   case class CancelScheduledSession(sessionId: String)
+
   case class ScheduleSession(sessionId: String)
 
   // messages used internally for starting session schedulers/emails
   case object ScheduleFeedbackEmailsStartingTomorrow
+
   case object ScheduleFeedbackRemindersStartingTomorrow
+
   case object ScheduleSessionNotificationStartingTomorrow
 
   private[actors] case class ScheduleFeedbackEmailsStartingToday(eventualSessions: Future[List[SessionInfo]])
+
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class ScheduleFeedbackRemindersStartingToday(eventualSessions: Future[List[SessionInfo]])
+
   private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class ScheduleSessionNotificationsStartingToday(eventualSessions: Future[List[SessionInfo]])
+
   private[actors] case class InitialSessionNotificationsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
+
   private[actors] case class SendEmail(session: List[SessionInfo], emailType: EmailType)
 
   // messages used for responding back with current schedulers state
   sealed trait SessionsSchedulerResponse
+
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
 }
+
+case class DefaultersPerSession(email: List[String], emailInfo: EmailInfo)
 
 case class EmailInfo(topic: String, presenter: String, date: String)
 
 class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
                                   usersRepository: UsersRepository,
                                   feedbackFormsRepository: FeedbackFormsRepository,
+                                  feedbackFormsResponseRepository: FeedbackFormsResponseRepository,
                                   configuration: Configuration,
                                   @Named("EmailManager") emailManager: ActorRef,
                                   dateTimeUtility: DateTimeUtility) extends Actor {
@@ -131,6 +148,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     case ScheduleFeedbackRemindersStartingToday(expiringSessions)            =>
       Logger.info(s"Scheduling feedback form reminder email to be sent for expiring sessions. This would run only once for " +
         s"all sessions scheduled today.")
+      Logger.info("-----------------Sessions received are = " + expiringSessions)
       val eventualExpiringSessionsReminder = scheduleEmails(expiringSessions, Reminder)
       eventualExpiringSessionsReminder.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
     case ScheduleSessionNotificationsStartingToday(eventualSessions)         =>
@@ -216,7 +234,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       recipients collect {
         case emails if emails.nonEmpty =>
           emailType match {
-            case Reminder     => reminderEmailHandler(sessions, emailInfo, emails)
+            case Reminder     =>
+              Logger.info("--------------In send email reminder, the session are = " + sessions)
+              reminderEmailHandler(sessions, emailInfo, emails)
             case Feedback     => feedbackEmailHandler(sessions, emailInfo, emails)
             case Notification => notificationEmailHandler(sessions, emailInfo, emails)
           }
@@ -229,16 +249,54 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def reminderEmailHandler(sessions: List[SessionInfo], emailInfo: List[EmailInfo], emails: List[String]): Unit = {
+    Logger.info("Sessions List : " + sessions)
     val key = dateTimeUtility.toLocalDate(sessions.head.date.value).toString
     val presenterEmails = sessions.map(_.email)
     val emailsExceptPresenter = emails diff presenterEmails
+    /*Logger.info("List of emails!!!!!!!!!!!!!!!! " + Await.result(
+      feedbackFormsResponseRepository.getAllResponseEmailsPerSession("59c8aad97900006001a22246"),Duration.Inf)    )
 
+    sessions.map{ session =>
+
+      val reminder = Map( session._id -> Await.result(feedbackFormsResponseRepository.getAllResponseEmailsPerSession(session._id.stringify),Duration.Inf))
+    }*/
+
+    val x: List[Future[List[(String, EmailInfo)]]] = sessions.map { session =>
+      feedbackFormsResponseRepository.getAllResponseEmailsPerSession(session._id.stringify).map {
+        listOfEmails =>
+          val ak1 = emailsExceptPresenter diff listOfEmails
+          Logger.info("List of emails : " + ak1)
+          ak1.map {
+            defaulter =>
+              (defaulter, emailInfo.filter(f => session.email == f.presenter).head)
+          }
+        //DefaultersPerSession(emails diff listOfEmails, emailInfo.filter(f => session.email == f.presenter).head)
+        /*emailManager ! EmailActor.SendEmail(
+          defaulters, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString()*/
+      }
+    }
+
+    val y = Future.sequence(x)
+
+    val z = y.map(_.flatten)
+    val aa: Future[Map[String, List[EmailInfo]]] = z.map {
+      _.groupBy(_._1).map { case (k, v) => (k, v.map(_._2)) }
+    }
+
+    aa.map { op =>
+      op.foreach { case (k, v) =>
+        Logger.info("List of emails: " + k + "->" + v)
+        emailManager ! EmailActor.SendEmail(
+          List(k), fromEmail, "Feedback reminder", views.html.emails.reminder(v, feedbackUrl).toString()
+        )
+      }
+    }
     scheduledEmails = scheduledEmails - key
 
-    emailManager ! EmailActor.SendEmail(
-      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
 
-    Logger.info(s"Reminder Email for sessions expiring on $key sent")
+    /*emailManager ! EmailActor.SendEmail(
+      emailsExceptPresenter, fromEmail, "Feedback reminder", views.html.emails.reminder(emailInfo, feedbackUrl).toString)
+    Logger.info(s"Reminder Email for sessions expiring on $key sent")*/
 
     sessions.map {
       session =>
@@ -306,10 +364,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     Logger.info(s"Feedback email for session ${sessions.head.session} sent")
   }
 
-  def scheduleEmails(eventualSessions: Future[List[SessionInfo]], emailType: EmailType): Future[Map[String, Cancellable]] =
+  def scheduleEmails(eventualSessions: Future[List[SessionInfo]], emailType: EmailType): Future[Map[String, Cancellable]] = {
+    println("|||||"+Await.result(eventualSessions,Duration.Inf))
     eventualSessions collect { case sessions if sessions.nonEmpty =>
       emailType match {
         case Reminder     =>
+          Logger.info("-------------In reminder, the sessions are = " + sessions)
           Map(dateTimeUtility.toLocalDate(sessions.head.date.value).toString ->
             scheduler.scheduleOnce(Duration.Zero, self, SendEmail(sessions, Reminder)))
         case Feedback     => sessions.map { session =>
@@ -321,7 +381,11 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
             scheduler.scheduleOnce(Duration.Zero, self, SendEmail(sessions, Notification)))
       }
     }
+  }
 
-  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
+  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = {
+    Logger.info("------------------Sessions for today = " + sessionsRepository.sessionsForToday(sessionState))
+    sessionsRepository.sessionsForToday(sessionState)
+  }
 
 }

@@ -6,8 +6,6 @@
 
     }{ header =>
        <div class="row">
-            @report.response match {
-                case first :: rest => {
                     <div class="col-md-12 feedback-form-display-container report-info">
                         <span class="label label-primary total-responses">Total <span class="badge badge-report" id="response-size">@{
                             report.response.size
@@ -33,6 +31,8 @@
                         </div>
 
                     </div>
+           @report.response match {
+           case first :: rest => {
                     <div class="col-md-12 feedback-form-display-container report-content-outer">
                         <div class="table-responsive manage-user-custom-table-margin report-content-outer">
                             <table class="table table-striped">

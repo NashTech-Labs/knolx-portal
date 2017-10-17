@@ -27,6 +27,8 @@ case class UserInfo(email: String,
                     algorithm: String,
                     active: Boolean,
                     admin: Boolean,
+                    coreMember :Boolean,
+                    superUser :Boolean,
                     banTill: BSONDateTime,
                     banCount: Int = 0,
                     _id: BSONObjectID = BSONObjectID.generate)
@@ -34,6 +36,8 @@ case class UserInfo(email: String,
 case class UpdatedUserInfo(email: String,
                            active: Boolean,
                            ban: Boolean,
+                           coreMember: Boolean,
+                           admin: Boolean,
                            password: Option[String])
 
 object UserJsonFormats {
@@ -107,13 +111,13 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     val selector = BSONDocument("email" -> updatedRecord.email)
     val modifier = (updatedRecord.password, updatedRecord.ban) match {
       case (Some(password), true)  =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration))
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
       case (Some(password), false) =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban))
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
       case (None, true)            =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration))
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
       case (None, false)           =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban))
+        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
     }
 
     collection

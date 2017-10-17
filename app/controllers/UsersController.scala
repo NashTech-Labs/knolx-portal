@@ -302,7 +302,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.updateuser(formWithErrors)))
       },
       userInfo => {
-        usersRepository.update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban,userInfo.coreMember,userInfo.admin, userInfo.password))
+        usersRepository
+          .update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban,userInfo.coreMember,userInfo.admin, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
@@ -322,7 +323,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest(views.html.users.updateuser(formWithErrors)))
       },
       userInfo => {
-        usersRepository.update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban,userInfo.coreMember,userInfo.admin, userInfo.password))
+        usersRepository
+          .update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban,userInfo.coreMember,userInfo.admin, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")

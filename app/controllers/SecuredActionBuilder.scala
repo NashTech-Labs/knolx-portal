@@ -10,7 +10,7 @@ import utilities.EncryptionUtility
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class UserSession(id: String, email: String, admin: Boolean,superUser: Boolean)
+case class UserSession(id: String, email: String, admin: Boolean, superUser: Boolean)
 
 case class SecuredRequest[A](user: UserSession, request: Request[A]) extends WrappedRequest(request)
 
@@ -39,7 +39,7 @@ case class UserActionBuilder(val parser: BodyParser[AnyContent],
 
         Future.successful(Redirect(routes.UsersController.login()).flashing("error" -> "Please login before accessing this page."))
       } { userInfo =>
-        val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin,userInfo.superUser)
+        val userSession = UserSession(userInfo._id.stringify, userInfo.email, userInfo.admin, userInfo.superUser)
 
         block(SecuredRequest(userSession, request))
       })
@@ -84,9 +84,9 @@ case class AdminActionBuilder(val parser: BodyParser[AnyContent],
 }
 
 case class SuperUserActionBuilder(val parser: BodyParser[AnyContent],
-                              usersRepository: UsersRepository,
-                              configuration: Configuration
-                             )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] with Results {
+                                  usersRepository: UsersRepository,
+                                  configuration: Configuration
+                                 )(implicit val executionContext: ExecutionContext) extends ActionBuilder[SecuredRequest, AnyContent] with Results {
 
   @Inject
   def this(parser: BodyParsers.Default, usersRepository: UsersRepository, configuration: Configuration)(implicit ec: ExecutionContext) =

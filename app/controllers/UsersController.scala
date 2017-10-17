@@ -200,29 +200,24 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             Logger.info(s"User $email not found")
             Redirect(routes.UsersController.login()).flashing("message" -> "User not found!")
           } { user =>
-            val admin = user.admin
-            val password = user.password
-            val superUser = user.superUser
 
-            if (PasswordUtility.isPasswordValid(loginInfo.password, password)) {
+            if (PasswordUtility.isPasswordValid(loginInfo.password, user.password)) {
               Logger.info(s"User $email successfully logged in")
-              (admin, superUser) match {
-                case (true,false) =>
+              (user.admin, user.superUser) match {
+                case (true, false)  =>
                   Redirect(routes.HomeController.index())
                     .withSession(
                       username -> EncryptionUtility.encrypt(email),
                       "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                     .flashing("message" -> "Welcome back!")
-                case (true,true) =>
-                  Logger.info("!!!!!!!!!!!!$$$$$$$$$$$$$$$!!!!!!1#######333")
+                case (true, true)   =>
                   Redirect(routes.HomeController.index())
                     .withSession(
                       username -> EncryptionUtility.encrypt(email),
                       "superUser" -> EncryptionUtility.encrypt(EncryptionUtility.SuperUserKey),
                       "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                     .flashing("message" -> "Welcome back!")
-                case (false,false) =>
-                  Logger.info("!!!!!!!!!!!!!!!!!!1#######333")
+                case (false, false) =>
                   Redirect(routes.HomeController.index())
                     .withSession(username -> EncryptionUtility.encrypt(email))
                     .flashing("message" -> "Welcome back!")
@@ -316,7 +311,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def updateUserByAdmin(): Action[AnyContent] = superUserAction.async { implicit request =>
+  def updateUserBySuperUser(): Action[AnyContent] = superUserAction.async { implicit request =>
     updateUserForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for user manage $formWithErrors")

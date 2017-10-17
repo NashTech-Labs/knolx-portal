@@ -12,7 +12,7 @@
                 <div class='col-md-12 feedback-card-author manage-user-container-email'><p>@userInfo.data.get("email")</p></div>
                 <div class='col-md-12'>
                     @if(SessionHelper.isSuperUser){
-                    <form class="CreateForm" action="@routes.UsersController.updateUserByAdmin()" method="post">
+                    <form class="CreateForm" action="@routes.UsersController.updateUserBySuperUser()" method="post">
                     } else {
                         <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
                             }

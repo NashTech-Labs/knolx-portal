@@ -36,7 +36,7 @@ case class UserInfo(email: String,
 case class UpdatedUserInfo(email: String,
                            active: Boolean,
                            ban: Boolean,
-                           coreMember :Boolean,
+                           coreMember: Boolean,
                            admin: Boolean,
                            password: Option[String])
 
@@ -121,7 +121,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     }
 
     collection
-      .flatMap(jsonCollection  =>
+      .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
   }
 

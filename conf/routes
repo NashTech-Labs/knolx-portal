@@ -13,7 +13,7 @@ GET         /users/manage/:pageNumber            controllers.UsersController.man
 POST        /users/search                        controllers.UsersController.searchUser
 GET         /user/update                         controllers.UsersController.getByEmail(email: String)
 POST        /user/update                         controllers.UsersController.updateUser
-POST        /user/manage/update                  controllers.UsersController.updateUserByAdmin
+POST        /user/manage/update                  controllers.UsersController.updateUserBySuperUser
 GET         /user/delete                         controllers.UsersController.deleteUser(email: String)
 GET         /user/forgotpassword                 controllers.UsersController.renderForgotPassword
 POST        /user/forgotpassword                 controllers.UsersController.generateForgotPasswordToken

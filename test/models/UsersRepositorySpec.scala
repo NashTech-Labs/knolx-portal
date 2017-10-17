@@ -24,7 +24,7 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val currentMillis = formatter.parse("2017-07-12T14:30:00").getTime
   val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
-  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false,coreMember = false,superUser = false, BSONDateTime(millis))
+  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false, coreMember = false, superUser = false, BSONDateTime(millis))
 
   "Users Repository" should {
 

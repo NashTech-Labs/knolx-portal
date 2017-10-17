@@ -98,46 +98,47 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   def fetchUserResponsesBySessionId(id: String): Action[AnyContent] = userAction.async { implicit request =>
     val responses = feedbackFormsResponseRepository.allResponsesBySession(id, Some(request.user.email))
 
-    renderFetchedResponses(responses, id) map { report =>
+    renderFetchedResponses(responses, id, request.user.superUser).map { report =>
       Ok(views.html.reports.report(report))
     }
   }
 
   def fetchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     val responses = feedbackFormsResponseRepository.allResponsesBySession(id, None)
-
-    renderFetchedResponses(responses, id) map { report =>
+    renderFetchedResponses(responses, id, request.user.superUser).map { report =>
       Ok(views.html.reports.report(report))
-    }
+            }
+  }
+
+  private def renderFetchedResponses(responses: Future[List[FeedbackFormsResponse]], id: String, isSuperUser: Boolean): Future[FeedbackReport] = {
+    sessionsRepository.getById(id).flatMap(_.fold {
+      Logger.error(s" No session found by $id")
+      Future.successful(FeedbackReport(None, Nil))
+    } { sessionInfo =>
+      val header = FeedbackReportHeader(sessionInfo._id.stringify, sessionInfo.topic, active = false,
+        sessionInfo.session, sessionInfo.meetup, new Date(sessionInfo.date.value).toString)
+      responses.map { sessionResponses =>
+        if (sessionResponses.nonEmpty) {
+          val questionAndResponses = sessionResponses.map(feedbackResponse =>
+            if (isSuperUser) {
+              UserFeedbackResponse(feedbackResponse.email, feedbackResponse.coreMember, feedbackResponse.feedbackResponse)
+            } else {
+              UserFeedbackResponse(" ", feedbackResponse.coreMember, feedbackResponse.feedbackResponse)
+            }
+          )
+          FeedbackReport(Some(header), questionAndResponses)
+        } else {
+          FeedbackReport(Some(header), Nil)
+        }
+      }
+    })
   }
 
   def searchAllResponsesBySessionId(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     val responses = feedbackFormsResponseRepository.allResponsesBySession(id, None)
-
-    renderFetchedResponses(responses, id) map { report =>
-      Ok(Json.toJson(FeedbackReport(report.reportHeader, report.response)).toString)
+    renderFetchedResponses(responses, id, request.user.superUser).map { report =>
+      Ok(Json.toJson(FeedbackReport(report.reportHeader, report.response)).toString())
     }
-  }
-
-  private def renderFetchedResponses(responses: Future[List[FeedbackFormsResponse]], id: String): Future[FeedbackReport] = {
-    sessionsRepository
-      .getById(id)
-      .flatMap(_.fold {
-        Logger.error(s"No session found by $id")
-
-        Future.successful(FeedbackReport(None, Nil))
-      } { sessionInfo =>
-        val header = FeedbackReportHeader(sessionInfo._id.stringify, sessionInfo.topic, active = false,
-          sessionInfo.session, sessionInfo.meetup, new Date(sessionInfo.date.value).toString)
-
-        responses map {
-          case sessionResponses if sessionResponses.nonEmpty =>
-            val questionAndResponses = sessionResponses map (feedbackResponse =>
-              UserFeedbackResponse(feedbackResponse.email, feedbackResponse.coreMember, feedbackResponse.feedbackResponse))
-            FeedbackReport(Some(header), questionAndResponses)
-          case _: List[FeedbackFormsResponse]                => FeedbackReport(Some(header), Nil)
-        }
-      })
   }
 
 }

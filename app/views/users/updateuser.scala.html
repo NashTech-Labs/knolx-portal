@@ -11,9 +11,22 @@
             <div class="login-outer user-manage-outer">
                 <div class='col-md-12 feedback-card-author manage-user-container-email'><p>@userInfo.data.get("email")</p></div>
                 <div class='col-md-12'>
-                    <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
+                    @if(SessionHelper.isSuperUser){
+                    <form class="CreateForm" action="@routes.UsersController.updateUserBySuperUser()" method="post">
+                    } else {
+                        <form class="CreateForm" action="@routes.UsersController.updateUser()" method="post">
+                            }
                         @helper.CSRF.formField
                         <input type='hidden' name="email" value="@userInfo.data.get("email")"/>
+                        @if(SessionHelper.isSuperUser){
+                        <label class='checkbox-outer'>
+                            <p class='manage-user-checkbox-text '>Admin</p>
+                            <input type='checkbox' @if(userInfo.data.get("admin").contains("true")) {
+                            checked } name='admin' id='suspend' class='custom-checkbox' value='true' />
+                            <span class='manage-user-label_text'></span>
+                        </label>
+                        }
+
                         <label class='checkbox-outer'>
                             <p class='manage-user-checkbox-text'>Active</p>
                             <input type='checkbox' @if(userInfo.data.get("active").contains("true")) {
@@ -28,6 +41,13 @@
                             <span class='manage-user-label_text'></span>
                         </label>
 
+                        <label class='checkbox-outer'>
+                            <p class='manage-user-checkbox-text manage-user-checkbox-coreMember-text'>Core Member</p>
+                            <input type='checkbox' @if(userInfo.data.get("coreMember").contains("true")) {
+                            checked } name='coreMember' id='suspend' class='custom-checkbox' value='true' />
+                            <span class='manage-user-label_text'></span>
+                        </label>
+
                         <div class="col-md-12 login-third update-second">
                             <div class="col-md-1"></div>
                             <div class="col-md-10 password-bar">
@@ -36,7 +56,7 @@
                             <div class="col-md-1"></div>
                         </div>
 
-                        <div class="col-md-12 update-second-field login-four save-user-changes">
+                        <div class="col-md-12 update-second-field login-four">
                             <div class="col-md-1"></div>
                             <div class="col-md-10 ">
                                 <input type="submit" value="Save" class="input-field update-button"/>

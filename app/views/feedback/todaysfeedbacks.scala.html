@@ -30,6 +30,23 @@
                             </div>
                         </div>
                     </div>
+                    <div class="modal fade" id="feedbackAttendance-@session.id" role="dialog">
+                        <div class="modal-dialog modal-sm feedbackAttendance-dialog">
+                            <div class="modal-content" id="feedbackAttendance-content">
+                                <div id="feedbackAttendance-header">
+                                    <button type="button" class="close" data-dismiss="modal" id="feedbackAttendance-close">X</button>
+                                </div>
+                                <div class="modal-body" id="feedbackAttendance-body">
+                                    <div class= "text-center" id="feedbackAttendance-centerBody" >
+                                        <p class="feedbackAttendance-header-text">Please let us know whether you attended this Knolx session</p>
+                                        <button type="attend" id="@session.id" class="btn btn-success feedbackAttendance-button attend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>I attended the session</button>
+                                        <br>
+                                        <button type="did not attend" id="@session.id" class="btn btn-danger feedbackAttendance-button didnotattend-button" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>I did not attend the session</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
                 }
             } else {
@@ -107,7 +124,7 @@
 
     <script src="@routes.Assets.versioned("javascripts/todayssessioninfo.js")" type="text/javascript"></script>
 
-        <!-- Modal -->
+
     <div class="modal fade" id="session-form-info" role="dialog">
         <div class="modal-dialog modal-lg">
             <div class="modal-content feedback-response-outer">
@@ -118,7 +135,7 @@
                                 <table class="table table-striped session-table">
                                     <tbody class="session-details">
                                         <tr>
-                                            <td>Presenter<br/><span class="session-card-values" id="form-author" ></span></td>
+                                          <td>Presenter <br/> <span class="session-card-values" id="form-author"></span></td>
                                         </tr>
                                         <tr>
                                             <td>Session<br/><span class="session-card-values" id="form-session"></span></td>
@@ -156,5 +173,5 @@
 
         </div>
     </div>
-
 }
+

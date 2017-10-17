@@ -9,7 +9,7 @@ import actors.UsersBanScheduler._
 import akka.actor.ActorRef
 import akka.pattern.ask
 import controllers.EmailHelper._
-import models.{FeedbackFormsRepository, SessionsRepository, UpdateSessionInfo, UsersRepository}
+import models._
 import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
@@ -38,6 +38,8 @@ case class UpdateSessionInformation(id: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
+                                    youtubeURL: Option[String],
+                                    slideShareURL: Option[String],
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
@@ -108,9 +110,12 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
         "must be in range 1 to 31", number => number >= 0 && number <= 31),
+      "youtubeURL" -> optional(nonEmptyText),
+      "slideShareURL" -> optional(nonEmptyText),
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
+
 
   def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository
@@ -287,7 +292,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
                   BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  cancelled = false, active = true, BSONDateTime(expirationDateMillis))
+                  cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None)
 
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
@@ -355,7 +360,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
-                sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays, sessionInformation.meetup))
+                sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
+                sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 
@@ -410,4 +416,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .flashing("message" -> "Feedback form schedule initiated"))
   }
 
+  def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
+    if (id.length != 24) {
+      Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found"))
+    } else {
+      val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
+      eventualMaybeSession.flatMap(maybeSession =>
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
+        (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    }
+  }
 }

@@ -2,13 +2,15 @@ package models
 
 import javax.inject.Inject
 
-import actors.SessionsScheduler.{EmailType, Notification, Reminder, EmailOnce}
+import actors.SessionsScheduler.{EmailOnce, EmailType, Notification, Reminder}
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
+import play.api.Logger
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -33,9 +35,12 @@ case class SessionInfo(userId: String,
                        cancelled: Boolean,
                        active: Boolean,
                        expirationDate: BSONDateTime,
+                       youtubeURL: Option[String],
+                       slideShareURL: Option[String],
                        reminder: Boolean = false,
                        notification: Boolean = false,
-                       _id: BSONObjectID = BSONObjectID.generate)
+                       _id: BSONObjectID = BSONObjectID.generate
+                      )
 
 case class UpdateSessionInfo(sessionUpdateFormData: UpdateSessionInformation,
                              expirationDate: BSONDateTime)
@@ -145,9 +150,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def paginate(pageNumber: Int, keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
-
     val condition = keyword match {
-      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
+      case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "") + ".*"), "$options" -> "i"))), "active" -> true)
       case None      => Json.obj("active" -> true)
     }
 
@@ -182,7 +187,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "feedbackFormId" -> updatedRecord.sessionUpdateFormData.feedbackFormId,
         "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
-        "expirationDate" -> updatedRecord.expirationDate)
+        "expirationDate" -> updatedRecord.expirationDate,
+        "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
+        "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL)
     )
 
     collection.flatMap(jsonCollection =>

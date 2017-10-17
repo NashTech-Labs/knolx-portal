@@ -55,10 +55,23 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].completed) {
-                            usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
+                            usersFound += "<td><div><span class='label label-default' >Completed</span></div></td>";
                         } else {
-                            usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div><td></tr>";
+                            usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div></td>";
                         }
+
+                        if (sessions[session].completed && !sessions[session].cancelled) {
+                           usersFound += "<td  title='Click here for more details' class='clickable-row'>" +
+                           "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                            "' style='text-decoration: none;'>" +
+                            "<p class='saving' style='font-size:25px;'>" +
+                            "<span>.</span><span>.</span><span>.</span></p></a></td></tr>";
+                        } else {
+                           usersFound += "<td title='Wait for session to be completed'>" +
+                           "<p class='saving' style='font-size:25px;'>" +
+                           "<span>.</span><span>.</span><span>.</span></p></a></td></tr>";
+                        }
+
                     }
 
                     $('#user-found').html(usersFound);
@@ -75,7 +88,7 @@ function slide(keyword, pageNumber) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
                     $('.pagination').html("");
                 }

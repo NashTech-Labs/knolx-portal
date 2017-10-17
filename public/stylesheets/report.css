@@ -31,9 +31,9 @@
 
 .report-other-info {
     width: 100%;
-    text-align: center;
     color: #fff;
     font-size: 30px;
+    margin-left: 40%;
 }
 
 .report-type {
@@ -60,4 +60,10 @@
 
 .feedback-notfound-color {
     color: #a8a8a8;
+}
+
+.feedback-responses-button {
+    float:right;
+    margin-right:10px;
+    border:none;
 }

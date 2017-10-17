@@ -40,7 +40,7 @@
                 <div class="col-md-12 login-second login-third update-second">
                     <div class="col-md-1"></div>
 
-                    <div class="col-md-8">
+                    <div class="col-md-8 ">
                         <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
                             <option selected value="">! Select Please</option>>
                             @for((value, key) <- feedbackForms) {
@@ -111,6 +111,22 @@
                             <span class="label_text"></span>
                             <p class="checkbox-text">Is Meetup ?</p>
                         </label>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="youtubeURL" class="update-field"/>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="text" name="slideShareURL" id="slideShareURL" value='@sessionInfo.data.get("slideShareURL")' placeholder="slideShareURL" class="update-field"/>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>

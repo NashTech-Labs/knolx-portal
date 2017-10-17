@@ -3,11 +3,14 @@ package controllers
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
+import akka.actor.ActorRef
+import com.google.inject.name.Names
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.Application
+import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.Results
@@ -26,17 +29,20 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   val writeResultfalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
+  private val sessionObjectWithSameEmail =
+    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
     Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
     active = true, _id)
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com", "presenter@example.com", _id.stringify, _id.stringify,
+  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com",false, "presenter@example.com", _id.stringify, _id.stringify,
     "topic",
     meetup = false,
     BSONDateTime(date.getTime),
@@ -57,6 +63,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         feedbackFormsRepository,
         feedbackResponseRepository,
         sessionsRepository,
+        config,
+        emailManager,
         dateTimeUtility,
         knolxControllerComponent)
 
@@ -65,6 +73,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsRepository = mock[SessionsRepository]
+    val emailManager: ActorRef =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
@@ -91,7 +102,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
-          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime),reminder = false, notification = false, _id)))
+          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate
@@ -105,7 +116,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       status(response) must be equalTo OK
     }
 
-    "render feedback form for today if session associated feedback form exists and session has expired expired" in new WithTestApplication {
+    "render feedback form for today if session associated feedback form exists and session has expired" in new WithTestApplication {
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
@@ -140,6 +151,17 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
 
       status(response) must be equalTo UNAUTHORIZED
+    }
+
+    "not render feedback form for today if the session was given by the user himself" in new WithTestApplication {
+      usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.activeSessions() returns sessionObjectWithSameEmail
+      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(None)
+      val response = controller.getFeedbackFormsForToday(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
+
+      status(response) must be equalTo OK
     }
 
     "not fetch response as no stored response found" in new WithTestApplication {

@@ -25,6 +25,7 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
     "session1",
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
+    0.00,
     _id)
 
   "Feedback forms response repository" should {

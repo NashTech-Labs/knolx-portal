@@ -30,7 +30,7 @@ case class FeedbackFormsResponse(email: String,
                                  session: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
-                                 rating: Double,
+                                 score: Double,
                                  _id: BSONObjectID = BSONObjectID.generate)
 
 object FeedbackFormsResponseFormat {
@@ -71,7 +71,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           "session" -> feedbackFormsResponse.session,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
           "responseDate" -> feedbackFormsResponse.responseDate,
-          "rating" -> feedbackFormsResponse.rating
+          "score" -> feedbackFormsResponse.score
         ))
 
     collection.flatMap(_.update(selector, modifier, upsert = true))

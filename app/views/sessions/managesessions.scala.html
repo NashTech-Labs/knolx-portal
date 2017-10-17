@@ -69,7 +69,7 @@
                                 })
 
                                 <td>
-                                @(if(knolxSession.rating.isEmpty) {
+                                @(if(knolxSession.rating.isEmpty || !knolxSession.expired) {
                                     "N/A"
                                 } else {
                                     knolxSession.rating

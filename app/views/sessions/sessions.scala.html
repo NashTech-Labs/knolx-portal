@@ -51,7 +51,7 @@
                                 else {
                                         <td class='suspended'>No</td>
                                 })
-                                <td>@(if(knolxSession.rating.isEmpty) {
+                                <td>@(if(knolxSession.rating.isEmpty || !knolxSession.expired) {
                                     "N/A"
                                 } else {
                                     knolxSession.rating

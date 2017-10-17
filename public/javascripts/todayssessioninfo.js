@@ -191,11 +191,11 @@ function loadFeedbackForm(values, sessionId) {
 }
 
 class FeedbackFormResponse {
-    constructor(sessionId, feedbackFormId, responses, rating) {
+    constructor(sessionId, feedbackFormId, responses, score) {
         this.sessionId = sessionId;
         this.feedbackFormId = feedbackFormId;
         this.responses = responses;
-        this.rating = rating
+        this.score = score
     }
 }
 
@@ -231,6 +231,7 @@ function submittedFeedbackForm() {
     }
     console.log(score);
     var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation, score);
+    console.log(feedbackFormWithResponse);
 
     if (isFormResponseValid(feedbackFormWithResponse)) {
 

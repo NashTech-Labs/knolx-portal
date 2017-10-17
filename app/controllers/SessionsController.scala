@@ -53,7 +53,8 @@ case class KnolxSession(id: String,
                         rating: String,
                         feedbackFormScheduled: Boolean = false,
                         dateString: String = "",
-                        completed: Boolean = false)
+                        completed: Boolean = false,
+                        expired: Boolean = false)
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
@@ -121,7 +122,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     sessionsRepository
       .paginate(pageNumber, keyword)
       .flatMap { sessionInfo =>
-        val knolxSessions = sessionInfo map (session =>
+        val knolxSessions = sessionInfo map { session =>
+          Logger.info("--------------Let's see = " + session.date.value)
+          val letsee = session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)
+          Logger.info("--------------Let's see 1 = " + letsee)
           KnolxSession(session._id.stringify,
             session.userId,
             new Date(session.date.value),
@@ -131,12 +135,15 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             session.meetup,
             session.cancelled,
             session.rating,
-            completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis))))
+            completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis)),
+            expired = new Date(session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)).before(new java.util.Date(System.currentTimeMillis())))
+        }
 
         sessionsRepository
           .activeCount(keyword)
           .map { count =>
             val pages = Math.ceil(count / 10D).toInt
+            Logger.info("----------------Expired = " + knolxSessions.head.expired)
             Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
           }
       }
@@ -163,7 +170,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 session.cancelled,
                 session.rating,
                 dateString = new Date(session.date.value).toString,
-                completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis))))
+                completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis)),
+                expired = new Date(session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)).before(new java.util.Date(System.currentTimeMillis()))))
 
             sessionsRepository
               .activeCount(sessionInformation.email)
@@ -190,7 +198,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               sessionInfo.email,
               sessionInfo.meetup,
               sessionInfo.cancelled,
-              sessionInfo.rating))
+              sessionInfo.rating,
+              expired = new Date(sessionInfo.date.value + (sessionInfo.feedbackExpirationDays * 24 * 60 * 60 * 100))
+                .before(new java.util.Date(System.currentTimeMillis()))))
 
         val eventualScheduledFeedbackForms =
           (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
@@ -292,7 +302,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
                   BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  0,cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
+                  0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
 
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {

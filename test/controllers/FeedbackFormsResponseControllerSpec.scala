@@ -31,10 +31,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObjectWithSameEmail =
     Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, _id)))
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
@@ -49,6 +49,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     "session1",
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
+    0.00,
     _id)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
@@ -102,7 +103,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
         Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "feedbackFormId", "topic",
-          1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+          1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate
@@ -268,7 +269,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"], "score":0.00}""")))
 
       status(response) must be equalTo OK
     }
@@ -282,7 +283,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"], "score":1.00}""")))
 
       status(response) must be equalTo INTERNAL_SERVER_ERROR
     }
@@ -340,7 +341,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""], "score":0.00}""")))
 
       status(response) must be equalTo OK
     }

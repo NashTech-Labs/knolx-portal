@@ -38,7 +38,7 @@ case class FeedbackForms(name: String,
                          active: Boolean = true,
                          id: String)
 
-case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String], rating: Double) {
+case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String], score: Double) {
 
   def validateSessionId: Option[String] =
     if (sessionId.nonEmpty) {
@@ -188,11 +188,11 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             val (header, response) = sanitizedResponse
             val timeStamp = dateTimeUtility.nowMillis
             val feedbackResponseData = FeedbackFormsResponse(request.user.email, header.email, request.user.id, feedbackFormResponse.sessionId,
-              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp), feedbackFormResponse.rating)
+              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp), feedbackFormResponse.score)
             feedbackResponseRepository.upsert(feedbackResponseData).flatMap { result =>
-              if (result.ok && feedbackFormResponse.rating != 0) {
+              if (result.ok && feedbackFormResponse.score != 0) {
                 Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-                sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.rating).map { result =>
+                sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.score).map { result =>
                   if (result.ok) {
                     emailManager ! EmailActor.SendEmail(
                       List(request.user.email), fromEmail, "Feedback Successfully Registered!", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
@@ -203,7 +203,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     InternalServerError("Something Went Wrong!")
                   }
                 }
-              } else if (feedbackFormResponse.rating == 0) {
+              } else if (feedbackFormResponse.score == 0) {
                 emailManager ! EmailActor.SendEmail(
                   List(request.user.email), fromEmail, "Feedback Successfully Registered!", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
                 Future.successful(Ok("Feedback form response successfully stored!"))

@@ -190,8 +190,13 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           } { sanitizedResponse =>
             val (header, response) = sanitizedResponse
             val timeStamp = dateTimeUtility.nowMillis
-            val feedbackResponseData = FeedbackFormsResponse(request.user.email, header.email, request.user.id, feedbackFormResponse.sessionId,
-              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
+            usersRepository.getByEmail(request.user.email).flatMap {
+              _.fold {
+                Logger.info(s"User ${request.user.email} not found")
+                Future.successful(Redirect(routes.UsersController.login()).flashing("message" -> "User not found!"))
+              } { userInfo =>
+            val feedbackResponseData = FeedbackFormsResponse(request.user.email, userInfo.coreMember, header.email, request.user.id,
+              feedbackFormResponse.sessionId, header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
             feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
               if (result.ok) {
                 Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
@@ -202,9 +207,11 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                 Logger.error(s"Something Went wrong when storing feedback form" +
                   s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
                 InternalServerError("Something Went Wrong!")
-              }
-            }
+               }
+             }
+           }
           }
+         }
         }
       } { errorMessage =>
         Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")

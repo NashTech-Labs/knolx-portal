@@ -16,7 +16,7 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@example.com",
+  private val feedbackResponse = FeedbackFormsResponse("test@example.com", false,
     "presenter@example.com",
     _id.stringify, _id.stringify,
     "topic",

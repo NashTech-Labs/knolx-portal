@@ -203,7 +203,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, user.password)) {
               Logger.info(s"User $email successfully logged in")
-              (user.admin, user.superUser) match {
+              ((user.admin, user.superUser) : @unchecked) match {
                 case (true, false)  =>
                   Redirect(routes.HomeController.index())
                     .withSession(
@@ -338,7 +338,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .flatMap {
         case Some(userInformation) =>
           val ban = new Date(userInformation.banTill.value).after(new Date(dateTimeUtility.nowMillis))
-          val filledForm = updateUserForm.fill(UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember,userInformation.admin, None))
+          val filledForm = updateUserForm.fill(
+            UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember,userInformation.admin, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None                  =>
           Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
@@ -436,17 +437,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                   user.fold {
                     Future.successful(Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, No user found with email provided"))))
                   } { userFound =>
-                    val ban = new Date(userFound.banTill.value).after(new Date(dateTimeUtility.nowMillis))
-                    val updatedRecord = UpdatedUserInfo(userFound.email, userFound.active, ban, userFound.coreMember,userFound.admin, Some(resetPasswordInfo.password))
-
                     usersRepository
-                      .update(updatedRecord)
+                      .updatePassword(userFound.email, resetPasswordInfo.password)
                       .map { result =>
                         if (result.ok) {
                           forgotPasswordRepository.upsert(requestFound.copy(active = false))
-                          Logger.info(s"Password successfully updated for ${updatedRecord.email}")
+                          Logger.info(s"Password successfully updated for ${userFound.email}")
                           Redirect(routes.UsersController.login())
-                            .flashing("successMessage" -> s"Password successfully updated for ${updatedRecord.email}")
+                            .flashing("successMessage" -> s"Password successfully updated for ${userFound.email}")
                         } else {
                           InternalServerError("Something went wrong!")
                         }
@@ -474,16 +472,22 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
         usersRepository
           .getActiveByEmail(email)
-          .map(_.fold {
+          .flatMap(_.fold {
             Logger.info(s"User $email not found")
-            Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "User not found!")
+            Future.successful(Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "User not found!"))
           } { user =>
             if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, user.password)) {
-              val ban = new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))
-              usersRepository.update(UpdatedUserInfo(request.user.email.toLowerCase, user.active, ban, user.coreMember,user.admin, Some(resetPasswordInfo.newPassword)))
-              Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
+              usersRepository.updatePassword(request.user.email.toLowerCase, resetPasswordInfo.newPassword)
+                .map { result =>
+                  if (result.ok) {
+                    Logger.info(s"Password successfully updated for ${user.email}")
+                    Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
+                  } else {
+                    InternalServerError("Something went wrong!")
+                  }
+                }
             } else {
-              Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "Current password invalid!")
+              Future.successful(Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "Current password invalid!"))
             }
           })
       })

@@ -123,9 +123,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber, keyword)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map { session =>
-          Logger.info("--------------Let's see = " + session.date.value)
           val letsee = session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)
-          Logger.info("--------------Let's see 1 = " + letsee)
           KnolxSession(session._id.stringify,
             session.userId,
             new Date(session.date.value),
@@ -143,7 +141,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           .activeCount(keyword)
           .map { count =>
             val pages = Math.ceil(count / 10D).toInt
-            Logger.info("----------------Expired = " + knolxSessions.head.expired)
             Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
           }
       }

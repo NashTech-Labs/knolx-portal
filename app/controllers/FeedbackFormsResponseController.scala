@@ -176,9 +176,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received bad request while storing feedback response, ${request.body}")
       Future.successful(BadRequest("Malformed Data!"))
     } { feedbackFormResponse =>
-      val validatedForm =
-        feedbackFormResponse.validateSessionId orElse
-          feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
+      val validatedForm = feedbackFormResponse.validateSessionId orElse
+        feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
       validatedForm.fold {
         deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
           feedbackResponse.fold {
@@ -194,7 +193,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
               } { userInfo =>
                 val feedbackResponseData = FeedbackFormsResponse(request.user.email, userInfo.coreMember, header.email, request.user.id,
                   feedbackFormResponse.sessionId, header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp), feedbackFormResponse.score)
-                feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
+                feedbackResponseRepository.upsert(feedbackResponseData).flatMap { result =>
                   if (result.ok && feedbackFormResponse.score != 0 && userInfo.coreMember) {
                     Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
                     sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.score).map { result =>
@@ -218,9 +217,6 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     Future.successful(InternalServerError("Something Went Wrong!"))
                   }
                 }
-                emailManager ! EmailActor.SendEmail(
-                  List(request.user.email), fromEmail, "Feedback Successfully Registered!", views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
-                Future.successful(Ok("Feedback form response successfully stored!"))
               }
             }
           }

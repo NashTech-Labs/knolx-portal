@@ -21,6 +21,7 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class QuestionResponse(question: String, options: List[String], response: String)
 
 case class FeedbackFormsResponse(email: String,
+                                 coreMember: Boolean,
                                  presenter: String,
                                  userId: String,
                                  sessionId: String,
@@ -62,6 +63,7 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
       BSONDocument(
         "$set" -> BSONDocument(
           "email" -> feedbackFormsResponse.email,
+          "coreMember" -> feedbackFormsResponse.coreMember,
           "presenter" -> feedbackFormsResponse.presenter,
           "userId" -> feedbackFormsResponse.userId,
           "sessionId" -> feedbackFormsResponse.sessionId,

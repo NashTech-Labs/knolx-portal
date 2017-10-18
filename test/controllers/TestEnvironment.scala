@@ -91,6 +91,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
         DefaultActionBuilder(bodyParser)(executionContext),
         UserActionBuilder(bodyParser, usersRepository, config)(executionContext),
         AdminActionBuilder(bodyParser, usersRepository, config)(executionContext),
+        SuperUserActionBuilder(bodyParser,usersRepository, config)(executionContext),
         stubPlayBodyParsers(NoMaterializer),
         stubMessagesApi(),
         stubLangs(),

@@ -10,6 +10,7 @@ object EncryptionUtility {
   private val IvSpec = new IvParameterSpec(new Array[Byte](16))
 
   val AdminKey = "Dx$V!nl%Ul^QS&u3*E5@acR-u7HPwg=="
+  val SuperUserKey = "DV$V~nl*Ul!QS&u8*E6@acR-h7HPqg+="
 
   def encrypt(text: String): String = {
     val cipher = Cipher.getInstance(Algorithm)

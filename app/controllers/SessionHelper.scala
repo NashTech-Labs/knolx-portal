@@ -18,6 +18,9 @@ object SessionHelper {
   def isAdmin(implicit request: Request[_]): Boolean =
     EncryptionUtility.decrypt(request.session.get("admin").getOrElse("")) == EncryptionUtility.AdminKey
 
+  def isSuperUser(implicit request: Request[_]): Boolean =
+    EncryptionUtility.decrypt(request.session.get("superUser").getOrElse("")) == EncryptionUtility.SuperUserKey
+
 }
 
 object EmailHelper {

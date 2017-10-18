@@ -177,9 +177,10 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received bad request while storing feedback response, ${request.body}")
       Future.successful(BadRequest("Malformed Data!"))
     } { feedbackFormResponse =>
+
       val validatedForm =
         feedbackFormResponse.validateSessionId orElse
-        feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
+          feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
       validatedForm.fold {
 
         deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
@@ -213,7 +214,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
   }
 
   private def updateRatingIfCoreMember(result: WriteResult, request: SecuredRequest[JsValue],
-                       feedbackFormResponse: FeedbackResponse, userInfo: UserInfo, header: ResponseHeader): Future[Result] = {
+                                       feedbackFormResponse: FeedbackResponse, userInfo: UserInfo, header: ResponseHeader): Future[Result] = {
     if (result.ok && feedbackFormResponse.score != 0 && userInfo.coreMember) {
       Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
       sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.score).map { result =>

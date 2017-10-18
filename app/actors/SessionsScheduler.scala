@@ -50,7 +50,6 @@ object SessionsScheduler {
 
   // messages used for responding back with current schedulers state
   sealed trait SessionsSchedulerResponse
-
   case class ScheduledSessions(sessionIds: List[String]) extends SessionsSchedulerResponse
 
 }

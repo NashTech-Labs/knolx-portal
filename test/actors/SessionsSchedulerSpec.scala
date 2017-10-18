@@ -40,6 +40,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
     val mockedScheduler: Scheduler = mock[Scheduler]
     val sessionsRepository: SessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackFormsResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
     val mailerClient: MailerClient = mock[MailerClient]
     val dateTimeUtility: DateTimeUtility = mock[DateTimeUtility]
 
@@ -96,7 +97,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         _id = feedbackFormId))
     val sessionsScheduler =
       TestActorRef(
-        new SessionsScheduler(sessionsRepository, usersRepository, feedbackFormsRepository, config, emailManager, dateTimeUtility) {
+        new SessionsScheduler(sessionsRepository, usersRepository, feedbackFormsRepository, feedbackFormsResponseRepository, config, emailManager, dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def scheduler: Scheduler = mockedScheduler

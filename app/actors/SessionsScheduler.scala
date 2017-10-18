@@ -229,16 +229,12 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def emailHandler: Receive = {
     case SendEmail(sessions, emailType) if sessions.nonEmpty =>
-      Logger.info("+++++++++++++++++++++++++++++++++In Send email, emailType = " + emailType)
       val recipients = usersRepository.getAllActiveEmails
-      Logger.info("+++++++++++++++++++++++++++++Recipients = " + recipients)
       val emailInfo = sessions.map(session => EmailInfo(session.topic, session.email, new Date(session.date.value).toString))
-      Logger.info("+++++++++++++++++++++++++++++++++ EmailInfo = " + emailInfo)
       recipients collect {
         case emails if emails.nonEmpty =>
           emailType match {
             case Reminder     =>
-              Logger.info("--------------In send email reminder, the session are = " + sessions)
               reminderEmailHandler(sessions, emailInfo, emails)
             case Feedback     => feedbackEmailHandler(sessions, emailInfo, emails)
             case Notification => notificationEmailHandler(sessions, emailInfo, emails)

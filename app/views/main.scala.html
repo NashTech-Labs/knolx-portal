@@ -32,10 +32,14 @@
         <script src="@routes.Assets.versioned("javascripts/header.js")" type="text/javascript"></script>
         <script type="text/javascript" src="@routes.JavascriptRouter.jsRoutes"></script>
         <script src="//platform.linkedin.com/in.js" type="text/javascript"> lang: en_US</script>
+        <script src="@routes.Assets.versioned("plugins/particles.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/app.js")" type="text/javascript"></script>
+
     </head>
     <body>
-        @header()
-        <div class="container-fluid">
+    @header()
+    <div id="particles-js"></div>
+      <div class="container-fluid">
         @content
         </div>
         <script src="@routes.Assets.versioned("javascripts/loader.js")" type="text/javascript"></script>

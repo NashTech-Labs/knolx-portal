@@ -13,3 +13,11 @@ a.btn.btn-sm.btn-primary.btn-create {
 .session-custom-search-bar {
     margin-bottom: 0 !important;
 }
+
+.btn-danger {
+    background-color: #c0392b !important;
+}
+
+.label-success {
+    background-color: #27ae60
+}

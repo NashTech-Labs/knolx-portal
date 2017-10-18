@@ -31,7 +31,7 @@
 
 .report-other-info {
     width: 100%;
-    text-align: center;
+    text-align:center;
     color: #fff;
     font-size: 30px;
 }
@@ -49,9 +49,9 @@
 .empty-reports {
     width: 100%;
     text-align: center;
-    font-size: 80px;
-    color: #a8a8a8;
-    padding-bottom: 80px;
+    font-size: 40px;
+    color: #ffffff;
+    padding-bottom: 50px;
 }
 
 .empty-reports_text {
@@ -60,4 +60,14 @@
 
 .feedback-notfound-color {
     color: #a8a8a8;
+}
+
+.feedback-responses-button {
+    float:right;
+    margin-right:10px;
+    border:none;
+}
+
+.report-margin-bottom {
+    margin-bottom: 15px;
 }

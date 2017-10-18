@@ -86,8 +86,9 @@
                         <tbody id="user-found">
                         @for(user <- users) {
                             <tr>
-                                @if(user.admin) {
-                                    <td class="active-status"><span class="label label-warning">Admin</span></td>
+                                @if(SessionHelper.isSuperUser) {
+                                        @if(user.admin && user.superUser) {
+                                <td class="active-status"><span class="label label-warning">SuperUser</span></td>
                                 } else {
                                     <td align="center">
                                         <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
@@ -97,6 +98,22 @@
                                             <em class="fa fa-trash"></em>
                                         </a>
                                     </td>
+                                }
+                             } else {
+                                @if(user.admin && !user.superUser) {
+                                <td class="active-status"><span class="label label-warning">Admin</span></td>
+                                } else if(user.admin && user.superUser) {
+                                <td class="active-status"><span class="label label-warning">SuperUser</span></td>
+                                } else {
+                                <td align="center">
+                                    <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
+                                        <em class="fa fa-pencil"></em>
+                                    </a>
+                                    <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
+                                        <em class="fa fa-trash"></em>
+                                    </a>
+                                </td>
+                                }
                                 }
                             <td>@user.email</td>
                                 @if(user.active) {

@@ -119,6 +119,7 @@ label {
 .update-button {
     background-color: #F1948A;
     color: #fff;
+    margin-bottom:15px;
 }
 
 .update-error {

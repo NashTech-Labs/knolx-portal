@@ -215,23 +215,14 @@ function submittedFeedbackForm() {
             response = getResponse(responseName);
             var noOfOptions = getNoOfOptions(responseName) - 1;
             var receivedScore = (getResponseValue(responseName)/noOfOptions) * 100;
-            //console.log(getResponseValue(responseName));
-            console.log("-------------------------------");
-            console.log("rating = " + score);
-            console.log("mcqCount = " + mcqCount);
-            console.log("value in id = " + getResponseValue(responseName));
-            console.log('Score received is = ' + score);
             score = ((score*mcqCount) + receivedScore)/(mcqCount + 1);
-            console.log(score);
             mcqCount++;
         } else {
             response = document.getElementById(responseName).value;
         }
         questionOptionInformation.push(response)
     }
-    console.log(score);
     var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation, score);
-    console.log(feedbackFormWithResponse);
 
     if (isFormResponseValid(feedbackFormWithResponse)) {
 

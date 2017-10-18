@@ -310,7 +310,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin= false, Some("12345678"))) returns updateWriteResult
 
-      val result = controller.updateUserByAdmin()(FakeRequest(POST, "getByEmail")
+      val result = controller.updateUserBySuperUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",

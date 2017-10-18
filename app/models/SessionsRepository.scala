@@ -294,7 +294,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     collection.flatMap(jsonCollection => jsonCollection.find(selector)
       .cursor[SessionInfo](ReadPreference.Primary)
       .collect[List](-1, FailOnError[List[SessionInfo]]())
-      .flatMap(eventualSession => eventualSession.headOption
+      .flatMap(sessions => sessions.headOption
         .fold {
           Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
         } { session =>

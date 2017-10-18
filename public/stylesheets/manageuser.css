@@ -408,3 +408,14 @@ input::placeholder {
 .ban-text {
     font-size: 13px;
 }
+
+.update-user-table>tbody>tr>td {
+    border: 0px ;
+    padding-top: 0px ;
+    padding-bottom:0px;
+    margin-bottom: 0px;
+    border-top:0px;
+}
+.update-user-table{
+border:none;
+}

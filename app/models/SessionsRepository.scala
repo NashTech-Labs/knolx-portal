@@ -291,8 +291,6 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def updateRating(sessionID: String, score: Double): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionID))
 
-    val modifier = BSONDocument("$inc" -> BSONDocument("noOfFeedbackResponses" -> 1))
-
     collection.flatMap(jsonCollection => jsonCollection.find(selector)
       .cursor[SessionInfo](ReadPreference.Primary)
       .collect[List](-1, FailOnError[List[SessionInfo]]())
@@ -308,7 +306,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
               case average if updatedScore > 40.00 => "Average"
               case _ => "Bad"
             }
-            jsonCollection.update(selector, BSONDocument("$set" -> BSONDocument("score" -> updatedScore, "rating" -> updatedRating),"$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
+            jsonCollection.update(selector, BSONDocument("$set" ->
+              BSONDocument("score" -> updatedScore, "rating" -> updatedRating),"$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
           }))
   }
 

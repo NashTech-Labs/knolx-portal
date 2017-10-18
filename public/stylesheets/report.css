@@ -31,9 +31,9 @@
 
 .report-other-info {
     width: 100%;
+    text-align:center;
     color: #fff;
     font-size: 30px;
-    margin-left: 40%;
 }
 
 .report-type {
@@ -49,9 +49,9 @@
 .empty-reports {
     width: 100%;
     text-align: center;
-    font-size: 80px;
-    color: #a8a8a8;
-    padding-bottom: 80px;
+    font-size: 30px;
+    color: #ffffff;
+    padding-bottom: 50px;
 }
 
 .empty-reports_text {
@@ -66,4 +66,8 @@
     float:right;
     margin-right:10px;
     border:none;
+}
+
+.report-margin-bottom {
+    margin-bottom: 15px;
 }

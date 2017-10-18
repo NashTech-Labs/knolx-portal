@@ -185,7 +185,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  @unchecked
   def loginUser: Action[AnyContent] = action.async { implicit request =>
     val username = configuration.get[String]("session.username")
     loginForm.bindFromRequest.fold(
@@ -204,7 +203,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, user.password)) {
               Logger.info(s"User $email successfully logged in")
-              (user.admin, user.superUser) match {
+              ((user.admin, user.superUser) : @unchecked) match {
                 case (true, false)  =>
                   Redirect(routes.HomeController.index())
                     .withSession(

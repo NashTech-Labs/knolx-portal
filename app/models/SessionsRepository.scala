@@ -295,20 +295,22 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .cursor[SessionInfo](ReadPreference.Primary)
       .collect[List](-1, FailOnError[List[SessionInfo]]())
       .flatMap(eventualSession => eventualSession.headOption
-          .fold {
-            Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-          } { session =>
-            val noOfFeedbackResponses = session.noOfFeedbackResponses
-            val currentScore = session.score
-            val updatedScore = ((currentScore * noOfFeedbackResponses) + score)/(noOfFeedbackResponses + 1)
-            val updatedRating = updatedScore match {
-              case good if updatedScore > 70.00 => "Good"
-              case average if updatedScore > 40.00 => "Average"
-              case _ => "Bad"
-            }
-            jsonCollection.update(selector, BSONDocument("$set" ->
-              BSONDocument("score" -> updatedScore, "rating" -> updatedRating),"$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
-          }))
+        .fold {
+          Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+        } { session =>
+          val noOfFeedbackResponses = session.noOfFeedbackResponses
+          val currentScore = session.score
+          val updatedScore = ((currentScore * noOfFeedbackResponses) + score) / (noOfFeedbackResponses + 1)
+          val updatedRating = updatedScore match {
+            case good if updatedScore > 70.00    => "Good"
+            case average if updatedScore > 40.00 => "Average"
+            case _                               => "Bad"
+          }
+          jsonCollection.update(selector, BSONDocument("$set" ->
+            BSONDocument("score" -> updatedScore, "rating" -> updatedRating), "$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
+        }
+      )
+    )
   }
 
 }

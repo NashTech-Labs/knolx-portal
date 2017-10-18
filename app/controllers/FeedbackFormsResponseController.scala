@@ -177,10 +177,13 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received bad request while storing feedback response, ${request.body}")
       Future.successful(BadRequest("Malformed Data!"))
     } { feedbackFormResponse =>
-      val validatedForm = feedbackFormResponse.validateSessionId orElse
+      val validatedForm =
+        feedbackFormResponse.validateSessionId orElse
         feedbackFormResponse.validateFeedbackFormId orElse feedbackFormResponse.validateFormResponse
       validatedForm.fold {
+
         deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
+
           feedbackResponse.fold {
             Logger.info(s"Feedback form submission unsuccessful due to Malformed data while " +
               s"validating form responses for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")

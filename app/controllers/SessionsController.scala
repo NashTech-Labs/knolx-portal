@@ -123,7 +123,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .paginate(pageNumber, keyword)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map { session =>
-          val letsee = session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)
           KnolxSession(session._id.stringify,
             session.userId,
             new Date(session.date.value),
@@ -134,7 +133,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             session.cancelled,
             session.rating,
             completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis)),
-            expired = new Date(session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)).before(new java.util.Date(System.currentTimeMillis())))
+            expired = new Date(session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100))
+              .before(new java.util.Date(System.currentTimeMillis())))
         }
 
         sessionsRepository

@@ -20,45 +20,32 @@ import akka.pattern.pipe
 object SessionsScheduler {
 
   sealed trait EmailType
-
   sealed trait EmailOnce
-
   case object Reminder extends EmailType with EmailOnce
-
   case object Notification extends EmailType with EmailOnce
-
   case object Feedback extends EmailType
 
   // messages used for getting/reconfiguring schedulers/scheduled-emails
   case object RefreshSessionsSchedulers
-
   case object GetScheduledSessions
-
   case class CancelScheduledSession(sessionId: String)
-
   case class ScheduleSession(sessionId: String)
 
   // messages used internally for starting session schedulers/emails
   case object ScheduleFeedbackEmailsStartingTomorrow
-
   case object ScheduleFeedbackRemindersStartingTomorrow
-
   case object ScheduleSessionNotificationStartingTomorrow
 
   private[actors] case class ScheduleFeedbackEmailsStartingToday(eventualSessions: Future[List[SessionInfo]])
-
   private[actors] case class InitiateFeedbackEmailsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class ScheduleFeedbackRemindersStartingToday(eventualSessions: Future[List[SessionInfo]])
-
   private[actors] case class InitialFeedbackRemindersStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class ScheduleSessionNotificationsStartingToday(eventualSessions: Future[List[SessionInfo]])
-
   private[actors] case class InitialSessionNotificationsStartingTomorrow(initialDelay: FiniteDuration, interval: FiniteDuration)
 
   private[actors] case class EventualScheduledEmails(scheduledMails: Map[String, Cancellable])
-
   private[actors] case class SendEmail(session: List[SessionInfo], emailType: EmailType)
 
   // messages used for responding back with current schedulers state
@@ -148,7 +135,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     case ScheduleFeedbackRemindersStartingToday(expiringSessions)            =>
       Logger.info(s"Scheduling feedback form reminder email to be sent for expiring sessions. This would run only once for " +
         s"all sessions scheduled today.")
-      Logger.info("-----------------Sessions received are = " + expiringSessions)
       val eventualExpiringSessionsReminder = scheduleEmails(expiringSessions, Reminder)
       eventualExpiringSessionsReminder.map(schedule => EventualScheduledEmails(schedule)) pipeTo self
     case ScheduleSessionNotificationsStartingToday(eventualSessions)         =>
@@ -234,8 +220,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
       recipients collect {
         case emails if emails.nonEmpty =>
           emailType match {
-            case Reminder     =>
-              reminderEmailHandler(sessions, emailInfo, emails)
+            case Reminder     => reminderEmailHandler(sessions, emailInfo, emails)
             case Feedback     => feedbackEmailHandler(sessions, emailInfo, emails)
             case Notification => notificationEmailHandler(sessions, emailInfo, emails)
           }
@@ -328,11 +313,9 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
   }
 
   def scheduleEmails(eventualSessions: Future[List[SessionInfo]], emailType: EmailType): Future[Map[String, Cancellable]] = {
-    println("|||||"+Await.result(eventualSessions,Duration.Inf))
     eventualSessions collect { case sessions if sessions.nonEmpty =>
       emailType match {
         case Reminder     =>
-          Logger.info("-------------In reminder, the sessions are = " + sessions)
           Map(dateTimeUtility.toLocalDate(sessions.head.date.value).toString ->
             scheduler.scheduleOnce(Duration.Zero, self, SendEmail(sessions, Reminder)))
         case Feedback     => sessions.map { session =>
@@ -346,9 +329,6 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
     }
   }
 
-  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = {
-    Logger.info("------------------Sessions for today = " + sessionsRepository.sessionsForToday(sessionState))
-    sessionsRepository.sessionsForToday(sessionState)
-  }
+  def sessionsForToday(sessionState: SessionState): Future[List[SessionInfo]] = sessionsRepository.sessionsForToday(sessionState)
 
 }

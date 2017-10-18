@@ -54,8 +54,6 @@ object SessionsScheduler {
 
 }
 
-case class DefaultersPerSession(email: List[String], emailInfo: EmailInfo)
-
 case class EmailInfo(topic: String, presenter: String, date: String)
 
 class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,

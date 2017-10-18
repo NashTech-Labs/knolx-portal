@@ -437,17 +437,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                   user.fold {
                     Future.successful(Unauthorized(views.html.users.login(loginForm.withGlobalError("Sorry, No user found with email provided"))))
                   } { userFound =>
-                    val ban = new Date(userFound.banTill.value).after(new Date(dateTimeUtility.nowMillis))
-                    val updatedRecord = UpdatedUserInfo(userFound.email, userFound.active, ban, userFound.coreMember,userFound.admin, Some(resetPasswordInfo.password))
-
                     usersRepository
-                      .updatePassword(updatedRecord)
+                      .updatePassword(userFound.email, resetPasswordInfo.password)
                       .map { result =>
                         if (result.ok) {
                           forgotPasswordRepository.upsert(requestFound.copy(active = false))
-                          Logger.info(s"Password successfully updated for ${updatedRecord.email}")
+                          Logger.info(s"Password successfully updated for ${userFound.email}")
                           Redirect(routes.UsersController.login())
-                            .flashing("successMessage" -> s"Password successfully updated for ${updatedRecord.email}")
+                            .flashing("successMessage" -> s"Password successfully updated for ${userFound.email}")
                         } else {
                           InternalServerError("Something went wrong!")
                         }
@@ -480,9 +477,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             Future.successful(Redirect(routes.UsersController.renderChangePassword()).flashing("message" -> "User not found!"))
           } { user =>
             if (PasswordUtility.isPasswordValid(resetPasswordInfo.currentPassword, user.password)) {
-              val ban = new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))
-              usersRepository.updatePassword(
-                UpdatedUserInfo(request.user.email.toLowerCase, user.active, ban, user.coreMember, user.admin, Some(resetPasswordInfo.newPassword)))
+              usersRepository.updatePassword(request.user.email.toLowerCase, resetPasswordInfo.newPassword)
                 .map { result =>
                   if (result.ok) {
                     Logger.info(s"Password successfully updated for ${user.email}")

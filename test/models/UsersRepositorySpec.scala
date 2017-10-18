@@ -282,17 +282,9 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
 
     "update the password" in {
       val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin = false, Some("12345678"))
-      val result = await(usersRepository.updatePassword(userTOUpdate))
+      val result = await(usersRepository.updatePassword(userTOUpdate.email, "12345678"))
 
       result must beEqualTo(updateWriteResult)
-    }
-
-    "not update the password" in {
-      val updateWriteResultWithFalse: UpdateWriteResult = UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None)
-      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin = false, None)
-      val result = await(usersRepository.updatePassword(userTOUpdate))
-
-      result.ok must beEqualTo(updateWriteResultWithFalse.ok)
     }
 
   }

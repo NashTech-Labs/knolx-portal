@@ -102,42 +102,46 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
         jsonCollection
           .insert(user))
 
-  def update(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+  def update(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
 
     val banTill: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.nowMillis).plusDays(banPeriod)
     val duration = BSONDateTime(dateTimeUtility.toMillis(banTill))
     val unban = BSONDateTime(dateTimeUtility.nowMillis)
 
-    val selector = BSONDocument("email" -> updatedRecord.email)
-    val modifier = (updatedRecord.password, updatedRecord.ban) match {
-      case (Some(password), true)  =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> duration, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
-      case (Some(password), false) =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
-      case (None, true)            =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> duration, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
-      case (None, false)           =>
-        BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
-    }
-
     collection
-      .flatMap(jsonCollection =>
-        jsonCollection.update(selector, modifier))
+      .flatMap(jsonCollection => jsonCollection.find(BSONDocument("email" -> updatedRecord.email))
+        .cursor[UserInfo](ReadPreference.Primary)
+        .collect[List](-1, FailOnError[List[UserInfo]]())
+        .flatMap(listOfUserInfo =>
+
+          listOfUserInfo.headOption.fold(
+            Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+          ) { user =>
+            val banPeriod = if (user.banTill.value > unban.value) user.banTill else duration
+            val selector = BSONDocument("email" -> updatedRecord.email)
+            val modifier = (updatedRecord.password, updatedRecord.ban) match {
+              case (Some(password), true)  =>
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> banPeriod, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+              case (Some(password), false) =>
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+              case (None, true)            =>
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> banPeriod, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+              case (None, false)           =>
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+            }
+            jsonCollection.update(selector, modifier)
+          }
+        )
+      )
   }
 
-  def updatePassword(updatedRecord: UpdatedUserInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+  def updatePassword(email: String, password: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
-    updatedRecord.password match {
-      case Some(password) =>
-        val modifier = BSONDocument("$set" -> BSONDocument("password" -> PasswordUtility.encrypt(password)))
+     val modifier = BSONDocument("$set" -> BSONDocument("password" -> PasswordUtility.encrypt(password)))
         collection
           .flatMap(jsonCollection =>
-            jsonCollection.update(BSONDocument("email" -> updatedRecord.email), modifier))
-      case None         =>
-        Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-    }
-
-  }
+            jsonCollection.update(BSONDocument("email" -> email), modifier))
+     }
 
   def ban(email: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val banTill: LocalDateTime = dateTimeUtility.toLocalDateTime(dateTimeUtility.nowMillis).plusDays(banPeriod)

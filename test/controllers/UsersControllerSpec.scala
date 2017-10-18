@@ -484,7 +484,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.nowMillis returns date.getTime
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
-      usersRepository.updatePassword(updateUserInfo) returns updateWriteResult
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.resetPassword()(FakeRequest(POST, "/reset/")
         .withFormUrlEncodedBody(
           "token" -> "token",
@@ -503,7 +503,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.nowMillis returns date.getTime
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
-      usersRepository.updatePassword(updateUserInfo) returns updateWriteResult
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.resetPassword()(FakeRequest(POST, "/reset/")
         .withFormUrlEncodedBody(
           "token" -> "token",
@@ -571,7 +571,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
-      usersRepository.updatePassword(updateUserInfo) returns updateWriteResult
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.changePassword()(FakeRequest(POST, "/reset/")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(
@@ -589,7 +589,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
-      usersRepository.updatePassword(updateUserInfo) returns updateWriteResult
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.changePassword()(FakeRequest(POST, "/reset/")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(

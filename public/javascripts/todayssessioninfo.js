@@ -146,7 +146,7 @@ function loadFeedbackForm(values, sessionId) {
                     "<div class='col-md-1'></div>" +
                     "<div style='width:auto; text-align:center'>" +
                     "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
-                    "</p>" +
+                                        "</p>"+
                     "<label class='radio-button'>" +
                     "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
                     "<span class='lab_text'></span>" +
@@ -181,7 +181,7 @@ function loadFeedbackForm(values, sessionId) {
         $('#feedback-response-form').append(
             "<div class='question-card form-question-card' id='question-outer-" + questionNumber + "'>" +
             "<label class='card-questions-label'>" +
-            "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
+                        "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
             "</label>" + optionsLoaded + "</div>"
         );
 

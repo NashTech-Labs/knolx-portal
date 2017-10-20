@@ -139,11 +139,9 @@ function loadFeedbackForm(values, sessionId) {
         }
         if (type == "MCQ") {
             for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-            if(options[optionNumber] == "Did not attend")
-            {
+            if(options[optionNumber] == "Did not attend") {
                 continue;
-            }
-            else {
+            } else {
                 optionsLoaded += "<div class='row questions-inlining'>" +
                     "<div class='col-md-1'></div>" +
                     "<div style='width:auto; text-align:center'>" +

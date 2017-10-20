@@ -18,35 +18,37 @@
                             }
                         @helper.CSRF.formField
                         <input type='hidden' name="email" value="@userInfo.data.get("email")"/>
+                            <table class="table update-user-table">
+                                <tbody class="update-user-table-column">
                         @if(SessionHelper.isSuperUser){
-                        <label class='checkbox-outer'>
-                            <p class='manage-user-checkbox-text '>Admin</p>
-                            <input type='checkbox' @if(userInfo.data.get("admin").contains("true")) {
+                                <tr>
+                        <td>    <p class='manage-user-checkbox-text '>Admin</p> </td>
+                        <td>    <input type='checkbox' @if(userInfo.data.get("admin").contains("true")) {
                             checked } name='admin' id='suspend' class='custom-checkbox' value='true' />
-                            <span class='manage-user-label_text'></span>
-                        </label>
+                            <span class='manage-user-label_text'></span></td>
+
+                                </tr>
                         }
-
-                        <label class='checkbox-outer'>
-                            <p class='manage-user-checkbox-text'>Active</p>
-                            <input type='checkbox' @if(userInfo.data.get("active").contains("true")) {
+                        <tr>
+                        <td>    <p class='manage-user-checkbox-text'>Active</p></td>
+                        <td>    <input type='checkbox' @if(userInfo.data.get("active").contains("true")) {
                             checked } name='active' id='suspend' class='custom-checkbox' value='true' />
-                            <span class='manage-user-label_text'></span>
-                        </label>
-
-                        <label class='checkbox-outer'>
-                            <p class='manage-user-checkbox-text manage-user-checkbox-ban-text'>Ban</p>
-                            <input type='checkbox' @if(userInfo.data.get("ban").contains("true")) {
+                            <span class='manage-user-label_text'></span></td>
+                        </tr>
+                        <tr>
+                        <td>    <p class='manage-user-checkbox-text manage-user-checkbox-ban-text'>Ban</p></td>
+                        <td>    <input type='checkbox' @if(userInfo.data.get("ban").contains("true")) {
                             checked } name='ban' id='suspend' class='custom-checkbox' value='true' />
-                            <span class='manage-user-label_text'></span>
-                        </label>
-
-                        <label class='checkbox-outer'>
-                            <p class='manage-user-checkbox-text manage-user-checkbox-coreMember-text'>Core Member</p>
-                            <input type='checkbox' @if(userInfo.data.get("coreMember").contains("true")) {
+                            <span class='manage-user-label_text'></span></td>
+                        </tr>
+                        <tr>
+                        <td>    <p class='manage-user-checkbox-text manage-user-checkbox-coreMember-text'>Core Member</p></td>
+                        <td>    <input type='checkbox' @if(userInfo.data.get("coreMember").contains("true")) {
                             checked } name='coreMember' id='suspend' class='custom-checkbox' value='true' />
-                            <span class='manage-user-label_text'></span>
-                        </label>
+                            <span class='manage-user-label_text'></span></td>
+                        </tr>
+                                </tbody>
+                            </table>
 
                         <div class="col-md-12 login-third update-second">
                             <div class="col-md-1"></div>

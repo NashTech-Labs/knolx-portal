@@ -268,7 +268,6 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
 
     "getByEmail user with password change and  banned" in {
       val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, admin= false, Some("12345678"))
-
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
       dateTimeUtility.localDateTimeIST returns localDateTime
@@ -277,6 +276,13 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       dateTimeUtility.toLocalDateTime(dateTimeUtility.nowMillis) returns localDateTime
 
       val result = await(usersRepository.update(userTOUpdate))
+
+      result must beEqualTo(updateWriteResult)
+    }
+
+    "update the password" in {
+      val userTOUpdate = UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin = false, Some("12345678"))
+      val result = await(usersRepository.updatePassword(userTOUpdate.email, "12345678"))
 
       result must beEqualTo(updateWriteResult)
     }

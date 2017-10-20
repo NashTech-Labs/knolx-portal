@@ -6,9 +6,8 @@
 
     }{ header =>
        <div class="row">
-            @report.response match {
-                case first :: rest => {
-                    <div class="col-md-12 feedback-form-display-container report-info">
+           <div class="report-info feedback-form-display-container">
+                    <div class="report-margin-bottom">
                         <span class="label label-primary total-responses">Total <span class="badge badge-report" id="response-size">@{
                             report.response.size
                         }</span>
@@ -25,14 +24,15 @@
                                 <span class="filter-label_text"></span>
                                 <p class="filter-checkbox-text" style="margin-top:9px;">Core Member</p>
                             </label>
-
-                        <div class="report-other-info">
-                           <div> @header.topic
-                            <sup><span class="label label-warning report-type">Knolx</span></sup></div>
-                        <p class="report-session-date">@header.date</p>
                         </div>
+                            <div class="report-other-info">
+                                @header.topic
+                            <sup><span class="label label-warning report-type">Knolx</span></sup>
+                        <p class="report-session-date">@header.date</p></div>
+           </div>
 
-                    </div>
+           @report.response match {
+           case first :: rest => {
                     <div class="col-md-12 feedback-form-display-container report-content-outer">
                         <div class="table-responsive manage-user-custom-table-margin report-content-outer">
                             <table class="table table-striped">
@@ -66,13 +66,15 @@
                             </table>
                         </div>
 
-
+                    </div>
                         }
-                case _ => {}
+                case _ => {
+           <div class="col-md-12 feedback-form-display-container report-content-outer">
+                        <div class="empty-reports"> No response </div>
+           </div>
+                        }
 
             }
-
-        </div>
         </div>
     }
 <script src="@routes.Assets.versioned("javascripts/report.js")" type="text/javascript"></script>

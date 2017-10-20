@@ -139,6 +139,11 @@ function loadFeedbackForm(values, sessionId) {
         }
         if (type == "MCQ") {
             for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
+            if(options[optionNumber] == "Did not attend")
+            {
+                continue;
+            }
+            else {
                 optionsLoaded += "<div class='row questions-inlining'>" +
                     "<div class='col-md-1'></div>" +
                     "<div style='width:auto; text-align:center'>" +
@@ -150,6 +155,7 @@ function loadFeedbackForm(values, sessionId) {
                     "</label>" +
                     "</div>" +
                     "</div>";
+                }
             }
         }
         else {

@@ -206,7 +206,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.createFeedbackForm()(request)
 
       status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+      contentAsString(response) must be equalTo "Question must require at least 1 option besides Did not attend!"
     }
 
     "render manage feedback forms page" in new WithTestApplication {
@@ -331,7 +331,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.updateFeedbackForm()(request)
 
       status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+      contentAsString(response) must be equalTo "Question must require at least 1 option besides Did not attend!"
     }
 
     "not getByEmail feedback form due to malformed data when name is empty" in new WithTestApplication {

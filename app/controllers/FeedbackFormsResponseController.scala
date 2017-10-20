@@ -198,7 +198,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
               } { userInfo =>
                 val feedbackResponseData = FeedbackFormsResponse(request.user.email, userInfo.coreMember, header.email, request.user.id,
                   feedbackFormResponse.sessionId, header.topic, header.meetUp, header.date,
-                  header.session, response, BSONDateTime(dateTimeUtility.nowMillis), feedbackFormResponse.score)
+                  header.session, response, BSONDateTime(dateTimeUtility.nowMillis))
                 feedbackResponseRepository.upsert(feedbackResponseData).flatMap { result =>
                   updateRatingIfCoreMember(result, request, feedbackFormResponse, userInfo, header)
                 }

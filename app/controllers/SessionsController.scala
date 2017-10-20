@@ -132,9 +132,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             session.meetup,
             session.cancelled,
             session.rating,
-            completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis)),
-            expired = new Date(session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100))
-              .before(new java.util.Date(System.currentTimeMillis())))
+            completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
+            expired = new Date(session.expirationDate.value)
+              .before(new java.util.Date(dateTimeUtility.nowMillis)))
         }
 
         sessionsRepository
@@ -167,8 +167,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 session.cancelled,
                 session.rating,
                 dateString = new Date(session.date.value).toString,
-                completed = new Date(session.date.value).before(new java.util.Date(System.currentTimeMillis)),
-                expired = new Date(session.date.value + (session.feedbackExpirationDays * 24 * 60 * 60 * 100)).before(new java.util.Date(System.currentTimeMillis()))))
+                completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
+                expired = new Date(session.expirationDate.value)
+                  .before(new java.util.Date(dateTimeUtility.nowMillis))))
 
             sessionsRepository
               .activeCount(sessionInformation.email)
@@ -196,8 +197,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               sessionInfo.meetup,
               sessionInfo.cancelled,
               sessionInfo.rating,
-              expired = new Date(sessionInfo.date.value + (sessionInfo.feedbackExpirationDays * 24 * 60 * 60 * 100))
-                .before(new java.util.Date(System.currentTimeMillis()))))
+              expired = new Date(sessionInfo.expirationDate.value)
+                .before(new java.util.Date(dateTimeUtility.nowMillis))))
 
         val eventualScheduledFeedbackForms =
           (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
@@ -242,7 +243,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 sessionInfo.cancelled,
                 sessionInfo.rating,
                 dateString = new Date(sessionInfo.date.value).toString,
-                completed = new Date(sessionInfo.date.value).before(new java.util.Date(System.currentTimeMillis))
+                completed = new Date(sessionInfo.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
+                expired = new Date(sessionInfo.expirationDate.value)
+                  .before(new java.util.Date(dateTimeUtility.nowMillis))
               ))
 
             val eventualScheduledFeedbackForms =

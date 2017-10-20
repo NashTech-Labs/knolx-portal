@@ -38,7 +38,6 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     "session1",
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
-    0.00,
     _id)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {

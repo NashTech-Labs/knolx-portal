@@ -7,13 +7,11 @@ import javax.inject.{Inject, Named}
 import actors.EmailActor
 import akka.actor.ActorRef
 import models._
-import play.api.{Configuration, Logger}
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.{Action, AnyContent, Result}
+import play.api.{Configuration, Logger}
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
@@ -213,8 +211,11 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  private def updateRatingIfCoreMember(result: WriteResult, request: SecuredRequest[JsValue],
-                                       feedbackFormResponse: FeedbackResponse, userInfo: UserInfo, header: ResponseHeader): Future[Result] = {
+  private def updateRatingIfCoreMember(result: WriteResult,
+                                       request: SecuredRequest[JsValue],
+                                       feedbackFormResponse: FeedbackResponse,
+                                       userInfo: UserInfo,
+                                       header: ResponseHeader): Future[Result] = {
     if (result.ok && feedbackFormResponse.score != 0 && userInfo.coreMember) {
       Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
       sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.score).map { result =>

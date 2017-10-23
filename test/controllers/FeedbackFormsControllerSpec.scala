@@ -28,7 +28,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -206,7 +206,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.createFeedbackForm()(request)
 
       status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+      contentAsString(response) must be equalTo "Question must require at least 1 option besides Did not attend!"
     }
 
     "render manage feedback forms page" in new WithTestApplication {
@@ -331,7 +331,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.updateFeedbackForm()(request)
 
       status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+      contentAsString(response) must be equalTo "Question must require at least 1 option besides Did not attend!"
     }
 
     "not getByEmail feedback form due to malformed data when name is empty" in new WithTestApplication {

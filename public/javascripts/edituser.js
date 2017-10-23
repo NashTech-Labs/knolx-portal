@@ -34,13 +34,29 @@ function slide(keyword, pageNumber, filter) {
                 var users = userInfo["users"];
                 var page = userInfo["page"];
                 var pages = userInfo["pages"];
+                var superUser = userInfo["isSuperUser"];
                 var usersFound = "";
 
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
-
-                        if (users[user].admin) {
+                        if (superUser) {
+                            if (users[user].admin && users[user].superUser) {
+                                usersFound += "<tr><td class='active-status'><span class='label label-warning'>SuperUser</span></td>"
+                            } else {
+                                usersFound += "<tr><td align='center'>" +
+                                    "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
+                                    "<em class='fa fa-pencil'></em>" +
+                                    "</a> " +
+                                    "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
+                                    "<em class='fa fa-trash'></em>" +
+                                    "</a>" +
+                                    "</td>"
+                            }
+                        } else {
+                        if (users[user].admin && !users[user].superUser) {
                             usersFound += "<tr><td class='active-status'><span class='label label-warning'>Admin</span></td>"
+                        } else if (users[user].admin && users[user].superUser) {
+                            usersFound += "<tr><td class='active-status'><span class='label label-warning'>SuperUser</span></td>"
                         } else {
                             usersFound += "<tr><td align='center'>" +
                                 "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
@@ -50,6 +66,7 @@ function slide(keyword, pageNumber, filter) {
                                 "<em class='fa fa-trash'></em>" +
                                 "</a>" +
                                 "</td>"
+                         }
                         }
                         usersFound += "<td>" + users[user].email + "</td>";
                         if (users[user].active) {

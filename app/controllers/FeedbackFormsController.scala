@@ -27,7 +27,7 @@ case class UpdateFeedbackFormInformation(id: String, name: String, questions: Li
     }
 
   def validateForm: Option[String] =
-    if (questions.forall(_.options.length >= 2)) {
+    if (questions.forall(_.options.length >= 2) && questions.nonEmpty) {
       None
     } else {
       Some("Question must require at least 1 option besides Did not attend!")
@@ -59,7 +59,7 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
     }
 
   def validateForm: Option[String] =
-    if (questions.forall(_.options.length >= 2)) {
+    if (questions.forall(_.options.length >= 2) && questions.nonEmpty) {
       None
     } else {
       Some("Question must require at least 1 option besides Did not attend!")

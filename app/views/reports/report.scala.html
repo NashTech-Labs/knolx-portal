@@ -7,24 +7,24 @@
     }{ header =>
        <div class="row">
            <div class="report-info feedback-form-display-container">
-                    <div class="report-margin-bottom">
-                        <span class="label label-primary total-responses">Total <span class="badge badge-report" id="response-size">@{
+                    <!--<div class="report-margin-bottom">
+                    -->    <span class="label label-primary total-responses">Total <span class="badge badge-report" id="response-size">@{
                             report.response.size
                         }</span>
                             </span>
-                            <label class="checkbox-outer feedback-responses-button">
+                            <label class="checkbox-outer feedback-responses-button report-checkbox-color">
                                 <input type='radio' id="all-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="all-@SessionHelper.isSuperUser"/>
 
-                                <span class="filter-label_text"></span>
-                                <p class="filter-checkbox-text" style="margin-top:9px;">All</p>
+                                <span class="filter-label_text report-checkbox-color"></span>
+                                <p class="filter-checkbox-text report-checkbox-color" style="margin-top:9px;">All</p>
                             </label>
 
                             <label class="checkbox-outer feedback-responses-button">
                                 <input type='radio' id="coreMember-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="coreMember-@SessionHelper.isSuperUser"/>
-                                <span class="filter-label_text"></span>
-                                <p class="filter-checkbox-text" style="margin-top:9px;">Core Member</p>
+                                <span class="filter-label_text report-checkbox-color"></span>
+                                <p class="filter-checkbox-text report-checkbox-color" style="margin-top:9px;">Core Member</p>
                             </label>
-                        </div>
+                        <!--</div>-->
                             <div class="report-other-info">
                                 @header.topic
                             <sup><span class="label label-warning report-type">Knolx</span></sup>

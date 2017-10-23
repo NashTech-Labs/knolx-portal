@@ -50,7 +50,7 @@
     width: 100%;
     text-align: center;
     font-size: 40px;
-    color: #ffffff;
+    color: #000000;
     padding-bottom: 50px;
 }
 
@@ -66,8 +66,17 @@
     float:right;
     margin-right:10px;
     border:none;
+    color: #fcfcfc !important;
 }
 
 .report-margin-bottom {
     margin-bottom: 15px;
+}
+
+.report-checkbox-color {
+    color: #fcfcfc !important;
+}
+
+.report-checkbox-color:before {
+    color: #fcfcfc !important;
 }

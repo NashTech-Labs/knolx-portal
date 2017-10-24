@@ -48,7 +48,6 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                         }
                     }
                     if (sno == '0') {
-                    console.log(sno);
                     userResponse += "<tr><td align='center' colspan='100%'><i class='fa fa-database' aria-hidden='true'>"
                                   +"</i><span class='no-record-found'>Oops! No Response Found</span></td></tr>";
                     }

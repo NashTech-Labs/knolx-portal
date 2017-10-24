@@ -79,7 +79,7 @@
 }
 
 #days:disabled {
-    background-color: #fff;
+    background-color: transparent;
     color: #dcdcdc;
 }
 

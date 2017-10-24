@@ -120,7 +120,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
     } { sessionInfo =>
       val header = FeedbackReportHeader(sessionInfo._id.stringify, sessionInfo.topic, active = false,
         sessionInfo.session, sessionInfo.meetup, new Date(sessionInfo.date.value).toString, sessionInfo.rating,
-          new Date(sessionInfo.expirationDate.value).before(new java.util.Date(dateTimeUtility.nowMillis)))
+        new Date(sessionInfo.expirationDate.value).before(new java.util.Date(dateTimeUtility.nowMillis)))
       responses.map { sessionResponses =>
         if (sessionResponses.nonEmpty) {
           val questionAndResponses = sessionResponses.map(feedbackResponse =>

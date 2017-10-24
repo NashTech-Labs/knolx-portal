@@ -13,7 +13,6 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
         {
             type: "GET",
             processData: false,
-            /*contentType: 'application/json',*/
             success: function (data) {
                 var values = JSON.parse(data);
                 var userResponse = "";
@@ -48,7 +47,11 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                             userResponse += "</tr>";
                         }
                     }
-                    $('#response-size').html(parseInt(sno))
+                    if (sno == '0') {
+                    console.log(sno);
+                    userResponse += "<tr><td align='center' colspan='100%'><i class='fa fa-database' aria-hidden='true'>"
+                                  +"</i><span class='no-record-found'>Oops! No Response Found</span></td></tr>";
+                    }
                 }
                 $('#user-response').html(userResponse);
             }, error: function (er) {

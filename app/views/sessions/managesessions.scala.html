@@ -19,7 +19,8 @@
             <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
-                    <table class="table table-responsive manage-user-custom-table-margin">
+                <div class="table-responsive manage-user-custom-table-margin">
+                    <table class="table">
                         <thead>
                             <tr class="table-header-color">
                                 <th>
@@ -113,6 +114,7 @@
                         }
                         </tbody>
                     </table>
+                </div>
             </div>
         </div>
     </div>

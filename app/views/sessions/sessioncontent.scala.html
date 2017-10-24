@@ -1,16 +1,9 @@
 @(session:SessionInfo)(implicit request: Request[_], flash: Flash)
 
-@main("") {
-
-
-<div class="grad1" style="margin-top:95px;">
-
-    <!--<div class="topic-header">
-    <div>@session.topic</div>
-    <div>by @session.email</div>
-    </div>-->
-    <div class="col-md-12 session-content-display-container report-info">
-        <span ><div class="report-other-info">@session.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
+@main(session.topic) {
+    <div class="grad1" style="margin-top:95px;">
+        <div class="col-md-12 session-content-display-container report-info">
+            <span ><div class="report-other-info">@session.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
                         </div>
                         </span>
     </div>

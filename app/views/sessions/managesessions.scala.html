@@ -37,6 +37,7 @@
                                 <th>Email</th>
                                 <th>Type</th>
                                 <th>Cancelled</th>
+                                <th>Rating</th>
                                 <th>Scheduled Status</th>
                                 <th>More Details</th>
                             </tr>
@@ -68,6 +69,13 @@
                                 } else {
                                         <td class='active-status'>No</td>
                                 })
+                                <td>
+                                @(if(knolxSession.rating.isEmpty || !knolxSession.expired) {
+                                    "N/A"
+                                } else {
+                                    knolxSession.rating
+                                })
+                                </td>
                                 <td>@if(knolxSession.completed && !knolxSession.cancelled) {
                                     <span class="label label-success">Completed</span>
                                     } else if(knolxSession.cancelled) {

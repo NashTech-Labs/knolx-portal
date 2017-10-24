@@ -70,7 +70,7 @@
 }
 
 .report-margin-bottom {
-    margin-bottom: 15px;
+    margin-bottom: 19px;
 }
 
 .report-checkbox-color {
@@ -79,4 +79,11 @@
 
 .report-checkbox-color:before {
     color: #fcfcfc !important;
+}
+
+.report-response-margin {
+    margin-top: 0px;
+    padding-top: 0px;
+    background-color:rgb(125, 158, 192);
+    border-radius:0px;
 }

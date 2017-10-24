@@ -64,20 +64,27 @@
                                 } else {
                                     knolxSession.rating
                                 })</td>
-                                <td>@(if(knolxSession.completed) {
+
+                                <td>@if(knolxSession.completed && !knolxSession.cancelled) {
                                         <span class="label label-success">Completed</span>
-                                } else {
+                                } else if(!knolxSession.completed) {
                                         <span class="label label-warning">Pending</span>
-                                })</td>
+                                } else if(knolxSession.cancelled) {
+                                    <span class="label label-warning cancelled-session">Cancelled</span>
+                                    }</td>
+
                                 @if(knolxSession.completed && !knolxSession.cancelled) {
                                 <td title="Click here for more details" class='clickable-row'>
                                     <a href='@routes.SessionsController.shareContent(knolxSession.id)'
-                                       style="text-decoration: none;">
-                                } else {
+                                       style="text-decoration: none;"><span class="label more-detail-session">Click here</span></a>
+                                } else if(!knolxSession.completed) {
                                 <td title="Wait for session to be completed">
-                                }
-                                <span class="label more-detail-session">Click here</span>
-                                    </a>
+                                <span class="label label-warning">Pending</span>
+                                    } else if(knolxSession.cancelled) {
+                                <td title="The session has been cancelled">
+                                <span class="label label-warning cancelled-session">Cancelled</span>
+                                    }
+
                                 </td>
                         </tr>
                         }

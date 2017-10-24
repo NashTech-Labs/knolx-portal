@@ -19,7 +19,8 @@
             <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
-                    <table class="table table-responsive manage-user-custom-table-margin">
+                <div class="table-responsive manage-user-custom-table-margin">
+                    <table class="table">
                         <thead>
                             <tr class="table-header-color">
                                 <th>
@@ -38,6 +39,7 @@
                                 <th>Cancelled</th>
                                 <th>Rating</th>
                                 <th>Scheduled Status</th>
+                                <th>More Details</th>
                             </tr>
                         </thead>
                         <tbody id="user-found">
@@ -75,12 +77,11 @@
                                     knolxSession.rating
                                 })
                                 </td>
-                                <td>
-                                @if(knolxSession.date.before(new java.util.Date(System.currentTimeMillis))) {
-                                    <div>
-                                        <span class="label label-success">Completed</span>
-                                    </div>
-                                } else {
+                                <td>@if(knolxSession.completed && !knolxSession.cancelled) {
+                                    <span class="label label-success">Completed</span>
+                                    } else if(knolxSession.cancelled) {
+                                    <span class="label label-warning cancelled-session">Cancelled</span>
+                                    } else {
                                     @if(knolxSession.feedbackFormScheduled) {
                                         <div>
                                             <span class="label label-success">Scheduled</span>
@@ -96,10 +97,23 @@
                                     }
                                 }
                                 </td>
+                                @if(knolxSession.completed && !knolxSession.cancelled) {
+                                <td title="Click here for more details" class='clickable-row'>
+                                    <a href='@routes.SessionsController.shareContent(knolxSession.id)'
+                                       style="text-decoration: none;"><span class="label more-detail-session">Click here</span></a>
+                                    } else if(!knolxSession.completed) {
+                                <td title="Wait for session to be completed">
+                                    <span class="label label-warning">Pending</span>
+                                    } else if(knolxSession.cancelled) {
+                                <td title="The session has been cancelled">
+                                    <span class="label label-warning cancelled-session">Cancelled</span>
+                                    }
+                                </td>
                             </tr>
                         }
                         </tbody>
                     </table>
+                </div>
             </div>
         </div>
     </div>

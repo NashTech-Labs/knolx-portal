@@ -78,7 +78,7 @@
                                 })
                                 </td>
                                 <td>
-                                @if(knolxSession.date.before(new java.util.Date(System.currentTimeMillis))) {
+                                @if(knolxSession.completed) {
                                     <div>
                                         <span class="label label-success">Completed</span>
                                     </div>
@@ -102,8 +102,10 @@
                                 <td title="Click here for more details" class='clickable-row'>
                                     <a href='@routes.SessionsController.shareContent(knolxSession.id)'
                                        style="text-decoration: none;">
-                                        } else {
+                                        } else if(!knolxSession.completed) {
                                 <td title="Wait for session to be completed">
+                                    } else if(knolxSession.cancelled) {
+                                <td title="The session has been cancelled">
                                     }
                                     <span class="label more-detail-session">Click here</span>
                                     </a>

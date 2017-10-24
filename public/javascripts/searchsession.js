@@ -37,15 +37,15 @@ function slide(keyword, pageNumber) {
                             "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
-                            usersFound += '<td><span class="label label-success ">Meetup</span></td>';
+                            usersFound += '<td><span class="label label-info meetup-session ">Meetup</span></td>';
                         } else {
-                            usersFound += '<td><span class="label label-warning ">Knolx</span></td>';
+                            usersFound += '<td><span class="label label-info knolx-session ">Knolx</span></td>';
                         }
 
                         if (sessions[session].cancelled) {
-                            usersFound += "<td class='active-status'>Yes</td>";
+                            usersFound += "<td class='suspended'>Yes</td>";
                         } else {
-                            usersFound += "<td class='suspended'>No</td>";
+                            usersFound += "<td class='active-status'>No</td>";
                         }
 
                         if (sessions[session].rating == "") {
@@ -55,23 +55,21 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].completed) {
-                            usersFound += "<td><div><span class='label label-default' >Completed</span></div></td>";
+                            usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
                         } else {
                             usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div></td>";
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
                            usersFound += "<td  title='Click here for more details' class='clickable-row'>" +
-                           "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                            "' style='text-decoration: none;'>" +
-                            "<p class='saving' style='font-size:25px;'>" +
-                            "<span>.</span><span>.</span><span>.</span></p></a></td></tr>";
-                        } else {
-                           usersFound += "<td title='Wait for session to be completed'>" +
-                           "<p class='saving' style='font-size:25px;'>" +
-                           "<span>.</span><span>.</span><span>.</span></p></a></td></tr>";
+                            "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                            "' style='text-decoration: none;'>";
+                        } else if(!sessions[session].completed) {
+                           usersFound += "<td title='Wait for session to be completed'>";
+                        } else if(sessions[session].cancelled) {
+                            usersFound += "<td title='The session has been cancelled'>";
                         }
-
+                        usersFound += "<span class='label more-detail-session'>Click here</span></a></tr>"
                     }
 
                     $('#user-found').html(usersFound);

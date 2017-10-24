@@ -44,36 +44,36 @@ function slide(keyword, pageNumber) {
                             "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
-                            usersFound += "<td class='active-status'>Yes</td>";
+                            usersFound += '<td><span class="label label-info meetup-session ">Meetup</span></td>';
                         } else {
-                            usersFound += "<td class='suspended'>No</td>";
+                            usersFound += '<td><span class="label label-info knolx-session ">Knolx</span></td>';
                         }
 
                         if (sessions[session].cancelled) {
-                            usersFound += "<td class='active-status'>Yes</td>";
+                            usersFound += "<td class='suspended'>Yes</td>";
                         } else {
-                            usersFound += "<td class='suspended'>No</td>";
+                            usersFound += "<td class='active-status'>No</td>";
                         }
 
-                        if (sessions[session].rating == "") {
+                        if (sessions[session].rating == "" || !sessions[session].expired) {
                             usersFound += "<td class='active-status'>N/A</td>";
                         } else {
                             usersFound += "<td class='suspended'>" + sessions[session].rating + "</td>";
                         }
 
                         if (sessions[session].completed) {
-                            usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
+                            usersFound += "<td><div><span class='label label-success' >Completed</span></div></td></tr>";
                         } else {
                             if (sessions[session].feedbackFormScheduled) {
                                 usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>" +
                                     "<a href='/session/" + sessions[session].id + "/cancel' class='cancel-red'>" +
                                     "Cancel</a>" +
-                                    "</div><td></tr>";
+                                    "</div></td></tr>";
                             } else {
                                 usersFound += "<td><div><span class='label label-warning' >Pending</span><br/>" +
                                     "<a href='/session/" + sessions[session].id + "/schedule' class='Schedule-green'>" +
                                     "Schedule</a>" +
-                                    "</div><td></tr>";
+                                    "</div></td></tr>";
                             }
                         }
                     }

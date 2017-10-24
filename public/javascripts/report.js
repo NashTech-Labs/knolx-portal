@@ -27,8 +27,9 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                         }
                         for (var question = 0; question < responses[response].questionResponse.length; question++) {
                             userResponse += "<td>" + responses[response].questionResponse[question].response
-                                + "</td></tr>";
+                                + "</td>";
                         }
+                        userResponse += "</tr>";
                     }
                     $('#response-size').html(responses.length)
                 } else {
@@ -42,8 +43,9 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                             }
                             for (var question = 0; question < responses[response].questionResponse.length; question++) {
                                 userResponse += "<td>" + responses[response].questionResponse[question].response
-                                    + "</td></tr>";
+                                    + "</td>";
                             }
+                            userResponse += "</tr>";
                         }
                     }
                     $('#response-size').html(parseInt(sno))

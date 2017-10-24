@@ -62,7 +62,18 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].completed) {
+                        console.log(sessions[session].cancelled);
                             usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
+                            if(!sessions[session].cancelled) {
+                                usersFound += "<td title='Click here for more details' class='clickable-row'>" +
+                                              "<a href='@routes.SessionsController.shareContent(knolxSession.id)'" +
+                                              "style='text-decoration: none;'>";
+                            }
+                            else {
+                            console.log(sessions[session].cancelled);
+                                usersFound += "<td title='Wait for session to be completed'>";
+                            }
+                            usersFound += "<span class='label more-detail-session'>Click here</span></a></td>";
                         } else {
                             if (sessions[session].feedbackFormScheduled) {
                                 usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>" +

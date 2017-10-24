@@ -141,7 +141,7 @@ input#form-name:focus {
 
 }
 
-label.radio-button .lab_text {display: inline-block; margin: 0 auto;  }
+label.radio-button .lab_text {display: inline-block;  }
 
 .delete-option-button {
     margin-top: 24px;

@@ -55,9 +55,9 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td class='active-status'>No</td>";
                         }
 
-                        if (sessions[session].rating == "") {
+                        if (sessions[session].rating == "" || !sessions[session].expired) {
                             usersFound += "<td>N/A</td>";
-                        } else {
+                        else {
                             usersFound += "<td>" + sessions[session].rating + "</td>";
                         }
 

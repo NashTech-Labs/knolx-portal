@@ -1,7 +1,6 @@
 .feedback-form-display-container {
     color: #000;
     margin: 100px 0px;
-    margin-bottom: 0;
     background-color: #fff;
     padding: 0px 0px 0px 0px;
     border-bottom-left-radius: 30px;
@@ -26,6 +25,12 @@
     box-shadow: 0 9px 8px -5px #a8a8a8;
     border-bottom: 1px solid #fff;
     height: 30px;
+}
+
+.questions-inlining {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 0;
 }
 
 .feedback-footer {
@@ -128,7 +133,6 @@
     -moz-box-shadow: inset 0 -10px 10px -10px #888;
     -webkit-box-shadow: inset 0 -10px 10px -10px #888;
     box-shadow: inset 0 -10px 10px -10px #888;
-
 }
 
 .accepting-response {
@@ -273,7 +277,6 @@
 
 .session-information-modal {
     padding-bottom: 0px;
-
 }
 
 .session-modal-title {
@@ -360,6 +363,7 @@
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
+    text-align: center;
 }
 
 .form-question-card {
@@ -368,6 +372,9 @@
     margin-top: 0px;
     margin-bottom: 15px;
     background-color: #fff;
+    overflow-x:auto;
+    white-space: nowrap;
+    height: 240px;
 }
 
 .submit-form-button {
@@ -494,7 +501,6 @@
 }
 
 .acknowledgement-text_tag {
-
     color: #85929E;
     text-shadow: none;
     font-family: 'gothic';
@@ -502,7 +508,6 @@
     letter-spacing: 1px;
     text-align: center;
     padding: 0px 0px;
-
 }
 
 .acknowledgement-custom-message {
@@ -585,6 +590,97 @@
 }
 
 .report-container {
-
     padding-top: 100px;
+}
+
+.form-question-card {
+    max-height: 260px;
+    height: auto;
+}
+
+#formData .preview-options {
+    padding-left: 40px;
+    line-height: 28px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    position: relative;
+}
+
+#formData .preview-options i.fa {
+    position: absolute;
+    left: 10px;
+    top: 6px;
+}
+.feedbackAttendance-dialog {
+    top: 15%;
+    width: 40vw;
+    margin: 0 auto;
+}
+
+#feedbackAttendance-content {
+    background-image: url('../images/mesh.svg');
+}
+
+#feedbackAttendance-body {
+    overflow: auto;
+    font-family: 'gothic';
+    height: 50vh;
+}
+
+.feedbackAttendance-button {
+    height: 8vh;
+    width: 40vh;
+    font-weight: 900;
+    font-size: 2.5vh;
+}
+
+#session-form-info {
+    overflow-y: auto;
+}
+
+.didnotattend-button {
+    margin-top: 5vh;
+}
+
+.form-question-card {
+    max-height: 260px;
+    height: auto;
+}
+
+#formData .preview-options {
+    padding-left: 40px;
+    line-height: 28px;
+    padding-right: 20px;
+    margin-bottom: 20px;
+    word-break: break-word;
+    position: relative;
+}
+
+#formData .preview-options i.fa {
+    position: absolute;
+    left: 10px;
+    top: 6px;
+}
+
+.feedbackAttendance-header-text {
+    font-weight: 900;
+    font-family: 'gothic';
+    margin: 5vh 0;
+    font-size: 2.5vh;
+}
+
+#feedbackAttendance-close {
+    padding: 10px;
+}
+
+. modal-content {
+    position: relative;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 0px solid rgba(0,0,0,.2);
+    border-radius: 6px;
+    outline: 0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

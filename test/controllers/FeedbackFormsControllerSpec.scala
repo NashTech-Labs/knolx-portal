@@ -23,12 +23,12 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val emailObject = Future.successful(Some(UserInfo("test@example.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(date.getTime), 0, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
   private val feedbackForms = FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)),
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
-      1, meetup = true, "rating", cancelled = false, active = true, BSONDateTime(date.getTime), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -206,7 +206,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.createFeedbackForm()(request)
 
       status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+      contentAsString(response) must be equalTo "Question must require at least 1 option besides Did not attend!"
     }
 
     "render manage feedback forms page" in new WithTestApplication {
@@ -331,7 +331,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with TestEnvironment
       val response = controller.updateFeedbackForm()(request)
 
       status(response) must be equalTo BAD_REQUEST
-      contentAsString(response) must be equalTo "Question must require at least 1 option!"
+      contentAsString(response) must be equalTo "Question must require at least 1 option besides Did not attend!"
     }
 
     "not getByEmail feedback form due to malformed data when name is empty" in new WithTestApplication {

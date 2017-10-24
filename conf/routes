@@ -13,6 +13,7 @@ GET         /users/manage/:pageNumber            controllers.UsersController.man
 POST        /users/search                        controllers.UsersController.searchUser
 GET         /user/update                         controllers.UsersController.getByEmail(email: String)
 POST        /user/update                         controllers.UsersController.updateUser
+POST        /user/manage/update                  controllers.UsersController.updateUserBySuperUser
 GET         /user/delete                         controllers.UsersController.deleteUser(email: String)
 GET         /user/forgotpassword                 controllers.UsersController.renderForgotPassword
 POST        /user/forgotpassword                 controllers.UsersController.generateForgotPasswordToken
@@ -33,6 +34,7 @@ POST        /session/update                      controllers.SessionsController.
 GET         /session/update                      controllers.SessionsController.update(id: String)
 GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
+GET         /session/content/:sessionId          controllers.SessionsController.shareContent(sessionId: String)
 
 # Feedback
 GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -52,5 +54,6 @@ GET         /reports/user                        controllers.FeedbackFormsReport
 GET         /reports/user/responses              controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
 GET         /reports/manage                      controllers.FeedbackFormsReportController.renderAllFeedbackReports
 GET         /reports/manage/responses            controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
+GET         /reports/manage/response             controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                        controllers.Assets.versioned(path="/public", file: Asset)

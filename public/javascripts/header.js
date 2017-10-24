@@ -1,3 +1,4 @@
+
 $(window).scroll(function () {
     if ($(document).scrollTop() > 40) {
         $('nav').addClass('shrink');
@@ -5,3 +6,4 @@ $(window).scroll(function () {
         $('nav').removeClass('shrink');
     }
 });
+

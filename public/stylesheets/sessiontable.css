@@ -34,7 +34,6 @@ thead > tr {
 }
 
 .table-responsive {
-    box-shadow: 0 4px 10px -5px #333;
     border-radius: 0px 0px 30px 30px;
     margin-bottom: 100px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -42,6 +41,9 @@ thead > tr {
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
+    border: 1px solid #9E9E9E;
+    border-bottom-style: none !important;
+    border-bottom-width: 0px !important;
 }
 
 .center {
@@ -130,5 +132,21 @@ ul.pagination.pagination-lg li a {
 
 .v-align-mobile {
     padding-right: 30px;
+}
+
+.knolx-session {
+    background-color :#26A69A;
+}
+
+.meetup-session {
+    background-color :#8e44ad;
+}
+
+.more-detail-session {
+    background-color :#F4511E;
+}
+
+.table-header-color {
+    background-color :#7d9ec0;
 }
 

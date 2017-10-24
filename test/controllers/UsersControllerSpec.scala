@@ -35,7 +35,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val currentMillis = currentDate.getTime
   private val passwordChangeRequest = PasswordChangeRequestInfo("test@knoldus.com", "token", BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, BSONDateTime(currentMillis), 0, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(currentMillis), 0, _id)))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -290,13 +290,34 @@ class UsersControllerSpec extends PlaySpecification with Results {
     "redirect to manage user page on successful submission of form" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))) returns updateWriteResult
+      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin= true, Some("12345678"))) returns updateWriteResult
 
       val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",
           "active" -> "true",
+          "ban"    -> "false",
+          "admin"  -> "true",
+          "coreMember" -> "false",
+          "password" -> "12345678"))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "redirect to manage user page on successful submission of form by admin" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin= false, Some("12345678"))) returns updateWriteResult
+
+      val result = controller.updateUserBySuperUser()(FakeRequest(POST, "getByEmail")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withFormUrlEncodedBody(
+          "email" -> "test@knoldus.com",
+          "active" -> "true",
+          "ban"    -> "false",
+          "admin"  -> "true",
+          "coreMember" -> "false",
           "password" -> "12345678"))
 
       status(result) must be equalTo SEE_OTHER
@@ -305,7 +326,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
     "throw internal server error while updating user information to database" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, Some("12345678"))) returns updateWriteResult
+      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin= false, Some("12345678"))) returns updateWriteResult
 
       val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -442,18 +463,6 @@ class UsersControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo UNAUTHORIZED
     }
 
-    "throw a unauthorised status if no password change request found for user" in new WithTestApplication {
-      forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(None)
-      val result = controller.resetPassword()(FakeRequest(POST, "/reset/")
-        .withFormUrlEncodedBody(
-          "token" -> "token",
-          "email" -> "test@knoldus.com",
-          "password" -> "12345678",
-          "confirmPassword" -> "12345678").withCSRFToken)
-
-      status(result) must be equalTo UNAUTHORIZED
-    }
-
     "throw a unauthorised status if for password reset request no active user found" in new WithTestApplication {
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns Future.successful(None)
@@ -468,14 +477,14 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "reset password for the user requested" in new WithTestApplication {
-      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, admin = true, Some("12345678"))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       dateTimeUtility.nowMillis returns date.getTime
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(updateUserInfo) returns updateWriteResult
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.resetPassword()(FakeRequest(POST, "/reset/")
         .withFormUrlEncodedBody(
           "token" -> "token",
@@ -487,14 +496,14 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "throw internal server error" in new WithTestApplication {
-      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, Some("12345678"))
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, admin = true, Some("12345678"))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       dateTimeUtility.nowMillis returns date.getTime
       forgotPasswordRepository.getPasswordChangeRequest("token", Some("test@knoldus.com")) returns Future.successful(Some(passwordChangeRequest))
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(updateUserInfo) returns updateWriteResult
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.resetPassword()(FakeRequest(POST, "/reset/")
         .withFormUrlEncodedBody(
           "token" -> "token",
@@ -557,8 +566,12 @@ class UsersControllerSpec extends PlaySpecification with Results {
     }
 
     "reset password while user is logged " in new WithTestApplication {
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, admin = true, Some("12345678"))
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
       val result = controller.changePassword()(FakeRequest(POST, "/reset/")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(
@@ -568,6 +581,41 @@ class UsersControllerSpec extends PlaySpecification with Results {
         .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
+    }
+
+    "reset password while user is logged but with no password" in new WithTestApplication {
+      val updateUserInfo = UpdatedUserInfo("test@knoldus.com", active = true, ban = true, coreMember = false, admin = true, Some("12345678"))
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 0, 0, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
+      usersRepository.updatePassword(updateUserInfo.email, "12345678") returns updateWriteResult
+      val result = controller.changePassword()(FakeRequest(POST, "/reset/")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withFormUrlEncodedBody(
+          "currentPassword" -> "12345678",
+          "newPassword" -> "12345678",
+          "confirmPassword" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "redirect to homepage when user is already logged in" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      val result = controller.login()(FakeRequest(GET,"/index/")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "redirect to login when user is not logged in" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      val result = controller.login()(FakeRequest(GET,"/login/")
+        .withCSRFToken)
+
+      status(result) must be equalTo OK
     }
 
   }

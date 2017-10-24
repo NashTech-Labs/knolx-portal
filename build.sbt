@@ -8,6 +8,7 @@ scalaVersion := "2.11.11"
 
 libraryDependencies ++= Seq(
   ehcache,
+  filters,
   ws,
   guice,
   "org.scalastyle" %% "scalastyle" % "0.8.0",

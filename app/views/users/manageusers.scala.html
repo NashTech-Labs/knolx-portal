@@ -7,6 +7,7 @@
             <div class="col-md-3"></div>
             <div class="col-md-6">
                 <div class="search-bar" id="search-bar">
+                    <em class="fa fa-search search-icon" ></em>
                     <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search user by email"/>
                 </div>
                 <div class="col-md-12 filter-outer">
@@ -73,9 +74,9 @@
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="table-responsive manage-user-custom-table-margin">
-                    <table class="table table-striped all-users-table">
+                    <table class="table all-users-table">
                         <thead>
-                            <tr>
+                            <tr class="table-header-color">
                                 <th class='col col-xs-3'>Edit</th>
                                 <th class='col col-xs-3'>Email</th>
                                 <th class='col col-xs-3'>Active Status</th>
@@ -85,8 +86,9 @@
                         <tbody id="user-found">
                         @for(user <- users) {
                             <tr>
-                                @if(user.admin) {
-                                    <td class="active-status"><span class="label label-warning">Admin</span></td>
+                                @if(SessionHelper.isSuperUser) {
+                                        @if(user.admin && user.superUser) {
+                                <td class="active-status"><span class="label label-warning">SuperUser</span></td>
                                 } else {
                                     <td align="center">
                                         <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
@@ -96,6 +98,22 @@
                                             <em class="fa fa-trash"></em>
                                         </a>
                                     </td>
+                                }
+                             } else {
+                                @if(user.admin && !user.superUser) {
+                                <td class="active-status"><span class="label label-warning">Admin</span></td>
+                                } else if(user.admin && user.superUser) {
+                                <td class="active-status"><span class="label label-warning">SuperUser</span></td>
+                                } else {
+                                <td align="center">
+                                    <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
+                                        <em class="fa fa-pencil"></em>
+                                    </a>
+                                    <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
+                                        <em class="fa fa-trash"></em>
+                                    </a>
+                                </td>
+                                }
                                 }
                             <td>@user.email</td>
                                 @if(user.active) {

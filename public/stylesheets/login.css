@@ -8,7 +8,7 @@
     animation: fadein 0.5s;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
-    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-top: 1px solid #fff;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -26,7 +26,9 @@
 }
 
 .user-manage-outer {
-    height: 420px;
+    height: auto;
+    float: left;
+    min-height:420px;
 }
 
 .forgot-password-outer {
@@ -89,7 +91,7 @@ input:invalid {
 }
 
 .login-button {
-    background-color: #45B39D;
+    background-color: rgb(125, 158, 192);
     color: #fff;
     border: None;
     outline: none;

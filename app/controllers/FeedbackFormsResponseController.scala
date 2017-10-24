@@ -2,16 +2,17 @@ package controllers
 
 import java.time.temporal.ChronoUnit
 import java.util.Date
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
+import actors.EmailActor
+import akka.actor.ActorRef
 import models._
-import play.api.Logger
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.libs.mailer.MailerClient
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
+import play.api.{Configuration, Logger}
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
@@ -36,7 +37,7 @@ case class FeedbackForms(name: String,
                          active: Boolean = true,
                          id: String)
 
-case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String]) {
+case class FeedbackResponse(sessionId: String, feedbackFormId: String, responses: List[String], score: Double) {
 
   def validateSessionId: Option[String] =
     if (sessionId.nonEmpty) {
@@ -74,9 +75,14 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                                 feedbackRepository: FeedbackFormsRepository,
                                                 feedbackResponseRepository: FeedbackFormsResponseRepository,
                                                 sessionsRepository: SessionsRepository,
+                                                configuration: Configuration,
+                                                @Named("EmailManager") emailManager: ActorRef,
                                                 dateTimeUtility: DateTimeUtility,
                                                 controllerComponents: KnolxControllerComponents
                                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
+  lazy val host: String = configuration.getOptional[String]("knolx.url").getOrElse("localhost:9000")
 
   implicit val questionInformationFormat: OFormat[QuestionInformation] = Json.format[QuestionInformation]
   implicit val feedbackFormsFormat: OFormat[FeedbackForms] = Json.format[FeedbackForms]
@@ -89,7 +95,8 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
           .activeSessions()
           .flatMap { activeSessions =>
             if (activeSessions.nonEmpty) {
-              val sessionFeedbackMappings = Future.sequence(activeSessions map { session =>
+              val sessionFeedbackMappings = Future.sequence(activeSessions filterNot { session => session.email == request.user.email.toLowerCase }
+                map { session =>
                 feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
                   case Some(form) =>
                     val sessionInformation =
@@ -127,7 +134,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
       } { bannedUser =>
         val bantill = dateTimeUtility.toLocalDate(bannedUser.banTill.value)
         val today = dateTimeUtility.localDateIST
-        val daysLeft = today.until(bantill, ChronoUnit.DAYS);
+        val daysLeft = today.until(bantill, ChronoUnit.DAYS)
         Future.successful(Unauthorized(views.html.feedback.banned(BannedUser(daysLeft, new Date(bannedUser.banTill.value).toString))))
       }
     }
@@ -177,20 +184,22 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         deepValidatedFeedbackResponses(feedbackFormResponse).flatMap { feedbackResponse =>
 
           feedbackResponse.fold {
+            Logger.info(s"Feedback form submission unsuccessful due to Malformed data while " +
+              s"validating form responses for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
             Future.successful(BadRequest("Malformed Data!"))
           } { sanitizedResponse =>
             val (header, response) = sanitizedResponse
-            val timeStamp = dateTimeUtility.nowMillis
-            val feedbackResponseData = FeedbackFormsResponse(request.user.email, header.email, request.user.id, feedbackFormResponse.sessionId,
-              header.topic, header.meetUp, header.date, header.session, response, BSONDateTime(timeStamp))
-            feedbackResponseRepository.upsert(feedbackResponseData).map { result =>
-              if (result.ok) {
-                Logger.info(s"Feedback form response successfully stored")
-                Ok("Feedback form response successfully stored!")
-              } else {
-                Logger.error(s"Something Went wrong when storing feedback form" +
-                  s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-                InternalServerError("Something Went Wrong!")
+            usersRepository.getByEmail(request.user.email).flatMap {
+              _.fold {
+                Logger.info(s"User ${request.user.email} not found")
+                Future.successful(Redirect(routes.UsersController.login()).flashing("message" -> "User not found!"))
+              } { userInfo =>
+                val feedbackResponseData = FeedbackFormsResponse(request.user.email, userInfo.coreMember, header.email, request.user.id,
+                  feedbackFormResponse.sessionId, header.topic, header.meetUp, header.date,
+                  header.session, response, BSONDateTime(dateTimeUtility.nowMillis))
+                feedbackResponseRepository.upsert(feedbackResponseData).flatMap { result =>
+                  updateRatingIfCoreMember(result, request, feedbackFormResponse, userInfo, header)
+                }
               }
             }
           }
@@ -199,7 +208,37 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Received a bad request for feedback form, ${request.body} $errorMessage")
         Future.successful(BadRequest("Malformed Data!"))
       }
+    }
+  }
 
+  private def updateRatingIfCoreMember(result: WriteResult,
+                                       request: SecuredRequest[JsValue],
+                                       feedbackFormResponse: FeedbackResponse,
+                                       userInfo: UserInfo,
+                                       header: ResponseHeader): Future[Result] = {
+    if (result.ok && feedbackFormResponse.score != 0 && userInfo.coreMember) {
+      Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+      sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.score).map { result =>
+        if (result.ok) {
+          emailManager ! EmailActor.SendEmail(
+            List(request.user.email), fromEmail, "Feedback Successfully Registered!",
+            views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
+          Ok("Feedback form response successfully stored!")
+        } else {
+          Logger.error(s"Something Went wrong when storing feedback form" +
+            s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+          InternalServerError("Something Went Wrong!")
+        }
+      }
+    } else if (result.ok) {
+      emailManager ! EmailActor.SendEmail(
+        List(request.user.email), fromEmail, "Feedback Successfully Registered!",
+        views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
+      Future.successful(Ok("Feedback form response successfully stored!"))
+    } else {
+      Logger.error(s"Something Went wrong when storing feedback form" +
+        s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+      Future.successful(InternalServerError("Something Went Wrong!"))
     }
   }
 

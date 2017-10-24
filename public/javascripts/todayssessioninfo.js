@@ -8,11 +8,22 @@ $(function () {
     });
 
     $('.fillFeedback').click(function () {
+        $('#feedbackAttendance-' + this.id).modal('show');
+        $('#feed-message').html("");
+    });
+
+    $('.btn-success').click(function () {
+        $('#feedbackAttendance-' + this.id).modal('hide');
         document.getElementById('display-feed-form').style.display = 'block';
         currentFeedbackProfile = this.value;
-        $('#feed-message').html("");
         formOpener(this.value);
         fetchResponse(this.id);
+    });
+
+    $('.btn-danger').click(function () {
+        $('#feedbackAttendance-' + this.id).modal('hide');
+        currentFeedbackProfile = this.value;
+        submittedFeedbackFormForNotAttend(this.id);
     });
 
     $('.getKnolxDetailsActive').click(function () {
@@ -113,6 +124,7 @@ var currentFeedbackProfile = "";
 
 function loadFeedbackForm(values, sessionId) {
 
+
     $('#mandatory-warning').css("display", "none");
     $('#feedback-response-form').html("");
     var optionsLoaded = "";
@@ -127,21 +139,25 @@ function loadFeedbackForm(values, sessionId) {
         }
         if (type == "MCQ") {
             for (var optionNumber = 0; optionNumber < options.length; optionNumber++) {
-                optionsLoaded += "<div class='row'>" +
+            if(options[optionNumber] == "Did not attend") {
+                continue;
+            } else {
+                optionsLoaded += "<div class='row questions-inlining'>" +
                     "<div class='col-md-1'></div>" +
-                    "<div class='col-md-10'>" +
+                    "<div style='width:auto; text-align:center'>" +
+                    "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
+                                        "</p>"+
                     "<label class='radio-button'>" +
                     "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +
                     "<span class='lab_text'></span>" +
-                    "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
-                    "</p>" +
                     "</label>" +
                     "</div>" +
                     "</div>";
+                }
             }
         }
         else {
-            optionsLoaded += "<div class='row'>" +
+            optionsLoaded += "<div class='row option-questions '>" +
                 "<div class='col-md-1'></div>" +
                 "<div class='col-md-10'>" +
                 "​<textarea class='comments' rows='2' id='option-" + questionNumber + "' cols='70' placeholder='Edit Comment Here!'></textarea>" +
@@ -165,7 +181,7 @@ function loadFeedbackForm(values, sessionId) {
         $('#feedback-response-form').append(
             "<div class='question-card form-question-card' id='question-outer-" + questionNumber + "'>" +
             "<label class='card-questions-label'>" +
-            "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
+                        "<p id='question-" + questionNumber + "' class='card-questions-other'>" + questions[questionNumber]['question'] + "</p>" +
             "</label>" + optionsLoaded + "</div>"
         );
 
@@ -179,10 +195,11 @@ function loadFeedbackForm(values, sessionId) {
 }
 
 class FeedbackFormResponse {
-    constructor(sessionId, feedbackFormId, responses) {
+    constructor(sessionId, feedbackFormId, responses, score) {
         this.sessionId = sessionId;
         this.feedbackFormId = feedbackFormId;
         this.responses = responses;
+        this.score = score
     }
 }
 
@@ -192,18 +209,24 @@ function submittedFeedbackForm() {
     var questionCount = Object.keys(questions);
     var questionOptionInformation = [];
     var sessionId = document.getElementById("current-session").value;
+    var score = 0;
+    var mcqCount = 0;
 
     for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
         var responseName = "option-" + questionNumber;
         var response = "";
         if (questions[questionNumber]["questionType"] == "MCQ") {
             response = getResponse(responseName);
+            var noOfOptions = getNoOfOptions(responseName) - 1;
+            var receivedScore = (getResponseValue(responseName) / noOfOptions) * 100;
+            score = ((score * mcqCount) + receivedScore) / (mcqCount + 1);
+            mcqCount++;
         } else {
             response = document.getElementById(responseName).value;
         }
         questionOptionInformation.push(response)
     }
-    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation);
+    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation, score);
 
     if (isFormResponseValid(feedbackFormWithResponse)) {
 
@@ -219,7 +242,7 @@ function submittedFeedbackForm() {
                 },
                 success: function (data) {
                     var currentFeedback = JSON.parse(currentFeedbackProfile);
-                    ackMessage("success_text", "Thankyou!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
+                    ackMessage("success_text", "Thank you!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
                 },
                 error: function (er) {
                     ackMessage("failure_text", "Oops!", "Something went wrong", 'We are unable to process your request, refreshing this page may fix this issue, in case it keeps occurring please contact the administrator', "Refresh", 'failure_text_color', 'failure_text_color-background-color');
@@ -236,6 +259,20 @@ function getResponse(name) {
         }
     }
     return "";
+}
+
+function getResponseValue(name) {
+    var group = document.getElementsByName(name);
+    for (var i = 0; i < group.length; i++) {
+        if (group[i].checked) {
+            return (parseInt(group[i].id.split("-")[1]));
+        }
+    }
+    return "";
+}
+
+function getNoOfOptions(name) {
+    return document.getElementsByName(name).length;
 }
 
 function isFormResponseValid(filledForm) {
@@ -286,6 +323,42 @@ function ackMessage(icon, greeting, tagline, ackMessage, btnText, colorClass, bg
         '</div>';
 
     document.getElementById('display-feed-form').style.display = 'none';
-    $('#feed-message').html(message)
+    $('#feed-message').html(message);
+}
 
+function submittedFeedbackFormForNotAttend(sessionId) {
+    var form = document.getElementById(sessionId + "-form").value;
+    var feedbackForm = JSON.parse(form);
+    feedbackFormId = feedbackForm['id'];
+    var questions = feedbackForm['questions'];
+    var questionCount = Object.keys(questions);
+    var questionOptionInformation = [];
+    var score = 0;
+    for (var questionNumber = 0; questionNumber < questionCount.length; questionNumber++) {
+        questionOptionInformation.push("Did not attend")
+    }
+    var feedbackFormWithResponse = new FeedbackFormResponse(sessionId, feedbackFormId, questionOptionInformation, score);
+
+    if (isFormResponseValid(feedbackFormWithResponse)) {
+
+        jsRoutes.controllers.FeedbackFormsResponseController.storeFeedbackFormResponse().ajax(
+            {
+                type: "POST",
+                processData: false,
+                contentType: 'application/json',
+                data: JSON.stringify(feedbackFormWithResponse),
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (data) {
+                    var currentFeedback = JSON.parse(currentFeedbackProfile);
+                    $('#session-form-info').modal('show');
+                    ackMessage("success_text", "Thank you!", "for your valuable feedback", 'We\'ll let <strong>' + currentFeedback.author.split('@')[0].replace('.', '') + '</strong> know your views on this <strong>' + currentFeedback.sessiontype + '</strong> session, <strong>anonymously</strong>. Also you can change your response anytime until this feedback form is active', "okay", 'success_text_color', 'success_text_color-background-color');
+                },
+                error: function (er) {
+                    ackMessage("failure_text", "Oops!", "Something went wrong", 'We are unable to process your request, refreshing this page may fix this issue, in case it keeps occurring please contact the administrator', "Refresh", 'failure_text_color', 'failure_text_color-background-color');
+                }
+            })
+    }
 }

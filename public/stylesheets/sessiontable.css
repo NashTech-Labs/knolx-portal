@@ -34,17 +34,15 @@ thead > tr {
 }
 
 .table-responsive {
-
     border-radius: 0px 0px 30px 30px;
-    margin-bottom: 100px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    border: 1px solid #9E9E9E;
     border-bottom-style: none !important;
     border-bottom-width: 0px !important;
+    overflow-x : inherit;
 }
 
 .center {

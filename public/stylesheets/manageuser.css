@@ -71,6 +71,7 @@ input::placeholder {
     background-color: transparent;
     background-image: none;
     padding: 1%;
+    margin-top: 100px;
 }
 
 .manage-user-container-custom-btn {
@@ -281,6 +282,7 @@ input::placeholder {
 
 .manage-user-custom-table-margin {
     margin: 0 0;
+
 }
 
 .search-text::-webkit-input-placeholder { /* Chrome */

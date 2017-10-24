@@ -21,7 +21,7 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                 if (isCoreMember == "all") {
                     for (var response = 0; response < responses.length; response++) {
                         userResponse += "<tr><td>" + (parseInt(response) + 1) + "</td>";
-                        if (isSuperUser) {
+                        if (isSuperUser == true) {
                             userResponse += "<td>" + responses[response].email + "</td>";
                         }
                         for (var question = 0; question < responses[response].questionResponse.length; question++) {
@@ -37,7 +37,7 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                         if (responses[response].coreMember) {
                             sno += (parseInt(sno) + 1);
                             userResponse += "<tr><td>" + parseInt(sno) + "</td>";
-                            if (isSuperUser) {
+                            if (isSuperUser == true) {
                                 userResponse += "<td>" + responses[response].email + "</td>";
                             }
                             for (var question = 0; question < responses[response].questionResponse.length; question++) {

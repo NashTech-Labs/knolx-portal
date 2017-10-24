@@ -29,7 +29,11 @@
                             <span class="label label-primary total-responses">Rating <span class="badge badge-report" id="response-size">@{
                             report.reportHeader.fold("N/A") { reportHeader =>
                                 if(reportHeader.expired) {
-                                    reportHeader.rating
+                                    if(reportHeader.rating.isEmpty) {
+                                        "N/A"
+                                    } else {
+                                        reportHeader.rating
+                                    }
                                 } else {
                                     "N/A"
                                 }

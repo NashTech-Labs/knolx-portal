@@ -55,12 +55,6 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td class='active-status'>No</td>";
                         }
 
-                        if (sessions[session].rating == "" || !sessions[session].expired) {
-                            usersFound += "<td>N/A</td>";
-                        } else {
-                            usersFound += "<td>" + sessions[session].rating + "</td>";
-                        }
-
                         if (sessions[session].completed && !sessions[session].cancelled) {
                             usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
                         } else if(sessions[session].cancelled) {

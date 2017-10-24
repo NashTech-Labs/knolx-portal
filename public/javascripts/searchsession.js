@@ -62,14 +62,14 @@ function slide(keyword, pageNumber) {
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
                            usersFound += "<td  title='Click here for more details' class='clickable-row'>" +
-                           "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                            "' style='text-decoration: none;'>" +
-                            "<span class='label more-detail-session'>Click here</span></a></td></tr>";
-                        } else {
-                           usersFound += "<td title='Wait for session to be completed'>" +
-                           "<span class='label more-detail-session'>Click here</span></a></td></tr>";
+                            "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                            "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
+                        } else if(!sessions[session].completed) {
+                           usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span>";
+                        } else if(sessions[session].cancelled) {
+                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning'>Cancelled</span>";
                         }
-
+                        usersFound += "</td></tr>"
                     }
 
                     $('#user-found').html(usersFound);

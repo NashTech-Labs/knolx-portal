@@ -197,6 +197,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               sessionInfo.meetup,
               sessionInfo.cancelled,
               sessionInfo.rating,
+              completed = new Date(sessionInfo.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
               expired = new Date(sessionInfo.expirationDate.value)
                 .before(new java.util.Date(dateTimeUtility.nowMillis))))
 

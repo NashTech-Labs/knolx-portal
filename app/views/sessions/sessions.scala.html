@@ -73,9 +73,14 @@
                                 <td title="Click here for more details" class='clickable-row'>
                                     <a href='@routes.SessionsController.shareContent(knolxSession.id)'
                                        style="text-decoration: none;"><span class="label more-detail-session">Click here</span></a>
-                                } else {
-                                <td title="Wait for session to be completed"><span class="label label-warning">Pending</span>
-                                }
+                                } else if(!knolxSession.completed) {
+                                <td title="Wait for session to be completed">
+                                <span class="label label-warning">Pending</span>
+                                    } else if(knolxSession.cancelled) {
+                                <td title="The session has been cancelled">
+                                <span class="label label-warning">Cancelled</span>
+                                    }
+
                                 </td>
                         </tr>
                         }

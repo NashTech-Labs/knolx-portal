@@ -17,16 +17,16 @@
 .update-outer {
     background-color: #FFF;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     margin-bottom: 20px;
     position: relative;
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
     padding-top: 20px;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     background-image: url('../images/mesh.svg');
     background-repeat: no-repeat;
     background-size: cover;

@@ -25,6 +25,22 @@
                                 <p class="filter-checkbox-text report-checkbox-color" style="margin-top:9px;">Core Member</p>
                             </label>
                         </div>
+                        <div>
+                            <span class="label label-primary total-responses">Rating <span class="badge badge-report" id="response-size">@{
+                            report.reportHeader.fold("N/A") { reportHeader =>
+                                if(reportHeader.expired) {
+                                    if(reportHeader.rating.isEmpty) {
+                                        "N/A"
+                                    } else {
+                                        reportHeader.rating
+                                    }
+                                } else {
+                                    "N/A"
+                                }
+                            }
+                        }</span>
+                            </span>
+                        </div>
                             <div class="report-other-info">
                                 @header.topic
                             <sup><span class="label label-warning report-type">Knolx</span></sup>

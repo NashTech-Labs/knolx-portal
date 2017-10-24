@@ -239,3 +239,8 @@ position: absolute;
   display: block;
   vertical-align: bottom;
 }
+
+.container-index {
+    position: relative;
+    z-index: 1;
+}

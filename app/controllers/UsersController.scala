@@ -50,7 +50,8 @@ case class UpdateUserInfo(email: String,
 case class UserSearchResult(users: List[ManageUserInfo],
                             pages: Int,
                             page: Int,
-                            keyword: String)
+                            keyword: String,
+                            isSuperUser: Boolean)
 
 @Singleton
 class UsersController @Inject()(messagesApi: MessagesApi,
@@ -283,7 +284,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               .map { count =>
                 val pages = Math.ceil(count / 10D).toInt
 
-                Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""))).toString)
+                Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""), request.user.superUser)).toString)
               }
           }
       }

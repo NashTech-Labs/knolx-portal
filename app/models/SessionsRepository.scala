@@ -91,7 +91,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           "$lte" -> BSONDateTime(endOfTheDay)))
       case ExpiringNextNotReminded  =>
         Json.obj("cancelled" -> false, "active" -> true, "expirationDate" -> BSONDocument("$gte" -> BSONDateTime(millis),
-          "$lte" -> BSONDateTime(endOfTheDay)),"reminder" -> false)
+          "$lte" -> BSONDateTime(endOfTheDay)), "reminder" -> false)
       case SchedulingNextUnNotified =>
         Json.obj("cancelled" -> false, "active" -> true, "date" -> BSONDocument("$gte" -> BSONDateTime(millis),
           "$lte" -> BSONDateTime(endOfTheDay)), "notification" -> false)

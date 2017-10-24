@@ -34,6 +34,7 @@ thead > tr {
 }
 
 .table-responsive {
+
     border-radius: 0px 0px 30px 30px;
     margin-bottom: 100px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -143,7 +144,11 @@ ul.pagination.pagination-lg li a {
 }
 
 .more-detail-session {
-    background-color :#F4511E;
+    background-color :#00BCD4;
+}
+
+.cancelled-session {
+    background-color:#F4511E;
 }
 
 .table-header-color {

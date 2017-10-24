@@ -61,8 +61,10 @@ function slide(keyword, pageNumber) {
                             usersFound += "<td>" + sessions[session].rating + "</td>";
                         }
 
-                        if (sessions[session].completed) {
+                        if (sessions[session].completed && !sessions[session].cancelled) {
                             usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
+                        } else if(sessions[session].cancelled) {
+                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
                         } else {
                             if (sessions[session].feedbackFormScheduled) {
                                 usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>" +
@@ -84,7 +86,7 @@ function slide(keyword, pageNumber) {
                         } else if(!sessions[session].completed) {
                             usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span>";
                         } else if(sessions[session].cancelled) {
-                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning'>Cancelled</span>";
+                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
                         }
                             usersFound += "</td></tr>"
                     }

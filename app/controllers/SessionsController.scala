@@ -40,6 +40,7 @@ case class UpdateSessionInformation(id: String,
                                     feedbackExpirationDays: Int,
                                     youtubeURL: Option[String],
                                     slideShareURL: Option[String],
+                                    cancelled: Boolean,
                                     meetup: Boolean = false)
 
 case class KnolxSession(id: String,
@@ -113,6 +114,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         "must be in range 1 to 31", number => number >= 0 && number <= 31),
       "youtubeURL" -> optional(nonEmptyText),
       "slideShareURL" -> optional(nonEmptyText),
+      "cancelled" -> boolean,
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
   )
@@ -372,7 +374,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
-                sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.meetup))
+                sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 

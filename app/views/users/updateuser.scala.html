@@ -3,12 +3,8 @@
 @main("Update User") {
 
     <div class="row">
-        <div class="col-md-4" >
-        </div>
-        <div class="col-md-4 profile" >
-            <div class="container-fluid default-margin-top">
-            </div>
-            <div class="login-outer user-manage-outer">
+        <div class="col-md-4" ></div>
+        <div class="col-md-4 update-outer top-container ">
                 <div class='col-md-12 feedback-card-author manage-user-container-email'><p>@userInfo.data.get("email")</p></div>
                 <div class='col-md-12'>
                     @if(SessionHelper.isSuperUser){
@@ -68,8 +64,6 @@
                             <div class="col-md-1"></div>
                         </div>
                     </form>
-
-                </div>
 
             </div>
         </div>

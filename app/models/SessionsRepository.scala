@@ -306,8 +306,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
                 val updatedScore = ((currentScore * noOfFeedbackResponses) + score) / (noOfFeedbackResponses + 1)
 
                 val updatedRating = updatedScore match {
-                  case good if updatedScore > 70.00    => "Good"
-                  case average if updatedScore > 40.00 => "Average"
+                  case good if updatedScore > 66.66666    => "Good"
+                  case average if updatedScore > 33.33333 => "Average"
                   case _                               => "Bad"
                 }
 

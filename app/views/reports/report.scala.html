@@ -12,6 +12,7 @@
                             report.response.size
                         }</span>
                             </span>
+                        @if(SessionHelper.isAdmin) {
                             <label class="checkbox-outer feedback-responses-button report-checkbox-color">
                                 <input type='radio' id="all-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="all-@SessionHelper.isSuperUser"/>
 
@@ -24,6 +25,7 @@
                                 <span class="filter-label_text report-checkbox-color"></span>
                                 <p class="filter-checkbox-text report-checkbox-color" style="margin-top:9px;">Core Member</p>
                             </label>
+                        }
                         </div>
                         <div>
                             <span class="label label-primary total-responses">Rating <span class="badge badge-report" id="response-size">@{

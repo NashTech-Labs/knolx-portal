@@ -1,13 +1,18 @@
 .create-outer {
     background-color: #FFF;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     position: relative;
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
-    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-top: 1px solid #fff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-image: url(../images/mesh.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .col-md-12 {

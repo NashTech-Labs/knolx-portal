@@ -50,10 +50,10 @@ function slide(keyword, pageNumber) {
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
                             usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
-                        } else if(!sessions[session].completed) {
-                            usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div></td>";
-                        } else {
+                        } else if(sessions[session].cancelled) {
                             usersFound += "<td><div><span class='label label-warning cancelled-session'>Cancelled</span></div></td>"
+                        } else {
+                            usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div></td>";
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {

@@ -1,7 +1,7 @@
 $('.custom-checkbox').click(function () {
     var filter = $('input[name="feedback-response-report"]:checked').val();
     var isCoreMember = filter.split('-')[0];
-    var isSuperUser = filter.split('-')[1];
+    var isSuperUser = (filter.split('-')[1] == "true");
     var id = this.id;
     var sessionId = id.split('-');
     fetchUserResponse(isCoreMember, isSuperUser, sessionId[1]);
@@ -35,7 +35,7 @@ function fetchUserResponse(isCoreMember, isSuperUser, sessionId) {
                     var sno = 0;
                     for (var response = 0; response < responses.length; response++) {
                         if (responses[response].coreMember) {
-                            sno += (parseInt(sno) + 1);
+                            sno = (parseInt(sno) + 1);
                             userResponse += "<tr><td>" + parseInt(sno) + "</td>";
                             if (isSuperUser == true) {
                                 userResponse += "<td>" + responses[response].email + "</td>";

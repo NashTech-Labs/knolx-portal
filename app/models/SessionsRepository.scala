@@ -188,7 +188,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
         "expirationDate" -> updatedRecord.expirationDate,
         "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
-        "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL)
+        "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL,
+        "cancelled" -> updatedRecord.sessionUpdateFormData.cancelled)
     )
 
     collection.flatMap(jsonCollection =>

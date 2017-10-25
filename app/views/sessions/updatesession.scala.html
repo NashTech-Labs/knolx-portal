@@ -115,6 +115,21 @@
                     <div class="col-md-1" ></div>
                 </div>
 
+                <div class="col-md-12 login-third">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <label class="checkbox-outer" >
+                            <input type='checkbox' name='cancelled' id='cancelled' class='custom-checkbox' value='true'
+                                   @(if(sessionInfo.data.getOrElse("cancelled", "false") == "true") {
+                            """checked="checked""""
+                            })/>
+                            <span class="label_text"></span>
+                            <p class="checkbox-text">Is Cancelled ?</p>
+                        </label>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >

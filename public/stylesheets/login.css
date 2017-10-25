@@ -6,8 +6,8 @@
     -ms-animation: fadein 0.5s; /* Internet Explorer */
     -o-animation: fadein 0.5s; /* Opera < 12.1 */
     animation: fadein 0.5s;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-top: 1px solid #fff;
     border-top-left-radius: 10px;

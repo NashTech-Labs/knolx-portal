@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="34px" height="30px" viewBox="0 0 34 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Group" sketch:type="MSLayerGroup">
+            <g id="lightbend-color-reverse" sketch:type="MSShapeGroup">
+                <g id="lightbend">
+                    <path d="M34,28.4280936 C34,29.0561097 33.4925894,29.5652174 32.8666667,29.5652174 L1.13333333,29.5652174 C0.507410617,29.5652174 7.54951657e-17,29.0561097 0,28.4280936 L0,1.13712375 C-7.54951657e-17,0.509107642 0.507410617,1.00996877e-16 1.13333333,0 L32.8666667,0 C33.4925894,2.52492193e-17 34,0.509107642 34,1.13712375 L34,20.8810033 L34,28.4280936 Z" id="Shape" fill="#FF931E"></path>
+                    <path d="M17,22.2876254 C11.2496555,22.2970127 5.5266948,21.4931186 -7.10542736e-15,19.8996656 L-7.10542736e-15,22.0602007 C5.53740697,23.5895102 11.2566827,24.3546307 17,24.3344482 C22.7433173,24.3546307 28.462593,23.5895102 34,22.0602007 L34,19.8996656 C28.4733052,21.4931186 22.7503445,22.2970127 17,22.2876254 L17,22.2876254 Z" id="Shape" fill="#FFFFFF"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

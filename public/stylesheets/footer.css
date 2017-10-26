@@ -1,5 +1,5 @@
 #myFooter {
-    background-color: #3c3d41;
+    background-color: #161616;
     color: white;
     padding-top: 30px;
     margin-top: 40px;
@@ -77,7 +77,7 @@ ul.contact-info li .contact-title {
     color: #8c8c8c;
 }
 
-.fa {
+.fa-footer {
 margin-right:11px;
 }
 

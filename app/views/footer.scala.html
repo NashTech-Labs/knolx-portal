@@ -1,0 +1,203 @@
+@()(implicit request: Request[_])
+
+@activeLink(currentPath: String) = @{
+if(request.path.equals(currentPath)) "active"
+}
+<footer id="myFooter">
+    <div class="footer">
+        <div class="container">
+            <div>
+                <div class="row" style="margin-top: -20px;">
+                    <a href="http://www.knoldus.com/home.knol"> <img alt="Knoldus | Knols.Commitment.Results"
+                                                                     src='@routes.Assets.versioned("images/knoldus_blocklogo_footer.png")'
+                                                                     width="150px"
+                                                                     height="auto"></a>
+                </div>
+                <div class="row" style="margin-top:10px;">
+                    <!-- Footer Col. -->
+                    <div class="col-md-6 col-sm-6 col-lg-6">
+
+                        <div class="row">
+                            <div class="footer-content">
+                                <div class="col-md-6 col-sm-6 footer-col">
+                                    <h4 class="footer-title">Recent Blogs</h4>
+                                    <div id="feed"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6 footer-col">
+                                <h4 class="footer-title">PARTNERS</h4>
+                                <div class="col-md-12 col-sm-12">
+                                    <div style="margin-bottom: 15px;">
+                                        <img alt="brand"
+                                             src='@routes.Assets.versioned("images/footer_partner_lightbend.svg")'>
+                                        <a href="http://www.lightbend.com/partners/systemintegrator-partners"
+                                           target="_blank">Lightbend Partner</a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 col-sm-12">
+                                    <div style="margin-bottom: 15px;">
+                                        <img alt="brand"
+                                             src='@routes.Assets.versioned("images/footer_partner_databricks.svg")'>
+                                        <a href="https://databricks.com/spark/certification/certified-system-integrators"
+                                           target="_blank">Databricks Partner</a>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-sm-12">
+                                    <div style="margin-bottom: 15px;">
+                                        <img alt="brand" src='@routes.Assets.versioned("images/confluent-blue.png")'>
+                                        <a href="http://www.confluent.io/partners/" target="_blank">Confluent
+                                            Partner</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6">
+                                <div class="social-networks">
+                                    <div class="col-md-4 col-sm-4"><a href="https://twitter.com/Knolspeak"
+                                                                      class="twitter"><i
+                                            class="fa fa-twitter"></i></a></div>
+                                    <div class="col-md-4 col-sm-4"><a href="https://www.facebook.com/KnoldusSoftware/"
+                                                                      class="facebook"><i
+                                            class="fa fa-facebook"></i></a></div>
+                                    <div class="col-md-4 col-sm-4"><a
+                                            href="https://www.linkedin.com/company/knoldus-software-llp-/"
+                                            class="linkedin"><i
+                                            class="fa fa-linkedin"></i></a></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="contact-title social-networks"
+                                     style="text-transform:capitalize; font-size:18px;">
+                                    <i class="fa fa-envelope" style="font-size:12px"></i> Email us at <a
+                                        href="mailto:hello@@knoldus.com"
+                                        style="text-transform:lowercase; color:#69E8FF; padding-left:5px; font-size:16px; color">hello@@knoldus.com</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Footer Col. -->
+                    <div class="col-md-6 col-sm-6 footer-col">
+                        <h4 class="footer-title">Get In Touch</h4>
+                        <div>
+
+                            <div class="col-md-5 col-sm-5 " style="border: none;">
+                                <ul class="contact-info">
+                                    <li>
+                                        <div class="contact-title">
+                                            <i class="fa fa-map-marker"></i>Head Office
+                                        </div>
+                                        <div class="contact-details">
+                                            Knoldus House <br> 10/19, Ground Floor<br> West
+                                            Patel Nagar<br> New Delhi - 110008 <br> India
+                                        </div>
+                                        <div class="contact-title">
+                                            <i class="fa fa-phone"></i>+91 - 120 4287693
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="contact-title">
+                                            <i class="fa fa-map-marker"></i>USA Office
+                                        </div>
+                                        <div class="contact-details">
+                                            Knoldus Inc<br>
+                                            56 N, Averry Ct <br> Palatine(Chicago), IL - 60067<br>USA
+                                        </div>
+                                        <div class="contact-title">
+                                            <i class="fa fa-phone"></i>+(1) 312-890-2448
+                                        </div>
+                                        <div class="contact-title"
+                                             style="text-transform:lowercase; font-size:12px; margin-top:2%">
+                                            <i class="fa fa-envelope" style="font-size:10px"></i> ram@@knoldus.com
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="contact-title">
+                                            <i class="fa fa-map-marker"></i>Canada Office
+                                        </div>
+                                        <div class="contact-details">
+                                            Knoldus Inc<br> 22-6859 Edenwood Drive,<br>
+                                            Mississauga ON L5N 5Z8 Canada
+                                        </div>
+                                        <div class="contact-title">
+                                            <i class="fa fa-phone"></i>+(1) 647-467-4396
+                                        </div>
+                                        <div class="contact-title"
+                                             style="text-transform:lowercase; font-size:12px; margin-top:2%">
+                                            <i class="fa fa-envelope" style="font-size:10px"></i> ca@@knoldus.com
+                                        </div>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+                            <div class="col-md-7 col-sm-7 " style="border: none;">
+                                <ul class="contact-info">
+                                    <li>
+                                        <div class="contact-title">
+                                            <i class="fa fa-map-marker"></i>Development Offices
+                                        </div>
+                                        <br>
+                                        <div class="contact-title">
+                                            <i class="fa fa-arrow-right"></i>
+                                            Knoldus House
+                                        </div>
+                                        <div class="contact-details">
+                                            SDF L-11, Noida Special Economic Zone<br>
+                                            Sector 81<br> Noida, Uttar Pradesh 201305 <br>
+                                            India
+                                        </div>
+                                        <div class="contact-title">
+                                            <i class="fa fa-phone"></i>+91 - 120 4287693
+                                        </div>
+                                        <br>
+                                        <div class="contact-title">
+                                            <i class="fa fa-arrow-right"></i> Knoldus House
+                                        </div>
+                                        <div class="contact-details">
+                                            30/29, 1st Floor, Above UCO Bank<br>
+                                            Near Siddhartha Hotel<br> East Patel Nagar, New Delhi -
+                                            110008<br> India
+                                        </div>
+                                        <div class="contact-title">
+                                            <i class="fa fa-phone"></i>+91 - 120 4287693
+                                        </div>
+                                        <br>
+                                        <div class="contact-title">
+                                            <i class="fa fa-arrow-right"></i> Singapore Office
+                                        </div>
+                                        <div class="contact-details">
+                                            143 Cecil Street<br>
+                                            #16-03 GB Buildingl<br> Singapore 069542<br>
+                                        </div>
+                                        <div class="contact-title">
+                                            <i class="fa fa-phone"></i>+65 - 9613 9539
+                                        </div>
+                                        <div class="contact-title"
+                                             style="text-transform:lowercase; font-size:12px; margin-top:2%">
+                                            <i class="fa fa-envelope" style="font-size:10px"></i> sg@@knoldus.com
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- //Footer Col.// -->
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <div style="text-align:center;">
+                            Copyright <span id="current-year"></span> © :<a href="http://www.knoldus.com/home.knol">
+                            Knoldus </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

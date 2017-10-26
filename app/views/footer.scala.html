@@ -1,8 +1,5 @@
 @()(implicit request: Request[_])
 
-@activeLink(currentPath: String) = @{
-if(request.path.equals(currentPath)) "active"
-}
 <footer id="myFooter">
     <div class="footer">
         <div class="container">

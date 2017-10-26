@@ -40,40 +40,23 @@ function slide(keyword, pageNumber, filter) {
                 if (users.length > 0) {
                     for (var user = 0; user < users.length; user++) {
                         if (superUser) {
-                        usersFound += "<tr><td align='center'>" +
-                                      "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
-                                      "<em class='fa fa-pencil'></em>" +
-                                      "</a> ";
                             if (users[user].admin && users[user].superUser) {
-                                usersFound += "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete disabled'>" +
-                                              "<em class='fa fa-trash'></em>" +
-                                              "</a>" +
-                                              "</td>";
+                                usersFound += "<tr><td class='active-status'><span class='label label-warning'>SuperUser</span></td>"
                             } else {
-                                usersFound += "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
+                                usersFound += "<tr><td align='center'>" +
+                                    "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
+                                    "<em class='fa fa-pencil'></em>" +
+                                    "</a> " +
+                                    "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete'>" +
                                     "<em class='fa fa-trash'></em>" +
                                     "</a>" +
                                     "</td>"
                             }
                         } else {
                         if (users[user].admin && !users[user].superUser) {
-                            usersFound += "<td align='center'>" +
-                                          "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
-                                          "<em class='fa fa-pencil'></em>" +
-                                          "</a> "+
-                                          "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete disabled'>" +
-                                          "<em class='fa fa-trash'></em>" +
-                                          "</a>" +
-                                          "</td>";
+                            usersFound += "<tr><td class='active-status'><span class='label label-warning'>Admin</span></td>"
                         } else if (users[user].admin && users[user].superUser) {
-                            usersFound += "<tr><td align='center'>" +
-                                          "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default disabled'>" +
-                                          "<em class='fa fa-pencil'></em>" +
-                                          "</a> "+
-                                          "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete disabled'>" +
-                                          "<em class='fa fa-trash'></em>" +
-                                          "</a>" +
-                                          "</td>";
+                            usersFound += "<tr><td class='active-status'><span class='label label-warning'>SuperUser</span></td>"
                         } else {
                             usersFound += "<tr><td align='center'>" +
                                 "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default'>" +
@@ -87,26 +70,14 @@ function slide(keyword, pageNumber, filter) {
                         }
                         usersFound += "<td>" + users[user].email + "</td>";
                         if (users[user].active) {
-                            usersFound += "<td class='active-status' style='white-space: nowrap;'><span class='label label-success'>Active</span></td>"
+                            usersFound += "<td class='active-status'><span class='label label-success'>Active</span></td>"
                         } else {
-                            usersFound += "<td class='suspended' style='white-space: nowrap;'><span class='label label-danger'>Suspended</span></td>"
+                            usersFound += "<td class='suspended'><span class='label label-danger'>Suspended</span></td>"
                         }
                         if (users[user].ban) {
-                            usersFound += "<td class='active-status' style='white-space: nowrap;'><span class='label label-danger'>Banned</span><p class='ban-text'>" + users[user].banTill + "</p></td>"
+                            usersFound += "<td class='active-status'><span class='label label-danger'>Banned</span><p class='ban-text'>" + users[user].banTill + "</p></td></tr>"
                         } else {
-                            usersFound += "<td class='suspended' style='white-space: nowrap;'><span class='label label-info'>Allowed</span></td>"
-                        }
-                        if (users[user].superUser && users[user].admin) {
-                              usersFound += "<td class='active-status' style='white-space: nowrap;'><span class='label label-superUser'>SuperUser</span>"
-                        } else if (users[user].admin && !users[user].superUser) {
-                              usersFound += "<td class='active-status' style='white-space: nowrap;'><span class='label label-warning'>Admin</span>"
-                        } else {
-                              usersFound += "<td class='active-status' style='white-space: nowrap;'><span class='label label-normalUser'>Normal User</span>"
-                        }
-                        if (users[user].coreMember) {
-                            usersFound += "<span class='label label-info meetup-session coreMember'>Core</span></td></tr>"
-                        } else {
-                            usersFound += "</td> </tr>"
+                            usersFound += "<td class='suspended'><span class='label label-info'>Allowed</span></td></tr>"
                         }
                     }
 
@@ -125,7 +96,7 @@ function slide(keyword, pageNumber, filter) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center' class='col-md-12' colspan='5'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>"
+                        "<tr><td align='center' class='col-md-12' colspan='4'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>"
                     );
 
                     $('.pagination').html("");

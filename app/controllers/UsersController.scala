@@ -38,7 +38,6 @@ case class ManageUserInfo(email: String,
                           banTill: String,
                           admin: Boolean = false,
                           superUser: Boolean = false,
-                          coreMember: Boolean = false,
                           ban: Boolean = false)
 
 case class UpdateUserInfo(email: String,
@@ -249,7 +248,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             new Date(user.banTill.value).toString,
             user.admin,
             user.superUser,
-            user.coreMember,
             new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
         usersRepository
@@ -279,7 +277,6 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 new Date(user.banTill.value).toString,
                 user.admin,
                 user.superUser,
-                user.coreMember,
                 new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
 
             usersRepository

@@ -423,3 +423,15 @@ input::placeholder {
 .update-user-table{
     border:none;
 }
+
+.label-superUser {
+    background-color: #34495e;
+}
+
+.label-normalUser {
+    background-color: #1abc9c;
+}
+
+.coreMember {
+    margin-left: 5px;
+}

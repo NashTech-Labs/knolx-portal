@@ -2,6 +2,36 @@
 
 @main("Register") {
     <div class="row">
+
+        <div class="row registration-error">
+            <div class="col-md-4" ></div>
+            <div class="col-md-4" >
+                @if(userForm.hasGlobalErrors || userForm("email").hasErrors || userForm("password").hasErrors ||
+                userForm("confirmPassword").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in ">
+                    <ul>
+                        @if(userForm.hasGlobalErrors) {
+                        <li>@userForm.globalError.map(_.message)</li>
+                        }
+                        @if(userForm("email").hasErrors) {
+                        <li>@userForm("email").error.map(error => messages(error.message))</li>
+                        }
+                        @if(userForm("password").hasErrors) {
+                        <li>@userForm("password").error.map(error => messages(error.message))</li>
+                        }
+                        @if(userForm("confirmPassword").hasErrors) {
+                        <li>@userForm("confirmPassword").error.map(error => messages(error.message))</li>
+                        }
+                        @if(!flash.isEmpty) {
+                        <li>@flash.get("message").fold("")(message => message)</li>
+                        }
+                    </ul>
+                </div>
+                }
+            </div>
+            <div class="col-md-4" ></div>
+        </div>
+
         <div class="col-md-4" >
 
         </div>
@@ -49,35 +79,6 @@
         </div>
 
         <div class="col-md-4"></div>
-    </div>
-
-    <div class="row registration-error">
-        <div class="col-md-4" ></div>
-        <div class="col-md-4" >
-        @if(userForm.hasGlobalErrors || userForm("email").hasErrors || userForm("password").hasErrors ||
-                userForm("confirmPassword").hasErrors || !flash.isEmpty) {
-            <div class="alert alert-danger fade in ">
-                <ul>
-                    @if(userForm.hasGlobalErrors) {
-                        <li>@userForm.globalError.map(_.message)</li>
-                    }
-                    @if(userForm("email").hasErrors) {
-                        <li>@userForm("email").error.map(error => messages(error.message))</li>
-                    }
-                    @if(userForm("password").hasErrors) {
-                        <li>@userForm("password").error.map(error => messages(error.message))</li>
-                    }
-                    @if(userForm("confirmPassword").hasErrors) {
-                        <li>@userForm("confirmPassword").error.map(error => messages(error.message))</li>
-                    }
-                    @if(!flash.isEmpty) {
-                        <li>@flash.get("message").fold("")(message => message)</li>
-                    }
-                </ul>
-            </div>
-        }
-        </div>
-        <div class="col-md-4" ></div>
     </div>
 
 }

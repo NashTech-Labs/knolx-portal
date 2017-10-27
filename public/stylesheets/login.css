@@ -18,7 +18,7 @@
 }
 
 .default-top-margin {
-    margin-top: 30%;
+    margin-top: 10%;
 }
 
 .register-custom-position {
@@ -53,7 +53,7 @@
 }
 
 .top-container {
-    margin-top: 90px;
+    margin-top: 40px;
 }
 
 .login-second {
@@ -121,7 +121,7 @@ input.input-field.logo:focus {
 }
 
 .login-error {
-    margin-top: 20px;
+    margin-top: 100px;
     text-align: center;
     font-size: 16px;
 }

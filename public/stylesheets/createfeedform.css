@@ -37,12 +37,11 @@
 }
 
 .create-feedback-button {
+    margin: 0 auto;
+    display: block;
     border-radius: 0px;
     bottom: 0px;
     right: 0px;
-    position: fixed;
-    margin-right: 20px;
-    margin-bottom: 20px;
     background-color: #eee;
     color: #5499C7;
     border: 2px solid #fff;

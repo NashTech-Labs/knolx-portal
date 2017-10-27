@@ -417,7 +417,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "category 1", None,
         "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -454,7 +454,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "category 1", None,
         "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 

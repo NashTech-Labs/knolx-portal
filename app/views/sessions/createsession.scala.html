@@ -39,6 +39,19 @@
                     </div>
                     <div class="col-md-1"></div>
                 </div>
+
+                <div class="col-md-12 login-second login-third update-second">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <select name="category" id="category" class="update-field login-second">
+                            @for((value, key) <- SessionValues.Sessions) {
+                            <option value="@value">@key</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+
                 <div class="col-md-1"></div>
 
                 <div class="col-md-12 login-second login-third update-second">

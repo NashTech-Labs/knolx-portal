@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
-import controllers.UpdateSessionInformation
+import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -52,9 +52,13 @@ object SessionJsonFormats {
   implicit val sessionFormat = Json.format[SessionInfo]
 
   sealed trait SessionState
+
   case object ExpiringNext extends SessionState
+
   case object ExpiringNextNotReminded extends SessionState
+
   case object SchedulingNext extends SessionState
+
   case object SchedulingNextUnNotified extends SessionState
 
 }
@@ -308,7 +312,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
                 val updatedRating = updatedScore match {
                   case good if updatedScore > 66.66666    => "Good"
                   case average if updatedScore > 33.33333 => "Average"
-                  case _                               => "Bad"
+                  case _                                  => "Bad"
                 }
 
                 jsonCollection.update(selector, BSONDocument("$set" ->
@@ -316,6 +320,21 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
               }
           )
       )
+  }
+
+  def sessionsInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Future[List[SessionInfo]] = {
+    val startDate = filterUserSessionInformation.startDate.getTime
+    val endDate = filterUserSessionInformation.endDate.getTime
+
+    val selector = BSONDocument("email" -> filterUserSessionInformation.email,
+                                "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
+                                                       "$lte" -> BSONDateTime(endDate)))
+
+    collection
+      .flatMap(
+        _.find(selector)
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }
 
 }

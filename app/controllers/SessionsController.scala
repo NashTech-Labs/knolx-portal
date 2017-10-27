@@ -64,6 +64,10 @@ case class SessionSearchResult(sessions: List[KnolxSession],
                                page: Int,
                                keyword: String)
 
+case class FilterUserSessionInformation(email: String,
+                                        startDate: Date,
+                                        endDate: Date)
+
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
 }

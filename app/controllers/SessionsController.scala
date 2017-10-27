@@ -77,6 +77,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
+                                   technologiesRepository: TechnologiesRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
@@ -284,10 +285,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   def create: Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
-      .map { feedbackForms =>
-        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+      .flatMap { feedbackForms =>
+        technologiesRepository
+        .getCategories
+          .map { categories =>
+            val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+            Ok(views.html.sessions.createsession(createSessionForm, formIds, categories))
+          }
 
-        Ok(views.html.sessions.createsession(createSessionForm, formIds))
       }
   }
 

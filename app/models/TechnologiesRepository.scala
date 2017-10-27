@@ -21,7 +21,7 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class CategoryInfo(categoryName: String,
                         _id: BSONObjectID = BSONObjectID.generate)
 
-class CategoryRepository  @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
+class TechnologiesRepository  @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
 
   import play.modules.reactivemongo.json._
 

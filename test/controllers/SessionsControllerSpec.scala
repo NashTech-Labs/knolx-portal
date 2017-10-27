@@ -55,12 +55,14 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         usersRepository,
         sessionsRepository,
         feedbackFormsRepository,
+        technologiesRepository,
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
         usersBanScheduler)
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val technologiesRepository = mock[TechnologiesRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))

@@ -47,7 +47,7 @@
     margin-bottom: 50px;
     padding-bottom: 50px;
     text-align: center;
-    line-height: 60px;
+    line-height: 30px;
     font-size: 30px;
     color: #fff;
     text-shadow: 0 0px 6px #999;
@@ -314,6 +314,7 @@
 }
 
 .feedback-card-author {
+    margin-top: 20px;
     font-size: 16px;
     color: #5D8D8C;
     text-shadow: none;
@@ -683,4 +684,8 @@
     border-radius: 6px;
     outline: 0;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.feedback-card-presenter {
+    font-size: 16px;
 }

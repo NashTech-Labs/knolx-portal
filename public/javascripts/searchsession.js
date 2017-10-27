@@ -57,7 +57,7 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
-                           usersFound += "<td  title='Click here for more details' class='clickable-row'>" +
+                           usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
                             "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
                             "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
                         } else if(sessions[session].cancelled) {

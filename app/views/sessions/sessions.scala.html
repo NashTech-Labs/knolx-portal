@@ -36,7 +36,7 @@
                                 <th>Type</th>
                                 <th>Cancelled</th>
                                 <th>Status</th>
-                                <th>More Details</th>
+                                <th>Slides & Videos</th>
                             </tr>
                         </thead>
                         <tbody id="user-found">
@@ -68,7 +68,7 @@
                                 </td>
 
                                 @if(knolxSession.completed && !knolxSession.cancelled) {
-                                <td title="Click here for more details" class='clickable-row'>
+                                <td title="Click here for slides & videos" class='clickable-row'>
                                     <a href='@routes.SessionsController.shareContent(knolxSession.id)'
                                        style="text-decoration: none;"><span class="label more-detail-session">Click here</span></a>
                                 } else if(knolxSession.cancelled) {

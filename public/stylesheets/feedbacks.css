@@ -97,7 +97,7 @@
     font-size: 18px;
     color: #fff;
     position: relative;
-    margin-top: 25px;
+    margin-top: 8px;
 }
 
 .feedback-card-button:hover {
@@ -688,4 +688,12 @@
 
 .feedback-card-presenter {
     font-size: 16px;
+}
+
+/*.card-presenter {
+    padding-top: 18px;
+}*/
+
+.card-session-date {
+    margin-top: 0px;
 }

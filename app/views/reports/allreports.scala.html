@@ -23,10 +23,14 @@
                                                 } else {
                                                     label-success
                                                 } custom-label-type">@sessionType</span></div>
-                                                <p>@session.topic</p></div>
+                                                <div>
+                                                    <p>@session.topic</p>
+                                                    <p class="feedback-card-presenter">@session.presenter</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
                                             <div class="col-md-12 feedback-card-by">held on</div>
                                             <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
-                                            <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
                                             <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
                                                 view</a>
                                         </div>
@@ -46,10 +50,14 @@
                                             } else {
                                                 label-success
                                             } custom-label-type">@sessionType</span></div>
-                                            <p>@session.topic</p></div>
+                                            <div>
+                                                <p>@session.topic</p>
+                                                <p class="feedback-card-presenter">@session.presenter</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
                                         <div class="col-md-12 feedback-card-by">held on</div>
                                         <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
-                                        <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
                                         <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
                                             view</a>
                                     </div>

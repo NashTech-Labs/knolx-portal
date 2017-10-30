@@ -667,7 +667,8 @@
 .feedbackAttendance-header-text {
     font-weight: 900;
     font-family: 'gothic';
-    margin: 5vh 0;
+    margin-bottom: 5vh;
+    margin-top: 0vh;
     font-size: 2.5vh;
 }
 

@@ -94,7 +94,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   }
 
   private def generateSessionReportHeader(session: SessionInfo, active: Boolean): FeedbackReportHeader = {
-    FeedbackReportHeader(session._id.stringify,session.topic, session.email, active = active,
+    FeedbackReportHeader(session._id.stringify, session.topic, session.email, active = active,
       session.session, session.meetup, new Date(session.date.value).toString, session.rating,
       new Date(session.expirationDate.value).before(new java.util.Date(dateTimeUtility.nowMillis)))
   }

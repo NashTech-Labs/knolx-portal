@@ -2,9 +2,26 @@
 
 @main("Update Session") {
 
-    <div class="row">
+    <div class="row update-error">
         <div class="col-md-4" ></div>
-        <div class="col-md-4 update-outer top-container">
+        <div class="col-md-4" >
+            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                @flash.get("message").fold("")(message => message)
+                @sessionInfo("date").error.map(error => messages(error.message))
+                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
+                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
+                @sessionInfo.globalError.map(_.message)
+            </div>
+            }
+        </div>
+        <div class="col-md-4" ></div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-4" ></div>
+        <div class="col-md-4 update-outer">
             <!--<div class="col-md-12 login-first top" > </div>-->
             <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
 
@@ -157,22 +174,6 @@
             <div class="col-md-12 create-footer"></div>
         </div>
 
-        <div class="col-md-4" ></div>
-    </div>
-
-    <div class="row update-error">
-        <div class="col-md-4" ></div>
-        <div class="col-md-4" >
-        @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
-            <div class="alert alert-danger fade in ">
-                @flash.get("message").fold("")(message => message)
-                @sessionInfo("date").error.map(error => messages(error.message))
-                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
-                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
-                @sessionInfo.globalError.map(_.message)
-            </div>
-        }
-        </div>
         <div class="col-md-4" ></div>
     </div>
 

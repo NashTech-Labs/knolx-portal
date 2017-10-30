@@ -339,8 +339,9 @@ input::placeholder {
 
 .user-updated-message {
     text-align: center;
-    margin-top: 5%;
+    margin-top: 80px;
     font-size: 15px;
+    margin-bottom: 0px !important;
 }
 
 .default-margin-top {

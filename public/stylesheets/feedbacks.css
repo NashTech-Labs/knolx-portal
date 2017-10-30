@@ -133,6 +133,7 @@
     -moz-box-shadow: inset 0 -10px 10px -10px #888;
     -webkit-box-shadow: inset 0 -10px 10px -10px #888;
     box-shadow: inset 0 -10px 10px -10px #888;
+    margin-bottom: 18px;
 }
 
 .accepting-response {
@@ -238,7 +239,7 @@
     font-size: 18px;
     color: #fff;
     position: relative;
-    margin-top: 25px;
+    margin-top: 8px;
     cursor: not-allowed;
 }
 
@@ -314,7 +315,6 @@
 }
 
 .feedback-card-author {
-    margin-top: 20px;
     font-size: 16px;
     color: #5D8D8C;
     text-shadow: none;
@@ -688,12 +688,4 @@
 
 .feedback-card-presenter {
     font-size: 16px;
-}
-
-/*.card-presenter {
-    padding-top: 18px;
-}*/
-
-.card-session-date {
-    margin-top: 0px;
 }

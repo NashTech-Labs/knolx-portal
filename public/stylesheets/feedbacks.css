@@ -614,7 +614,7 @@
     top: 6px;
 }
 .feedbackAttendance-dialog {
-    top: 15%;
+    top: 24%;
     margin: 0 auto;
 }
 
@@ -688,6 +688,7 @@
 @media (min-width: 768px)
 .modal-feedback-width {
     width: 380px;
+    top: 24%;
 }
 .feedback-card-presenter {
     font-size: 16px;

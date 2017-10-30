@@ -33,7 +33,7 @@ ul > li > a {
     border-color: transparent;
 }
 
-html,body,#particle-js {
+html,body{
     margin: 0;
     height: 100%;
     background-color: #eeeeee;
@@ -221,7 +221,7 @@ i.fa.fa-user:active {
     color: #337ab7;
     text-decoration: none;
     border: 1px solid #ddd;
-    background-color: transparent;
+    background-color: #7d9ec0;
 }
 
 .collapsing {
@@ -231,10 +231,4 @@ i.fa.fa-user:active {
 .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
     background-color: #352C25;
     color: #fff;
-}
-
-canvas {
-position: absolute;
-  display: block;
-  vertical-align: bottom;
 }

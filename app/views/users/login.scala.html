@@ -1,10 +1,27 @@
 @(loginForm: Form[LoginInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Login") {
+
+    <div class="row login-error">
+        <div class="col-md-4" ></div>
+        <div class="col-md-4" >
+            @if(loginForm.hasGlobalErrors || loginForm("email").hasErrors || flash.get("message").nonEmpty || flash.get("error").nonEmpty) {
+            <div class="alert alert-danger fade in ">
+                @flash.get("message").fold("")(message => message)
+                @flash.get("error").fold("")(message => message)
+                @loginForm("email").error.map(error => messages(error.message))
+                @loginForm.globalError.map(_.message)
+            </div>
+            }
+        </div>
+        <div class="col-md-4" ></div>
+    </div>
+
     <div class="row">
+
         <div class="col-md-4" ></div>
         <div class="col-md-4 profile">
-            <div class="default-top-margin">
+            <div>
                 @if(flash.get("successMessage").nonEmpty) {
                     <div class="alert alert-success login-error">
                         <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
@@ -47,20 +64,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4" ></div>
-    </div>
-    <div class="row login-error">
-        <div class="col-md-4" ></div>
-        <div class="col-md-4" >
-        @if(loginForm.hasGlobalErrors || loginForm("email").hasErrors || flash.get("message").nonEmpty || flash.get("error").nonEmpty) {
-            <div class="alert alert-danger fade in ">
-                @flash.get("message").fold("")(message => message)
-                @flash.get("error").fold("")(message => message)
-                @loginForm("email").error.map(error => messages(error.message))
-                @loginForm.globalError.map(_.message)
-            </div>
-        }
         </div>
         <div class="col-md-4" ></div>
     </div>

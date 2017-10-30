@@ -120,8 +120,8 @@ ul.pagination.pagination-lg li a {
 }
 
 .pagination li:hover.active a {
-    background-color: #16A085;
-    color: #fff !important;
+    background-color: #bdf9d8;
+    color: #000 !important;
     cursor: pointer
 }
 

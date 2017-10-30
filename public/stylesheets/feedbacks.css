@@ -614,7 +614,7 @@
     top: 6px;
 }
 .feedbackAttendance-dialog {
-    top: 15%;
+    top: 24%;
     margin: 0 auto;
 }
 
@@ -626,6 +626,7 @@
     overflow: auto;
     font-family: 'gothic';
     height: 50vh;
+    padding: 0px;
 }
 
 .feedbackAttendance-button {
@@ -666,7 +667,8 @@
 .feedbackAttendance-header-text {
     font-weight: 900;
     font-family: 'gothic';
-    margin: 5vh 0;
+    margin-bottom: 5vh;
+    margin-top: 0vh;
     font-size: 2.5vh;
 }
 
@@ -688,7 +690,16 @@
 @media (min-width: 768px)
 .modal-feedback-width {
     width: 380px;
+    top: 24%;
 }
 .feedback-card-presenter {
     font-size: 16px;
+}
+
+.in {
+    padding-right: 0px !important;
+}
+
+.modal-feedback-header {
+    border-bottom: 0px;
 }

@@ -626,6 +626,7 @@
     overflow: auto;
     font-family: 'gothic';
     height: 50vh;
+    padding: 0px;
 }
 
 .feedbackAttendance-button {
@@ -666,7 +667,8 @@
 .feedbackAttendance-header-text {
     font-weight: 900;
     font-family: 'gothic';
-    margin: 5vh 0;
+    margin-bottom: 5vh;
+    margin-top: 0vh;
     font-size: 2.5vh;
 }
 
@@ -692,4 +694,12 @@
 }
 .feedback-card-presenter {
     font-size: 16px;
+}
+
+.in {
+    padding-right: 0px !important;
+}
+
+.modal-feedback-header {
+    border-bottom: 0px;
 }

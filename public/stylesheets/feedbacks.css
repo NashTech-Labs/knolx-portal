@@ -626,6 +626,7 @@
     overflow: auto;
     font-family: 'gothic';
     height: 50vh;
+    padding: 0px;
 }
 
 .feedbackAttendance-button {
@@ -692,4 +693,12 @@
 }
 .feedback-card-presenter {
     font-size: 16px;
+}
+
+.in {
+    padding-right: 0px !important;
+}
+
+.modal-feedback-header {
+    border-bottom: 0px;
 }

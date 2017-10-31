@@ -16,7 +16,8 @@ import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
-import reactivemongo.bson.BSONDateTime
+import reactivemongo.api.commands.WriteResult
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
 import scala.collection.immutable.IndexedSeq
@@ -32,7 +33,19 @@ case class CreateSessionInformation(email: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
-                                    meetup: Boolean)
+                                    meetup: Boolean) {
+  def validateCategory: Option[String] = {
+    if (category.equals("other")) {
+      if (other.isEmpty) {
+        Some("Please enter a category name if you have selected other")
+      } else {
+        None
+      }
+    } else {
+      None
+    }
+  }
+}
 
 case class UpdateSessionInformation(id: String,
                                     date: Date,
@@ -101,8 +114,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
         session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
-      "category" -> nonEmptyText,
-      "other" -> optional(text),
+      "category" -> text.verifying("Please attach a category", !_.isEmpty),
+      "other" -> optional(nonEmptyText),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
@@ -314,31 +327,46 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   .getByEmail(createSessionInfo.email.toLowerCase)
                   .flatMap(_.fold {
                     Future.successful(
-                      BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds, categories)))
+                      BadRequest(views.html.sessions.createsession
+                        (createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds, categories)))
                   } { userJson =>
                     val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
                     val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
                       BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
                       createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
                       0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
-
-                    sessionsRepository.insert(session) flatMap { result =>
-                      if (result.ok) {
-                        Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
-                        sessionsScheduler ! RefreshSessionsSchedulers
-                        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
+                    val validatedForm = createSessionInfo.validateCategory
+                    validatedForm.fold {
+                      upsertSessionCategory(createSessionInfo.category, createSessionInfo.other).flatMap {
+                      case true => sessionsRepository.insert(session) flatMap { result =>
+                        if (result.ok) {
+                          Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
+                          sessionsScheduler ! RefreshSessionsSchedulers
+                          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
+                        }
+                        else {
+                          Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
+                          Future.successful(InternalServerError("Something went wrong!"))
+                        }
                       }
-                      else {
-                        Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
-                        Future.successful(InternalServerError("Something went wrong!"))
-                      }
+                      case false => Future.successful(InternalServerError("Something went wrong!"))
                     }
-                  })
+                  } { errorMessage =>
+                      Future.successful(BadRequest(views.html.sessions.createsession
+                        (createSessionForm.fill(createSessionInfo).withGlobalError(errorMessage), formIds, categories)))
+                    }})
               })
           }
       }
   }
 
+  private def upsertSessionCategory(category: String, other: Option[String]): Future[Boolean] = {
+    if(category.equals("other")) {
+      technologiesRepository.upsert(CategoryInfo(other.get.toLowerCase())).map (_.ok)
+    } else {
+      Future.successful(true)
+    }
+  }
   private def sessionExpirationMillis(date: Date, customDays: Int): Long =
     if (customDays > 0) {
       customSessionExpirationMillis(date, customDays)

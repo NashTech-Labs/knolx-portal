@@ -7,7 +7,8 @@
         <div class="col-md-4">
             @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
             createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
-            createSessionForm("feedbackFormId").hasErrors || createSessionForm("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+            createSessionForm("feedbackFormId").hasErrors || createSessionForm("category").hasErrors
+            || createSessionForm("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
             <div class="alert alert-danger fade in ">
                 <ul>
                     @if(createSessionForm.hasGlobalErrors) {
@@ -24,6 +25,9 @@
                     }
                     @if(createSessionForm("feedbackFormId").hasErrors) {
                     <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("category").hasErrors) {
+                    <li>@createSessionForm("category").error.map(error => messages(error.message))</li>
                     }
                     @if(createSessionForm("feedbackExpirationDays").hasErrors) {
                     <li>@createSessionForm("feedbackExpirationDays").error.map(error => messages(error.message))</li>
@@ -94,8 +98,8 @@
                 <div class="col-md-12 login-second login-third update-second" id="other-input">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
-                        <input type="text" value='@createSessionForm.data.get("email")' name="other" id="other"
-                         placeholder="Other Category" required class="update-field reg create-email"/>
+                        <input type="text" value='@createSessionForm.data.get("other")' name="other" id="other"
+                         placeholder="Other Category" class="update-field reg create-email"/>
                     </div>
                     <div class="col-md-1"></div>
                 </div>

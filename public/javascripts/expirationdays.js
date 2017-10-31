@@ -13,8 +13,10 @@ $(function () {
     $('#category').change(function(){
         if($(this).val() === "other"){
          $('#other-input').show();
+         $('#other').prop("required", true);
         } else {
          $('#other-input').hide();
+         $('#other').prop("required", false);
          }
     });
 });

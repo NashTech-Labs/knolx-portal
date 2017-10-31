@@ -24,6 +24,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+
 case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
@@ -85,6 +89,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+  implicit val filterUserSessionInfoFormat: OFormat[FilterUserSessionInformation] = Json.format[FilterUserSessionInformation]
+  implicit val SessionInfoFormat: OFormat[SessionInfo] = Json.format[SessionInfo]
 
   val sessionSearchForm = Form(
     mapping(
@@ -441,6 +447,12 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       eventualMaybeSession.flatMap(maybeSession =>
         maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    }
+  }
+
+  def filterInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Action[AnyContent] = action.async { implicit request =>
+    sessionsRepository.sessionsInTimeRange(filterUserSessionInformation).map { sessions =>
+      Ok(Json.toJson(sessions.head).toString())
     }
   }
 }

@@ -1,0 +1,10 @@
+@()(implicit flash: Flash, request: Request[_])
+
+@main(message) {
+<form action="@routes.SessionsController.filterInTimeRange()" method="post">
+<input type="text" id="email" />
+<input type="text" id="startDate" />
+<input type="text" id="endDate" />
+<input type="submit" value="submit" />
+</form>
+    }

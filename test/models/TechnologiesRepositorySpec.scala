@@ -14,8 +14,8 @@ class TechnologiesRepositorySpec extends PlaySpecification {
 
   "Technologies Repository" should {
 
-    "insert a new category" in {
-      val created: Boolean = await(technologiesRepository.insert(categoryInfo).map(_.ok))
+    "upsert a new category" in {
+      val created: Boolean = await(technologiesRepository.upsert(categoryInfo).map(_.ok))
 
       created must beEqualTo(true)
     }
@@ -23,7 +23,7 @@ class TechnologiesRepositorySpec extends PlaySpecification {
     "get category list" in {
       val categories: List[CategoryInfo] = await(technologiesRepository.getCategories)
 
-      categories must beEqualTo(List(categoryInfo))
+      categories.head.categoryName must beEqualTo(categoryInfo.categoryName)
 
     }
   }

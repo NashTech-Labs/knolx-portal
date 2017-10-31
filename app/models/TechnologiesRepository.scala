@@ -37,11 +37,11 @@ class TechnologiesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("technologies"))
 
-  def insert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .insert(category))
+  def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("categoryName" -> category.categoryName)
+
+    collection.flatMap(_.update(selector, selector, upsert = true))
+  }
 
   def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] = {
     collection.

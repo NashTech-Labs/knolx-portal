@@ -8,7 +8,6 @@ import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import utilities.DateTimeUtility
 import models.technologiesJsonFormats._
 import play.api.libs.json.Json
 
@@ -31,7 +30,8 @@ object technologiesJsonFormats {
   implicit val technologiesFormat = Json.format[CategoryInfo]
 
 }
-class TechnologiesRepository  @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+
+class TechnologiesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
 
@@ -51,5 +51,4 @@ class TechnologiesRepository  @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           cursor[CategoryInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[CategoryInfo]]()))
   }
-
 }

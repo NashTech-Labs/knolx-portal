@@ -1,14 +1,15 @@
-@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], categories: List[CategoryInfo])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
 
     <div class="row update-error">
         <div class="col-md-4" ></div>
         <div class="col-md-4" >
-            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("category").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
             <div class="alert alert-danger fade in ">
                 @flash.get("message").fold("")(message => message)
                 @sessionInfo("date").error.map(error => messages(error.message))
+                @sessionInfo("category").error.map(error => messages(error.message))
                 @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
                 @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
                 @sessionInfo.globalError.map(_.message)
@@ -52,6 +53,34 @@
                         </select>
                     </div>
                     <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-second login-third update-second">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <select name="category" id="category" class="update-field login-second">
+                            <option value="">! Select Category Please</option>
+                            @for(category <- categories) {
+                            <option value="@category.categoryName"
+                                @(if(sessionInfo.data.getOrElse("category", "") == category.categoryName){
+                            "selected"
+                            })>
+                            @category.categoryName
+                            </option>
+                            }
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+
+                <div class="col-md-12 login-second login-third update-second" id="other-input">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="text" value='@sessionInfo.data.get("other")' name="other" id="other"
+                               placeholder="Other Category" class="update-field reg create-email"/>
+                    </div>
+                    <div class="col-md-1"></div>
                 </div>
 
                 <div class="col-md-12 login-second login-third update-second">

@@ -25,7 +25,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   private val endOfDayDate = formatter.parse(endOfDayDateString)
   private val endOfDayMillis = endOfDayDate.getTime
 
-  val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "feedbackFormId", "topic1",
+  val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "category", "feedbackFormId", "topic1",
     1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, sessionId)
 
   trait TestScope extends Scope {
@@ -93,7 +93,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "getByEmail session" in new TestScope {
       val updatedSession = UpdateSessionInfo(UpdateSessionInformation(sessionId.stringify, currentDate,
-        "updatedSession", "category 1", None, "feedbackFormId", "updatedTopic", 1, Some("youtubeURL"), Some("slideShareURL"),cancelled = false), BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
+        "updatedSession", "category", None, "feedbackFormId", "updatedTopic", 1, Some("youtubeURL"), Some("slideShareURL"),cancelled = false), BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
 
       val updated: Boolean = await(sessionsRepository.update(updatedSession).map(_.ok))
 
@@ -152,7 +152,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "get active sessions" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
-      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "feedbackFormId", "topic2",
         1, meetup = true, "", 0, cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
@@ -169,7 +169,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "get active sessions by email" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
-      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "feedbackFormId", "topic2",
         1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
@@ -186,7 +186,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "get immediate previous expired sessions" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
-      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "feedbackFormId", "topic2",
         1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
@@ -203,7 +203,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "update rating for a given session ID" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
-      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "feedbackFormId", "topic2",
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "feedbackFormId", "topic2",
         1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"), 0, reminder = false, notification = false, sessionId)
 
       val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))

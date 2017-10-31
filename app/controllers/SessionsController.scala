@@ -300,39 +300,42 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
-        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+        technologiesRepository
+          .getCategories
+          .flatMap { categories =>
+            val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+            createSessionForm.bindFromRequest.fold(
+              formWithErrors => {
+                Logger.error(s"Received a bad request for create session $formWithErrors")
+                Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors, formIds, categories)))
+              },
+              createSessionInfo => {
+                usersRepository
+                  .getByEmail(createSessionInfo.email.toLowerCase)
+                  .flatMap(_.fold {
+                    Future.successful(
+                      BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds, categories)))
+                  } { userJson =>
+                    val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
+                    val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
+                      BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
+                      createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
+                      0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
 
-        createSessionForm.bindFromRequest.fold(
-          formWithErrors => {
-            Logger.error(s"Received a bad request for create session $formWithErrors")
-            Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors, formIds)))
-          },
-          createSessionInfo => {
-            usersRepository
-              .getByEmail(createSessionInfo.email.toLowerCase)
-              .flatMap(_.fold {
-                Future.successful(
-                  BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
-              } { userJson =>
-                val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
-                val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
-                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
-                  createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
-
-                sessionsRepository.insert(session) flatMap { result =>
-                  if (result.ok) {
-                    Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
-                    sessionsScheduler ! RefreshSessionsSchedulers
-                    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
-                  }
-                  else {
-                    Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
-                    Future.successful(InternalServerError("Something went wrong!"))
-                  }
-                }
+                    sessionsRepository.insert(session) flatMap { result =>
+                      if (result.ok) {
+                        Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
+                        sessionsScheduler ! RefreshSessionsSchedulers
+                        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
+                      }
+                      else {
+                        Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
+                        Future.successful(InternalServerError("Something went wrong!"))
+                      }
+                    }
+                  })
               })
-          })
+          }
       }
   }
 

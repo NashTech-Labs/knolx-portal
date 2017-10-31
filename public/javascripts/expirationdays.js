@@ -1,10 +1,21 @@
 $(function () {
+
+    $('#other-input').hide();
+
     $('#disableDays').click(function () {
         disableDays();
     });
 
     $('#radio-days').click(function () {
         enableDays();
+    });
+
+    $('#category').change(function(){
+        if($(this).val() === "other"){
+         $('#other-input').show();
+        } else {
+         $('#other-input').hide();
+         }
     });
 });
 

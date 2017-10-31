@@ -2,10 +2,47 @@
 
 @main("Create Session") {
 
+    <div class="row registration-error">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
+            createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
+            createSessionForm("feedbackFormId").hasErrors || createSessionForm("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                <ul>
+                    @if(createSessionForm.hasGlobalErrors) {
+                    <li>@createSessionForm.globalError.map(_.message)</li>
+                    }
+                    @if(createSessionForm("email").hasErrors) {
+                    <li>@createSessionForm("email").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("date").hasErrors) {
+                    <li>@createSessionForm("date").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("session").hasErrors) {
+                    <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("feedbackFormId").hasErrors) {
+                    <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
+                    }
+                    @if(createSessionForm("feedbackExpirationDays").hasErrors) {
+                    <li>@createSessionForm("feedbackExpirationDays").error.map(error => messages(error.message))</li>
+                    }
+                    @if(!flash.isEmpty) {
+                    <li>@flash.get("message").fold("")(message => message)</li>
+                    }
+                </ul>
+            </div>
+            }
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+
     <div class="row">
+
         <div class="col-md-4"></div>
 
-        <div class="col-md-4 create-outer top-container">
+        <div class="col-md-4 create-outer">
             <form class="CreateForm customForm" action="@routes.SessionsController.createSession()" method="post">
 
                 @helper.CSRF.formField
@@ -32,9 +69,9 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
                         <select name="session" id="session" class="update-field login-second">
-                        @for((value, key) <- SessionValues.Sessions) {
+                            @for((value, key) <- SessionValues.Sessions) {
                             <option value="@value">@key</option>
-                        }
+                            }
                         </select>
                     </div>
                     <div class="col-md-1"></div>
@@ -44,10 +81,21 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
                         <select name="category" id="category" class="update-field login-second">
-                            @for((value, key) <- SessionValues.Sessions) {
-                            <option value="@value">@key</option>
-                            }
+                            <option selected value="">! Select Category Please</option>
+                            @for(category <- categories) {
+                            <option value="@category.categoryName">@category.categoryName</option>
+                        }
+                            <option value="other">Other</option>
                         </select>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+
+                <div class="col-md-12 login-second login-third update-second" id="other-input">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10 ">
+                        <input type="text" value='@createSessionForm.data.get("email")' name="other" id="other"
+                         placeholder="Other Category" required class="update-field reg create-email"/>
                     </div>
                     <div class="col-md-1"></div>
                 </div>
@@ -137,42 +185,6 @@
                 </div>
             </form>
             <div class="col-md-12 create-footer"></div>
-        </div>
-        <div class="col-md-4"></div>
-    </div>
-
-    <div class="row registration-error">
-        <div class="col-md-4"></div>
-        <div class="col-md-4">
-        @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
-                createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
-                createSessionForm("feedbackFormId").hasErrors || createSessionForm("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
-            <div class="alert alert-danger fade in ">
-                <ul>
-                    @if(createSessionForm.hasGlobalErrors) {
-                        <li>@createSessionForm.globalError.map(_.message)</li>
-                    }
-                    @if(createSessionForm("email").hasErrors) {
-                        <li>@createSessionForm("email").error.map(error => messages(error.message))</li>
-                    }
-                    @if(createSessionForm("date").hasErrors) {
-                        <li>@createSessionForm("date").error.map(error => messages(error.message))</li>
-                    }
-                    @if(createSessionForm("session").hasErrors) {
-                        <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
-                    }
-                    @if(createSessionForm("feedbackFormId").hasErrors) {
-                        <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
-                    }
-                    @if(createSessionForm("feedbackExpirationDays").hasErrors) {
-                        <li>@createSessionForm("feedbackExpirationDays").error.map(error => messages(error.message))</li>
-                    }
-                    @if(!flash.isEmpty) {
-                        <li>@flash.get("message").fold("")(message => message)</li>
-                    }
-                </ul>
-            </div>
-        }
         </div>
         <div class="col-md-4"></div>
     </div>

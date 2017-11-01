@@ -112,8 +112,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .find(Json.obj("active" -> true))
           .sort(Json.obj("date" -> 1))
-          .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+            .cursor[SessionInfo](ReadPreference.Primary)
+            .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
   def getById(id: String)(implicit ex: ExecutionContext): Future[Option[SessionInfo]] =
     collection

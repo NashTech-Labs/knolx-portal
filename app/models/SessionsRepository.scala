@@ -186,6 +186,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "topic" -> updatedRecord.sessionUpdateFormData.topic,
         "session" -> updatedRecord.sessionUpdateFormData.session,
         "category" -> updatedRecord.sessionUpdateFormData.category,
+        "subCategory" -> updatedRecord.sessionUpdateFormData.subCategory,
         "feedbackFormId" -> updatedRecord.sessionUpdateFormData.feedbackFormId,
         "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,

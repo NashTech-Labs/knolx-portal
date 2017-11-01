@@ -22,7 +22,6 @@ libraryDependencies ++= Seq(
   "com.google.apis" % "google-api-services-youtube" % "v3-rev184-1.22.0",
   "com.google.oauth-client" % "google-oauth-client" % "1.22.0",
   "com.google.oauth-client" % "google-oauth-client-jetty" % "1.22.0",
-  "com.madhukaraphatak" %% "java-sizeof" % "0.1",
   "com.typesafe.akka" %% "akka-testkit" % "2.5.2" % Test,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
   specs2 % Test

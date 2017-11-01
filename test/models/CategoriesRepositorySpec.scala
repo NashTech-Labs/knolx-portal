@@ -22,8 +22,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
 
     "get category list" in {
       val categories: List[CategoryInfo] = await(categoriesRepository.getCategories)
-
-      /*categories.head.categoryName must beEqualTo(categoryInfo.categoryName)*/
+      
       categories.head.subCategory.head must beEqualTo("Angular Js")
 
     }

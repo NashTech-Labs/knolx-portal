@@ -18,11 +18,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
-
-/*
-case class SubCategory(subCategory: List[String])
-*/
-
 case class CategoryInfo(categoryName: String,
                         subCategory: List[String],
                         _id: BSONObjectID = BSONObjectID.generate

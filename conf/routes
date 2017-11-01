@@ -22,6 +22,12 @@ POST        /user/forgotpassword/reset           controllers.UsersController.res
 GET         /user/changepassword                 controllers.UsersController.renderChangePassword
 POST        /user/changepassword                 controllers.UsersController.changePassword
 
+# Upload
++ nocsrf
+POST        /youtube/:sessionId/upload           controllers.YoutubeController.upload(sessionId: String)
++ nocsrf
+GET         /youtube/:sessionId/cancel           controllers.YoutubeController.cancel(sessionId: String)
+
 # Session
 GET         /session                             controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
 POST        /session/search                      controllers.SessionsController.searchSessions

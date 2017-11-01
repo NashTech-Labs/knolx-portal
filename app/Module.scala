@@ -26,9 +26,20 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
       .toProvider(Providers.guicify(Akka.providerOf(classOf[UsersBanScheduler], "UsersBanScheduler", Function.identity())))
       .asEagerSingleton
 
+    bind[ActorRef]
+      .annotatedWith(Names.named("YouTubeUploadManager"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploadManager], "YouTubeUploadManager", Function.identity())))
+      .asEagerSingleton
+
+    bind[ActorRef]
+      .annotatedWith(Names.named("YouTubeUploader"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploader], "YouTubeUploader", Function.identity())))
+      .asEagerSingleton
+
     bind(classOf[KnolxControllerComponents])
       .to(classOf[DefaultKnolxControllerComponents])
       .asEagerSingleton()
+
   }
 
 }

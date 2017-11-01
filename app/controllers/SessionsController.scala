@@ -29,24 +29,11 @@ case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
                                     category :String,
-                                    other: Option[String],
+                                    subCategory: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
-                                    meetup: Boolean) {
-
-  def validateCategory: Option[String] = {
-    if (category.equals("other")) {
-      if (other.isEmpty) {
-        Some("Please enter a category name if you have selected other")
-      } else {
-        None
-      }
-    } else {
-      None
-    }
-  }
-}
+                                    meetup: Boolean)
 
 case class UpdateSessionInformation(id: String,
                                     date: Date,
@@ -129,7 +116,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
         session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
       "category" -> text.verifying("Please attach a category", !_.isEmpty),
-      "other" -> optional(nonEmptyText),
+      "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
@@ -312,16 +299,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   def create: Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
-      .flatMap { feedbackForms =>
-        technologiesRepository
-        .getCategories
-          .map { categories =>
-            val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
-            Ok(views.html.sessions.createsession(createSessionForm, formIds, categories))
+      .map { feedbackForms =>
+        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+            Ok(views.html.sessions.createsession(createSessionForm, formIds))
           }
-
       }
-  }
 
   def createSession: Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository

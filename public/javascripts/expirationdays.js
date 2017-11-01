@@ -1,7 +1,5 @@
 $(function () {
 
-    $('#other-input').hide();
-
     $('#disableDays').click(function () {
         disableDays();
     });
@@ -10,15 +8,6 @@ $(function () {
         enableDays();
     });
 
-    $('#category').change(function(){
-        if($(this).val() === "other"){
-         $('#other-input').show();
-         $('#other').prop("required", true);
-        } else {
-         $('#other-input').hide();
-         $('#other').prop("required", false);
-         }
-    });
 });
 
 

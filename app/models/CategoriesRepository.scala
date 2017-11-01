@@ -44,8 +44,9 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("categoryName" -> category.categoryName)
-    val modifier = BSONDocument("categoryName" -> category.categoryName,
-                                "subCategory" -> category.subCategory)
+    val modifier = BSONDocument("$addToSet" -> BSONDocument(
+                                "subCategory" -> BSONDocument(
+                                "$each" -> category.subCategory)))
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }

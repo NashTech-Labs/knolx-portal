@@ -36,7 +36,6 @@ case class SessionInfo(userId: String,
                        expirationDate: BSONDateTime,
                        youtubeURL: Option[String],
                        slideShareURL: Option[String],
-                       noOfFeedbackResponses: Int,
                        reminder: Boolean = false,
                        notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate
@@ -292,7 +291,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   def updateRating(sessionID: String, scores: List[Double]): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionID))
-    val sessionScore = scores.filterNot(_ == 0).sum
+    val scoresWithoutZero = scores.filterNot(_ == 0)
+    val sessionScore = if(scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
 
     val updatedRating = sessionScore match {
       case good if sessionScore >= 60.00    => "Good"

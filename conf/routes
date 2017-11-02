@@ -61,4 +61,4 @@ GET         /assets/*file                        controllers.Assets.versioned(pa
 GET         /favicon.ico                         controllers.Assets.at(path="/public/images", file="favicon.png")
 
 GET          /piechart                           controllers.SessionsController.renderPieChart
-GET          /piecharts                          controllers.SessionsController.piechart
+POST         /piechart                           controllers.SessionsController.piechart

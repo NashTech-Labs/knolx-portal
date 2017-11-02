@@ -65,9 +65,11 @@ case class KnolxSession(id: String,
                         completed: Boolean = false,
                         expired: Boolean = false)
 
-case class CategoryInformation(categoryName: String, totalSession: Int)
+case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
 
-case class KnolxSessionInformation(total: Int, categoryInformation: List[CategoryInformation])
+case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
+
+case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
@@ -95,6 +97,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
   implicit val categoriesFormat: OFormat[CategoryInfo] = Json.format[CategoryInfo]
+  implicit val subCategoryInformation = Json.format[SubCategoryInformation]
   implicit val categoryInformation = Json.format[CategoryInformation]
   implicit val knolxSessionInformation = Json.format[KnolxSessionInformation]
 
@@ -468,9 +471,24 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def piechart: Action[AnyContent] = action.async { implicit request =>
-    sessionsRepository.sessions.map{ sessions =>
-      val categriesAnalysisInfo = sessions.groupBy(_.category).map(sessionInfo => CategoryInformation(sessionInfo._1,sessionInfo._2.length)).toList
-      Ok(Json.toJson(KnolxSessionInformation(sessions.length,categriesAnalysisInfo)).toString)
+    categoriesRepository.getCategories.flatMap { categoryInfo =>
+      val primaryCategoryList = categoryInfo.map(_.categoryName)
+      sessionsRepository.sessions.map { sessions =>
+
+        val categoryUsedInSession = sessions.groupBy(_.category).keys.toList
+
+        val categoryNotUsedInSession = primaryCategoryList diff categoryUsedInSession
+
+        val categoriesUsedAnalysisInfo = sessions.groupBy(_.category).map { sessionInfo =>
+          val subCategoryInfo: List[SubCategoryInformation] = sessionInfo._2.groupBy(_.subCategory).map(
+            sessionBasedSubcategory => SubCategoryInformation(sessionBasedSubcategory._1, sessionBasedSubcategory._2.length)).toList
+          CategoryInformation(sessionInfo._1, sessionInfo._2.length, subCategoryInfo)
+        }.toList
+
+        val categoriesAnalysisInfo = categoriesUsedAnalysisInfo ::: categoryNotUsedInSession.map(category => CategoryInformation(category, 0, Nil))
+
+        Ok(Json.toJson(KnolxSessionInformation(sessions.length, categoriesAnalysisInfo)).toString)
+      }
     }
   }
 }

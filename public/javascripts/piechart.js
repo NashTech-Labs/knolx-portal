@@ -1,52 +1,89 @@
 $( document ).ready(function() {
 
+$("text.highcharts-credits").hide();
+
      jsRoutes.controllers.SessionsController.piechart().ajax(
         {
-                        type: "GET",
-                        processData: false,
-                        success: function (data){
-                        var values = JSON.parse(data);
+            type: 'POST',
+            processData: false,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
 
-                var items = [];
-                for (var ln = 0; ln < values['categoryInformation'].length; ln++) {
-                    var item = {
-                    "name": values['categoryInformation'][ln].categoryName,
-                    "y" :   parseFloat(values['categoryInformation'][ln].totalSession/values.total)
-                 };
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
+            success: function (data){
+            var values = JSON.parse(data);
+            var items = [];
+            var series = [];
+
+            var categoryInfo = values['categoryInformation']
+            for (var i = 0; i < categoryInfo.length; i++) {
+                var dataSubCategory = [];
+                var item = {
+                    "name": categoryInfo[i].categoryName,
+                    "y" :   parseFloat(categoryInfo[i].totalSessionCategory/values.totalSession),
+                    "drilldown": categoryInfo[i].categoryName
+                };
                 items.push(item);
-            }
-           var myChart = Highcharts.chart('container', {
-            chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false,
-                type: 'pie'
-            },
-            title: {
-                text: 'Knolx Session Analysis'
-            },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                        style: {
-                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                        }
-                    }
+
+                for(var j = 0; j < categoryInfo[i]["subCategoryInfo"].length; j++ ){
+                    var dataSub = [categoryInfo[i]["subCategoryInfo"][j].subCategoryName,categoryInfo[i]["subCategoryInfo"][j].totalSessionSubCategory ];
+                    dataSubCategory.push(dataSub);
                 }
-            },
-            series: [{
-                name: 'Brands',
-                colorByPoint: true,
-                data: items
-            }]
-            })
+            var drillData = {
+                "name": categoryInfo[i].categoryName ,
+                "id": categoryInfo[i].categoryName,
+                "data" : dataSubCategory
+            };
+        series.push(drillData);
+            }
+            var myChart = Highcharts.chart('container', {
+                     chart: {
+                     type: 'pie'
+                 },
+                     title: {
+                         text: 'Browser market shares. January, 2015 to May, 2015'
+                     },
+                     subtitle: {
+                         text: 'Click the slices to view versions. Source: netmarketshare.com.'
+                     },
+                     plotOptions: {
+                         pie: {
+                             allowPointSelect: true,
+                             cursor: 'pointer',
+                             depth: 35,
+                             dataLabels: {
+                                 enabled: false
+                             },
+                             showInLegend: true
+                         }
+                     },
+
+                     tooltip: {
+                         headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                         pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.percentage:.1f}%</b> of total<br/>'
+                     },
+                     series: [{
+                         name: 'Primary Category',
+                         colorByPoint: true,
+                         data: items
+                     }],
+                     drilldown: {
+                         series: series
+                     },
+                     responsive: {
+                       rules: [{
+                         condition: {
+                           maxWidth: 500
+                         },
+                         chartOptions: {
+                           legend: {
+                             enabled: false
+                           }
+                         }
+                       }]
+                     }
+                 });
            }
         })
 });

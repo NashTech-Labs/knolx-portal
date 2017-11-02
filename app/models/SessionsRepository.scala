@@ -285,36 +285,23 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def updateRating(sessionID: String, score: Double): Future[UpdateWriteResult] = {
+  def updateRating(sessionID: String, scores: List[Double]): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionID))
+    val sessionScore = scores.filterNot(_ == 0).sum
+
+    val updatedRating = sessionScore match {
+      case good if sessionScore > 70.00    => "Good"
+      case average if sessionScore > 40.00 => "Average"
+      case _                               => "Bad"
+    }
+
+    val modifier = BSONDocument("$set" -> BSONDocument("score" -> sessionScore, "rating" -> updatedRating))
 
     collection
-      .flatMap(jsonCollection =>
+      .flatMap { jsonCollection =>
         jsonCollection
-          .find(selector)
-          .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[SessionInfo]]())
-          .flatMap(sessions =>
-            sessions
-              .headOption
-              .fold {
-                Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-              } { session =>
-                val noOfFeedbackResponses = session.noOfFeedbackResponses
-                val currentScore = session.score
-                val updatedScore = ((currentScore * noOfFeedbackResponses) + score) / (noOfFeedbackResponses + 1)
-
-                val updatedRating = updatedScore match {
-                  case good if updatedScore > 70.00    => "Good"
-                  case average if updatedScore > 40.00 => "Average"
-                  case _                               => "Bad"
-                }
-
-                jsonCollection.update(selector, BSONDocument("$set" ->
-                  BSONDocument("score" -> updatedScore, "rating" -> updatedRating), "$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
-              }
-          )
-      )
+          .update(selector, modifier)
+      }
   }
 
 }

@@ -31,6 +31,7 @@ case class FeedbackFormsResponse(email: String,
                                  session: String,
                                  feedbackResponse: List[QuestionResponse],
                                  responseDate: BSONDateTime,
+                                 score: Double,
                                  _id: BSONObjectID = BSONObjectID.generate)
 
 object FeedbackFormsResponseFormat {
@@ -71,7 +72,8 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           "sessiondate" -> feedbackFormsResponse.sessiondate,
           "session" -> feedbackFormsResponse.session,
           "feedbackResponse" -> feedbackFormsResponse.feedbackResponse,
-          "responseDate" -> feedbackFormsResponse.responseDate
+          "responseDate" -> feedbackFormsResponse.responseDate,
+          "score" -> feedbackFormsResponse.score
         ))
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
@@ -110,6 +112,19 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
       ).map(_.flatMap(_ ("email").asOpt[String]))
+  }
+
+  def getScores(sessionId: String)(implicit ex: ExecutionContext): Future[List[Double]] = {
+    val query = Json.obj("sessionId" -> sessionId)
+    val projection = Json.obj("score" -> 1)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(query, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("score").asOpt[Double]))
   }
 
 }

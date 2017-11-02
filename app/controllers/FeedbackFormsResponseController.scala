@@ -196,7 +196,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
               } { userInfo =>
                 val feedbackResponseData = FeedbackFormsResponse(request.user.email, userInfo.coreMember, header.email, request.user.id,
                   feedbackFormResponse.sessionId, header.topic, header.meetUp, header.date,
-                  header.session, response, BSONDateTime(dateTimeUtility.nowMillis))
+                  header.session, response, BSONDateTime(dateTimeUtility.nowMillis), feedbackFormResponse.score)
                 feedbackResponseRepository.upsert(feedbackResponseData).flatMap { result =>
                   updateRatingIfCoreMember(result, request, feedbackFormResponse, userInfo, header)
                 }
@@ -216,18 +216,20 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                        feedbackFormResponse: FeedbackResponse,
                                        userInfo: UserInfo,
                                        header: ResponseHeader): Future[Result] = {
-    if (result.ok && feedbackFormResponse.score != 0 && userInfo.coreMember) {
+    if (/*result.ok && feedbackFormResponse.score != 0 && */userInfo.coreMember) {
       Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-      sessionsRepository.updateRating(feedbackFormResponse.sessionId, feedbackFormResponse.score).map { result =>
-        if (result.ok) {
-          emailManager ! EmailActor.SendEmail(
-            List(request.user.email), fromEmail, "Feedback Successfully Registered!",
-            views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
-          Ok("Feedback form response successfully stored!")
-        } else {
-          Logger.error(s"Something Went wrong when storing feedback form" +
-            s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-          InternalServerError("Something Went Wrong!")
+      feedbackResponseRepository.getScores(feedbackFormResponse.sessionId).flatMap { scores =>
+        sessionsRepository.updateRating(feedbackFormResponse.sessionId, scores).map { result =>
+          if (result.ok) {
+            emailManager ! EmailActor.SendEmail(
+              List(request.user.email), fromEmail, "Feedback Successfully Registered!",
+              views.html.emails.feedbackresponse(header.email, header.topic, header.meetUp).toString)
+            Ok("Feedback form response successfully stored!")
+          } else {
+            Logger.error(s"Something Went wrong when storing feedback form" +
+              s" response feedback for  session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
+            InternalServerError("Something Went Wrong!")
+          }
         }
       }
     } else if (result.ok) {

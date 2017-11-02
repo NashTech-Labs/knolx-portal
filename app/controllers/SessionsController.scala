@@ -1,5 +1,6 @@
 package controllers
 
+import java.text.SimpleDateFormat
 import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
@@ -72,6 +73,8 @@ case class FilterUserSessionInformation(email: String,
                                         startDate: Date,
                                         endDate: Date)
 
+case class FilterSessions(email: String, startDateString: String, endDateString: String)
+
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
 }
@@ -127,6 +130,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "cancelled" -> boolean,
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
+  )
+
+  val filterSessionsForm = Form(
+    mapping(
+      "email" -> nonEmptyText,
+      "startDateString" -> nonEmptyText,
+      "endDateString" -> nonEmptyText
+    )(FilterSessions.apply)(FilterSessions.unapply)
   )
 
 
@@ -450,9 +461,50 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def filterInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Action[AnyContent] = action.async { implicit request =>
-    sessionsRepository.sessionsInTimeRange(filterUserSessionInformation).map { sessions =>
-      Ok(Json.toJson(sessions.head).toString())
-    }
+  def renderAnalyticsPage: Action[AnyContent] = action.async { implicit request =>
+    Future.successful(Ok(views.html.analytics()))
+  }
+
+  def filterInTimeRange: Action[AnyContent] = action.async { implicit request =>
+
+    Logger.info("Please come here too")
+
+    filterSessionsForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for filtering sessions " + formWithErrors)
+        Future.successful(BadRequest(Json.toJson(List("Akshansh")).toString))
+      },
+      filterSessionInfo => {
+        val df = new SimpleDateFormat("yyyy-MM-dd H:mm")
+        Logger.info("--------------------------startDateString = " + filterSessionInfo.startDateString)
+        Logger.info("--------------------------endDateString = " + filterSessionInfo.endDateString)
+
+        val startDate: Date = df.parse(filterSessionInfo.startDateString)
+        val endDate: Date = df.parse(filterSessionInfo.endDateString)
+
+        Logger.info("-----------------------------startDate = " + startDate)
+        Logger.info("-----------------------------endDate  = " + endDate)
+        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(filterSessionInfo.email, startDate, endDate)).map { sessions =>
+
+          Logger.info("-----------------------------List of sessions = " + sessions)
+          val knolxSessions = sessions map { session =>
+            KnolxSession(session._id.stringify,
+              session.userId,
+              new Date(session.date.value),
+              session.session,
+              session.topic,
+              session.email,
+              session.meetup,
+              session.cancelled,
+              "",
+              dateString = new Date(session.date.value).toString,
+              completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
+              expired = new Date(session.expirationDate.value)
+                .before(new java.util.Date(dateTimeUtility.nowMillis)))
+          }
+          Ok(Json.toJson(knolxSessions).toString)
+        }
+      }
+    )
   }
 }

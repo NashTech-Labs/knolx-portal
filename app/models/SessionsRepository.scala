@@ -327,6 +327,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val endDate = filterUserSessionInformation.endDate.getTime
 
     val selector = BSONDocument("email" -> filterUserSessionInformation.email,
+                                "active" -> true,
                                 "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
                                                        "$lte" -> BSONDateTime(endDate)))
 

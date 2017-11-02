@@ -217,7 +217,7 @@ function submittedFeedbackForm() {
         var response = "";
         if (questions[questionNumber]["questionType"] == "MCQ") {
             response = getResponse(responseName);
-            var noOfOptions = getNoOfOptions(responseName) - 1;
+            var noOfOptions = getNoOfOptions(responseName);
             var receivedScore = (getResponseValue(responseName) / noOfOptions) * 100;
             score = ((score * mcqCount) + receivedScore) / (mcqCount + 1);
             mcqCount++;

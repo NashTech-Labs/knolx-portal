@@ -52,9 +52,13 @@ object SessionJsonFormats {
   implicit val sessionFormat = Json.format[SessionInfo]
 
   sealed trait SessionState
+
   case object ExpiringNext extends SessionState
+
   case object ExpiringNextNotReminded extends SessionState
+
   case object SchedulingNext extends SessionState
+
   case object SchedulingNextUnNotified extends SessionState
 
 }
@@ -188,7 +192,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
         "expirationDate" -> updatedRecord.expirationDate,
         "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
-        "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL)
+        "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL,
+        "cancelled" -> updatedRecord.sessionUpdateFormData.cancelled)
     )
 
     collection.flatMap(jsonCollection =>
@@ -290,9 +295,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val sessionScore = scores.filterNot(_ == 0).sum
 
     val updatedRating = sessionScore match {
-      case good if sessionScore > 70.00    => "Good"
-      case average if sessionScore > 40.00 => "Average"
-      case _                               => "Bad"
+      case good if sessionScore >= 60.00    => "Good"
+      case average if sessionScore >= 30.00 => "Average"
+      case _                                => "Bad"
     }
 
     val modifier = BSONDocument("$set" -> BSONDocument("score" -> sessionScore, "rating" -> updatedRating))

@@ -18,23 +18,26 @@
                                         } else {
                                             label-success
                                         } custom-label-type">@sessionType</span></div>
-                                        <p>@session.topic</p></div>
-                                    <div class="col-md-12 feedback-card-by">from</div>
-                                    <div class="col-md-12 feedback-card-author"><p>@session.email</p></div>
+                                        <p>@session.topic</p>
+                                        <p class="feedback-card-presenter">@session.email</p>
+                                    </div>
+                                    <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
+                                    <div class="col-md-12 feedback-card-by">held on</div>
+                                    <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
+                                    <div class="col-md-12 feedback-card-by">expires on</div>
+                                    <div class="col-md-12 feedback-card-author"><p>@session.expirationDate</p></div>
                                     <button type="button" id='@session.id' class="btn feedback-card-button fillFeedback" value='{"topic":"@session.topic","author":"@session.email","session":"@session.session","scheduled":"@session.date","expire":"@session.expirationDate","sessiontype":"@sessionType"}'>
                                         Fill Out</button>
-                                    <input type="hidden" id='@session.id-form' value ='@feedbackForm'/>
-                                    <div class="col-md-12 feedback-card-author more" ><p id='details-@session.id' class="getKnolxDetailsActive">
-                                        More...</p></div>
                                 </div>
+                                    <input type="hidden" id='@session.id-form' value ='@feedbackForm'/>
                             </div>
                         </div>
                     </div>
-                    <div class="modal fade" id="feedbackAttendance-@session.id" role="dialog">
-                        <div class="modal-dialog modal-sm feedbackAttendance-dialog">
+                    <div class="modal fade" id="feedbackAttendance-@session.id" role="dialog" style="padding-right: 0px; !important;">
+                        <div class="modal-dialog modal-feedback-width feedbackAttendance-dialog">
                             <div class="modal-content" id="feedbackAttendance-content">
-                                <div id="feedbackAttendance-header">
-                                    <button type="button" class="close" data-dismiss="modal" id="feedbackAttendance-close">X</button>
+                                <div class="modal-header modal-feedback-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">X</span></button>
                                 </div>
                                 <div class="modal-body" id="feedbackAttendance-body">
                                     <div class= "text-center" id="feedbackAttendance-centerBody" >
@@ -60,16 +63,19 @@
                                         <div class="session-content">
                                             <div class="col-md-12 feedback-card-topic custom-position expired">
                                                 <div class="session-type"><span class="label label-default custom-label-type">@sessionType</span></div>
-                                                <p>@expiredSession.topic</p></div>
-                                            <div class="col-md-12 feedback-card-by">by</div>
-                                            <div class="col-md-12 feedback-card-author expire-color"><p>@expiredSession.email</p></div>
+                                                <p>@expiredSession.topic</p>
+                                                <p class="feedback-card-presenter">@expiredSession.email</p>
+                                            </div>
+                                            <div class="col-md-12 feedback-card-author"><p>@expiredSession.session</p></div>
+                                            <div class="col-md-12 feedback-card-by">held on</div>
+                                            <div class="col-md-12 feedback-card-author"><p>@expiredSession.date</p></div>
+                                            <div class="col-md-12 feedback-card-by">expires on</div>
+                                            <div class="col-md-12 feedback-card-author"><p>@expiredSession.expirationDate</p></div>
                                         </div>
                                         <button type="button" class="btn  feedback-card-expire-button expired">
                                             Expired</button>
-                                        <input type="hidden" id='@expiredSession.id' value='{"topic":"@expiredSession.topic","author":"@expiredSession.email","session":"@expiredSession.session","scheduled":"@expiredSession.date","expire":"@expiredSession.expirationDate","sessiontype":"@sessionType"}'/>
-                                        <div class="col-md-12 feedback-card-author more"><p id='details-@expiredSession.id' class="getKnolxDetailsExpired">
-                                            More...</p></div>
                                     </div>
+                                        <input type="hidden" id='@expiredSession.id' value='{"topic":"@expiredSession.topic","author":"@expiredSession.email","session":"@expiredSession.session","scheduled":"@expiredSession.date","expire":"@expiredSession.expirationDate","sessiontype":"@sessionType"}'/>
                                 </div>
                             </div>
                         </div>
@@ -86,44 +92,7 @@
         <div class="col-md-2" ></div>
     </div>
 
-    <div class="modal fade" id="sessionDetailInfo" role="dialog">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header session-modal-title" id="feedback-info-modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title" id="session-topic" ></h4>
-                </div>
-                <div class="modal-body session-information-modal">
-                    <table class="table table-striped session-table">
-                        <tbody class="session-details">
-                            <tr>
-                                <td>Presenter<br/><span class="session-card-values" id="author" ></span></td>
-                            </tr>
-                            <tr>
-                                <td>Session<br/><span class="session-card-values" id="session"></span></td>
-                            </tr>
-                            <tr>
-                                <td>scheduled<br/><span class="session-card-values" id="scheduled"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Expiration<br/><span class="session-card-values" id="expire"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Type<br/><span class="session-card-values" id="sessiontype"></span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer session-modal-footer">
-                    <button type="button" class="btn btn-default session-modal-footer-btn" id='session-modal-footer-btn' data-dismiss="modal">
-                        Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="@routes.Assets.versioned("javascripts/todayssessioninfo.js")" type="text/javascript"></script>
-
 
     <div class="modal fade" id="session-form-info" role="dialog">
         <div class="modal-dialog modal-lg">

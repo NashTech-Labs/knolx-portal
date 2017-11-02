@@ -17,10 +17,13 @@ import scala.concurrent.Future
 
 case class FeedbackReportHeader(sessionId: String,
                                 topic: String,
+                                presenter: String,
                                 active: Boolean,
                                 session: String,
                                 meetUp: Boolean,
-                                date: String)
+                                date: String,
+                                rating: String,
+                                expired: Boolean)
 
 case class UserFeedbackResponse(email: String, coreMember: Boolean, questionResponse: List[QuestionResponse])
 
@@ -91,8 +94,9 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   }
 
   private def generateSessionReportHeader(session: SessionInfo, active: Boolean): FeedbackReportHeader = {
-    FeedbackReportHeader(session._id.stringify, session.topic, active = active,
-      session.session, session.meetup, new Date(session.date.value).toString)
+    FeedbackReportHeader(session._id.stringify, session.topic, session.email, active = active,
+      session.session, session.meetup, new Date(session.date.value).toString, session.rating,
+      new Date(session.expirationDate.value).before(new java.util.Date(dateTimeUtility.nowMillis)))
   }
 
   def fetchUserResponsesBySessionId(id: String): Action[AnyContent] = userAction.async { implicit request =>
@@ -115,8 +119,9 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
       Logger.error(s" No session found by $id")
       Future.successful(FeedbackReport(None, Nil))
     } { sessionInfo =>
-      val header = FeedbackReportHeader(sessionInfo._id.stringify, sessionInfo.topic, active = false,
-        sessionInfo.session, sessionInfo.meetup, new Date(sessionInfo.date.value).toString)
+      val header = FeedbackReportHeader(sessionInfo._id.stringify, sessionInfo.topic, sessionInfo.email, active = false,
+        sessionInfo.session, sessionInfo.meetup, new Date(sessionInfo.date.value).toString, sessionInfo.rating,
+        new Date(sessionInfo.expirationDate.value).before(new java.util.Date(dateTimeUtility.nowMillis)))
       responses.map { sessionResponses =>
         if (sessionResponses.nonEmpty) {
           val questionAndResponses = sessionResponses.map(feedbackResponse =>

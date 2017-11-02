@@ -6,9 +6,9 @@
     -ms-animation: fadein 0.5s; /* Internet Explorer */
     -o-animation: fadein 0.5s; /* Opera < 12.1 */
     animation: fadein 0.5s;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-top: 1px solid #fff;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -18,7 +18,7 @@
 }
 
 .default-top-margin {
-    margin-top: 30%;
+    margin-top: 10%;
 }
 
 .register-custom-position {
@@ -53,7 +53,7 @@
 }
 
 .top-container {
-    margin-top: 90px;
+    margin-top: 40px;
 }
 
 .login-second {
@@ -91,7 +91,7 @@ input:invalid {
 }
 
 .login-button {
-    background-color: #45B39D;
+    background-color: rgb(125, 158, 192);
     color: #fff;
     border: None;
     outline: none;
@@ -121,7 +121,7 @@ input.input-field.logo:focus {
 }
 
 .login-error {
-    margin-top: 20px;
+    margin-top: 80px;
     text-align: center;
     font-size: 16px;
 }

@@ -1,13 +1,12 @@
 @(session:SessionInfo)(implicit request: Request[_], flash: Flash)
 
-@main("") {
-
-
-<div class="grad1" style="margin-top:95px;">
-
-    <div class="topic-name ">@session.topic</div>
-    <div class="topic-presenter">by @session.email</div>
-
+@main(session.topic) {
+    <div class="grad1" style="margin-top:95px;">
+        <div class="col-md-12 session-content-display-container report-info">
+            <span ><div class="report-other-info">@session.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
+                        </div>
+                        </span>
+    </div>
     <hr class="hr-shadow">
     <div class="row" style="padding-top:20px;">
         <div class="col-md-6 text-center">
@@ -30,7 +29,7 @@
                     </a>
                 </div>
                 <div class="share-style">
-                    <script type="IN/Share" data-url="//@slideShareURL"></script>
+                    <script type="IN/Share" data-url="https://@slideShareURL"></script>
                 </div>
             </div>
 
@@ -56,12 +55,13 @@
                     </a>
                 </div>
                 <div class="share-style">
-                    <script type="IN/Share" data-url="//@youtubeURL"></script>
+                    <script type="IN/Share" data-url="https://@youtubeURL"></script>
                 </div>
             </div>
             }
         </div>
     </div>
+    <div class="feedback-footer"></div>
 </div>
 
 <script src="@routes.Assets.versioned("javascripts/share.js")" type="text/javascript"></script>

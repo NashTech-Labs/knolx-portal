@@ -33,17 +33,17 @@ ul > li > a {
     border-color: transparent;
 }
 
-html, body {
+html,body{
     margin: 0;
     height: 100%;
-    background-color: #352C25;
-    background-image: url('../images/plx.jpg');
+    background-color: #eeeeee;
     background-repeat: no-repeat;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    padding: 0 1%;
+
+
 }
 
 @font-face {
@@ -51,11 +51,13 @@ html, body {
     src: url('font/h3.ttf');
 }
 
+
 nav.navbar {
     -webkit-transition: all 0.5s ease;
     transition: all 0.5s ease;
-    height: 68px;
+    height: 60px;
     padding-top: 5px;
+    background-color: transparent;
 }
 
 nav.navbar.shrink {
@@ -152,7 +154,7 @@ i.fa.fa-user:active {
     background-color: transparent;
     color: #fff;
     font-weight: bolder;
-    text-shadow: 0 0 10px #85929E;
+    text-shadow: 0 0 10px #1076d4;
 }
 
 .navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:focus, .navbar-default .navbar-nav > .open > a:hover {
@@ -219,15 +221,18 @@ i.fa.fa-user:active {
     color: #337ab7;
     text-decoration: none;
     border: 1px solid #ddd;
-    background-color: transparent;
+    background-color: #7d9ec0;
 }
 
-.collapsing, .in {
-    background-color: #352C25;
+.collapsing  {
     box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
 }
 
 .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
-    background-color: #352C25;
+    background-color: #b2afad;
     color: #fff;
+}
+
+.navbar-toggle-background-color {
+    background-color:#eeeeee;
 }

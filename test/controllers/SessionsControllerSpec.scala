@@ -418,7 +418,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
-        "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), meetup = true), BSONDateTime(1498415399000L))
+        "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
@@ -455,7 +455,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
       val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
-        "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), meetup = true), BSONDateTime(1498415399000L))
+        "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject

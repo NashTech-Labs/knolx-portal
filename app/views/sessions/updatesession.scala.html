@@ -2,10 +2,27 @@
 
 @main("Update Session") {
 
-    <div class="row">
+    <div class="row update-error">
         <div class="col-md-4" ></div>
-        <div class="col-md-4 update-outer top-container">
-            <div class="col-md-12 login-first top" > </div>
+        <div class="col-md-4" >
+            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+            <div class="alert alert-danger fade in ">
+                @flash.get("message").fold("")(message => message)
+                @sessionInfo("date").error.map(error => messages(error.message))
+                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
+                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
+                @sessionInfo.globalError.map(_.message)
+            </div>
+            }
+        </div>
+        <div class="col-md-4" ></div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-4" ></div>
+        <div class="col-md-4 update-outer">
+            <!--<div class="col-md-12 login-first top" > </div>-->
             <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
 
                 @helper.CSRF.formField
@@ -115,10 +132,17 @@
                     <div class="col-md-1" ></div>
                 </div>
 
-                <div class="col-md-12 login-third update-second">
+                <div class="col-md-12 login-third">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="youtubeURL" class="update-field"/>
+                        <label class="checkbox-outer" >
+                            <input type='checkbox' name='cancelled' id='cancelled' class='custom-checkbox' value='true'
+                                   @(if(sessionInfo.data.getOrElse("cancelled", "false") == "true") {
+                            """checked="checked""""
+                            })/>
+                            <span class="label_text"></span>
+                            <p class="checkbox-text">Is Cancelled ?</p>
+                        </label>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>
@@ -126,7 +150,15 @@
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <input type="text" name="slideShareURL" id="slideShareURL" value='@sessionInfo.data.get("slideShareURL")' placeholder="slideShareURL" class="update-field"/>
+                        <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="Embed YouTube URL" class="update-field"/>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="text" name="slideShareURL" id="slideShareURL" value='@sessionInfo.data.get("slideShareURL")' placeholder="Embed SlideShare URL" class="update-field"/>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>
@@ -142,22 +174,6 @@
             <div class="col-md-12 create-footer"></div>
         </div>
 
-        <div class="col-md-4" ></div>
-    </div>
-
-    <div class="row update-error">
-        <div class="col-md-4" ></div>
-        <div class="col-md-4" >
-        @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
-            <div class="alert alert-danger fade in ">
-                @flash.get("message").fold("")(message => message)
-                @sessionInfo("date").error.map(error => messages(error.message))
-                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
-                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
-                @sessionInfo.globalError.map(_.message)
-            </div>
-        }
-        </div>
         <div class="col-md-4" ></div>
     </div>
 

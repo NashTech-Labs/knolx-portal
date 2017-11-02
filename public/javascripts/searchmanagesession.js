@@ -44,38 +44,52 @@ function slide(keyword, pageNumber) {
                             "<td>" + sessions[session].email + "</td>";
 
                         if (sessions[session].meetup) {
-                            usersFound += "<td class='active-status'>Yes</td>";
+                            usersFound += '<td><span class="label label-info meetup-session ">Meetup</span></td>';
                         } else {
-                            usersFound += "<td class='suspended'>No</td>";
+                            usersFound += '<td><span class="label label-info knolx-session ">Knolx</span></td>';
                         }
 
                         if (sessions[session].cancelled) {
-                            usersFound += "<td class='active-status'>Yes</td>";
+                            usersFound += "<td class='suspended'>Yes</td>";
                         } else {
-                            usersFound += "<td class='suspended'>No</td>";
+                            usersFound += "<td class='active-status'>No</td>";
                         }
 
-                        if (sessions[session].rating == "") {
-                            usersFound += "<td class='active-status'>N/A</td>";
+                        if (sessions[session].rating == "" || !sessions[session].expired) {
+                            usersFound += "<td>N/A</td>";
                         } else {
-                            usersFound += "<td class='suspended'>" + sessions[session].rating + "</td>";
+                            usersFound += "<td>" + sessions[session].rating + "</td>";
                         }
 
-                        if (sessions[session].completed) {
-                            usersFound += "<td><div><span class='label label-default' >Completed</span></div><td></tr>";
+                        if (sessions[session].completed && !sessions[session].cancelled) {
+                            usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
+                        } else if(sessions[session].cancelled) {
+                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
                         } else {
                             if (sessions[session].feedbackFormScheduled) {
                                 usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>" +
                                     "<a href='/session/" + sessions[session].id + "/cancel' class='cancel-red'>" +
                                     "Cancel</a>" +
-                                    "</div><td></tr>";
+                                    "</div></td>";
                             } else {
                                 usersFound += "<td><div><span class='label label-warning' >Pending</span><br/>" +
                                     "<a href='/session/" + sessions[session].id + "/schedule' class='Schedule-green'>" +
                                     "Schedule</a>" +
-                                    "</div><td></tr>";
+                                    "</div></td>";
                             }
                         }
+
+                        if (sessions[session].completed && !sessions[session].cancelled) {
+                            usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
+                                          "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                                          "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
+                        } else if(sessions[session].cancelled) {
+                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
+                        }
+                        else if(!sessions[session].completed) {
+                            usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span>";
+                        }
+                            usersFound += "</td></tr>"
                     }
 
                     $('#user-found').html(usersFound);

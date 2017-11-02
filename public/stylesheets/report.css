@@ -31,9 +31,9 @@
 
 .report-other-info {
     width: 100%;
+    text-align:center;
     color: #fff;
     font-size: 30px;
-    margin-left: 40%;
 }
 
 .report-type {
@@ -49,9 +49,9 @@
 .empty-reports {
     width: 100%;
     text-align: center;
-    font-size: 80px;
-    color: #a8a8a8;
-    padding-bottom: 80px;
+    font-size: 40px;
+    color: #000000;
+    padding-bottom: 50px;
 }
 
 .empty-reports_text {
@@ -66,4 +66,24 @@
     float:right;
     margin-right:10px;
     border:none;
+    color: #fcfcfc !important;
+}
+
+.report-margin-bottom {
+    margin-bottom: 19px;
+}
+
+.report-checkbox-color {
+    color: #fcfcfc !important;
+}
+
+.report-checkbox-color:before {
+    color: #fcfcfc !important;
+}
+
+.report-response-margin {
+    margin-top: 0px;
+    padding-top: 0px;
+    background-color:rgb(125, 158, 192);
+    border-radius:0px;
 }

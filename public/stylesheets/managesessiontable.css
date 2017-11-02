@@ -1,6 +1,6 @@
 .btn-primary {
     color: #fff;
-    background-color: transparent;
+    background-color: #7d9ec0;
     border: 2px solid #fff;
     font-weight: bold;
     font-family: 'gothic'
@@ -12,4 +12,12 @@ a.btn.btn-sm.btn-primary.btn-create {
 
 .session-custom-search-bar {
     margin-bottom: 0 !important;
+}
+
+.btn-danger {
+    background-color: #c0392b !important;
+}
+
+.label-success {
+    background-color: #27ae60
 }

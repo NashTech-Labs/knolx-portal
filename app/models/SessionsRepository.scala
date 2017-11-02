@@ -51,13 +51,9 @@ object SessionJsonFormats {
   implicit val sessionFormat = Json.format[SessionInfo]
 
   sealed trait SessionState
-
   case object ExpiringNext extends SessionState
-
   case object ExpiringNextNotReminded extends SessionState
-
   case object SchedulingNext extends SessionState
-
   case object SchedulingNextUnNotified extends SessionState
 
 }
@@ -289,8 +285,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def updateRating(sessionID: String, scores: List[Double]): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionID))
+  def updateRating(sessionId: String, scores: List[Double]): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val scoresWithoutZero = scores.filterNot(_ == 0)
     val sessionScore = if(scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
 

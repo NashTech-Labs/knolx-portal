@@ -1,5 +1,6 @@
 package models
 
+import com.sun.corba.se.spi.ior.ObjectId
 import play.api.test.PlaySpecification
 import reactivemongo.bson.BSONObjectID
 
@@ -25,6 +26,12 @@ class CategoriesRepositorySpec extends PlaySpecification {
 
       categories.head.subCategory.head must beEqualTo("Angular Js")
 
+    }
+
+    "delete sub Category" in {
+      val deleteSubCategory = await(categoriesRepository.deleteSubCategory(categoryId.stringify,List("Angular Js")))
+
+      deleteSubCategory.ok must beEqualTo(true)
     }
   }
 

@@ -72,6 +72,7 @@ object SessionValues {
 class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
+                                   categoriesRepository: CategoriesRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
@@ -437,6 +438,26 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       eventualMaybeSession.flatMap(maybeSession =>
         maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
+    }
+  }
+
+  def addCategory : Action[AnyContent] = action.async{ implicit request =>
+    categoriesRepository.getCategories.map{
+      category =>
+        Ok(views.html.category(category))
+    }
+  }
+
+  def deleteSubCategory(id: String, subCategory: List[String]) : Action[AnyContent] =adminAction.async{ implicit request =>
+    categoriesRepository.deleteSubCategory(id,subCategory).flatMap { result =>
+       if (result.ok) {
+          categoriesRepository.getCategories.map{
+            category =>
+              Ok(views.html.category(category))
+          }
+        } else{
+          Future.successful(Ok("Something went wrong! unable to delete category"))
+        }
     }
   }
 }

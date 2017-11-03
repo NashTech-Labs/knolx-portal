@@ -5,11 +5,11 @@ import javax.inject.Inject
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import models.categoriesJsonFormats._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,5 +53,14 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           find(Json.obj()).
           cursor[CategoryInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[CategoryInfo]]()))
+  }
+
+  def deleteSubCategory(id: String,subCategory: List[String])(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+
+    val selector = BSONDocument("_id" -> id)
+    val modifier = BSONDocument("$pull" -> BSONDocument(
+                                "subCategory"-> BSONDocument(
+                                "$in" -> subCategory)))
+    collection.flatMap(_.update(selector, modifier, multi = true))
   }
 }

@@ -62,3 +62,6 @@ GET         /favicon.ico                         controllers.Assets.at(path="/pu
 
 GET          /piechart                           controllers.SessionsController.renderPieChart
 POST         /piechart                           controllers.SessionsController.piechart
+
+GET         /analytics                           controllers.SessionsController.renderAnalyticsPage
+POST        /analytics                           controllers.SessionsController.filterInTimeRange

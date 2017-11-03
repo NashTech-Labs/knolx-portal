@@ -471,9 +471,17 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def piechart: Action[AnyContent] = action.async { implicit request =>
+
     categoriesRepository.getCategories.flatMap { categoryInfo =>
+
       val primaryCategoryList = categoryInfo.map(_.categoryName)
       sessionsRepository.sessions.map { sessions =>
+
+        val date = new Date(sessions.head.date.value)
+        import java.util.Calendar
+        val cal = Calendar.getInstance
+        cal.setTime(date)
+        Logger.error("!!!!!!!!!!! ->" + cal.get(Calendar.MONTH))
 
         val categoryUsedInSession = sessions.groupBy(_.category).keys.toList
 
@@ -486,9 +494,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         }.toList
 
         val categoriesAnalysisInfo = categoriesUsedAnalysisInfo ::: categoryNotUsedInSession.map(category => CategoryInformation(category, 0, Nil))
-
-        Ok(Json.toJson(KnolxSessionInformation(sessions.length, categoriesAnalysisInfo)).toString)
+         Ok(Json.toJson(KnolxSessionInformation(sessions.length, categoriesAnalysisInfo)).toString)
       }
     }
   }
+
 }

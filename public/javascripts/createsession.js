@@ -11,7 +11,6 @@ $( document ).ready(function() {
                     categories+= "<option value='" + values[i].categoryName + "'>" + values[i].categoryName + "</option>";
                     }
                     $("#category").append(categories);
-
                     $("select#category").on('change',function(){
                       var selected = $('#category option:selected').val();
                         for (var i = 0; i < values.length; i++){

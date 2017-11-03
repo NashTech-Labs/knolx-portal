@@ -330,11 +330,15 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val startDate = filterUserSessionInformation.startDate.getTime
     val endDate = filterUserSessionInformation.endDate.getTime
 
-    val selector = BSONDocument("email" -> filterUserSessionInformation.email,
-                                "active" -> true,
-                                "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
-                                                       "$lte" -> BSONDateTime(endDate)))
-
+    val selector = filterUserSessionInformation.email match {
+      case Some(email) =>  BSONDocument ("email" -> email,
+                    "active" -> true,
+                    "date" -> BSONDocument ("$gte" -> BSONDateTime (startDate),
+                    "$lte" -> BSONDateTime (endDate) ) )
+      case None =>  BSONDocument ("active" -> true,
+                    "date" -> BSONDocument ("$gte" -> BSONDateTime (startDate),
+                    "$lte" -> BSONDateTime (endDate) ) )
+    }
     collection
       .flatMap(
         _.find(selector)

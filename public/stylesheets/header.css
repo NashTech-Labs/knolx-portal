@@ -224,11 +224,15 @@ i.fa.fa-user:active {
     background-color: #7d9ec0;
 }
 
-.collapsing {
+.collapsing  {
     box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
 }
 
 .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover {
-    background-color: #352C25;
+    background-color: #b2afad;
     color: #fff;
+}
+
+.navbar-toggle-background-color {
+    background-color:#eeeeee;
 }

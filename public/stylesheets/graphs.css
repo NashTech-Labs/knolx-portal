@@ -1,0 +1,20 @@
+.table-condensed > thead > tr {
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.table-condensed > thead > tr > th {
+    color: black;
+}
+
+.analysis-container {
+    margin: 100px 0px;
+    background-color: #fff;
+}
+
+.graph-panel {
+    min-width: 320px;
+    height: 250px;
+    max-width: 600px;
+    margin: 0 auto;
+}

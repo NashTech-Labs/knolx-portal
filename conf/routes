@@ -60,8 +60,5 @@ GET         /reports/manage/response             controllers.FeedbackFormsReport
 GET         /assets/*file                        controllers.Assets.versioned(path="/public", file: Asset)
 GET         /favicon.ico                         controllers.Assets.at(path="/public/images", file="favicon.png")
 
-GET          /piechart                           controllers.SessionsController.renderPieChart
-POST         /piechart                           controllers.SessionsController.piechart
-
-GET         /analytics                           controllers.SessionsController.renderAnalyticsPage
-POST        /analytics                           controllers.SessionsController.filterInTimeRange
+GET          /analysis                           controllers.AnalysisController.renderPieChart
+POST         /analysis                           controllers.AnalysisController.pieChart

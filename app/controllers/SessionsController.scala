@@ -66,27 +66,12 @@ case class KnolxSession(id: String,
                         completed: Boolean = false,
                         expired: Boolean = false)
 
-case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
-
-case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
-
-case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
-
 case class SessionEmailInformation(email: Option[String], page: Int)
 
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
                                keyword: String)
-
-case class FilterUserSessionInformation(email: Option[String],
-                                        startDate: Date,
-                                        endDate: Date)
-
-case class FilterSessionInformation(startDate: String,
-                                    endDate: String)
-
-case class FilterSessions(email: String, startDateString: String, endDateString: String)
 
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
@@ -107,11 +92,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
   implicit val categoriesFormat: OFormat[CategoryInfo] = Json.format[CategoryInfo]
-  implicit val subCategoryInformation: OFormat[SubCategoryInformation] = Json.format[SubCategoryInformation]
-  implicit val categoryInformation: OFormat[CategoryInformation] = Json.format[CategoryInformation]
-  implicit val knolxSessionInformation: OFormat[KnolxSessionInformation] = Json.format[KnolxSessionInformation]
-  implicit val filterUserSessionInfoFormat: OFormat[FilterUserSessionInformation] = Json.format[FilterUserSessionInformation]
-  implicit val filterSessionInfoFormat: OFormat[FilterSessionInformation] = Json.format[FilterSessionInformation]
   implicit val SessionInfoFormat: OFormat[SessionInfo] = Json.format[SessionInfo]
 
   val sessionSearchForm = Form(
@@ -153,21 +133,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "cancelled" -> boolean,
       "meetup" -> boolean
     )(UpdateSessionInformation.apply)(UpdateSessionInformation.unapply)
-  )
-
-  val filterSessionsForm = Form(
-    mapping(
-      "email" -> nonEmptyText,
-      "startDateString" -> nonEmptyText,
-      "endDateString" -> nonEmptyText
-    )(FilterSessions.apply)(FilterSessions.unapply)
-  )
-
-  val filterSessionsInformationForm = Form(
-    mapping(
-      "startDate" -> nonEmptyText,
-      "endDate" -> nonEmptyText
-    )(FilterSessionInformation.apply)(FilterSessionInformation.unapply)
   )
 
 
@@ -493,96 +458,4 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     Ok(Json.toJson(categories).toString))
   }
 
-
-  def renderPieChart: Action[AnyContent] = action { implicit request =>
-
-    Ok(views.html.piechart())
-  }
-
-  def piechart: Action[AnyContent] = action.async { implicit request =>
-
-    filterSessionsInformationForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request for filtering sessions " + formWithErrors)
-        Future.successful(BadRequest(Json.toJson(List("Akshansh")).toString))
-      }, filterSessionsInformationForm => {
-        Logger.error("################" + filterSessionsInformationForm.startDate )
-        val df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-        Logger.info("--------------------------startaDateString = " + filterSessionsInformationForm.startDate)
-        Logger.info("--------------------------endaDateString = " + filterSessionsInformationForm.endDate)
-        val startDate: Date = df.parse(filterSessionsInformationForm.startDate)
-        val endDate: Date = df.parse(filterSessionsInformationForm.endDate)
-        Logger.info("-----------------------------startDate = " + startDate)
-        Logger.info("-----------------------------endDate  = " + endDate)
-
-
-        categoriesRepository.getCategories.flatMap { categoryInfo =>
-         val primaryCategoryList = categoryInfo.map(_.categoryName)
-
-          sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
-            val categoryUsedInSession = sessions.groupBy(_.category).keys.toList
-            val categoryNotUsedInSession = primaryCategoryList diff categoryUsedInSession
-
-          val totalSubCategoryInfo = sessions.groupBy(_.subCategory).map( b => SubCategoryInformation(b._1,b._2.length)).toList
-            val categoriesUsedAnalysisInfo = sessions.groupBy(_.category).map { sessionInfo =>
-              val subCategoryInfo: List[SubCategoryInformation] = sessionInfo._2.groupBy(_.subCategory).map(
-                sessionBasedSubcategory => SubCategoryInformation(sessionBasedSubcategory._1, sessionBasedSubcategory._2.length)).toList
-              CategoryInformation(sessionInfo._1, sessionInfo._2.length, subCategoryInfo)
-            }.toList
-
-            val categoriesAnalysisInfo = categoriesUsedAnalysisInfo ::: categoryNotUsedInSession.map(category => CategoryInformation(category, 0, Nil))
-            Ok(Json.toJson(KnolxSessionInformation(sessions.length, categoriesAnalysisInfo),totalSubCategoryInfo).toString)
-          }
-        }
-      }
-    )
-  }
-
-
-  def renderAnalyticsPage: Action[AnyContent] = action.async { implicit request =>
-    Future.successful(Ok(views.html.analytics()))
-  }
-
-  def filterInTimeRange: Action[AnyContent] = action.async { implicit request =>
-
-    Logger.info("Please come here too")
-
-    filterSessionsForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request for filtering sessions " + formWithErrors)
-        Future.successful(BadRequest(Json.toJson(List("Akshansh")).toString))
-      },
-      filterSessionInfo => {
-        val df = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-        Logger.info("--------------------------startDateString = " + filterSessionInfo.startDateString)
-        Logger.info("--------------------------endDateString = " + filterSessionInfo.endDateString)
-
-        val startDate: Date = df.parse(filterSessionInfo.startDateString)
-        val endDate: Date = df.parse(filterSessionInfo.endDateString)
-
-        Logger.info("-----------------------------startDate = " + startDate)
-        Logger.info("-----------------------------endDate  = " + endDate)
-        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(Some(filterSessionInfo.email), startDate, endDate)).map { sessions =>
-
-          Logger.info("-----------------------------List of sessions = " + sessions)
-          val knolxSessions = sessions map { session =>
-            KnolxSession(session._id.stringify,
-              session.userId,
-              new Date(session.date.value),
-              session.session,
-              session.topic,
-              session.email,
-              session.meetup,
-              session.cancelled,
-              "",
-              dateString = new Date(session.date.value).toString,
-              completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
-              expired = new Date(session.expirationDate.value)
-                .before(new java.util.Date(dateTimeUtility.nowMillis)))
-          }
-          Ok(Json.toJson(knolxSessions).toString)
-        }
-      }
-    )
-  }
 }

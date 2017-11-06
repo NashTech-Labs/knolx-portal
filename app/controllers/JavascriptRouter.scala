@@ -21,13 +21,12 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.shareContent,
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession,
-      controllers.routes.javascript.SessionsController.filterInTimeRange,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
       controllers.routes.javascript.FeedbackFormsReportController.searchAllResponsesBySessionId,
       controllers.routes.javascript.SessionsController.getCategory,
-      controllers.routes.javascript.SessionsController.piechart
+      controllers.routes.javascript.AnalysisController.pieChart
     )).as("text/javascript")
   }
 

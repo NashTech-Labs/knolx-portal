@@ -1,5 +1,4 @@
 $(function () {
-
     $('#disableDays').click(function () {
         disableDays();
     });
@@ -7,7 +6,6 @@ $(function () {
     $('#radio-days').click(function () {
         enableDays();
     });
-
 });
 
 

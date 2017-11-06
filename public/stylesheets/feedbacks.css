@@ -47,7 +47,7 @@
     margin-bottom: 50px;
     padding-bottom: 50px;
     text-align: center;
-    line-height: 60px;
+    line-height: 30px;
     font-size: 30px;
     color: #fff;
     text-shadow: 0 0px 6px #999;
@@ -97,7 +97,7 @@
     font-size: 18px;
     color: #fff;
     position: relative;
-    margin-top: 25px;
+    margin-top: 8px;
 }
 
 .feedback-card-button:hover {
@@ -133,6 +133,7 @@
     -moz-box-shadow: inset 0 -10px 10px -10px #888;
     -webkit-box-shadow: inset 0 -10px 10px -10px #888;
     box-shadow: inset 0 -10px 10px -10px #888;
+    margin-bottom: 18px;
 }
 
 .accepting-response {
@@ -238,7 +239,7 @@
     font-size: 18px;
     color: #fff;
     position: relative;
-    margin-top: 25px;
+    margin-top: 8px;
     cursor: not-allowed;
 }
 
@@ -613,8 +614,7 @@
     top: 6px;
 }
 .feedbackAttendance-dialog {
-    top: 15%;
-    width: 40vw;
+    top: 24%;
     margin: 0 auto;
 }
 
@@ -626,6 +626,7 @@
     overflow: auto;
     font-family: 'gothic';
     height: 50vh;
+    padding: 0px;
 }
 
 .feedbackAttendance-button {
@@ -666,7 +667,8 @@
 .feedbackAttendance-header-text {
     font-weight: 900;
     font-family: 'gothic';
-    margin: 5vh 0;
+    margin-bottom: 5vh;
+    margin-top: 0vh;
     font-size: 2.5vh;
 }
 
@@ -683,4 +685,21 @@
     border-radius: 6px;
     outline: 0;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+@media (min-width: 768px)
+.modal-feedback-width {
+    width: 380px;
+    top: 24%;
+}
+.feedback-card-presenter {
+    font-size: 16px;
+}
+
+.in {
+    padding-right: 0px !important;
+}
+
+.modal-feedback-header {
+    border-bottom: 0px;
 }

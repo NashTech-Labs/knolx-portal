@@ -60,4 +60,9 @@ GET         /assets/*file                        controllers.Assets.versioned(pa
 GET         /favicon.ico                         controllers.Assets.at(path="/public/images", file="favicon.png")
 
 
-GET         /category                           controllers.SessionsController.addCategory
+GET         /category                           controllers.SessionsController.renderCategoryPage
+
+GET         /addprimarycategory                 controllers.SessionsController.addPrimaryCategory(categoryName: String)
+GET         /addsubcategory                     controllers.SessionsController.addSubCategory(categoryName: String,subCategory: String)
+GET         /modifyprimarycategory              controllers.SessionsController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
+GET         /modifysubcategory              controllers.SessionsController.sentSubCategory

@@ -9,6 +9,7 @@ import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import models.categoriesJsonFormats._
+import play.api.Logger
 import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,16 +38,28 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("categories"))
 
+  def insertCategory(categoryName: String)(implicit ex: ExecutionContext): Future[WriteResult] ={
+    val categoryInfo = CategoryInfo(categoryName, List())
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .insert(categoryInfo))
+  }
+
   def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("categoryName" -> category.categoryName)
     val modifier = BSONDocument("$addToSet" -> BSONDocument(
                                 "subCategory" -> BSONDocument(
                                 "$each" -> category.subCategory)))
+    /*val modifier = BSONDocument("$push" -> BSONDocument(
+      "subCategory" -> category.subCategory
+    ))*/
 
-    collection.flatMap(_.update(selector, modifier, upsert = true))
+    collection.flatMap(_.update(selector, modifier))
   }
 
   def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] = {
+    Logger.info("getCategories")
     collection.
       flatMap(jsonCollection =>
         jsonCollection.
@@ -55,12 +68,38 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[CategoryInfo]]()))
   }
 
-  def deleteSubCategory(id: String,subCategory: List[String])(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+  def modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)(implicit ex : ExecutionContext): Future[UpdateWriteResult] = {
 
-    val selector = BSONDocument("_id" -> id)
+    val selector = BSONDocument("categoryName" -> oldCategoryName)
+    val modifier = BSONDocument("$set" -> BSONDocument(
+      "categoryName" -> newCategoryName
+    ))
+    collection.flatMap(_.update(selector,modifier))
+  }
+
+  def modifySubCategory(categoryName: String, oldSubCategoryName: String,
+                        newSubCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+
+    val selector = BSONDocument("categoryName" -> categoryName,"subCategory" -> oldSubCategoryName)
+    val modifier = BSONDocument("$set" -> BSONDocument(
+                                "subCategory.$" -> newSubCategoryName
+                                ))
+    collection.flatMap(_.update(selector,modifier))
+  }
+
+  def deletePrimaryCategory(categoryName: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("categoryName" -> categoryName)
+
+    collection.flatMap(_.remove(selector))
+  }
+
+
+  def deleteSubCategory(categoryName: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+
+    val selector = BSONDocument("categoryName" -> categoryName)
     val modifier = BSONDocument("$pull" -> BSONDocument(
-                                "subCategory"-> BSONDocument(
-                                "$in" -> subCategory)))
+      "subCategory"-> BSONDocument(
+        "$in" -> subCategory)))
     collection.flatMap(_.update(selector, modifier, multi = true))
   }
 }

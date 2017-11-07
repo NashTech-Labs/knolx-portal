@@ -24,6 +24,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+case class CategoryDetails(categoryName: String, subCategory: String)
+
 case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
@@ -82,6 +84,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+  implicit val categoryDetailsInfoFormat =Json.format[CategoryDetails]
 
   val sessionSearchForm = Form(
     mapping(
@@ -441,15 +444,17 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def addCategory : Action[AnyContent] = action.async{ implicit request =>
+  def renderCategoryPage: Action[AnyContent] = adminAction.async{ implicit request =>
+    Logger.info("render category Page")
     categoriesRepository.getCategories.map{
+      Logger.info("Inside render category page")
       category =>
         Ok(views.html.category(category))
     }
   }
 
-  def deleteSubCategory(id: String, subCategory: List[String]) : Action[AnyContent] =adminAction.async{ implicit request =>
-    categoriesRepository.deleteSubCategory(id,subCategory).flatMap { result =>
+  def deleteSubCategory(categoryName: String, subCategory: String) : Action[AnyContent] =adminAction.async{ implicit request =>
+    categoriesRepository.deleteSubCategory(categoryName ,subCategory).flatMap { result =>
        if (result.ok) {
           categoriesRepository.getCategories.map{
             category =>
@@ -460,4 +465,77 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         }
     }
   }
+
+  def addPrimaryCategory(categoryName: String) : Action[AnyContent] = action.async { implicit request =>
+    categoriesRepository.getCategories.flatMap { result =>
+      if (result.contains(categoryName)) {
+        Future.successful(BadRequest("Two primary category with same cannot exist"))
+      } else {
+        categoriesRepository.insertCategory(categoryName).map { result =>
+          if (result.ok) {
+            Ok("Successful category added")
+          } else {
+            BadRequest("Unsuccessfull attempt")
+          }
+        }
+      }
+    }
+
+    /*categoriesRepository.insertCategory(categoryName).map { result =>
+      if (result.ok) {
+        Ok("Successful category added")
+      } else {
+        BadRequest("Unsuccessfull attempt")
+      }
+    }*/
+  }
+
+  def addSubCategory(categoryName: String,subCategory: String): Action[AnyContent] = action.async { implicit request =>
+    val subCategoryInfo = CategoryInfo(categoryName,List(subCategory))
+    categoriesRepository.upsert(subCategoryInfo).map { result =>
+      if (result.ok) {
+        Ok("Successfully sub-category added")
+      } else {
+        BadRequest("Unsuccessful sub-category added")
+      }
+
+    }
+  }
+
+  def modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String): Action[AnyContent] = action.async { implicit request =>
+
+    categoriesRepository.modifyPrimaryCategory(oldCategoryName,newCategoryName).map { result =>
+      if (result.ok) {
+        Ok("Successfully modified primary category")
+      } else {
+        Logger.info("Error Inside Sessions Controller")
+        BadRequest("Unsuccessfully attempt to modify primary category")
+      }
+
+    }
+  }
+
+  def sentSubCategory() : Action[AnyContent] =action.async { implicit request =>
+    Logger.info("sentSUbcategory")
+    categoriesRepository.getCategories.map { categories =>
+      val c = categories.flatMap(category =>
+        category.subCategory.map(a => CategoryDetails(category.categoryName, a))
+      )
+      Logger.info("The value of c is = " + c)
+      Ok(Json.toJson(c).toString())
+    }
+  }
+
+    def modifySubCategory(categoryName: String,oldSubCategoryName: String,
+                          newSubCategoryName: String) : Action[AnyContent] = action.async { implicit request =>
+      categoriesRepository.modifySubCategory(categoryName,oldSubCategoryName,newSubCategoryName).map {
+        result =>
+          if(result.ok) {
+            Ok("Successfully Modified sub category")
+          } else {
+            BadRequest("Bad request")
+          }
+      }
+    }
+
 }

@@ -1,0 +1,116 @@
+@()(implicit request: Request[_])
+
+@activeLink(currentPath: String) = @{
+if(request.path.equals(currentPath)) "active"
+}
+
+<div class="wrapper">
+    <!-- Sidebar Holder -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+                <span class="main-logo">
+                    <a href="#" class="pull-left logo">
+                    <img src='@routes.Assets.versioned("images/logo2.png")'>
+                </a>
+                    </span>
+                <span class="img-logo">
+                <a href="#"><img src='@routes.Assets.versioned("images/favicon.png")'></a>
+            </span>
+        </div>
+
+        <ul class="list-unstyled components">
+            <li class="@activeLink("/session") alignLinks">
+                <a href="@routes.SessionsController.sessions(1, None)">
+                    <i class="fa fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+
+            @if(SessionHelper.isAdmin) {
+            <li class="alignLinks">
+                <a href="#manageSubmenu" data-toggle="collapse" aria-expanded="false">
+                    <i class="fa fa-wrench"></i><span> Manage</span>
+                    <b class="caret"></b>
+                </a>
+
+                <ul class="collapse list-unstyled" id="manageSubmenu">
+                    <li class="alignLinks">
+                        <a href="@routes.SessionsController.manageSessions(1, None)"><i class="fa fa-hourglass-end" aria-hidden="true"></i>
+                            <span>Sessions</span></a>
+                    </li>
+                    <li class="alignLinks">
+                        <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)"><i class="fa fa-file" aria-hidden="true"></i>
+                            <span>Feedback Forms</span></a>
+                    </li>
+                    <li class="alignLinks">
+                        <a href="@routes.UsersController.manageUser(1, None)"><i class="fa fa-users" aria-hidden="true"></i>
+                            <span>Users</span></a>
+                    </li>
+                    <li class="alignLinks">
+                        <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()"><i class="fa fa-folder-open" aria-hidden="true"></i>
+                            <span>Reports</span></a>
+                    </li>
+                </ul>
+            </li>
+
+            }
+
+            @if(SessionHelper.isLoggedIn) {
+            <li class="@activeLink(routes.UsersController.login().url) alignLinks">
+                <a href="@routes.UsersController.login()"><i class="fa fa-sign-in"></i>
+                    <span>Login</span></a>
+            </li>
+            }
+
+            @if(SessionHelper.isLoggedIn) {
+            <li class="@activeLink(routes.UsersController.register().url) alignLinks">
+                <a href="@routes.UsersController.register()"><i class="fa fa-user-plus"></i>
+                    <span>Register</span></a>
+            </li>
+            } else {
+
+            <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks">
+                <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday"><i class="fa fa-comments"></i>
+                    <span>Feedbacks</span></a>
+            </li>
+
+            <li class="alignLinks">
+                <a href="#user-submenu" data-toggle="collapse" aria-expanded="false">
+                    <i class="fa fa-user-circle-o"></i> <span>@SessionHelper.email.split("@")(0).split('.')(0)
+                    </span>
+                    <b class="caret"></b>
+                </a>
+                <ul class="collapse list-unstyled" id="user-submenu">
+                    <li class="alignLinks">
+                        <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()"><i class="fa fa-table" aria-hidden="true"></i>
+                            <span>My session reports</span></a>
+                    </li>
+                    <li class="alignLinks">
+                        <a href="@routes.UsersController.renderChangePassword()"><i class="fa fa-key" aria-hidden="true"></i>
+                            <span>Reset Password</span></a>
+                    </li>
+                    <li class="alignLinks">
+                        <a href="@routes.UsersController.logout()"><i class="fa fa-sign-out" aria-hidden="true"></i>
+                            <span>Logout</span></a>
+                    </li>
+                </ul>
+            </li>
+            }
+        </ul>
+    </nav>
+
+    <div id="page-wrapper" class="gray-bg">
+        <div class="row border-bottom">
+            <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info navbar-btn">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+
+                </div>
+
+
+            </nav>
+        </div>
+        <div class="wrapper-content">

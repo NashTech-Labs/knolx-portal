@@ -86,6 +86,15 @@
                 </div>
             </div>
         </div>
+        @helper.form(action = routes.YoutubeController.upload("123"), 'enctype -> "multipart/form-data") {
+
+        <input type="file" name="picture">
+
+        <p>
+            <input type="submit">
+        </p>
+
+        }
     </div>
 
    <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>

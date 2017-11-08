@@ -150,6 +150,39 @@
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
+                        <input type="file" name="file" id="youtubeVideo" placeholder="Choose File to upload" class="update-field" value='@sessionInfo.data.get("sessionId")'/>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second" id="upload-success-message" style="display:none;">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <p>The video has been successfully uploaded</p>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second" id="upload-failure-message" style="display:none;">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <p>The video was not uploaded</p>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 update-second-field login-four" >
+                    <div class="col-md-6" >
+                        <input type="button" id="uploadVideo" value="Upload" class="input-field update-button"/>
+                    </div>
+                    <div class="col-md-6" >
+                        <input type="button" id="cancelVideo" value="Cancel" class="input-field update-button"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
                         <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="Embed YouTube URL" class="update-field"/>
                     </div>
                     <div class="col-md-1" ></div>

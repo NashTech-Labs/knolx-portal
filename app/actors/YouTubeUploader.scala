@@ -6,9 +6,7 @@ import javax.inject.{Inject, Named}
 
 import actors.YouTubeUploader._
 import akka.actor.{Actor, ActorRef}
-import com.google.api.client.auth.oauth2.{Credential, StoredCredential}
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
+import com.google.api.client.auth.oauth2.{Credential, StoredCredential, TokenResponse}
 import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
 import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -17,6 +15,7 @@ import com.google.api.client.util.store.{DataStore, FileDataStoreFactory}
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.{Video, VideoSnippet, VideoStatus}
 import com.google.common.collect.Lists
+import com.typesafe.config.ConfigFactory
 import play.api.Logger
 
 import scala.collection.JavaConverters._
@@ -25,7 +24,7 @@ object YouTubeUploader {
   private val httpTransport = new NetHttpTransport
   private val jsonFactory = new JacksonFactory
 
-  private val clientSecretReader = new InputStreamReader(new FileInputStream("/home/sid/Downloads/clients_secrets.json"))
+  private val clientSecretReader = new InputStreamReader(new FileInputStream("/home/knoldus/Downloads/clients_secrets.json"))
   private val clientSecrets = GoogleClientSecrets.load(jsonFactory, clientSecretReader)
 
   private val credentialsDirectory = ".oauth-credentials"
@@ -49,11 +48,18 @@ object YouTubeUploader {
     val flow =
       new GoogleAuthorizationCodeFlow
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+        .setAccessType("offline")
         .setCredentialDataStore(dataStore).build()
 
-    val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
+    val conf = ConfigFactory.load()
 
-    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
+    val refreshToken = conf.getString("youtube.refreshToken")
+
+    val response = new TokenResponse
+
+    response.setRefreshToken(refreshToken)
+
+    flow.createAndStoreCredential(response, "user")
   }
 
   // Commands for YouTubeUploader actor

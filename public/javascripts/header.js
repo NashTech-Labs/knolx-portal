@@ -8,8 +8,20 @@ $(window).scroll(function () {
 });*/
 $(document).ready(function () {
  $('#sidebarCollapse').on('click', function () {
-     $('#sidebar').toggleClass('active');
+     $('#sidebar, #content').toggleClass('active');
  });
+
+ $("#sidebar").niceScroll({
+     cursorcolor: '#53619d',
+     cursorwidth: 0,
+     cursorborder: 'none'
+ });
+
+ $("#sidebar.active").niceScroll({
+      cursorcolor: '#53619d',
+      cursorwidth: 4,
+      cursorborder: 'none'
+  });
 
  function header(){
     var width= $(window).width();
@@ -18,6 +30,5 @@ $(document).ready(function () {
        $('#sidebar').addClass('active');
     }
  }
-
  header();
 });

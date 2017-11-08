@@ -5,12 +5,13 @@ a, a:hover, a:focus {
 }
 
 .navbar {
-    padding-left: 10px;
+    padding: 15px;
     background: #fff;
     border: none;
     border-radius: 0;
-    margin-bottom: 0px;
+    margin-bottom: 40px;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    z-index: 0;
 }
 
 i, span {
@@ -24,8 +25,12 @@ i, span {
 }
 
 #sidebar {
-    min-width: 150px;
-    max-width: 150px;
+    width: 180px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 999;
     background: #2f4050;
     color: #fff;
     transition: all 0.3s;
@@ -90,7 +95,7 @@ i, span {
 
 #sidebar.active .sidebar-header {
     padding-top: 10px;
-    background: #6d7fcc;
+    background: #1ab394;
 }
 
 #sidebar.active ul li a span {
@@ -135,18 +140,6 @@ ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;
     background: #2f4050;
-}
-
-ul.CTAs {
-    padding: 20px;
-}
-
-ul.CTAs a {
-    text-align: center;
-    font-size: 0.9em !important;
-    display: block;
-    border-radius: 5px;
-    margin-bottom: 5px;
 }
 
 .fa-comments {
@@ -230,7 +223,6 @@ html,body{
     background-size: cover;
     height: 100%;
 
-
 }
 
 .pagination > li > a {
@@ -294,6 +286,21 @@ html,body{
     margin: 0 0 0 0px;
   }
 }
-.wrapper-content {
-    overflow: auto;
+#content {
+    width: calc(100% - 180px);
+    padding-top:0px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    position: absolute;
+    top: 0;
+    right: 0;
+    overflow:auto;
+}
+
+#content.active {
+    width: calc(100% - 80px);
+}
+
+.container {
+    max-width: 1100px;
 }

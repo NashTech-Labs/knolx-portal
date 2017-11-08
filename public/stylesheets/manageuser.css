@@ -72,6 +72,7 @@ input::placeholder {
     background-image: none;
     padding: 1%;
     margin-top: 20px;
+    overflow: auto;
 }
 
 .manage-user-container-custom-btn {

@@ -1,23 +1,15 @@
 .table > tbody > tr > td {
-    padding-top: 20px;
-    padding-bottom: 20px;
     text-align: center;
-    font-family: 'gothic';
-    font-size: 17px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
 }
 
 th {
     text-align: center;
-    font-family: 'gothic';
-    font-size: 16px;
-    letter-spacing: 2px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    letter-spacing: 1px;
     color: #fff;
-}
-
-thead > tr {
-    -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
@@ -34,16 +26,14 @@ thead > tr {
 }
 
 .table-responsive {
-    border-radius: 0px 0px 30px 30px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    border-bottom-style: none !important;
-    border-bottom-width: 0px !important;
     overflow-x : inherit;
 }
+
 
 .center {
     display: table;

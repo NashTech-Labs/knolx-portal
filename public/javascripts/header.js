@@ -9,6 +9,7 @@ $(window).scroll(function () {
 $(document).ready(function () {
  $('#sidebarCollapse').on('click', function () {
      $('#sidebar, #content').toggleClass('active');
+     $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
  });
 
  $("#sidebar").niceScroll({
@@ -22,6 +23,8 @@ $(document).ready(function () {
       cursorwidth: 4,
       cursorborder: 'none'
   });
+
+  $('.IsBestAnswer').addClass('bestanswer').removeClass('IsBestAnswer');
 
  function header(){
     var width= $(window).width();

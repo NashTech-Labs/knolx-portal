@@ -1,11 +1,11 @@
 a, a:hover, a:focus {
     color: inherit;
     text-decoration: none;
-    transition: all 0.3s;
+    transition: all 0.5s;
 }
 
 .navbar {
-    padding: 15px;
+    min-height:44px;
     background: #fff;
     border: none;
     border-radius: 0;
@@ -33,13 +33,14 @@ i, span {
     z-index: 999;
     background: #2f4050;
     color: #fff;
-    transition: all 0.3s;
+    transition: width 0.5s ease-in-out;
 }
 
 #sidebar.active {
+    width:80px;
     min-width: 80px;
-    max-width: 80px;
     text-align: center;
+    transition: width 0.5s ease-in-out;
 }
 
 #sidebar.active .sidebar-header .main-logo, #sidebar.active .CTAs {
@@ -142,23 +143,76 @@ ul ul a {
     background: #2f4050;
 }
 
+
+.navbar-top-links li{
+display: inline-block;
+}
+
+.navbar-top-links li ul li{
+display: block;
+}
+
 .fa-comments {
     color: #fff;
     text-shadow: 0 0 10px #85929E;
 }
 
-.fa-home, .fa-sign-in, .fa-wrench {
+.fa-home, .fa-wrench {
     color: #fff;
     font-size: 23px;
     text-shadow: 0 0 10px #85929E;
 }
 
-.fa-user-plus {
-    color: #fff;
-    font-size: 20px;
+.fa-sign-in, .fa-user-plus,.fa-sign-out {
+    color: black;
+    font-size: 16px;
     margin-top: 3px;
+    margin-right:2px;
 }
 
+#sidebarCollapse {
+    background-color: #2f4050;
+    text-align: center;
+    padding: 20px 0;
+    position: relative;
+}
+
+#sidebarCollapse > [class*="fa fa-"] {
+        display: inline-block;
+        cursor: pointer;
+        font-size: 15px;
+        color: white;
+        border: 1px solid #1ab394;
+        padding: 0 5px;
+        line-height: 18px;
+        border-radius: 16px;
+        background-color: #1ab394;
+        position: relative;
+    }
+
+#sidebarCollapse:before {
+        content: "";
+        display: inline-block;
+        height: 0;
+        border-top: 1px solid #1ab394;
+        position: absolute;
+        left: 2px;
+        right: 2px;
+        top: 30px;
+    }
+
+.sidebar.active #sidebarCollapse:before {
+    left: 5px;
+    right: 5px;
+}
+
+.sidebar.active #sidebarCollapse > [class*="fa fa-"] {
+    font-size: 13px;
+    padding: 0 4px;
+    line-height: 15px;
+    border-width: 1px;
+    border-color: #1ab394;
+}
 /* ---------------------------------------------------
     MEDIAQUERIES
 ----------------------------------------------------- */
@@ -222,6 +276,7 @@ html,body{
     -o-background-size: cover;
     background-size: cover;
     height: 100%;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
 }
 
@@ -262,10 +317,10 @@ html,body{
 }
 
  #page-wrapper{
-  -webkit-transition: all 0.4s;
-  -moz-transition: all 0.4s;
-  -o-transition: all 0.4s;
-  transition: all 0.4s;
+  -webkit-transition: all 0.3s;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
 }
 
 #page-wrapper {
@@ -287,20 +342,35 @@ html,body{
   }
 }
 #content {
+    background-color:#eeeeee;
     width: calc(100% - 180px);
     padding-top:0px;
     min-height: 100vh;
-    transition: all 0.3s;
     position: absolute;
     top: 0;
     right: 0;
     overflow:auto;
+    transition: width 0.5s ease-in-out;
 }
 
 #content.active {
     width: calc(100% - 80px);
+    transition: width 0.5s ease-in-out;
 }
 
 .container {
     max-width: 1100px;
+}
+
+.dropdown-menu > li > a {
+    display: block;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #555;
+    padding: 5px 25px 10px 25px;
+}
+
+.dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
+    text-decoration: none;
 }

@@ -526,16 +526,36 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-    def modifySubCategory(categoryName: String,oldSubCategoryName: String,
-                          newSubCategoryName: String) : Action[AnyContent] = action.async { implicit request =>
-      categoriesRepository.modifySubCategory(categoryName,oldSubCategoryName,newSubCategoryName).map {
-        result =>
-          if(result.ok) {
-            Ok("Successfully Modified sub category")
-          } else {
-            BadRequest("Bad request")
-          }
+  def modifySubCategory(categoryName: String,oldSubCategoryName: String,
+                        newSubCategoryName: String) : Action[AnyContent] = action.async { implicit request =>
+    categoriesRepository.modifySubCategory(categoryName,oldSubCategoryName,newSubCategoryName).map {
+      result =>
+        if(result.ok) {
+          Ok("Successfully Modified sub category")
+        } else {
+          BadRequest("Bad request")
+        }
+    }
+  }
+
+  def deletePrimaryCategory(categoryName: String): Action[AnyContent] = action.async { implicit request =>
+    categoriesRepository.deletePrimaryCategory(categoryName) map { result =>
+      if(result.ok) {
+        Ok("Successfully deleted primary category")
+      } else {
+        BadRequest("Bad request")
       }
     }
+  }
+
+  def deleteSubCategory(categoryName: String, subCategory: String): Action[AnyContent] = action.async { implicit request =>
+    categoriesRepository.deleteSubCategory(categoryName, subCategory) map { result =>
+      if(result.ok) {
+        Ok("Successfully deleted sub category")
+      } else {
+        BadRequest("Bad request")
+      }
+    }
+  }
 
 }

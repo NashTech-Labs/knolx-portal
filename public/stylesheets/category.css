@@ -1,0 +1,10 @@
+
+.panel-heading {
+    text-align: center;
+    font-family: 'gothic';
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #fff;
+    background-color: #7C96C0;
+    font-weight: bold;
+}

@@ -1,7 +1,6 @@
 $(function () {
     var oldCategoryName;
-
-    modifySubCategory
+    var oldSubCategoryName;
     $("#add-primary-category").click( function () {
         var categoryName = $("#primary-category").val();
         addCategory(categoryName);
@@ -28,16 +27,10 @@ $(function () {
 
     $("#modify-sub-category").on('input change', function() {
         $("#new-sub-category").show();
-
-        var CompanyName=$(this).val();
-
-        c_id= $(this).html();
-        console.log(c_id);
-        console.log(document.getElementById("modify-sub-category").innerHTML);
-        /*var oldSubCategoryName = document.getElementById(this).text();*/
+        oldSubCategoryName = $(this).val();
     });
 
-    $("#waf").click( function() {
+    $("#memory").click( function() {
 
        var newSubCategoryName = $("#new-sub-category").val();
         var oldSubCategoryName = $("#modify-sub-category").val();

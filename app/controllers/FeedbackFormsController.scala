@@ -26,12 +26,16 @@ case class UpdateFeedbackFormInformation(id: String, name: String, questions: Li
       Some("Form name must not be empty!")
     }
 
-  def validateForm: Option[String] =
-    if (questions.forall(_.options.length >= 2) && questions.nonEmpty) {
+  def validateForm: Option[String] = {
+    val otherOptions = questions map { question =>
+      question.options.filterNot(_ == "Did not attend")
+    }
+    if (otherOptions.forall(_.nonEmpty) && questions.nonEmpty) {
       None
     } else {
       Some("Question must require at least 1 option besides Did not attend!")
     }
+  }
 
   def validateQuestion: Option[String] =
     if (!questions.map(_.question).contains("")) {
@@ -58,12 +62,16 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
       Some("Form name must not be empty!")
     }
 
-  def validateForm: Option[String] =
-    if (questions.forall(_.options.length >= 2) && questions.nonEmpty) {
+  def validateForm: Option[String] = {
+    val otherOptions = questions map { question =>
+      question.options.filterNot(_ == "Did not attend")
+    }
+    if (otherOptions.forall(_.nonEmpty) && questions.nonEmpty) {
       None
     } else {
       Some("Question must require at least 1 option besides Did not attend!")
     }
+  }
 
   def validateQuestion: Option[String] =
     if (!questions.map(_.question).contains("")) {

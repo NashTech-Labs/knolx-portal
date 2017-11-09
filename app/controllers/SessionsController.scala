@@ -334,8 +334,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
 
     val expirationDate = scheduledDate.getDayOfWeek match {
-      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(3)
-      case DayOfWeek.SATURDAY => scheduledDate.plusDays(2)
+      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(4)
+      case DayOfWeek.SATURDAY => scheduledDate.plusDays(3)
       case _: DayOfWeek       => scheduledDate.plusDays(1)
     }
 

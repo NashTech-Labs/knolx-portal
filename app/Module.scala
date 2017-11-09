@@ -36,6 +36,11 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
       .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploader], "YouTubeUploader", Function.identity())))
       .asEagerSingleton
 
+    bind[ActorRef]
+      .annotatedWith(Names.named("YouTubeUploadProgress"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploadProgress], "YouTubeUploadProgress", Function.identity())))
+      .asEagerSingleton
+
     bind(classOf[KnolxControllerComponents])
       .to(classOf[DefaultKnolxControllerComponents])
       .asEagerSingleton()

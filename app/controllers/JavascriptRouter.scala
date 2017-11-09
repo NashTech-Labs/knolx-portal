@@ -25,7 +25,11 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.FeedbackFormsReportController.searchAllResponsesBySessionId,
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession,
-      controllers.routes.javascript.YoutubeController.upload
+      controllers.routes.javascript.YoutubeController.upload,
+      controllers.routes.javascript.YoutubeController.getUploader,
+      controllers.routes.javascript.YoutubeController.cancel,
+      controllers.routes.javascript.YoutubeController.checkIfUploading,
+      controllers.routes.javascript.YoutubeController.getVideoId
     )).as("text/javascript")
   }
 

@@ -28,6 +28,7 @@
                 @helper.CSRF.formField
 
                 <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
                 <div class="col-md-12" >
                     <div class="col-md-1" ></div>
@@ -150,7 +151,7 @@
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <input type="file" name="file" id="youtubeVideo" placeholder="Choose File to upload" class="update-field" value='@sessionInfo.data.get("sessionId")'/>
+                        <input type="file" name="file" id="youtubeVideo" class="update-field" value='@sessionInfo.data.get("sessionId")'/>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>
@@ -167,6 +168,40 @@
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
                         <p>The video was not uploaded</p>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <p>The upload of video was cancelled!</p>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second" id="no-upload-cancel" style="display:none;">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <p>There is no upload going on right now!</p>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second" id="already-upload" style="display:none;">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <p>There is already an upload going on right now!</p>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second" id="show-progress" style="display:none;">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <div class="progress">
+                            <div id="progress" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>

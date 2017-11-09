@@ -6,8 +6,13 @@ import javax.inject.{Inject, Named}
 
 import actors.YouTubeUploader._
 import akka.actor.{Actor, ActorRef}
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration._
 import com.google.api.client.auth.oauth2.{Credential, StoredCredential, TokenResponse}
 import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
+import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -19,6 +24,7 @@ import com.typesafe.config.ConfigFactory
 import play.api.Logger
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 object YouTubeUploader {
   private val httpTransport = new NetHttpTransport
@@ -67,15 +73,22 @@ object YouTubeUploader {
                     is: InputStream,
                     title: String,
                     description: Option[String],
-                    tags: List[String])
+                    tags: List[String],
+                    fileSize: Long)
+
+  case class VideoId(sessionId: String)
+
 }
 
-class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderManager: ActorRef) extends Actor {
+class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderManager: ActorRef,
+                                @Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef) extends Actor {
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty
+  var videoIds: Map[String, String] = Map.empty
 
   def receive: Receive = {
-    case YouTubeUploader.Upload(sessionId, is, title, description, tags) => upload(sessionId, is, title, description, tags)
+    case YouTubeUploader.Upload(sessionId, is, title, description, tags, fileSize) => upload(sessionId, is, title, description, tags, fileSize)
+    case YouTubeUploader.VideoId(sessionId) => sender() ! videoIds.get(sessionId)
     case msg                                                             =>
       Logger.info(s"Received a message in YouTubeUploader that cannot be handled $msg")
   }
@@ -84,19 +97,25 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderMa
              is: InputStream,
              title: String,
              description: Option[String],
-             tags: List[String]): Video = {
+             tags: List[String],
+             fileSize: Long): Video = {
     Logger.info(s"Starting video upload for session $sessionId")
 
     val snippet = new VideoSnippet().setTitle(title).setDescription(description.getOrElse("")).setTags(tags.asJava)
     val videoObjectDefiningMetadata = new Video().setSnippet(snippet).setStatus(status)
-    val mediaContent = new InputStreamContent(videoFileFormat, is)
+    val mediaContent = new InputStreamContent(videoFileFormat, is).setLength(fileSize)
 
     val videoInsert = youtube.videos().insert(part, videoObjectDefiningMetadata, mediaContent)
-    val uploader = videoInsert.getMediaHttpUploader.setDirectUploadEnabled(false)
+    val uploader = videoInsert.getMediaHttpUploader.setDirectUploadEnabled(false).setChunkSize(256 * 0x400)
 
+    youtubeUploadProgress ! Uploader(sessionId, uploader)
     youtubeUploaderManager ! YouTubeUploadManager.RegisterUploadListener(sessionId, uploader)
 
-    videoInsert.execute()
+    val video = videoInsert.execute()
+
+    videoIds += sessionId -> video.getId
+
+    video
   }
 
 }

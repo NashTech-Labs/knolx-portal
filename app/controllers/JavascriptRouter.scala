@@ -28,7 +28,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.addPrimaryCategory,
       controllers.routes.javascript.SessionsController.addSubCategory,
       controllers.routes.javascript.SessionsController.modifyPrimaryCategory,
-      controllers.routes.javascript.SessionsController.sentSubCategory
+      controllers.routes.javascript.SessionsController.modifySubCategory,
+      controllers.routes.javascript.SessionsController.deletePrimaryCategory
     )).as("text/javascript")
   }
 

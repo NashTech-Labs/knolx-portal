@@ -1,16 +1,16 @@
 $(function () {
-    var oldCategoryName;
-    var oldSubCategoryName;
+
+    var oldCategoryName = "";
+    var oldSubCategoryName = "";
     $("#add-primary-category").click( function () {
         var categoryName = $("#primary-category").val();
         addCategory(categoryName);
     });
 
+    var subCategory = "";
     $("#add-sub-category").click( function(){
             var categoryName = $("#search-primary-category").val();
-            var subCategory = $("#sub-category").val();
-
-            console.log(categoryName,subCategory);
+            subCategory = $("#sub-category").val();
             addSubCategory(categoryName,subCategory);
     });
 
@@ -28,18 +28,20 @@ $(function () {
     $("#modify-sub-category").on('input change', function() {
         $("#new-sub-category").show();
         oldSubCategoryName = $(this).val();
+        categoryName = $("#categoryName").val();
     });
 
-    $("#memory").click( function() {
-
+    $("#modify-sub-category-btn").click( function() {
        var newSubCategoryName = $("#new-sub-category").val();
-        var oldSubCategoryName = $("#modify-sub-category").val();
-        var categoryName =  $('#modify-sub-category').html;
-
-        alert(newSubCategoryName + " " + oldSubCategoryName + " " + categoryName)
-        modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName);
-
+       modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName);
     });
+
+    $("#delete-primary-category-btn").click( function() {
+        $("#delete-sub-category").on('input change', function () {
+            categoryName=$(this).val();
+            console.log("categoryName");
+        })
+    })
 
 
 });
@@ -58,12 +60,16 @@ function addCategory(categoryName) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },*/
             success: function(data) {
-                $("#successful-add-category").show();
-                $("#categories").append("<option value='" + categoryName + "'>" + categoryName + "</option>")
+                $("#success-message").show();
+                $("#wrong-message").hide();
                 $("#primary-category").val("");
+                document.getElementById("success-message").text(data);
+                $("#categories").append("<option value='" + categoryName + "'>" + categoryName + "</option>")
             },
             error: function(er) {
-                $("#unsuccessful-add-category").show();
+                $("#success-message").hide();
+                $("#wrong-message").show();
+                document.getElementById("wrong-message").innerHTML = er.responseText
             }
         }
     )
@@ -75,21 +81,24 @@ function addSubCategory(categoryName,subCategory) {
             type: 'GET',
             processData: false,
             contentType: false,
-
             success: function(data) {
-                $("#successful-add-sub-category").show();
-                $("#search-primary-secondary").val("");
-
+                $("#wrong-message").hide();
                 $("#sub-category").val("");
+                $("#succes-message").show();
+                document.getElementById("success-message").text(data);
+                $("#subcategories").append("<option value='" + subCategory + "'>" + categoryName + "</option>");
             },
             error: function(er) {
-                $("#unsuccessful-add-sub-category").show();
+                $("#wrong-message").show();
+                $("#succes-message").hide();
+                document.getElementById("wrong-message").innerHTML=er.responseText;
             }
         }
     )
 }
 
 function modifyPrimaryCategory(oldCategoryName,newCategoryName) {
+
     jsRoutes.controllers.SessionsController.modifyPrimaryCategory(oldCategoryName,newCategoryName).ajax (
         {
             type: 'GET',
@@ -97,20 +106,24 @@ function modifyPrimaryCategory(oldCategoryName,newCategoryName) {
             contentType: false,
 
             success: function(data) {
-                $("#successful-modify-primary-category").show();
+                $("#wrong-message").hide();
                 $("#new-primary-category").val("");
-
+                $("#succes-message").show();
+                document.getElementById("success-message").text(data);
             },
             error: function(er) {
-                $("#unsuccessful-modify-primary-category").show();
+                $("#wrong-message").show();
+                $("#succes-message").hide();
+                $("#new-primary-category").val("");
+                document.getElementById("wrong-message").innerHTML=er.responseText;
             }
         }
     )
 }
-/*
 
 function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName){
 
+    console.log(categoryName + "----" + oldSubCategoryName + "----" + newSubCategoryName)
     jsRoutes.controllers.SessionsController.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).ajax (
         {
             type:'GET',
@@ -118,33 +131,35 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
             contentType: false,
 
             success: function(data) {
-                $("#successful-modify-sub-category").show();
+                $("#wrong-message").hide();
+                $("#succes-message").show();
+                $("#new-sub-category").show();
+                document.getElementById("success-message").text(data);
+                $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
             },
             error: function(er) {
-                $("#unsuccessful-modify-sub-category").show();
-            }
+                $("#wrong-message").show();
+                $("#succes-message").hide();
+                document.getElementById("wrong-message").innerHTML=er.responseText;
+                $("#new-sub-category").val("");
+             },
         }
     )
 }
 
-*/
+function deletePrimaryCategory(categoryName){
 
-function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName){
-
-    jsRoutes.controllers.SessionsController.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).ajax(
+    jsRoutes.controllers.SessionsController.deletePrimaryCategory(categoryName).ajax(
         {
             type:'GET',
             processData: false,
-            contentType: 'application/json',
+            contentType: false,
 
             success: function(data) {
-                var values = JSON.parse(data);
-                console.log(values);
-                $("#successful-modify-sub-category").show();
-                $("#new-sub-category").val("");
-
-
+                console.log(data)
+                $("#wrong-message").hide();
+                $("#succes-message").show();
             },
             error: function(er) {
                 console.log("No subcategory is available")

@@ -65,4 +65,5 @@ GET         /category                           controllers.SessionsController.r
 GET         /addprimarycategory                 controllers.SessionsController.addPrimaryCategory(categoryName: String)
 GET         /addsubcategory                     controllers.SessionsController.addSubCategory(categoryName: String,subCategory: String)
 GET         /modifyprimarycategory              controllers.SessionsController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
-GET         /modifysubcategory              controllers.SessionsController.sentSubCategory
+GET         /modifysubcategory                  controllers.SessionsController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+GET         /deleteprimarycategory              controllers.SessionsController.deletePrimaryCategory(categoryName: String)

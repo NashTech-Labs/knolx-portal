@@ -51,11 +51,8 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val modifier = BSONDocument("$addToSet" -> BSONDocument(
                                 "subCategory" -> BSONDocument(
                                 "$each" -> category.subCategory)))
-    /*val modifier = BSONDocument("$push" -> BSONDocument(
-      "subCategory" -> category.subCategory
-    ))*/
-
     collection.flatMap(_.update(selector, modifier))
+
   }
 
   def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] = {
@@ -80,6 +77,7 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def modifySubCategory(categoryName: String, oldSubCategoryName: String,
                         newSubCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
 
+    Logger.info("Inside models modifySubCategory")
     val selector = BSONDocument("categoryName" -> categoryName,"subCategory" -> oldSubCategoryName)
     val modifier = BSONDocument("$set" -> BSONDocument(
                                 "subCategory.$" -> newSubCategoryName
@@ -92,7 +90,6 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     collection.flatMap(_.remove(selector))
   }
-
 
   def deleteSubCategory(categoryName: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
 

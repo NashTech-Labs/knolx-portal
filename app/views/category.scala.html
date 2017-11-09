@@ -1,137 +1,150 @@
-@(categories :List[CategoryInfo])(implicit request: Request[_])
+@(categories :List[CategoryInfo])(implicit request: Request[_], flash : Flash)
 
 @main("Add Category") {
 
 <div class="container">
-    <div class="panel-group">
-        <div class="panel panel-default" style="margin-top:100px;margin-bottom: 40px">
-            @if(SessionHelper.isSuperUser) {
-            <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Add Category/Sub-Category</div>
-            } else {
-            <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Add Sub-Category</div>
-            }
-            <div class="panel-body">
-                @if(SessionHelper.isSuperUser) {
+    <div class="row" style="margin-bottom: 100px;"></div>
 
-                <div class="col-md-6">
-                    <input type="text" name="category" id="primary-category" placeholder="Add a category!">
-
-                    <label style="display:none;" id="successful-add-category">Category was successfully added</label>
-                    <label style="display:none;" id="unsuccessful-add-category">Category could not be added due to some error</label>
-                    <div style="padding-top: 10px; padding-bottom: 30px;">
-                        <button type="button" id="add-primary-category" class="btn btn-success">Add</button>
-                    </div>
-                </div>
-                }
-
-                <div class="col-md-6">
-                    <input list="categories" id="search-primary-category" name="category" placeholder="Search a category!">
-                    <datalist id="categories">
-                        @for(category <- categories){
-                            <option value="@category.categoryName">@category.categoryName</option>
-                        }
-                    </datalist>
-                    <div style="padding-top: 10px;">
-                        <input type="text" id="sub-category" name="subcategory" placeholder="Add a new Sub-Catgeory">
-                    </div>
-                    <label style="display:none;" id="successful-add-sub-category">Sub-Category was successfully added</label>
-                    <label style="display:none;" id="unsuccessful-add-sub-category">Sub-Category could not be added due to some error</label>
-                    <div style="padding-top: 10px;">
-                        <button type="button" id="add-sub-category" class="btn btn-success">Add</button>
-                    </div>
-                </div>
-
-            </div>
+    <!--<div class="row">
+        &lt;!&ndash;<div class="col-md-1"></div>&ndash;&gt;
+        <div class="col-md-12">
+            <div id="success-message" class=" alert alert-success fade in" style="padding-top: 10px; display: none;"></div>
+            <div id="wrong-message" class="alert alert-danger fade in"style="padding-top: 10px;  display: none;"></div>
         </div>
+        &lt;!&ndash;<div class="col-md-1"></div>&ndash;&gt;
+    </div>-->
 
-        <div class="panel panel-default" style="margin-bottom: 40px;">
-            @if(SessionHelper.isSuperUser) {
-            <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Modify Category/Sub-Category</div>
-            } else {
-            <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Modify Sub-Category</div>
-            }
-            <div class="panel-body">
+    <div class="col-md-12">
+        <div id="success-message" class=" alert alert-success fade in" style="padding-top: 10px; display: none;"></div>
+        <div id="wrong-message" class="alert alert-danger fade in" style="padding-top: 10px;  display: none;"></div>
+        <div class="panel-group">
+
+            <div class="panel panel-default" style="margin-bottom: 40px">
                 @if(SessionHelper.isSuperUser) {
-                <div class ="col-md-6">
-                    <input list="categories" id="modify-primary-category" name="category" placeholder="Select a category!">
-
-                    <datalist id="categories">
-                        @for(category <- categories){
-                        <option value="@category.categoryName">@category.categoryName</option>
-                        }
-
-                    </datalist>
-                    <div>
-                        <input id="new-primary-category" style="display:none" placeholder="Modify primary category">
-                    </div>
-                    <label style="display:none;" id="successful-modify-primary-category">Primary category was successfully modified</label>
-                    <label style="display:none;" id="unsuccessful-modify-primary-category">Primary category could not be modified due to some error</label>
-                    <div style="padding-top: 10px; padding-bottom:30px;">
-                        <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify</button>
-                    </div>
-                </div>
+                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Add Category/Sub-Category</div>
+                } else {
+                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Add Sub-Category</div>
                 }
-                <div class="col-md-6">
-                    <div>
-                        <input list="subcategories" id="modify-sub-category" name="isubcategory" placeholder="Select a sub-category!">
-                        <datalist id="subcategories">
-                            @for(category <- categories){
-                                @for(subCategory <- category.subCategory) {
-                            <option value="@subCategory" class="@category.categoryName" >@category.categoryName</option>
-                            }}
-                        </datalist>
+                <div class="panel-body">
+                    <div class="row">
+                        @if(SessionHelper.isSuperUser) {
 
-                        <div>
-                            <input id="new-sub-category" style="display:none" placeholder="Modify sub-category">
+                        <div class="col-md-6">
+                            <input type="text" name="category" id="primary-category" placeholder="Add a category!">
+                            <div style="padding-top: 10px; padding-bottom: 30px;">
+                                <button type="button" id="add-primary-category" class="btn btn-success">Add</button>
+                            </div>
                         </div>
-                        <label style="display:none;" id="successful-modify-sub-category">Sub-category was successfully modified</label>
-                        <label style="display:none;" id="unsuccessful-modify-sub-category">Sub-category could not be modified due to some error</label>
-                    </div>
-                    <div style="padding-top: 10px;" >
-                        <button type="button" id="waf" class="btn btn-info">Modify</button>
+                        }
+
+                        <div class="col-md-6">
+                            <input list="categories" id="search-primary-category" name="category" placeholder="Search a category!">
+                            <datalist id="categories">
+                                @for(category <- categories){
+                                    <option value="@category.categoryName">@category.categoryName</option>
+                                }
+                            </datalist>
+                            <div style="padding-top: 10px;">
+                                <input type="text" id="sub-category" name="subcategory" placeholder="Add a new Sub-Catgeory" required>
+                            </div>
+                            <div style="padding-top: 10px;">
+                                <button type="button" id="add-sub-category" class="btn btn-success">Add</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
             </div>
-        </div>
 
-        <div class="panel panel-default" style="margin-bottom: 40px">
-            @if(SessionHelper.isSuperUser) {
-            <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Delete Category/Sub-Category</div>
-            } else {
-            <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Delete Sub-Category</div>
-            }
-            <div class="panel-body">
+            <div class="panel panel-default" style="margin-bottom: 40px;">
                 @if(SessionHelper.isSuperUser) {
-
-                <div class="col-md-6" style="padding-top: 10px;">
-                    <input list="Categories" name="Catgeory" placeholder="Select a Catgeory!">
-                    <datalist id="Categories">
-                        @for(category <- categories) {
-                        <option value="@category.categoryName"> @category.categoryName</option>
-                        }
-                    </datalist>
-                    <div style="padding-top: 10px; padding-bottom:30px;">
-                        <button type="button" class="btn btn-danger">Delete</button>
-                    </div>
-                </div>
+                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Modify Category/Sub-Category</div>
+                } else {
+                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Modify Sub-Category</div>
                 }
+                <div class="panel-body">
+                    <div class="row">
+                        @if(SessionHelper.isSuperUser) {
+                        <div class ="col-md-6">
+                            <input list="categories" id="modify-primary-category" name="category" placeholder="Select a category!">
 
-                <div class="col-md-6">
-                    <input list="sub-Category" name="sub-Catgeory" placeholder="Select a sub-Catgeory!">
-                    <datalist id="sub-Category">
-                        @for(category <- categories) {
-                        <option value="@category.categoryName">@category.categoryName</option>
+                            <datalist id="categories">
+                                @for(category <- categories){
+                                <option value="@category.categoryName">@category.categoryName</option>
+                                }
+
+                            </datalist>
+                            <div>
+                                <input id="new-primary-category" style="margin-top: 10px; display:none" placeholder="Modify primary category">
+                            </div>
+                            <div style="padding-top: 10px;">
+                                <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify</button>
+                            </div>
+                        </div>
+
                         }
-                    </datalist>
-                    <div style="padding-top: 10px;">
-                        <button type="button" class="btn btn-danger">Delete</button>
+                        <div class="col-md-6">
+                            <div>
+                                <input list="subcategories" id="modify-sub-category"  name="subcategory" placeholder="Select a sub-category!">
+                                <datalist id="subcategories">
+                                    @for(category <- categories){
+                                        @for(subCategory <- category.subCategory) {
+                                    <input id="categoryName" value="@category.categoryName" hidden>
+                                    <option value="@subCategory" id="dropDownSelect" class="@category.categoryName">@category.categoryName</option>
+                                        }
+                                    }
+                                </datalist>
+                                <div style="padding-top: 10px;">
+                                    <input id="new-sub-category" style="margin-bottom: 10px;display:none" placeholder="Modify sub-category">
+                                </div>
+                            </div>
+                            <div >
+                                <button type="button" id="modify-sub-category-btn" class="btn btn-info">Modify</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="panel panel-default" style="margin-bottom: 40px">
+                @if(SessionHelper.isSuperUser) {
+                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Delete Category/Sub-Category</div>
+                } else {
+                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Delete Sub-Category</div>
+                }
+                <div class="panel-body">
+                    <div class="row">
+                        @if(SessionHelper.isSuperUser) {
+
+                        <div class="col-md-6">
+                            <input list="Categories" id="delete-sub-category" name="Catgeory" placeholder="Select a Category!">
+                            <datalist id="Categories">
+                                @for(category <- categories) {
+                                    <option value="@category.categoryName"> @category.categoryName</option>
+                                }
+                            </datalist>
+
+                            <div style="padding-top: 10px;">
+                                <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete</button>
+                            </div>
+                        </div>
+                        }
+
+                        <div class="col-md-6">
+                            <input list="sub-Category" name="sub-Catgeory" placeholder="Select a sub-Catgeory!">
+                            <datalist id="sub-Category">
+                                @for(category <- categories) {
+                                    @for(subCategory <- category.subCategory) {
+                                <option value="@subCategory">@category.categoryName</option>
+                                }}
+                            </datalist>
+                            <div style="padding-top: 10px;">
+                                <button type="button" class="btn btn-danger">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 </div>
 

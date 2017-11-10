@@ -25,43 +25,39 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   controllerComponents: KnolxControllerComponents,
                                   @Named("YouTubeUploader") youtubeManager: ActorRef,
                                   @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
-                                  @Named("YouTubeUploadProgress")youtubeUploadProgress: ActorRef,
+                                  @Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef,
                                   implicit val mat: Materializer
                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val timeout = Timeout(100 seconds)
 
-  def upload(sessionId: String, fileSize: Long): Action[MultipartFormData[TemporaryFile]] = Action(parse.multipartFormData) { request =>
+  def upload(sessionId: String /*, fileSize: Long*/): Action[MultipartFormData[TemporaryFile]] = Action(parse.multipartFormData) { request =>
     Logger.info("Called uploadFile function" + request)
     request.body.file("file").fold {
       BadRequest("Something went wrong while uploading the file. Please try again.")
     } { videoFile =>
+      val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
+      Logger.info("-------------------------File size = " + fileSize)
       youtubeManager ! YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize)
       Ok("Uploading started!")
     }
   }
 
   def getUploader(sessionId: String): Action[AnyContent] = action.async { implicit request =>
-    //Logger.info("------------------------------Sending ask request to youtube uploader actor")
     (youtubeUploadProgress ? VideoUploader(sessionId)).mapTo[Option[MediaHttpUploader]]
       .map { maybeUploader =>
-        //Logger.info("------------- maybeUploader = " + maybeUploader)
         maybeUploader.fold {
-          //Logger.info("------------------Returning bad request")
           Ok(Json.toJson(0L).toString)
         } { uploader =>
-          //Logger.info("-------------- Returning Ok")
           uploader.getUploadState match {
             case UploadState.MEDIA_COMPLETE => Ok("Upload Completed!")
-            case _ => Ok(Json.toJson(uploader.getProgress).toString)
+            case _                          => Ok(Json.toJson(uploader.getProgress).toString)
           }
-          //Ok(Json.toJson(uploader.getNumBytesUploaded).toString)
         }
       }
   }
 
   def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
-    Logger.info("----------------Inside cancel function")
     youtubeUploadManager ! YouTubeUploadManager.CancelVideoUpload(sessionId)
     youtubeUploadProgress ! RemoveVideoUploader(sessionId)
 
@@ -69,7 +65,6 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def getVideoId(sessionId: String): Action[AnyContent] = action.async { implicit request =>
-    Logger.info("Inside getVideoId function")
     (youtubeManager ? YouTubeUploader.VideoId(sessionId)).mapTo[Option[String]]
       .map { maybeVideoId =>
         maybeVideoId.fold {
@@ -88,7 +83,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         } { uploader =>
           uploader.getUploadState match {
             case UploadState.MEDIA_COMPLETE => BadRequest("Not Uploading any video for current session")
-            case _ => Ok ("Video is uploading")
+            case _                          => Ok("Video is uploading")
           }
         }
       }

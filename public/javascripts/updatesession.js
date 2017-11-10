@@ -1,8 +1,33 @@
 var cancel = false;
 var uploading = false;
 
+Dropzone.autoDiscover = false;
+
 $(function () {
     var sessionId = $('input[name^="sessionId"]').val();
+
+    var myDropzone = new Dropzone("#youtubeVideo", {
+        url: "/youtube/" + sessionId + "/upload",
+        maxFilesize: 2048,
+        dictDefaultMessage: "Drop your file here to upload(or click)",
+        uploadMultiple: false,
+        headers: {
+            'CSRF-Token': document.getElementById('csrfToken').value
+        }
+    });
+
+    myDropzone.on("sending", function(file, xhr, formData) {
+        console.log("File size = " + file.size);
+        xhr.setRequestHeader("filesize", file.size);
+    });
+
+    myDropzone.on("complete", function(file) {
+        uploading = true;
+        console.log("File uploading completed");
+        $("#show-progress").show();
+        showProgress(sessionId);
+    });
+
     console.log("sessionId = " + sessionId);
     $("#upload-success-message").hide();
 
@@ -158,4 +183,10 @@ function fillYoutubeEmbedURL(sessionId) {
                 console.log("An error was encountered = " + er);
             }
         });
+}
+
+function getUrl(file) {
+    var fileSize = file.size;
+    var url = "/youtube/" + sessionId + "/" + fileSize + "/upload";
+    return url;
 }

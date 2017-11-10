@@ -151,7 +151,12 @@
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <input type="file" name="file" id="youtubeVideo" class="update-field" value='@sessionInfo.data.get("sessionId")'/>
+                        <div id="youtubeVideo" class="dropzone" >
+<!--
+                            <input type="file" name="file" id="youtubeVideo" class="update-field " value='@sessionInfo.data.get("sessionId")' />
+-->
+                            <!--<p>Drop files to upload or click</p>-->
+                        </div>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>
@@ -239,11 +244,20 @@
                     <div class="col-md-1" ></div>
                 </div>
             </form>
+
             <div class="col-md-12 create-footer"></div>
         </div>
 
+        <!--<div class="row">
+            <div class="col-md-12">
+                &lt;!&ndash;<div class="dropzone">&ndash;&gt;
+                    <div class="dropzone" id="youtubeVideo" ></div>
+                &lt;!&ndash;</div>&ndash;&gt;
+            </div>
+        </div>-->
         <div class="col-md-4" ></div>
     </div>
+
 
     @feedbackforms.feedbackformpreview()
 

@@ -3,7 +3,7 @@
 @main("All reports") {
     <div class="row">
         <div class="col-md-2" ></div>
-        <div class="col-md-8 feedback-form-display-container report-container">
+        <div class="col-md-8 feedback-form-display-container">
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {

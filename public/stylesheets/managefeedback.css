@@ -1,7 +1,7 @@
 .feedback-form-container {
     background-color: #fff;
     color: #000;
-    margin-top: 100px;
+    margin-top: 20px;
     background-color: #FFF;
     box-shadow: 0 9px 6px -5px #9E9E9E;
     padding: 0px 0px;
@@ -11,7 +11,6 @@
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    border-radius: 30px;
     background-image: url('../images/mesh.svg');
     background-repeat: no-repeat;
     background-size: cover;

@@ -68,10 +68,10 @@ input::placeholder {
 }
 
 .manage-user-container-custom-margin {
-    background-color: transparent;
     background-image: none;
     padding: 1%;
-    margin-top: 100px;
+    margin-top: 20px;
+    overflow: auto;
 }
 
 .manage-user-container-custom-btn {

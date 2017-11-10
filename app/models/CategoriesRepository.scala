@@ -6,9 +6,9 @@ import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import models.categoriesJsonFormats._
+import models.CategoriesJsonFormats._
 import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,17 +18,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
+case class CategoryInfo(categoryName: String, subCategory: List[String], _id: BSONObjectID = BSONObjectID.generate)
 
-/*
-case class SubCategory(subCategory: List[String])
-*/
-
-case class CategoryInfo(categoryName: String,
-                        subCategory: List[String],
-                        _id: BSONObjectID = BSONObjectID.generate
-                       )
-
-object categoriesJsonFormats {
+object CategoriesJsonFormats {
 
   import play.api.libs.json.Json
 
@@ -58,4 +50,5 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           cursor[CategoryInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[CategoryInfo]]()))
   }
+
 }

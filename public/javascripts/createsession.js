@@ -5,6 +5,7 @@ $(document).ready(function () {
             type: "GET",
             processData: false,
             success: function (data) {
+                console.log(data);
                 var values = JSON.parse(data);
                 var categories = "";
                 for (var i = 0; i < values.length; i++) {

@@ -1,6 +1,5 @@
 package controllers
 
-import java.text.SimpleDateFormat
 import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
@@ -15,9 +14,9 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
-import reactivemongo.bson.BSONDateTime
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
 import scala.collection.immutable.IndexedSeq
@@ -68,6 +67,8 @@ case class KnolxSession(id: String,
 
 case class SessionEmailInformation(email: Option[String], page: Int)
 
+case class ModelsCategoryInformation(categoryName: String, subCategory: List[String])
+
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
@@ -91,8 +92,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
-  implicit val categoriesFormat: OFormat[CategoryInfo] = Json.format[CategoryInfo]
-  implicit val SessionInfoFormat: OFormat[SessionInfo] = Json.format[SessionInfo]
+  implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   val sessionSearchForm = Form(
     mapping(
@@ -453,9 +453,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def getCategory: Action[AnyContent] = adminAction.async { implicit request =>
-    categoriesRepository.getCategories.map(categories =>
-      Ok(Json.toJson(categories).toString))
+  def getCategory: Action[AnyContent] = action.async { implicit request =>
+    categoriesRepository.getCategories.map { categories =>
+      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category.categoryName, category.subCategory))
+      Ok(Json.toJson(listOfCategoryInfo).toString)
+    }
   }
 
 }

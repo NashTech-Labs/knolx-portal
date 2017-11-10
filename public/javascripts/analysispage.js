@@ -1,4 +1,5 @@
 $(function () {
+
     var startDate = moment().subtract(3, 'months').startOf('day').format('YYYY-MM-DD HH:mm').toString();
     var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
 
@@ -17,11 +18,11 @@ $(function () {
 });
 
 function analysis(startDate, EndDate) {
-    var formData = new FormData();
-    formData.append("startDate", startDate);
-    formData.append("endDate", EndDate);
+//    var formData = new FormData();
+//    formData.append("startDate", startDate);
+//    formData.append("endDate", EndDate);
 
-    jsRoutes.controllers.KnolxAnalysisController.pieChart().ajax(
+    /*jsRoutes.controllers.KnolxAnalysisController.pieChart().ajax(
         {
             type: 'POST',
             processData: false,
@@ -36,19 +37,43 @@ function analysis(startDate, EndDate) {
 
                 pieChart(values);
 
-                columnChart(values[1]);
+    */
 
-                lineGraph(values[2]);
+     columnChart(startDate, EndDate);
+
+      /*          lineGraph(values[2]);
 
             }, error: function (er) {
             console.log("No session found!");
         }
-        })
+        })*/
 }
 
-function columnChart(data) {
-    var subCategoryData = [];
-    var columnGraphXAxis = [];
+function columnChart(startDate, EndDate) {
+
+        var formData = {
+            "startDate": startDate,
+            "endDate"  : EndDate
+            };
+
+            console.log(JSON.stringify(formData));
+
+    jsRoutes.controllers.KnolxAnalysisController.renderColumnChart().ajax(
+            {
+                type: 'POST',
+                processData: false,
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (data) {
+
+                var values = JSON.parse(data);
+                console.log(values);
+            var subCategoryData = [];
+            var columnGraphXAxis = [];
 
     for (var i = 0; i < data.length; i++) {
         var dataSub = data[i].subCategoryName;
@@ -78,10 +103,16 @@ function columnChart(data) {
             showInLegend: false
         }]
     });
+    }
+    });
 
 }
 
+/*
 function pieChart(values) {
+var formData = new FormData();
+    formData.append("startDate", startDate);
+    formData.append("endDate", EndDate);
     var items = [];
     var series = [];
 
@@ -155,6 +186,9 @@ function pieChart(values) {
 }
 
 function lineGraph(data) {
+var formData = new FormData();
+    formData.append("startDate", startDate);
+    formData.append("endDate", EndDate);
     var seriesData = [];
     var xAxisData = [];
 
@@ -205,3 +239,4 @@ function lineGraph(data) {
         }]
     });
 }
+*/

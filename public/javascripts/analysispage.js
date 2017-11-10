@@ -1,5 +1,4 @@
 $(function () {
-
     var startDate = moment().subtract(3, 'months').startOf('day').format('YYYY-MM-DD HH:mm').toString();
     var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
 
@@ -14,18 +13,15 @@ $(function () {
 
         analysis(startDate, endDate);
     });
-
 });
 
 function analysis(startDate, EndDate) {
-
      pieChart(startDate, EndDate);
      columnChart(startDate, EndDate);
      lineGraph(startDate, EndDate);
 }
 
 function columnChart(startDate, EndDate) {
-
         var formData = {
             "startDate": startDate,
             "endDate"  : EndDate
@@ -76,9 +72,7 @@ function columnChart(startDate, EndDate) {
     });
     }
     });
-
 }
-
 
 function pieChart(startDate, EndDate) {
     var formData = {
@@ -177,7 +171,7 @@ function pieChart(startDate, EndDate) {
 
 function lineGraph(startDate, EndDate) {
 
-        var formData = {
+    var formData = {
             "startDate": startDate,
             "endDate"  : EndDate
             };
@@ -194,16 +188,13 @@ function lineGraph(startDate, EndDate) {
     success: function (data) {
 
     var values = JSON.parse(data);
-
     var seriesData = [];
     var xAxisData = [];
-
     for (var i = 0; i < values.length; i++) {
 
         xAxisData.push(values[i].monthName);
         seriesData.push(values[i].total);
     }
-
     Highcharts.chart('line-graph', {
         chart: {
             type: 'area'
@@ -244,7 +235,6 @@ function lineGraph(startDate, EndDate) {
             data: seriesData
         }]
     });
+    }
+  })
 }
-})
-}
-

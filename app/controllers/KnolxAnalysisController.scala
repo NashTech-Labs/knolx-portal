@@ -25,25 +25,17 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 // Knolx related analytics classes
 case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
-
 case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
-
 case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
-
 case class KnolxMonthlyInfo(monthName: String, total: Int)
-
 case class KnolxAnalysisDateRange(startDate: String, endDate: String)
 
 // User knolx related analytics classes
-case class FilterSessions(email: String, startDateString: String, endDateString: String)
-
 case class FilterUserSessionInformation(email: Option[String], startDate: Date, endDate: Date)
 
 @Singleton
 class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
-                                        usersRepository: UsersRepository,
                                         sessionsRepository: SessionsRepository,
-                                        feedbackFormsRepository: FeedbackFormsRepository,
                                         categoriesRepository: CategoriesRepository,
                                         dateTimeUtility: DateTimeUtility,
                                         controllerComponents: KnolxControllerComponents,
@@ -62,16 +54,6 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
     (JsPath \ "startDate").read[String] and
       (JsPath \ "endDate").read[String]
     ) (KnolxAnalysisDateRange.apply _)
-
-
-  val filterSessionsForm = Form(
-    mapping(
-      "email" -> nonEmptyText,
-      "startDateString" -> nonEmptyText,
-      "endDateString" -> nonEmptyText
-    )(FilterSessions.apply)(FilterSessions.unapply)
-  )
-
 
   def renderAnalysisPage: Action[AnyContent] = userAction { implicit request =>
     Ok(views.html.analysis.analysispage())

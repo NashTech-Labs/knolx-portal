@@ -54,13 +54,9 @@ object SessionJsonFormats {
   implicit val sessionFormat = Json.format[SessionInfo]
 
   sealed trait SessionState
-
   case object ExpiringNext extends SessionState
-
   case object ExpiringNextNotReminded extends SessionState
-
   case object SchedulingNext extends SessionState
-
   case object SchedulingNextUnNotified extends SessionState
 
 }
@@ -118,8 +114,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .find(Json.obj("active" -> true))
           .sort(Json.obj("date" -> 1))
-            .cursor[SessionInfo](ReadPreference.Primary)
-            .collect[List](-1, FailOnError[List[SessionInfo]]()))
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
   def getById(id: String)(implicit ex: ExecutionContext): Future[Option[SessionInfo]] =
     collection
@@ -331,13 +327,13 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val endDate = filterUserSessionInformation.endDate.getTime
 
     val selector = filterUserSessionInformation.email match {
-      case Some(email) =>  BSONDocument ("email" -> email,
-                    "active" -> true,
-                    "date" -> BSONDocument ("$gte" -> BSONDateTime (startDate),
-                    "$lte" -> BSONDateTime (endDate) ) )
-      case None =>  BSONDocument ("active" -> true,
-                    "date" -> BSONDocument ("$gte" -> BSONDateTime (startDate),
-                    "$lte" -> BSONDateTime (endDate) ) )
+      case Some(email) => BSONDocument("email" -> email,
+        "active" -> true,
+        "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
+          "$lte" -> BSONDateTime(endDate)))
+      case None        => BSONDocument("active" -> true,
+        "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
+          "$lte" -> BSONDateTime(endDate)))
     }
     collection
       .flatMap(

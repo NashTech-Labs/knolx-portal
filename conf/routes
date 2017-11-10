@@ -61,5 +61,7 @@ GET         /assets/*file                        controllers.Assets.versioned(pa
 GET         /favicon.ico                         controllers.Assets.at(path="/public/images", file="favicon.png")
 
 # Analysis
-GET          /knolx/analysis                           controllers.KnolxAnalysisController.renderAnalysisPage
-POST         /knolx/analysis/columnchart               controllers.KnolxAnalysisController.renderColumnChart
+GET          /knolx/analysis                     controllers.KnolxAnalysisController.renderAnalysisPage
+POST         /knolx/analysis/columnchart         controllers.KnolxAnalysisController.renderColumnChart
+POST         /knolx/analysis/piechart            controllers.KnolxAnalysisController.renderPieChart
+POST         /knolx/analysis/linechart           controllers.KnolxAnalysisController.renderLineChart

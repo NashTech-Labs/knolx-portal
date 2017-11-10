@@ -25,14 +25,18 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 // Knolx related analytics classes
 case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
+
 case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
+
 case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
 
 case class KnolxMonthlyInfo(monthName: String, total: Int)
+
 case class KnolxAnalysisDateRange(startDate: String, endDate: String)
 
 // User knolx related analytics classes
 case class FilterSessions(email: String, startDateString: String, endDateString: String)
+
 case class FilterUserSessionInformation(email: Option[String], startDate: Date, endDate: Date)
 
 @Singleton
@@ -52,21 +56,12 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
   implicit val knolxSessionInformation: OFormat[KnolxSessionInformation] = Json.format[KnolxSessionInformation]
   implicit val filterUserSessionInfoFormat: OFormat[FilterUserSessionInformation] = Json.format[FilterUserSessionInformation]
   implicit val filterSessionInfoFormat: OFormat[KnolxAnalysisDateRange] = Json.format[KnolxAnalysisDateRange]
-  implicit val SessionInfoFormat: OFormat[SessionInfo] = Json.format[SessionInfo]
   implicit val knolxMonthlyInfo: OFormat[KnolxMonthlyInfo] = Json.format[KnolxMonthlyInfo]
-
-  implicit val knolxAnalysisDateRangeWrites: Writes[KnolxAnalysisDateRange] = (
-    (JsPath \ "startDate").write[String] and
-      (JsPath \ "endDate").write[String]
-    )(unlift(KnolxAnalysisDateRange.unapply))
 
   implicit val knolxAnalysisDateRangeReads: Reads[KnolxAnalysisDateRange] = (
     (JsPath \ "startDate").read[String] and
       (JsPath \ "endDate").read[String]
-    )(KnolxAnalysisDateRange.apply _)
-
-
-
+    ) (KnolxAnalysisDateRange.apply _)
 
 
   val filterSessionsForm = Form(
@@ -77,23 +72,16 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
     )(FilterSessions.apply)(FilterSessions.unapply)
   )
 
-  /*val filterSessionsInformationForm = Form(
-    mapping(
-      "startDate" -> nonEmptyText,
-      "endDate" -> nonEmptyText
-    )(KnolxAnalysisDateRange.apply)(KnolxAnalysisDateRange.unapply)
-  )*/
-
 
   def renderAnalysisPage: Action[AnyContent] = userAction { implicit request =>
     Ok(views.html.analysis.analysispage())
   }
 
-  /*def pieChart: Action[AnyContent] = userAction.async { implicit request =>
-    filterSessionsInformationForm.bindFromRequest.fold(
+  def renderPieChart: Action[JsValue] = action(parse.json).async { implicit request =>
+    request.body.validate[KnolxAnalysisDateRange].fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for filtering sessions " + formWithErrors)
-        Future.successful(BadRequest(Json.toJson(List("Akshansh")).toString))
+        Future.successful(BadRequest(JsError.toJson(formWithErrors)))
       }, filterSessionsInformationForm => {
 
         val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
@@ -107,24 +95,23 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
             val categoryUsedInSession = sessions.groupBy(_.category).keys.toList
             val categoryNotUsedInSession = primaryCategoryList diff categoryUsedInSession
 
-            val categoriesUsedAnalysisInfo = sessions.groupBy(_.category).map { sessionInfo =>
-              val subCategoryInfo: List[SubCategoryInformation] = sessionInfo._2.groupBy(_.subCategory).map(
-                sessionBasedSubcategory => SubCategoryInformation(sessionBasedSubcategory._1, sessionBasedSubcategory._2.length)).toList
-              CategoryInformation(sessionInfo._1, sessionInfo._2.length, subCategoryInfo)
+            val categoriesUsedAnalysisInfo = sessions.groupBy(_.category).map { case (categoryName, categoryBasedSession) =>
+              val subCategoryInfo: List[SubCategoryInformation] = categoryBasedSession.groupBy(_.subCategory).map {
+                case (subCategoryName, sessionBasedSubcategory) => SubCategoryInformation(subCategoryName, sessionBasedSubcategory.length)
+              }.toList
+              CategoryInformation(categoryName, categoryBasedSession.length, subCategoryInfo)
             }.toList
 
             val categoriesAnalysisInfo = categoriesUsedAnalysisInfo ::: categoryNotUsedInSession.map(category => CategoryInformation(category, 0, Nil))
             Ok(Json.toJson(KnolxSessionInformation(sessions.length,
-              categoriesAnalysisInfo), getAllSubCategoryInfo(sessions),
-              getMonthlyInfo(sessions)).toString)
+              categoriesAnalysisInfo)).toString)
           }
         }
       }
     )
-  }*/
+  }
 
-  def renderColumnChart: Action[JsValue] = Action(parse.json).async{ implicit request =>
-    Logger.error("-------->>>>>>>>>>>>>" + request.body)
+  def renderColumnChart: Action[JsValue] = action(parse.json).async { implicit request =>
     request.body.validate[KnolxAnalysisDateRange].fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for filtering sessions " + formWithErrors)
@@ -135,21 +122,35 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         val endDate: Date = dateFormat.parse(filterSessionsInformationForm.endDate)
 
         sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
-          val subCategoryList = sessions.groupBy(_.subCategory).map { listOfSubCategory =>
-            SubCategoryInformation(listOfSubCategory._1, listOfSubCategory._2.length)
+          val subCategoryList = sessions.groupBy(_.subCategory).map { case (subCategory, session) =>
+            SubCategoryInformation(subCategory, session.length)
           }.toList
           Ok(Json.toJson(subCategoryList).toString)
         }
       })
   }
 
-  /*private def getMonthlyInfo(sessions: List[SessionInfo]): List[KnolxMonthlyInfo] = {
-    val monthFormat = new SimpleDateFormat("MMMM")
-    val sessionMonthList = sessions.map(session => monthFormat.format(new Date(session.date.value)))
+  def renderLineChart: Action[JsValue] = action(parse.json).async { implicit request =>
+    request.body.validate[KnolxAnalysisDateRange].fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for filtering sessions " + formWithErrors)
+        Future.successful(BadRequest(JsError.toJson(formWithErrors)))
+      }, filterSessionsInformationForm => {
+        val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+        val startDate: Date = dateFormat.parse(filterSessionsInformationForm.startDate)
+        val endDate: Date = dateFormat.parse(filterSessionsInformationForm.endDate)
 
-    sessionMonthList.groupBy(identity).map { case (month, monthlySessions) =>
-      KnolxMonthlyInfo(month, monthlySessions.length)
-    }.toList
+        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
+
+          val monthFormat = new SimpleDateFormat("MMMM")
+          val sessionMonthList = sessions.map(session => monthFormat.format(new Date(session.date.value)))
+
+          val sessionMonthInfo = sessionMonthList.groupBy(identity).map { case (month, monthlySessions) =>
+            KnolxMonthlyInfo(month, monthlySessions.length)
+          }.toList
+          Ok(Json.toJson(sessionMonthInfo).toString)
+        }
+      })
   }
-*/
+
 }

@@ -18,35 +18,10 @@ $(function () {
 });
 
 function analysis(startDate, EndDate) {
-//    var formData = new FormData();
-//    formData.append("startDate", startDate);
-//    formData.append("endDate", EndDate);
 
-    /*jsRoutes.controllers.KnolxAnalysisController.pieChart().ajax(
-        {
-            type: 'POST',
-            processData: false,
-            contentType: false,
-            data: formData,
-            beforeSend: function (request) {
-                var csrfToken = document.getElementById('csrfToken').value;
-                return request.setRequestHeader('CSRF-Token', csrfToken);
-            },
-            success: function (data) {
-                var values = JSON.parse(data);
-
-                pieChart(values);
-
-    */
-
+     pieChart(startDate, EndDate);
      columnChart(startDate, EndDate);
-
-      /*          lineGraph(values[2]);
-
-            }, error: function (er) {
-            console.log("No session found!");
-        }
-        })*/
+     lineGraph(startDate, EndDate);
 }
 
 function columnChart(startDate, EndDate) {
@@ -55,9 +30,6 @@ function columnChart(startDate, EndDate) {
             "startDate": startDate,
             "endDate"  : EndDate
             };
-
-            console.log(JSON.stringify(formData));
-
     jsRoutes.controllers.KnolxAnalysisController.renderColumnChart().ajax(
             {
                 type: 'POST',
@@ -71,13 +43,12 @@ function columnChart(startDate, EndDate) {
                 success: function (data) {
 
                 var values = JSON.parse(data);
-                console.log(values);
             var subCategoryData = [];
             var columnGraphXAxis = [];
 
-    for (var i = 0; i < data.length; i++) {
-        var dataSub = data[i].subCategoryName;
-        var sessionSub = data[i].totalSessionSubCategory;
+    for (var i = 0; i < values.length; i++) {
+        var dataSub = values[i].subCategoryName;
+        var sessionSub = values[i].totalSessionSubCategory;
 
         subCategoryData.push(dataSub);
         columnGraphXAxis.push(sessionSub);
@@ -108,21 +79,37 @@ function columnChart(startDate, EndDate) {
 
 }
 
-/*
-function pieChart(values) {
-var formData = new FormData();
-    formData.append("startDate", startDate);
-    formData.append("endDate", EndDate);
-    var items = [];
-    var series = [];
 
-    var categoryInfo = values[0]['categoryInformation'];
+function pieChart(startDate, EndDate) {
+    var formData = {
+            "startDate": startDate,
+            "endDate"  : EndDate
+            };
+
+    jsRoutes.controllers.KnolxAnalysisController.renderPieChart().ajax(
+                {
+                    type: 'POST',
+                    processData: false,
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    beforeSend: function (request) {
+                        var csrfToken = document.getElementById('csrfToken').value;
+                        return request.setRequestHeader('CSRF-Token', csrfToken);
+                    },
+                    success: function (data) {
+                    console.log(data);
+                    var values = JSON.parse(data);
+                    console.log(values);
+                    var items = [];
+                     var series = [];
+
+    var categoryInfo = values['categoryInformation'];
 
     for (var i = 0; i < categoryInfo.length; i++) {
         var dataSubCategory = [];
         var item = {
             "name": categoryInfo[i].categoryName,
-            "y": parseFloat(categoryInfo[i].totalSessionCategory / values[0].totalSession),
+            "y": parseFloat(categoryInfo[i].totalSessionCategory / values.totalSession),
             "drilldown": categoryInfo[i].categoryName
         };
         items.push(item);
@@ -184,18 +171,37 @@ var formData = new FormData();
         }
     });
 }
+})
+}
 
-function lineGraph(data) {
-var formData = new FormData();
-    formData.append("startDate", startDate);
-    formData.append("endDate", EndDate);
+
+function lineGraph(startDate, EndDate) {
+
+        var formData = {
+            "startDate": startDate,
+            "endDate"  : EndDate
+            };
+    jsRoutes.controllers.KnolxAnalysisController.renderLineChart().ajax(
+    {
+        type: 'POST',
+        processData: false,
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+    beforeSend: function (request) {
+        var csrfToken = document.getElementById('csrfToken').value;
+        return request.setRequestHeader('CSRF-Token', csrfToken);
+    },
+    success: function (data) {
+
+    var values = JSON.parse(data);
+
     var seriesData = [];
     var xAxisData = [];
 
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < values.length; i++) {
 
-        xAxisData.push(data[i].monthName);
-        seriesData.push(data[i].total);
+        xAxisData.push(values[i].monthName);
+        seriesData.push(values[i].total);
     }
 
     Highcharts.chart('line-graph', {
@@ -239,4 +245,6 @@ var formData = new FormData();
         }]
     });
 }
-*/
+})
+}
+

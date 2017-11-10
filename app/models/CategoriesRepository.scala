@@ -42,13 +42,12 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] = {
+  def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] =
     collection.
       flatMap(jsonCollection =>
         jsonCollection.
           find(Json.obj()).
           cursor[CategoryInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[CategoryInfo]]()))
-  }
 
 }

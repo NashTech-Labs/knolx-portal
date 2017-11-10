@@ -47,16 +47,16 @@ case class FilterSessionInformation(startDate: String,
 case class FilterSessions(email: String, startDateString: String, endDateString: String)
 
 @Singleton
-class AnalysisController @Inject()(messagesApi: MessagesApi,
-                                   usersRepository: UsersRepository,
-                                   sessionsRepository: SessionsRepository,
-                                   feedbackFormsRepository: FeedbackFormsRepository,
-                                   categoriesRepository: CategoriesRepository,
-                                   dateTimeUtility: DateTimeUtility,
-                                   controllerComponents: KnolxControllerComponents,
-                                   @Named("SessionsScheduler") sessionsScheduler: ActorRef,
-                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef
-                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
+                                        usersRepository: UsersRepository,
+                                        sessionsRepository: SessionsRepository,
+                                        feedbackFormsRepository: FeedbackFormsRepository,
+                                        categoriesRepository: CategoriesRepository,
+                                        dateTimeUtility: DateTimeUtility,
+                                        controllerComponents: KnolxControllerComponents,
+                                        @Named("SessionsScheduler") sessionsScheduler: ActorRef,
+                                        @Named("UsersBanScheduler") usersBanScheduler: ActorRef
+                                       ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val subCategoryInformation: OFormat[SubCategoryInformation] = Json.format[SubCategoryInformation]
   implicit val categoryInformation: OFormat[CategoryInformation] = Json.format[CategoryInformation]
@@ -123,9 +123,9 @@ class AnalysisController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  private def getAllSubCategoryInfo(sessions : List[SessionInfo]): List[SubCategoryInformation] ={
+  private def getAllSubCategoryInfo(sessions: List[SessionInfo]): List[SubCategoryInformation] = {
 
-    sessions.groupBy(_.subCategory).map{ listOfSubCategory =>
+    sessions.groupBy(_.subCategory).map { listOfSubCategory =>
       SubCategoryInformation(listOfSubCategory._1, listOfSubCategory._2.length)
     }.toList
   }
@@ -135,9 +135,9 @@ class AnalysisController @Inject()(messagesApi: MessagesApi,
     val monthFormat = new SimpleDateFormat("MMMM")
     val sessionMonthList = sessions.map(session =>
       monthFormat.format(new Date(session.date.value)))
-    sessionMonthList.groupBy(identity).map( sessionMonth =>
-        KnolxMonthlyInfo(sessionMonth._1,sessionMonth._2.length)
-      ).toList
-    }
+    sessionMonthList.groupBy(identity).map(sessionMonth =>
+      KnolxMonthlyInfo(sessionMonth._1, sessionMonth._2.length)
+    ).toList
+  }
 
 }

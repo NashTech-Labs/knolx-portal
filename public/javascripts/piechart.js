@@ -24,7 +24,7 @@ function analysis(startDate, EndDate) {
             formData.append("startDate", startDate);
             formData.append("endDate", EndDate);
 
-        jsRoutes.controllers.AnalysisController.pieChart().ajax(
+        jsRoutes.controllers.KnolxAnalysisController.pieChart().ajax(
         {
            type: 'POST',
             processData: false,

@@ -1,5 +1,6 @@
 package utilities
 
+import java.text.SimpleDateFormat
 import java.time._
 import java.util.{Date, TimeZone}
 
@@ -11,6 +12,8 @@ class DateTimeUtility {
   val ISTZoneId = ZoneId.of("Asia/Kolkata")
   val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
+  val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+  val monthFormat = new SimpleDateFormat("MMMM")
 
   def nowMillis: Long =
     System.currentTimeMillis
@@ -39,4 +42,13 @@ class DateTimeUtility {
   def toMillis(localDateTime: LocalDateTime): Long =
     localDateTime.toEpochSecond(ZoneOffset) * 1000
 
+  def dateToLocalDateTime(millis : Long): Long =
+    Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime.toEpochSecond(ZoneOffset) * 1000
+
+  def getMonth(millis : Long): String =
+    monthFormat.format(new Date(millis))
+
+  def parseDateString(date: String): Long =
+    dateFormat.parse(date).getTime
 }
+

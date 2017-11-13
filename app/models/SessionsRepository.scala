@@ -310,9 +310,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
   def sessionsInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Future[List[SessionInfo]] = {
-    val startDate = filterUserSessionInformation.startDate.getTime
-    val endDate = filterUserSessionInformation.endDate.getTime
-
+    val startDate = dateTimeUtility.dateToLocalDateTime(filterUserSessionInformation.startDate)
+    val endDate = dateTimeUtility.dateToLocalDateTime(filterUserSessionInformation.endDate)
     val selector = filterUserSessionInformation.email match {
       case Some(email) => BSONDocument("email" -> email,
         "active" -> true,

@@ -38,13 +38,13 @@ function columnChart(startDate, EndDate) {
                 },
                 success: function (data) {
 
-                var values = JSON.parse(data);
+
             var subCategoryData = [];
             var columnGraphXAxis = [];
 
-    for (var i = 0; i < values.length; i++) {
-        var dataSub = values[i].subCategoryName;
-        var sessionSub = values[i].totalSessionSubCategory;
+    for (var i = 0; i < data.length; i++) {
+        var dataSub = data[i].subCategoryName;
+        var sessionSub = data[i].totalSessionSubCategory;
 
         subCategoryData.push(dataSub);
         columnGraphXAxis.push(sessionSub);
@@ -92,18 +92,17 @@ function pieChart(startDate, EndDate) {
                     },
                     success: function (data) {
                     console.log(data);
-                    var values = JSON.parse(data);
-                    console.log(values);
+
                     var items = [];
                      var series = [];
 
-    var categoryInfo = values['categoryInformation'];
+    var categoryInfo = data['categoryInformation'];
 
     for (var i = 0; i < categoryInfo.length; i++) {
         var dataSubCategory = [];
         var item = {
             "name": categoryInfo[i].categoryName,
-            "y": parseFloat(categoryInfo[i].totalSessionCategory / values.totalSession),
+            "y": parseFloat(categoryInfo[i].totalSessionCategory / data.totalSession),
             "drilldown": categoryInfo[i].categoryName
         };
         items.push(item);
@@ -187,13 +186,13 @@ function lineGraph(startDate, EndDate) {
     },
     success: function (data) {
 
-    var values = JSON.parse(data);
+
     var seriesData = [];
     var xAxisData = [];
-    for (var i = 0; i < values.length; i++) {
+    for (var i = 0; i < data.length; i++) {
 
-        xAxisData.push(values[i].monthName);
-        seriesData.push(values[i].total);
+        xAxisData.push(data[i].monthName);
+        seriesData.push(data[i].total);
     }
     Highcharts.chart('line-graph', {
         chart: {

@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
-import controllers.UpdateSessionInformation
+import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -25,6 +25,8 @@ case class SessionInfo(userId: String,
                        email: String,
                        date: BSONDateTime,
                        session: String,
+                       category: String,
+                       subCategory: String,
                        feedbackFormId: String,
                        topic: String,
                        feedbackExpirationDays: Int,
@@ -52,9 +54,13 @@ object SessionJsonFormats {
   implicit val sessionFormat = Json.format[SessionInfo]
 
   sealed trait SessionState
+
   case object ExpiringNext extends SessionState
+
   case object ExpiringNextNotReminded extends SessionState
+
   case object SchedulingNext extends SessionState
+
   case object SchedulingNextUnNotified extends SessionState
 
 }
@@ -183,6 +189,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "date" -> BSONDateTime(updatedRecord.sessionUpdateFormData.date.getTime),
         "topic" -> updatedRecord.sessionUpdateFormData.topic,
         "session" -> updatedRecord.sessionUpdateFormData.session,
+        "category" -> updatedRecord.sessionUpdateFormData.category,
+        "subCategory" -> updatedRecord.sessionUpdateFormData.subCategory,
         "feedbackFormId" -> updatedRecord.sessionUpdateFormData.feedbackFormId,
         "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
@@ -286,36 +294,58 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def updateRating(sessionID: String, score: Double): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionID))
+  def updateRating(sessionId: String, scores: List[Double]): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val scoresWithoutZero = scores.filterNot(_ == 0)
+    val sessionScore = if(scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
+
+    val updatedRating = sessionScore match {
+      case good if sessionScore >= 60.00    => "Good"
+      case average if sessionScore >= 30.00 => "Average"
+      case _                                => "Bad"
+    }
+
+    val modifier = BSONDocument("$set" -> BSONDocument("score" -> sessionScore, "rating" -> updatedRating))
 
     collection
-      .flatMap(jsonCollection =>
+      .flatMap { jsonCollection =>
         jsonCollection
-          .find(selector)
+          .update(selector, modifier)
+      }
+  }
+
+  def sessionsInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Future[List[SessionInfo]] = {
+    val startDate = filterUserSessionInformation.startDate.getTime
+    val endDate = filterUserSessionInformation.endDate.getTime
+
+    val selector = filterUserSessionInformation.email match {
+      case Some(email) =>  BSONDocument ("email" -> email,
+                    "active" -> true,
+                    "date" -> BSONDocument ("$gte" -> BSONDateTime (startDate),
+                    "$lte" -> BSONDateTime (endDate) ) )
+      case None =>  BSONDocument ("active" -> true,
+                    "date" -> BSONDocument ("$gte" -> BSONDateTime (startDate),
+                    "$lte" -> BSONDateTime (endDate) ) )
+    }
+    collection
+      .flatMap(
+        _.find(selector)
           .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[SessionInfo]]())
-          .flatMap(sessions =>
-            sessions
-              .headOption
-              .fold {
-                Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-              } { session =>
-                val noOfFeedbackResponses = session.noOfFeedbackResponses
-                val currentScore = session.score
-                val updatedScore = ((currentScore * noOfFeedbackResponses) + score) / (noOfFeedbackResponses + 1)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+  }
 
-                val updatedRating = updatedScore match {
-                  case good if updatedScore > 66.66666    => "Good"
-                  case average if updatedScore > 33.33333 => "Average"
-                  case _                               => "Bad"
-                }
+  def updateSubCategoryOnDelete(subCategory : String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("subCategory" -> subCategory)
+    val modifier = BSONDocument("subCategory" -> "" )
 
-                jsonCollection.update(selector, BSONDocument("$set" ->
-                  BSONDocument("score" -> updatedScore, "rating" -> updatedRating), "$inc" -> BSONDocument("noOfFeedbackResponses" -> 1)))
-              }
-          )
-      )
+    collection.flatMap(_.update(selector,modifier,multi=true))
+  }
+
+  def updateCategoryOnDelete(category : String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("category" -> category)
+    val modifier = BSONDocument("category" -> "" )
+
+    collection.flatMap(_.update(selector,modifier,multi=true))
   }
 
 }

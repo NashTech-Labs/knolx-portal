@@ -2,12 +2,15 @@ $(function () {
 
     var oldCategoryName = "";
     var oldSubCategoryName = "";
+    var subCategoryName = "";
+    var categoryName = "";
+    var subCategory = "";
+
     $("#add-primary-category").click( function () {
-        var categoryName = $("#primary-category").val();
+        categoryName = $("#primary-category").val();
         addCategory(categoryName);
     });
 
-    var subCategory = "";
     $("#add-sub-category").click( function(){
             var categoryName = $("#search-primary-category").val();
             subCategory = $("#sub-category").val();
@@ -36,12 +39,85 @@ $(function () {
        modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName);
     });
 
+    $("#delete-primary-category").on('input change', function() {
+        categoryName = $(this).val();
+        subCategoryByPrimaryCategory(categoryName);
+    });
+
     $("#delete-primary-category-btn").click( function() {
-        $("#delete-sub-category").on('input change', function () {
-            categoryName=$(this).val();
-            console.log("categoryName");
-        })
-    })
+        console.log("---------------" + categoryName);
+        deletePrimaryCategory(categoryName);
+    });
+
+    $("#delete-sub-category-btn").on('click', function() {
+
+
+    });
+
+    $("#delete-sub-category-modal-yes-btn").click( function() {
+
+          deleteSubCategory(categoryName, subCategoryName);
+    });
+
+    listData();
+    function listData(){
+        var id;
+        $('#sub-Categorya option').each(function(i, e){
+            id = $(this).attr("id", "id_" + i).appendTo(this);
+        });
+        }
+
+        $("input[name=sub-Catgeoryrtyty]").focusout(function(){
+
+        });
+
+
+
+
+
+
+
+
+
+// var id = document.querySelector('#datalist1 option[value=' + g +']').dataset.id;
+
+/*console.log("new option"+id);
+    var val = $(id).text();
+        console.log("val>>>"+val);
+    }
+
+    function det() {
+    *//*console.log("val>>>");
+      $('#delete-sub-category').on('input change',function() {
+        console.log("val>>>22");
+        var opt = $(this).find("option:selected").attr("id");
+
+        *//**//*alert(opt.length ? opt.text() : 'NO OPTION');*//**//*
+        console.log("id>>>>>"+opt);
+      });*//*
+      console.log("option id>>>");
+      var id;
+      var ie;
+      $("#delete-sub-category").on('input change', function () {
+      var g = $('#delete-sub-category').val();
+      id = $('#sub-Category option[value=' + g +']').attr('id');
+      console.log("sgdfhdfkds");
+      ie=$("#" + id).text();
+
+                                              // var val = $(ie).html();
+                                              console.log("option id>>>"+id);
+console.log("option valuejhdsgu>>>"+ie);
+
+                                          });
+                                          ie=$("#" + id).text();
+//                                          *//*console.log("after input change id>>>"+id);
+//                                          console.log("option valuejhdsgu>>>"+ie);*//*
+    };*/
+
+/*    det();*/
+
+
+
 
 
 });
@@ -84,14 +160,14 @@ function addSubCategory(categoryName,subCategory) {
             success: function(data) {
                 $("#wrong-message").hide();
                 $("#sub-category").val("");
-                $("#succes-message").show();
-                document.getElementById("success-message").text(data);
+                $("#success-message").show();
+                document.getElementById("success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + subCategory + "'>" + categoryName + "</option>");
             },
             error: function(er) {
                 $("#wrong-message").show();
-                $("#succes-message").hide();
-                document.getElementById("wrong-message").innerHTML=er.responseText;
+                $("#success-message").hide();
+                document.getElementById("wrong-message").innerHTML = er.responseText;
             }
         }
     )
@@ -131,10 +207,11 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
             contentType: false,
 
             success: function(data) {
+                console.log(data);
                 $("#wrong-message").hide();
-                $("#succes-message").show();
+                $("#success-message").show();
                 $("#new-sub-category").show();
-                document.getElementById("success-message").text(data);
+                document.getElementById("success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
             },
@@ -167,4 +244,91 @@ function deletePrimaryCategory(categoryName){
         }
     )
 
+}
+
+function subCategoryByPrimaryCategory(categoryName) {
+
+    jsRoutes.controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName).ajax(
+        {
+            type:'GET',
+            processData: false,
+            contentType: 'application/json',
+            success: function(data) {
+                var subCategories = JSON.parse(data);
+
+                if(subCategories.length) {
+                    console.log("Sub category = " + subCategories);
+                    var restricted = '<div class="alert alert-warning">' +
+                                     '<strong>Warning!</strong> Indicates a warning that might need attention.'+
+                                     '</div>';
+                    var subCategoryList = '<ul id="list-sub-categories">'
+                    for(var i = 0 ; i < subCategories.length ; i++) {
+                        subCategoryList += "<li>" + subCategories[i] + "</li>";
+                    }
+                    $("#category-sessions").html(subCategoryList);
+                }
+                console.log("ggdgdddddddddddd")
+            },
+            error: function(er) {
+
+            }
+        }
+    )
+}
+
+function topicMatchedWithCategory(categoryName, subCategoryName){
+    jsRoutes.controllers.SessionsController.getTopicsBySubCategory(subCategoryName).ajax(
+        {
+            type:'GET',
+            processData: false,
+            contentType: 'application/json',
+            success: function(data) {
+                var topics = JSON.parse(data);
+                /*console.log("topics = " + topics);*/
+                if(topics.length) {
+                    var sessions = '<ul id="list-sessions">';
+                    for(var i = 0 ; i < topics.length ; i++) {
+                        sessions += "<li>" + topics[i] + "</li>";
+                    }
+                    sessions += "</ul>";
+                    $("#subcategory-sessions").html(sessions);
+                } else {
+                    console.log("NO session");
+                    $("#no-sessions").remove();
+                    var noSessions = '<label id= "no-sessions">No sessions exists!</label>'
+                    $("#subcategory-sessions").before(noSessions);
+                    $("#subcategory-sessions").hide();
+                }
+            },
+            error: function(er) {
+            }
+        }
+    )
+}
+
+function deleteSubCategory(categoryName, subCategoryName) {
+
+    console.log("inside delete sub category js fun" + categoryName + "bbbbbb " +subCategoryName)
+
+    jsRoutes.controllers.SessionsController.deleteSubCategory(categoryName, subCategoryName).ajax(
+        {
+            type:'GET',
+            processData: false,
+            contentType: false,
+
+            success: function(data) {
+                $("#wrong-message").hide();
+                $("#success-message").show();
+                $("#delete-sub-category").val("");
+                document.getElementById("success-message").innerHTML = data;
+                $("#subcategory-sessions").hide();
+            },
+            error: function(er) {
+                $("#wrong-message").show();
+                $("#succes-message").hide();
+                document.getElementById("wrong-message").innerHTML=er.responseText;
+                $("#delete-sub-category").val("");
+            }
+        }
+    )
 }

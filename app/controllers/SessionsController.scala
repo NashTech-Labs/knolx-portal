@@ -1,5 +1,6 @@
 package controllers
 
+import java.text.SimpleDateFormat
 import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
@@ -15,7 +16,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
@@ -26,9 +27,15 @@ import scala.concurrent.duration._
 
 case class CategoryDetails(categoryName: String, subCategory: String)
 
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+
 case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
+                                    category: String,
+                                    subCategory: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
@@ -37,6 +44,8 @@ case class CreateSessionInformation(email: String,
 case class UpdateSessionInformation(id: String,
                                     date: Date,
                                     session: String,
+                                    category: String,
+                                    subCategory: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
@@ -84,7 +93,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
-  implicit val categoryDetailsInfoFormat: OFormat[CategoryDetails] =Json.format[CategoryDetails]
+  implicit val categoryDetailsInfoFormat: OFormat[CategoryDetails] = Json.format[CategoryDetails]
+  implicit val categoriesFormat: OFormat[CategoryInfo] = Json.format[CategoryInfo]
+  implicit val SessionInfoFormat: OFormat[SessionInfo] = Json.format[SessionInfo]
 
   val sessionSearchForm = Form(
     mapping(
@@ -100,6 +111,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
         session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
+      "category" -> text.verifying("Please attach a category", !_.isEmpty),
+      "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
@@ -112,6 +125,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
         session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
+      "category" -> text.verifying("Please attach a category", !_.isEmpty),
+      "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
@@ -282,7 +297,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .getAll
       .map { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
-
         Ok(views.html.sessions.createsession(createSessionForm, formIds))
       }
   }
@@ -292,7 +306,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .getAll
       .flatMap { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
-
         createSessionForm.bindFromRequest.fold(
           formWithErrors => {
             Logger.error(s"Received a bad request for create session $formWithErrors")
@@ -307,17 +320,16 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               } { userJson =>
                 val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
-                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
+                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.category,
+                  createSessionInfo.subCategory, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
                   0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
-
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                     sessionsScheduler ! RefreshSessionsSchedulers
                     Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
-                  }
-                  else {
+                  } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     Future.successful(InternalServerError("Something went wrong!"))
                   }
@@ -376,7 +388,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             .map { feedbackForms =>
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-                new Date(sessionInformation.date.value), sessionInformation.session,
+                new Date(sessionInformation.date.value), sessionInformation.session, sessionInformation.category, sessionInformation.subCategory,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
                 sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
@@ -444,18 +456,18 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def renderCategoryPage: Action[AnyContent] = adminAction.async{ implicit request =>
+  def renderCategoryPage: Action[AnyContent] = adminAction.async { implicit request =>
     Logger.info("render category Page")
-    categoriesRepository.getCategories.map{
+    categoriesRepository.getCategories.map {
       Logger.info("Inside render category page")
       category =>
         Ok(views.html.category(category))
     }
   }
 
-  def addPrimaryCategory(categoryName: String) : Action[AnyContent] = superUserAction.async { implicit request =>
+  def addPrimaryCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
     Logger.info("Inside add primary category")
-    if(categoryName.trim().isEmpty){
+    if (categoryName.trim().isEmpty) {
       Future.successful(BadRequest("Primary category cannot be empty"))
     } else {
       categoriesRepository.getCategories.flatMap { result =>
@@ -474,13 +486,15 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def addSubCategory(categoryName: String,subCategory: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def addSubCategory(categoryName: String, subCategory: String): Action[AnyContent] = adminAction.async { implicit request =>
     Logger.info("Inside add Sub category")
     if (subCategory.trim().isEmpty) {
       Future.successful(BadRequest("Subcategory cannot be empty"))
     } else {
       categoriesRepository.getCategories.flatMap { result =>
-        result.find {_.categoryName == categoryName }
+        result.find {
+          _.categoryName == categoryName
+        }
           .fold {
             Future.successful(BadRequest("No primary category found."))
           } { categoryInfo =>
@@ -527,21 +541,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  /*def sentSubCategory() : Action[AnyContent] =action.async { implicit request =>
-    Logger.info("sentSUbcategory")
-    categoriesRepository.getCategories.map { categories =>
-      val c = categories.flatMap(category =>
-        category.subCategory.map(a => CategoryDetails(category.categoryName, a))
-      )
-      Logger.info("The value of c is = " + c)
-      Ok(Json.toJson(c).toString())
-    }
-  }*/
-
-  def modifySubCategory(categoryName: String,oldSubCategoryName: String,
-                        newSubCategoryName: String) : Action[AnyContent] = adminAction.async { implicit request =>
+  def modifySubCategory(categoryName: String, oldSubCategoryName: String,
+                        newSubCategoryName: String): Action[AnyContent] = adminAction.async { implicit request =>
     Logger.info("----------------------Inside modifySubCategory")
-    if(newSubCategoryName.trim().isEmpty) {
+    if (newSubCategoryName.trim().isEmpty) {
       Future.successful(BadRequest("Modify sub-category cannot be empty"))
     } else {
       categoriesRepository.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).map {
@@ -562,34 +565,77 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     if (categoryName.trim().isEmpty) {
       Future.successful(BadRequest("Please select a valid primary category"))
     } else {
-      categoriesRepository.deletePrimaryCategory(categoryName).map { result =>
-        if (result.ok) {
-          Ok("Successfully deleted primary category")
+      sessionsRepository.updateCategoryOnDelete(categoryName).flatMap { sessions =>
+        if (sessions.ok) {
+          categoriesRepository.deletePrimaryCategory(categoryName).map { result =>
+            if (result.ok) {
+              Ok("Successfully deleted primary category")
+            } else {
+              BadRequest("Bad request")
+            }
+          }
         } else {
-          BadRequest("Bad request")
+          Future.successful(BadRequest("Got an error while deleting"))
         }
       }
     }
   }
 
-  def deleteSubCategory(categoryName: String, subCategory: String) : Action[AnyContent] =adminAction.async{ implicit request =>
-    sessionsRepository.sessions.map { sessionInformation =>
-
-
+  def getSubCategoryByPrimaryCategory(categoryName: String): Action[AnyContent] = action.async { implicit request =>
+    if (categoryName.trim().isEmpty) {
+      Future.successful(BadRequest("Please select a valid primary category"))
+    } else {
+      categoriesRepository.getCategories.map {
+        categories =>
+          val subCategoryList = categories.filter {
+            category => category.categoryName == categoryName
+          }.flatMap(_.subCategory)
+          Ok(Json.toJson(subCategoryList).toString())
       }
-
     }
+  }
 
-    categoriesRepository.deleteSubCategory(categoryName ,subCategory).flatMap { result =>
-      if (result.ok) {
-        categoriesRepository.getCategories.map{
-          category =>
-            Ok(views.html.category(category))
+  def deleteSubCategory(categoryName: String, subCategory: String): Action[AnyContent] = adminAction.async { implicit request =>
+    if (subCategory.trim.isEmpty) {
+      Future.successful(BadRequest("Sub-category cannot be empty"))
+    } else {
+      Logger.info(s"..........Before session repository $categoryName $subCategory")
+      sessionsRepository.updateSubCategoryOnDelete(subCategory).flatMap { sessions =>
+        Logger.info("Inside session repository")
+        if (sessions.ok) {
+          Logger.info(".............. Before categories repository")
+          categoriesRepository.deleteSubCategory(categoryName, subCategory).flatMap { result =>
+            if (result.ok) {
+              Future.successful(Ok("Sub-category was successfully deleted"))
+            } else {
+              Future.successful(BadRequest("Something went wrong! unable to delete category"))
+            }
+          }
+        } else {
+          Future.successful(BadRequest("Got an error while deleting"))
         }
-      } else{
-        Future.successful(Ok("Something went wrong! unable to delete category"))
       }
     }
+  }
+
+  def getTopicsBySubCategory(subCategory: String): Action[AnyContent] = action.async { implicit request =>
+    if (subCategory.trim.isEmpty) {
+      Future.successful(BadRequest("Please select a valid sub-category"))
+    } else {
+      sessionsRepository.sessions.map { sessionInformation =>
+        val sessionTopicList = sessionInformation.filter {
+          session => session.subCategory == subCategory
+        }.map {
+          _.topic
+        }
+        Ok(Json.toJson(sessionTopicList).toString())
+      }
+    }
+  }
+
+  def getCategory: Action[AnyContent] = adminAction.async { implicit request =>
+    categoriesRepository.getCategories.map(categories =>
+      Ok(Json.toJson(categories).toString))
   }
 
 }

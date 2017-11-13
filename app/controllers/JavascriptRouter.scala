@@ -19,6 +19,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.searchManageSession,
       controllers.routes.javascript.SessionsController.searchSessions,
       controllers.routes.javascript.SessionsController.shareContent,
+      controllers.routes.javascript.SessionsController.update,
+      controllers.routes.javascript.SessionsController.deleteSession,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
@@ -29,7 +31,12 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.addSubCategory,
       controllers.routes.javascript.SessionsController.modifyPrimaryCategory,
       controllers.routes.javascript.SessionsController.modifySubCategory,
-      controllers.routes.javascript.SessionsController.deletePrimaryCategory
+      controllers.routes.javascript.SessionsController.deletePrimaryCategory,
+      controllers.routes.javascript.SessionsController.getCategory,
+      controllers.routes.javascript.SessionsController.deleteSubCategory,
+      controllers.routes.javascript.SessionsController.getTopicsBySubCategory,
+      controllers.routes.javascript.SessionsController.getSubCategoryByPrimaryCategory,
+      controllers.routes.javascript.AnalysisController.pieChart
     )).as("text/javascript")
   }
 

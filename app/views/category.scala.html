@@ -5,28 +5,22 @@
 <div class="container">
     <div class="row" style="margin-bottom: 100px;"></div>
 
-    <!--<div class="row">
-        &lt;!&ndash;<div class="col-md-1"></div>&ndash;&gt;
-        <div class="col-md-12">
-            <div id="success-message" class=" alert alert-success fade in" style="padding-top: 10px; display: none;"></div>
-            <div id="wrong-message" class="alert alert-danger fade in"style="padding-top: 10px;  display: none;"></div>
-        </div>
-        &lt;!&ndash;<div class="col-md-1"></div>&ndash;&gt;
-    </div>-->
-
     <div class="col-md-12">
-        <div id="success-message" class=" alert alert-success fade in" style="padding-top: 10px; display: none;"></div>
-        <div id="wrong-message" class="alert alert-danger fade in" style="padding-top: 10px;  display: none;"></div>
+        <div class="category-message">
+            <div id="success-message" class=" alert alert-success fade in"
+                 style="padding-top: 10px; display: none;"></div>
+            <div id="wrong-message" class="alert alert-danger fade in" style="padding-top: 10px;  display: none;"></div>
+        </div>
         <div class="panel-group">
 
             <div class="panel panel-default" style="margin-bottom: 40px">
                 @if(SessionHelper.isSuperUser) {
-                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Add Category/Sub-Category</div>
+                <div class="panel-heading panel-title">Add Category/Sub-Category</div>
                 } else {
-                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Add Sub-Category</div>
+                <div class="panel-heading panel-title">Add Sub-Category</div>
                 }
                 <div class="panel-body">
-                    <div class="row">
+                    <div class="row panel-content">
                         @if(SessionHelper.isSuperUser) {
 
                         <div class="col-md-6">
@@ -38,14 +32,16 @@
                         }
 
                         <div class="col-md-6">
-                            <input list="categories" id="search-primary-category" name="category" placeholder="Search a category!">
+                            <input list="categories" id="search-primary-category" name="category"
+                                   placeholder="Search a category!">
                             <datalist id="categories">
                                 @for(category <- categories){
-                                    <option value="@category.categoryName">@category.categoryName</option>
+                                <option value="@category.categoryName">@category.categoryName</option>
                                 }
                             </datalist>
                             <div style="padding-top: 10px;">
-                                <input type="text" id="sub-category" name="subcategory" placeholder="Add a new Sub-Catgeory" required>
+                                <input type="text" id="sub-category" name="subcategory"
+                                       placeholder="Add a new Sub-Catgeory" required>
                             </div>
                             <div style="padding-top: 10px;">
                                 <button type="button" id="add-sub-category" class="btn btn-success">Add</button>
@@ -57,15 +53,16 @@
 
             <div class="panel panel-default" style="margin-bottom: 40px;">
                 @if(SessionHelper.isSuperUser) {
-                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Modify Category/Sub-Category</div>
+                <div class="panel-heading panel-title">Modify Category/Sub-Category</div>
                 } else {
-                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Modify Sub-Category</div>
+                <div class="panel-heading panel-title">Modify Sub-Category</div>
                 }
                 <div class="panel-body">
-                    <div class="row">
+                    <div class="row panel-content">
                         @if(SessionHelper.isSuperUser) {
-                        <div class ="col-md-6">
-                            <input list="categories" id="modify-primary-category" name="category" placeholder="Select a category!">
+                        <div class="col-md-6">
+                            <input list="categories" id="modify-primary-category" name="category"
+                                   placeholder="Select a category!">
 
                             <datalist id="categories">
                                 @for(category <- categories){
@@ -74,30 +71,36 @@
 
                             </datalist>
                             <div>
-                                <input id="new-primary-category" style="margin-top: 10px; display:none" placeholder="Modify primary category">
+                                <input id="new-primary-category" style="margin-top: 10px; display:none"
+                                       placeholder="Modify primary category">
                             </div>
                             <div style="padding-top: 10px;">
-                                <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify</button>
+                                <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify
+                                </button>
                             </div>
                         </div>
 
                         }
                         <div class="col-md-6">
                             <div>
-                                <input list="subcategories" id="modify-sub-category"  name="subcategory" placeholder="Select a sub-category!">
+                                <input list="subcategories" id="modify-sub-category" name="subcategory"
+                                       placeholder="Select a sub-category!">
                                 <datalist id="subcategories">
                                     @for(category <- categories){
-                                        @for(subCategory <- category.subCategory) {
+                                    @for(subCategory <- category.subCategory) {
                                     <input id="categoryName" value="@category.categoryName" hidden>
-                                    <option value="@subCategory" id="dropDownSelect" class="@category.categoryName">@category.categoryName</option>
-                                        }
+                                    <option value="@subCategory" id="dropDownSelect" class="@category.categoryName">
+                                        @category.categoryName
+                                    </option>
+                                    }
                                     }
                                 </datalist>
                                 <div style="padding-top: 10px;">
-                                    <input id="new-sub-category" style="margin-bottom: 10px;display:none" placeholder="Modify sub-category">
+                                    <input id="new-sub-category" style="margin-bottom: 10px;display:none"
+                                           placeholder="Modify sub-category">
                                 </div>
                             </div>
-                            <div >
+                            <div>
                                 <button type="button" id="modify-sub-category-btn" class="btn btn-info">Modify</button>
                             </div>
                         </div>
@@ -107,38 +110,58 @@
 
             <div class="panel panel-default" style="margin-bottom: 40px">
                 @if(SessionHelper.isSuperUser) {
-                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Delete Category/Sub-Category</div>
+                <div class="panel-heading panel-title">Delete Category/Sub-Category</div>
                 } else {
-                <div class="panel-heading panel-header" style="background-color: #7c96c0; color: #fff;">Delete Sub-Category</div>
+                <div class="panel-heading panel-title">Delete Sub-Category</div>
                 }
                 <div class="panel-body">
-                    <div class="row">
+                    <div class="row panel-content">
                         @if(SessionHelper.isSuperUser) {
 
                         <div class="col-md-6">
-                            <input list="Categories" id="delete-sub-category" name="Catgeory" placeholder="Select a Category!">
+                            <input list="Categories" id="delete-primary-category" name="Catgeory"
+                                   placeholder="Select a Category!">
                             <datalist id="Categories">
                                 @for(category <- categories) {
-                                    <option value="@category.categoryName"> @category.categoryName</option>
+                                <option value="@category.categoryName"> @category.categoryName</option>
                                 }
                             </datalist>
-
+                            <div id="category-sessions"></div>
                             <div style="padding-top: 10px;">
-                                <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete</button>
+                                <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete
+                                </button>
                             </div>
                         </div>
                         }
 
                         <div class="col-md-6">
-                            <input list="sub-Category" name="sub-Catgeory" placeholder="Select a sub-Catgeory!">
-                            <datalist id="sub-Category">
-                                @for(category <- categories) {
-                                    @for(subCategory <- category.subCategory) {
-                                <option value="@subCategory">@category.categoryName</option>
+                            <!--<div class="ui fluid search selection dropdown">
+                                <input type="hidden" name="country">
+                                <i class="dropdown icon"></i>
+                                <div class="default text">Select Country</div>
+                                <div class="menu">
+                                    @for(category <- categories) {
+                                        @for(subCategory<- category.subCategory) {
+                                    <div class="item" data-value="af"><i class="af flag"></i>@subCategory @category.categoryName</div>
+                                    }
+                                    }
+                                </div>
+                            </div>-->
+
+                            <input list="suggestionList" id="answerInput">
+                            <datalist id="suggestionList">
+                                @for((category,indexCategory) <- categories.zipWithIndex) {
+                                @for((subCategory,index)<- category.subCategory.zipWithIndex) {
+                                <option value="@subCategory" data-value="@category.categoryName"><p>@category.categoryName<br/></p></option>
                                 }}
                             </datalist>
+                            <input type="hidden" name="answer" id="answerInput-hidden">
+
+
+                            <div id="subcategory-sessions"></div>
                             <div style="padding-top: 10px;">
-                                <button type="button" class="btn btn-danger">Delete</button>
+                                <button type="button" class="btn btn-danger" id="delete-sub-category-btn">Delete
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -147,5 +170,37 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="delete-sub-category-modal" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-body update-warning-outer feedback-form-restricted">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="col-md-12 delete-warning-sign">
+                    <i class="fa fa-trash update-warning-sign" aria-hidden="true"></i>
+                    <span class="delete-warning-title-message">Confirm your submission</span>
+                </div>
+                <div class="col-md-12 update-warning-message">
+                    Are you sure you want to delete it?
+                </div>
+                <button type="button" class="btn btn-danger delete-warning-btn" id="delete-sub-category-modal-yes-btn"
+                        data-dismiss="modal">
+                    Yes
+                </button>
+                <button type="button" class="btn btn-default delete-warning-btn" id="delete-sub-category-modal-no-btn"
+                        data-dismiss="modal">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<script>
+    $(document).ready(()=>{
+    console.log("HIIIIIII");
+    $('.testSelAll').SumoSelect({ okCancelInMulti: false, selectAll: false });
+    });
+
+</script>-->
 
 }

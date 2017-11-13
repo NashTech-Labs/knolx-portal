@@ -13,26 +13,53 @@ class CategoriesRepositorySpec extends PlaySpecification {
   private val categoryId = BSONObjectID.generate
   val categoryInfo = CategoryInfo("Front-End", List("Angular Js","D3JS"),categoryId)
 
-  "Technologies Repository" should {
+  "Categories Repository" should {
 
-    "upsert a new category" in {
+    "insert a new category" in {
+      val created = await(categoriesRepository.insertCategory("Backend"))
+
+      created.ok must beEqualTo(true)
+    }
+
+    "upsert a sub-category" in {
       val created: Boolean = await(categoriesRepository.upsert(categoryInfo).map(_.ok))
 
       created must beEqualTo(true)
     }
 
     "get category list" in {
-      val categories: List[CategoryInfo] = await(categoriesRepository.getCategories)
+      val insertCategoryInfo = CategoryInfo("Backend",List("scala"),BSONObjectID.generate)
+      val insert = await(categoriesRepository.insertCategory("Backend"))
+      val subCategory = await(categoriesRepository.upsert(insertCategoryInfo))
+      val categoriesList: List[CategoryInfo] = await(categoriesRepository.getCategories)
 
-      categories.head.subCategory.head must beEqualTo("Angular Js")
+      categoriesList.head.subCategory must beEqualTo (List("scala"))
+    }
 
+    "modify a primary category" in {
+      val update = await(categoriesRepository.modifyPrimaryCategory("Front-End","Front End"))
+
+      update.ok must beEqualTo(true)
+    }
+
+    "modify a sub-category" in {
+      val update = await(categoriesRepository.modifySubCategory("Front-End","D3JS","D3 JS"))
+
+      update.ok must beEqualTo(true)
+    }
+
+    "delete a primary category" in {
+      val deletePrimaryCateogry = await(categoriesRepository.deletePrimaryCategory("Front-End"))
+
+      deletePrimaryCateogry.ok must beEqualTo(true)
     }
 
     "delete sub Category" in {
-      val deleteSubCategory = await(categoriesRepository.deleteSubCategory(categoryId.stringify,List("Angular Js")))
+      val deleteSubCategory = await(categoriesRepository.deleteSubCategory("Front-End","Angular Js"))
 
       deleteSubCategory.ok must beEqualTo(true)
     }
+
   }
 
 }

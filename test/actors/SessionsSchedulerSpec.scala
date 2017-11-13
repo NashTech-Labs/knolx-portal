@@ -62,6 +62,8 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         email = "test@example.com",
         date = BSONDateTime(knolxSessionDateTime),
         session = "session 1",
+        category = "category",
+        subCategory = "subCategory",
         feedbackFormId = "feedbackFormId",
         topic = "Akka",
         feedbackExpirationDays = 1,
@@ -73,13 +75,15 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         BSONDateTime(knolxSessionDateTime),
         youtubeURL = Some("youtubeURL"),
         slideShareURL = Some("slideShareURL"),
-        noOfFeedbackResponses = 0,
+        noOfFeedbackResponses =1,
         _id = sessionId),
         SessionInfo(
           userId = "userId",
           email = "test1@example.com",
           date = BSONDateTime(knolxSessionDateTime),
           session = "session 1",
+          category = "category",
+          subCategory = "subCategory",
           feedbackFormId = "feedbackFormId",
           topic = "Play Framework",
           feedbackExpirationDays = 1,
@@ -91,8 +95,9 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           BSONDateTime(knolxSessionDateTime),
           youtubeURL = Some("youtubeURL"),
           slideShareURL = Some("slideShareURL"),
-          noOfFeedbackResponses = 0,
+          noOfFeedbackResponses =1,
           _id = sessionId))
+
     val maybeFeedbackForm =
       Option(FeedbackForm(
         name = "Feedback Form Template 1",

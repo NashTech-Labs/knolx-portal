@@ -175,7 +175,6 @@ class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-
   def update(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .activeSessions()

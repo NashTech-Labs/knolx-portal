@@ -6,7 +6,7 @@ $(function () {
 
     $('#demo').daterangepicker({
         "startDate": moment().subtract(1, 'months'),
-        "endDate": moment().format('DD-MM-YYYY')
+        "endDate": moment()
     }, function (start, end, label) {
         var startDate = start.format('YYYY-MM-DD h:mm A');
         var endDate = end.format('YYYY-MM-DD h:mm A');

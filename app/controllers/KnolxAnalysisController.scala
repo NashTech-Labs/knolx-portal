@@ -57,8 +57,8 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Received a bad request for Pie Chart" + jsonValidationErrors)
         Future.successful(BadRequest(JsError.toJson(jsonValidationErrors)))
       }, knolxAnalysisDateRange => {
-        val startDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.startDate)
-        val endDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.endDate)
+        val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
+        val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
 
         categoriesRepository.getCategories.flatMap { categoryInfo =>
           val primaryCategoryList = categoryInfo.map(_.categoryName)
@@ -88,8 +88,8 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Received a bad request for filtering sessions " + jsonValidationErrors)
         Future.successful(BadRequest(JsError.toJson(jsonValidationErrors)))
       }, knolxAnalysisDateRange => {
-        val startDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.startDate)
-        val endDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.endDate)
+        val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
+        val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
 
         sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
           val subCategoryList = sessions.groupBy(_.subCategory).map { case (subCategory, session) =>
@@ -106,8 +106,8 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Received a bad request for filtering sessions " + jsonValidationErrors)
         Future.successful(BadRequest(JsError.toJson(jsonValidationErrors)))
       }, knolxAnalysisDateRange => {
-        val startDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.startDate)
-        val endDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.endDate)
+        val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
+        val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
 
         sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
           val sessionMonthList = sessions.map(session => dateTimeUtility.getMonth(session.date.value))

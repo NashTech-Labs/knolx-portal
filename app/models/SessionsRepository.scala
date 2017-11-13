@@ -310,16 +310,15 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
   def sessionsInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Future[List[SessionInfo]] = {
-    val startDate = dateTimeUtility.dateToLocalDateTime(filterUserSessionInformation.startDate)
-    val endDate = dateTimeUtility.dateToLocalDateTime(filterUserSessionInformation.endDate)
+
     val selector = filterUserSessionInformation.email match {
       case Some(email) => BSONDocument("email" -> email,
         "active" -> true,
-        "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
-          "$lte" -> BSONDateTime(endDate)))
+        "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate),
+          "$lte" -> BSONDateTime(filterUserSessionInformation.endDate)))
       case None        => BSONDocument("active" -> true,
-        "date" -> BSONDocument("$gte" -> BSONDateTime(startDate),
-          "$lte" -> BSONDateTime(endDate)))
+        "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate),
+          "$lte" -> BSONDateTime(filterUserSessionInformation.endDate)))
     }
     collection
       .flatMap(

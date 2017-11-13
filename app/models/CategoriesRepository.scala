@@ -21,17 +21,13 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class CategoryInfo(categoryName: String, subCategory: List[String], _id: BSONObjectID = BSONObjectID.generate)
 
 object CategoriesJsonFormats {
-
   import play.api.libs.json.Json
-
   implicit val categoriesFormat = Json.format[CategoryInfo]
-
 }
 
 class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
-
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("categories"))
 
   def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {

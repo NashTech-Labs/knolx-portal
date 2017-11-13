@@ -14,9 +14,9 @@ import play.api.Logger
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
-import reactivemongo.bson.{BSONDateTime, BSONObjectID}
+import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
 import scala.collection.immutable.IndexedSeq
@@ -24,9 +24,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-// this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class CreateSessionInformation(email: String,
                                     date: Date,
@@ -66,9 +63,7 @@ case class KnolxSession(id: String,
                         expired: Boolean = false)
 
 case class SessionEmailInformation(email: Option[String], page: Int)
-
 case class ModelsCategoryInformation(categoryName: String, subCategory: List[String])
-
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,

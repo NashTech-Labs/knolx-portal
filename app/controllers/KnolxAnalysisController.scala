@@ -17,13 +17,9 @@ import scala.concurrent.Future
 
 // Knolx related analytics classes
 case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
-
 case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
-
 case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
-
 case class KnolxMonthlyInfo(monthName: String, total: Int)
-
 case class KnolxAnalysisDateRange(startDate: String, endDate: String)
 
 // User knolx related analytics classes
@@ -110,14 +106,11 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Received a bad request for filtering sessions " + jsonValidationErrors)
         Future.successful(BadRequest(JsError.toJson(jsonValidationErrors)))
       }, knolxAnalysisDateRange => {
-
         val startDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.startDate)
         val endDate: Long = dateTimeUtility.parseDateString(knolxAnalysisDateRange.endDate)
 
         sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
-
           val sessionMonthList = sessions.map(session => dateTimeUtility.getMonth(session.date.value))
-
           val sessionMonthInfo = sessionMonthList.groupBy(identity).map { case (month, monthlySessions) =>
             KnolxMonthlyInfo(month, monthlySessions.length)
           }.toList

@@ -24,9 +24,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+
 case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
+                                    category: String,
+                                    subCategory: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
@@ -35,6 +38,8 @@ case class CreateSessionInformation(email: String,
 case class UpdateSessionInformation(id: String,
                                     date: Date,
                                     session: String,
+                                    category: String,
+                                    subCategory: String,
                                     feedbackFormId: String,
                                     topic: String,
                                     feedbackExpirationDays: Int,
@@ -58,7 +63,7 @@ case class KnolxSession(id: String,
                         expired: Boolean = false)
 
 case class SessionEmailInformation(email: Option[String], page: Int)
-
+case class ModelsCategoryInformation(categoryName: String, subCategory: List[String])
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
@@ -73,6 +78,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
+                                   categoriesRepository: CategoriesRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
@@ -81,6 +87,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+  implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   val sessionSearchForm = Form(
     mapping(
@@ -96,6 +103,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
         session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
+      "category" -> text.verifying("Please attach a category", !_.isEmpty),
+      "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected", number => number >= 0 && number <= 31),
@@ -108,6 +117,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone),
       "session" -> nonEmptyText.verifying("Wrong session type specified!",
         session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
+      "category" -> text.verifying("Please attach a category", !_.isEmpty),
+      "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
       "topic" -> nonEmptyText,
       "feedbackExpirationDays" -> number.verifying("Invalid feedback form expiration days selected, " +
@@ -278,7 +289,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .getAll
       .map { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
-
         Ok(views.html.sessions.createsession(createSessionForm, formIds))
       }
   }
@@ -288,7 +298,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .getAll
       .flatMap { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
-
         createSessionForm.bindFromRequest.fold(
           formWithErrors => {
             Logger.error(s"Received a bad request for create session $formWithErrors")
@@ -303,17 +312,16 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               } { userJson =>
                 val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
                 val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
-                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.feedbackFormId,
+                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.category,
+                  createSessionInfo.subCategory, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
                   0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None)
-
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                     sessionsScheduler ! RefreshSessionsSchedulers
                     Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
-                  }
-                  else {
+                  } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     Future.successful(InternalServerError("Something went wrong!"))
                   }
@@ -334,8 +342,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
 
     val expirationDate = scheduledDate.getDayOfWeek match {
-      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(3)
-      case DayOfWeek.SATURDAY => scheduledDate.plusDays(2)
+      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(4)
+      case DayOfWeek.SATURDAY => scheduledDate.plusDays(3)
       case _: DayOfWeek       => scheduledDate.plusDays(1)
     }
 
@@ -372,7 +380,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             .map { feedbackForms =>
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
-                new Date(sessionInformation.date.value), sessionInformation.session,
+                new Date(sessionInformation.date.value), sessionInformation.session, sessionInformation.category, sessionInformation.subCategory,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
                 sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
               Ok(views.html.sessions.updatesession(filledForm, formIds))
@@ -439,4 +447,12 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
+
+  def getCategory: Action[AnyContent] = action.async { implicit request =>
+    categoriesRepository.getCategories.map { categories =>
+      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category.categoryName, category.subCategory))
+      Ok(Json.toJson(listOfCategoryInfo).toString)
+    }
+  }
+
 }

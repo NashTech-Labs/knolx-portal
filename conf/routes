@@ -35,6 +35,7 @@ GET         /session/update                      controllers.SessionsController.
 GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
 GET         /session/content/:sessionId          controllers.SessionsController.shareContent(sessionId: String)
+GET         /session/categories                  controllers.SessionsController.getCategory
 
 # Feedback
 GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -58,3 +59,9 @@ GET         /reports/manage/response             controllers.FeedbackFormsReport
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                        controllers.Assets.versioned(path="/public", file: Asset)
 GET         /favicon.ico                         controllers.Assets.at(path="/public/images", file="favicon.png")
+
+# Analysis
+GET          /knolx/analysis                     controllers.KnolxAnalysisController.renderAnalysisPage
+POST         /knolx/analysis/columnchart         controllers.KnolxAnalysisController.renderColumnChart
+POST         /knolx/analysis/piechart            controllers.KnolxAnalysisController.renderPieChart
+POST         /knolx/analysis/linechart           controllers.KnolxAnalysisController.renderLineChart

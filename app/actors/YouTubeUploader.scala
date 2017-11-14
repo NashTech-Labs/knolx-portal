@@ -1,6 +1,7 @@
 package actors
 
 import java.io.{File, FileInputStream, InputStream, InputStreamReader}
+import java.security.PrivateKey
 import java.util
 import javax.inject.{Inject, Named}
 
@@ -11,7 +12,9 @@ import akka.util.Timeout
 
 import scala.concurrent.duration._
 import com.google.api.client.auth.oauth2.{Credential, StoredCredential, TokenResponse}
-import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
+import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets, GoogleCredential}
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.InputStreamContent
 import com.google.api.client.http.javanet.NetHttpTransport
@@ -38,7 +41,7 @@ object YouTubeUploader {
 
   private val videoFileFormat = "video/*"
   private val part = "snippet,statistics,status"
-  private val status = new VideoStatus().setPrivacyStatus("public")
+  private val status = new VideoStatus().setPrivacyStatus("private")
 
   private val scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.upload")
   private val credential = authorize(scopes)
@@ -47,17 +50,16 @@ object YouTubeUploader {
       .setApplicationName("Knolx Portal")
       .build()
 
-  private def authorize(scopes: util.List[String]): Credential = {
+  /*private def authorize(scopes: util.List[String]): Credential = {
     val fileDataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home") + "/" + credentialsDirectory))
     val dataStore: DataStore[StoredCredential] = fileDataStoreFactory.getDataStore(credentialDataStore)
 
     val flow =
       new GoogleAuthorizationCodeFlow
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-        .setAccessType("offline")
         .setCredentialDataStore(dataStore).build()
 
-    val conf = ConfigFactory.load()
+    /*val conf = ConfigFactory.load()
 
     val refreshToken = conf.getString("youtube.refreshToken")
 
@@ -65,7 +67,44 @@ object YouTubeUploader {
 
     response.setRefreshToken(refreshToken)
 
-    flow.createAndStoreCredential(response, "user")
+    flow.createAndStoreCredential(response, "user")*/
+
+    /*new GoogleCredential.Builder()
+        .setTransport(httpTransport)
+        .setJsonFactory(jsonFactory)
+        .setServiceAccountId("test-knolx-portal@knolx-portal-test-account.iam.gserviceaccount.com")
+        .setServiceAccountPrivateKeyFromP12File(new File("/home/knoldus/Downloads/Knolx Portal Test Account-cff9269f23ec.p12"))
+        .setServiceAccountScopes(scopes)
+        .setServiceAccountUser("isanythingallowed999@gmail.com")
+        .build()*/
+
+    /*new GoogleCredential.Builder()
+      .setTransport(httpTransport)
+      .setJsonFactory(JSON_FACTORY)
+      .setServiceAccountId(emailAddress)
+      .setServiceAccountPrivateKeyFromP12File(new File("MyProject.p12"))
+      .setServiceAccountScopes(Collections.singleton(SQLAdminScopes.SQLSERVICE_ADMIN))
+      .setServiceAccountUser("user@example.com")
+      .build()*/
+
+    val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
+
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
+  }*/
+
+  private def authorize(scopes: util.List[String]): Credential = {
+    val fileDataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home") + "/" + credentialsDirectory))
+    val dataStore: DataStore[StoredCredential] = fileDataStoreFactory.getDataStore(credentialDataStore)
+
+    val flow =
+      new GoogleAuthorizationCodeFlow
+      .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
+          .setApprovalPrompt("force").setAccessType("offline")
+        .setCredentialDataStore(dataStore).build()
+
+    val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
+
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
   }
 
   // Commands for YouTubeUploader actor

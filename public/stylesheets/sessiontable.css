@@ -21,7 +21,7 @@ th {
 }
 
 @font-face {
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     src: url('font/gothic.ttf');
 }
 

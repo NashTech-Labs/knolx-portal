@@ -58,7 +58,7 @@
     border: none;
     outline: none;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     width: 85%;
     text-align: center;
@@ -79,7 +79,7 @@ input#form-name:focus {
     outline: none;
     border-bottom: 1px solid #dcdcdc;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     text-align: center;
     color: #EC7063;
@@ -93,7 +93,7 @@ input#form-name:focus {
     outline: none;
     border-bottom: 1px dotted #dcdcdc;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -184,7 +184,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
     outline: none;
     border-bottom: 1px dotted #dcdcdc;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     text-align: center;
     color: #EC7063;
@@ -309,7 +309,7 @@ textarea{
     border-bottom: 1px dotted #dcdcdc;
     outline: none;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
     height: 80px;

@@ -16,7 +16,7 @@
     border: none;
     background-color: transparent;
     outline: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     text-align: center;
     letter-spacing: 2px;
@@ -79,7 +79,7 @@ input::placeholder {
 }
 
 .manage-user-container-email {
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 2px;
     padding: 0px 0px 15px 0px;
@@ -98,7 +98,7 @@ input::placeholder {
 .manage-user-checkbox-text {
     text-align: left;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #888888;
     text-shadow: none;
     letter-spacing: 2px;
@@ -164,7 +164,7 @@ input::placeholder {
     text-align: center;
     color: #EC7063;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
     letter-spacing: 2px;
 }
@@ -174,7 +174,7 @@ input::placeholder {
     margin-top: -160px;
     color: #EC7063;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
     letter-spacing: 2px;
     font-weight: bold;
@@ -189,7 +189,7 @@ input::placeholder {
     width: 100%;
     font-size: 20px;
     color: #EC7063;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
     letter-spacing: 2px;
     font-weight: bold;
@@ -274,7 +274,7 @@ input::placeholder {
 
 .all-users-table > tbody > tr > td:first-child, .all-users-table > tbody > tr > td:nth-child(2) {
     text-align: center;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 17px;
     letter-spacing: 1px;
     color: #666;

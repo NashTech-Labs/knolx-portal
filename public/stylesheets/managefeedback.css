@@ -49,7 +49,7 @@
     margin: 0 auto;
     text-align: center;
     overflow: hidden;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
     color: #27AE60;
 }
@@ -91,13 +91,13 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
 
 .flash-success {
     margin-top: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 17px;
 }
 
 .flash-failure {
     margin-top: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 17px;
 }
 

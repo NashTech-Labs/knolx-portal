@@ -40,13 +40,13 @@
 
     <div class="row">
 
-        <div class="col-md-4"></div>
+        <div class="col-md-2"></div>
 
-        <div class="col-md-4 create-outer">
+        <div class="col-md-8 create-outer">
             <form class="CreateForm customForm" action="@routes.SessionsController.createSession()" method="post">
 
                 @helper.CSRF.formField
-
+            <div class="col-md-6">
                 <div class="col-md-12">
                     <div class="col-md-1"></div>
                     <div class="col-md-10 ">
@@ -92,6 +92,8 @@
                     <div class="col-md-2"><i class="fa fa-eye preview" id="previewId" ></i></div>
                     <div class="col-md-1"></div>
                 </div>
+            </div>
+                <div class="col-md-6">
 
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1"></div>
@@ -152,17 +154,18 @@
                     <div class="col-md-1"></div>
                 </div>
 
-                <div class="col-md-12 update-second-field login-four">
-                    <div class="col-md-1"></div>
-                    <div class="col-md-10 loader-outer">
+                <div class="col-md-12 login-four">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6 loader-outer">
                         <input type="submit" value="Create" class="input-field update-button"/>
                     </div>
-                    <div class="col-md-1"></div>
+                    <div class="col-md-3"></div>
                 </div>
+            </div>
             </form>
-            <div class="col-md-12 create-footer"></div>
+           <!-- <div class="col-md-12 create-footer"></div>-->
         </div>
-        <div class="col-md-4"></div>
+        <div class="col-md-2"></div>
     </div>
 
 

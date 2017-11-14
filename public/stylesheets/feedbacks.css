@@ -356,7 +356,7 @@
     width: 90%;
     outline: none;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -504,7 +504,7 @@
 .acknowledgement-text_tag {
     color: #85929E;
     text-shadow: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 1px;
     text-align: center;
@@ -515,7 +515,7 @@
     margin-top: 30px;
     color: #639593;
     text-shadow: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
     letter-spacing: 1px;
     text-align: center;
@@ -523,7 +523,7 @@
 
 .submission-success-okay-btn {
     text-shadow: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 1px;
     text-align: center;
@@ -562,7 +562,7 @@
 
 .ban_text-title {
     color: #a8a8a8;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-top: 10px;
     font-weight: bolder;
 }
@@ -624,7 +624,7 @@
 
 #feedbackAttendance-body {
     overflow: auto;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     height: 50vh;
     padding: 0px;
 }
@@ -666,7 +666,7 @@
 
 .feedbackAttendance-header-text {
     font-weight: 900;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-bottom: 5vh;
     margin-top: 0vh;
     font-size: 2.5vh;

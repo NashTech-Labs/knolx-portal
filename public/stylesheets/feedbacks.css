@@ -1,23 +1,10 @@
 .feedback-form-display-container {
     color: #000;
-    margin: 60px 0px;
+    margin: 80px 0px;
     background-color: #fff;
     padding: 0px 0px 0px 0px;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
-    -moz-animation: fadein 2s; /* Firefox < 16 */
-    -ms-animation: fadein 2s; /* Internet Explorer */
-    -o-animation: fadein 2s; /* Opera < 12.1 */
-    animation: fadein 2s;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     padding-top: 50px;
-    border-top: 1px solid #fff;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
 }
 
 .feedback-top-banner {

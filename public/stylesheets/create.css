@@ -6,6 +6,14 @@
     padding-left: 0px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     border-top: 1px solid #fff;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+}
+
+.control-label {
+    padding-top: 4px;
+    margin-bottom: 0;
+    text-align: right;
 }
 
 .col-md-12 {
@@ -23,7 +31,6 @@
 .preview {
     font-size: 30px;
     text-align: center;
-    padding-top: 15px;
     cursor: pointer;
     color: #666;
 }
@@ -33,11 +40,8 @@
 }
 
 .feedback-duration {
-
-    margin-top: 20px;
     line-height: 0.5em;
     padding: 20px 0px;
-    padding-left: 20px;
     box-shadow: 0 4px 10px -5px #a8a8a8;
 }
 
@@ -72,13 +76,12 @@
 
 #days {
     font-size: 22px;
-    color: #F1948A;
-    /*margin-top: 12px;*/
+    color: #566573;
 }
 
 #days:disabled {
     background-color: transparent;
-    color: #dcdcdc;
+    color: #566573;
 }
 
 .duration-title {

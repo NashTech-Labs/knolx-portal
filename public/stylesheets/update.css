@@ -1,12 +1,13 @@
 .update-field {
     width: 100%;
-    border: none;
-    border-bottom: 2px dotted #CACFD2;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 18px;
+    font-size: 15px;
     color: #566573;
     background-color: transparent;
-    padding: 15px 0px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
     outline: none;
 }
 
@@ -14,6 +15,10 @@
     margin-bottom: 20px;
 }
 
+
+.disp-inline {
+    display: inline;
+}
 .update-outer {
     background-color: #FFF;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -78,7 +83,7 @@ label {
     font-family: "FontAwesome";
     display: inline-block;
     width: 10px;
-    color: #F1948A;
+    color: #1ab394;
     font-size: 35px;
     margin-right: 50px;
 }
@@ -121,7 +126,7 @@ label {
 }
 
 .update-button {
-    background-color: #F1948A;
+    background-color: #1ab394;
     color: #fff;
     margin-bottom:15px;
 }

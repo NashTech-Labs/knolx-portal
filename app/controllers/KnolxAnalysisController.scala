@@ -42,11 +42,6 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
   implicit val filterSessionInfoFormat: OFormat[KnolxAnalysisDateRange] = Json.format[KnolxAnalysisDateRange]
   implicit val knolxMonthlyInfo: OFormat[KnolxMonthlyInfo] = Json.format[KnolxMonthlyInfo]
 
-  implicit val knolxAnalysisDateRangeReads: Reads[KnolxAnalysisDateRange] = (
-    (JsPath \ "startDate").read[String] and
-      (JsPath \ "endDate").read[String]
-    ) (KnolxAnalysisDateRange.apply _)
-
   def renderAnalysisPage: Action[AnyContent] = action { implicit request =>
     Ok(views.html.analysis.analysispage())
   }

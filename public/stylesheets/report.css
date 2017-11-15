@@ -4,10 +4,8 @@
 
 .report-info {
     padding: 20px 0;
-    border-radius: 0px;
     margin-bottom: 0px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-    background-color: #639593;
+    background-color: #1ab394;
 }
 
 .report-content-outer {

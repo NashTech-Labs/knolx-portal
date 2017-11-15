@@ -26,6 +26,11 @@ if(request.path.equals(currentPath)) "active"
                 </a>
             </li>
 
+            <li class="@activeLink(routes.KnolxAnalysisController.renderAnalysisPage().url) alignLinks">
+                <a href="@routes.KnolxAnalysisController.renderAnalysisPage"><i class="fa fa-line-chart"></i>
+                    <span>Analysis</span></a>
+            </li>
+
             @if(!SessionHelper.isLoggedIn) {
 
 

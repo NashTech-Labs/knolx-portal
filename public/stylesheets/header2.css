@@ -152,7 +152,7 @@ display: inline-block;
 display: block;
 }
 
-.fa-comments, .fa-home, .fa-wrench  {
+.fa-comments, .fa-home, .fa-wrench, .fa-line-chart  {
     color: #fff;
     text-shadow: 0 0 10px #85929E;
 }
@@ -300,7 +300,7 @@ html,body{
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1080px;
 }
 
 .dropdown-menu > li > a {
@@ -320,4 +320,11 @@ html,body{
     color: black;
     background-color: #eee;
     border-color: #337ab7;
+}
+
+@media (min-width: 1200px) {
+    .container {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    }
 }

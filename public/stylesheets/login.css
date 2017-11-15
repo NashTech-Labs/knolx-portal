@@ -8,6 +8,7 @@
     border-image: none;
     border-style: solid solid none;
     border-width: 1px 0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .default-top-margin {
@@ -25,11 +26,15 @@
 }
 
 .forgot-password-outer {
-    height: 300px;
+        height:160px;
+        background-color: #ffffff;
+        color: inherit;
+        padding: 15px 20px 20px 20px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .reset-password-outer {
-    height: 440px;
+    min-height: 280px !important;
 }
 
 .login-first {
@@ -57,11 +62,6 @@
     outline: none;
 }
 
-.custom-textbox-alignment {
-    line-height: 50px;
-    padding-top: 20px;
-}
-
 .input-field {
     background-color: #FFFFFF;
     background-image: none;
@@ -83,10 +83,11 @@ input:invalid {
 }
 
 .login-button {
-    background-color: rgb(125, 158, 192);
+    background-color:#1ab394;
     color: #fff;
     border: None;
     outline: none;
+    font-weight:900;
 }
 
 .forgot-password {

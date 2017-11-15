@@ -299,10 +299,6 @@ html,body{
     transition: width 0.5s ease-in-out;
 }
 
-.container {
-    max-width: 1080px;
-}
-
 .dropdown-menu > li > a {
     display: block;
     clear: both;
@@ -322,9 +318,30 @@ html,body{
     border-color: #337ab7;
 }
 
-@media (min-width: 1200px) {
-    .container {
-    padding-left: 0px !important;
-    padding-right: 0px !important;
+.container {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+        margin-right: 40px !important;
+        margin-left: 40px !important;
     }
+
+
+.container-knolx {
+    width:100%;
+    padding-left: 40px !important;
+    padding-right: 10px !important;
+    margin-right: 0px !important;
+    margin-left: 0px !important;
 }
+.container-knolx .row{
+    width:100%;
+}
+
+/*.container {
+    width: calc(100% - 180px);
+}
+
+.container.active {
+    width: calc(100% - 80px);
+}*/
+

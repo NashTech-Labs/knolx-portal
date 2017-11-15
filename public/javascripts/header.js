@@ -8,7 +8,7 @@ $(window).scroll(function () {
 });*/
 $(document).ready(function () {
  $('#sidebarCollapse').on('click', function () {
-     $('#sidebar, #content').toggleClass('active');
+     $('#sidebar, #content, .container').toggleClass('active');
      $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
  });
 

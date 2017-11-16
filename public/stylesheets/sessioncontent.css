@@ -8,7 +8,7 @@
 }
 
 .topic-presenter {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     src: url('font/Capsuula.ttf');
     font-size: 20px;
     padding-left:10px;

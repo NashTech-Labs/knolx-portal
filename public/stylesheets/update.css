@@ -1,7 +1,7 @@
 .update-field {
+    padding-left: 5px;
     width: 100%;
     border: 1px solid #ccc;
-    border-radius: 4px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
     color: #566573;
@@ -19,6 +19,7 @@
 .disp-inline {
     display: inline;
 }
+
 .update-outer {
     background-color: #FFF;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -62,19 +63,19 @@ label {
 }
 
 .label_text {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #888888;
     align-self: center;
 
 }
 
 .checkbox-text {
-    font-size: 17px;
-    font-family: 'headerfont';
-    color: #888888;
+    font-size: 15px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #676a6c;
     margin: 0px;
-    margin-top: 15px;
-    letter-spacing: 2px;
+    margin-top: 10px;
+    letter-spacing: 1px;
 }
 
 .label_text:before {
@@ -84,8 +85,8 @@ label {
     display: inline-block;
     width: 10px;
     color: #1ab394;
-    font-size: 35px;
-    margin-right: 50px;
+    font-size: 30px;
+    margin-right: 30px;
 }
 
 .custom-checkbox:checked + .label_text:before {

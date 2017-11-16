@@ -239,7 +239,7 @@ input::placeholder {
     color: #639593;
     text-shadow: none;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
     letter-spacing: 1px;
     padding-top: 20px;
@@ -369,7 +369,7 @@ input::placeholder {
 }
 
 .filter-label_text {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #9E9E9E;
     align-self: center;
 
@@ -377,7 +377,7 @@ input::placeholder {
 
 .filter-checkbox-text {
     font-size: 14px;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #9E9E9E;
     margin: 0px;
     margin-top: 15px;

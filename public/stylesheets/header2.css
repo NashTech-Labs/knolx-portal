@@ -340,18 +340,10 @@ html,body{
 
 
 .container-knolx > .row > .header-container {
-    height: 70px;
+    padding:2px 15px;
     background-color: #FFFFFF;
-    padding-left: 18px;
-    margin-left: 0px !important;
+    margin-left: -23px !important;
+    margin-right: -25px !important;
+    margin-top: 15px;
 
 }
-
-/*.container {
-    width: calc(100% - 180px);
-}
-
-.container.active {
-    width: calc(100% - 80px);
-}*/
-

@@ -107,7 +107,7 @@ input#form-name:focus {
     display: flex;
 }
 .lab_text {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #888888;
     align-self: center;
 }
@@ -295,7 +295,7 @@ textarea{
     outline: none;
     box-shadow: 0 4px 6px -5px #333;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
     letter-spacing: 1px;
     color: #7F8C8D;

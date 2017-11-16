@@ -1,23 +1,18 @@
 .login-outer {
-    min-height:280px;
     height:auto;
     background-color: #ffffff;
     color: inherit;
-    padding: 0px;
+    padding: 0px 10px;
     border-color: #e7eaec;
     border-image: none;
     border-style: solid solid none;
     border-width: 1px 0;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .default-top-margin {
     margin-top: 10%;
 }
 
-.register-custom-position {
-    padding-top: 15px;
-}
 
 .user-manage-outer {
     height: auto;
@@ -26,15 +21,10 @@
 }
 
 .forgot-password-outer {
-        height:160px;
+        height:140px;
         background-color: #ffffff;
         color: inherit;
         padding: 15px 20px 20px 20px;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-.reset-password-outer {
-    min-height: 330px !important;
 }
 
 .login-first {

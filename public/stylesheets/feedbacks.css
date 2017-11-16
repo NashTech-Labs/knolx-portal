@@ -189,7 +189,7 @@
     color: #566573;
     text-shadow: none;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 1px;
     padding-top: 10px;
@@ -479,7 +479,7 @@
     color: #85929E;
     text-shadow: none;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 35px;
     letter-spacing: 1px;
     padding: 40px 0 0 10px;

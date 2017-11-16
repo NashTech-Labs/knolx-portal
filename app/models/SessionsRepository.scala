@@ -5,7 +5,7 @@ import javax.inject.Inject
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
 import controllers.UpdateSessionInformation
 import models.SessionJsonFormats._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
@@ -303,6 +303,29 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .update(selector, modifier)
       }
+  }
+
+  def getVideoURL(sessionId: String): Future[List[String]] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val projection = Json.obj("youtubeURL" -> 1)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("youtubeURL").asOpt[String]))
+  }
+
+  def updateVideoURL(sessionId: String, youtubeURL: String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument("youtubeURL" -> youtubeURL)
+    )
+
+    collection.flatMap(jsonCollection =>
+      jsonCollection.update(selector, modifier))
   }
 
 }

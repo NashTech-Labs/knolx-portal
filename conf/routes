@@ -24,10 +24,11 @@ POST        /user/changepassword                 controllers.UsersController.cha
 
 # Upload
 + nocsrf
-POST        /youtube/:sessionId/upload controllers.YoutubeController.upload(sessionId: String)
+POST        /youtube/:sessionId/upload           controllers.YoutubeController.upload(sessionId: String)
 GET         /youtube/:sessionId/upload           controllers.YoutubeController.checkIfUploading(sessionId: String)
 GET         /youtube/:sessionId/videoid          controllers.YoutubeController.getVideoId(sessionId: String)
 GET         /youtube/:sessionId/uploader         controllers.YoutubeController.getUploader(sessionId: String)
+POST        /youtube/:sessionId/update           controllers.YoutubeController.updateVideo(sessionId)
 + nocsrf
 GET         /youtube/:sessionId/cancel           controllers.YoutubeController.cancel(sessionId: String)
 
@@ -44,6 +45,7 @@ GET         /session/update                      controllers.SessionsController.
 GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
 GET         /session/content/:sessionId          controllers.SessionsController.shareContent(sessionId: String)
+GET         /session/:sessionId/:videoURL/updateyoutubeurl           controllers.SessionsController.storeVideoURL(sessionId: String, videoURL: String)
 
 # Feedback
 GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)

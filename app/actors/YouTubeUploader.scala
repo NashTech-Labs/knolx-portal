@@ -43,7 +43,8 @@ object YouTubeUploader {
   private val part = "snippet,statistics,status"
   private val status = new VideoStatus().setPrivacyStatus("private")
 
-  private val scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.upload")
+  private val scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube")
   private val credential = authorize(scopes)
   private val youtube =
     new YouTube.Builder(httpTransport, jsonFactory, credential)
@@ -99,12 +100,28 @@ object YouTubeUploader {
     val flow =
       new GoogleAuthorizationCodeFlow
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-          .setApprovalPrompt("force").setAccessType("offline")
         .setCredentialDataStore(dataStore).build()
+
+    /*val conf = ConfigFactory.load()
+
+    val refreshToken = conf.getString("youtube.refreshToken")
+
+    val response = new TokenResponse
+
+    response.setRefreshToken(refreshToken)
+
+    val a = flow.createAndStoreCredential(response, "user987")
+
+    Logger.info("-----------------Access Token = " + a.getAccessToken)*/
+
+    /*val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
+
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user921")*/
 
     val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
 
-    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user4090")
+
   }
 
   // Commands for YouTubeUploader actor
@@ -117,18 +134,26 @@ object YouTubeUploader {
 
   case class VideoId(sessionId: String)
 
+  case class VideoDetails(videoId: String,
+                          title: String,
+                          description: Option[String],
+                          tags: List[String],
+                          status: String,
+                          category: String)
+
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderManager: ActorRef,
                                 @Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef) extends Actor {
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty
-  var videoIds: Map[String, String] = Map.empty
+  var sessionVideos: Map[String, Video] = Map.empty
 
   def receive: Receive = {
     case YouTubeUploader.Upload(sessionId, is, title, description, tags, fileSize) => upload(sessionId, is, title, description, tags, fileSize)
-    case YouTubeUploader.VideoId(sessionId) => sender() ! videoIds.get(sessionId)
-    case msg                                                             =>
+    case YouTubeUploader.VideoId(sessionId)                                        => sender() ! sessionVideos.get(sessionId)
+    case videoDetails: YouTubeUploader.VideoDetails                                => sender() ! update(videoDetails)
+    case msg                                                                       =>
       Logger.info(s"Received a message in YouTubeUploader that cannot be handled $msg")
   }
 
@@ -152,9 +177,31 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderMa
 
     val video = videoInsert.execute()
 
-    videoIds += sessionId -> video.getId
+    sessionVideos += sessionId -> video
 
     video
+  }
+
+  def update(videoDetails: VideoDetails): String = {
+
+    val video = new Video
+
+    val snippet = new VideoSnippet()
+      .setTitle(videoDetails.title)
+      .setDescription(videoDetails.description.getOrElse(""))
+      .setTags(videoDetails.tags.asJava)
+      .setCategoryId(videoDetails.category)
+    val videoStatus = new VideoStatus().setPrivacyStatus(videoDetails.status)
+
+    video.setSnippet(snippet).setStatus(videoStatus).setId(videoDetails.videoId)
+
+    val videoUpdate = youtube.videos().update(part, video)
+    try {
+      videoUpdate.execute()
+      "Successfully updated the video details"
+    } catch {
+      case error: Throwable => "Something went wrong while updating the video details" + error+ "-------------Video ID = " + videoDetails.videoId
+    }
   }
 
 }

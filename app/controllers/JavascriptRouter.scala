@@ -19,6 +19,7 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.searchManageSession,
       controllers.routes.javascript.SessionsController.searchSessions,
       controllers.routes.javascript.SessionsController.shareContent,
+      controllers.routes.javascript.SessionsController.storeVideoURL,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
@@ -29,7 +30,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.YoutubeController.getUploader,
       controllers.routes.javascript.YoutubeController.cancel,
       controllers.routes.javascript.YoutubeController.checkIfUploading,
-      controllers.routes.javascript.YoutubeController.getVideoId
+      controllers.routes.javascript.YoutubeController.getVideoId,
+      controllers.routes.javascript.YoutubeController.updateVideo
     )).as("text/javascript")
   }
 

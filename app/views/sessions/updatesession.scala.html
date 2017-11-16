@@ -151,12 +151,38 @@
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <div id="youtubeVideo" class="dropzone" >
-<!--
-                            <input type="file" name="file" id="youtubeVideo" class="update-field " value='@sessionInfo.data.get("sessionId")' />
--->
-                            <!--<p>Drop files to upload or click</p>-->
-                        </div>
+                        <div id="youtubeVideo" class="dropzone" ></div>
+                    </div>
+                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <div class="col-md-1" ></div>
+                    <div class="col-md-10 " >
+                        <input type="text" name="title" id="youtube-title" value='@sessionInfo.data.get("topic")' placeholder="Video title" required class="update-field"/>
+                        <input type="text" name="description" id="youtube-description" value='@sessionInfo.data.get("topic")' placeholder="Video description" required class="update-field"/>
+                        <input type="text" name="tags" id="youtube-tags" value='@sessionInfo.data.get("topic")' placeholder="Video tags" required class="update-field"/>
+                        <select name="category" id="youtube-category" class="update-field login-second">
+                            <option value="2">Cars & Vehicles</option>
+                            <option value="23">Comedy</option>
+                            <option value="27">Education</option>
+                            <option value="24">Entertainment</option>
+                            <option value="20">Gaming</option>
+                            <option value="26">How-to & Style</option>
+                            <option value="10">Music</option>
+                            <option value="25">News & Politics</option>
+                            <option value="29">Non-profits & Activism</option>
+                            <option value="22">People & Blogs</option>
+                            <option value="15">Pets & Animals</option>
+                            <option value="28">Science & Technology</option>
+                            <option value="17">Sport</option>
+                            <option value="19">Travel & Events</option>
+                        </select>
+                        <select name="status" id="youtube-status" class="update-field login-second">
+                            <option value="private">Private</option>
+                            <option value="public">Public</option>
+                        </select>
+                        <input type="button" id="updateVideo" value="Update" class="input-field update-button"/>
                     </div>
                     <div class="col-md-1" ></div>
                 </div>
@@ -248,13 +274,6 @@
             <div class="col-md-12 create-footer"></div>
         </div>
 
-        <!--<div class="row">
-            <div class="col-md-12">
-                &lt;!&ndash;<div class="dropzone">&ndash;&gt;
-                    <div class="dropzone" id="youtubeVideo" ></div>
-                &lt;!&ndash;</div>&ndash;&gt;
-            </div>
-        </div>-->
         <div class="col-md-4" ></div>
     </div>
 

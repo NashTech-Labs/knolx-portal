@@ -75,6 +75,11 @@ $(function () {
             $("#no-upload-cancel").show();
         }
     });
+
+    $("#updateVideo").click( function () {
+        update(sessionId);
+    });
+
 });
 
 function uploadVideo(sessionId) {
@@ -176,8 +181,10 @@ function fillYoutubeEmbedURL(sessionId) {
             processData: false,
             contentType: false,
             success: function(data) {
+                var videoId = JSON.parse(data);
                 console.log("Setting embedded URL for youtube")
-                $("#youtubeURL").val("www.youtube.com/embed/" + JSON.parse(data));
+                $("#youtubeURL").val("www.youtube.com/embed/" + videoId);
+                storeVideoURL(sessionId);
             },
             error: function(er) {
                 console.log("An error was encountered = " + er);
@@ -189,4 +196,60 @@ function getUrl(file) {
     var fileSize = file.size;
     var url = "/youtube/" + sessionId + "/" + fileSize + "/upload";
     return url;
+}
+
+function storeVideoURL(sessionId) {
+    var youtubeURL = $("#youtubeURL").val();
+    jsRoutes.controllers.SessionsController.storeVideoURL(sessionId, youtubeURL).ajax(
+        {
+            type: 'GET',
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                console.log(data);
+            },
+            error: function(er) {
+                console.log("Error occurred = " + er);
+            }
+        })
+}
+
+function update(sessionId) {
+    var title = $("#youtube-title").val();
+    var description = $("#youtube-description").val();
+    var tags = [$("#youtube-tags").val()];
+    var status = $("#youtube-status").val();
+    var category = $("#youtube-category").val();
+
+    var formData = {
+        "title": title,
+        "description": description,
+        "tags": tags,
+        "status": status,
+        "category": category
+    };
+
+    jsRoutes.controllers.YoutubeController.updateVideo(sessionId).ajax(
+        {
+            type: 'POST',
+            processData: false,
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
+            success: function (data) {
+                console.log("Successfully Completed & data received was = " + data);
+            },
+            error: function(er) {
+                console.log("Error occurred: " + er);
+            }
+        });
+
+    console.log("title = " + title);
+    console.log("description = " + description);
+    console.log("tags = " + tags);
+    console.log("status = " + status);
 }

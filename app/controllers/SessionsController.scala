@@ -439,4 +439,17 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
+
+  def storeVideoURL(sessionId: String, youtubeURL: String): Action[AnyContent] = action.async { implicit request =>
+    Logger.info(s"Updating video URL for session $sessionId")
+
+    sessionsRepository.updateVideoURL(sessionId, youtubeURL).map { result =>
+      if(result.ok) {
+        Ok("Video stored successfully!")
+      } else {
+        BadRequest("Something went wrong while storing the video")
+      }
+    }
+  }
+
 }

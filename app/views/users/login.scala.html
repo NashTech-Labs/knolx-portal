@@ -22,6 +22,9 @@
         <div class="col-md-2" ></div>
         <div class="col-md-8 profile" style="padding-bottom: 10px;">
             <div class="row login-outer">
+                <div class="col-md-12 panel panel-default" style="margin-bottom: 0 !important;">
+                    <div class="panel-heading" style="font-size: 18px; font-weight: 900; ">Login</div>
+                </div>
                 @if(flash.get("successMessage").nonEmpty) {
                     <div class="alert alert-success login-error">
                         <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)

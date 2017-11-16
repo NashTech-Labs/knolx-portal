@@ -126,9 +126,12 @@ label {
 }
 
 .update-button {
+    text-transform: uppercase;
     background-color: #1ab394;
     color: #fff;
     margin-bottom:15px;
+    font-size: 2vh;
+    font-weight: bolder;
 }
 
 .update-error {

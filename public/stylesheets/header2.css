@@ -337,6 +337,16 @@ html,body{
     width:100%;
 }
 
+
+
+.container-knolx > .row > .header-container {
+    height: 70px;
+    background-color: #FFFFFF;
+    padding-left: 18px;
+    margin-left: 0px !important;
+
+}
+
 /*.container {
     width: calc(100% - 180px);
 }

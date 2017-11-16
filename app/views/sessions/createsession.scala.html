@@ -2,6 +2,12 @@
 
 @main("Create Session") {
 
+    <div class="row ">
+        <div class="header-container ">
+        Create Session
+        </div>
+    </div>
+
     <div class="row registration-error">
         <div class="col-md-4"></div>
         <div class="col-md-4">
@@ -49,9 +55,9 @@
     <div class="row">
 
         <div class="col-md-12 create-outer">
-            <div class="col-md-12 panel panel-default">
+            @*<div class="col-md-12 panel panel-default">
                 <div class="panel-heading" style="font-size: 20px; font-weight: 900; ">Create Session</div>
-            </div>
+            </div>*@
 
             <form class="CreateForm customForm" action="@routes.SessionsController.createSession()" method="post">
 
@@ -68,7 +74,7 @@
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
                     <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
-                    placeholder="Date" required class="update-field reg form-control"/>
+                    placeholder="Date" required class="update-field reg"/>
                     </div>
                 </div>
 

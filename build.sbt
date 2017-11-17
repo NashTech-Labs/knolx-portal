@@ -20,6 +20,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer" % "5.0.0",
   "com.typesafe.akka" %% "akka-testkit" % "2.5.2" % Test,
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
+  "org.seleniumhq.selenium" % "selenium-java" % "3.0.1" % Test,
+  "org.seleniumhq.selenium" % "selenium-chrome-driver" % "2.24.1",
   specs2 % Test
 )
 

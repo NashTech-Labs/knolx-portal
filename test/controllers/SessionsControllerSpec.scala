@@ -669,7 +669,9 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val categories = List(CategoryInfo("Front End",List("Angular JS","HTML"),categoryId))
       val getCategories = categoriesRepository.getCategories returns  Future(categories)
 
-      val result = controller.renderCategoryPage(FakeRequest())
+      val result = controller.renderCategoryPage(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withCSRFToken)
 
       status(result) must be equalTo OK
     }

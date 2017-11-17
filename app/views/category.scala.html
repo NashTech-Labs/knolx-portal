@@ -10,6 +10,7 @@
             <div id="success-message" class=" alert alert-success fade in"
                  style="padding-top: 10px; display: none;"></div>
             <div id="wrong-message" class="alert alert-danger fade in" style="padding-top: 10px;  display: none;"></div>
+
         </div>
         <div class="panel-group">
 
@@ -83,18 +84,21 @@
                         }
                         <div class="col-md-6">
                             <div>
-                                <input list="subcategories" id="modify-sub-category" name="subcategory"
-                                       placeholder="Select a sub-category!">
-                                <datalist id="subcategories">
-                                    @for(category <- categories){
-                                    @for(subCategory <- category.subCategory) {
-                                    <input id="categoryName" value="@category.categoryName" hidden>
-                                    <option value="@subCategory" id="dropDownSelect" class="@category.categoryName">
-                                        @category.categoryName
-                                    </option>
-                                    }
-                                    }
-                                </datalist>
+                                <!--<div id="holder">
+                                    <input type="hidden" id="pair"/>
+                                    <input type="text" id="modify-sub-category"/><button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                    <div id="results-outer">
+                                        &lt;!&ndash; results goes here &ndash;&gt;
+                                    </div>
+                                </div>-->
+                                <div id="mod-holder">
+                                    <input type="hidden" id="mod-pair"/>
+                                    <input type="text" id="mod-datalist"/><button id="mod-drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                    <div id="mod-results-outer">
+                                        <!-- results goes here -->
+                                    </div>
+                                </div>
+
                                 <div style="padding-top: 10px;">
                                     <input id="new-sub-category" style="margin-bottom: 10px;display:none"
                                            placeholder="Modify sub-category">
@@ -135,28 +139,14 @@
                         }
 
                         <div class="col-md-6">
-                            <!--<div class="ui fluid search selection dropdown">
-                                <input type="hidden" name="country">
-                                <i class="dropdown icon"></i>
-                                <div class="default text">Select Country</div>
-                                <div class="menu">
-                                    @for(category <- categories) {
-                                        @for(subCategory<- category.subCategory) {
-                                    <div class="item" data-value="af"><i class="af flag"></i>@subCategory @category.categoryName</div>
-                                    }
-                                    }
+
+                            <div id="holder">
+                                <input type="hidden" id="pair"/>
+                                <input type="text" id="datalist"/><button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                <div id="results-outer">
+                                    <!-- results goes here -->
                                 </div>
-                            </div>-->
-
-                            <input list="suggestionList" id="answerInput">
-                            <datalist id="suggestionList">
-                                @for((category,indexCategory) <- categories.zipWithIndex) {
-                                @for((subCategory,index)<- category.subCategory.zipWithIndex) {
-                                <option value="@subCategory" data-value="@category.categoryName"><p>@category.categoryName<br/></p></option>
-                                }}
-                            </datalist>
-                            <input type="hidden" name="answer" id="answerInput-hidden">
-
+                            </div>
 
                             <div id="subcategory-sessions"></div>
                             <div style="padding-top: 10px;">
@@ -195,12 +185,5 @@
         </div>
     </div>
 </div>
-<!--<script>
-    $(document).ready(()=>{
-    console.log("HIIIIIII");
-    $('.testSelAll').SumoSelect({ okCancelInMulti: false, selectAll: false });
-    });
-
-</script>-->
 
 }

@@ -1,3 +1,11 @@
+function Element(subcatagory, primarycatagory) {
+        this.subcatagory = subcatagory;
+        this.primarycatagory = primarycatagory;
+}
+
+var fields = [];
+var result = "";
+
 $(function () {
 
     var oldCategoryName = "";
@@ -28,11 +36,11 @@ $(function () {
         modifyPrimaryCategory(oldCategoryName,newCategoryName);
     });
 
-    $("#modify-sub-category").on('input change', function() {
+    /*$("#modify-sub-category").on('change', function() {
         $("#new-sub-category").show();
         oldSubCategoryName = $(this).val();
         categoryName = $("#categoryName").val();
-    });
+    });*/
 
     $("#modify-sub-category-btn").click( function() {
        var newSubCategoryName = $("#new-sub-category").val();
@@ -50,79 +58,194 @@ $(function () {
     });
 
     $("#delete-sub-category-btn").on('click', function() {
-
-
+        $("#delete-sub-category-modal").modal('show');
     });
 
     $("#delete-sub-category-modal-yes-btn").click( function() {
-
           deleteSubCategory(categoryName, subCategoryName);
     });
 
-    listData();
-    function listData(){
-        var id;
-        $('#sub-Categorya option').each(function(i, e){
-            id = $(this).attr("id", "id_" + i).appendTo(this);
+    listSubCategoryWithPrimaryCategory();
+
+    $("#datalist").keyup(function(event){
+        var keyword = $("#datalist").val().toLowerCase();
+        result = "";
+        prepareResult(keyword)
+    });
+
+    function prepareResult(keyword){
+        fields.forEach(function (element) {
+               if(element.subcatagory.toLowerCase().includes(keyword)){
+              result = result + '<div class="result" id="'+element.subcatagory+'-'+element.primarycatagory+'"><div class="sub-catagory wordwrap"><strong>'+element.subcatagory+'</strong></div><div class="primary-catagory">'+element.primarycatagory+'</div> </div>'
+           }
         });
-        }
-
-        $("input[name=sub-Catgeoryrtyty]").focusout(function(){
-
-        });
-
-
-
-
-
-
-
-
-
-// var id = document.querySelector('#datalist1 option[value=' + g +']').dataset.id;
-
-/*console.log("new option"+id);
-    var val = $(id).text();
-        console.log("val>>>"+val);
+        $('#results-outer').html(result);
+        $('#results-outer').show();
+        result = "";
     }
 
-    function det() {
-    *//*console.log("val>>>");
-      $('#delete-sub-category').on('input change',function() {
-        console.log("val>>>22");
-        var opt = $(this).find("option:selected").attr("id");
+    $("#drop-btn").click(function(){
+         var keyword = $("#datalist").val().toLowerCase();
+         if( keyword == ""){
+            if($('#results-outer').is(":visible")){
+                 $('#results-outer').hide();
+            }else{
+              prepareResult("");
+            }
+          }
+         else{
+           if($('#results-outer').is(":visible")){
+               $('#results-outer').hide();
+            }else{
+              prepareResult(keyword);
+            }
+         }
+    });
 
-        *//**//*alert(opt.length ? opt.text() : 'NO OPTION');*//**//*
-        console.log("id>>>>>"+opt);
-      });*//*
-      console.log("option id>>>");
-      var id;
-      var ie;
-      $("#delete-sub-category").on('input change', function () {
-      var g = $('#delete-sub-category').val();
-      id = $('#sub-Category option[value=' + g +']').attr('id');
-      console.log("sgdfhdfkds");
-      ie=$("#" + id).text();
+    $("#datalist").blur(function() {
+         $('#results-outer').hide()
+    });
 
-                                              // var val = $(ie).html();
-                                              console.log("option id>>>"+id);
-console.log("option valuejhdsgu>>>"+ie);
+    $(document).mouseup(function(e) {
+        var container = $("#holder");
+        if (!container.is(e.target) && container.has(e.target).length === 0)
+        $('#results-outer').hide()
+    });
 
-                                          });
-                                          ie=$("#" + id).text();
-//                                          *//*console.log("after input change id>>>"+id);
-//                                          console.log("option valuejhdsgu>>>"+ie);*//*
-    };*/
+    $("html").delegate( ".result", "mousedown", function() {
+      var attribute = $(this).attr('id');
+      var splits = attribute.split('-');
+      console.log("splits = " + splits);
+      subCategoryName = splits[0];
+      categoryName = splits[1];
+      alert(categoryName + " ..... " + subCategoryName);
+      $("#datalist").val(splits[0]);
+      topicMatchedWithCategory(categoryName, subCategoryName)
+      $("#subcategory-sessions").show();
+      $("#pair").val(attribute);
+      $('#results-outer').hide();
+    });
 
-/*    det();*/
+    $("html").delegate( ".result", "mouseover", function() {
+       $(this).addClass('over');
+    });
 
+    $("html").delegate( ".result", "mouseleave", function() {
+       $(this).removeClass('over');
+    });
 
+    /*for modify sub-category*/
 
+    $("#mod-datalist").keyup(function(event){
+            var keyword = $("#mod-datalist").val().toLowerCase();
+            result = "";
+            modPrepareResult(keyword)
+        });
+
+    function modPrepareResult(keyword){
+            fields.forEach(function (element) {
+                   if(element.subcatagory.toLowerCase().includes(keyword)){
+                  result = result + '<div class="mod-result" id="'+element.subcatagory+'-'+element.primarycatagory+'"><div class="sub-catagory wordwrap"><strong>'+element.subcatagory+'</strong></div><div class="primary-catagory">'+element.primarycatagory+'</div> </div>'
+               }
+            });
+            $('#mod-results-outer').html(result);
+            $('#mod-results-outer').show();
+            result = "";
+        }
+
+    $("#mod-drop-btn").click(function(){
+             var keyword = $("#mod-datalist").val().toLowerCase();
+             if( keyword == ""){
+                if($('#mod-results-outer').is(":visible")){
+                     $('#mod-results-outer').hide();
+                }else{
+                  modPrepareResult("");
+                }
+              }
+             else{
+               if($('#mod-results-outer').is(":visible")){
+                   $('#mod-results-outer').hide();
+                }else{
+                  modPrepareResult(keyword);
+                }
+             }
+        });
+
+    $("#mod-datalist").blur(function() {
+         $('#mod-results-outer').hide()
+    });
+
+    $(document).mouseup(function(e) {
+        var container = $("#mod-holder");
+        if (!container.is(e.target) && container.has(e.target).length === 0)
+        $('#mod-results-outer').hide()
+    });
+
+    var newSubCategoryName = "";
+    $("html").delegate( ".mod-result", "mousedown", function() {
+          var attribute = $(this).attr('id');
+          var splits = attribute.split('-');
+          console.log("splits = " + splits);
+          oldSubCategoryName = splits[0];
+          categoryName = splits[1];
+          alert(categoryName + " ..... " + subCategoryName);
+          $("#mod-datalist").val(splits[0]);
+          $("#new-sub-category").show();
+          //newSubCategoryName = $("#new-sub-category").val();
+
+          $("#mod-pair").val(attribute);
+          $('#mod-results-outer').hide();
+        });
+
+        /*$("#modify-sub-category-btn").click( function() {
+               var newSubCategoryName = $("#new-sub-category").val();
+               modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName);
+            });*/
+
+        $("html").delegate( ".mod-result", "mouseover", function() {
+           $(this).addClass('over');
+        });
+
+    $("html").delegate( ".mod-result", "mouseleave", function() {
+           $(this).removeClass('over');
+        });
 
 
 });
 
 
+function listSubCategoryWithPrimaryCategory() {
+
+    jsRoutes.controllers.SessionsController.getCategory().ajax(
+    {
+        type: 'GET',
+        processData: false,
+        contentType: 'application/json',
+        success: function(data) {
+
+            var values =JSON.parse(data);
+            var listOfData = [];
+            console.log(values[0].subCategory);
+            for(var i = 0; i< values.length; i++ ) {
+               for(var j = 0;j< values[i].subCategory.length; j++) {
+
+                  var elem = new Element(values[i].subCategory[j], values[i].categoryName);
+                   fields.push(elem);
+               }
+            }
+        }
+});
+}
+
+function successMessageBox() {
+    $("#success-message").show();
+    $("#wrong-message").hide();
+}
+
+function wrongMessageBox() {
+    $("#success-message").hide();
+    $("#wrong-message").show();
+}
 
 function addCategory(categoryName) {
     jsRoutes.controllers.SessionsController.addPrimaryCategory(categoryName).ajax (
@@ -130,21 +253,15 @@ function addCategory(categoryName) {
             type: 'GET',
             processData: false,
             contentType: false,
-            /*beforeSend: function (request) {
-                var csrfToken = document.getElementById('csrfToken').value;
 
-                return request.setRequestHeader('CSRF-Token', csrfToken);
-            },*/
             success: function(data) {
-                $("#success-message").show();
-                $("#wrong-message").hide();
+                successMessageBox();
                 $("#primary-category").val("");
-                document.getElementById("success-message").text(data);
+                document.getElementById("success-message").innerHTML = data;
                 $("#categories").append("<option value='" + categoryName + "'>" + categoryName + "</option>")
             },
             error: function(er) {
-                $("#success-message").hide();
-                $("#wrong-message").show();
+                wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML = er.responseText
             }
         }
@@ -158,15 +275,13 @@ function addSubCategory(categoryName,subCategory) {
             processData: false,
             contentType: false,
             success: function(data) {
-                $("#wrong-message").hide();
+                successMessageBox()
                 $("#sub-category").val("");
-                $("#success-message").show();
                 document.getElementById("success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + subCategory + "'>" + categoryName + "</option>");
             },
             error: function(er) {
-                $("#wrong-message").show();
-                $("#success-message").hide();
+                wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML = er.responseText;
             }
         }
@@ -182,14 +297,12 @@ function modifyPrimaryCategory(oldCategoryName,newCategoryName) {
             contentType: false,
 
             success: function(data) {
-                $("#wrong-message").hide();
+                successMessageBox();
                 $("#new-primary-category").val("");
-                $("#succes-message").show();
                 document.getElementById("success-message").text(data);
             },
             error: function(er) {
-                $("#wrong-message").show();
-                $("#succes-message").hide();
+                wrongMessageBox();
                 $("#new-primary-category").val("");
                 document.getElementById("wrong-message").innerHTML=er.responseText;
             }
@@ -208,16 +321,14 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
 
             success: function(data) {
                 console.log(data);
-                $("#wrong-message").hide();
-                $("#success-message").show();
+                successMessageBox();
                 $("#new-sub-category").show();
                 document.getElementById("success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
             },
             error: function(er) {
-                $("#wrong-message").show();
-                $("#succes-message").hide();
+                wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML=er.responseText;
                 $("#new-sub-category").val("");
              },
@@ -225,37 +336,16 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
     )
 }
 
-function deletePrimaryCategory(categoryName){
+function deletePrimaryCategory(categoryName) {
 
     jsRoutes.controllers.SessionsController.deletePrimaryCategory(categoryName).ajax(
         {
             type:'GET',
             processData: false,
-            contentType: false,
-
-            success: function(data) {
-                console.log(data)
-                $("#wrong-message").hide();
-                $("#succes-message").show();
-            },
-            error: function(er) {
-                console.log("No subcategory is available")
-            }
-        }
-    )
-
-}
-
-function subCategoryByPrimaryCategory(categoryName) {
-
-    jsRoutes.controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName).ajax(
-        {
-            type:'GET',
-            processData: false,
             contentType: 'application/json',
             success: function(data) {
-                var subCategories = JSON.parse(data);
-
+                successMessageBox();
+                /*var subCategories = JSON.parse(data);
                 if(subCategories.length) {
                     console.log("Sub category = " + subCategories);
                     var restricted = '<div class="alert alert-warning">' +
@@ -266,25 +356,58 @@ function subCategoryByPrimaryCategory(categoryName) {
                         subCategoryList += "<li>" + subCategories[i] + "</li>";
                     }
                     $("#category-sessions").html(subCategoryList);
-                }
-                console.log("ggdgdddddddddddd")
+                }*/
+                console.log("data is = " + data)
+                document.getElementById("success-message").innerHTML = data;
             },
             error: function(er) {
-
+                wrongMessageBox();
+                console.log("error is  = " + er.responseText)
+                document.getElementById("wrong-message").innerHTML=er.responseText;
             }
         }
     )
 }
 
+function subCategoryByPrimaryCategory(categoryName) {
+
+     jsRoutes.controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName).ajax(
+         {
+             type:'GET',
+             processData: false,
+             contentType: 'application/json',
+             success: function(data) {
+                 var subCategories = JSON.parse(data);
+
+                 if(subCategories.length) {
+                     console.log("Sub category = " + subCategories);
+                     var restricted = '<div class="alert alert-warning">' +
+                                      '<strong>Warning!</strong> Indicates a warning that might need attention.'+
+                                      '</div>';
+                     var subCategoryList = '<ul id="list-sub-categories">'
+                     for(var i = 0 ; i < subCategories.length ; i++) {
+                         subCategoryList += "<li>" + subCategories[i] + "</li>";
+                     }
+                     $("#category-sessions").html(subCategoryList);
+                }
+
+             },
+             error: function(er) {
+                $("#category-sessions").html("<p> * No sub category exists </p>");
+             }
+         }
+     )
+ }
+
 function topicMatchedWithCategory(categoryName, subCategoryName){
-    jsRoutes.controllers.SessionsController.getTopicsBySubCategory(subCategoryName).ajax(
+    jsRoutes.controllers.SessionsController.getTopicsBySubCategory(categoryName, subCategoryName).ajax(
         {
             type:'GET',
             processData: false,
             contentType: 'application/json',
             success: function(data) {
                 var topics = JSON.parse(data);
-                /*console.log("topics = " + topics);*/
+                console.log("topics = " + topics);
                 if(topics.length) {
                     var sessions = '<ul id="list-sessions">';
                     for(var i = 0 ; i < topics.length ; i++) {
@@ -317,15 +440,13 @@ function deleteSubCategory(categoryName, subCategoryName) {
             contentType: false,
 
             success: function(data) {
-                $("#wrong-message").hide();
-                $("#success-message").show();
+                successMessageBox();
                 $("#delete-sub-category").val("");
                 document.getElementById("success-message").innerHTML = data;
                 $("#subcategory-sessions").hide();
             },
             error: function(er) {
-                $("#wrong-message").show();
-                $("#succes-message").hide();
+                wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML=er.responseText;
                 $("#delete-sub-category").val("");
             }

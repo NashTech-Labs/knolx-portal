@@ -334,16 +334,16 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }
 
-  def updateSubCategoryOnDelete(subCategory : String): Future[UpdateWriteResult] = {
+  def updateSubCategoryOnChange(subCategory : String,updateSubCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("subCategory" -> subCategory)
-    val modifier = BSONDocument("subCategory" -> "" )
+    val modifier = BSONDocument("$set" -> BSONDocument("subCategory" -> updateSubCategory))
 
     collection.flatMap(_.update(selector,modifier,multi=true))
   }
 
-  def updateCategoryOnDelete(category : String): Future[UpdateWriteResult] = {
+  def updateCategoryOnChange(category : String,updateCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("category" -> category)
-    val modifier = BSONDocument("category" -> "" )
+    val modifier = BSONDocument("$set" -> BSONDocument("category" -> updateCategory))
 
     collection.flatMap(_.update(selector,modifier,multi=true))
   }

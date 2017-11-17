@@ -67,10 +67,9 @@ GET         /addsubcategory                     controllers.SessionsController.a
 GET         /modifyprimarycategory              controllers.SessionsController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
 GET         /modifysubcategory                  controllers.SessionsController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
 GET         /deleteprimarycategory              controllers.SessionsController.deletePrimaryCategory(categoryName: String)
+GET         /getsubcategorybyprimarycategory    controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName: String)
 GET         /deletesubcategory                  controllers.SessionsController.deleteSubCategory(categoryName: String, subCategoryName: String)
-GET         /gettopicsbysubcategory             controllers.SessionsController.getTopicsBySubCategory(subCategory: String)
-GET         /getsubcategorybycategory           controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName: String)
-
+GET         /gettopicsbysubcategory             controllers.SessionsController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 # Analysis
 GET          /analysis                           controllers.AnalysisController.renderPieChart
 POST         /analysis                           controllers.AnalysisController.pieChart

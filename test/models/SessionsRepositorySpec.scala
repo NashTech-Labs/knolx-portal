@@ -222,6 +222,18 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       result.ok must beEqualTo(false)
     }
 
+    "update sub category on change" in new TestScope {
+      val deleteSubCategory = await(sessionsRepository.updateSubCategoryOnChange("subCategory",""))
+
+      deleteSubCategory.ok must beEqualTo(true)
+    }
+
+    "update category on delete" in new TestScope {
+      val deleteCategory = await(sessionsRepository.updateCategoryOnChange("category",""))
+
+      deleteCategory.ok must beEqualTo(true)
+    }
+
   }
 
 }

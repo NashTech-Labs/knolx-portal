@@ -10,7 +10,7 @@ import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import models.categoriesJsonFormats._
 import play.api.Logger
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +33,7 @@ object categoriesJsonFormats {
 }
 
 class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
-
+  println("cfvgbhjkdfghj")
   import play.modules.reactivemongo.json._
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("categories"))
@@ -87,8 +87,17 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def deletePrimaryCategory(categoryName: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("categoryName" -> categoryName)
-
     collection.flatMap(_.remove(selector))
+  }
+
+  def getSubCategoryByPrimaryCategory(categoryName: String)(implicit ex: ExecutionContext) = {
+    val selector = BSONDocument("categoryName" -> categoryName)
+    val projection = BSONDocument("_id" -> 0 , "subCategory" -> 1)
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector,projection)
+          .cursor[JsArray](ReadPreference.primary).headOption)
   }
 
   def deleteSubCategory(categoryName: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
@@ -100,4 +109,20 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector, modifier, multi = true))
 
   }
+  /*def searchSubCategory(keyword : Option[String] = None): Unit = {
+
+    val condition = keyword match {
+      case Some(key) => Json.obj(List(Json.obj("subCategory" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "") + ".*")))))
+
+      case None => getCategories
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](FailOnError[List[CategoryInfo]]()))
+  }*/
+
 }

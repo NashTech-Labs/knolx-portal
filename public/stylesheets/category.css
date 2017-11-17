@@ -54,3 +54,80 @@
 .panel-content {
     overflow-x: auto;
 }
+
+#holder{
+width:400px;
+//text-align:center;
+//padding-top:20px;
+}
+
+#datalist{
+width:60%;
+height:40px;
+border:2px solid #dcdcdc;
+padding:2px 5px;
+outline:none;
+}
+
+#results-outer{
+width:60%;
+max-height:200px;
+//background:blue;
+margin-left:9.5%;
+overflow-y: auto;
+overflow-x: hidden;
+display:None;
+z-index:9999;
+box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.result{
+width:100%;
+height:40px;
+line-height:40px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+}
+
+.sub-catagory{
+float:left;
+width:50%;
+height:100%;
+text-align:center;
+}
+
+.primary-catagory{
+float:left;
+width:50%;
+height:100%;
+text-align:center;
+}
+
+.wordwrap {
+   white-space: pre-wrap;      /* CSS3 */
+   white-space: -moz-pre-wrap; /* Firefox */
+   white-space: -pre-wrap;     /* Opera <7 */
+   white-space: -o-pre-wrap;   /* Opera 7 */
+   word-wrap: break-word;      /* IE */
+}
+
+#drop-btn{
+height:40px;
+border:none;
+outline:none;
+}
+
+#submit-btn{
+height:40px;
+border:none;
+outline:none;
+margin-left:5px;
+background-color:#EC7063;
+color:#fff;
+padding:5px 10px;
+}
+
+.over{
+ background-color:#eee;
+}
+

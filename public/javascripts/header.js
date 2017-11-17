@@ -8,7 +8,7 @@ $(window).scroll(function () {
 });*/
 $(document).ready(function () {
  $('#sidebarCollapse').on('click', function () {
-     $('#sidebar, #content, .container').toggleClass('active');
+     $('#sidebar, #content').toggleClass("active");
      $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
  });
 
@@ -25,13 +25,4 @@ $(document).ready(function () {
   });
 
   $('.IsBestAnswer').addClass('bestanswer').removeClass('IsBestAnswer');
-
- function header(){
-    var width= $(window).width();
-
-    if (width<=768) {
-       $('#sidebar').addClass('active');
-    }
- }
- header();
 });

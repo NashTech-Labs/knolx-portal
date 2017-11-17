@@ -6,7 +6,7 @@
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(active.nonEmpty) {
                 @for((session, feedbackForm) <- active) {
-                    <div class="col-md-3">
+                    <div class="col-md-3 filter-padding-left">
                         <div class="col-md-12">
                             <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
@@ -86,7 +86,6 @@
                     </div>
                 }
             }
-            <div class="col-md-12 feedback-footer"></div>
         </div>
     </div>
 

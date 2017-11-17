@@ -1,10 +1,7 @@
 .feedback-form-display-container {
     color: #000;
-    margin: 80px 0px;
-    background-color: #fff;
+    margin: 40px 0px;
     padding: 0px 0px 0px 0px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    padding-top: 50px;
 }
 
 .feedback-top-banner {
@@ -30,14 +27,12 @@
     width: 100%;
     margin: 0 auto;
     margin-bottom: 50px;
-    padding-bottom: 50px;
     text-align: center;
     line-height: 30px;
-    font-size: 30px;
+    font-size: 20px;
     color: #fff;
     text-shadow: 0 0px 6px #999;
-    background-color: #dcdcdc;
-    box-shadow: 0 6px 20px #a8a8a8;
+    background-color: #FFFFFF;
 }
 
 .card-custom-padding {
@@ -72,13 +67,12 @@
 
 .feedback-card-button {
     border-radius: 0;
-    width: 80%;
+    width: 60%;
     margin-bottom: 20px;
     border: 2px solid #dcdcdc;
     letter-spacing: 2px;
     background-color: #639593;
     outline: none !important;
-    padding: 12px 0px;
     font-size: 18px;
     color: #fff;
     position: relative;
@@ -305,7 +299,6 @@
     text-shadow: none;
     word-wrap: break-word;
     line-height: 1.2em;
-    padding: 0px 15px 0px 15px;
 }
 
 .more {

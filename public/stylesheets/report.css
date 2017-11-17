@@ -6,6 +6,8 @@
     padding: 20px 0;
     margin-bottom: 0px;
     background-color: #1ab394;
+    background-image: url(../images/mesh.svg);
+    background-size: cover;
 }
 
 .report-content-outer {

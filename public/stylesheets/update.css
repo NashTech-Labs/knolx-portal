@@ -22,14 +22,12 @@
 
 .update-outer {
     background-color: #FFF;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
     margin-bottom: 20px;
     position: relative;
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
-    padding-top: 20px;
+    padding-top: 15px;
 }
 
 #date {
@@ -64,11 +62,11 @@ label {
 }
 
 .checkbox-text {
-    font-size: 15px;
+    font-size: 14px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #676a6c;
     margin: 0px;
-    margin-top: 10px;
+    margin-top: 12px;
     letter-spacing: 1px;
 }
 
@@ -108,7 +106,7 @@ label {
 
 .update-second-field {
     padding-top: 20px;
-    line-height: 50px;
+    line-height: 20px;
 }
 
 .custom-alert {
@@ -121,12 +119,10 @@ label {
 }
 
 .update-button {
-    text-transform: uppercase;
     background-color: #1ab394;
     color: #fff;
     margin-bottom:15px;
-    font-size: 2vh;
-    font-weight: bolder;
+    font-size: 3vh;
 }
 
 .update-error {

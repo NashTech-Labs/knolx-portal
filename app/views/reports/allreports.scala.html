@@ -2,13 +2,12 @@
 
 @main("All reports") {
     <div class="row">
-        <div class="col-md-2" ></div>
-        <div class="col-md-8 feedback-form-display-container">
+        <div class="col-md-12 feedback-form-display-container">
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {
                     @if(session.active) {
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
@@ -39,7 +38,7 @@
                         </div>
                     }
                     } else {
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
@@ -72,8 +71,6 @@
                     <p class="empty-reports_text">No feedback reports found!</p>
                 </div>
             }
-            <div class="col-md-12 feedback-footer"></div>
         </div>
-        <div class="col-md-2" ></div>
     </div>
 }

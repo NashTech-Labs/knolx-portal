@@ -19,3 +19,8 @@
     max-width: 600px;
     margin: 0 auto;
 }
+.date-range-picker {
+    text-align: right;
+    margin-top: 10px;
+    padding-right: 15px !important;
+}

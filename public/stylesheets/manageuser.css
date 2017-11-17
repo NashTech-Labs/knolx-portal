@@ -85,7 +85,7 @@ input::placeholder {
     font-size: 18px;
     letter-spacing: 2px;
     padding: 0px 0px 15px 0px;
-    margin-top: 45px;
+    margin-top: 10px;
     text-align: center;
 }
 
@@ -101,9 +101,8 @@ input::placeholder {
     text-align: left;
     font-size: 18px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #888888;
+    color: #676a6c;
     text-shadow: none;
-    letter-spacing: 2px;
     margin-top: 15px;
     margin-right: 34%;
     margin-left: 20%;
@@ -160,15 +159,12 @@ input::placeholder {
 .password-text {
     height: 100%;
     width: 100%;
-    border-bottom: 2px dotted #CACFD2;
-    background-color: transparent;
     outline: none;
     text-align: center;
-    color: #EC7063;
+    color: #676a6c;
     font-size: 20px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
-    letter-spacing: 2px;
 }
 
 .empty-email {
@@ -276,9 +272,8 @@ input::placeholder {
 .all-users-table > tbody > tr > td:first-child, .all-users-table > tbody > tr > td:nth-child(2) {
     text-align: center;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 17px;
+    font-size: 15px;
     letter-spacing: 1px;
-    color: #666;
 }
 
 .manage-user-custom-table-margin {

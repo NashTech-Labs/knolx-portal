@@ -59,14 +59,14 @@ function slide(keyword, pageNumber) {
                         if (sessions[session].completed && !sessions[session].cancelled) {
                            usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
                             "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                            "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
+                            "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a></td>";
                         } else if(sessions[session].cancelled) {
-                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
+                            usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span></td>";
                         }
                         else if(!sessions[session].completed) {
-                           usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span>";
+                           usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span></td>";
                         }
-                        usersFound += "</td></tr>"
+                        usersFound += "</tr>"
                     }
 
                     $('#user-found').html(usersFound);
@@ -83,7 +83,7 @@ function slide(keyword, pageNumber) {
                     }
                 } else {
                     $('#user-found').html(
-                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                        "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
                     $('.pagination').html("");
                 }

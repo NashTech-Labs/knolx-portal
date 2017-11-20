@@ -58,7 +58,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
-        usersBanScheduler)
+        usersBanScheduler,
+        youtubeUploaderManager)
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]
@@ -66,6 +67,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
     val usersBanScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
+    val youtubeUploaderManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
     }

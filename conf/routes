@@ -25,9 +25,8 @@ POST        /user/changepassword                 controllers.UsersController.cha
 # Upload
 + nocsrf
 POST        /youtube/:sessionId/upload           controllers.YoutubeController.upload(sessionId: String)
-GET         /youtube/:sessionId/upload           controllers.YoutubeController.checkIfUploading(sessionId: String)
 GET         /youtube/:sessionId/videoid          controllers.YoutubeController.getVideoId(sessionId: String)
-GET         /youtube/:sessionId/uploader         controllers.YoutubeController.getUploader(sessionId: String)
+GET         /youtube/:sessionId/progress         controllers.YoutubeController.getPercentageUploaded(sessionId: String)
 POST        /youtube/:sessionId/update           controllers.YoutubeController.updateVideo(sessionId)
 + nocsrf
 GET         /youtube/:sessionId/cancel           controllers.YoutubeController.cancel(sessionId: String)

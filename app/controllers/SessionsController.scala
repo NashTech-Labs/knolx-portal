@@ -4,10 +4,14 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.Categories
 import actors.SessionsScheduler._
 import actors.UsersBanScheduler._
 import akka.actor.ActorRef
 import akka.pattern.ask
+import akka.util.Timeout
+import com.google.api.services.youtube.YouTube
+import com.google.api.services.youtube.model.{VideoCategory, VideoCategoryListResponse}
 import controllers.EmailHelper._
 import models._
 import play.api.Logger
@@ -64,6 +68,8 @@ case class SessionSearchResult(sessions: List[KnolxSession],
                                page: Int,
                                keyword: String)
 
+case class VideoCategories(id: String, name: String)
+
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
 }
@@ -76,11 +82,13 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
-                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef
+                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef,
+                                   @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+  implicit val timeout = Timeout(100 seconds)
 
   val sessionSearchForm = Form(
     mapping(
@@ -369,13 +377,21 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         case Some(sessionInformation) =>
           feedbackFormsRepository
             .getAll
-            .map { feedbackForms =>
+            .flatMap { feedbackForms =>
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
                 sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
-              Ok(views.html.sessions.updatesession(filledForm, formIds))
+              val eventualYoutubeCategories = (youtubeUploaderManager ? Categories).mapTo[List[VideoCategory]]
+                .map { categories =>
+                  categories.map { cat =>
+                    VideoCategories(cat.getId, cat.getSnippet.getTitle)
+                  }
+                }
+              eventualYoutubeCategories.map { youtubeCategories =>
+                Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories))
+              }
             }
 
         case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
@@ -389,8 +405,16 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
         updateSessionForm.bindFromRequest.fold(
           formWithErrors => {
+            val eventualYoutubeCategories = (youtubeUploaderManager ? Categories).mapTo[List[VideoCategory]]
+              .map { categories =>
+                categories.map { cat =>
+                  VideoCategories(cat.getId, cat.getSnippet.getTitle)
+                }
+              }
             Logger.error(s"Received a bad request for getByEmail session $formWithErrors")
-            Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
+            eventualYoutubeCategories.map { youtubeCategories =>
+              BadRequest(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories))
+            }
           },
           updateSessionInfo => {
             val expirationMillis = sessionExpirationMillis(updateSessionInfo.date, updateSessionInfo.feedbackExpirationDays)

@@ -16,6 +16,9 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
     bindActorFactory[EmailActor, ConfiguredEmailActor.Factory]
     bindActor[EmailManager]("EmailManager")
 
+    bindActorFactory[YouTubeUploader, ConfiguredYouTubeUploader.Factory]
+    bindActorFactory[YouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
+
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))
       .toProvider(Providers.guicify(Akka.providerOf(classOf[SessionsScheduler], "SessionsScheduler", Function.identity())))
@@ -39,6 +42,16 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
     bind[ActorRef]
       .annotatedWith(Names.named("YouTubeUploadProgress"))
       .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploadProgress], "YouTubeUploadProgress", Function.identity())))
+      .asEagerSingleton
+
+    bind[ActorRef]
+      .annotatedWith(Names.named("YouTubeUploaderManager"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploaderManager], "YouTubeUploaderManager", Function.identity())))
+      .asEagerSingleton
+
+    bind[ActorRef]
+      .annotatedWith(Names.named("YouTubeCategoryActor"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeCategoryActor], "YouTubeCategoryActor", Function.identity())))
       .asEagerSingleton
 
     bind(classOf[KnolxControllerComponents])

@@ -4,8 +4,9 @@ import java.util.concurrent.TimeoutException
 
 import actors.SessionsScheduler._
 import actors.UsersBanScheduler.GetScheduledBannedUsers
-import actors.{ConfiguredEmailActor, EmailActor, EmailManager}
+import actors._
 import akka.actor._
+import com.google.api.services.youtube.model.{Video, VideoCategory}
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Module}
 import com.typesafe.config.ConfigFactory
@@ -20,7 +21,7 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{BodyParser, _}
 import play.api.test._
-import play.api.{Application, Configuration}
+import play.api.{Application, Configuration, Logger}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
@@ -56,6 +57,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
   protected def fakeApp(system: ActorSystem = actorSystem): Application = {
     val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
     val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
+    val youtubeUploadManager = system.actorOf(Props(new DummyYouTubeUploadManager))
 
     val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {
@@ -69,6 +71,14 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
 
         bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
         bindActor[EmailManager]("EmailManager")
+
+        bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
+        bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
+        bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
+
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("YouTubeUploadManager"))
+          .toInstance(youtubeUploadManager)
 
         bind(classOf[KnolxControllerComponents])
           .toInstance(knolxControllerComponent)
@@ -91,7 +101,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
         DefaultActionBuilder(bodyParser)(executionContext),
         UserActionBuilder(bodyParser, usersRepository, config)(executionContext),
         AdminActionBuilder(bodyParser, usersRepository, config)(executionContext),
-        SuperUserActionBuilder(bodyParser,usersRepository, config)(executionContext),
+        SuperUserActionBuilder(bodyParser, usersRepository, config)(executionContext),
         stubPlayBodyParsers(NoMaterializer),
         stubMessagesApi(),
         stubLangs(),
@@ -145,4 +155,28 @@ class TestEmailActor extends Actor {
     case request: EmailActor.SendEmail                                => sender ! request
   }
 
+}
+
+class DummyYouTubeUploadManager extends Actor {
+
+  override def receive: Receive = {
+    case YouTubeUploadManager.VideoId(sessionId)               =>
+      Logger.info("Getting from sessionVideos")
+      sender() ! Some(new Video)
+    case YouTubeUploadManager.VideoUploader(sessionId: String) => sender() ! Some(50D)
+  }
+}
+
+class DummyYouTubeUploader extends Actor {
+
+  override def receive: Receive = {
+    case YouTubeUploader.VideoDetails => sender() ! "Successfully updated the video details"
+  }
+}
+
+class DummyYouTubeCategoryActor extends Actor {
+
+  override def receive: Receive = {
+    case Categories => sender() ! List[VideoCategory]()
+  }
 }

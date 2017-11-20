@@ -1,4 +1,4 @@
-@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], youtubeCategories: List[VideoCategories])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
 
@@ -159,29 +159,20 @@
                 <div class="col-md-12 login-third update-second">
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <input type="text" name="title" id="youtube-title" value='@sessionInfo.data.get("topic")' placeholder="Video title" required class="update-field"/>
-                        <input type="text" name="description" id="youtube-description" value='@sessionInfo.data.get("topic")' placeholder="Video description" required class="update-field"/>
-                        <input type="text" name="tags" id="youtube-tags" value='@sessionInfo.data.get("topic")' placeholder="Video tags" required class="update-field"/>
+                        <input type="text" name="title" id="youtube-title" value='@sessionInfo.data.get("topic")' placeholder="Video title" class="update-field"/>
+                        <input type="text" name="description" id="youtube-description"  placeholder="Video description" class="update-field"/>
+                        <input type="text" name="tags" id="youtube-tags" data-role="tagsinput" placeholder="Video tags" class="update-field"/>
                         <select name="category" id="youtube-category" class="update-field login-second">
-                            <option value="2">Cars & Vehicles</option>
-                            <option value="23">Comedy</option>
-                            <option value="27">Education</option>
-                            <option value="24">Entertainment</option>
-                            <option value="20">Gaming</option>
-                            <option value="26">How-to & Style</option>
-                            <option value="10">Music</option>
-                            <option value="25">News & Politics</option>
-                            <option value="29">Non-profits & Activism</option>
-                            <option value="22">People & Blogs</option>
-                            <option value="15">Pets & Animals</option>
-                            <option value="28">Science & Technology</option>
-                            <option value="17">Sport</option>
-                            <option value="19">Travel & Events</option>
+                            @for(youtubeCategory <- youtubeCategories) {
+                            <option value="@youtubeCategory.id">@youtubeCategory.name</option>
+                            }
                         </select>
                         <select name="status" id="youtube-status" class="update-field login-second">
                             <option value="private">Private</option>
                             <option value="public">Public</option>
                         </select>
+                        <p id="successful-update" style="display:none">The details of the video were updated successfully!</p>
+                        <p id="unsuccessful-update" style="display:none">The details of the video were updated successfully!</p>
                         <input type="button" id="updateVideo" value="Update" class="input-field update-button"/>
                     </div>
                     <div class="col-md-1" ></div>
@@ -265,7 +256,7 @@
                 <div class="col-md-12 update-second-field login-four" >
                     <div class="col-md-1" ></div>
                     <div class="col-md-10 " >
-                        <input type="submit" value="Save" class="input-field update-button"/>
+                        <input type="submit" value="Save" class="input-field update-button" />
                     </div>
                     <div class="col-md-1" ></div>
                 </div>

@@ -1,7 +1,15 @@
 var cancel = false;
 var uploading = false;
+var redirect = true;
 
 Dropzone.autoDiscover = false;
+
+window.onbeforeunload = function() {
+    if(!redirect) {
+        return 'The file upload is still going on. If you leave the page now your upload' +
+        'will be cancelled. Are you sure you want to leave the page?';
+    }
+}
 
 $(function () {
     var sessionId = $('input[name^="sessionId"]').val();
@@ -17,21 +25,28 @@ $(function () {
     });
 
     myDropzone.on("sending", function(file, xhr, formData) {
+        redirect = false;
         console.log("File size = " + file.size);
         xhr.setRequestHeader("filesize", file.size);
     });
 
     myDropzone.on("complete", function(file) {
+        redirect = true;
         uploading = true;
         console.log("File uploading completed");
         $("#show-progress").show();
-        showProgress(sessionId);
+        //showProgress(sessionId);
     });
+
+    myDropzone.on("success", function(file, response) {
+        console.log("Showing progress now");
+        showProgress(sessionId);
+    })
 
     console.log("sessionId = " + sessionId);
     $("#upload-success-message").hide();
 
-    jsRoutes.controllers.YoutubeController.checkIfUploading(sessionId).ajax(
+    jsRoutes.controllers.YoutubeController.getPercentageUploaded(sessionId).ajax(
         {
             type: 'GET',
             processData: false,
@@ -80,9 +95,13 @@ $(function () {
         update(sessionId);
     });
 
+    $('#youtube-tags').tagsinput({
+      cancelConfirmKeysOnEmpty: false
+    });
+
 });
 
-function uploadVideo(sessionId) {
+/*function uploadVideo(sessionId) {
     console.log("Inside uploadVideo function")
     var formData = new FormData();
     var fileSize = 0;
@@ -110,10 +129,10 @@ function uploadVideo(sessionId) {
                 $("#upload-failure-message").show();
             }
         });
-}
+}*/
 
 function showProgress(sessionId) {
-    jsRoutes.controllers.YoutubeController.getUploader(sessionId).ajax(
+    jsRoutes.controllers.YoutubeController.getPercentageUploaded(sessionId).ajax(
         {
             type: 'GET',
             processData: false,
@@ -125,7 +144,7 @@ function showProgress(sessionId) {
             },
             success: function(data) {
                 if(!cancel) {
-                    if(data == "Upload Completed!") {
+                    if(data == 100) {
                         $("#upload-success-message").show();
                         $("#show-progress").hide();
                         $("#progress").width('0%');
@@ -133,7 +152,7 @@ function showProgress(sessionId) {
                         uploading = false;
                         fillYoutubeEmbedURL(sessionId);
                     } else {
-                    var percentageUploaded = data*100;
+                    var percentageUploaded = data;
                     console.log("percentageUploaded = " + percentageUploaded);
                     $("#progress").width(percentageUploaded + '%');
                     $("#progress").text(Math.ceil(percentageUploaded) * 1  + '%');
@@ -142,7 +161,7 @@ function showProgress(sessionId) {
                 }
             },
             error: function(er) {
-                console.log("showProgress failed");
+                console.log("showProgress failed with error = " + er);
             }
         });
 }
@@ -217,7 +236,7 @@ function storeVideoURL(sessionId) {
 function update(sessionId) {
     var title = $("#youtube-title").val();
     var description = $("#youtube-description").val();
-    var tags = [$("#youtube-tags").val()];
+    var tags = $("#youtube-tags").val().split(",");
     var status = $("#youtube-status").val();
     var category = $("#youtube-category").val();
 

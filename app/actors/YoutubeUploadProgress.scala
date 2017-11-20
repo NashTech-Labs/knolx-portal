@@ -3,7 +3,6 @@ package actors
 import akka.actor.Actor
 import com.google.api.client.googleapis.media.MediaHttpUploader
 
-case class VideoUploader(sessionId: String)
 case class Uploader(sessionId: String, uploader: MediaHttpUploader)
 case class RemoveVideoUploader(sessionId: String)
 
@@ -13,7 +12,7 @@ class YouTubeUploadProgress extends Actor {
 
   override def receive: Receive = {
     case Uploader(sessionId, uploader) => addUploader(sessionId, uploader)
-    case VideoUploader(sessionId) => sender() ! getUploader(sessionId)
+    //case VideoUploader(sessionId) => sender() ! getUploader(sessionId)
     case RemoveVideoUploader(sessionId) => removeUploader(sessionId)
   }
 

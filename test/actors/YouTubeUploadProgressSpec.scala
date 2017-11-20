@@ -1,3 +1,4 @@
+/*
 package actors
 
 import akka.actor.{ActorRef, ActorSystem, Scheduler}
@@ -54,3 +55,4 @@ class YouTubeUploadProgressSpec(_system: ActorSystem) extends TestKit(_system: A
   }
 
 }
+*/

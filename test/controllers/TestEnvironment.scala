@@ -31,6 +31,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
   val usersRepository: UsersRepository = mock[UsersRepository]
   val config = Configuration(ConfigFactory.load("application.conf"))
   val knolxControllerComponent: KnolxControllerComponents = TestHelpers.stubControllerComponents
+
   private val actorSystem: ActorSystem = ActorSystem("TestEnvironment")
 
   override def afterAll(): Unit = {

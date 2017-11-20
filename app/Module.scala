@@ -9,6 +9,7 @@ import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.libs.Akka
+import services.YoutubeService
 
 class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
@@ -18,6 +19,9 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
     bindActorFactory[YouTubeUploader, ConfiguredYouTubeUploader.Factory]
     bindActorFactory[YouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
+
+    bind[YoutubeService]
+      .toInstance(new YoutubeService)
 
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))

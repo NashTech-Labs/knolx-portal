@@ -15,11 +15,11 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{MultipartFormData, Results}
-import play.api.test.{FakeHeaders, FakeRequest, PlaySpecification, StubControllerComponentsFactory}
+import play.api.test._
 import play.api.test
 import utilities.DateTimeUtility
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -27,7 +27,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results {
 
   val sessionId = "SessionId"
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment{
+  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
     implicit lazy val materializer = app.materializer
     lazy val controller =
@@ -56,12 +56,11 @@ class YoutubeControllerSpec extends PlaySpecification with Results {
 
     "send BadRequest if file not found" in new WithTestApplication {
 
-
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val part = FilePart[TemporaryFile](key = "image", filename = "the.file", contentType = Some("image/jpeg"), ref = tempFile)
       val formData = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq())
 
-      val result = controller.upload(sessionId)(FakeRequest(POST, "/youtube/:sessionId/upload")
+      val result = controller.upload(sessionId)(FakeRequest(POST, "/youtube/SessionId/upload")
         .withHeaders(("fileSize", "10"))
         .withMultipartFormDataBody(formData))
 

@@ -33,7 +33,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   sessionsRepository: SessionsRepository,
                                   @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
                                   @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef
-                                 )(implicit val mat: Materializer, ec: ExecutionContext) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+                                 )/*(implicit val mat: Materializer, ec: ExecutionContext)*/ extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val timeout = Timeout(100 seconds)
 

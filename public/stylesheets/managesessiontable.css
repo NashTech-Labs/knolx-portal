@@ -3,7 +3,7 @@
     background-color: #7d9ec0;
     border: 2px solid #fff;
     font-weight: bold;
-    font-family: 'gothic'
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 a.btn.btn-sm.btn-primary.btn-create {

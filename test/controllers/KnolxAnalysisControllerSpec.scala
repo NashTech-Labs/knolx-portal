@@ -95,8 +95,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
 
     "render Pie Chart" in new WithTestApplication {
 
-      dateTimeUtility.parseDateString("2017-07-15 00:00") returns parseStartDate
-      dateTimeUtility.parseDateString("2017-10-15 23:59") returns parseEndDate
+      dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
+      dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
       sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
 
@@ -119,8 +119,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
 
     "render Column Chart" in new WithTestApplication {
 
-      dateTimeUtility.parseDateString("2017-07-15 00:00") returns parseStartDate
-      dateTimeUtility.parseDateString("2017-10-15 23:59") returns parseEndDate
+      dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
+      dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
       sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
 
@@ -143,8 +143,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
 
     "render Line Chart" in new WithTestApplication {
 
-      dateTimeUtility.parseDateString("2017-07-15 00:00") returns parseStartDate
-      dateTimeUtility.parseDateString("2017-10-15 23:59") returns parseEndDate
+      dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
+      dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
       sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
 

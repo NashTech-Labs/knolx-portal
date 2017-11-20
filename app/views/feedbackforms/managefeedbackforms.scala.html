@@ -23,8 +23,7 @@
 
 
         <div class="row">
-            <div class="col-md-2" ></div>
-            <div class="col-md-8 feedback-form-container custom-attributes" >
+            <div class="col-md-12 feedback-form-container custom-attributes" >
                     <div class="col-md-8 info-feedback" ></div>
                     <div class="col-md-4 text-right new-feedback-button" >
                         <a href="@routes.FeedbackFormsController.feedbackForm()" class="btn btn-sm btn-primary btn-create-feed">
@@ -51,7 +50,7 @@
                 }
 
                 @updateFeedbackFormInformation.map { feedbackFormInformation =>
-                    <div class="col-md-4 feedback-div-outer">
+                    <div class="col-md-3 feedback-div-outer">
 
                         <a href="@routes.FeedbackFormsController.update(feedbackFormInformation.id)">
                             <div class="feedback-form">
@@ -66,10 +65,8 @@
                     </div>
                 }
 
-                <div class="col-md-4 feedback-div-outer" ></div>
-                <div class="col-md-4 feedback-div-outer" ></div>
-                <div class="col-md-12 feedback-footer"> </div>
+                <div class="col-md-3 feedback-div-outer" ></div>
+                <div class="col-md-3 feedback-div-outer" ></div>
             </div>
-            <div class="col-md-2" ></div>
         </div>
     }

@@ -144,8 +144,8 @@ function loadFeedbackForm(values, sessionId) {
             } else {
                 optionsLoaded += "<div class='row questions-inlining'>" +
                     "<div class='col-md-1'></div>" +
-                    "<div style='width:auto; text-align:center'>" +
-                    "<p class='checkbox-text form-card-options'>" + options[optionNumber] +
+                    "<div style='display: inline-flex; width:auto; text-align:center'>" +
+                    "<p class='checkbox-text form-card-options' style='margin-top: 6px !important;'>" + options[optionNumber] +
                                         "</p>"+
                     "<label class='radio-button'>" +
                     "<input type='radio'  name='option-" + questionNumber + "' id='option-" + optionNumber + "-" + questionNumber + "' class='custom-checkbox' value='" + options[optionNumber] + "'/>" +

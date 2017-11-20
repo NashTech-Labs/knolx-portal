@@ -12,7 +12,7 @@
 .from-title {
     font-size: 25px;
     color: #fff;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .preview-questions {
@@ -23,7 +23,7 @@
     width: 100%;
     outline: none;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     text-align: left;
     color: #EC7063;
@@ -37,7 +37,7 @@
     width: 100%;
     outline: none;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
 }
@@ -63,7 +63,7 @@
     border: 2px solid #fff;
     background-color: #5D6D7E;
     color: #fff;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
     font-weight: bolder;
 }

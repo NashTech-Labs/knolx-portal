@@ -1,23 +1,7 @@
 .feedback-form-display-container {
     color: #000;
-    margin: 100px 0px;
-    background-color: #fff;
+    margin: 40px 0px;
     padding: 0px 0px 0px 0px;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
-    -moz-animation: fadein 2s; /* Firefox < 16 */
-    -ms-animation: fadein 2s; /* Internet Explorer */
-    -o-animation: fadein 2s; /* Opera < 12.1 */
-    animation: fadein 2s;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
-    padding-top: 50px;
-    border-top: 1px solid #fff;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
 }
 
 .feedback-top-banner {
@@ -36,8 +20,6 @@
 .feedback-footer {
     height: 30px;
     background-color: #dcdcdc;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
     margin-top: 10px;
 }
 
@@ -45,14 +27,12 @@
     width: 100%;
     margin: 0 auto;
     margin-bottom: 50px;
-    padding-bottom: 50px;
     text-align: center;
     line-height: 30px;
-    font-size: 30px;
+    font-size: 20px;
     color: #fff;
     text-shadow: 0 0px 6px #999;
-    background-color: #dcdcdc;
-    box-shadow: 0 6px 20px #a8a8a8;
+    background-color: #FFFFFF;
 }
 
 .card-custom-padding {
@@ -87,13 +67,12 @@
 
 .feedback-card-button {
     border-radius: 0;
-    width: 80%;
+    width: 60%;
     margin-bottom: 20px;
     border: 2px solid #dcdcdc;
     letter-spacing: 2px;
     background-color: #639593;
     outline: none !important;
-    padding: 12px 0px;
     font-size: 18px;
     color: #fff;
     position: relative;
@@ -204,7 +183,7 @@
     color: #566573;
     text-shadow: none;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 1px;
     padding-top: 10px;
@@ -320,7 +299,6 @@
     text-shadow: none;
     word-wrap: break-word;
     line-height: 1.2em;
-    padding: 0px 15px 0px 15px;
 }
 
 .more {
@@ -356,7 +334,7 @@
     width: 90%;
     outline: none;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -494,7 +472,7 @@
     color: #85929E;
     text-shadow: none;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 35px;
     letter-spacing: 1px;
     padding: 40px 0 0 10px;
@@ -504,7 +482,7 @@
 .acknowledgement-text_tag {
     color: #85929E;
     text-shadow: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 1px;
     text-align: center;
@@ -515,7 +493,7 @@
     margin-top: 30px;
     color: #639593;
     text-shadow: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
     letter-spacing: 1px;
     text-align: center;
@@ -523,7 +501,7 @@
 
 .submission-success-okay-btn {
     text-shadow: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 1px;
     text-align: center;
@@ -562,7 +540,7 @@
 
 .ban_text-title {
     color: #a8a8a8;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-top: 10px;
     font-weight: bolder;
 }
@@ -624,7 +602,7 @@
 
 #feedbackAttendance-body {
     overflow: auto;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     height: 50vh;
     padding: 0px;
 }
@@ -666,7 +644,7 @@
 
 .feedbackAttendance-header-text {
     font-weight: 900;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-bottom: 5vh;
     margin-top: 0vh;
     font-size: 2.5vh;

@@ -2,7 +2,7 @@
     height:auto;
     background-color: #ffffff;
     color: inherit;
-    padding: 0px 10px;
+    padding: 10px 10px;
     border-color: #e7eaec;
     border-image: none;
     border-style: solid solid none;
@@ -73,6 +73,7 @@ input:invalid {
 }
 
 .login-button {
+    padding: 5px;
     background-color:#1ab394;
     color: #fff;
     border: None;
@@ -89,7 +90,6 @@ input:invalid {
 
 .forgot-password-link {
     text-decoration: none !important;
-    color: #EC7063;
 }
 
 input.input-field.logo:focus {

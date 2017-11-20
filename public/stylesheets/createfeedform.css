@@ -42,8 +42,8 @@
     border-radius: 0px;
     bottom: 0px;
     right: 0px;
-    background-color: #eee;
-    color: #5499C7;
+    background-color: #5499C7;
+    color: #FFFFFF;
     border: 2px solid #fff;
 }
 
@@ -113,7 +113,6 @@ input#form-name:focus {
 }
 
 .lab_text:before {
-    margin-top: 15px;
     content: "\f10c";
     font-family: "FontAwesome";
     display: inline-block;
@@ -126,7 +125,6 @@ input#form-name:focus {
 }
 
 .custom-checkbox:checked + .lab_text:before {
-    margin-top: 15px;
     content: "\f111";
     font-family: "FontAwesome";
     display: inline-block;

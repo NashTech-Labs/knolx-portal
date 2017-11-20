@@ -30,7 +30,7 @@
 }
 
 .preview {
-    font-size: 30px;
+    font-size: 20px;
     text-align: center;
     cursor: pointer;
     color: #666;
@@ -185,4 +185,10 @@
     100% {
         transform: scale(1);
     }
+}
+
+.hr-line-dashed {
+    border-top: 1px dashed #e7eaec;
+    height: 1px;
+    margin: 10px 0;
 }

@@ -120,9 +120,3 @@ function slide(keyword, pageNumber) {
             }
         });
 }
-
-$(function () {
- console.log("before");
-    $('meta[name=viewport]').attr('content', 'initial-scale');
-    console.log("after")
-});

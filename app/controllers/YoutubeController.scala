@@ -4,10 +4,9 @@ import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.YouTubeUploadManager.VideoUploader
-import actors.{RemoveVideoUploader, YouTubeUploadManager, YouTubeUploader}
+import actors.{YouTubeUploadManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
-import akka.stream.Materializer
 import akka.util.Timeout
 import com.google.api.services.youtube.model.Video
 import models.SessionsRepository
@@ -18,7 +17,7 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 case class UpdateVideoDetails(title: String,
@@ -33,21 +32,31 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   sessionsRepository: SessionsRepository,
                                   @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
                                   @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef
-                                 )(implicit val mat: Materializer, ec: ExecutionContext) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+                                 ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  implicit val timeout = Timeout(100 seconds)
+  implicit val timeout = Timeout(100.seconds)
 
   implicit val questionInformationFormat: OFormat[UpdateVideoDetails] = Json.format[UpdateVideoDetails]
 
-  def upload(sessionId: String): Action[MultipartFormData[TemporaryFile]] = Action(parse.multipartFormData).async { request =>
+  def upload(sessionId: String): Action[AnyContent] = action.async { request =>
     Logger.info("Called uploadFile function" + request)
-    request.body.file("file").fold {
-      Future.successful(BadRequest("Something went wrong while uploading the file. Please try again."))
-    } { videoFile =>
-      val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
-      Logger.info("-------------------------File size = " + fileSize)
-      (youtubeUploaderManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
-        .map(_ => Ok("Uploading started!"))
+
+    request.body.asMultipartFormData.fold {
+      Logger.error(s"Something went wrong when getting multipart form data")
+
+      Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
+    } { multiPartFormData =>
+      multiPartFormData.file("file").fold {
+        Logger.error(s"Something went wrong when getting file part from multipart form data")
+
+        Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
+      } { videoFile =>
+        val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
+        Logger.info("-------------------------File size = " + fileSize)
+
+        (youtubeUploaderManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
+          .map(_ => Ok("Uploading started!"))
+      }
     }
   }
 

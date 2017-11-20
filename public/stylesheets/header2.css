@@ -301,3 +301,21 @@ html,body{
 .nav, .nav > li , .nav > li > a {
     height: inherit;
 }
+
+.navbar-toggle-background-color {
+    background-color:#eeeeee;
+    color: #FFFFFF;
+}
+
+.navbar .navbar-toggle:focus, .navbar .navbar-toggle:hover {
+    background-color: #b2afad;
+    color: #fff;
+}
+
+.navbar .navbar-toggle .icon-bar {
+    background-color: #fff;
+}
+
+.navbar-collapse {
+    overflow-x: hidden !important;
+}

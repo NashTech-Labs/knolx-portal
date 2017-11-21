@@ -3,13 +3,18 @@ package controllers
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
-import akka.actor.ActorRef
+import actors._
+import akka.actor.{Props, ActorSystem, ActorRef}
+import com.google.inject.AbstractModule
 import com.google.inject.name.Names
+import com.typesafe.config.ConfigFactory
 import models._
 import org.specs2.execute.{AsResult, Result}
+import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.{Configuration, Application}
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
@@ -23,7 +28,9 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results {
+class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results with Mockito {
+
+  val system = ActorSystem()
 
   val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
   val writeResultfalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
@@ -52,13 +59,54 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     0.00,
     _id)
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+  abstract class WithTestApplication extends TestEnvironment1(system) with Scope {
+    val mailerClient = mock[MailerClient]
+    val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackResponseRepository = mock[FeedbackFormsResponseRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsRepository = mock[SessionsRepository]
+    val usersRepository = mock[UsersRepository]
 
-    lazy val app: Application = fakeApp()
+    val config = Configuration(ConfigFactory.load("application.conf"))
+
+    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+
+    val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
+    val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
+    val youtubeUploadManager = system.actorOf(Props(new DummyYouTubeUploadManager))
+
+    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+      override def configure(): Unit = {
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("SessionsScheduler"))
+          .toInstance(sessionsScheduler)
+
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("UsersBanScheduler"))
+          .toInstance(usersBanScheduler)
+
+        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
+        bindActor[EmailManager]("EmailManager")
+
+        bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
+        bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
+        bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
+
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("YouTubeUploadManager"))
+          .toInstance(youtubeUploadManager)
+
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
+      }
+    })
+
+    lazy val app = fakeApp(testModule)
+    lazy val emailManager = app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
     lazy val controller =
       new FeedbackFormsResponseController(
-        knolxControllerComponent.messagesApi,
+        TestHelpers.stubMessagesApi(),
         mailerClient,
         usersRepository,
         feedbackFormsRepository,
@@ -68,19 +116,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
         emailManager,
         dateTimeUtility,
         knolxControllerComponent)
-
-    val mailerClient = mock[MailerClient]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-    val feedbackResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsRepository = mock[SessionsRepository]
-    val emailManager: ActorRef =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
-
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
   }
 
   "Feedback Response Controller" should {
@@ -361,6 +396,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
 
       status(response) must be equalTo BAD_REQUEST
     }
+
   }
 
 }

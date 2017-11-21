@@ -26,6 +26,86 @@ import play.api.{Application, Configuration, Logger}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 
+object TestHelpers extends PlayRunners
+  with HeaderNames
+  with Status
+  with MimeTypes
+  with HttpProtocol
+  with DefaultAwaitTimeout
+  with ResultExtractors
+  with Writeables
+  with EssentialActionCaller
+  with RouteInvokers
+  with FutureAwaits
+  with TestStubControllerComponentsFactory
+
+trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory with StubBodyParserFactory with StubMessagesFactory {
+
+  def stubControllerComponents(usersRepository: UsersRepository, config: Configuration): KnolxControllerComponents = {
+    val bodyParser = stubBodyParser(AnyContentAsEmpty)
+    val executionContext = ExecutionContext.global
+
+    DefaultKnolxControllerComponents(
+      DefaultActionBuilder(bodyParser)(executionContext),
+      UserActionBuilder(bodyParser, usersRepository, config)(executionContext),
+      AdminActionBuilder(bodyParser, usersRepository, config)(executionContext),
+      SuperUserActionBuilder(bodyParser, usersRepository, config)(executionContext),
+      stubPlayBodyParsers(NoMaterializer),
+      stubMessagesApi(),
+      stubLangs(),
+      new DefaultFileMimeTypes(FileMimeTypesConfiguration()),
+      executionContext)
+  }
+
+  override def stubBodyParser[T](content: T = AnyContentAsEmpty): BodyParser[T] = {
+    BodyParser(_ => Accumulator.done(Right(content)))
+  }
+
+}
+
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+
+abstract class TestApplication(system: ActorSystem) extends SpecificationLike with BeforeAllAfterAll {
+
+  override def afterAll(): Unit = {
+    shutdownActorSystem(system)
+  }
+
+  protected def shutdownActorSystem(actorSystem: ActorSystem,
+                                    duration: Duration = 10.seconds,
+                                    verifySystemShutdown: Boolean = false): Unit = {
+    actorSystem.terminate()
+
+    try Await.ready(actorSystem.whenTerminated, duration) catch {
+      case _: TimeoutException ⇒
+        val msg = "Failed to stop [%s] within [%s]".format(actorSystem.name, duration)
+
+        if (verifySystemShutdown) {
+          throw new RuntimeException(msg)
+        } else {
+          actorSystem.log.warning(msg)
+        }
+    }
+  }
+
+  protected def fakeApp(testModule: Option[AbstractModule] = None): Application =
+    new GuiceApplicationBuilder()
+      .overrides(testModule.map(GuiceableModule.guiceable).toSeq: _*)
+      .disable[Module]
+      .build
+
+}
+
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+
 trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mockito {
 
   val usersRepository: UsersRepository = mock[UsersRepository]
@@ -170,6 +250,7 @@ class DummyYouTubeUploadManager extends Actor {
       sender() ! Some(new Video)
     case YouTubeUploadManager.VideoUploader(sessionId: String) => sender() ! Some(50D)
   }
+
 }
 
 class DummyYouTubeUploader extends Actor {
@@ -180,6 +261,7 @@ class DummyYouTubeUploader extends Actor {
     case request: YouTubeUploader.VideoDetails => sender() ! request
     case _ => sender() ! "What?"
   }
+
 }
 
 class DummyYouTubeCategoryActor extends Actor {
@@ -187,6 +269,7 @@ class DummyYouTubeCategoryActor extends Actor {
   override def receive: Receive = {
     case Categories => sender() ! List[VideoCategory]()
   }
+
 }
 
 class DummyYouTubeUploaderManager extends Actor {

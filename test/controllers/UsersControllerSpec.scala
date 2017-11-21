@@ -4,14 +4,19 @@ import java.text.SimpleDateFormat
 import java.time.{Instant, ZoneId}
 import java.util.TimeZone
 
-import akka.actor.ActorRef
+import actors._
+import akka.actor.{ActorRef, ActorSystem, Props}
+import com.google.inject.AbstractModule
 import com.google.inject.name.Names
+import com.typesafe.config.ConfigFactory
 import models.{UpdatedUserInfo, _}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import org.specs2.mock.Mockito
+import play.api.{Application, Configuration}
 import play.api.inject.{BindingKey, QualifierInstance}
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.Results
 import play.api.test.CSRFTokenHelper._
@@ -25,6 +30,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class UsersControllerSpec extends PlaySpecification with Results {
 
+  private val system = ActorSystem("TestActorSystem")
+
   private val emptyEmailObject = Future.successful(None)
   private val _id: BSONObjectID = BSONObjectID.generate
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
@@ -37,8 +44,28 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(currentMillis), 0, _id)))
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+  abstract class WithTestApplication extends TestApplication(system) with Scope {
+    val usersRepository = mock[UsersRepository]
+    val forgotPasswordRepository = mock[ForgotPasswordRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val mailerClient = mock[MailerClient]
+
+    val config = Configuration(ConfigFactory.load("application.conf"))
+
+    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+
+    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+      override def configure(): Unit = {
+        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
+        bindActor[EmailManager]("EmailManager")
+      }
+    })
+
     lazy val app: Application = fakeApp()
+
+    val emailManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+
     lazy val controller =
       new UsersController(knolxControllerComponent.messagesApi,
         usersRepository,
@@ -46,14 +73,8 @@ class UsersControllerSpec extends PlaySpecification with Results {
         config,
         dateTimeUtility,
         knolxControllerComponent,
-        app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager"))))))
-    val forgotPasswordRepository = mock[ForgotPasswordRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val mailerClient = mock[MailerClient]
+        emailManager)
 
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
   }
 
   "Users Controller" should {

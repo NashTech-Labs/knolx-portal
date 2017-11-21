@@ -29,7 +29,7 @@
         <div class="col-md-8 profile" style="padding-bottom: 10px;">
             <div class="row login-outer">
                 @if(flash.get("successMessage").nonEmpty) {
-                    <div class="alert alert-success login-error">
+                    <div class="alert alert-success">
                         <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
                     </div>
                 }

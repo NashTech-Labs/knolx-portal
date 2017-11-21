@@ -2,14 +2,17 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.concurrent.TimeoutException
 
 import actors._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.ConfigFactory
+import helpers.BeforeAllAfterAll
 import models._
 import org.specs2.mock.Mockito
+import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
 import play.api.Configuration
 import play.api.inject.{BindingKey, QualifierInstance}
@@ -23,11 +26,12 @@ import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito {
+class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito with SpecificationLike with BeforeAllAfterAll {
 
-  private val system = ActorSystem("TestActorSystem")
+  private val system = ActorSystem()
 
   private val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
   private val writeResultFalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
@@ -111,6 +115,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
         emailManager,
         dateTimeUtility,
         knolxControllerComponent)
+  }
+
+  override def afterAll(): Unit = {
+    system.terminate()
   }
 
   "Feedback Response Controller" should {

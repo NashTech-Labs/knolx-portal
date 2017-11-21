@@ -71,27 +71,6 @@ trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory wit
 
 abstract class TestApplication(system: ActorSystem) extends SpecificationLike with BeforeAllAfterAll {
 
-  override def afterAll(): Unit = {
-    shutdownActorSystem(system)
-  }
-
-  protected def shutdownActorSystem(actorSystem: ActorSystem,
-                                    duration: Duration = 10.seconds,
-                                    verifySystemShutdown: Boolean = false): Unit = {
-    actorSystem.terminate()
-
-    try Await.ready(actorSystem.whenTerminated, duration) catch {
-      case _: TimeoutException ⇒
-        val msg = "Failed to stop [%s] within [%s]".format(actorSystem.name, duration)
-
-        if (verifySystemShutdown) {
-          throw new RuntimeException(msg)
-        } else {
-          actorSystem.log.warning(msg)
-        }
-    }
-  }
-
   protected def fakeApp(testModule: Option[AbstractModule] = None): Application =
     new GuiceApplicationBuilder()
       .overrides(testModule.map(GuiceableModule.guiceable).toSeq: _*)

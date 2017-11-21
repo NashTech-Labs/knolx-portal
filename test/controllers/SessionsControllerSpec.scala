@@ -9,10 +9,11 @@ import akka.actor.{Props, ActorSystem, ActorRef}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.ConfigFactory
+import helpers.BeforeAllAfterAll
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
-import org.specs2.mutable.Around
+import org.specs2.mutable.{SpecificationLike, Around}
 import org.specs2.specification.Scope
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Application}
@@ -28,9 +29,9 @@ import play.api.test.CSRFTokenHelper._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class SessionsControllerSpec extends PlaySpecification with Mockito {
+class SessionsControllerSpec extends PlaySpecification with Mockito with SpecificationLike with BeforeAllAfterAll {
 
-  private val system = ActorSystem("TestActorSystem")
+  private val system = ActorSystem()
 
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id = BSONObjectID.generate()
@@ -113,6 +114,10 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         sessionsScheduler,
         usersBanScheduler,
         youtubeUploaderManager)
+  }
+
+  override def afterAll(): Unit = {
+    system.terminate()
   }
 
   "Session Controller" should {

@@ -71,7 +71,7 @@
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="table-responsive manage-user-custom-table-margin">
-                    <table class="table all-users-table">
+                    <table class="table all-users-table table-responsive table-striped">
                         <thead>
                             <tr class="table-header-color">
                                 <th class='col col-xs-2'>Edit</th>
@@ -176,9 +176,9 @@
                     </table>
                 </div>
             </div>
+            <div class="col-md-12" style="margin-bottom: 25px;">@pagination(pageNumber, pages, routes.UsersController.manageUser, keyword)</div>
         </div>
     </div>
     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/edituser.js")" type="text/javascript"></script>
-    @pagination(pageNumber, pages, routes.UsersController.manageUser, keyword)
 }

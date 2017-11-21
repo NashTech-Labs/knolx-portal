@@ -1,11 +1,6 @@
-#myFooter {
-    background-color: white;
-    color: black;
+.footer {
     padding-top: 30px;
     margin-top: 40px;
-}
-
-.footer {
     font-style: inherit;
     color:#676a6c;
     background: none repeat scroll 0 0 white;

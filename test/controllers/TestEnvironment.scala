@@ -26,6 +26,49 @@ import play.api.{Application, Configuration, Logger}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
 
+object TestHelpers extends PlayRunners
+  with HeaderNames
+  with Status
+  with MimeTypes
+  with HttpProtocol
+  with DefaultAwaitTimeout
+  with ResultExtractors
+  with Writeables
+  with EssentialActionCaller
+  with RouteInvokers
+  with FutureAwaits
+  with TestStubControllerComponentsFactory
+
+trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory with StubBodyParserFactory with StubMessagesFactory {
+
+  def stubControllerComponents(usersRepository: UsersRepository, config: Configuration): KnolxControllerComponents = {
+    val bodyParser = stubBodyParser(AnyContentAsEmpty)
+    val executionContext = ExecutionContext.global
+
+    DefaultKnolxControllerComponents(
+      DefaultActionBuilder(bodyParser)(executionContext),
+      UserActionBuilder(bodyParser, usersRepository, config)(executionContext),
+      AdminActionBuilder(bodyParser, usersRepository, config)(executionContext),
+      SuperUserActionBuilder(bodyParser, usersRepository, config)(executionContext),
+      stubPlayBodyParsers(NoMaterializer),
+      stubMessagesApi(),
+      stubLangs(),
+      new DefaultFileMimeTypes(FileMimeTypesConfiguration()),
+      executionContext)
+  }
+
+  override def stubBodyParser[T](content: T = AnyContentAsEmpty): BodyParser[T] = {
+    BodyParser(_ => Accumulator.done(Right(content)))
+  }
+
+}
+
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+// =====================================================================================================================
+
 trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mockito {
 
   val usersRepository: UsersRepository = mock[UsersRepository]

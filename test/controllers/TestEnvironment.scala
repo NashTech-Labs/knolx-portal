@@ -69,7 +69,7 @@ trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory wit
 // =====================================================================================================================
 // =====================================================================================================================
 
-abstract class TestEnvironment1(system: ActorSystem) extends SpecificationLike with BeforeAllAfterAll {
+abstract class TestApplication(system: ActorSystem) extends SpecificationLike with BeforeAllAfterAll {
 
   override def afterAll(): Unit = {
     shutdownActorSystem(system)

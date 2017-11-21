@@ -54,7 +54,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       meetup = false, BSONDateTime(date.getTime), "session1", List(questionResponseInformation), BSONDateTime(date.getTime),
       0.00, _id)
 
-  abstract class WithTestApplication extends TestEnvironment1(system) with Scope {
+  abstract class WithTestApplication extends TestApplication(system) with Scope {
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val feedbackResponseRepository = mock[FeedbackFormsResponseRepository]
     val sessionsRepository = mock[SessionsRepository]

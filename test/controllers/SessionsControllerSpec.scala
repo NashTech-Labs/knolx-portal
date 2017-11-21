@@ -53,7 +53,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
   private val emptyEmailObject = Future.successful(None)
 
-  abstract class WithTestApplication extends TestEnvironment1(system) with Scope {
+  abstract class WithTestApplication extends TestApplication(system) with Scope {
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val usersRepository = mock[UsersRepository]

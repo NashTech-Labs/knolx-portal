@@ -63,29 +63,6 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
         TestHelpers.stubControllerComponents(usersRepository, config))
   }
 
-  /*abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp()
-    lazy val controller =
-      new FeedbackFormsReportController(
-        knolxControllerComponent.messagesApi,
-        mailerClient,
-        usersRepository,
-        feedbackFormsRepository,
-        feedbackFormsResponseRepository,
-        sessionsRepository,
-        dateTimeUtility,
-        knolxControllerComponent)
-    val mailerClient = mock[MailerClient]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-    val feedbackFormsResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsRepository = mock[SessionsRepository]
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
-  }*/
-
   "Feedback forms report controller" should {
 
     "render reports page for a particular user if user has active sessions and also has feedbacks" in new TestScope {

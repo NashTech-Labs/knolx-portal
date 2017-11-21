@@ -13,13 +13,13 @@
 
 .navbar-default .navbar-nav > li > a {
     color: #000;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
     letter-spacing: 2px;
 }
 
 ul > li > a {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
     margin-top: 2px;
 }
@@ -47,7 +47,7 @@ html,body{
 }
 
 @font-face {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     src: url('font/h3.ttf');
 }
 

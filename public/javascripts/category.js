@@ -14,14 +14,20 @@ $(function () {
     var categoryName = "";
     var subCategory = "";
 
-    $("#add-primary-category").click( function () {
+    $("#add-primary-category").click( function (e) {
+
         categoryName = $("#primary-category").val();
         addCategory(categoryName);
+        e.preventDefault();
     });
+
+    $("#search-primary-category").on('input change', function(){
+        $("#insert-sub-category").show();
+    })
 
     $("#add-sub-category").click( function(){
             var categoryName = $("#search-primary-category").val();
-            subCategory = $("#sub-category").val();
+            subCategory = $("#insert-sub-category").val();
             addSubCategory(categoryName,subCategory);
     });
 
@@ -84,7 +90,7 @@ $(function () {
         result = "";
     }
 
-    $("#drop-btn").click(function(){
+    $("#drop-btn").click(function(e){
          var keyword = $("#datalist").val().toLowerCase();
          if( keyword == ""){
             if($('#results-outer').is(":visible")){
@@ -100,6 +106,7 @@ $(function () {
               prepareResult(keyword);
             }
          }
+         e.preventDefault();
     });
 
     $("#datalist").blur(function() {
@@ -414,6 +421,7 @@ function topicMatchedWithCategory(categoryName, subCategoryName){
                         sessions += "<li>" + topics[i] + "</li>";
                     }
                     sessions += "</ul>";
+
                     $("#subcategory-sessions").html(sessions);
                 } else {
                     console.log("NO session");

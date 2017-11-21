@@ -32,11 +32,13 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.modifyPrimaryCategory,
       controllers.routes.javascript.SessionsController.modifySubCategory,
       controllers.routes.javascript.SessionsController.getCategory,
+      controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
+      controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
+      controllers.routes.javascript.KnolxAnalysisController.renderLineChart,
       controllers.routes.javascript.SessionsController.deletePrimaryCategory,
       controllers.routes.javascript.SessionsController.getSubCategoryByPrimaryCategory,
       controllers.routes.javascript.SessionsController.deleteSubCategory,
-      controllers.routes.javascript.SessionsController.getTopicsBySubCategory,
-      controllers.routes.javascript.AnalysisController.pieChart
+      controllers.routes.javascript.SessionsController.getTopicsBySubCategory
     )).as("text/javascript")
   }
 

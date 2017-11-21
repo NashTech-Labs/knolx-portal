@@ -1,12 +1,3 @@
-.session-content-display-container {
-    color: #000;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
-
 .frame-panel {
      border:2px solid #CCC;
      border-width:2px;
@@ -17,7 +8,7 @@
 }
 
 .topic-presenter {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     src: url('font/Capsuula.ttf');
     font-size: 20px;
     padding-left:10px;
@@ -33,9 +24,6 @@
 .grad1 {
     height: auto;
     background: white; /* For browsers that do not support gradients */
-    border: 2px;
-    border-radius: 30px;
-    background-image: url('../images/mesh.svg');
 }
 
 .hr-shadow {
@@ -46,20 +34,4 @@
 	border-bottom: 1px solid #1f1209;
 	box-shadow: 0 20px 20px -20px #333;
     margin: 0px auto;
-}
-
-.topic-header {
-    font-size: 30px;
-    word-wrap: break-word;
-    line-height: 1.2em;
-    color: #fff;
-    text-shadow: none;
-    background-color: rgb(125, 158, 192);
-    padding: 40px 10px 40px 10px;
-    background-image: url(../images/mesh.svg);
-    background-repeat: no-repeat;
-    background-size: cover;
-    -moz-box-shadow: inset 0 -10px 10px -10px #888;
-    -webkit-box-shadow: inset 0 -10px 10px -10px #888;
-    box-shadow: inset 0 -10px 10px -10px #888;
 }

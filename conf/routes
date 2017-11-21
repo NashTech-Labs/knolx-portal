@@ -35,7 +35,7 @@ GET         /session/update                      controllers.SessionsController.
 GET         /session/:sessionId/cancel           controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule         controllers.SessionsController.scheduleSession(sessionId: String)
 GET         /session/content/:sessionId          controllers.SessionsController.shareContent(sessionId: String)
-GET         /session/category                    controllers.SessionsController.getCategory
+GET         /session/categories                  controllers.SessionsController.getCategory
 
 # Feedback
 GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -71,5 +71,7 @@ GET         /getsubcategorybyprimarycategory    controllers.SessionsController.g
 GET         /deletesubcategory                  controllers.SessionsController.deleteSubCategory(categoryName: String, subCategoryName: String)
 GET         /gettopicsbysubcategory             controllers.SessionsController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 # Analysis
-GET          /analysis                           controllers.AnalysisController.renderPieChart
-POST         /analysis                           controllers.AnalysisController.pieChart
+GET          /knolx/analysis                     controllers.KnolxAnalysisController.renderAnalysisPage
+POST         /knolx/analysis/columnchart         controllers.KnolxAnalysisController.renderColumnChart
+POST         /knolx/analysis/piechart            controllers.KnolxAnalysisController.renderPieChart
+POST         /knolx/analysis/linechart           controllers.KnolxAnalysisController.renderLineChart

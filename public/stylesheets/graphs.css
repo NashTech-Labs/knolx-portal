@@ -8,13 +8,19 @@
 }
 
 .analysis-container {
-    margin: 100px 0px;
-    background-color: #fff;
+    margin: 40px 0px;
+    /*background-color: #fff;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);*/
 }
 
 .graph-panel {
-    min-width: 320px;
+    min-width: 300px;
     height: 250px;
     max-width: 600px;
     margin: 0 auto;
+}
+.date-range-picker {
+    text-align: right;
+    margin-top: 10px;
+    padding-right: 15px !important;
 }

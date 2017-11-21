@@ -2,6 +2,7 @@
     margin-bottom: 0px;
 }
 
+/*
 .search-bar {
     height: 50px;
     border: 1px solid #9E9E9E;
@@ -16,7 +17,7 @@
     border: none;
     background-color: transparent;
     outline: none;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     text-align: center;
     letter-spacing: 2px;
@@ -26,6 +27,7 @@
     float:left;
     margin-left: -25px;
 }
+*/
 
 .search-icon{
     padding-left: 10px;
@@ -68,10 +70,10 @@ input::placeholder {
 }
 
 .manage-user-container-custom-margin {
-    background-color: transparent;
     background-image: none;
     padding: 1%;
-    margin-top: 100px;
+    margin-top: 20px;
+    overflow: auto;
 }
 
 .manage-user-container-custom-btn {
@@ -79,11 +81,11 @@ input::placeholder {
 }
 
 .manage-user-container-email {
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
     letter-spacing: 2px;
     padding: 0px 0px 15px 0px;
-    margin-top: 45px;
+    margin-top: 10px;
     text-align: center;
 }
 
@@ -98,10 +100,9 @@ input::placeholder {
 .manage-user-checkbox-text {
     text-align: left;
     font-size: 18px;
-    font-family: 'gothic';
-    color: #888888;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #676a6c;
     text-shadow: none;
-    letter-spacing: 2px;
     margin-top: 15px;
     margin-right: 34%;
     margin-left: 20%;
@@ -121,7 +122,7 @@ input::placeholder {
     font-family: "FontAwesome";
     display: inline-block;
     width: 10px;
-    color: #EC7063;
+    color: #676a6c;
     font-size: 35px;
     margin-right: 50px;
 }
@@ -158,15 +159,12 @@ input::placeholder {
 .password-text {
     height: 100%;
     width: 100%;
-    border-bottom: 2px dotted #CACFD2;
-    background-color: transparent;
     outline: none;
     text-align: center;
-    color: #EC7063;
+    color: #676a6c;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
-    letter-spacing: 2px;
 }
 
 .empty-email {
@@ -174,7 +172,7 @@ input::placeholder {
     margin-top: -160px;
     color: #EC7063;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
     letter-spacing: 2px;
     font-weight: bold;
@@ -189,7 +187,7 @@ input::placeholder {
     width: 100%;
     font-size: 20px;
     color: #EC7063;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-shadow: none;
     letter-spacing: 2px;
     font-weight: bold;
@@ -239,7 +237,7 @@ input::placeholder {
     color: #639593;
     text-shadow: none;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
     letter-spacing: 1px;
     padding-top: 20px;
@@ -250,7 +248,6 @@ input::placeholder {
 .all-users {
     position: relative;
     background-color: transparent;
-    margin-top: 30px;
 }
 
 #found-user-details {
@@ -274,10 +271,9 @@ input::placeholder {
 
 .all-users-table > tbody > tr > td:first-child, .all-users-table > tbody > tr > td:nth-child(2) {
     text-align: center;
-    font-family: 'gothic';
-    font-size: 17px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
     letter-spacing: 1px;
-    color: #666;
 }
 
 .manage-user-custom-table-margin {
@@ -341,7 +337,6 @@ input::placeholder {
     text-align: center;
     margin-top: 80px;
     font-size: 15px;
-    margin-bottom: 0px !important;
 }
 
 .default-margin-top {
@@ -369,34 +364,32 @@ input::placeholder {
 }
 
 .filter-label_text {
-    font-family: 'headerfont';
-    color: #9E9E9E;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #676a6c;
     align-self: center;
 
 }
 
 .filter-checkbox-text {
     font-size: 14px;
-    font-family: 'headerfont';
-    color: #9E9E9E;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #676a6c;
     margin: 0px;
-    margin-top: 15px;
-    letter-spacing: 2px;
+    margin-top: 0px;
+    margin-left: 3px;
 }
 
 .filter-label_text:before {
-    margin-top: 3px;
     content: "\f096";
     font-family: "FontAwesome";
     display: inline-block;
     width: 10px;
-    color: #9E9E9E;
-    font-size: 25px;
-    margin-right: 25px;
+    color: #676a6c;
+    font-size: 15px;
+    margin-right: 8px;
 }
 
 .custom-checkbox:checked + .filter-label_text:before {
-    margin-top: 3px;
     content: "\f14a";
     font-family: "FontAwesome";
     display: inline-block;
@@ -406,6 +399,10 @@ input::placeholder {
 
 .filter-padding-left {
     padding-left: 0px;
+}
+
+.filter-padding-right{
+    padding-right: 0px;
 }
 
 .rest {

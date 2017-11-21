@@ -1,12 +1,13 @@
 .update-field {
+    padding-left: 5px;
     width: 100%;
-    border: none;
-    border-bottom: 2px dotted #CACFD2;
-    font-family: 'gothic';
-    font-size: 18px;
+    border: 1px solid #ccc;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
     color: #566573;
     background-color: transparent;
-    padding: 15px 0px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
     outline: none;
 }
 
@@ -14,22 +15,19 @@
     margin-bottom: 20px;
 }
 
+
+.disp-inline {
+    display: inline;
+}
+
 .update-outer {
     background-color: #FFF;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
     margin-bottom: 20px;
     position: relative;
     min-height: 1px;
     padding-right: 0px;
     padding-left: 0px;
-    padding-top: 20px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
+    padding-top: 15px;
 }
 
 #date {
@@ -57,19 +55,19 @@ label {
 }
 
 .label_text {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #888888;
     align-self: center;
 
 }
 
 .checkbox-text {
-    font-size: 17px;
-    font-family: 'headerfont';
-    color: #888888;
+    font-size: 14px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #676a6c;
     margin: 0px;
-    margin-top: 15px;
-    letter-spacing: 2px;
+    margin-top: 12px;
+    letter-spacing: 1px;
 }
 
 .label_text:before {
@@ -78,9 +76,9 @@ label {
     font-family: "FontAwesome";
     display: inline-block;
     width: 10px;
-    color: #F1948A;
-    font-size: 35px;
-    margin-right: 50px;
+    color: #1ab394;
+    font-size: 30px;
+    margin-right: 30px;
 }
 
 .custom-checkbox:checked + .label_text:before {
@@ -108,7 +106,7 @@ label {
 
 .update-second-field {
     padding-top: 20px;
-    line-height: 50px;
+    line-height: 20px;
 }
 
 .custom-alert {
@@ -121,9 +119,10 @@ label {
 }
 
 .update-button {
-    background-color: #F1948A;
+    background-color: #1ab394;
     color: #fff;
     margin-bottom:15px;
+    font-size: 3vh;
 }
 
 .update-error {

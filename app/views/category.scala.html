@@ -2,188 +2,241 @@
 
 @main("Add Category") {
 
-<div class="container">
-    <div class="row" style="margin-bottom: 100px;"></div>
+    <div class="row" style="margin-bottom: 50px;"></div>
 
-    <div class="col-md-12">
-        <div class="category-message">
+    <!--<div class="col-md-12">-->
+
+        <div class="col-md-10 category-message">
             <div id="success-message" class=" alert alert-success fade in"
                  style="padding-top: 10px; display: none;"><a class="close" data-dismiss="alert" href="#">x</a></div>
-            <div id="wrong-message" class="alert alert-danger fade in" style="padding-top: 10px;  display: none;"><a class="close" data-dismiss="alert" href="#">x</a></div>
-
+            <div id="wrong-message" class="alert alert-danger fade in" style="padding-top: 10px;  display: none;"><a
+                    class="close" data-dismiss="alert" href="#">x</a></div>
         </div>
-        <div class="panel-group">
 
-            <div class="panel panel-default" style="margin-bottom: 40px">
-                @if(SessionHelper.isSuperUser) {
-                <div class="panel-heading panel-title">Add Category/Sub-Category</div>
-                } else {
-                <div class="panel-heading panel-title">Add Sub-Category</div>
-                }
-                <div class="panel-body">
-                    <div class="row panel-content">
-                        @if(SessionHelper.isSuperUser) {
+        <div class ="row">
+            <!--<div class="col-md-1"></div>-->
+            <div class="col-md-12">
 
-                        <div class="col-md-6">
-                            <input type="text" name="category" id="primary-category" placeholder="Add a category!">
-                            <div style="padding-top: 10px; padding-bottom: 30px;">
-                                <button type="button" id="add-primary-category" class="btn btn-success">Add</button>
-                            </div>
+                <!--Add Category -->
+                <div class="col-md-6">
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>Add Category</h5>
                         </div>
-                        }
+                        <div class="ibox-content">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <input id="primary-category" type="text" placeholder="Category" class="form-control">
+                                </div>
 
-                        <div class="col-md-6">
-                            <input list="categories" id="search-primary-category" name="category"
-                                   placeholder="Search a category!">
-                            <datalist id="categories">
-                                @for(category <- categories){
-                                <option value="@category.categoryName">@category.categoryName</option>
-                                }
-                            </datalist>
-                            <div style="padding-top: 10px;">
-                                <input type="text" id="sub-category" name="subcategory"
-                                       placeholder="Add a new Sub-Catgeory" required>
-                            </div>
-                            <div style="padding-top: 10px;">
-                                <button type="button" id="add-sub-category" class="btn btn-success">Add</button>
-                            </div>
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button id="add-primary-category" class="btn btn-success">Add</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Add sub category-->
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-title">
+                            <h5>Add Sub-Category</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <input list="category-drop-down" id="search-primary-category" type="text"
+                                           placeholder="Category" class="form-control">
+                                    <datalist id="category-drop-down">
+                                        @for(category <- categories){
+                                        <option value="@category.categoryName">@category.categoryName</option>
+                                        }
+                                    </datalist>
+                                    <div style="">
+                                        <input type="text" id="insert-sub-category" name="subcategory"
+                                               placeholder="Add a new Sub-Category" class="form-control"
+                                               style="margin-top: 15px; display: none;" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button id="add-sub-category" class="btn btn-success">Add</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Modify category-->
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-title">
+                            <h5>Modify Category</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <input list="category-list" id="modify-primary-category" type="text"
+                                           placeholder="Category" class="form-control">
+                                    <datalist id="category-list">
+                                        @for(category <- categories){
+                                        <option value="@category.categoryName">@category.categoryName</option>
+                                        }
+
+                                    </datalist>
+                                    <div style="">
+                                        <input type="text" id="new-primary-category" name="subcategory"
+                                               placeholder="Modify Category" class="form-control"
+                                               style="margin-top: 15px; display: none;" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button type="button" id="modify-primary-category-btn " class="btn btn-info">Modify
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!--Modify sub-category-->
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-title">
+                            <h5>Modify Sub-Category</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Category" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button type="button" id="modify-sub-category-btn" class="btn btn-info">Modify
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Delete category-->
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-title">
+                            <h5>Delete Category</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <input list="category-list" id="delete-primary-category" class="form-control"
+                                           name="Catgeory"
+                                           placeholder="Select a Category!">
+                                    <datalist id="category-list">
+                                        @for(category <- categories) {
+                                        <option value="@category.categoryName"> @category.categoryName</option>
+                                        }
+                                    </datalist>
+                                    <div id="category-sessions"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Delete Sub-category-->
+                <div class="col-md-6">
+                    <div class="ibox ">
+                        <div class="ibox-title">
+                            <h5>Delete Sub-Category</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <div id="holder">
+                                        <div style="border:1px solid #e5e6e7; width :80%; margin-left:15px;" onmouseover="hideit()" onmouseleave="showit()">
+                                            <input type="hidden" id="pair"/>
+                                            <input type="text" id="datalist" class="" placeholder="Search a Sub-Category"/>
+                                            <button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                        </div>
+                                        <div id="results-outer">
+                                            <!-- results goes here -->
+                                        </div>
+                                    </div>
+                                    <div id="subcategory-sessions"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-10">
+                                        <button type="button" class="btn btn-danger" id="zz"
+                                                style="position: absolute;z-index:8888;">Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 48px;"></div>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
+            <!--<div class="col-md-1"></div>-->
+        </div>
 
-            <div class="panel panel-default" style="margin-bottom: 40px;">
-                @if(SessionHelper.isSuperUser) {
-                <div class="panel-heading panel-title">Modify Category/Sub-Category</div>
-                } else {
-                <div class="panel-heading panel-title">Modify Sub-Category</div>
-                }
-                <div class="panel-body">
-                    <div class="row panel-content">
-                        @if(SessionHelper.isSuperUser) {
-                        <div class="col-md-6">
-                            <input list="categories" id="modify-primary-category" name="category"
-                                   placeholder="Select a category!">
 
-                            <datalist id="categories">
-                                @for(category <- categories){
-                                <option value="@category.categoryName">@category.categoryName</option>
-                                }
-
-                            </datalist>
-                            <div>
-                                <input id="new-primary-category" style="margin-top: 10px; display:none"
-                                       placeholder="Modify primary category">
-                            </div>
-                            <div style="padding-top: 10px;">
-                                <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify
-                                </button>
-                            </div>
-                        </div>
-
-                        }
-                        <div class="col-md-6">
-                            <div>
-                                <!--<div id="holder">
-                                    <input type="hidden" id="pair"/>
-                                    <input type="text" id="modify-sub-category"/><button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
-                                    <div id="results-outer">
-                                        &lt;!&ndash; results goes here &ndash;&gt;
-                                    </div>
-                                </div>-->
-                                <div id="mod-holder">
-                                    <input type="hidden" id="mod-pair"/>
-                                    <input type="text" id="mod-datalist"/><button id="mod-drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
-                                    <div id="mod-results-outer">
-                                        <!-- results goes here -->
-                                    </div>
-                                </div>
-
-                                <div style="padding-top: 10px;">
-                                    <input id="new-sub-category" style="margin-bottom: 10px;display:none"
-                                           placeholder="Modify sub-category">
-                                </div>
-                            </div>
-                            <div>
-                                <button type="button" id="modify-sub-category-btn" class="btn btn-info">Modify</button>
-                            </div>
-                        </div>
+    <div class="modal fade" id="delete-sub-category-modal" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-body update-warning-outer feedback-form-restricted">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="col-md-12 delete-warning-sign">
+                        <i class="fa fa-trash update-warning-sign" aria-hidden="true"></i>
+                        <span class="delete-warning-title-message">Confirm your submission</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="panel panel-default" style="margin-bottom: 40px">
-                @if(SessionHelper.isSuperUser) {
-                <div class="panel-heading panel-title">Delete Category/Sub-Category</div>
-                } else {
-                <div class="panel-heading panel-title">Delete Sub-Category</div>
-                }
-                <div class="panel-body">
-                    <div class="row panel-content">
-                        @if(SessionHelper.isSuperUser) {
-
-                        <div class="col-md-6">
-                            <input list="Categories" id="delete-primary-category" name="Catgeory"
-                                   placeholder="Select a Category!">
-                            <datalist id="Categories">
-                                @for(category <- categories) {
-                                <option value="@category.categoryName"> @category.categoryName</option>
-                                }
-                            </datalist>
-                            <div id="category-sessions"></div>
-                            <div style="padding-top: 10px;">
-                                <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete
-                                </button>
-                            </div>
-                        </div>
-                        }
-
-                        <div class="col-md-6">
-
-                            <div id="holder">
-                                <input type="hidden" id="pair"/>
-                                <input type="text" id="datalist"/><button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
-                                <div id="results-outer">
-                                    <!-- results goes here -->
-                                </div>
-                            </div>
-
-                            <div id="subcategory-sessions"></div>
-                            <div style="padding-top: 10px;">
-                                <button type="button" class="btn btn-danger" id="delete-sub-category-btn">Delete
-                                </button>
-                            </div>
-                        </div>
+                    <div class="col-md-12 update-warning-message">
+                        Are you sure you want to delete it?
                     </div>
+                    <button type="button" class="btn btn-danger delete-warning-btn" id="delete-sub-category-modal-yes-btn"
+                            data-dismiss="modal">
+                        Yes
+                    </button>
+                    <button type="button" class="btn btn-default delete-warning-btn" id="delete-sub-category-modal-no-btn"
+                            data-dismiss="modal">
+                        No
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="delete-sub-category-modal" role="dialog">
-    <div class="modal-dialog modal-md">
-        <div class="modal-content">
-            <div class="modal-body update-warning-outer feedback-form-restricted">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <div class="col-md-12 delete-warning-sign">
-                    <i class="fa fa-trash update-warning-sign" aria-hidden="true"></i>
-                    <span class="delete-warning-title-message">Confirm your submission</span>
-                </div>
-                <div class="col-md-12 update-warning-message">
-                    Are you sure you want to delete it?
-                </div>
-                <button type="button" class="btn btn-danger delete-warning-btn" id="delete-sub-category-modal-yes-btn"
-                        data-dismiss="modal">
-                    Yes
-                </button>
-                <button type="button" class="btn btn-default delete-warning-btn" id="delete-sub-category-modal-no-btn"
-                        data-dismiss="modal">
-                    No
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+
+    function showit() {
+    document.getElementById('drop-btn').style.visibility = "hidden";
+    }
+
+    function hideit() {
+    document.getElementById('drop-btn').style.visibility = "visible";
+    }
+
+</script>
 
 }
+

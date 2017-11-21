@@ -1,6 +1,5 @@
 package controllers
 
-import java.text.SimpleDateFormat
 import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
@@ -24,8 +23,6 @@ import scala.collection.immutable.IndexedSeq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-
-case class CategoryDetails(categoryName: String, subCategory: String)
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -69,7 +66,7 @@ case class KnolxSession(id: String,
                         expired: Boolean = false)
 
 case class SessionEmailInformation(email: Option[String], page: Int)
-
+case class ModelsCategoryInformation(_id: String, categoryName: String, subCategory: List[String])
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
@@ -93,9 +90,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
-  implicit val categoryDetailsInfoFormat: OFormat[CategoryDetails] = Json.format[CategoryDetails]
-  implicit val categoriesFormat: OFormat[CategoryInfo] = Json.format[CategoryInfo]
-  implicit val SessionInfoFormat: OFormat[SessionInfo] = Json.format[SessionInfo]
+  implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   val sessionSearchForm = Form(
     mapping(
@@ -323,7 +318,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.category,
                   createSessionInfo.subCategory, createSessionInfo.feedbackFormId,
                   createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
-                  0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None, 0)
+                  0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None)
                 sessionsRepository.insert(session) flatMap { result =>
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
@@ -350,8 +345,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     val scheduledDate = dateTimeUtility.toLocalDateTimeEndOfDay(date)
 
     val expirationDate = scheduledDate.getDayOfWeek match {
-      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(3)
-      case DayOfWeek.SATURDAY => scheduledDate.plusDays(2)
+      case DayOfWeek.FRIDAY   => scheduledDate.plusDays(4)
+      case DayOfWeek.SATURDAY => scheduledDate.plusDays(3)
       case _: DayOfWeek       => scheduledDate.plusDays(1)
     }
 
@@ -718,14 +713,13 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
     }
   }*/
-  def getCategory: Action[AnyContent] = adminAction.async { implicit request =>
-    categoriesRepository.getCategories.map(categories =>
-      Ok(Json.toJson(categories).toString))
+
+  def getCategory: Action[AnyContent] = action.async { implicit request =>
+    Logger.info("Inside get category of controller")
+    categoriesRepository.getCategories.map { categories =>
+      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.toString(), category.categoryName, category.subCategory))
+      Ok(Json.toJson(listOfCategoryInfo).toString)
+    }
   }
 
-  /*def searchSubCategory = adminAction.async { implicit request =>
-
-
-  }
-*/
 }

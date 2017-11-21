@@ -1,22 +1,19 @@
 .modal-title-outer {
 
-    background-color: #F1948A;
+    background-color: #1ab394;
     text-align: center;
-    -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    box-shadow: 0 1px 20px #555;
     border-bottom: 1px solid #a8a8a8;
 
 }
 
 .from-title {
-    font-size: 25px;
+    font-size: 20px;
     color: #fff;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 .preview-questions {
-    margin-top: 20px;
+    margin-top: 15px;
     padding-left: 20px;
     line-height: 40px;
     border: none;
@@ -24,9 +21,9 @@
     outline: none;
     font-size: 20px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-align: left;
-    color: #EC7063;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -38,8 +35,8 @@
     outline: none;
     font-size: 18px;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    letter-spacing: 2px;
-    color: #7F8C8D;
+    letter-spacing: 1px;
+    color: #676a6c;
 }
 .preview-comment {
     font-size: 12px;
@@ -53,17 +50,23 @@
 }
 
 .modal-footer-outer {
-    background-color: #5D6D7E;
+    background-color: #2f4050;
     text-align: center;
 }
 
 .close-modal-btn {
     padding: 5px 15px 5px 15px;
     border-radius: 0px;
-    border: 2px solid #fff;
-    background-color: #5D6D7E;
+    border: 2px solid #1ab394;
+    background-color: #1ab394;
     color: #fff;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
     font-weight: bolder;
+}
+
+.close-modal-btn:hover {
+    background-color: #1ab394;
+    color: #FFFFFF;
+    border-color: #1ab399;
 }

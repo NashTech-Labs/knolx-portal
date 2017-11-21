@@ -603,7 +603,7 @@
 #feedbackAttendance-body {
     overflow: auto;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    height: 50vh;
+    height: 42vh;
     padding: 0px;
 }
 
@@ -631,7 +631,7 @@
     padding-left: 40px;
     line-height: 28px;
     padding-right: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     word-break: break-word;
     position: relative;
 }

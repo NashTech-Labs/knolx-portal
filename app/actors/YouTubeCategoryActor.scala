@@ -6,8 +6,6 @@ import akka.actor.Actor
 import com.google.api.services.youtube.model.VideoCategory
 import services.YoutubeService
 
-import scala.collection.JavaConversions._
-
 
 object ConfiguredYouTubeCategoryActor {
 
@@ -26,7 +24,7 @@ class YouTubeCategoryActor @Inject()(youtubeService: YoutubeService) extends Act
   }
 
   def returnCategoryList: List[VideoCategory] = {
-    youtubeService.youtube.videoCategories().list("snippet").setRegionCode("IN").execute().getItems.toList
+    youtubeService.getCategoryList
   }
 
 }

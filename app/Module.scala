@@ -20,9 +20,6 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
     bindActorFactory[YouTubeUploader, ConfiguredYouTubeUploader.Factory]
     bindActorFactory[YouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
 
-    bind[YoutubeService]
-      .toInstance(new YoutubeService)
-
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))
       .toProvider(Providers.guicify(Akka.providerOf(classOf[SessionsScheduler], "SessionsScheduler", Function.identity())))

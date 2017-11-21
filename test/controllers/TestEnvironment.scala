@@ -4,7 +4,7 @@ import java.util.concurrent.TimeoutException
 
 import actors.SessionsScheduler._
 import actors.UsersBanScheduler.GetScheduledBannedUsers
-import actors._
+import actors.{YouTubeUploader, _}
 import akka.actor._
 import com.google.api.services.youtube.model.{Video, VideoCategory}
 import com.google.inject.name.Names
@@ -59,6 +59,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
     val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
     val youtubeUploadManager = system.actorOf(Props(new DummyYouTubeUploadManager))
+    val youtubeUploaderManager = system.actorOf(Props(new DummyYouTubeUploaderManager))
 
     val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {
@@ -75,7 +76,10 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
 
         bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
         bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
-        bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("YouTubeUploaderManager"))
+          .toInstance(youtubeUploaderManager)
+        //bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
 
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("YouTubeUploadManager"))
@@ -171,7 +175,10 @@ class DummyYouTubeUploadManager extends Actor {
 class DummyYouTubeUploader extends Actor {
 
   override def receive: Receive = {
-    case YouTubeUploader.VideoDetails => sender() ! "Successfully updated the video details"
+    case request: YouTubeUploader.Upload =>
+      sender() ! request
+    case request: YouTubeUploader.VideoDetails => sender() ! request
+    case _ => sender() ! "What?"
   }
 }
 
@@ -179,5 +186,14 @@ class DummyYouTubeCategoryActor extends Actor {
 
   override def receive: Receive = {
     case Categories => sender() ! List[VideoCategory]()
+  }
+}
+
+class DummyYouTubeUploaderManager extends Actor {
+
+  override def receive: Receive = {
+    case request: YouTubeUploader.Upload => sender() ! "Upload started"
+    case request: YouTubeUploader.VideoDetails => sender() ! "Updated video details"
+    case _ => sender() ! "What?!?!?!"
   }
 }

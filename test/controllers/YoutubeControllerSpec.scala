@@ -1,30 +1,26 @@
 package controllers
 
 import akka.actor.ActorRef
-import akka.stream.{ActorMaterializer, Materializer}
 import com.google.inject.name.Names
-import models.{ForgotPasswordRepository, SessionsRepository}
+import models.SessionsRepository
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
 import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.Files
-import play.api.libs.Files.{DefaultTemporaryFileCreator, TemporaryFile, TemporaryFileCreator}
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.mailer.MailerClient
+import play.api.libs.Files.TemporaryFile
+import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.{BadPart, FilePart}
 import play.api.mvc.{MultipartFormData, Results}
 import play.api.test._
-import play.api.test
-import utilities.DateTimeUtility
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class YoutubeControllerSpec extends PlaySpecification with Results {
 
-  val sessionId = "SessionId"
+  private val sessionId = "SessionId"
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -60,13 +56,40 @@ class YoutubeControllerSpec extends PlaySpecification with Results {
       val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
 
       val request =
-        FakeRequest(POST, "/youtube/sessionId/upload")
+        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
           .withHeaders(("fileSize", "10"))
           .withMultipartFormDataBody(multipartBody)
 
       val result = controller.upload(sessionId)(request)
 
       status(result) must be equalTo 200
+    }
+
+    "send bad request if video file not found in the request" in new WithTestApplication {
+      val parameters = Map[String, Seq[String]]("" -> Seq(""), "" -> Seq(""))
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
+      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+
+      val request =
+        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+          .withHeaders(("fileSize", "10"))
+          .withMultipartFormDataBody(multipartBody)
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo 400
+    }
+
+    "send bad request if multipart form data is corrupted in the request" in new WithTestApplication {
+      val request =
+        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+          .withHeaders(("fileSize", "10"))
+
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo 400
     }
 
     "return Ok when asked for percentage of file" in new WithTestApplication {
@@ -95,7 +118,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo 400
     }
 
-    "update video details" in new WithTestApplication {
+    "return bad request if no video URL is found for the session" in new WithTestApplication {
       private val jsonBody = Json.parse(
         """{
           |	"title": "title",
@@ -111,6 +134,24 @@ class YoutubeControllerSpec extends PlaySpecification with Results {
       val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/:sessionId/update").withBody(jsonBody))
 
       status(result) must be equalTo 400
+    }
+
+    "update video details" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"title": "title",
+          |	"description": "None",
+          |	"tags": ["tag1", "tag2"],
+          |	"status": "private",
+          |	"category": "Education"
+          |}""".stripMargin
+      )
+
+      sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/:sessionId/update").withBody(jsonBody))
+
+      status(result) must be equalTo 200
     }
 
   }

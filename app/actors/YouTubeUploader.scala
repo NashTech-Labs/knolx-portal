@@ -40,7 +40,7 @@ object YouTubeUploader {
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderManager: ActorRef,
-                                @Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef,
+                                /*@Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef,*/
                                 youtubeService: YoutubeService) extends Actor {
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty
@@ -61,46 +61,9 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderMa
              fileSize: Long): Video = {
     Logger.info(s"Starting video upload for session $sessionId")
 
-    val snippet = new VideoSnippet().setTitle(title).setDescription(description.getOrElse("")).setTags(tags.asJava)
-    val videoObjectDefiningMetadata = new Video().setSnippet(snippet).setStatus(youtubeService.status)
-    val mediaContent = new InputStreamContent(youtubeService.videoFileFormat, is).setLength(fileSize)
-
-    val videoInsert = youtubeService.youtube.videos().insert(youtubeService.part, videoObjectDefiningMetadata, mediaContent)
-    val uploader = videoInsert.getMediaHttpUploader.setDirectUploadEnabled(false).setChunkSize(256 * 0x400)
-
-    //youtubeUploadProgress ! Uploader(sessionId, uploader)
-    youtubeUploaderManager ! YouTubeUploadManager.RegisterUploadListener(sessionId, uploader)
-    sender() ! "Uploader set"
-
-    val video = videoInsert.execute()
-
-    //sessionVideos += sessionId -> video
-    youtubeUploaderManager ! YouTubeUploadManager.SessionVideo(sessionId, video)
-
-    video
+    youtubeService.upload(sessionId, is, title, description, tags, fileSize, sender())
   }
 
-  def update(videoDetails: VideoDetails): String = {
-
-    val video = new Video
-
-    val snippet = new VideoSnippet()
-      .setTitle(videoDetails.title)
-      .setDescription(videoDetails.description.getOrElse(""))
-      .setTags(videoDetails.tags.asJava)
-      .setCategoryId(videoDetails.category)
-    val videoStatus = new VideoStatus().setPrivacyStatus(videoDetails.status)
-
-    video.setSnippet(snippet).setStatus(videoStatus).setId(videoDetails.videoId)
-
-    val videoUpdate = youtubeService.youtube.videos().update(youtubeService.part, video)
-    try {
-      videoUpdate.execute()
-      "Successfully updated the video details"
-    } catch {
-      case error: Throwable =>
-        "Something went wrong while updating the video details" + error + "-------------Video ID = " + videoDetails.videoId
-    }
-  }
+  def update(videoDetails: VideoDetails): String = youtubeService.update(videoDetails)
 
 }

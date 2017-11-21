@@ -126,9 +126,9 @@ a[data-toggle="collapse"] {
     position: relative;
 }
 
-ul ul a {
-    font-size: 0.9em !important;
-    padding-left: 30px !important;
+#sidebar ul ul li a {
+    font-size: 1.1em !important;
+    padding-left: 25px !important;
 }
 
 .navbar-top-links li{

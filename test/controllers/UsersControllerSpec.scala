@@ -6,6 +6,7 @@ import java.util.TimeZone
 
 import akka.actor.ActorRef
 import com.google.inject.name.Names
+import helpers.TestEnvironment
 import models.{UpdatedUserInfo, _}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around

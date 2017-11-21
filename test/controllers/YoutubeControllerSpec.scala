@@ -3,6 +3,7 @@ package controllers
 import akka.actor.ActorRef
 import akka.stream.{ActorMaterializer, Materializer}
 import com.google.inject.name.Names
+import helpers.TestEnvironment
 import models.{ForgotPasswordRepository, SessionsRepository}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around

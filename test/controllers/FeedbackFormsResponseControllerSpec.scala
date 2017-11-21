@@ -9,7 +9,7 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.ConfigFactory
-import helpers.BeforeAllAfterAll
+import helpers._
 import models._
 import org.specs2.mock.Mockito
 import org.specs2.mutable.SpecificationLike

@@ -3,6 +3,7 @@ package controllers
 import java.text.SimpleDateFormat
 
 import com.typesafe.config.ConfigFactory
+import helpers.TestHelpers
 import models._
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope

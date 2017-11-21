@@ -1,6 +1,7 @@
 package controllers
 
 import com.typesafe.config.ConfigFactory
+import helpers.TestHelpers
 import models.{SessionsRepository, FeedbackFormsResponseRepository, FeedbackFormsRepository, UsersRepository}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito

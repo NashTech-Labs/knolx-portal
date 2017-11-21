@@ -1,0 +1,3 @@
+$(function () {
+    $('#manageSubmenu').collapse('toggle');
+});

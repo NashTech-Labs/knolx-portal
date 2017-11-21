@@ -14,13 +14,13 @@ $(document).ready(function () {
 
  $("#sidebar").niceScroll({
      cursorcolor: '#53619d',
-     cursorwidth: 0,
+     cursorwidth: 2,
      cursorborder: 'none'
  });
 
  $("#sidebar.active").niceScroll({
       cursorcolor: '#53619d',
-      cursorwidth: 4,
+      cursorwidth: 2,
       cursorborder: 'none'
   });
 

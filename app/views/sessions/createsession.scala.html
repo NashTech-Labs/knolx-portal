@@ -138,8 +138,8 @@
                                 <p class="checkbox-text radio-style">Default</p>
                             </label>
                         </div>
-                        <div class="col-md-8 days-outer" >
-                            <label class="radio-button">
+                        <div class="col-md-8 days-outer">
+                            <label class="radio-button" style="padding-top: 10px;">
                             @if(createSessionForm.data.get("feedbackExpirationDays").nonEmpty && !createSessionForm.data.get("feedbackExpirationDays").contains("0")) {
                                 <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
                                 <span class="lab_text"></span>

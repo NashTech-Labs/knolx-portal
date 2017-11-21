@@ -25,7 +25,7 @@ POST        /user/changepassword                 controllers.UsersController.cha
 # Session
 GET         /session                             controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
 POST        /session/search                      controllers.SessionsController.searchSessions
-GET         /session/manage                      controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+GET         /session/manage/:pageNumber          controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
 POST        /session/manage/search               controllers.SessionsController.searchManageSession
 GET         /session/create                      controllers.SessionsController.create
 POST        /session/create                      controllers.SessionsController.createSession
@@ -38,7 +38,7 @@ GET         /session/content/:sessionId          controllers.SessionsController.
 GET         /session/categories                  controllers.SessionsController.getCategory
 
 # Feedback
-GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
+GET         /feedbackform/manage/:pageNumber     controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
 GET         /feedbackform/create                 controllers.FeedbackFormsController.feedbackForm
 POST        /feedbackform/create                 controllers.FeedbackFormsController.createFeedbackForm
 GET         /feedbackform/update                 controllers.FeedbackFormsController.update(id: String)

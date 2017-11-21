@@ -42,8 +42,6 @@
 
 .feedback-duration {
     line-height: 0.5em;
-    padding: 20px 0px;
-    box-shadow: 0 4px 10px -5px #a8a8a8;
 }
 
 .radio-style {
@@ -51,7 +49,7 @@
     font-size: 16px;
     color: #566573;
     font-weight: normal;
-    margin-top: 15px;
+    margin-top: 0;
 }
 
 .radio-style-days {
@@ -59,7 +57,7 @@
     font-size: 16px;
     color: #566573;
     font-weight: normal;
-    margin-top: 10px;
+    margin-top: -4px;
 }
 
 .days {
@@ -104,7 +102,7 @@
 }
 
 .feedback-expiration {
-    padding-top: 4px;
+    padding-top: 15px;
 }
 
 .pin_text {

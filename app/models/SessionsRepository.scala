@@ -331,7 +331,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
 
-  def sessionsInTimeRange1(filterUserSessionInformation: FilterUserSessionInformation): Future[List[(String, Int)]] = {
+  def getMonthlyInfoSessions(filterUserSessionInformation: FilterUserSessionInformation): Future[List[(String, Int)]] = {
     collection
       .flatMap { jsonCollection =>
         import jsonCollection.BatchCommands.AggregationFramework._

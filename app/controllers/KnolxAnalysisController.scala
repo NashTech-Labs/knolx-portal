@@ -105,7 +105,7 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
         val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
 
-        sessionsRepository.sessionsInTimeRange1(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
+        sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
           val knolxMonthlyInfoList = sessions.map { case (month, monthlySessions) =>
             KnolxMonthlyInfo(dateTimeUtility.formatDate(month), monthlySessions)
           }

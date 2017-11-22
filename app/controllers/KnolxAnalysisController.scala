@@ -109,6 +109,7 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
           val sessionMonthInfo = sessionMonthList.groupBy(identity).map { case (month, monthlySessions) =>
             KnolxMonthlyInfo(month, monthlySessions.length)
           }.toList
+          Logger.info("--->" + sessionMonthInfo)
           Ok(Json.toJson(sessionMonthInfo))
         }
       })

@@ -1,6 +1,5 @@
 .frame-panel {
-     border:2px solid #CCC;
-     border-width:2px;
+     border:none;
      margin-bottom:5px;
      max-width: 100%;
      width:500px;

@@ -98,8 +98,8 @@ if(request.path.equals(currentPath)) "active"
                             <i class="fa fa-file" aria-hidden="true"></i>
                             <span>Feedback Forms</span></a>
                     </li>
-                    <li class="@activeLink(routes.UsersController.manageUser(1, None).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
-                        <a href="@routes.UsersController.manageUser(1, None)">
+                    <li class="@activeLink(routes.UsersController.manageUser(1, None, 10).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
+                        <a href="@routes.UsersController.manageUser(1, None, 10)">
                             <i class="fa fa-users" aria-hidden="true"></i>
                             <span>Users</span></a>
                     </li>

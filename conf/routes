@@ -9,7 +9,7 @@ POST        /login                               controllers.UsersController.log
 GET         /logout                              controllers.UsersController.logout
 GET         /register                            controllers.UsersController.register
 POST        /register                            controllers.UsersController.createUser
-GET         /users/manage/:pageNumber            controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
+GET         /users/manage/:pageNumber            controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String], pageSize: Int)
 POST        /users/search                        controllers.UsersController.searchUser
 GET         /user/update                         controllers.UsersController.getByEmail(email: String)
 POST        /user/update                         controllers.UsersController.updateUser

@@ -16,7 +16,7 @@ function slide(keyword, pageNumber, pageSize) {
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
-    formData.append("pageSize", pageSize)
+    formData.append("pageSize", pageSize);
 
     jsRoutes.controllers.SessionsController.searchManageSession().ajax(
         {

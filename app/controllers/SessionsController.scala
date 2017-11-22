@@ -531,7 +531,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             if(session.ok) {
               categoriesRepository.modifyPrimaryCategory(oldCategoryName, newCategoryName).map { result =>
                 if (result.ok) {
-                  Ok("Primary Category was successfully modified")
+                  Ok("Primary category was successfully modified")
                 } else {
                   Logger.info("Error Inside Sessions Controller")
                   BadRequest("Unsuccessfully attempt to modify primary category")

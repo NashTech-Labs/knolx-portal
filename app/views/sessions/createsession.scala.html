@@ -33,7 +33,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 login-third update-second disp-inline">
+                <div class="col-md-12 disp-inline">
                     <label class="col-md-2 control-label">Session</label>
                     <div class="col-md-10">
                         <select name="session" id="session" class="update-field login-second">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 login-third update-second disp-inline form-group">
+                <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Sub-Category</label>
                     <div class="col-md-10">
                         <select name="subCategory" id="subCategory" class="update-field login-second">
@@ -62,7 +62,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 update-second disp-inline form-group">
+                <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Feedback Form</label>
                     <div class="col-md-7">
                         <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
@@ -72,11 +72,11 @@
                             }
                         </select>
                     </div>
-                    <div class="col-md-3"><i class="fa fa-eye preview" id="previewId" data-toggle="tooltip" data-placement="bottom" title="Feedback Form preview" ></i></div>
+                    <div class="col-md-3"><i class="fa fa-eye preview" id="previewId" data-toggle="tooltip" data-placement="right" title="Feedback Form preview" ></i></div>
                 </div>
 
 
-                <div class="col-md-12 login-third update-second disp-inline form-group">
+                <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Session's Topic</label>
                     <div class="col-md-10">
                         <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
@@ -171,6 +171,7 @@
 
                 </div>
                 <div class="col-md-12 login-four">
+                    <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
                     <div class="col-md-2 loader-outer">
                         <a href="@routes.SessionsController.create()" class="btn" style="color: inherit;

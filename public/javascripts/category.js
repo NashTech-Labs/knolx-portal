@@ -15,7 +15,6 @@ $(function () {
     var subCategory = "";
 
     $("#add-primary-category").click( function (e) {
-
         categoryName = $("#primary-category").val();
         addCategory(categoryName);
         e.preventDefault();
@@ -64,50 +63,94 @@ $(function () {
     });
 
     $("#delete-sub-category-btn").on('click', function() {
-        $("#delete-sub-category-modal").modal('show');
+        deleteSubCategory(categoryName, subCategoryName);
     });
 
-    $("#delete-sub-category-modal-yes-btn").click( function() {
-          deleteSubCategory(categoryName, subCategoryName);
+    $("#mod-sub-category-hover").mouseover( function(){
+        showIt('mod-drop-btn');
     });
+
+    $("#mod-sub-category-hover").mouseleave( function(){
+        hideIt('mod-drop-btn');
+    });
+
+    $("#sub-category-hover").mouseover( function(){
+        showIt('drop-btn');
+    });
+
+    $("#sub-category-hover").mouseleave( function(){
+        hideIt('drop-btn');
+    });
+
+    function showIt(id) {
+        document.getElementById(id).style.visibility = "visible";
+    }
+
+    function hideIt(id) {
+        document.getElementById(id).style.visibility = "hidden";
+    }
 
     listSubCategoryWithPrimaryCategory();
 
-    $("#datalist").keyup(function(event){
-        var keyword = $("#datalist").val().toLowerCase();
-        result = "";
-        prepareResult(keyword)
+
+    $("#datalist").keyup(function(e){
+        dropDown('#datalist', '#results-outer',"result");
     });
 
-    function prepareResult(keyword){
+    $("#mod-datalist").keyup(function(e){
+        dropDown('#mod-datalist', '#mod-results-outer', "mod-result");
+    });
+
+
+    function dropDown(id, targetId, renderResult){
+        alert(renderResult);
+        console.log(id)
+        var keyword = $(id).val().toLowerCase();
+        result = "";
+        prepareResult(keyword, targetId, renderResult )
+    }
+
+    function prepareResult(keyword, targetId, renderResult){
+            console.log("Keyword =" + keyword  +" +++ " + targetId);
+
         fields.forEach(function (element) {
                if(element.subcatagory.toLowerCase().includes(keyword)){
-              result = result + '<div class="result" id="'+element.subcatagory+'-'+element.primarycatagory+'"><div class="sub-catagory wordwrap"><strong>'+element.subcatagory+'</strong></div><div class="primary-catagory">'+element.primarycatagory+'</div> </div>'
+              result = result + '<div class="' +renderResult + '" id="'+element.subcatagory+'-'+element.primarycatagory+'"><div class="sub-catagory wordwrap"><strong>'+element.subcatagory+'</strong></div><div class="primary-catagory">'+element.primarycatagory+'</div> </div>'
            }
         });
-        $('#results-outer').html(result);
-        $('#results-outer').show();
+        $(targetId).html(result);
+        $(targetId).show();
         result = "";
     }
 
-    $("#drop-btn").click(function(e){
-         var keyword = $("#datalist").val().toLowerCase();
+    $("#drop-btn").click( function(e){
+        showResult("#datalist","#results-outer", "result");
+        e.preventDefault();
+    });
+
+    $("#mod-drop-btn").click( function(e){
+        showResult("#mod-datalist","#mod-results-outer", "mod-result");
+        e.preventDefault();
+    });
+
+
+    function showResult(id, targetId, renderResult) {
+        var keyword = $(id).val().toLowerCase();
          if( keyword == ""){
-            if($('#results-outer').is(":visible")){
-                 $('#results-outer').hide();
+            if($(targetId).is(":visible")){
+                 $(targetId).hide();
             }else{
-              prepareResult("");
+              prepareResult("",targetId, renderResult);
             }
           }
          else{
-           if($('#results-outer').is(":visible")){
-               $('#results-outer').hide();
+           if($(targetId).is(":visible")){
+               $(targetId).hide();
             }else{
-              prepareResult(keyword);
+              prepareResult(keyword,targetId, renderResult);
             }
          }
-         e.preventDefault();
-    });
+    }
 
     $("#datalist").blur(function() {
          $('#results-outer').hide()
@@ -125,12 +168,24 @@ $(function () {
       console.log("splits = " + splits);
       subCategoryName = splits[0];
       categoryName = splits[1];
-      alert(categoryName + " ..... " + subCategoryName);
       $("#datalist").val(splits[0]);
       topicMatchedWithCategory(categoryName, subCategoryName)
       $("#subcategory-sessions").show();
       $("#pair").val(attribute);
       $('#results-outer').hide();
+    });
+    var newSubCategoryName = "";
+    $("html").delegate( ".mod-result", "mousedown", function() {
+          var attribute = $(this).attr('id');
+          var splits = attribute.split('-');
+          console.log("splits = " + splits);
+          oldSubCategoryName = splits[0];
+          categoryName = splits[1];
+          $("#mod-datalist").val(splits[0]);
+          $("#new-sub-category").show();
+          //newSubCategoryName = $("#new-sub-category").val();
+          $("#mod-pair").val(attribute);
+          $('#mod-results-outer').hide();
     });
 
     $("html").delegate( ".result", "mouseover", function() {
@@ -147,35 +202,6 @@ $(function () {
             var keyword = $("#mod-datalist").val().toLowerCase();
             result = "";
             modPrepareResult(keyword)
-        });
-
-    function modPrepareResult(keyword){
-            fields.forEach(function (element) {
-                   if(element.subcatagory.toLowerCase().includes(keyword)){
-                  result = result + '<div class="mod-result" id="'+element.subcatagory+'-'+element.primarycatagory+'"><div class="sub-catagory wordwrap"><strong>'+element.subcatagory+'</strong></div><div class="primary-catagory">'+element.primarycatagory+'</div> </div>'
-               }
-            });
-            $('#mod-results-outer').html(result);
-            $('#mod-results-outer').show();
-            result = "";
-        }
-
-    $("#mod-drop-btn").click(function(){
-             var keyword = $("#mod-datalist").val().toLowerCase();
-             if( keyword == ""){
-                if($('#mod-results-outer').is(":visible")){
-                     $('#mod-results-outer').hide();
-                }else{
-                  modPrepareResult("");
-                }
-              }
-             else{
-               if($('#mod-results-outer').is(":visible")){
-                   $('#mod-results-outer').hide();
-                }else{
-                  modPrepareResult(keyword);
-                }
-             }
         });
 
     $("#mod-datalist").blur(function() {
@@ -195,11 +221,9 @@ $(function () {
           console.log("splits = " + splits);
           oldSubCategoryName = splits[0];
           categoryName = splits[1];
-          alert(categoryName + " ..... " + subCategoryName);
           $("#mod-datalist").val(splits[0]);
           $("#new-sub-category").show();
           //newSubCategoryName = $("#new-sub-category").val();
-
           $("#mod-pair").val(attribute);
           $('#mod-results-outer').hide();
         });
@@ -209,14 +233,13 @@ $(function () {
                modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName);
             });*/
 
-        $("html").delegate( ".mod-result", "mouseover", function() {
-           $(this).addClass('over');
-        });
+    $("html").delegate( ".mod-result", "mouseover", function() {
+       $(this).addClass('over');
+    });
 
     $("html").delegate( ".mod-result", "mouseleave", function() {
            $(this).removeClass('over');
-        });
-
+    });
 
 });
 
@@ -254,6 +277,11 @@ function wrongMessageBox() {
     $("#wrong-message").show();
 }
 
+function scrollToTop() {
+    /*$('html,body').scrollTop(0);*/
+    $('html, body').animate({ scrollTop: 0 }, 'fast')
+}
+
 function addCategory(categoryName) {
     jsRoutes.controllers.SessionsController.addPrimaryCategory(categoryName).ajax (
         {
@@ -265,11 +293,13 @@ function addCategory(categoryName) {
                 successMessageBox();
                 $("#primary-category").val("");
                 document.getElementById("success-message").innerHTML = data;
-                $("#categories").append("<option value='" + categoryName + "'>" + categoryName + "</option>")
+                scrollToTop();
+               /* $("#categories").append("<option value='" + categoryName + "'>" + categoryName + "</option>")*/
             },
             error: function(er) {
                 wrongMessageBox();
-                document.getElementById("wrong-message").innerHTML = er.responseText
+                document.getElementById("wrong-message").innerHTML = er.responseText;
+                scrollToTop();
             }
         }
     )
@@ -286,10 +316,12 @@ function addSubCategory(categoryName,subCategory) {
                 $("#sub-category").val("");
                 document.getElementById("success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + subCategory + "'>" + categoryName + "</option>");
+                scrollToTop();
             },
             error: function(er) {
                 wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML = er.responseText;
+                scrollToTop();
             }
         }
     )
@@ -306,12 +338,14 @@ function modifyPrimaryCategory(oldCategoryName,newCategoryName) {
             success: function(data) {
                 successMessageBox();
                 $("#new-primary-category").val("");
-                document.getElementById("success-message").text(data);
+                document.getElementById("success-message").innerHTML = data;
+                scrollToTop();
             },
             error: function(er) {
                 wrongMessageBox();
                 $("#new-primary-category").val("");
                 document.getElementById("wrong-message").innerHTML=er.responseText;
+                scrollToTop();
             }
         }
     )
@@ -333,11 +367,13 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
                 document.getElementById("success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
+                scrollToTop();
             },
             error: function(er) {
                 wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML=er.responseText;
                 $("#new-sub-category").val("");
+                scrollToTop();
              },
         }
     )
@@ -352,25 +388,17 @@ function deletePrimaryCategory(categoryName) {
             contentType: 'application/json',
             success: function(data) {
                 successMessageBox();
-                /*var subCategories = JSON.parse(data);
-                if(subCategories.length) {
-                    console.log("Sub category = " + subCategories);
-                    var restricted = '<div class="alert alert-warning">' +
-                                     '<strong>Warning!</strong> Indicates a warning that might need attention.'+
-                                     '</div>';
-                    var subCategoryList = '<ul id="list-sub-categories">'
-                    for(var i = 0 ; i < subCategories.length ; i++) {
-                        subCategoryList += "<li>" + subCategories[i] + "</li>";
-                    }
-                    $("#category-sessions").html(subCategoryList);
-                }*/
+                $("#delete-primary-category").val("");
                 console.log("data is = " + data)
                 document.getElementById("success-message").innerHTML = data;
+                $("category-sessions").hide();
+                scrollToTop();
             },
             error: function(er) {
                 wrongMessageBox();
                 console.log("error is  = " + er.responseText)
                 document.getElementById("wrong-message").innerHTML=er.responseText;
+                scrollToTop();
             }
         }
     )
@@ -384,23 +412,25 @@ function subCategoryByPrimaryCategory(categoryName) {
              processData: false,
              contentType: 'application/json',
              success: function(data) {
+                 $("#no-subCategory").remove();
                  var subCategories = JSON.parse(data);
-
                  if(subCategories.length) {
                      console.log("Sub category = " + subCategories);
-                     var restricted = '<div class="alert alert-warning">' +
-                                      '<strong>Warning!</strong> Indicates a warning that might need attention.'+
-                                      '</div>';
-                     var subCategoryList = '<ul id="list-sub-categories">'
+                     var subCategoryList = '<ul id="list-sessions">'
                      for(var i = 0 ; i < subCategories.length ; i++) {
                          subCategoryList += "<li>" + subCategories[i] + "</li>";
                      }
+                     subCategoryList += '</ul>';
                      $("#category-sessions").html(subCategoryList);
+                     $("#category-sessions").show();
                 }
-
              },
              error: function(er) {
-                $("#category-sessions").html("<p> * No sub category exists </p>");
+                $("#no-subCategory").remove();
+                var noSubCategory = '<label id= "no-subCategory">No sub-category exists!</label>'
+                $("#category-sessions").before(noSubCategory);
+                $("#category-sessions").hide();
+
              }
          }
      )
@@ -413,6 +443,7 @@ function topicMatchedWithCategory(categoryName, subCategoryName){
             processData: false,
             contentType: 'application/json',
             success: function(data) {
+                $("#no-sessions").remove();
                 var topics = JSON.parse(data);
                 console.log("topics = " + topics);
                 if(topics.length) {
@@ -421,10 +452,8 @@ function topicMatchedWithCategory(categoryName, subCategoryName){
                         sessions += "<li>" + topics[i] + "</li>";
                     }
                     sessions += "</ul>";
-
                     $("#subcategory-sessions").html(sessions);
                 } else {
-                    console.log("NO session");
                     $("#no-sessions").remove();
                     var noSessions = '<label id= "no-sessions">No sessions exists!</label>'
                     $("#subcategory-sessions").before(noSessions);
@@ -432,6 +461,7 @@ function topicMatchedWithCategory(categoryName, subCategoryName){
                 }
             },
             error: function(er) {
+                $("#subcategory-sessions").hide();
             }
         }
     )
@@ -446,18 +476,20 @@ function deleteSubCategory(categoryName, subCategoryName) {
             type:'GET',
             processData: false,
             contentType: false,
-
             success: function(data) {
                 successMessageBox();
-                $("#delete-sub-category").val("");
+                $("#datalist").val("");
                 document.getElementById("success-message").innerHTML = data;
                 $("#subcategory-sessions").hide();
+                scrollToTop();
             },
             error: function(er) {
                 wrongMessageBox();
                 document.getElementById("wrong-message").innerHTML=er.responseText;
                 $("#delete-sub-category").val("");
+                scrollToTop();
             }
+
         }
     )
 }

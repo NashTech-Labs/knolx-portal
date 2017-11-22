@@ -13,7 +13,8 @@ class DateTimeUtility {
   val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-  val monthFormat = new SimpleDateFormat("MMMM")
+  val yearMonthFormatDB = new SimpleDateFormat("yyyy-MM")
+  val yearMonthFormat = new SimpleDateFormat("yyyy-MMMM")
 
   def nowMillis: Long =
     System.currentTimeMillis
@@ -42,12 +43,17 @@ class DateTimeUtility {
   def toMillis(localDateTime: LocalDateTime): Long =
     localDateTime.toEpochSecond(ZoneOffset) * 1000
 
-  def getMonth(millis : Long): String =
-    monthFormat.format(new Date(millis))
+ /* def getMonth(millis : Long): String =
+    monthFormat.format(new Date(millis))*/
 
   def parseDateStringToIST(date: String): Long = {
     val millis = dateFormat.parse(date).getTime
     Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime.toEpochSecond(ZoneOffset) * 1000
+  }
+
+  def formatDate(stringDate: String): String = {
+    val utilDate = yearMonthFormatDB.parse(stringDate)
+    yearMonthFormat.format(utilDate)
   }
 }
 

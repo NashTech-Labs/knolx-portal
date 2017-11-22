@@ -346,7 +346,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember,userInformation.admin, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None                  =>
-          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10)).flashing("message" -> "Something went wrong!"))
       }
   }
 
@@ -485,7 +485,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 .map { result =>
                   if (result.ok) {
                     Logger.info(s"Password successfully updated for ${user.email}")
-                    Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
+                    Redirect(routes.SessionsController.sessions(1, None, 10)).flashing("message" -> "Password reset successfully!")
                   } else {
                     InternalServerError("Something went wrong!")
                   }

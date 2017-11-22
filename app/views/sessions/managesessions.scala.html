@@ -1,10 +1,19 @@
-@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_], flash: Flash)
+@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int, pageSize: Int)(implicit request: Request[_], flash: Flash)
 
 @main("Manage Sessions") {
 
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-            <div class="col-md-9"></div>
+            <label class="col-md-2" style="font-weight: normal">
+                Show
+                <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                @for(value <- List(10,20,30,40,50)) {
+                    <option value="@value">@value</option>
+                }
+                </select>
+                Entries
+            </label>
+            <div class="col-md-7"></div>
             <div class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;">
                 <input class="search-text" autocomplete="off" name="email" id="search-text" style="float:right"/>
                 <span style="float: right; padding-right: 5px !important; padding-top: 4px !important;">Search</span>
@@ -115,7 +124,7 @@
                     </table>
                 </div>
             </div>
-            <div class="col-md-12" style="margin-bottom: 25px;">@pagination(pageNumber, pages, routes.SessionsController.manageSessions)</div>
+            <div class="col-md-12" style="margin-bottom: 25px;">@pagination(pageNumber, pages, pageSize, routes.SessionsController.manageSessions)</div>
         </div>
     </div>
 

@@ -1,15 +1,22 @@
 $(function () {
     $('#search-text').keyup(function () {
-        slide(this.value, 1);
+        var pageSize = $('#show-entries').val();
+        slide(this.value, 1, pageSize);
+    });
+
+    $('#show-entries').on('change', function () {
+        var keyword = $('#search-text').val();
+        slide(keyword, 1, this.val());
     });
 });
 
-function slide(keyword, pageNumber) {
+function slide(keyword, pageNumber, pageSize) {
     var email = keyword;
 
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
+    formData.append("pageSize", pageSize)
 
     jsRoutes.controllers.SessionsController.searchManageSession().ajax(
         {

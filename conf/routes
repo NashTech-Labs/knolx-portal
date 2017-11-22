@@ -23,9 +23,9 @@ GET         /user/changepassword                 controllers.UsersController.ren
 POST        /user/changepassword                 controllers.UsersController.changePassword
 
 # Session
-GET         /session                             controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
+GET         /session                             controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String], pageSize: Int)
 POST        /session/search                      controllers.SessionsController.searchSessions
-GET         /session/manage/:pageNumber          controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+GET         /session/manage/:pageNumber          controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String], pageSize: Int)
 POST        /session/manage/search               controllers.SessionsController.searchManageSession
 GET         /session/create                      controllers.SessionsController.create
 POST        /session/create                      controllers.SessionsController.createSession

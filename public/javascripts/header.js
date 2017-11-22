@@ -7,22 +7,28 @@ $(window).scroll(function () {
     }
 });*/
 $(document).ready(function () {
- $('#sidebarCollapse').on('click', function () {
-     $('#sidebar, #content').toggleClass("active");
-     $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
- });
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar, #content').toggleClass("active");
+        $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
+    });
 
- $("#sidebar").niceScroll({
-     cursorcolor: '#53619d',
-     cursorwidth: 2,
-     cursorborder: 'none'
- });
+    /*$("#sidebar").niceScroll({
+        cursorcolor: "#4285b0",
+        cursoropacitymin: 0.3,
+        background: "#cedbec",
+        cursorborder: "0",
+        autohidemode: true,
+        cursorminheight: 30
+    });
 
- $("#sidebar.active").niceScroll({
-      cursorcolor: '#53619d',
-      cursorwidth: 2,
-      cursorborder: 'none'
-  });
+    $("#sidebar.active").getNiceScroll().resize();*/
 
-  $('.IsBestAnswer').addClass('bestanswer').removeClass('IsBestAnswer');
+
+});
+
+
+
+
+$(document).ready(function() {
+
 });

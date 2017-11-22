@@ -1,22 +1,31 @@
 $(function () {
     $('#search-text').keyup(function () {
         var filter = $('input[name="user-filter"]:checked').val();
-        slide(this.value, 1, filter);
+        var pageSize = $('#show-entries').val();
+        slide(this.value, 1, filter, pageSize);
     });
 
     $('.custom-checkbox').click(function () {
         var filter = $('input[name="user-filter"]:checked').val();
-        slide($('#search-text').val(), 1, filter);
+        var pageSize = $('#show-entries').val();
+        slide($('#search-text').val(), 1, filter, pageSize);
+    });
+
+    $('#show-entries').on('change', function () {
+        var filter = $('input[name="user-filter"]:checked').val();
+        var keyword = $('#search-text').val();
+        slide(keyword, 1, filter, this.val());
     });
 });
 
-function slide(keyword, pageNumber, filter) {
+function slide(keyword, pageNumber, filter, pageSize) {
     var email = keyword;
 
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
     formData.append("filter", filter);
+    formData.append("pageSize", pageSize);
 
     jsRoutes.controllers.UsersController.searchUser().ajax(
         {

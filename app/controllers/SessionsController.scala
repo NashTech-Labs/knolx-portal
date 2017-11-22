@@ -62,7 +62,7 @@ case class KnolxSession(id: String,
                         completed: Boolean = false,
                         expired: Boolean = false)
 
-case class SessionEmailInformation(email: Option[String], page: Int)
+case class SessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
 case class ModelsCategoryInformation(categoryName: String, subCategory: List[String])
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
@@ -92,7 +92,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   val sessionSearchForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number.verifying("Invalid feedback form expiration days selected", _ >= 1)
+      "page" -> number.verifying("Invalid Page Number", _ >= 1),
+      "pageSize" -> number.verifying("Invalid Page size", _>=10)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
@@ -131,9 +132,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   )
 
 
-  def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>
+  def sessions(pageNumber: Int = 1, keyword: Option[String] = None, pageSize: Int): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository
-      .paginate(pageNumber, keyword)
+      .paginate(pageNumber, keyword, pageSize)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map { session =>
           KnolxSession(session._id.stringify,
@@ -154,7 +155,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           .activeCount(keyword)
           .map { count =>
             val pages = Math.ceil(count / 10D).toInt
-            Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
+            Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber, 10))
           }
       }
   }
@@ -167,7 +168,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       },
       sessionInformation => {
         sessionsRepository
-          .paginate(sessionInformation.page, sessionInformation.email)
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
             val knolxSessions = sessionInfo map (session =>
               KnolxSession(session._id.stringify,
@@ -195,9 +196,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = adminAction.async { implicit request =>
+  def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None, pageSize: Int): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
-      .paginate(pageNumber, keyword)
+      .paginate(pageNumber, keyword, pageSize)
       .flatMap { sessionsInfo =>
         val knolxSessions =
           sessionsInfo map (sessionInfo =>
@@ -230,7 +231,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             .activeCount(keyword)
             .map { count =>
               val pages = Math.ceil(count / 10D).toInt
-              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber))
+              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber, pageSize))
             }
         }
       }
@@ -244,7 +245,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       },
       sessionInformation => {
         sessionsRepository
-          .paginate(sessionInformation.page, sessionInformation.email)
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
             val knolxSessions = sessionInfo map (sessionInfo =>
               KnolxSession(sessionInfo._id.stringify,
@@ -320,7 +321,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                     sessionsScheduler ! RefreshSessionsSchedulers
-                    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
+                    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10)).flashing("message" -> "Session successfully created!"))
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     Future.successful(InternalServerError("Something went wrong!"))
@@ -366,7 +367,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       } { _ =>
         Logger.info(s"Knolx session $id successfully deleted")
         sessionsScheduler ! RefreshSessionsSchedulers
-        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!"))
+        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10)).flashing("message" -> "Session successfully Deleted!"))
       })
   }
 
@@ -386,7 +387,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 
-        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10)).flashing("message" -> "Something went wrong!"))
       }
   }
 
@@ -410,7 +411,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
                   sessionsScheduler ! RefreshSessionsSchedulers
                   Logger.error(s"Cannot refresh feedback form actors while updating session ${updateSessionInfo.id}")
-                  Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated"))
+                  Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10)).flashing("message" -> "Session successfully updated"))
                 } else {
                   Logger.error(s"Something went wrong when updating a new Knolx session for user  ${updateSessionInfo.id}")
                   Future.successful(InternalServerError("Something went wrong!"))
@@ -423,27 +424,27 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
+        Redirect(routes.SessionsController.manageSessions(1, None, 10))
           .flashing("message" -> "Scheduled feedback form successfully cancelled!")
       case false =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
+        Redirect(routes.SessionsController.manageSessions(1, None, 10))
           .flashing("message" -> "Either feedback form was already sent or Something went wrong while removing scheduled feedback form!")
     }
   }
 
   def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsScheduler ! ScheduleSession(sessionId)
-    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
+    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10))
       .flashing("message" -> "Feedback form schedule initiated"))
   }
 
   def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
     if (id.length != 24) {
-      Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found"))
+      Future.successful(Redirect(routes.SessionsController.sessions(1, None, 10)).flashing("message" -> "Session Not Found"))
     } else {
       val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
       eventualMaybeSession.flatMap(maybeSession =>
-        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None, 10)).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }

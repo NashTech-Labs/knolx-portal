@@ -9,7 +9,7 @@ POST        /login                               controllers.UsersController.log
 GET         /logout                              controllers.UsersController.logout
 GET         /register                            controllers.UsersController.register
 POST        /register                            controllers.UsersController.createUser
-GET         /users/manage/:pageNumber            controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
+GET         /users/manage/:pageNumber            controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String], pageSize: Int)
 POST        /users/search                        controllers.UsersController.searchUser
 GET         /user/update                         controllers.UsersController.getByEmail(email: String)
 POST        /user/update                         controllers.UsersController.updateUser
@@ -23,9 +23,9 @@ GET         /user/changepassword                 controllers.UsersController.ren
 POST        /user/changepassword                 controllers.UsersController.changePassword
 
 # Session
-GET         /session                             controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
+GET         /session                             controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String], pageSize: Int)
 POST        /session/search                      controllers.SessionsController.searchSessions
-GET         /session/manage                      controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+GET         /session/manage/:pageNumber          controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String], pageSize: Int)
 POST        /session/manage/search               controllers.SessionsController.searchManageSession
 GET         /session/create                      controllers.SessionsController.create
 POST        /session/create                      controllers.SessionsController.createSession
@@ -38,7 +38,7 @@ GET         /session/content/:sessionId          controllers.SessionsController.
 GET         /session/categories                  controllers.SessionsController.getCategory
 
 # Feedback
-GET         /feedbackform/manage                 controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
+GET         /feedbackform/manage/:pageNumber     controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
 GET         /feedbackform/create                 controllers.FeedbackFormsController.feedbackForm
 POST        /feedbackform/create                 controllers.FeedbackFormsController.createFeedbackForm
 GET         /feedbackform/update                 controllers.FeedbackFormsController.update(id: String)

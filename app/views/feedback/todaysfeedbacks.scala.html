@@ -2,12 +2,11 @@
 
 @main("Feedbacks") {
     <div class="row">
-        <div class="col-md-2" ></div>
-        <div class="col-md-8 feedback-form-display-container">
+        <div class="col-md-12 feedback-form-display-container">
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(active.nonEmpty) {
                 @for((session, feedbackForm) <- active) {
-                    <div class="col-md-4">
+                    <div class="col-md-3 filter-padding-left">
                         <div class="col-md-12">
                             <div id="parent" class="feedback-response-sessions">
                                 <div class="card-body">
@@ -55,7 +54,7 @@
             } else {
                 @if(expired.nonEmpty) {
                     @for(expiredSession <- expired) {
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions">
                                     <div class="card-body">
@@ -87,9 +86,7 @@
                     </div>
                 }
             }
-            <div class="col-md-12 feedback-footer"></div>
         </div>
-        <div class="col-md-2" ></div>
     </div>
 
     <script src="@routes.Assets.versioned("javascripts/todayssessioninfo.js")" type="text/javascript"></script>

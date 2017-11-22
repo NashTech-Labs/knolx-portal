@@ -29,11 +29,11 @@ class SessionsControllerSpec extends PlaySpecification with Results {
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
       1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val optionOfSessionObject =
-    Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId", "topic",
+    Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
       1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
@@ -55,12 +55,14 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         usersRepository,
         sessionsRepository,
         feedbackFormsRepository,
+        categoriesRepository,
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
         usersBanScheduler)
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val categoriesRepository = mock[CategoriesRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
@@ -235,6 +237,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -253,7 +257,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
-
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
@@ -267,6 +270,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -292,6 +297,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "date" -> "2017-06-21T16:00",
               "feedbackFormId" -> _id.stringify,
               "session" -> "session",
+              "category" -> "test category",
+              "subCategory" -> "subCategory",
               "topic" -> "topic",
               "meetup" -> "true")
             .withCSRFToken)
@@ -307,7 +314,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getByEmail("test2@example.com") returns Future.successful(None)
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -318,6 +325,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withFormUrlEncodedBody("email" -> "test2@example.com",
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "meetup" -> "true")
@@ -345,6 +354,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "date" -> sessionDateString,
               "feedbackFormId" -> _id.stringify,
               "session" -> "session 1",
+              "category" -> "test category",
+              "subCategory" -> "subCategory",
               "topic" -> "topic",
               "meetup" -> "true")
             .withCSRFToken)
@@ -357,9 +368,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-
-      val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1",
-        "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1", "category",
+        "subCategory", "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -413,11 +423,10 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
-
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "test category", "subCategory",
         "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -434,6 +443,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -450,11 +461,10 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
-
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "test category", "subCategory",
         "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -471,6 +481,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -487,7 +499,6 @@ class SessionsControllerSpec extends PlaySpecification with Results {
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
       dateTimeUtility.startOfDayMillis returns System.currentTimeMillis
@@ -499,6 +510,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-21T16:00",
             "session" -> "session",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "meetup" -> "true")
@@ -524,6 +537,8 @@ class SessionsControllerSpec extends PlaySpecification with Results {
               "date" -> sessionDateString,
               "feedbackFormId" -> _id.stringify,
               "session" -> "session 1",
+              "category" -> "test category",
+              "subCategory" -> "subCategory",
               "topic" -> "topic",
               "meetup" -> "true")
             .withCSRFToken)
@@ -649,4 +664,5 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo SEE_OTHER
     }
   }
+
 }

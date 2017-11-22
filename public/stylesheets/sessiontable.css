@@ -1,23 +1,19 @@
+.table {
+    margin-bottom: 15px !important;
+}
+
 .table > tbody > tr > td {
-    padding-top: 20px;
-    padding-bottom: 20px;
     text-align: center;
-    font-family: 'gothic';
-    font-size: 17px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
 }
 
 th {
     text-align: center;
-    font-family: 'gothic';
-    font-size: 16px;
-    letter-spacing: 2px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    letter-spacing: 1px;
     color: #fff;
-}
-
-thead > tr {
-    -moz-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    -webkit-box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
@@ -29,21 +25,19 @@ thead > tr {
 }
 
 @font-face {
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     src: url('font/gothic.ttf');
 }
 
 .table-responsive {
-    border-radius: 0px 0px 30px 30px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    border-bottom-style: none !important;
-    border-bottom-width: 0px !important;
     overflow-x : inherit;
 }
+
 
 .center {
     display: table;
@@ -53,14 +47,15 @@ thead > tr {
 
 .v-align {
     display: table-cell;
-    text-align: center;
+    text-align: right;
 }
 
 ul.pagination.pagination-lg li a {
-    color: #fff;
-    font-size: 20px;
-    font-weight: bolder;
-    border-bottom: 2px solid #45B39D;
+    color: #676a6c;
+    font-size: 15px;
+    border: 1px solid #e7eaec;
+    border-radius:0 ;
+    padding: 2px 5px !important;
 }
 
 @keyframes fadein {
@@ -113,24 +108,29 @@ ul.pagination.pagination-lg li a {
 }
 
 .pagination li.active a {
-    background-color: #000;
-    opacity: 0.5;
-    color: #fff !important;
-    border: 1px solid #eee;
+    background-color: #f4f4f4;
+    color: #676a6c!important;
 }
 
 .pagination li:hover.active a {
-    background-color: #bdf9d8;
-    color: #000 !important;
-    cursor: pointer
+    background-color: #f4f4f4;
+    color: #676a6c !important;
+    cursor: default;
+    border: 1px solid #e7eaec;
+}
+
+.pagination{
+    margin: 0;
+}
+
+.pagination li:not(.active) a {
+    background-color: #FFFFFF;
+    color: #676a6c;
 }
 
 .pagination li:hover:not(.active) a {
-    background-color: #ddd;
-}
-
-.v-align-mobile {
-    padding-right: 30px;
+    background-color: #f4f4f4;
+    color: #676a6c;
 }
 
 .knolx-session {

@@ -42,8 +42,8 @@
     border-radius: 0px;
     bottom: 0px;
     right: 0px;
-    background-color: #eee;
-    color: #5499C7;
+    background-color: #5499C7;
+    color: #FFFFFF;
     border: 2px solid #fff;
 }
 
@@ -58,7 +58,7 @@
     border: none;
     outline: none;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     width: 85%;
     text-align: center;
@@ -79,7 +79,7 @@ input#form-name:focus {
     outline: none;
     border-bottom: 1px solid #dcdcdc;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     text-align: center;
     color: #EC7063;
@@ -93,7 +93,7 @@ input#form-name:focus {
     outline: none;
     border-bottom: 1px dotted #dcdcdc;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
@@ -107,13 +107,12 @@ input#form-name:focus {
     display: flex;
 }
 .lab_text {
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #888888;
     align-self: center;
 }
 
 .lab_text:before {
-    margin-top: 15px;
     content: "\f10c";
     font-family: "FontAwesome";
     display: inline-block;
@@ -126,7 +125,6 @@ input#form-name:focus {
 }
 
 .custom-checkbox:checked + .lab_text:before {
-    margin-top: 15px;
     content: "\f111";
     font-family: "FontAwesome";
     display: inline-block;
@@ -184,7 +182,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
     outline: none;
     border-bottom: 1px dotted #dcdcdc;
     font-size: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     text-align: center;
     color: #EC7063;
@@ -295,7 +293,7 @@ textarea{
     outline: none;
     box-shadow: 0 4px 6px -5px #333;
     font-weight: bold;
-    font-family: 'headerfont';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 22px;
     letter-spacing: 1px;
     color: #7F8C8D;
@@ -309,7 +307,7 @@ textarea{
     border-bottom: 1px dotted #dcdcdc;
     outline: none;
     font-size: 18px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     letter-spacing: 2px;
     color: #7F8C8D;
     height: 80px;

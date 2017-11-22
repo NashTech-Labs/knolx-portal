@@ -1,29 +1,18 @@
 .login-outer {
-    height: 420px;
-    background-color: #FFF;
-    -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
-    -moz-animation: fadein 0.5s; /* Firefox < 16 */
-    -ms-animation: fadein 0.5s; /* Internet Explorer */
-    -o-animation: fadein 0.5s; /* Opera < 12.1 */
-    animation: fadein 0.5s;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    border-top: 1px solid #fff;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
+    height:auto;
+    background-color: #ffffff;
+    color: inherit;
+    padding: 10px 10px;
+    border-color: #e7eaec;
+    border-image: none;
+    border-style: solid solid none;
+    border-width: 1px 0;
 }
 
 .default-top-margin {
     margin-top: 10%;
 }
 
-.register-custom-position {
-    padding-top: 15px;
-}
 
 .user-manage-outer {
     height: auto;
@@ -32,11 +21,10 @@
 }
 
 .forgot-password-outer {
-    height: 300px;
-}
-
-.reset-password-outer {
-    height: 440px;
+        height:140px;
+        background-color: #ffffff;
+        color: inherit;
+        padding: 15px 20px 20px 20px;
 }
 
 .login-first {
@@ -57,29 +45,23 @@
 }
 
 .login-second {
-    line-height: 50px;
-    padding-top: 50px;
+    margin-bottom: 15px;
 }
 
 .no-outline {
     outline: none;
 }
 
-.custom-textbox-alignment {
-    line-height: 50px;
-    padding-top: 20px;
-}
-
 .input-field {
+    background-color: #FFFFFF;
+    background-image: none;
+    border: 1px solid #e5e6e7;
+    border-radius: 1px;
+    color: inherit;
+    display: block;
+    padding: 6px 12px;
+    transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
     width: 100%;
-    text-align: center;
-    font-family: 'gothic';
-    font-size: 18px;
-    color: #566573;
-    border: none;
-    border-bottom: 2px dotted #CACFD2;
-    background-color: transparent;
-    box-shadow: none;
 }
 
 input:invalid {
@@ -91,10 +73,12 @@ input:invalid {
 }
 
 .login-button {
-    background-color: rgb(125, 158, 192);
+    padding: 5px;
+    background-color:#1ab394;
     color: #fff;
     border: None;
     outline: none;
+    font-weight:900;
 }
 
 .forgot-password {
@@ -106,7 +90,6 @@ input:invalid {
 
 .forgot-password-link {
     text-decoration: none !important;
-    color: #EC7063;
 }
 
 input.input-field.logo:focus {
@@ -121,7 +104,7 @@ input.input-field.logo:focus {
 }
 
 .login-error {
-    margin-top: 80px;
+    margin-top: 20px;
     text-align: center;
     font-size: 16px;
 }

@@ -3,12 +3,12 @@
 @main("Sessions") {
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-            <div class="col-md-3"></div>
-            <div class="col-md-6 search-bar session-custom-search-bar" id="search-bar">
-               <em class="fa fa-search search-icon" ></em>
-               <input class="search-text" autocomplete="off" name="email" id="search-text" placeholder="Search Knolx Sessions"/>
+            <div class="col-md-9"></div>
+            <div class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;">
+                <input class="search-text" autocomplete="off" name="email" id="search-text" style="float:right"/>
+                <span style="float: right; padding-right: 5px !important; padding-top: 4px !important;">Search</span>
             </div>
-            <div class="col-md-3"></div>
+
             <div class="col-md-12 all-users">
                @if(!flash.isEmpty) {
                 @if(flash.get("message").isDefined) {
@@ -25,8 +25,8 @@
                 }
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
-                <div class="table-responsive manage-user-custom-table-margin">
-                    <table class="table">
+                <div class=" manage-user-custom-table-margin">
+                    <table class="table table-responsive table-striped">
                         <thead>
                             <tr class="table-header-color">
                                 <th>Date</th>
@@ -85,10 +85,11 @@
                     </table>
                 </div>
             </div>
+            <div class="col-md-12" style="margin-bottom: 25px;">@pagination(pageNumber, pages, routes.SessionsController.sessions)</div>
         </div>
     </div>
 
    <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/searchsession.js")" type="text/javascript"></script>
-    @pagination(pageNumber, pages, routes.SessionsController.sessions)
+
 }

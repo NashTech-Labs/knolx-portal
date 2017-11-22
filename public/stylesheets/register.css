@@ -1,12 +1,12 @@
 .top-registration-field {
-    padding-top: 30px;
-    margin-top: 17px;
+    margin-top: 5px;
 }
 
 .registration-button {
-    background-color: rgb(125, 158, 192);
+    background-color: #1ab394;
     color: #fff;
     border: None;
+    margin-bottom: 15px;
 }
 
 input.input-field.reg:focus {
@@ -15,6 +15,6 @@ input.input-field.reg:focus {
 }
 
 .registration-error {
-    margin-top: 80px;
+    margin-top: 20px;
     font-size: 16px;
 }

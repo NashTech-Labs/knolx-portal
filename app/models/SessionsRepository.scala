@@ -325,6 +325,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     collection
       .flatMap(
         _.find(selector)
+          .sort(Json.obj("date" -> 1))
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }

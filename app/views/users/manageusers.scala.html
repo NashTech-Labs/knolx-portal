@@ -50,10 +50,10 @@
                     <div class="col-md-5 rest">
                     </div>
                 </div>
-                <div class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;">
-                    <input class="search-text" autocomplete="off" name="email" id="search-text"style="float:right"/>
-                    <span style="float: right; padding-right: 5px !important; padding-top: 4px !important;">Search</span>
-                </div>
+                <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
+                    Search
+                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: auto;"/>
+                </label>
             </div>
             @if(flash.get("success").fold("")(identity).nonEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message">

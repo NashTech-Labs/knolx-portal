@@ -42,7 +42,7 @@ class DateTimeUtility {
 
   def toMillis(localDateTime: LocalDateTime): Long =
     localDateTime.toEpochSecond(ZoneOffset) * 1000
-  
+
   def parseDateStringToIST(date: String): Long = {
     val millis = dateFormat.parse(date).getTime
     Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime.toEpochSecond(ZoneOffset) * 1000

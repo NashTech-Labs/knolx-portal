@@ -87,7 +87,7 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.remove(selector))
   }
 
-  def getSubCategoryByPrimaryCategory(categoryName: String)(implicit ex: ExecutionContext) = {
+  def getSubCategoryByPrimaryCategory(categoryName: String)(implicit ex: ExecutionContext): Future[Option[JsArray]] = {
     val selector = BSONDocument("categoryName" -> categoryName)
     val projection = BSONDocument("_id" -> 0 , "subCategory" -> 1)
     collection
@@ -121,5 +121,4 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[SessionInfo](ReadPreference.Primary)
           .collect[List](FailOnError[List[CategoryInfo]]()))
   }*/
-
 }

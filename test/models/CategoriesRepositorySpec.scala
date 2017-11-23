@@ -1,6 +1,5 @@
 package models
 
-import com.sun.corba.se.spi.ior.ObjectId
 import play.api.test.PlaySpecification
 import reactivemongo.bson.BSONObjectID
 
@@ -49,9 +48,9 @@ class CategoriesRepositorySpec extends PlaySpecification {
     }
 
     "delete a primary category" in {
-      val deletePrimaryCateogry = await(categoriesRepository.deletePrimaryCategory("Front-End"))
+      val deletePrimaryCategory = await(categoriesRepository.deletePrimaryCategory("Front-End"))
 
-      deletePrimaryCateogry.ok must beEqualTo(true)
+      deletePrimaryCategory.ok must beEqualTo(true)
     }
 
     "delete sub Category" in {

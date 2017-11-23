@@ -8,23 +8,23 @@ $(window).scroll(function () {
 });*/
 $(document).ready(function () {
 
-    if (localStorage.hasActiveClass === "yes") {
+    /*if (localStorage.hasActiveClass === "yes") {
         $('#sidebar, #content').addClass("active")
     } else {
         $('#sidebar, #content').addClass("")
-    }
+    }*/
 
     $('#sidebarCollapse').on('click', function () {
         $('#sidebar, #content').toggleClass("active");
 
-        if ($('#sidebar').hasClass("active")) {
+        /*if ($('#sidebar').hasClass("active")) {
             localStorage.removeItem("hasActivClass");
             localStorage.hasActiveClass = "yes";
         } else {
             localStorage.removeItem("hasActivClass");
             localStorage.hasActiveClass = "no"
         }
-
+*/
         $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
     });
 

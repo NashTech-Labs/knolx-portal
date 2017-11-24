@@ -39,11 +39,13 @@ $(function () {
     myDropzone.on("success", function(file, response) {
         console.log("Showing progress now");
         $("#show-progress").show();
+        $("#cancel-video-button").show();
         showProgress(sessionId);
     })
 
     console.log("sessionId = " + sessionId);
     $("#upload-success-message").hide();
+    $("#cancel-video-button").hide();
 
     jsRoutes.controllers.YoutubeController.getPercentageUploaded(sessionId).ajax(
         {
@@ -57,6 +59,7 @@ $(function () {
                 $("#no-upload-cancel").hide();
                 $("#cancel-message").hide();
                 $("#show-progress").show();
+                $("#cancel-video-button").show();
                 uploading = true;
                 showProgress(sessionId);
             }
@@ -95,8 +98,16 @@ $(function () {
     });
 
     $('#youtube-tags').tagsinput({
-      cancelConfirmKeysOnEmpty: false
+      cancelConfirmKeysOnEmpty: true
     });
+
+    if($("#youtubeURL").val() != '') {
+        $("#update-youtube-details").show();
+    } else {
+        $("#update-youtube-details").hide();
+    }
+
+    $(".bootstrap-tagsinput input").addClass('update-field');
 
 });
 
@@ -202,6 +213,7 @@ function fillYoutubeEmbedURL(sessionId) {
                 var videoId = JSON.parse(data);
                 console.log("Setting embedded URL for youtube")
                 $("#youtubeURL").val("www.youtube.com/embed/" + videoId);
+                $("#update-youtube-details").show();
                 storeVideoURL(sessionId);
             },
             error: function(er) {

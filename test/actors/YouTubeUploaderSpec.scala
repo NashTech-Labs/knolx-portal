@@ -2,12 +2,11 @@ package actors
 
 import java.io.InputStream
 
-import actors.YouTubeUploader.VideoDetails
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.api.services.youtube.model.{Video, VideoSnippet}
 import com.google.inject.name.Names
-import controllers.TestEnvironment
+import helpers.TestEnvironment
 import org.specs2.specification.Scope
 import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
@@ -41,9 +40,12 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
     val youtubeUploadManager: ActorRef =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploadManager")))))
 
+    val youtubeUploaderManager: ActorRef =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
+
     val youtubeService = mock[YoutubeService]
     val youtubeUploader =
-      TestActorRef(new YouTubeUploader(youtubeUploadManager, youtubeService))
+      TestActorRef(new YouTubeUploader(youtubeUploadManager, youtubeUploaderManager, youtubeService))
   }
 
   "Youtube Uploader" should {
@@ -53,21 +55,6 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       youtubeUploader ! YouTubeUploader.Upload(sessionId, inputStream, title, description, tags, 1L)
 
       expectNoMsg
-    }
-
-    "update video details" in new TestScope {
-      val videoDetails = VideoDetails("videoId",
-        title,
-        description,
-        tags,
-        status,
-        category)
-
-      youtubeService.update(videoDetails) returns "Successfully updated the video details"
-
-      youtubeUploader ! videoDetails
-
-      expectMsg("Successfully updated the video details")
     }
   }
 }

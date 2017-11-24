@@ -34,12 +34,11 @@ $(function () {
         redirect = true;
         uploading = true;
         console.log("File uploading completed");
-        $("#show-progress").show();
-        //showProgress(sessionId);
     });
 
     myDropzone.on("success", function(file, response) {
         console.log("Showing progress now");
+        $("#show-progress").show();
         showProgress(sessionId);
     })
 

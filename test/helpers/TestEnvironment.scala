@@ -1,16 +1,14 @@
-package controllers
+package helpers
 
 import java.util.concurrent.TimeoutException
 
-import actors.SessionsScheduler._
-import actors.UsersBanScheduler.GetScheduledBannedUsers
-import actors.{YouTubeUploader, _}
+import actors._
 import akka.actor._
 import com.google.api.services.youtube.model.{Video, VideoCategory}
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Module}
 import com.typesafe.config.ConfigFactory
-import helpers.BeforeAllAfterAll
+import controllers._
 import models.UsersRepository
 import org.apache.commons.mail.EmailException
 import org.specs2.mock.Mockito
@@ -21,7 +19,7 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{BodyParser, _}
 import play.api.test._
-import play.api.{Application, Configuration, Logger}
+import play.api.{Application, Configuration}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext}
@@ -70,27 +68,6 @@ trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory wit
 // =====================================================================================================================
 
 abstract class TestApplication(system: ActorSystem) extends SpecificationLike with BeforeAllAfterAll {
-
-  override def afterAll(): Unit = {
-    shutdownActorSystem(system)
-  }
-
-  protected def shutdownActorSystem(actorSystem: ActorSystem,
-                                    duration: Duration = 10.seconds,
-                                    verifySystemShutdown: Boolean = false): Unit = {
-    actorSystem.terminate()
-
-    try Await.ready(actorSystem.whenTerminated, duration) catch {
-      case _: TimeoutException ⇒
-        val msg = "Failed to stop [%s] within [%s]".format(actorSystem.name, duration)
-
-        if (verifySystemShutdown) {
-          throw new RuntimeException(msg)
-        } else {
-          actorSystem.log.warning(msg)
-        }
-    }
-  }
 
   protected def fakeApp(testModule: Option[AbstractModule] = None): Application =
     new GuiceApplicationBuilder()
@@ -155,7 +132,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
         bindActor[EmailManager]("EmailManager")
 
         bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
-        bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
+        bindActorFactory[DummyYouTubeDetailsActor, ConfiguredYouTubeDetailsActor.Factory]
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("YouTubeUploaderManager"))
           .toInstance(youtubeUploaderManager)
@@ -213,70 +190,4 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     with FutureAwaits
     with TestStubControllerComponentsFactory
 
-}
-
-class DummySessionsScheduler extends Actor {
-
-  def receive: Receive = {
-    case GetScheduledSessions              => sender ! ScheduledSessions(List.empty)
-    case CancelScheduledSession(sessionId) => sender ! true
-    case ScheduleSession(sessionId)        => sender ! true
-  }
-
-}
-
-class DummyUsersBanScheduler extends Actor {
-
-  def receive: Receive = {
-    case GetScheduledBannedUsers => sender ! List.empty
-  }
-
-}
-
-class TestEmailActor extends Actor {
-
-  def receive: Receive = {
-    case EmailActor.SendEmail(_, _, subject, _) if subject == "crash" => throw new EmailException
-    case request: EmailActor.SendEmail                                => sender ! request
-  }
-
-}
-
-class DummyYouTubeUploadManager extends Actor {
-
-  override def receive: Receive = {
-    case YouTubeUploadManager.VideoId(sessionId)               =>
-      Logger.info("Getting from sessionVideos")
-      sender() ! Some(new Video)
-    case YouTubeUploadManager.VideoUploader(sessionId: String) => sender() ! Some(50D)
-  }
-
-}
-
-class DummyYouTubeUploader extends Actor {
-
-  override def receive: Receive = {
-    case request: YouTubeUploader.Upload =>
-      sender() ! request
-    case request: YouTubeUploader.VideoDetails => sender() ! request
-    case _ => sender() ! "What?"
-  }
-
-}
-
-class DummyYouTubeCategoryActor extends Actor {
-
-  override def receive: Receive = {
-    case Categories => sender() ! List[VideoCategory]()
-  }
-
-}
-
-class DummyYouTubeUploaderManager extends Actor {
-
-  override def receive: Receive = {
-    case request: YouTubeUploader.Upload => sender() ! "Upload started"
-    case request: YouTubeUploader.VideoDetails => sender() ! "Updated video details"
-    case _ => sender() ! "What?!?!?!"
-  }
 }

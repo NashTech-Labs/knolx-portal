@@ -8,7 +8,7 @@ import akka.actor.{ActorRef, ActorSystem, Cancellable, Scheduler}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.inject.name.Names
-import controllers.TestEnvironment
+import helpers.TestEnvironment
 import models.SessionJsonFormats.SchedulingNext
 import models._
 import org.mockito.Mockito.verify
@@ -31,7 +31,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
   def this() = this(ActorSystem("MySpec"))
 
   override def afterAll() {
-    TestKit.shutdownActorSystem(system)
+    system.terminate()
   }
 
   trait TestScope extends Scope {

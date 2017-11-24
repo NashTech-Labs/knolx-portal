@@ -30,17 +30,11 @@ object YouTubeUploader {
                     tags: List[String],
                     fileSize: Long)
 
-  case class VideoDetails(videoId: String,
-                          title: String,
-                          description: Option[String],
-                          tags: List[String],
-                          status: String,
-                          category: String)
-
 }
 
-class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderManager: ActorRef,
+class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
                                 /*@Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef,*/
+                               @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
                                 youtubeService: YoutubeService) extends Actor {
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty
@@ -48,7 +42,6 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderMa
 
   def receive: Receive = {
     case YouTubeUploader.Upload(sessionId, is, title, description, tags, fileSize) => upload(sessionId, is, title, description, tags, fileSize)
-    case videoDetails: YouTubeUploader.VideoDetails                                => sender() ! update(videoDetails)
     case msg                                                                       =>
       Logger.info(s"Received a message in YouTubeUploader that cannot be handled $msg")
   }
@@ -58,12 +51,12 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploaderMa
              title: String,
              description: Option[String],
              tags: List[String],
-             fileSize: Long): Video = {
+             fileSize: Long): Unit = {
     Logger.info(s"Starting video upload for session $sessionId")
 
     youtubeService.upload(sessionId, is, title, description, tags, fileSize, sender())
-  }
+    youtubeUploaderManager ! "Done"
 
-  def update(videoDetails: VideoDetails): String = youtubeService.update(videoDetails)
+  }
 
 }

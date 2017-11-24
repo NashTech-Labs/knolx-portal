@@ -4,11 +4,12 @@ import java.io.{FileInputStream, InputStream}
 
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import controllers.{DummyYouTubeCategoryActor, DummyYouTubeUploader, TestEmailActor}
+import helpers.{DummyYouTubeDetailsActor, DummyYouTubeUploader}
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
+import org.specs2.matcher.AnyBeHaveMatchers
 import play.api.libs.Files
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
@@ -29,9 +30,9 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     }
   }
 
-  object DummyYouTubeCategoryActorFactory extends actors.ConfiguredYouTubeCategoryActor.Factory {
+  object DummyYouTubeDetailsActorFactory extends actors.ConfiguredYouTubeDetailsActor.Factory {
     def apply(): Actor = {
-      val youtubeCategoryActorRef = TestActorRef[DummyYouTubeCategoryActor]
+      val youtubeCategoryActorRef = TestActorRef[DummyYouTubeDetailsActor]
       youtubeCategoryActorRef.underlyingActor
     }
   }
@@ -40,23 +41,16 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
 
     sealed trait TestInjectedActorSupport extends InjectedActorSupport {
       override def injectedChild(create: => Actor, name: String, props: Props => Props = identity)(implicit context: ActorContext): ActorRef = {
-        TestActorRef[DummyYouTubeUploader]
-        //TestActorRef[DummyYouTubeCategoryActor]
-      }
-    }
-
-    sealed trait TestInjectedActorSupport1 extends InjectedActorSupport {
-      override def injectedChild(create: => Actor, name: String, props: Props => Props = identity)(implicit context: ActorContext): ActorRef = {
-        TestActorRef[DummyYouTubeCategoryActor]
-        TestActorRef[DummyYouTubeUploader]
+        if (name.contains("YouTubeDetailsActor")) {
+          TestActorRef[DummyYouTubeDetailsActor]
+        } else {
+          TestActorRef[DummyYouTubeUploader]
+        }
       }
     }
 
     val youtubeUploaderManager =
-      TestActorRef(new YouTubeUploaderManager(DummyYouTubeUploaderFactory, DummyYouTubeCategoryActorFactory) with TestInjectedActorSupport with TestInjectedActorSupport1)
-
-    val abc =
-      TestActorRef(new YouTubeUploaderManager(DummyYouTubeUploaderFactory, DummyYouTubeCategoryActorFactory) with TestInjectedActorSupport1 )
+      TestActorRef(new YouTubeUploaderManager(DummyYouTubeUploaderFactory, DummyYouTubeDetailsActorFactory) with TestInjectedActorSupport)
   }
 
   override def afterAll() {
@@ -78,7 +72,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
 
     "forward request to youtube uploader to update video details" in new UnitTestScope {
 
-      val request = YouTubeUploader.VideoDetails("videoId", "title", Some("description"),
+      val request = VideoDetails("videoId", "title", Some("description"),
         List("tags"), "public", "Education")
 
       youtubeUploaderManager ! request
@@ -91,6 +85,29 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       youtubeUploaderManager ! Categories
 
       expectMsg(List())
+    }
+
+    "not upload video if already 5 videos are uploading" in new UnitTestScope {
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
+        List("tags"), 10L)
+
+      youtubeUploaderManager.underlyingActor.noOfActors = 5
+
+      youtubeUploaderManager ! request
+
+      expectMsg("Cant upload any more videos parallely.")
+    }
+
+    "decrement no of actors" in new UnitTestScope {
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
+        List("tags"), 10L)
+
+      youtubeUploaderManager ! request
+      youtubeUploaderManager ! "Done"
+
+      youtubeUploaderManager.underlyingActor.noOfActors mustBe 0
     }
   }
 

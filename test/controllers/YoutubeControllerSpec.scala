@@ -1,29 +1,58 @@
 package controllers
 
-import akka.actor.ActorRef
+import actors.{ConfiguredEmailActor, EmailManager}
+import akka.actor.{ActorRef, ActorSystem}
+import akka.stream.{ActorMaterializer, Materializer}
+import com.google.inject.AbstractModule
 import com.google.inject.name.Names
-import models.SessionsRepository
+import com.typesafe.config.ConfigFactory
+import helpers.{TestApplication, TestEmailActor, TestEnvironment, TestHelpers}
+import models.{ForgotPasswordRepository, SessionsRepository, UsersRepository}
 import org.specs2.execute.{AsResult, Result}
+import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.{Application, Configuration}
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.Files
 import play.api.libs.Files.TemporaryFile
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.{BadPart, FilePart}
 import play.api.mvc.{MultipartFormData, Results}
 import play.api.test._
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class YoutubeControllerSpec extends PlaySpecification with Results {
+class YoutubeControllerSpec extends PlaySpecification with Results with Mockito {
 
+  private val system = ActorSystem("TestActorSystem")
   private val sessionId = "SessionId"
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
+  abstract class WithTestApplication extends TestEnvironment with Scope {
     lazy val app: Application = fakeApp()
+
+    //val usersRepository = mock[UsersRepository]
+    val sessionsRepository = mock[SessionsRepository]
+    //val config = Configuration(ConfigFactory.load("application.conf"))
+    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+
+    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+      override def configure(): Unit = {
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("YouTubeUploaderManager"))
+          .toInstance(youtubeUploaderManager)
+
+        bind(classOf[ActorRef])
+          .annotatedWith(Names.named("YouTubeUploadManager"))
+          .toInstance(youtubeUploadManager)
+
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
+      }
+    })*/
 
     lazy val controller =
       new YoutubeController(
@@ -34,17 +63,12 @@ class YoutubeControllerSpec extends PlaySpecification with Results {
         youtubeUploadManager
       )
 
-    val sessionsRepository = mock[SessionsRepository]
-
     val youtubeUploadManager =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploadManager")))))
 
     val youtubeUploaderManager =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
 
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
   }
 
   "Youtube Controller" should {

@@ -2,14 +2,17 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.concurrent.TimeoutException
 
 import actors._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.ConfigFactory
+import helpers._
 import models._
 import org.specs2.mock.Mockito
+import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
 import play.api.Configuration
 import play.api.inject.{BindingKey, QualifierInstance}
@@ -23,11 +26,12 @@ import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito {
+class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito with SpecificationLike with BeforeAllAfterAll {
 
-  private val system = ActorSystem("TestActorSystem")
+  private val system = ActorSystem()
 
   private val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
   private val writeResultFalse = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
@@ -54,49 +58,29 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       meetup = false, BSONDateTime(date.getTime), "session1", List(questionResponseInformation), BSONDateTime(date.getTime),
       0.00, _id)
 
-  abstract class WithTestApplication extends TestApplication(system) with Scope {
+  abstract class WithTestApplication extends TestEnvironment with Scope {
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val feedbackResponseRepository = mock[FeedbackFormsResponseRepository]
     val sessionsRepository = mock[SessionsRepository]
-    val usersRepository = mock[UsersRepository]
+    //val usersRepository = mock[UsersRepository]
     val mailerClient = mock[MailerClient]
     val dateTimeUtility = mock[DateTimeUtility]
 
-    val config = Configuration(ConfigFactory.load("application.conf"))
+    //val config = Configuration(ConfigFactory.load("application.conf"))
 
-    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
 
-    val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
-    val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
-    val youtubeUploadManager = system.actorOf(Props(new DummyYouTubeUploadManager))
-
-    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("SessionsScheduler"))
-          .toInstance(sessionsScheduler)
-
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("UsersBanScheduler"))
-          .toInstance(usersBanScheduler)
-
         bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
         bindActor[EmailManager]("EmailManager")
-
-        bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
-        bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
-        bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
-
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("YouTubeUploadManager"))
-          .toInstance(youtubeUploadManager)
 
         bind(classOf[KnolxControllerComponents])
           .toInstance(knolxControllerComponent)
       }
-    })
+    })*/
 
-    lazy val app = fakeApp(testModule)
+    lazy val app = fakeApp()
     lazy val emailManager = app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
     lazy val controller =
@@ -111,6 +95,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
         emailManager,
         dateTimeUtility,
         knolxControllerComponent)
+  }
+
+  override def afterAll(): Unit = {
+    system.terminate()
   }
 
   "Feedback Response Controller" should {

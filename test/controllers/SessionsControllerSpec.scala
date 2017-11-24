@@ -9,10 +9,11 @@ import akka.actor.{Props, ActorSystem, ActorRef}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.ConfigFactory
+import helpers._
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
-import org.specs2.mutable.Around
+import org.specs2.mutable.{SpecificationLike, Around}
 import org.specs2.specification.Scope
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Application}
@@ -28,9 +29,9 @@ import play.api.test.CSRFTokenHelper._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class SessionsControllerSpec extends PlaySpecification with Mockito {
+class SessionsControllerSpec extends PlaySpecification with Mockito with SpecificationLike with BeforeAllAfterAll {
 
-  private val system = ActorSystem("TestActorSystem")
+  private val system = ActorSystem()
 
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id = BSONObjectID.generate()
@@ -53,17 +54,17 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
 
   private val emptyEmailObject = Future.successful(None)
 
-  abstract class WithTestApplication extends TestApplication(system) with Scope {
+  abstract class WithTestApplication extends TestEnvironment with Scope {
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
-    val usersRepository = mock[UsersRepository]
+    //val usersRepository = mock[UsersRepository]
     val dateTimeUtility = mock[DateTimeUtility]
 
-    val config = Configuration(ConfigFactory.load("application.conf"))
+    //val config = Configuration(ConfigFactory.load("application.conf"))
 
-    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
 
-    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {
         val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
         val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
@@ -77,23 +78,16 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
           .annotatedWith(Names.named("UsersBanScheduler"))
           .toInstance(usersBanScheduler)
 
-        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
-        bindActor[EmailManager]("EmailManager")
-
         bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
         bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
         bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
 
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("YouTubeUploadManager"))
-          .toInstance(youtubeUploadManager)
-
         bind(classOf[KnolxControllerComponents])
           .toInstance(knolxControllerComponent)
       }
-    })
+    })*/
 
-    lazy val app = fakeApp(testModule)
+    lazy val app = fakeApp()
 
     val sessionsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
@@ -113,6 +107,10 @@ class SessionsControllerSpec extends PlaySpecification with Mockito {
         sessionsScheduler,
         usersBanScheduler,
         youtubeUploaderManager)
+  }
+
+  override def afterAll(): Unit = {
+    system.terminate()
   }
 
   "Session Controller" should {

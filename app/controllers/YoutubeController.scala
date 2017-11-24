@@ -4,7 +4,7 @@ import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.YouTubeUploadManager.VideoUploader
-import actors.{YouTubeUploadManager, YouTubeUploader}
+import actors.{VideoDetails, YouTubeUploadManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
@@ -34,7 +34,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef
                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  implicit val timeout = Timeout(100.seconds)
+  implicit val timeout = Timeout(10.seconds)
 
   implicit val questionInformationFormat: OFormat[UpdateVideoDetails] = Json.format[UpdateVideoDetails]
 
@@ -55,7 +55,14 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         Logger.info("-------------------------File size = " + fileSize)
 
         (youtubeUploaderManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
-          .map(_ => Ok("Uploading started!"))
+          .mapTo[String]
+          .map { message =>
+            if(message.equals("Cant upload any more videos parallely.")) {
+              BadRequest(message)
+            } else {
+              Ok(message)
+            }
+          }
       }
     }
   }
@@ -101,7 +108,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
             Future.successful(BadRequest("No video found for this session"))
           } { videoURL =>
             val videoId = videoURL.split("/")(2)
-            (youtubeUploaderManager ? YouTubeUploader.VideoDetails(videoId,
+            (youtubeUploaderManager ? VideoDetails(videoId,
               updateVideoDetails.title,
               updateVideoDetails.description,
               updateVideoDetails.tags,

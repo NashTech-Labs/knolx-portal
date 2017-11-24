@@ -2,11 +2,14 @@ package controllers
 
 import java.text.SimpleDateFormat
 
+import com.google.inject.AbstractModule
 import com.typesafe.config.ConfigFactory
+import helpers.TestHelpers
 import models._
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
 import play.api.Configuration
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.mailer.MailerClient
 import play.api.test.CSRFTokenHelper._
 import play.api.test.{FakeRequest, PlaySpecification}
@@ -51,6 +54,15 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
 
     val config = Configuration(ConfigFactory.load("application.conf"))
 
+    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+
+    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+      override def configure(): Unit = {
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
+      }
+    })
+
     lazy val controller =
       new FeedbackFormsReportController(
         TestHelpers.stubMessagesApi(),
@@ -60,7 +72,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
         feedbackFormsResponseRepository,
         sessionsRepository,
         dateTimeUtility,
-        TestHelpers.stubControllerComponents(usersRepository, config))
+        knolxControllerComponent)
   }
 
   "Feedback forms report controller" should {

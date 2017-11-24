@@ -9,7 +9,6 @@ import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.libs.Akka
-import services.YoutubeService
 
 class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
@@ -18,7 +17,7 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
     bindActor[EmailManager]("EmailManager")
 
     bindActorFactory[YouTubeUploader, ConfiguredYouTubeUploader.Factory]
-    bindActorFactory[YouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
+    bindActorFactory[YouTubeDetailsActor, ConfiguredYouTubeDetailsActor.Factory]
 
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))
@@ -51,8 +50,8 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
       .asEagerSingleton
 
     bind[ActorRef]
-      .annotatedWith(Names.named("YouTubeCategoryActor"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeCategoryActor], "YouTubeCategoryActor", Function.identity())))
+      .annotatedWith(Names.named("YouTubeDetailsActor"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeDetailsActor], "YouTubeDetailsActor", Function.identity())))
       .asEagerSingleton
 
     bind(classOf[KnolxControllerComponents])

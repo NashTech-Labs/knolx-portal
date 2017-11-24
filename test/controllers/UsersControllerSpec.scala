@@ -8,6 +8,7 @@ import actors._
 import akka.actor.{ActorRef, ActorSystem, Props}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
+import helpers._
 import com.typesafe.config.ConfigFactory
 import models.{UpdatedUserInfo, _}
 import org.specs2.execute.{AsResult, Result}
@@ -28,7 +29,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class UsersControllerSpec extends PlaySpecification with Results {
+class UsersControllerSpec extends PlaySpecification with Results with Mockito {
 
   private val system = ActorSystem("TestActorSystem")
 
@@ -44,22 +45,25 @@ class UsersControllerSpec extends PlaySpecification with Results {
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(currentMillis), 0, _id)))
 
-  abstract class WithTestApplication extends TestApplication(system) with Scope {
-    val usersRepository = mock[UsersRepository]
+  abstract class WithTestApplication extends TestEnvironment with Scope {
+    //val usersRepository = mock[UsersRepository]
     val forgotPasswordRepository = mock[ForgotPasswordRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val mailerClient = mock[MailerClient]
 
-    val config = Configuration(ConfigFactory.load("application.conf"))
+    //val config = Configuration(ConfigFactory.load("application.conf"))
 
-    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
 
-    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {
         bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
         bindActor[EmailManager]("EmailManager")
+
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
       }
-    })
+    })*/
 
     lazy val app: Application = fakeApp()
 

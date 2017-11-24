@@ -12,7 +12,7 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.http._
 import com.google.api.services.youtube.model.Video
 import com.google.inject.name.Names
-import controllers.TestEnvironment
+import helpers.TestEnvironment
 import models.{FeedbackFormsResponseRepository, SessionsRepository}
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope

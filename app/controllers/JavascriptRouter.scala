@@ -20,17 +20,21 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.searchSessions,
       controllers.routes.javascript.SessionsController.shareContent,
       controllers.routes.javascript.SessionsController.storeVideoURL,
+      controllers.routes.javascript.SessionsController.update,
+      controllers.routes.javascript.SessionsController.deleteSession,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
       controllers.routes.javascript.FeedbackFormsReportController.searchAllResponsesBySessionId,
-      controllers.routes.javascript.SessionsController.update,
-      controllers.routes.javascript.SessionsController.deleteSession,
       controllers.routes.javascript.YoutubeController.upload,
       controllers.routes.javascript.YoutubeController.getPercentageUploaded,
       controllers.routes.javascript.YoutubeController.cancel,
       controllers.routes.javascript.YoutubeController.getVideoId,
-      controllers.routes.javascript.YoutubeController.updateVideo
+      controllers.routes.javascript.YoutubeController.updateVideo,
+      controllers.routes.javascript.SessionsController.getCategory,
+      controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
+      controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
+      controllers.routes.javascript.KnolxAnalysisController.renderLineChart
     )).as("text/javascript")
   }
 

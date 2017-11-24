@@ -17,13 +17,13 @@
                                 <input type='radio' id="all-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="all-@SessionHelper.isSuperUser"/>
 
                                 <span class="filter-label_text report-checkbox-color"></span>
-                                <p class="filter-checkbox-text report-checkbox-color" style="margin-top:9px;">All</p>
+                                <p class="filter-checkbox-text report-checkbox-color">All</p>
                             </label>
 
                             <label class="checkbox-outer feedback-responses-button">
                                 <input type='radio' id="coreMember-@header.sessionId" name='feedback-response-report' class='custom-checkbox' value="coreMember-@SessionHelper.isSuperUser"/>
                                 <span class="filter-label_text report-checkbox-color"></span>
-                                <p class="filter-checkbox-text report-checkbox-color" style="margin-top:9px;">Core Member</p>
+                                <p class="filter-checkbox-text report-checkbox-color" >Core Member</p>
                             </label>
                         }
                         </div>
@@ -45,7 +45,11 @@
                         </div>
                             <div class="report-other-info">
                                 @header.topic
-                            <sup><span class="label label-warning report-type">Knolx</span></sup>
+                                <sup><span class="label report-type label-warning @if(header.meetUp) {
+                                    meetup-session">Meetup</span>
+                                    } else {
+                                    ">Knolx </span>
+                                    }</sup>
                         <p class="report-session-date">@header.date</p></div>
            </div>
 

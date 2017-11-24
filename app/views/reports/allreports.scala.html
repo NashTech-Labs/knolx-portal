@@ -2,13 +2,12 @@
 
 @main("All reports") {
     <div class="row">
-        <div class="col-md-2" ></div>
-        <div class="col-md-8 feedback-form-display-container">
+        <div class="col-md-12 feedback-form-display-container">
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {
                     @if(session.active) {
-                        <div class="col-md-4">
+                        <div class="col-md-3 filter-padding-left">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
@@ -16,13 +15,12 @@
                                             <div class="accepting-response"><span class="label label-danger live">
                                                 Live</span></div>
                                         </div>
-                                        @defining("Knolx") { sessionType =>
                                             <div class="col-md-12 feedback-card-topic custom-position">
-                                                <div class="session-type"><span class="label @if(sessionType == "Knolx") {
-                                                    label-warning
+                                                <div class="session-type"><span class="label @if(session.meetUp) {
+                                                    label-info meetup-session custom-label-type">Meetup</span></div>
                                                 } else {
-                                                    label-success
-                                                } custom-label-type">@sessionType</span></div>
+                                                    label-info knolx-session custom-label-type">Knolx </span></div>
+                                                }
                                                 <div>
                                                     <p>@session.topic</p>
                                                     <p class="feedback-card-presenter">@session.presenter</p>
@@ -37,20 +35,18 @@
                                 </div>
                             </div>
                         </div>
-                    }
                     } else {
-                        <div class="col-md-4">
+                        <div class="col-md-3 filter-padding-left">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
-                                    @defining("Knolx") { sessionType =>
                                         <div class="col-md-12 feedback-card-topic custom-position">
-                                            <div class="session-type"><span class="label @if(sessionType == "Knolx") {
-                                                label-warning
+                                            <div class="session-type"><span class="label @if(session.meetUp) {
+                                                label-info meetup-session custom-label-type">Meetup</span></div>
                                             } else {
-                                                label-success
-                                            } custom-label-type">@sessionType</span></div>
-                                            <div>
+                                            label-info knolx-session custom-label-type">Knolx</span></div>
+                                        }
+                                        <div>
                                                 <p>@session.topic</p>
                                                 <p class="feedback-card-presenter">@session.presenter</p>
                                             </div>
@@ -65,15 +61,12 @@
                             </div>
                         </div>
                     }
-                    }
                 }
             } else {
                 <div class="empty-reports"><i class="fa fa-folder-open" aria-hidden="true"></i>
                     <p class="empty-reports_text">No feedback reports found!</p>
                 </div>
             }
-            <div class="col-md-12 feedback-footer"></div>
         </div>
-        <div class="col-md-2" ></div>
     </div>
 }

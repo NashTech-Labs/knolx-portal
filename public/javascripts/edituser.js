@@ -141,9 +141,3 @@ function slide(keyword, pageNumber, filter) {
             }
         });
 }
-
-$(function () {
- console.log("before");
-    $('meta[name=viewport]').attr('content', 'initial-scale');
-    console.log("after")
-});

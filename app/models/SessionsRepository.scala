@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
-import controllers.UpdateSessionInformation
+import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats._
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -25,6 +25,8 @@ case class SessionInfo(userId: String,
                        email: String,
                        date: BSONDateTime,
                        session: String,
+                       category: String,
+                       subCategory: String,
                        feedbackFormId: String,
                        topic: String,
                        feedbackExpirationDays: Int,
@@ -182,6 +184,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "date" -> BSONDateTime(updatedRecord.sessionUpdateFormData.date.getTime),
         "topic" -> updatedRecord.sessionUpdateFormData.topic,
         "session" -> updatedRecord.sessionUpdateFormData.session,
+        "category" -> updatedRecord.sessionUpdateFormData.category,
+        "subCategory" -> updatedRecord.sessionUpdateFormData.subCategory,
         "feedbackFormId" -> updatedRecord.sessionUpdateFormData.feedbackFormId,
         "feedbackExpirationDays" -> updatedRecord.sessionUpdateFormData.feedbackExpirationDays,
         "meetup" -> updatedRecord.sessionUpdateFormData.meetup,
@@ -219,6 +223,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .sort(Json.obj("date" -> -1))
           .cursor[SessionInfo](ReadPreference.primary)
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
@@ -244,6 +249,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .sort(Json.obj("date" -> -1))
           .cursor[SessionInfo](ReadPreference.primary)
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
@@ -326,6 +332,25 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
     collection.flatMap(jsonCollection =>
       jsonCollection.update(selector, modifier))
+  }
+
+  def sessionsInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Future[List[SessionInfo]] = {
+
+    val selector = filterUserSessionInformation.email match {
+      case Some(email) => BSONDocument("email" -> email,
+        "active" -> true, "cancelled" -> false,
+        "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate),
+          "$lte" -> BSONDateTime(filterUserSessionInformation.endDate)))
+      case None        => BSONDocument("active" -> true, "cancelled" -> false,
+        "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate),
+          "$lte" -> BSONDateTime(filterUserSessionInformation.endDate)))
+    }
+    collection
+      .flatMap(
+        _.find(selector)
+          .sort(Json.obj("date" -> 1))
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }
 
 }

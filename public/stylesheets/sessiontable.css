@@ -1,3 +1,7 @@
+.table {
+    margin-bottom: 15px !important;
+}
+
 .table > tbody > tr > td {
     text-align: center;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -21,7 +25,7 @@ th {
 }
 
 @font-face {
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     src: url('font/gothic.ttf');
 }
 
@@ -43,14 +47,15 @@ th {
 
 .v-align {
     display: table-cell;
-    text-align: center;
+    text-align: right;
 }
 
 ul.pagination.pagination-lg li a {
-    color: #fff;
-    font-size: 20px;
-    font-weight: bolder;
-    border-bottom: 2px solid #45B39D;
+    color: #676a6c;
+    font-size: 15px;
+    border: 1px solid #e7eaec;
+    border-radius:0 ;
+    padding: 2px 5px !important;
 }
 
 @keyframes fadein {
@@ -103,24 +108,29 @@ ul.pagination.pagination-lg li a {
 }
 
 .pagination li.active a {
-    background-color: #000;
-    opacity: 0.5;
-    color: #fff !important;
-    border: 1px solid #eee;
+    background-color: #f4f4f4;
+    color: #676a6c!important;
 }
 
 .pagination li:hover.active a {
-    background-color: #bdf9d8;
-    color: #000 !important;
-    cursor: pointer
+    background-color: #f4f4f4;
+    color: #676a6c !important;
+    cursor: default;
+    border: 1px solid #e7eaec;
+}
+
+.pagination{
+    margin: 0;
+}
+
+.pagination li:not(.active) a {
+    background-color: #FFFFFF;
+    color: #676a6c;
 }
 
 .pagination li:hover:not(.active) a {
-    background-color: #ddd;
-}
-
-.v-align-mobile {
-    padding-right: 30px;
+    background-color: #f4f4f4;
+    color: #676a6c;
 }
 
 .knolx-session {

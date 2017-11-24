@@ -2,6 +2,12 @@
 
 @main("Login") {
 
+    <div class="row ">
+        <div class="header-container">
+            <h2 style="margin-top:10px;">Login</h2>
+        </div>
+    </div>
+
     <div class="row login-error">
         <div class="col-md-4" ></div>
         <div class="col-md-4" >
@@ -17,13 +23,13 @@
         <div class="col-md-4" ></div>
     </div>
 
-    <div class="row login-error">
+    <div class="row">
 
         <div class="col-md-2" ></div>
         <div class="col-md-8 profile" style="padding-bottom: 10px;">
             <div class="row login-outer">
                 @if(flash.get("successMessage").nonEmpty) {
-                    <div class="alert alert-success login-error">
+                    <div class="alert alert-success">
                         <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
                     </div>
                 }
@@ -37,13 +43,13 @@
                             <input type="text" name="email" id="email" value='@loginForm.data.get("email")' placeholder="Email" required class="input-field no-outline reg"/>
                         </div>
 
-                        <div style="margin-bottom:15px;" >
+                        <div style="margin-bottom:10px;" >
                             <label style="font-weight:none; float:left;">Password</label>
                                 <input type="password" name="password" id="password" placeholder="Password" required class="input-field no-outline reg"/>
                         </div>
 
                         <div style="margin-bottom:20px;"  >
-                            <button class="btn btn-sm btn-primary" style="float:right" type="submit"><strong>Log in</strong></button>
+                            <button class="login-button" style="float:right" type="submit"><strong>Log in</strong></button>
                             <label style="float:left;"><a href="@routes.UsersController.renderForgotPassword()" class="forgot-password-link">
                                 Forgot password?</a></label>
                         </div>

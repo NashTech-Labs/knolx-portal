@@ -2,18 +2,13 @@
     background-color: #fff;
     color: #000;
     margin-top: 20px;
-    background-color: #FFF;
-    box-shadow: 0 9px 6px -5px #9E9E9E;
     padding: 0px 0px;
-/ / padding-bottom: 50 px;
+ // padding-bottom: 50 px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    background-image: url('../images/mesh.svg');
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 .feedback-div-outer {
@@ -49,13 +44,9 @@
     margin: 0 auto;
     text-align: center;
     overflow: hidden;
-    font-family: 'gothic';
-    font-size: 20px;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
     color: #27AE60;
-}
-
-.feedback-form:hover {
-    box-shadow: 0 4px 6px -5px #333;
 }
 
 .new-feedback-button {
@@ -70,7 +61,6 @@
 .btn-create-feed {
     padding: 5px 15px 5px 15px;
     background-color: rgb(125, 158, 192);
-    border: 2px solid #fff;
     font-size: 15px;
     color: #fff;
     font-weight: bold;
@@ -78,7 +68,7 @@
 }
 
 a.btn.btn-sm.btn-primary.btn-create-feed:hover {
-    background-color: rgb(125, 158, 192);
+    background-color: #2e6da4;
 }
 
 .custom-fadein {
@@ -91,13 +81,13 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
 
 .flash-success {
     margin-top: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 17px;
 }
 
 .flash-failure {
     margin-top: 20px;
-    font-family: 'gothic';
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 17px;
 }
 
@@ -106,9 +96,5 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
 }
 
 .custom-attributes{
-    box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
-    padding-top: 2%;
     border-top: 1px solid #fff;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
 }

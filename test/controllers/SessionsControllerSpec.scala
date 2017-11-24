@@ -34,15 +34,14 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
   private val system = ActorSystem()
 
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
-  private val _id = BSONObjectID.generate()
+  private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId",
-      "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime),
-      Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+
   private val optionOfSessionObject =
-    Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId",
-      "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime),
-      Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+    Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
@@ -57,6 +56,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
   abstract class WithTestApplication extends TestEnvironment with Scope {
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val categoriesRepository = mock[CategoriesRepository]
     //val usersRepository = mock[UsersRepository]
     val dateTimeUtility = mock[DateTimeUtility]
 
@@ -102,6 +102,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         usersRepository,
         sessionsRepository,
         feedbackFormsRepository,
+        categoriesRepository,
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
@@ -277,6 +278,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -295,7 +298,6 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
-
       feedbackFormsRepository.getAll returns Future(feedbackForms)
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
@@ -309,6 +311,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -334,6 +338,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
               "date" -> "2017-06-21T16:00",
               "feedbackFormId" -> _id.stringify,
               "session" -> "session",
+              "category" -> "test category",
+              "subCategory" -> "subCategory",
               "topic" -> "topic",
               "meetup" -> "true")
             .withCSRFToken)
@@ -360,6 +366,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withFormUrlEncodedBody("email" -> "test2@example.com",
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "meetup" -> "true")
@@ -387,6 +395,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
               "date" -> sessionDateString,
               "feedbackFormId" -> _id.stringify,
               "session" -> "session 1",
+              "category" -> "test category",
+              "subCategory" -> "subCategory",
               "topic" -> "topic",
               "meetup" -> "true")
             .withCSRFToken)
@@ -399,9 +409,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-
-      val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1",
-        "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1", "category",
+        "subCategory", "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -459,7 +468,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "test category", "subCategory",
         "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -476,6 +485,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -492,11 +503,10 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
-
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 
-      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1",
+      val updatedInformation = UpdateSessionInfo(UpdateSessionInformation(_id.stringify, date, "session 1", "test category", "subCategory",
         "feedbackFormId", "topic", 1, Some("youtubeURL"), Some("slideShareURL"), cancelled = false, meetup = true), BSONDateTime(1498415399000L))
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -513,6 +523,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-25T16:00",
             "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "feedbackExpirationDays" -> "1",
@@ -529,7 +541,6 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
-
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
       dateTimeUtility.startOfDayMillis returns System.currentTimeMillis
@@ -541,6 +552,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withFormUrlEncodedBody("sessionId" -> _id.stringify,
             "date" -> "2017-06-21T16:00",
             "session" -> "session",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
             "feedbackFormId" -> "feedbackFormId",
             "topic" -> "topic",
             "meetup" -> "true")
@@ -566,6 +579,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
               "date" -> sessionDateString,
               "feedbackFormId" -> _id.stringify,
               "session" -> "session 1",
+              "category" -> "test category",
+              "subCategory" -> "subCategory",
               "topic" -> "topic",
               "meetup" -> "true")
             .withCSRFToken)
@@ -691,4 +706,5 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       status(result) must be equalTo SEE_OTHER
     }
   }
+
 }

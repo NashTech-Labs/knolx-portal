@@ -19,6 +19,7 @@ import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
+import play.api.mvc.Results
 import play.api.test.CSRFTokenHelper._
 import play.api.test.{FakeRequest, _}
 import reactivemongo.api.commands.DefaultWriteResult
@@ -38,13 +39,11 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id = BSONObjectID.generate()
   private val sessionObjectWithSameEmail =
-    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions",
-      "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true,
-      BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "feedbackFormId",
-      "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime),
-      Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject =
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
@@ -120,9 +119,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
     "render feedback form for today if session associated feedback form exists and session has not expired" in new WithTestApplication {
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
-        Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions",
-          "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true,
-          BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+        Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "category", "subCategory", "feedbackFormId", "topic",
+          1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate
@@ -380,7 +378,6 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       status(response) must be equalTo BAD_REQUEST
     }
-
   }
 
 }

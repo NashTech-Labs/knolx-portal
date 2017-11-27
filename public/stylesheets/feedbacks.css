@@ -1,6 +1,6 @@
 .feedback-form-display-container {
     color: #000;
-    margin: 40px 0px;
+    margin: 20px 0px;
     padding: 0px 0px 0px 0px;
 }
 
@@ -198,7 +198,7 @@
 }
 
 .session-card-values {
-    font-size: 22px;
+    font-size: 16px;
     color: #F1948A;
 }
 
@@ -499,7 +499,7 @@
     text-align: center;
 }
 
-.submission-success-okay-btn {
+.submission-success-okay-btn .submission-success-okay-btn:hover {
     text-shadow: none;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;
@@ -509,7 +509,7 @@
 }
 
 .banned-warning {
-    margin: 100px 0px;
+    margin: 30px 0px;
     background-color: #fff;
     box-shadow: 0 4px 7px -5px #333;
     padding: 10px 50px 80px 30px;
@@ -539,7 +539,7 @@
 }
 
 .ban_text-title {
-    color: #a8a8a8;
+    color: #676a6c;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-top: 10px;
     font-weight: bolder;

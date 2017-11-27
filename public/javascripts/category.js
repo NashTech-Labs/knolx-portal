@@ -287,6 +287,7 @@ function addCategory(categoryName) {
                 scrollToTop();
                 $("#category-drop-down").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
                 $("#categoryList").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
+                $("#category-list-delete").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
             },
             error: function (er) {
                 wrongMessageBox();

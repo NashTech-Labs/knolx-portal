@@ -1,14 +1,15 @@
 @(session:SessionInfo)(implicit request: Request[_], flash: Flash)
 
 @main(session.topic) {
-    <div class="grad1"style="margin-top:30px; ">
-        <div class="col-md-12 report-info" style="text-align: center">
-            <span ><div class="report-other-info">@session.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
+    <div class="row grad1"style="margin-top:30px; ">
+        <div class="col-md-12 report-info filter-padding-left filter-padding-right" style="text-align: center">
+            <span >
+                <div class="report-other-info">@session.topic <sup><span class="label label-warning report-type">Knolx</span></sup>
                         </div>
                         </span>
     </div>
-    <div class="row" style="padding-top:20px;">
-        <div class="col-md-6 text-center">
+    <div class="col-md-12">
+        <div class="col-md-6 text-center" style="margin-top: 25px;">
             @session.slideShareURL.fold{
             @sessionNotFound("Slides")
             } { slideShareURL =>
@@ -34,7 +35,7 @@
 
             }
         </div>
-        <div class="col-md-6 text-center">
+        <div class="col-md-6 text-center" style="margin-top: 25px;">
             @session.youtubeURL.fold{
             @sessionNotFound("Video Session")
             } { youtubeURL =>
@@ -60,7 +61,6 @@
             }
         </div>
     </div>
-    <div class="feedback-footer"></div>
 </div>
 
 <script src="@routes.Assets.versioned("javascripts/share.js")" type="text/javascript"></script>

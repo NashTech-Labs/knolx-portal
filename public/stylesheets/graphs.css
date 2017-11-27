@@ -8,7 +8,7 @@
 }
 
 .analysis-container {
-    margin: 40px -15px;
+    margin: 20px -15px;
 }
 
 .graph-panel {
@@ -20,5 +20,4 @@
 .date-range-picker {
     text-align: right;
     margin-top: 10px;
-    padding-right: 15px !important;
 }

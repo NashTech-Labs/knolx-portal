@@ -1,7 +1,7 @@
 @()(implicit request: Request[_])
 
 @activeLink(currentPath: String) = @{
-if(request.path.equals(currentPath)) "active"
+    if(request.path.equals(currentPath)) "active"
 }
 
 <div class="wrapper">
@@ -10,22 +10,22 @@ if(request.path.equals(currentPath)) "active"
     <nav class="navbar navbar-fixed-top" role="navigation" style="margin-bottom: 0">
         <div class="navbar-header" style="height: 50px;">
             <span class="main-logo" >
-                <a href="#" class="pull-left logo">
+                <a href="@routes.SessionsController.sessions(1, None)" class="pull-left logo">
                     <img src='@routes.Assets.versioned("images/logo3.png")' style="padding-left: 15px;">
                 </a>
             </span>
         </div>
         <ul class="nav navbar-nav navbar-right">
-            @if(SessionHelper.isLoggedIn) {
+        @if(SessionHelper.isLoggedIn) {
             <li class="@activeLink(routes.UsersController.login().url) alignLinks" >
                 <a href="@routes.UsersController.login()"><i class="fa fa-sign-in"></i>
                     <span>Login</span></a>
             </li>
-            <li class="@activeLink(routes.UsersController.register().url) alignLinks"style="padding-right: 10px;">
+            <li class="@activeLink(routes.UsersController.register().url) alignLinks" style="padding-right: 10px;">
                 <a href="@routes.UsersController.register()"><i class="fa fa-user-plus"></i>
                     <span>Register</span></a>
             </li>
-            } else {
+        } else {
             <li class="dropdown alignLinks">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-right: 30px;">
                     <i class="fa fa-user-circle-o"></i> <span>@SessionHelper.email.split("@")(0).split('.')(0)
@@ -44,48 +44,49 @@ if(request.path.equals(currentPath)) "active"
                 </ul>
             </li>
 
-            }
+        }
 
         </ul>
     </nav>
     <nav id="sidebar">
+        <script src="@routes.Assets.versioned("javascripts/activesidebar.js")" type="text/javascript"></script>
 
         <ul class="list-unstyled components" style="border-bottom: none;">
             <li class="@activeLink("/session") alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
-            <a href="@routes.SessionsController.sessions(1, None)">
-                <i class="fa fa-clock-o"></i>
-                <span>Sessions</span></a>
+                <a href="@routes.SessionsController.sessions(1, None)">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Sessions</span>
+                </a>
             </li>
 
             <li class="@activeLink(routes.KnolxAnalysisController.renderAnalysisPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Analysis">
-                <a href="@routes.KnolxAnalysisController.renderAnalysisPage">
-                    <i class="fa fa-line-chart"></i>
+                <a href="@routes.KnolxAnalysisController.renderAnalysisPage"><i class="fa fa-line-chart"></i>
                     <span>Analysis</span></a>
             </li>
 
             @if(!SessionHelper.isLoggedIn) {
 
 
-            <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback">
-                <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday">
-                    <i class="fa fa-comments"></i>
-                    <span>Feedbacks</span></a>
-            </li>
-            <li class="@activeLink(routes.FeedbackFormsReportController.renderUserFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Knolx Report">
-                <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
-                    <i class="fa fa-table"></i>
-                    <span>Knolx reports</span></a>
-            </li>
+                <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback">
+                    <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday">
+                        <i class="fa fa-comments"></i>
+                        <span>Feedbacks</span></a>
+                </li>
+                <li class="@activeLink(routes.FeedbackFormsReportController.renderUserFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Knolx Report">
+                    <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
+                        <i class="fa fa-table"></i>
+                        <span>Knolx reports</span></a>
+                </li>
             }
 
             @if(SessionHelper.isAdmin) {
 
-            <li class="alignLinks">
-                <a href="#manageSubmenu" data-toggle="collapse" aria-expanded="false">
-                    <i class="fa fa-wrench"></i>
-                    <span>Manage</span>
-                    <b class="caret"></b>
-                </a>
+                <li class="alignLinks">
+                    <a href="#manageSubmenu" data-toggle="collapse" aria-expanded="false">
+                        <i class="fa fa-wrench"></i>
+                        <span>Manage</span>
+                        <b class="caret"></b>
+                    </a>
 
                 <ul class="collapse list-unstyled" id="manageSubmenu">
                     <li class="@activeLink(routes.SessionsController.manageSessions(1, None).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
@@ -118,7 +119,7 @@ if(request.path.equals(currentPath)) "active"
 
             }
         </ul>
-        <div id="sidebarCollapse">
+        <div id="sidebarCollapse" style="margin-bottom: 40px">
             <i id="collapse-button" class="fa fa-angle-double-left">
             </i>
         </div>

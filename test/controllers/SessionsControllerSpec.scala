@@ -847,7 +847,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       sessionsRepository.updateCategoryOnChange("Front End", "") returns updateWriteResult
       categoriesRepository.deletePrimaryCategory(categoryId.stringify) returns updateWriteResult
 
-      val result = controller.deletePrimaryCategory(categoryId.stringify)(FakeRequest()
+      val result = controller.deletePrimaryCategory(categoryId.toString())(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
       status(result) must be equalTo OK
     }

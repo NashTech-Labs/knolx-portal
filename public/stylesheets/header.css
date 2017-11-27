@@ -26,11 +26,14 @@ i, span {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
+    max-height: 95%;
+    min-height: 95%;
     z-index: 999;
     background: #2f4050;
     color: #fff;
     transition: width 0.5s ease-in-out;
+    overflow-x: hidden !important;
+    overflow-y:scroll  ;
 }
 
 #sidebar.active {
@@ -126,9 +129,9 @@ a[data-toggle="collapse"] {
     position: relative;
 }
 
-ul ul a {
-    font-size: 0.9em !important;
-    padding-left: 30px !important;
+#sidebar ul ul li a {
+    font-size: 1.1em !important;
+    padding-left: 25px !important;
 }
 
 .navbar-top-links li{

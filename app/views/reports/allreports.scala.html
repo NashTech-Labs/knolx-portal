@@ -7,7 +7,7 @@
             @if(sessionIds.nonEmpty) {
                 @for(session <- sessionIds) {
                     @if(session.active) {
-                        <div class="col-md-3">
+                        <div class="col-md-3 filter-padding-left">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
@@ -36,7 +36,7 @@
                             </div>
                         </div>
                     } else {
-                        <div class="col-md-3">
+                        <div class="col-md-3 filter-padding-left">
                             <div class="col-md-12">
                                 <div id="parent" class="feedback-response-sessions custom-position">
                                     <div class="card-body card-custom-padding">
@@ -69,4 +69,5 @@
             }
         </div>
     </div>
+    <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
 }

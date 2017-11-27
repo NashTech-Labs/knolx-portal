@@ -45,7 +45,11 @@
                         </div>
                             <div class="report-other-info">
                                 @header.topic
-                            <sup><span class="label label-warning report-type">Knolx</span></sup>
+                                <sup><span class="label report-type label-warning @if(header.meetUp) {
+                                    meetup-session">Meetup</span>
+                                    } else {
+                                    ">Knolx </span>
+                                    }</sup>
                         <p class="report-session-date">@header.date</p></div>
            </div>
 

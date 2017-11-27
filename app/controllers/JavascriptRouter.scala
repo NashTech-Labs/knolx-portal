@@ -27,18 +27,18 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.FeedbackFormsReportController.searchAllResponsesBySessionId,
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession,
-      controllers.routes.javascript.SessionsController.addPrimaryCategory,
-      controllers.routes.javascript.SessionsController.addSubCategory,
-      controllers.routes.javascript.SessionsController.modifyPrimaryCategory,
-      controllers.routes.javascript.SessionsController.modifySubCategory,
-      controllers.routes.javascript.SessionsController.getCategory,
+      controllers.routes.javascript.SessionsCategoryController.addPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.addSubCategory,
+      controllers.routes.javascript.SessionsCategoryController.modifyPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.modifySubCategory,
+      controllers.routes.javascript.SessionsCategoryController.getCategory,
+      controllers.routes.javascript.SessionsCategoryController.deletePrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.getSubCategoryByPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.deleteSubCategory,
+      controllers.routes.javascript.SessionsCategoryController.getTopicsBySubCategory,
       controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
       controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
-      controllers.routes.javascript.KnolxAnalysisController.renderLineChart,
-      controllers.routes.javascript.SessionsController.deletePrimaryCategory,
-      controllers.routes.javascript.SessionsController.getSubCategoryByPrimaryCategory,
-      controllers.routes.javascript.SessionsController.deleteSubCategory,
-      controllers.routes.javascript.SessionsController.getTopicsBySubCategory
+      controllers.routes.javascript.KnolxAnalysisController.renderLineChart
     )).as("text/javascript")
   }
 

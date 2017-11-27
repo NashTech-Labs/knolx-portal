@@ -240,7 +240,7 @@ $(function () {
 
 function listSubCategoryWithPrimaryCategory() {
 
-    jsRoutes.controllers.SessionsController.getCategory().ajax(
+    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
         {
             type: 'GET',
             processData: false,
@@ -275,7 +275,7 @@ function scrollToTop() {
 }
 
 function addCategory(categoryName) {
-    jsRoutes.controllers.SessionsController.addPrimaryCategory(categoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.addPrimaryCategory(categoryName).ajax(
         {
             type: 'GET',
             processData: false,
@@ -299,7 +299,7 @@ function addCategory(categoryName) {
 }
 
 function addSubCategory(categoryName, subCategory) {
-    jsRoutes.controllers.SessionsController.addSubCategory(categoryName, subCategory).ajax(
+    jsRoutes.controllers.SessionsCategoryController.addSubCategory(categoryName, subCategory).ajax(
         {
             type: 'GET',
             processData: false,
@@ -321,7 +321,7 @@ function addSubCategory(categoryName, subCategory) {
 
 function modifyPrimaryCategory(categoryId, newCategoryName) {
 
-    jsRoutes.controllers.SessionsController.modifyPrimaryCategory(categoryId, newCategoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.modifyPrimaryCategory(categoryId, newCategoryName).ajax(
         {
             type: 'GET',
             processData: false,
@@ -346,7 +346,7 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
 function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName) {
 
     console.log(categoryName + "----" + oldSubCategoryName + "----" + newSubCategoryName)
-    jsRoutes.controllers.SessionsController.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).ajax(
         {
             type: 'GET',
             processData: false,
@@ -372,7 +372,7 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
 
 function deletePrimaryCategory(categoryId) {
 
-    jsRoutes.controllers.SessionsController.deletePrimaryCategory(categoryId).ajax(
+    jsRoutes.controllers.SessionsCategoryController.deletePrimaryCategory(categoryId).ajax(
         {
             type: 'GET',
             processData: false,
@@ -397,7 +397,7 @@ function deletePrimaryCategory(categoryId) {
 
 function subCategoryByPrimaryCategory(categoryName) {
 
-    jsRoutes.controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName).ajax(
         {
             type: 'GET',
             processData: false,
@@ -428,7 +428,7 @@ function subCategoryByPrimaryCategory(categoryName) {
 }
 
 function topicMatchedWithCategory(categoryName, subCategoryName) {
-    jsRoutes.controllers.SessionsController.getTopicsBySubCategory(categoryName, subCategoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName, subCategoryName).ajax(
         {
             type: 'GET',
             processData: false,
@@ -464,7 +464,7 @@ function deleteSubCategory(categoryName, subCategoryName) {
 
     console.log("inside delete sub category js fun" + categoryName + "bbbbbb " + subCategoryName)
 
-    jsRoutes.controllers.SessionsController.deleteSubCategory(categoryName, subCategoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.deleteSubCategory(categoryName, subCategoryName).ajax(
         {
             type: 'GET',
             processData: false,

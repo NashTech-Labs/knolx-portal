@@ -35,7 +35,7 @@ GET         /session/update                         controllers.SessionsControll
 GET         /session/:sessionId/cancel              controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule            controllers.SessionsController.scheduleSession(sessionId: String)
 GET         /session/content/:sessionId             controllers.SessionsController.shareContent(sessionId: String)
-GET         /session/categories                     controllers.SessionsController.getCategory
+GET         /session/categories                     controllers.SessionsCategoryController.getCategory
 
 # Feedback
 GET         /feedbackform/manage/:pageNumber        controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -61,15 +61,15 @@ GET         /assets/*file                           controllers.Assets.versioned
 GET         /favicon.ico                            controllers.Assets.at(path="/public/images", file="favicon.png")
 
 #Category
-GET         /category                           controllers.SessionsController.renderCategoryPage
-GET         /addprimarycategory                 controllers.SessionsController.addPrimaryCategory(categoryName: String)
-GET         /addsubcategory                     controllers.SessionsController.addSubCategory(categoryName: String,subCategory: String)
-GET         /modifyprimarycategory              controllers.SessionsController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
-GET         /modifysubcategory                  controllers.SessionsController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
-GET         /deleteprimarycategory              controllers.SessionsController.deletePrimaryCategory(categoryName: String)
-GET         /getsubcategorybyprimarycategory    controllers.SessionsController.getSubCategoryByPrimaryCategory(categoryName: String)
-GET         /deletesubcategory                  controllers.SessionsController.deleteSubCategory(categoryName: String, subCategoryName: String)
-GET         /gettopicsbysubcategory             controllers.SessionsController.getTopicsBySubCategory(categoryName: String, subCategory: String)
+GET         /category                           controllers.SessionsCategoryController.renderCategoryPage
+GET         /addprimarycategory                 controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
+GET         /addsubcategory                     controllers.SessionsCategoryController.addSubCategory(categoryName: String,subCategory: String)
+GET         /modifyprimarycategory              controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
+GET         /modifysubcategory                  controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+GET         /deleteprimarycategory              controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
+GET         /getsubcategorybyprimarycategory    controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
+GET         /deletesubcategory                  controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
+GET         /gettopicsbysubcategory             controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 # Analysis
 GET         /knolx/analysis                         controllers.KnolxAnalysisController.renderAnalysisPage
 POST        /knolx/analysis/columnchart             controllers.KnolxAnalysisController.renderColumnChart

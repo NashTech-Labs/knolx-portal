@@ -5,10 +5,8 @@ import javax.inject.Inject
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
-import reactivemongo.bson.{BSONDocument, BSONDocumentWriter, BSONObjectID}
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import models.CategoriesJsonFormats._
 import play.api.Logger
@@ -44,18 +42,15 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    Logger.info("555%%%%%%%%55->" + category)
     val selector = BSONDocument("categoryName" -> category.categoryName)
     val modifier = BSONDocument("$addToSet" -> BSONDocument(
       "subCategory" -> BSONDocument(
         "$each" -> category.subCategory)))
-    Logger.error("%%%%%%%%%%%----->")
     collection.flatMap(_.update(selector, modifier))
 
   }
 
   def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] = {
-    Logger.info("getCategories")
     collection.
       flatMap(jsonCollection =>
         jsonCollection.
@@ -108,19 +103,5 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector, modifier, multi = true))
 
   }
-  /*def searchSubCategory(keyword : Option[String] = None): Unit = {
 
-    val condition = keyword match {
-      case Some(key) => Json.obj(List(Json.obj("subCategory" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "") + ".*")))))
-
-      case None => getCategories
-    }
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(condition)
-          .cursor[SessionInfo](ReadPreference.Primary)
-          .collect[List](FailOnError[List[CategoryInfo]]()))
-  }*/
 }

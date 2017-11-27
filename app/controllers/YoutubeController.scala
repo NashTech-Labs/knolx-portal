@@ -4,7 +4,7 @@ import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.YouTubeUploadManager.VideoUploader
-import actors.{VideoDetails, YouTubeUploadManager, YouTubeUploader}
+import actors.{Cancel, VideoDetails, YouTubeUploadManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
@@ -80,6 +80,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
 
   def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
     youtubeUploadManager ! YouTubeUploadManager.CancelVideoUpload(sessionId)
+    youtubeUploaderManager ! Cancel
 
     Ok("Upload cancelled!")
   }

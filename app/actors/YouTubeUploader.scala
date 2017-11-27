@@ -55,7 +55,7 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadMana
     Logger.info(s"Starting video upload for session $sessionId")
 
     youtubeService.upload(sessionId, is, title, description, tags, fileSize, sender())
-    youtubeUploaderManager ! "Done"
+    youtubeUploaderManager ! Done
 
   }
 

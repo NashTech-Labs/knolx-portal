@@ -9,6 +9,9 @@ import org.apache.commons.mail.EmailException
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
+case object Done
+case object Cancel
+
 class YouTubeUploaderManager @Inject()(
                                         configuredYouTubeUploader: ConfiguredYouTubeUploader.Factory,
                                         configuredYouTubeDetailsActor: ConfiguredYouTubeDetailsActor.Factory
@@ -35,10 +38,11 @@ class YouTubeUploaderManager @Inject()(
         Logger.info("Cant upload any more videos parallely.")
         sender() ! "Cant upload any more videos parallely."
       }
-    case "Done" => noOfActors-=1
+    case Done => noOfActors-=1
+    case Cancel => noOfActors-=1
     case request: VideoDetails =>
-      val youTubeUploader = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      youTubeUploader forward request
+      val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
+      youTubeDetailsActor forward request
     case Categories                                                                       =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward Categories

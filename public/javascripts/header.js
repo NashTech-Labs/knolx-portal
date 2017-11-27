@@ -33,18 +33,9 @@ function activeSidebar() {
 function activeCollapseButton() {
     if (localStorage.hasActiveClass === "yes") {
         $('#collapse-button').removeClass("fa-angle-double-left").addClass("fa-angle-double-right");
+        $('#content').addClass("active");
     } else {
         $('#collapse-button').addClass("fa-angle-double-left").removeClass("fa-angle-double-right");
-    }
-
-    if (localStorage.hasActiveClass === "yes") {
-        $('#content').addClass("active");
-
-    } else {
         $('#content').addClass("");
     }
-}
-
-function collapseManageSubmenu() {
-    $('#manageSubmenu').collapse('toggle');
 }

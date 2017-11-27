@@ -3,23 +3,24 @@
     max-height:75px;
     margin:0;
     padding:0;
-    text-indent:10px;
 }
 
 #subcategory-sessions, #category-sessions {
   display: none;
-  margin-top: 10px;
+  /*margin-top: 10px;*/
   border:1px solid #e5e6e7;
   font-family:'gothic';
   height:auto;
   max-height: 65px;
   overflow-y: auto;
-  margin: 15px 0px;
+  padding-left: 12px;
+  /*margin: 15px 0px;*/
 }
 
 #no-sessions, #no-subCategory {
-    padding-left: 15px;
-    padding-top: 10px;
+    padding-top: 5px;
+    color: red;
+    font-weight: inherit;
 }
 
 .category-message {
@@ -27,7 +28,11 @@
     font-size: 16px;
     overflow-wrap: break-word;
     padding-right: 5px;
+    width: 98.2%;
 }
+#sub-category-topics {
+    height: 25px;
+ }
 
 /*#holder{
 width:400px;
@@ -91,15 +96,16 @@ z-index: 9999;
     border:none;
     outline:none;
     font-size:16px;
-    background:#fff;
+    background:#eee;
     visibility:hidden;
+    width: 21px;
+    height: 12px;
+    text-align: center;
 }
 
 .over{
  background-color:#eee;
 }
-
-/*new category page css*/
 
 .ibox {
     position: static;
@@ -137,8 +143,8 @@ h5 {
     border-image: none;
     border-style: solid solid none;
     border-width: 1px 0;
-    min-height: 185px;
-    max-height:185px;
+    min-height: 205px;
+    max-height:205px;
 }
 
 .form-control {
@@ -160,13 +166,17 @@ h5 {
     margin-bottom: 5px;
 }
 
+.category-label-custom {
+    padding-left: 15px;
+}
+
 .form-horizontal .form-group {
     margin-right: 25px;
     margin-left: 15px;
 }
 
 .category-btn {
-    margin-top: 15px;
+    padding-left: 35px;
 }
 
 .btn-footer {
@@ -178,4 +188,33 @@ h5 {
 .btn-footer-custom {
     position:relative;
     z-index:8888;
+}
+
+.info-message {
+    font-weight: inherit;
+}
+
+#subcategory-linked-category-message, #topic-linked-subcategory-message {
+    display: none;
+    padding-top: 5px;
+    color: red;
+}
+
+#success-message, #wrong-message {
+    padding-top: 10px;
+    display: none;
+}
+
+#insert-sub-category, #new-primary-category, #new-sub-category {
+    margin-top: 15px;
+    display: none;
+}
+
+#mod-sub-category-hover, #sub-category-hover {
+    border:1px solid #e5e6e7;
+    width :100%;
+}
+
+.top-row-adjust {
+    margin-bottom: 50px;
 }

@@ -36,7 +36,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
     }
 
     "modify a primary category" in {
-      val update = await(categoriesRepository.modifyPrimaryCategory("Front-End","Front End"))
+      val update = await(categoriesRepository.modifyPrimaryCategory(categoryId.stringify,"Front End"))
 
       update.ok must beEqualTo(true)
     }
@@ -48,7 +48,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
     }
 
     "delete a primary category" in {
-      val deletePrimaryCategory = await(categoriesRepository.deletePrimaryCategory("Front-End"))
+      val deletePrimaryCategory = await(categoriesRepository.deletePrimaryCategory(categoryId.stringify))
 
       deletePrimaryCategory.ok must beEqualTo(true)
     }

@@ -452,12 +452,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   }
 
   def renderCategoryPage: Action[AnyContent] = adminAction.async { implicit request =>
-    Logger.info("render category Page")
-     // categoriesRepository.getCategories
+    Logger.info("-------------------------render category Page")
     categoriesRepository.getCategories.map {
-      Logger.info("Inside render category page")
+      Logger.info("-------------------------Inside render category page")
       category =>
-        Logger.info("Caetgory List " + category)
+        Logger.info("--------------------------Caetgory List " + category)
         Ok(views.html.category(category))
     }
   }
@@ -497,10 +496,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           } { categoryInfo =>
             val newSubCategory = categoryInfo.subCategory.find(_.toLowerCase == subCategory.toLowerCase)
             newSubCategory.fold {
-              val subCategoryInfo = CategoryInfo(categoryName, List(subCategory))
+              val subCategoryInfo = CategoryInfo(categoryName, List(subCategory), categoryInfo._id)
+              Logger.error("------>" + subCategoryInfo + "-------------->" + categoryInfo)
               categoriesRepository.upsert(subCategoryInfo).map { result =>
 
-                Logger.info("Inside add sub category " + result)
+                Logger.info("Inside add sub category1 " + result)
                 if (result.ok) {
                   Ok("Sub-category was successfully added")
                 } else {
@@ -516,20 +516,18 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
+  def modifyPrimaryCategory(categoryId: String, newCategoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
     Logger.info("Inside modify primary category")
     if (newCategoryName.trim().isEmpty) {
       Future.successful(BadRequest("Modify primary category cannot be empty"))
     } else {
-      Logger.info("Old category name = " + oldCategoryName)
+      Logger.info("Old category name = " + categoryId)
       Logger.info("new category name = " + newCategoryName)
       categoriesRepository.getCategories.flatMap { result =>
-        if (result.exists(category => category.categoryName.toLowerCase.equals(newCategoryName.toLowerCase))) {
-          Future.successful(BadRequest("Primary category already exits"))
-        } else {
-          sessionsRepository.updateCategoryOnChange(oldCategoryName, newCategoryName).flatMap { session =>
+        val category = result.filter( c => c._id.stringify==categoryId).head
+          sessionsRepository.updateCategoryOnChange(category.categoryName, newCategoryName).flatMap { session =>
             if(session.ok) {
-              categoriesRepository.modifyPrimaryCategory(oldCategoryName, newCategoryName).map { result =>
+              categoriesRepository.modifyPrimaryCategory(category._id.stringify, newCategoryName).map { result =>
                 if (result.ok) {
                   Ok("Primary category was successfully modified")
                 } else {
@@ -544,7 +542,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         }
       }
     }
-  }
 
   def modifySubCategory(categoryName: String, oldSubCategoryName: String,
                         newSubCategoryName: String): Action[AnyContent] = adminAction.async { implicit request =>
@@ -559,7 +556,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             category => category.categoryName.toLowerCase == categoryName.toLowerCase
           }.flatMap(_.subCategory)
 
-          val check = subCategoryList.map(_.toLowerCase).contains(newSubCategoryName.toLowerCase)
+          val check = subCategoryList.contains(newSubCategoryName)
           Logger.error("list--->" + subCategoryList + "new ------>  " + newSubCategoryName.toLowerCase + "---check-->  " + check)
           if (check) {
             Future.successful(BadRequest("Sub category already exits"))
@@ -586,55 +583,44 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  /*def deletePrimaryCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
-    Logger.info("------Inside delete primary category")
-    if (categoryName.trim().isEmpty) {
-      Future.successful(BadRequest("Please select a valid primary category"))
-    } else {
-      sessionsRepository.updateCategoryOnDelete(categoryName).flatMap { sessions =>
-        if (sessions.ok) {
-          categoriesRepository.deletePrimaryCategory(categoryName).map { result =>
-            if (result.ok) {
-              Ok("Successfully deleted primary category")
-            } else {
-              BadRequest("Bad request")
-            }
-          }
-        } else {
-          Future.successful(BadRequest("Got an error while deleting"))
-        }
-      }
-    }
-  }*/
-
-  def deletePrimaryCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
-    if (categoryName.trim().isEmpty) {
+  def deletePrimaryCategory(categoryId: String): Action[AnyContent] = superUserAction.async { implicit request =>
+    Logger.info("Inside delete primary category" + categoryId)
+    if (categoryId.trim().isEmpty) {
       Future.successful(BadRequest("Please select a valid primary category"))
     } else {
       categoriesRepository.getCategories.flatMap {
         categories =>
-          val subCategoryList = categories.filter {
-            category => category.categoryName == categoryName
-          }.flatMap(_.subCategory)
-          Logger.info("Primary category with its sub category " + subCategoryList)
-          if (subCategoryList.isEmpty) {
-            Logger.info("Update Session Table on category delete")
-            sessionsRepository.updateCategoryOnChange(categoryName,"").flatMap { session =>
-              if (session.ok) {
-                Logger.info("Delete primary category on delete")
-                categoriesRepository.deletePrimaryCategory(categoryName).map { result =>
-                  if (result.ok) {
-                    Ok("Primary category was successfully deleted")
-                  } else {
-                    BadRequest("Got an error while deleting")
+          Logger.info("List of categories = " + categories)
+          Logger.info("CategoryId = " + categoryId)
+          val category = categories.find {
+            c =>
+              Logger.info("current category id is = " + c._id + " and is being compared with categoryId" + categoryId)
+              c._id.toString() == categoryId
+          }
+          category.fold {
+            Future.successful(BadRequest("No such primary category exists"))
+          } { category =>
+            val subCategoryList = category.subCategory
+            Logger.info("Primary category with its sub category " + subCategoryList)
+            if (subCategoryList.isEmpty) {
+              Logger.info("Update Session Table on category delete")
+              sessionsRepository.updateCategoryOnChange(category.categoryName, "").flatMap { session =>
+                if (session.ok) {
+                  Logger.info("Delete primary category on delete")
+                  categoriesRepository.deletePrimaryCategory(category._id.stringify).map { result =>
+                    if (result.ok) {
+                      Ok("Primary category was successfully deleted")
+                    } else {
+                      BadRequest("Got an error while deleting")
+                    }
                   }
+                } else {
+                  Future.successful(BadRequest("Got an error in session table"))
                 }
-              } else {
-                Future.successful(BadRequest("Got an error in session table"))
               }
+            } else {
+              Future.successful(BadRequest("First delete all its sub category"))
             }
-          } else {
-            Future.successful(BadRequest("First delete all its sub category"))
           }
       }
     }
@@ -701,23 +687,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  /*def getSubCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
-    if(categoryName.trim.isEmpty) {
-      Future.successful(BadRequest("Please select a valid category"))
-    } else {
-      Logger.info("Category name  = " + categoryName)
-      categoriesRepository.getSubCategoryByPrimaryCategory(categoryName).map {
-        subCategoryList =>
-          Logger.info("Sub category List values = " + subCategoryList)
-          Ok("fghjkl");
-      }
-    }
-  }*/
-
   def getCategory: Action[AnyContent] = action.async { implicit request =>
     Logger.info("Inside get category of controller")
     categoriesRepository.getCategories.map { categories =>
-      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.toString(), category.categoryName, category.subCategory))
+      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.stringify, category.categoryName, category.subCategory))
       Ok(Json.toJson(listOfCategoryInfo).toString)
     }
   }

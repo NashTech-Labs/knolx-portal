@@ -330,4 +330,35 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }
 
+
+  def getMonthlyInfoSessions(filterUserSessionInformation: FilterUserSessionInformation): Future[List[(String, Int)]] = {
+    collection
+      .flatMap { jsonCollection =>
+        import jsonCollection.BatchCommands.AggregationFramework._
+
+        jsonCollection
+          .aggregate(
+            firstOperator = Match(
+              Json.obj(
+                "active" -> true,
+                "cancelled" -> false,
+                "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate), "$lte" -> BSONDateTime(filterUserSessionInformation.endDate))
+              )
+            ),
+            otherOperators = List(
+              Group(Json.obj("$dateToString" -> Json.obj("format" -> "%Y-%m", "date" -> "$date")))("count" -> SumAll),
+              Sort(Ascending("_id"))
+            ))
+          .map { aggRes =>
+            aggRes
+              .firstBatch
+              .map(res => (res \ "_id", res \ "count"))
+              .collect {
+                case (dateLookup, knolxCountLookup) if dateLookup.isDefined && knolxCountLookup.isDefined =>
+                  (dateLookup.get.validate[String].getOrElse(""), knolxCountLookup.get.validate[Int].getOrElse(0))
+              }
+              .filter { case (date, _) => date != "" }
+          }
+      }
+  }
 }

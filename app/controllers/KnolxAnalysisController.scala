@@ -1,5 +1,6 @@
 package controllers
 
+import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.actor.ActorRef
@@ -104,12 +105,11 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
         val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
 
-        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
-          val sessionMonthList = sessions.map(session => dateTimeUtility.getMonth(session.date.value))
-          val sessionMonthInfo = sessionMonthList.groupBy(identity).map { case (month, monthlySessions) =>
-            KnolxMonthlyInfo(month, monthlySessions.length)
-          }.toList
-          Ok(Json.toJson(sessionMonthInfo))
+        sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, startDate, endDate)).map { sessions =>
+          val knolxMonthlyInfoList = sessions.map { case (month, monthlySessions) =>
+            KnolxMonthlyInfo(dateTimeUtility.formatDate(month), monthlySessions)
+          }
+          Ok(Json.toJson(knolxMonthlyInfoList))
         }
       })
   }

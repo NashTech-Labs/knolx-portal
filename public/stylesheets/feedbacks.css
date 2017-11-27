@@ -198,7 +198,7 @@
 }
 
 .session-card-values {
-    font-size: 22px;
+    font-size: 16px;
     color: #F1948A;
 }
 
@@ -499,7 +499,7 @@
     text-align: center;
 }
 
-.submission-success-okay-btn {
+.submission-success-okay-btn .submission-success-okay-btn:hover {
     text-shadow: none;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 18px;

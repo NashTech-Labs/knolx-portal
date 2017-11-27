@@ -19,13 +19,10 @@ $(document).ready(function () {
 
         $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
     });
-
-    $('.IsBestAnswer').addClass('bestanswer').removeClass('IsBestAnswer');
 });
 
 
-function activeSidebar()
-{
+function activeSidebar() {
     if (localStorage.hasActiveClass === "yes") {
         $('#sidebar').addClass("active");
     } else {
@@ -45,6 +42,5 @@ function activeCollapseButton() {
 
     } else {
         $('#content').addClass("");
-
     }
 }

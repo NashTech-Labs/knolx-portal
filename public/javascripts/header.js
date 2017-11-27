@@ -44,3 +44,7 @@ function activeCollapseButton() {
         $('#content').addClass("");
     }
 }
+
+function collapseManageSubmenu() {
+    $('#manageSubmenu').collapse('toggle');
+}

@@ -5,7 +5,3 @@ $(document).on('submit', 'form.customForm', function () {
 $(document).ready(function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
-
-function collapseManageSubmenu() {
-    $('#manageSubmenu').collapse('toggle');
-}

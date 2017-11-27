@@ -524,24 +524,24 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       Logger.info("Old category name = " + categoryId)
       Logger.info("new category name = " + newCategoryName)
       categoriesRepository.getCategories.flatMap { result =>
-        val category = result.filter( c => c._id.stringify==categoryId).head
-          sessionsRepository.updateCategoryOnChange(category.categoryName, newCategoryName).flatMap { session =>
-            if(session.ok) {
-              categoriesRepository.modifyPrimaryCategory(category._id.stringify, newCategoryName).map { result =>
-                if (result.ok) {
-                  Ok("Primary category was successfully modified")
-                } else {
-                  Logger.info("Error Inside Sessions Controller")
-                  BadRequest("Unsuccessfully attempt to modify primary category")
-                }
+        val category = result.filter(c => c._id.stringify == categoryId).head
+        sessionsRepository.updateCategoryOnChange(category.categoryName, newCategoryName).flatMap { session =>
+          if (session.ok) {
+            categoriesRepository.modifyPrimaryCategory(category._id.stringify, newCategoryName).map { result =>
+              if (result.ok) {
+                Ok("Primary category was successfully modified")
+              } else {
+                Logger.info("Error Inside Sessions Controller")
+                BadRequest("Unsuccessfully attempt to modify primary category")
               }
-            } else{
-              Future.successful(BadRequest("Update on session table was unsuccessful"))
             }
+          } else {
+            Future.successful(BadRequest("Update on session table was unsuccessful"))
           }
         }
       }
     }
+  }
 
   def modifySubCategory(categoryName: String, oldSubCategoryName: String,
                         newSubCategoryName: String): Action[AnyContent] = adminAction.async { implicit request =>
@@ -637,7 +637,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           }.flatMap(_.subCategory)
           Logger.info("Primary category with its sub category " + subCategoryList)
 
-          if(subCategoryList.isEmpty) {
+          if (subCategoryList.isEmpty) {
             BadRequest(Json.toJson(subCategoryList).toString)
           } else {
             Ok(Json.toJson(subCategoryList).toString())
@@ -651,7 +651,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       Future.successful(BadRequest("Sub-category cannot be empty"))
     } else {
       Logger.info(s"..........Before session repository $categoryName $subCategory")
-      sessionsRepository.updateSubCategoryOnChange(subCategory,"").flatMap { sessions =>
+      sessionsRepository.updateSubCategoryOnChange(subCategory, "").flatMap { sessions =>
         Logger.info("Inside session repository")
         if (sessions.ok) {
           Logger.info(".............. Before categories repository")

@@ -1,7 +1,6 @@
 a, a:hover, a:focus {
     color: inherit;
     text-decoration: none;
-    transition: all 0.5s;
 }
 
 .navbar {
@@ -48,7 +47,7 @@ i, span {
 }
 
 #sidebar.active ul li a {
-    padding: 20px 10px;
+    padding: 10px;
     text-align: center;
     font-size: 0.85em;
 }
@@ -56,7 +55,7 @@ i, span {
 #sidebar.active ul li a i {
     margin-right:  0;
     display: block;
-    font-size: 1.8em;
+    font-size: 1.1em;
     margin-bottom: 5px;
 }
 
@@ -106,7 +105,7 @@ i, span {
 
 #sidebar ul li a {
     padding: 10px;
-    font-size: 1.1em;
+    font-size: 1.1em !important;
     display: block;
 }
 

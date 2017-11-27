@@ -22,3 +22,29 @@ $(document).ready(function () {
 
     $('.IsBestAnswer').addClass('bestanswer').removeClass('IsBestAnswer');
 });
+
+
+function activeSidebar()
+{
+    if (localStorage.hasActiveClass === "yes") {
+        $('#sidebar').addClass("active");
+    } else {
+        $('#sidebar').addClass("");
+    }
+}
+
+function activeCollapseButton() {
+    if (localStorage.hasActiveClass === "yes") {
+        $('#collapse-button').removeClass("fa-angle-double-left").addClass("fa-angle-double-right");
+    } else {
+        $('#collapse-button').addClass("fa-angle-double-left").removeClass("fa-angle-double-right");
+    }
+
+    if (localStorage.hasActiveClass === "yes") {
+        $('#content').addClass("active");
+
+    } else {
+        $('#content').addClass("");
+
+    }
+}

@@ -273,6 +273,7 @@ html,body{
 }
 
 .container-knolx {
+    margin-bottom: 50px !important;
     width:100%;
     padding-left: 40px !important;
     padding-right: 10px !important;

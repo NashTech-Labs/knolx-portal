@@ -1,13 +1,27 @@
 $(function () {
-    var startDate = moment().subtract(3, 'months').startOf('day').format('YYYY-MM-DD HH:mm').toString();
+    var startDate = moment().subtract(1, 'years').startOf('day').format('YYYY-MM-DD HH:mm').toString();
     var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
 
-    analysis(startDate, endDate);
+    if (sessionStorage.startDate === undefined) {
+        sessionStorage.setItem("startDate", startDate);
+    }
+
+    if (sessionStorage.endDate === undefined) {
+        sessionStorage.setItem("endDate", endDate);
+    }
+
+    var startDateSessionStorage = moment(sessionStorage.startDate).startOf('day').format('YYYY-MM-DD HH:mm').toString();
+    var endDateSessionStorage = moment(sessionStorage.endDate).endOf('day').format('YYYY-MM-DD HH:mm').toString();
+
+    analysis(startDateSessionStorage, endDateSessionStorage);
 
     $('#demo').daterangepicker({
-        "startDate": moment().subtract(3, 'months'),
-        "endDate": moment()
-    }, function (start, end, label) {
+        "startDate": new Date(sessionStorage.startDate),
+        "endDate": new Date(sessionStorage.endDate)
+    }, function (start, end) {
+        sessionStorage.setItem("startDate", start);
+        sessionStorage.setItem("endDate", end);
+
         var startDate = start.format('YYYY-MM-DD h:mm A');
         var endDate = end.format('YYYY-MM-DD h:mm A');
 

@@ -283,14 +283,14 @@ function addCategory(categoryName) {
             success: function (data) {
                 successMessageBox();
                 $("#primary-category").val("");
-                document.getElementById("success-message").innerHTML = data;
+                document.getElementById("disp-success-message").innerHTML = data;
                 scrollToTop();
                 $("#category-drop-down").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
                 $("#categoryList").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("wrong-message").innerHTML = er.responseText;
+                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -306,12 +306,12 @@ function addSubCategory(categoryName, subCategory) {
             success: function (data) {
                 successMessageBox()
                 $("#sub-category").val("");
-                document.getElementById("success-message").innerHTML = data;
+                document.getElementById("disp-success-message").innerHTML = data;
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("wrong-message").innerHTML = er.responseText;
+                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -329,13 +329,13 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
             success: function (data) {
                 successMessageBox();
                 $("#new-primary-category").val("");
-                document.getElementById("success-message").innerHTML = data;
+                document.getElementById("disp-success-message").innerHTML = data;
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
                 $("#new-primary-category").val("");
-                document.getElementById("wrong-message").innerHTML = er.responseText;
+                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -354,14 +354,14 @@ function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
                 console.log(data);
                 successMessageBox();
                 $("#new-sub-category").show();
-                document.getElementById("success-message").innerHTML = data;
+                document.getElementById("disp-success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("wrong-message").innerHTML = er.responseText;
+                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
                 $("#new-sub-category").val("");
                 scrollToTop();
             },
@@ -380,14 +380,14 @@ function deletePrimaryCategory(categoryId) {
                 successMessageBox();
                 $("#delete-primary-category").val("");
                 console.log("data is = " + data)
-                document.getElementById("success-message").innerHTML = data;
+                document.getElementById("disp-success-message").innerHTML = data;
                 $("category-sessions").hide();
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
                 console.log("error is  = " + er.responseText)
-                document.getElementById("wrong-message").innerHTML = er.responseText;
+                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -471,13 +471,13 @@ function deleteSubCategory(categoryName, subCategoryName) {
             success: function (data) {
                 successMessageBox();
                 $("#datalist").val("");
-                document.getElementById("success-message").innerHTML = data;
+                document.getElementById("disp-success-message").innerHTML = data;
                 $("#subcategory-sessions").hide();
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("wrong-message").innerHTML = er.responseText;
+                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
                 $("#delete-sub-category").val("");
                 scrollToTop();
             }

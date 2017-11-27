@@ -19,18 +19,7 @@ $(document).ready(function () {
 
         $('#collapse-button').toggleClass("fa-angle-double-left fa-angle-double-right");
     });
-});
 
-
-function activeSidebar() {
-    if (localStorage.hasActiveClass === "yes") {
-        $('#sidebar').addClass("active");
-    } else {
-        $('#sidebar').addClass("");
-    }
-}
-
-function activeCollapseButton() {
     if (localStorage.hasActiveClass === "yes") {
         $('#collapse-button').removeClass("fa-angle-double-left").addClass("fa-angle-double-right");
         $('#content').addClass("active");
@@ -38,4 +27,4 @@ function activeCollapseButton() {
         $('#collapse-button').addClass("fa-angle-double-left").removeClass("fa-angle-double-right");
         $('#content').addClass("");
     }
-}
+});

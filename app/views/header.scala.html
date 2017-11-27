@@ -49,9 +49,7 @@
         </ul>
     </nav>
     <nav id="sidebar">
-        <script>
-                activeSidebar()
-        </script>
+        <script src="@routes.Assets.versioned("javascripts/activesidebar.js")" type="text/javascript"></script>
 
         <ul class="list-unstyled components" style="border-bottom: none;">
             <li class="@activeLink("/session") alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
@@ -122,4 +120,3 @@
         </div>
     </nav>
     <div id="content" style="margin-top: 60px;">
-        <script>activeCollapseButton()</script>

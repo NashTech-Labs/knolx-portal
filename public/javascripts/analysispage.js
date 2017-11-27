@@ -3,12 +3,10 @@ $(function () {
     var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
 
     if (sessionStorage.startDate === undefined) {
-
         sessionStorage.setItem("startDate", startDate);
     }
 
     if (sessionStorage.endDate === undefined) {
-
         sessionStorage.setItem("endDate", endDate);
     }
 
@@ -21,7 +19,6 @@ $(function () {
         "startDate": new Date(sessionStorage.startDate),
         "endDate": new Date(sessionStorage.endDate)
     }, function (start, end) {
-
         sessionStorage.setItem("startDate", start);
         sessionStorage.setItem("endDate", end);
 

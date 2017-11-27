@@ -26,11 +26,14 @@ i, span {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
+    max-height: 95%;
+    min-height: 95%;
     z-index: 999;
     background: #2f4050;
     color: #fff;
     transition: width 0.5s ease-in-out;
+    overflow-x: hidden !important;
+    overflow-y:scroll  ;
 }
 
 #sidebar.active {
@@ -272,8 +275,8 @@ html,body{
 
 .container-knolx {
     width:100%;
-    padding-left: 35px !important;
-    padding-right: 0 !important;
+    padding-left: 40px !important;
+    padding-right: 10px !important;
     margin-right: 0 !important;
     margin-left: 0 !important;
 }

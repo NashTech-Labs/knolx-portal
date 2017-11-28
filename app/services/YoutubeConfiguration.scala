@@ -5,8 +5,6 @@ import java.util
 import javax.inject.Inject
 
 import com.google.api.client.auth.oauth2.{Credential, StoredCredential, TokenResponse}
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.InputStreamContent
@@ -16,9 +14,8 @@ import com.google.api.client.util.store.{DataStore, FileDataStoreFactory}
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model._
 import com.google.common.collect.Lists
-import com.typesafe.config.ConfigFactory
 import controllers.UpdateVideoDetails
-import play.api.{Configuration, Logger}
+import play.api.Configuration
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -54,8 +51,6 @@ class YoutubeConfiguration @Inject()(configuration: Configuration) {
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
         .setCredentialDataStore(dataStore).build()
 
-    /*val conf = ConfigFactory.load()*/
-
     val refreshToken = configuration.get[String]("youtube.refreshToken")
 
     val response = new TokenResponse
@@ -63,11 +58,6 @@ class YoutubeConfiguration @Inject()(configuration: Configuration) {
     response.setRefreshToken(refreshToken)
 
     flow.createAndStoreCredential(response, "user1066")
-
-    /*val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
-
-    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user4093")*/
-
   }
 
   def executeCategoryList(listOfYoutubeCategories: YouTube#VideoCategories#List): List[VideoCategory] =

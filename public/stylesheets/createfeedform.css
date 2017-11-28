@@ -37,11 +37,10 @@
 }
 
 .create-feedback-button {
-    display: block;
-    margin: 0 auto;
+    position: fixed;
     border-radius: 0px;
-    bottom: 0px;
-    right: 0px;
+    bottom: 40px;
+    right: 30px;
     background-color: #5499C7;
     color: #FFFFFF;
     border: 2px solid #fff;
@@ -222,7 +221,7 @@ a.fa.fa-trash.delete-form:hover {
 .add-question-parent {
     width: 100%;
     position: relative;
-    margin-bottom: 105px;
+    margin-bottom: 140px;
 }
 
 .add-type-tooltip{

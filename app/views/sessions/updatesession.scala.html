@@ -1,24 +1,6 @@
-@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], youtubeCategories: List[VideoCategories])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], youtubeCategories: List[VideoCategories], videoDetails: Option[UpdateVideoDetails])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
-
-    <!--<div class="row update-error">
-        <div class="col-md-4" ></div>
-        <div class="col-md-4" >
-            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("category").hasErrors || sessionInfo("subCategory").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
-            <div class="alert alert-danger fade in ">
-                @flash.get("message").fold("")(message => message)
-                @sessionInfo("date").error.map(error => messages(error.message))
-                @sessionInfo("category").error.map(error => messages(error.message))
-                @sessionInfo("subCategory").error.map(error => messages(error.message))
-                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
-                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
-                @sessionInfo.globalError.map(_.message)
-            </div>
-            }
-        </div>
-        <div class="col-md-4" ></div>
-    </div>-->
 
     <div class="row ">
         <div class="header-container">
@@ -163,129 +145,6 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 login-third update-second">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 " >
-                        <div id="youtubeVideo" class="dropzone" ></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="update-youtube-details">
-                    <label class="col-md-2 control-label">Title</label>
-                    <div class="col-md-10 " >
-                        <input type="text" name="title" id="youtube-title" value='@sessionInfo.data.get("topic")' placeholder="Video title" class="update-field"/>
-                    </div>
-                    <label class="col-md-2 control-label">Description</label>
-                    <div class="col-md-10 " >
-                        <input type="text" name="description" id="youtube-description"  placeholder="Video description" class="update-field"/>
-                    </div>
-                    <label class="col-md-2 control-label">Video tags</label>
-                    <div class="col-md-10 " >
-                        <input type="text" name="tags" id="youtube-tags" data-role="tagsinput" placeholder="Video tags" class="update-field"/>
-                    </div>
-                    <label class="col-md-2 control-label">Video Category</label>
-                    <div class="col-md-10 " >
-                        <select name="category" id="youtube-category" class="update-field login-second">
-                            @for(youtubeCategory <- youtubeCategories) {
-                            <option value="@youtubeCategory.id">@youtubeCategory.name</option>
-                            }
-                        </select>
-                    </div>
-                    <label class="col-md-2 control-label">Video Status</label>
-                    <div class="col-md-10 " >
-                        <select name="status" id="youtube-status" class="update-field login-second">
-                            <option value="private">Private</option>
-                            <option value="public">Public</option>
-                        </select>
-                    </div>
-                    <!--<div class="col-md-10 " >
-                        <p id="successful-update" style="display:none">The details of the video were updated successfully!</p>
-                        <p id="unsuccessful-update" style="display:none">The details of the video were updated successfully!</p>
-                        <input type="button" id="updateVideo" value="Update" class="input-field update-button"/>
-                    </div>-->
-                    <div class="col-md-12 login-four">
-                        <div class="hr-line-dashed"></div>
-                        <div class="col-md-2"></div>
-                        <div class="col-md-2 loader-outer">
-                            <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
-                        </div>
-                        <div class="col-md-6"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="upload-success-message" style="display:none;">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 alert alert-success fade in" >
-                        <p>The video has been successfully uploaded</p>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="upload-failure-message" style="display:none;">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 alert alert-danger fade in" >
-                        <p>The video was not uploaded</p>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 alert alert-success fade in" >
-                        <p>The upload of video was cancelled!</p>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="no-upload-cancel" style="display:none;">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 alert alert-danger fade in" >
-                        <p>There is no upload going on right now!</p>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="already-upload" style="display:none;">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 alert alert-danger fade in" >
-                        <p>There is already an upload going on right now!</p>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second" id="show-progress" style="display:none;">
-                    <div class="col-md-2" ></div>
-                    <div class="col-md-10 " >
-                        <div class="progress">
-                            <div id="progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-four" id="cancel-video-button">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-2 loader-outer">
-                        <input type="button" id="cancelVideo" value="Cancel" class="btn btn-success" style="background-color: #1ab394;"/>
-                    </div>
-                    <div class="col-md-6"></div>
-                </div>
-
-                <div class="col-md-12 login-third update-second">
-                    <label class="col-md-2 control-label">Embed Youtube URL</label>
-                    <div class="col-md-10 " >
-                        <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="Embed YouTube URL" class="update-field"/>
-                    </div>
-                </div>
-
-                <div class="col-md-12 login-third update-second">
-                    <label class="col-md-2 control-label">Embed Slideshare URL</label>
-                    <div class="col-md-10 " >
-                        <input type="text" name="slideShareURL" id="slideShareURL" value='@sessionInfo.data.get("slideShareURL")' placeholder="Embed SlideShare URL" class="update-field"/>
-                    </div>
-                </div>
-
-                <!--<div class="col-md-12 update-second-field login-four" >
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
-                        <input type="submit" value="Save" class="input-field update-button" />
-                    </div>
-                    <div class="col-md-1" ></div>
-                </div>-->
                 <div class="col-md-12">
                 <div class="col-md-2" ></div>
                 <div class="col-md-4" >
@@ -319,6 +178,21 @@
                     </div>
                     }
                 </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <label class="col-md-2 control-label">Embed Youtube URL</label>
+                    <div class="col-md-10 " >
+                        <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="Embed YouTube URL" class="update-field"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 login-third update-second">
+                    <label class="col-md-2 control-label">Embed Slideshare URL</label>
+                    <div class="col-md-10 " >
+                        <input type="text" name="slideShareURL" id="slideShareURL" value='@sessionInfo.data.get("slideShareURL")' placeholder="Embed SlideShare URL" class="update-field"/>
+                    </div>
+                </div>
+
                 <div class="col-md-6" ></div>
                 </div>
                 <div class="col-md-12 login-four">
@@ -329,9 +203,149 @@
                     </div>
                     <div class="col-md-6"></div>
                 </div>
+
             </form>
         </div>
     </div>
+
+<div class="row">
+    <div class="col-md-12 create-outer">
+
+        <div class="col-md-12 login-third update-second form-group">
+            <label class="col-md-2 control-label">Upload Video</label>
+            <div class="col-md-10 " >
+                <div id="youtubeVideo" class="dropzone" ></div>
+            </div>
+        </div>
+
+        <!--<input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+        <input name ="videoId" type="hidden" value='@sessionInfo.data.get("youtubeURL")'/>-->
+        <div class="col-md-12 login-third update-second" id="update-youtube-details">
+            <label class="col-md-2 control-label">Title</label>
+            <div class="col-md-10 form-group" >
+                <input type="text" name="title" id="youtube-title" value='@videoDetails.fold("")(_.title)' placeholder="Video title" class="update-field"/>
+            </div>
+            <label class="col-md-2 control-label">Description</label>
+            <div class="col-md-10 form-group" >
+                <input type="text" name="description" id="youtube-description"  value='@videoDetails.fold("")(_.description.fold("")(identity))' placeholder="Video description" class="update-field"/>
+            </div>
+            <label class="col-md-2 control-label">Video tags</label>
+            <div class="col-md-10 form-group" >
+                <input type="text" name="tags" id="youtube-tags" data-role="tagsinput" value='@videoDetails.fold("")(_.tags.mkString(","))' placeholder="Video tags" class="update-field"/>
+            </div>
+            <label class="col-md-2 control-label">Video Category</label>
+            <div class="col-md-10 form-group" >
+                <select name="category" id="youtube-category" class="update-field">
+                    @for(youtubeCategory <- youtubeCategories) {
+                    <option value="@youtubeCategory.id"
+                        @if(videoDetails.fold("")(_.category) == youtubeCategory.id) {
+                            selected
+                        }
+                    >@youtubeCategory.name</option>
+                    }
+                </select>
+            </div>
+            <label class="col-md-2 control-label">Video Status</label>
+            <div class="col-md-10 form-group" >
+                <select name="status" id="youtube-status" class="update-field login-second">
+                    <option value="private"
+                        @if(videoDetails.fold("")(_.status) == "private") {
+                            selected
+                    }
+                    >Private</option>
+                    <option value="public"
+                        @if(videoDetails.fold("")(_.status) == "public") {
+                            selected
+                    }
+                    >Public</option>
+                </select>
+            </div>
+
+            <div class="col-md-12 login-third update-second" id="successful-update" style="display:none;">
+                <div class="col-md-2" ></div>
+                <div class="col-md-10 alert alert-success alert-dismissable" >
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <p>The video has been successfully updated</p>
+                </div>
+            </div>
+
+            <div class="col-md-12 login-third update-second" id="unsuccessful-update" style="display:none;">
+                <div class="col-md-2" ></div>
+                <div class="col-md-10 alert alert-success alert-dismissable" >
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <p>Something went wrong and the video was not able to be updated</p>
+                </div>
+            </div>
+
+            <div class="col-md-12 login-four">
+                <div class="hr-line-dashed"></div>
+                <div class="col-md-2"></div>
+                <div class="col-md-2 loader-outer">
+                    <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
+                </div>
+                <div class="col-md-6"></div>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="upload-success-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-success alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The video has been successfully uploaded</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="upload-failure-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The video was not uploaded</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-success alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The upload of video was cancelled!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="no-upload-cancel" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>There is no upload going on right now!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="already-upload" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>There is already an upload going on right now!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="show-progress" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 " >
+                <div class="progress">
+                    <div id="progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-four" id="cancel-video-button">
+            <div class="col-md-2"></div>
+            <div class="col-md-2 loader-outer">
+                <input type="button" id="cancelVideo" value="Cancel" class="btn btn-success" style="background-color: #1ab394;"/>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+
+    </div>
+</div>
 
 
     @feedbackforms.feedbackformpreview()

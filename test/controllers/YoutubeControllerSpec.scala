@@ -34,25 +34,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
   abstract class WithTestApplication extends TestEnvironment with Scope {
     lazy val app: Application = fakeApp()
 
-    //val usersRepository = mock[UsersRepository]
     val sessionsRepository = mock[SessionsRepository]
-    //val config = Configuration(ConfigFactory.load("application.conf"))
-    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
-
-    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
-      override def configure(): Unit = {
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("YouTubeUploaderManager"))
-          .toInstance(youtubeUploaderManager)
-
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("YouTubeUploadManager"))
-          .toInstance(youtubeUploadManager)
-
-        bind(classOf[KnolxControllerComponents])
-          .toInstance(knolxControllerComponent)
-      }
-    })*/
 
     lazy val controller =
       new YoutubeController(
@@ -65,7 +47,6 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
     val youtubeUploadManager =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploadManager")))))
-
     val youtubeUploaderManager =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
 

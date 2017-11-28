@@ -2,14 +2,11 @@ package controllers
 
 import com.typesafe.config.ConfigFactory
 import helpers.TestHelpers
-import models.{SessionsRepository, FeedbackFormsResponseRepository, FeedbackFormsRepository, UsersRepository}
-import org.specs2.execute.{AsResult, Result}
+import models.{FeedbackFormsRepository, FeedbackFormsResponseRepository, SessionsRepository, UsersRepository}
 import org.specs2.mock.Mockito
-import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.{Configuration, Application}
+import play.api.Configuration
 import play.api.libs.mailer.MailerClient
-import play.api.mvc._
 import play.api.test.{FakeRequest, PlaySpecification}
 import utilities.DateTimeUtility
 

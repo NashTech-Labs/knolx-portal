@@ -1,30 +1,23 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDateTime, ZoneId, LocalTime, Instant}
-import java.util.{TimeZone, Date}
+import java.time.{Instant, LocalDateTime, LocalTime, ZoneId}
+import java.util.{Date, TimeZone}
 
-import actors._
-import akka.actor.{Props, ActorSystem, ActorRef}
-import com.google.inject.AbstractModule
+import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Names
-import com.typesafe.config.ConfigFactory
 import helpers._
 import models._
-import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
-import org.specs2.mutable.{SpecificationLike, Around}
+import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
-import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.{Configuration, Application}
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
-import play.api.mvc.Results
+import play.api.test.CSRFTokenHelper._
 import play.api.test._
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
-import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,11 +30,11 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtube/URL/id"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val optionOfSessionObject =
     Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtube/URL/id"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
@@ -57,35 +50,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val categoriesRepository = mock[CategoriesRepository]
-    //val usersRepository = mock[UsersRepository]
+
     val dateTimeUtility = mock[DateTimeUtility]
-
-    //val config = Configuration(ConfigFactory.load("application.conf"))
-
-    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
-
-    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
-      override def configure(): Unit = {
-        val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
-        val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
-        val youtubeUploadManager = system.actorOf(Props(new DummyYouTubeUploadManager))
-
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("SessionsScheduler"))
-          .toInstance(sessionsScheduler)
-
-        bind(classOf[ActorRef])
-          .annotatedWith(Names.named("UsersBanScheduler"))
-          .toInstance(usersBanScheduler)
-
-        bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
-        bindActorFactory[DummyYouTubeCategoryActor, ConfiguredYouTubeCategoryActor.Factory]
-        bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
-
-        bind(classOf[KnolxControllerComponents])
-          .toInstance(knolxControllerComponent)
-      }
-    })*/
 
     lazy val app = fakeApp()
 
@@ -410,7 +376,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1", "category",
-        "subCategory", "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+        "subCategory", "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtube/URL/id"), Some("slideShareURL"), reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo

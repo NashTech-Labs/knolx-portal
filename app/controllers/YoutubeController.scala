@@ -11,8 +11,9 @@ import akka.util.Timeout
 import com.google.api.services.youtube.model.Video
 import models.SessionsRepository
 import play.api.Logger
+import play.api.data.Forms._
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc._
 
@@ -26,6 +27,14 @@ case class UpdateVideoDetails(title: String,
                               status: String,
                               category: String)
 
+case class UpdateVideoInfo(sessionId: String,
+                           videoId: String,
+                           title: String,
+                           description: Option[String],
+                           tags: List[String],
+                           status: String,
+                           category: String)
+
 @Singleton
 class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   controllerComponents: KnolxControllerComponents,
@@ -37,6 +46,18 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   implicit val timeout = Timeout(10.seconds)
 
   implicit val questionInformationFormat: OFormat[UpdateVideoDetails] = Json.format[UpdateVideoDetails]
+
+  val updateVideoDetailsForm = Form(
+    mapping(
+      "sessionId" -> nonEmptyText,
+      "videoId" -> nonEmptyText,
+      "title" -> nonEmptyText,
+      "description" -> optional(nonEmptyText),
+      "tags" -> list(text),
+      "status" -> nonEmptyText,
+      "category" -> nonEmptyText
+    )(UpdateVideoInfo.apply)(UpdateVideoInfo.unapply)
+  )
 
   def upload(sessionId: String): Action[AnyContent] = action.async { request =>
     Logger.info("Called uploadFile function" + request)
@@ -52,12 +73,11 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
       } { videoFile =>
         val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
-        Logger.info("-------------------------File size = " + fileSize)
 
         (youtubeUploaderManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
           .mapTo[String]
           .map { message =>
-            if(message.equals("Cant upload any more videos parallely.")) {
+            if (message.equals("Cant upload any more videos parallely.")) {
               BadRequest(message)
             } else {
               Ok(message)

@@ -3,14 +3,10 @@ package actors
 import java.io.InputStream
 import javax.inject.{Inject, Named}
 
-import actors.YouTubeUploader._
 import akka.actor.{Actor, ActorRef}
-import com.google.api.client.http.InputStreamContent
-import com.google.api.services.youtube.model.{Video, VideoSnippet, VideoStatus}
+import com.google.api.services.youtube.model.Video
 import play.api.Logger
 import services.YoutubeService
-
-import scala.collection.JavaConverters._
 
 object ConfiguredYouTubeUploader {
 
@@ -33,7 +29,6 @@ object YouTubeUploader {
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
-                                /*@Named("YouTubeUploadProgress") youtubeUploadProgress: ActorRef,*/
                                @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
                                 youtubeService: YoutubeService) extends Actor {
 
@@ -41,7 +36,8 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadMana
   var sessionVideos: Map[String, Video] = Map.empty
 
   def receive: Receive = {
-    case YouTubeUploader.Upload(sessionId, is, title, description, tags, fileSize) => upload(sessionId, is, title, description, tags, fileSize)
+    case YouTubeUploader.Upload(sessionId, is, title, description, tags, fileSize) =>
+      upload(sessionId, is, title, description, tags, fileSize)
     case msg                                                                       =>
       Logger.info(s"Received a message in YouTubeUploader that cannot be handled $msg")
   }

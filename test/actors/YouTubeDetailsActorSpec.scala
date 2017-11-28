@@ -1,14 +1,10 @@
 package actors
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.api.services.youtube.model.VideoCategory
-import com.google.inject.name.Names
 import helpers.TestEnvironment
-import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
-import play.api.Application
-import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import services.YoutubeService
 
@@ -62,6 +58,14 @@ class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: Act
       youtubeDetailsActor ! videoDetails
 
       expectMsg("Successfully updated the video details")
+    }
+
+    "return details of a video" in new TestScope {
+      youtubeService.getVideoDetails("videoId") returns None
+
+      youtubeDetailsActor ! GetDetails("videoId")
+
+      expectMsg(None)
     }
   }
 }

@@ -4,7 +4,7 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
-import actors.Categories
+import actors.{Categories, GetDetails}
 import actors.SessionsScheduler._
 import actors.UsersBanScheduler._
 import akka.actor.ActorRef
@@ -397,8 +397,16 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                     VideoCategories(cat.getId, cat.getSnippet.getTitle)
                   }
                 }
-              eventualYoutubeCategories.map { youtubeCategories =>
-                Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories))
+              eventualYoutubeCategories.flatMap { youtubeCategories =>
+                sessionInformation.youtubeURL.fold {
+                  Future.successful(Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, None)))
+                } { videoURL =>
+                  val videoId = videoURL.split("/")(2)
+                  (youtubeUploaderManager ? GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
+                    .map { videoDetails =>
+                      Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, videoDetails))
+                    }
+                }
               }
             }
 
@@ -420,8 +428,22 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 }
               }
             Logger.error(s"Received a bad request for getByEmail session $formWithErrors")
-            eventualYoutubeCategories.map { youtubeCategories =>
-              BadRequest(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories))
+            eventualYoutubeCategories.flatMap { youtubeCategories =>
+              val youtubeURL = formWithErrors.value.fold{
+                val maybeForm: Option[String] = None
+                maybeForm
+              } {updateSessionInfo =>
+                updateSessionInfo.youtubeURL
+              }
+              youtubeURL.fold{
+                Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, None)))
+              } { url =>
+                val videoId = url.split("/")(2)
+                (youtubeUploaderManager ? GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
+                  .map { videoDetails =>
+                    Ok(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, videoDetails))
+                  }
+              }
             }
           },
           updateSessionInfo => {

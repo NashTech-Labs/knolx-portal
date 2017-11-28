@@ -46,24 +46,9 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(currentMillis), 0, _id)))
 
   abstract class WithTestApplication extends TestEnvironment with Scope {
-    //val usersRepository = mock[UsersRepository]
     val forgotPasswordRepository = mock[ForgotPasswordRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val mailerClient = mock[MailerClient]
-
-    //val config = Configuration(ConfigFactory.load("application.conf"))
-
-    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
-
-    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
-      override def configure(): Unit = {
-        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
-        bindActor[EmailManager]("EmailManager")
-
-        bind(classOf[KnolxControllerComponents])
-          .toInstance(knolxControllerComponent)
-      }
-    })*/
 
     lazy val app: Application = fakeApp()
 

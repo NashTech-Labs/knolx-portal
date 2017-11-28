@@ -136,6 +136,7 @@ function showProgress(sessionId) {
                         $("#progress").width('0%');
                         $("#progress").text('0%');
                         uploading = false;
+                        $("#youtubeVideo").show();
                         fillYoutubeEmbedURL(sessionId);
                     } else {
                     var percentageUploaded = data;
@@ -167,6 +168,7 @@ function cancelVideo(sessionId) {
                 $("#progress").text('0%');
                 $("#cancel-message").show();
                 $("#youtubeVideo").show();
+                $("#cancel-video-button").hide();
             },
             error: function(er) {
                 $("#upload-success-message").hide();
@@ -190,6 +192,7 @@ function fillYoutubeEmbedURL(sessionId) {
                 var videoId = JSON.parse(data);
                 console.log("Setting embedded URL for youtube")
                 $("#youtubeURL").val("www.youtube.com/embed/" + videoId);
+                $("#videoId").val(videoId);
                 $("#update-youtube-details").show();
                 $("#youtubeVideo").show();
                 storeVideoURL(sessionId);
@@ -249,9 +252,11 @@ function update(sessionId) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
+                $("#successful-update").show();
                 console.log("Successfully Completed & data received was = " + data);
             },
             error: function(er) {
+                $("#unsuccessful-update").show();
                 console.log("Error occurred: " + er);
             }
         });

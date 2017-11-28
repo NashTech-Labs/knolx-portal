@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import akka.actor.Actor
 import com.google.api.services.youtube.model.VideoCategory
+import controllers.UpdateVideoDetails
 import services.YoutubeService
 
 
@@ -24,17 +25,19 @@ case class VideoDetails(videoId: String,
                         status: String,
                         category: String)
 
+case class GetDetails(videoId: String)
+
 class YouTubeDetailsActor @Inject()(youtubeService: YoutubeService) extends Actor {
 
   override def receive: Receive = {
-    case Categories                 => sender() ! returnCategoryList
-    case videoDetails: VideoDetails => sender() ! update(videoDetails)
+    case Categories                  => sender() ! returnCategoryList
+    case videoDetails: VideoDetails  => sender() ! update(videoDetails)
+    case GetDetails(videoId: String) => sender() ! getVideoDetails(videoId)
   }
 
-  def returnCategoryList: List[VideoCategory] = {
-    youtubeService.getCategoryList
-  }
+  def returnCategoryList: List[VideoCategory] = youtubeService.getCategoryList
 
   def update(videoDetails: VideoDetails): String = youtubeService.update(videoDetails)
 
+  def getVideoDetails(videoId: String): Option[UpdateVideoDetails] = youtubeService.getVideoDetails(videoId)
 }

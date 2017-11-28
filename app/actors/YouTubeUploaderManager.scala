@@ -4,8 +4,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Stop
-import akka.actor.{Actor, OneForOneStrategy, Props}
-import org.apache.commons.mail.EmailException
+import akka.actor.{Actor, OneForOneStrategy}
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -30,12 +29,10 @@ class YouTubeUploaderManager @Inject()(
   override def receive: Receive = {
     case request: YouTubeUploader.Upload =>
       if(noOfActors < limit) {
-        Logger.info(s"Current number of actors is $noOfActors")
         val youTubeUploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
         noOfActors+=1
         youTubeUploader forward request
       } else {
-        Logger.info("Cant upload any more videos parallely.")
         sender() ! "Cant upload any more videos parallely."
       }
     case Done => noOfActors-=1
@@ -46,6 +43,9 @@ class YouTubeUploaderManager @Inject()(
     case Categories                                                                       =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward Categories
+    case request: GetDetails =>
+      val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
+      youTubeDetailsActor forward request
     case msg                                                                                       =>
       Logger.info(s"Received a message in YouTubeUploaderManager that cannot be handled $msg")
   }

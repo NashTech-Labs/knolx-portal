@@ -61,23 +61,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val feedbackResponseRepository = mock[FeedbackFormsResponseRepository]
     val sessionsRepository = mock[SessionsRepository]
-    //val usersRepository = mock[UsersRepository]
+
     val mailerClient = mock[MailerClient]
     val dateTimeUtility = mock[DateTimeUtility]
-
-    //val config = Configuration(ConfigFactory.load("application.conf"))
-
-    //val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
-
-    /*val testModule = Option(new AbstractModule with AkkaGuiceSupport {
-      override def configure(): Unit = {
-        bindActorFactory[TestEmailActor, ConfiguredEmailActor.Factory]
-        bindActor[EmailManager]("EmailManager")
-
-        bind(classOf[KnolxControllerComponents])
-          .toInstance(knolxControllerComponent)
-      }
-    })*/
 
     lazy val app = fakeApp()
     lazy val emailManager = app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))

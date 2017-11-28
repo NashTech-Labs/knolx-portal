@@ -4,7 +4,6 @@ import java.io.InputStream
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import com.google.api.services.youtube.model.{Video, VideoSnippet}
 import com.google.inject.name.Names
 import helpers.TestEnvironment
 import org.specs2.specification.Scope

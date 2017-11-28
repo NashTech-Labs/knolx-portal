@@ -4,22 +4,19 @@ import java.io.InputStream
 
 import actors.VideoDetails
 import akka.actor.ActorRef
-import akka.http.scaladsl.model.HttpRequest
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.media.MediaHttpUploader
-import com.google.api.client.http.{AbstractInputStreamContent, HttpRequestInitializer, InputStreamContent}
 import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.http.{AbstractInputStreamContent, HttpRequestInitializer, InputStreamContent}
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
-import com.google.api.services.youtube.model.{Video, VideoCategory, VideoCategoryListResponse, VideoSnippet}
+import com.google.api.services.youtube.model.{Video, VideoCategory, VideoSnippet}
 import com.google.inject.name.Names
 import helpers.TestEnvironment
 import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
-
-import scala.collection.JavaConverters._
 
 class YoutubeServiceSpec extends Specification {
 
@@ -64,7 +61,7 @@ class YoutubeServiceSpec extends Specification {
       videoCategories.list("snippet") returns videoCategoriesList
 
       videoCategoriesList.setRegionCode("IN") returns videoCategoriesList
-      youtubeConfig.execute(videoCategoriesList) returns List[VideoCategory]()
+      youtubeConfig.executeCategoryList(videoCategoriesList) returns List[VideoCategory]()
 
       val result = service.getCategoryList
 
@@ -133,6 +130,22 @@ class YoutubeServiceSpec extends Specification {
       val result = service.update(videoDetails)
 
       result must be equalTo "Successfully updated the video details"
+    }
+
+    "return video details" in new WithTestApplication {
+      val listOfVideos = mock[YouTube#Videos#List]
+
+      youtubeConfig.youtube returns youtube
+      youtube.videos() returns videos
+      youtubeConfig.part returns "part"
+
+      videos.list("part") returns listOfVideos
+      listOfVideos.setId("videoId") returns listOfVideos
+      youtubeConfig.getVideoDetails(listOfVideos) returns List()
+
+      val result = service.getVideoDetails("videoId")
+
+      result must be equalTo None
     }
   }
 }

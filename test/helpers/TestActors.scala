@@ -49,7 +49,7 @@ class DummyYouTubeUploadManager extends Actor {
 class DummyYouTubeUploader extends Actor {
 
   override def receive: Receive = {
-    case request: YouTubeUploader.Upload       => sender() ! request
+    case request: YouTubeUploader.Upload => sender() ! request
   }
 
 }
@@ -57,7 +57,7 @@ class DummyYouTubeUploader extends Actor {
 class DummyYouTubeDetailsActor extends Actor {
 
   override def receive: Receive = {
-    case Categories => sender() ! List[VideoCategory]()
+    case Categories            => sender() ! List[VideoCategory]()
     case request: VideoDetails => sender() ! request
   }
 
@@ -66,11 +66,12 @@ class DummyYouTubeDetailsActor extends Actor {
 class DummyYouTubeUploaderManager extends Actor {
 
   override def receive: Receive = {
-    case request: YouTubeUploader.Upload       => sender() ! "Upload started"
-    case request: VideoDetails => sender() ! "Updated video details"
-    case Categories                            =>
+    case request: YouTubeUploader.Upload => sender() ! "Upload started"
+    case request: VideoDetails           => sender() ! "Updated video details"
+    case Categories                      =>
       val videoCategorySnippet = new VideoCategorySnippet().setTitle("Education")
       sender() ! List(new VideoCategory().setSnippet(videoCategorySnippet).setId("12"))
-    case _                                     => sender() ! "What?!?!?!"
+    case request: GetDetails             => sender() ! None
+    case _                               => sender() ! "What?!?!?!"
   }
 }

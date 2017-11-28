@@ -2,25 +2,19 @@ package actors
 
 import java.io.InputStream
 
-import actors.SessionsScheduler.ScheduledSessions
-import akka.actor.{ActorRef, ActorSystem, Scheduler}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.api.client.googleapis.media.MediaHttpUploader
-import com.google.api.client.googleapis.media.MediaHttpUploader.UploadState
-import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.http._
+import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.services.youtube.model.Video
 import com.google.inject.name.Names
 import helpers.TestEnvironment
-import models.{FeedbackFormsResponseRepository, SessionsRepository}
-import org.specs2.mutable.Specification
 import org.specs2.specification.Scope
 import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import reactivemongo.bson.BSONObjectID
-import utilities.DateTimeUtility
 
 import scala.concurrent.duration._
 
@@ -98,16 +92,6 @@ class YouTubeUploadManagerSpec(_system: ActorSystem) extends TestKit(_system: Ac
 
       result must be equalTo Some(100D)
     }
-
-    /*"return 100 when video has been uploaded for the session and the uploader is still in sessionUploaders" in new TestScope {
-
-      youtubeUploadManager.underlyingActor.sessionUploaders += sessionId -> mediaHttpUploader
-      mediaHttpUploader.getUploadState returns UploadState.MEDIA_COMPLETE
-
-      val result: Option[Double] = await((youtubeUploadManager ? YouTubeUploadManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
-
-      result must be equalTo Some(100D)
-    }*/
 
     "return video for the session" in new TestScope {
 

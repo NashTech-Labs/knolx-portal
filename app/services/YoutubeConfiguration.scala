@@ -15,6 +15,7 @@ import com.google.api.client.util.store.{DataStore, FileDataStoreFactory}
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model._
 import com.google.common.collect.Lists
+import controllers.UpdateVideoDetails
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -36,52 +37,10 @@ class YoutubeConfiguration {
   private val scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube")
   private val credential = authorize(scopes)
-  val youtube =
+  val youtube: YouTube =
     new YouTube.Builder(httpTransport, jsonFactory, credential)
       .setApplicationName("Knolx Portal")
       .build()
-
-  /*private def authorize(scopes: util.List[String]): Credential = {
-    val fileDataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home") + "/" + credentialsDirectory))
-    val dataStore: DataStore[StoredCredential] = fileDataStoreFactory.getDataStore(credentialDataStore)
-
-    val flow =
-      new GoogleAuthorizationCodeFlow
-      .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
-        .setCredentialDataStore(dataStore).build()
-
-    /*val conf = ConfigFactory.load()
-
-    val refreshToken = conf.getString("youtube.refreshToken")
-
-    val response = new TokenResponse
-
-    response.setRefreshToken(refreshToken)
-
-    flow.createAndStoreCredential(response, "user")*/
-
-    /*new GoogleCredential.Builder()
-        .setTransport(httpTransport)
-        .setJsonFactory(jsonFactory)
-        .setServiceAccountId("test-knolx-portal@knolx-portal-test-account.iam.gserviceaccount.com")
-        .setServiceAccountPrivateKeyFromP12File(new File("/home/knoldus/Downloads/Knolx Portal Test Account-cff9269f23ec.p12"))
-        .setServiceAccountScopes(scopes)
-        .setServiceAccountUser("isanythingallowed999@gmail.com")
-        .build()*/
-
-    /*new GoogleCredential.Builder()
-      .setTransport(httpTransport)
-      .setJsonFactory(JSON_FACTORY)
-      .setServiceAccountId(emailAddress)
-      .setServiceAccountPrivateKeyFromP12File(new File("MyProject.p12"))
-      .setServiceAccountScopes(Collections.singleton(SQLAdminScopes.SQLSERVICE_ADMIN))
-      .setServiceAccountUser("user@example.com")
-      .build()*/
-
-    val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
-
-    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
-  }*/
 
   private def authorize(scopes: util.List[String]): Credential = {
     val fileDataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home") + "/" + credentialsDirectory))
@@ -114,9 +73,11 @@ class YoutubeConfiguration {
 
   }
 
-  def execute(a: YouTube#VideoCategories#List): List[VideoCategory] = {
-    a.execute().getItems.toList
-  }
+  def executeCategoryList(listOfYoutubeCategories: YouTube#VideoCategories#List): List[VideoCategory] =
+    listOfYoutubeCategories
+      .execute()
+      .getItems
+      .toList
 
   def getVideoSnippet(title: String,
                       description: Option[String],
@@ -124,11 +85,11 @@ class YoutubeConfiguration {
                       categoryId: String = ""): VideoSnippet = {
     val videoSnippet =
       new VideoSnippet()
-      .setTitle(title)
-      .setDescription(description.getOrElse(""))
-      .setTags(tags.asJava)
+        .setTitle(title)
+        .setDescription(description.getOrElse(""))
+        .setTags(tags.asJava)
 
-    if(categoryId.isEmpty) videoSnippet else videoSnippet.setCategoryId(categoryId)
+    if (categoryId.isEmpty) videoSnippet else videoSnippet.setCategoryId(categoryId)
   }
 
   def getVideo(snippet: VideoSnippet, status: String, videoId: String = ""): Video = {
@@ -137,7 +98,7 @@ class YoutubeConfiguration {
         .setSnippet(snippet)
         .setStatus(new VideoStatus().setPrivacyStatus(status))
 
-    if(videoId.isEmpty) video else video.setId(videoId)
+    if (videoId.isEmpty) video else video.setId(videoId)
   }
 
   def getInputStreamContent(is: InputStream, fileSize: Long): InputStreamContent =
@@ -148,4 +109,21 @@ class YoutubeConfiguration {
       .getMediaHttpUploader
       .setDirectUploadEnabled(false)
       .setChunkSize(chunkSize)
+
+  def getVideoDetails(listToExecute: YouTube#Videos#List): List[UpdateVideoDetails] = {
+    listToExecute
+      .execute().getItems.toList.map { video =>
+      val tags: List[String] = Option(video.getSnippet.getTags).fold {
+        val noTags: List[String] = Nil
+        noTags
+      } {
+        _.toList
+      }
+      UpdateVideoDetails(video.getSnippet.getTitle,
+        Some(video.getSnippet.getDescription),
+        tags,
+        video.getStatus.getPrivacyStatus,
+        video.getSnippet.getCategoryId)
+    }
+  }
 }

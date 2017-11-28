@@ -12,7 +12,7 @@ import com.google.api.services.youtube.model.Video
 import com.google.inject.name.Names
 import helpers.TestEnvironment
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.{Application, Logger}
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
@@ -29,7 +29,8 @@ class YouTubeUploadManagerSpec(_system: ActorSystem) extends TestKit(_system: Ac
   })
 
   private val requestInitializer = new HttpRequestInitializer {
-    override def initialize(request: HttpRequest): Unit = ???
+    override def initialize(request: HttpRequest): Unit =
+      Logger.info("Performing unit action")
   }
 
   private val mediaHttpUploader = new MediaHttpUploader(abstractIS, new NetHttpTransport, requestInitializer)

@@ -60,8 +60,6 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   )
 
   def upload(sessionId: String): Action[AnyContent] = action.async { request =>
-    Logger.info("Called uploadFile function" + request)
-
     request.body.asMultipartFormData.fold {
       Logger.error(s"Something went wrong when getting multipart form data")
 

@@ -1,7 +1,6 @@
 a, a:hover, a:focus {
     color: inherit;
     text-decoration: none;
-    transition: all 0.5s;
 }
 
 .navbar {
@@ -26,11 +25,14 @@ i, span {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
+    max-height: 95%;
+    min-height: 95%;
     z-index: 999;
     background: #2f4050;
     color: #fff;
     transition: width 0.5s ease-in-out;
+    overflow-x: hidden !important;
+    overflow-y:scroll  ;
 }
 
 #sidebar.active {
@@ -45,7 +47,7 @@ i, span {
 }
 
 #sidebar.active ul li a {
-    padding: 20px 10px;
+    padding: 10px;
     text-align: center;
     font-size: 0.85em;
 }
@@ -53,7 +55,7 @@ i, span {
 #sidebar.active ul li a i {
     margin-right:  0;
     display: block;
-    font-size: 1.8em;
+    font-size: 1.1em;
     margin-bottom: 5px;
 }
 
@@ -103,7 +105,7 @@ i, span {
 
 #sidebar ul li a {
     padding: 10px;
-    font-size: 1.1em;
+    font-size: 1.1em !important;
     display: block;
 }
 
@@ -271,9 +273,10 @@ html,body{
 }
 
 .container-knolx {
+    margin-bottom: 50px !important;
     width:100%;
-    padding-left: 35px !important;
-    padding-right: 0 !important;
+    padding-left: 40px !important;
+    padding-right: 10px !important;
     margin-right: 0 !important;
     margin-left: 0 !important;
 }

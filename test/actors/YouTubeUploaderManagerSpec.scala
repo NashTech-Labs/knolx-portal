@@ -10,7 +10,7 @@ import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.{Application, Configuration}
 import play.api.inject.BindingKey
 import play.api.libs.Files
 import play.api.libs.concurrent.InjectedActorSupport
@@ -22,6 +22,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
   with Mockito with ImplicitSender with BeforeAndAfterAll {
 
   private val sessionId = "SessionId"
+  val configuration = mock[Configuration]
 
   def this() = this(ActorSystem("MySpec"))
 
@@ -52,14 +53,14 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     }
 
     val youtubeUploaderManager =
-      TestActorRef(new YouTubeUploaderManager(DummyYouTubeUploaderFactory, DummyYouTubeDetailsActorFactory) with TestInjectedActorSupport)
+      TestActorRef(new YouTubeUploaderManager(DummyYouTubeUploaderFactory, DummyYouTubeDetailsActorFactory, configuration) with TestInjectedActorSupport)
   }
 
   abstract class IntegrationTestScope extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
     lazy val configuredYoutubeUploader = app.injector.instanceOf(BindingKey(classOf[ConfiguredYouTubeUploader.Factory]))
     lazy val configuredYoutubeDetailsActor = app.injector.instanceOf(BindingKey(classOf[ConfiguredYouTubeDetailsActor.Factory]))
-    lazy val youtubeUploaderManager = TestActorRef(new YouTubeUploaderManager(configuredYoutubeUploader, configuredYoutubeDetailsActor))
+    lazy val youtubeUploaderManager = TestActorRef(new YouTubeUploaderManager(configuredYoutubeUploader, configuredYoutubeDetailsActor, configuration))
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
@@ -76,6 +77,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     // Unit tests
     // =================================================================================================================
     "forward request to youtube uploader" in new UnitTestScope {
+      configuration.get[Int]("youtube.actors.limit") returns 5
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)

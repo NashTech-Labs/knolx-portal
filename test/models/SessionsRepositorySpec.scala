@@ -2,7 +2,7 @@ package models
 
 import java.text.SimpleDateFormat
 
-import controllers.UpdateSessionInformation
+import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats.{ExpiringNext, ExpiringNextNotReminded, SchedulingNext, SchedulingNextUnNotified}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
@@ -19,11 +19,19 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
   private val sessionId = BSONObjectID.generate
   private val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
   private val currentDateString = "2017-07-12T14:30:00"
+  private val startDateString = "2017-07-10T14:30:00"
+  private val startDate = formatter.parse(startDateString).getTime
+  private val endDateString = "2017-07-13T23:59:00"
+  private val endDate = formatter.parse(endDateString).getTime
   private val currentDate = formatter.parse(currentDateString)
   private val currentMillis = currentDate.getTime
   private val endOfDayDateString = "2017-07-12T23:59:59"
   private val endOfDayDate = formatter.parse(endOfDayDateString)
   private val endOfDayMillis = endOfDayDate.getTime
+  private val yearMonthFormatDB = new SimpleDateFormat("yyyy-MM")
+  private val yearMonthFormat = new SimpleDateFormat("yyyy-MMMM")
+  private val utilDate = yearMonthFormatDB.parse(currentDateString)
+  private val yearMonth= yearMonthFormat.format(utilDate)
 
   val sessionInfo = SessionInfo("testId1", "test@example.com", BSONDateTime(currentMillis), "session1", "category", "subCategory", "feedbackFormId", "topic1",
     1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, sessionId)
@@ -212,6 +220,14 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       val result: UpdateWriteResult = await(sessionsRepository.updateRating(sessionId.stringify, List(90.00)))
 
       result.ok must beEqualTo(true)
+    }
+
+    "return session monthly Info" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+
+      val result: List[(String, Int)] = await(sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, startDate, endDate)))
+
+      result must beEqualTo(List(("2017-07", 4)))
     }
   }
 

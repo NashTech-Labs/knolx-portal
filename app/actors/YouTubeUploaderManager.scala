@@ -18,7 +18,7 @@ class YouTubeUploaderManager @Inject()(
                                       ) extends Actor with InjectedActorSupport {
 
   var noOfActors = 0
-  val limit = configuration.get[Int]("youtube.actors.limit")
+  lazy val limit: Int = configuration.get[Int]("youtube.actors.limit")
 
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {

@@ -142,7 +142,7 @@ function loadFeedbackForm(values, sessionId) {
             if(options[optionNumber] == "Did not attend") {
                 continue;
             } else {
-                optionsLoaded += "<div class='row questions-inlining'>" +
+                optionsLoaded += "<div class='row questions-inlining'  style='width: auto !important;'>" +
                     "<div class='col-md-1'></div>" +
                     "<div style='display: inline-flex; width:auto; text-align:center'>" +
                     "<p class='checkbox-text form-card-options' style='margin-top: 6px !important;'>" + options[optionNumber] +
@@ -157,7 +157,7 @@ function loadFeedbackForm(values, sessionId) {
             }
         }
         else {
-            optionsLoaded += "<div class='row option-questions '>" +
+            optionsLoaded += "<div class='row option-questions ' style='width: auto !important;'>" +
                 "<div class='col-md-1'></div>" +
                 "<div class='col-md-10'>" +
                 "​<textarea class='comments' rows='2' id='option-" + questionNumber + "' cols='70' placeholder='Edit Comment Here!'></textarea>" +

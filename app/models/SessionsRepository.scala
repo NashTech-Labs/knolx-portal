@@ -364,14 +364,12 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def updateSubCategoryOnChange(subCategory : String,updateSubCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("subCategory" -> subCategory)
     val modifier = BSONDocument("$set" -> BSONDocument("subCategory" -> updateSubCategory))
-
     collection.flatMap(_.update(selector,modifier,multi=true))
   }
 
   def updateCategoryOnChange(category : String,updateCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("category" -> category)
     val modifier = BSONDocument("$set" -> BSONDocument("category" -> updateCategory))
-
     collection.flatMap(_.update(selector,modifier,multi=true))
   }
 

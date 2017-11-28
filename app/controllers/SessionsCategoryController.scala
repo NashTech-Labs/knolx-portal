@@ -1,8 +1,8 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-
 import models._
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
@@ -41,8 +41,10 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
         } else {
           categoriesRepository.insertCategory(categoryName).map { result =>
             if (result.ok) {
+              Logger.info(s"Primary category was successfully added $categoryName")
               Ok("Primary category was successfully added")
             } else {
+              Logger.error(s"Something went wrong while adding primary category $categoryName")
               BadRequest("Primary category cannot be added due to some error")
             }
           }
@@ -67,8 +69,10 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
               val subCategoryInfo = CategoryInfo(categoryName, List(subCategory), categoryInfo._id)
               categoriesRepository.upsert(subCategoryInfo).map { result =>
                 if (result.ok) {
+                  Logger.info(s"Sub-category was successfully added $subCategory")
                   Ok("Sub-category was successfully added")
                 } else {
+                  Logger.error(s"Something went wrong while adding sub-category $subCategory")
                   BadRequest("Unsuccessful sub-category added")
                 }
               }
@@ -90,9 +94,11 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
           if (session.ok) {
             categoriesRepository.modifyPrimaryCategory(category._id.stringify, newCategoryName).map { result =>
               if (result.ok) {
+                Logger.info(s"Primary category was successfully modified $newCategoryName")
                 Ok("Primary category was successfully modified")
               } else {
-                BadRequest("Unsuccessfully attempt to modify primary category")
+                Logger.error(s"Something went wrong while modifying primary category $newCategoryName")
+                BadRequest("Unsuccessful attempt to modify primary category")
               }
             }
           } else {
@@ -122,8 +128,10 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
                 categoriesRepository.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).map {
                   result =>
                     if (result.ok) {
+                      Logger.info(s"Sub-category was successfully modified $newSubCategoryName")
                       Ok("Successfully Modified sub category")
                     } else {
+                      Logger.error(s"Something went wrong while modifying sub-category $newSubCategoryName")
                       BadRequest("Got an error while modifying sub category")
                     }
                 }
@@ -155,8 +163,10 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
                 if (session.ok) {
                   categoriesRepository.deletePrimaryCategory(category._id.stringify).map { result =>
                     if (result.ok) {
+                      Logger.info(s"Primary category with categoryId $categoryId was successfully deleted")
                       Ok("Primary category was successfully deleted")
                     } else {
+                      Logger.error(s"Something went wrong while deleting primary category with category Id $categoryId")
                       BadRequest("Got an error while deleting")
                     }
                   }
@@ -198,8 +208,10 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
         if (sessions.ok) {
           categoriesRepository.deleteSubCategory(categoryName, subCategory).flatMap { result =>
             if (result.ok) {
+              Logger.info(s"Sub-category was successfully deleted $subCategory")
               Future.successful(Ok("Sub-category was successfully deleted"))
             } else {
+              Logger.error(s"Something went wrong while deleting $subCategory")
               Future.successful(BadRequest("Something went wrong! unable to delete category"))
             }
           }

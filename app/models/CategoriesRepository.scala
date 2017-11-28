@@ -10,7 +10,7 @@ import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import models.CategoriesJsonFormats._
 import play.api.Logger
-import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
+import play.api.libs.json.JsArray
 import models.CategoriesJsonFormats._
 import play.api.libs.json.Json
 
@@ -70,8 +70,6 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def modifySubCategory(categoryName: String, oldSubCategoryName: String,
                         newSubCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-
-    Logger.info("Inside models modifySubCategory")
     val selector = BSONDocument("categoryName" -> categoryName,"subCategory" -> oldSubCategoryName)
     val modifier = BSONDocument("$set" -> BSONDocument(
       "subCategory.$" -> newSubCategoryName
@@ -95,13 +93,11 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def deleteSubCategory(categoryName: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    Logger.info("Delete sub category")
     val selector = BSONDocument("categoryName" -> categoryName)
     val modifier = BSONDocument("$pull" -> BSONDocument(
       "subCategory"-> subCategory))
     Logger.info("At end delete sub category")
     collection.flatMap(_.update(selector, modifier, multi = true))
-
   }
 
 }

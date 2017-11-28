@@ -79,7 +79,6 @@ object SessionValues {
 class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
-                                   categoriesRepository: CategoriesRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
@@ -89,7 +88,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
-  implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   val sessionSearchForm = Form(
     mapping(

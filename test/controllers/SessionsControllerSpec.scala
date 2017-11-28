@@ -54,13 +54,11 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         knolxControllerComponent.messagesApi,
         usersRepository,
         sessionsRepository,
-        categoriesRepository,
         feedbackFormsRepository,
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
         usersBanScheduler)
-    val categoriesRepository = mock[CategoriesRepository]
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val dateTimeUtility = mock[DateTimeUtility]

@@ -211,20 +211,23 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   }
 
   def getSubCategoryByPrimaryCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
-    if (categoryName.trim().isEmpty) {
+    val cleanedCategoryName = categoryName.trim
+
+    if (cleanedCategoryName.isEmpty) {
       Future.successful(BadRequest("Please select a valid primary category"))
     } else {
-      categoriesRepository.getCategories.map {
-        categories =>
-          val subCategoryList = categories.filter {
-            category => category.categoryName == categoryName
-          }.flatMap(_.subCategory)
+      categoriesRepository
+        .getCategories
+        .map { categories =>
+          val subCategoryList =
+            categories.filter(category => category.categoryName.toLowerCase == cleanedCategoryName.toLowerCase).flatMap(_.subCategory)
+
           if (subCategoryList.isEmpty) {
             BadRequest(Json.toJson(subCategoryList).toString)
           } else {
             Ok(Json.toJson(subCategoryList).toString())
           }
-      }
+        }
     }
   }
 

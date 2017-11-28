@@ -28,6 +28,8 @@
             @helper.CSRF.formField
 
                 <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+                <input id="primary-category" value='@sessionInfo.data.get("category")' type="hidden" />
+                <input id="sub-category" value='@sessionInfo.data.get("subCategory")' type="hidden" />
 
                 <div class="col-md-12" >
                     <div class="col-md-1" ></div>

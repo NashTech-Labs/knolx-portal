@@ -95,27 +95,29 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   }
 
   def modifyPrimaryCategory(categoryId: String, newCategoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
-    if (newCategoryName.trim().isEmpty) {
+    if (newCategoryName.trim.isEmpty) {
       Future.successful(BadRequest("Modify primary category cannot be empty"))
     } else {
-      categoriesRepository.getCategories.flatMap { result =>
-        val category = result.filter(c => c._id.stringify == categoryId).head
-        sessionsRepository.updateCategoryOnChange(category.categoryName, newCategoryName).flatMap { session =>
-          if (session.ok) {
-            categoriesRepository.modifyPrimaryCategory(category._id.stringify, newCategoryName).map { result =>
-              if (result.ok) {
-                Logger.info(s"Primary category was successfully modified $newCategoryName")
-                Ok("Primary category was successfully modified")
-              } else {
-                Logger.error(s"Something went wrong while modifying primary category $newCategoryName")
-                BadRequest("Unsuccessful attempt to modify primary category")
+      categoriesRepository
+        .getCategories
+        .flatMap { categories =>
+          val category = categories.filter(_._id.stringify == categoryId).head
+          sessionsRepository.updateCategoryOnChange(category.categoryName, newCategoryName).flatMap { session =>
+            if (session.ok) {
+              categoriesRepository.modifyPrimaryCategory(category._id.stringify, newCategoryName).map { result =>
+                if (result.ok) {
+                  Logger.info(s"Primary category was successfully modified $newCategoryName")
+                  Ok("Primary category was successfully modified")
+                } else {
+                  Logger.error(s"Something went wrong while modifying primary category $newCategoryName")
+                  BadRequest("Unsuccessful attempt to modify primary category")
+                }
               }
+            } else {
+              Future.successful(BadRequest("Update on session table was unsuccessful"))
             }
-          } else {
-            Future.successful(BadRequest("Update on session table was unsuccessful"))
           }
         }
-      }
     }
   }
 

@@ -130,36 +130,43 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   def modifySubCategory(categoryName: String,
                         oldSubCategoryName: String,
                         newSubCategoryName: String): Action[AnyContent] = adminAction.async { implicit request =>
-    if (newSubCategoryName.trim.isEmpty) {
+    val cleanSubCategory = newSubCategoryName.trim
+
+    if (cleanSubCategory.isEmpty) {
       Future.successful(BadRequest("Modify sub-category cannot be empty"))
     } else {
-      categoriesRepository.getCategories.flatMap {
-        categories =>
-          val subCategoryList = categories.filter {
-            category => category.categoryName.toLowerCase == categoryName.toLowerCase
-          }.flatMap(_.subCategory)
-          val check = subCategoryList.contains(newSubCategoryName)
-          if (check) {
+      categoriesRepository
+        .getCategories
+        .flatMap { categories =>
+          val subCategoryList =
+            categories.filter(_.categoryName.toLowerCase == categoryName.toLowerCase).flatMap(_.subCategory.map(_.toLowerCase))
+          val subCategoryExists = subCategoryList.contains(cleanSubCategory.toLowerCase)
+
+          if (subCategoryExists) {
             Future.successful(BadRequest("Sub-category already exists"))
           } else {
-            sessionsRepository.updateSubCategoryOnChange(oldSubCategoryName, newSubCategoryName).flatMap { session =>
-              if (session.ok) {
-                categoriesRepository.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).map {
-                  result =>
-                    if (result.ok) {
-                      Logger.info(s"Sub-category was successfully modified $newSubCategoryName")
-                      Ok("Successfully Modified sub category")
-                    } else {
-                      Logger.error(s"Something went wrong while modifying sub-category $newSubCategoryName")
-                      BadRequest("Got an error while modifying sub category")
+            sessionsRepository
+              .updateSubCategoryOnChange(oldSubCategoryName, newSubCategoryName)
+              .flatMap { session =>
+                if (session.ok) {
+                  categoriesRepository
+                    .modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
+                    .map {
+                      result =>
+                        if (result.ok) {
+                          Logger.info(s"Sub-category was successfully modified $newSubCategoryName")
+                          Ok("Successfully Modified sub category")
+                        } else {
+                          Logger.error(s"Something went wrong while modifying sub-category $newSubCategoryName")
+                          BadRequest("Got an error while modifying sub category")
+                        }
                     }
+                } else {
+                  Future.successful(BadRequest("Got an error on updating session table"))
                 }
-              } else {
-                Future.successful(BadRequest("Got an error on updating session table"))
               }
-            }
           }
-      }
+        }
     }
   }
 

@@ -1,6 +1,6 @@
 $(function () {
     var startDate = moment().subtract(1, 'years').startOf('day').format('YYYY-MM-DD HH:mm').toString();
-    var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
+    var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm').toString();
 
     if (sessionStorage.startDate === undefined) {
         sessionStorage.setItem("startDate", startDate);

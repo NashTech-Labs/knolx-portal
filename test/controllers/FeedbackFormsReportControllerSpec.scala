@@ -2,11 +2,14 @@ package controllers
 
 import java.text.SimpleDateFormat
 
+import com.google.inject.AbstractModule
+import com.typesafe.config.ConfigFactory
+import helpers.TestHelpers
 import models._
-import org.specs2.execute.{AsResult, Result}
-import org.specs2.mutable.Around
+import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.Configuration
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.mailer.MailerClient
 import play.api.test.CSRFTokenHelper._
 import play.api.test.{FakeRequest, PlaySpecification}
@@ -16,7 +19,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvironment {
+class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
 
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
@@ -41,11 +44,28 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     0.00,
     _id)
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp()
+  trait TestScope extends Scope {
+    val mailerClient = mock[MailerClient]
+    val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val feedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
+    val dateTimeUtility = mock[DateTimeUtility]
+    val sessionsRepository = mock[SessionsRepository]
+    val usersRepository = mock[UsersRepository]
+
+    val config = Configuration(ConfigFactory.load("application.conf"))
+
+    val knolxControllerComponent = TestHelpers.stubControllerComponents(usersRepository, config)
+
+    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
+      override def configure(): Unit = {
+        bind(classOf[KnolxControllerComponents])
+          .toInstance(knolxControllerComponent)
+      }
+    })
+
     lazy val controller =
       new FeedbackFormsReportController(
-        knolxControllerComponent.messagesApi,
+        TestHelpers.stubMessagesApi(),
         mailerClient,
         usersRepository,
         feedbackFormsRepository,
@@ -53,20 +73,11 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
         sessionsRepository,
         dateTimeUtility,
         knolxControllerComponent)
-    val mailerClient = mock[MailerClient]
-    val feedbackFormsRepository: FeedbackFormsRepository = mock[FeedbackFormsRepository]
-    val feedbackFormsResponseRepository: FeedbackFormsResponseRepository = mock[FeedbackFormsResponseRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsRepository = mock[SessionsRepository]
-
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
   }
 
   "Feedback forms report controller" should {
 
-    "render reports page for a particular user if user has active sessions and also has feedbacks" in new WithTestApplication {
+    "render reports page for a particular user if user has active sessions and also has feedbacks" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
@@ -81,7 +92,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render reports page with all users report, if user is admin" in new WithTestApplication {
+    "render reports page with all users report, if user is admin" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(None) returns sessionObject
@@ -96,7 +107,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render reports page for a particular user if user no active sessions and also no feedbacks" in new WithTestApplication {
+    "render reports page for a particular user if user no active sessions and also no feedbacks" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns Future.successful(List())
@@ -110,7 +121,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render reports page for a particular user if user has active sessions with no feedback submitted yet" in new WithTestApplication {
+    "render reports page for a particular user if user has active sessions with no feedback submitted yet" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
@@ -125,7 +136,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render reports page for a particular user if  no session is  active for the user but has feedback form" in new WithTestApplication {
+    "render reports page for a particular user if  no session is  active for the user but has feedback form" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns Future.successful(List())
@@ -140,7 +151,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     }
 
 
-    "render reports page for a particular user if user has active session and has no feedback form" in new WithTestApplication {
+    "render reports page for a particular user if user has active session and has no feedback form" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
@@ -154,7 +165,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render report by session id if responses found for admin" in new WithTestApplication {
+    "render report by session id if responses found for admin" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List(feedbackResponse))
@@ -167,7 +178,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render report by session id if responses found for user" in new WithTestApplication {
+    "render report by session id if responses found for user" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject.map(user => Some(user.get.copy(admin = false)))
       sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("test@knoldus.com")) returns Future.successful(List(feedbackResponse))
@@ -180,7 +191,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       status(response) must be equalTo OK
     }
 
-    "render report by session id if no response found" in new WithTestApplication {
+    "render report by session id if no response found" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())

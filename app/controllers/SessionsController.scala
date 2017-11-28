@@ -5,9 +5,11 @@ import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.SessionsScheduler._
-import actors.UsersBanScheduler._
+import actors.{GetCategories, GetDetails}
 import akka.actor.ActorRef
 import akka.pattern.ask
+import akka.util.Timeout
+import com.google.api.services.youtube.model.VideoCategory
 import controllers.EmailHelper._
 import models._
 import play.api.Logger
@@ -23,7 +25,6 @@ import scala.collection.immutable.IndexedSeq
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-
 
 case class CreateSessionInformation(email: String,
                                     date: Date,
@@ -69,6 +70,8 @@ case class SessionSearchResult(sessions: List[KnolxSession],
                                page: Int,
                                keyword: String)
 
+case class VideoCategories(id: String, name: String)
+
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
 }
@@ -82,8 +85,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
-                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef
+                                   @Named("UsersBanScheduler") usersBanScheduler: ActorRef,
+                                   @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+
+  implicit val timeout = Timeout(10.seconds)
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
@@ -377,16 +383,31 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         case Some(sessionInformation) =>
           feedbackFormsRepository
             .getAll
-            .map { feedbackForms =>
+            .flatMap { feedbackForms =>
               val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
               val filledForm = updateSessionForm.fill(UpdateSessionInformation(sessionInformation._id.stringify,
                 new Date(sessionInformation.date.value), sessionInformation.session, sessionInformation.category, sessionInformation.subCategory,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
                 sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
-              Ok(views.html.sessions.updatesession(filledForm, formIds))
-            }
+              val eventualYoutubeCategories =
+                (youtubeUploaderManager ? GetCategories)
+                  .mapTo[List[VideoCategory]]
+                  .map(_.map(videoCategory => VideoCategories(videoCategory.getId, videoCategory.getSnippet.getTitle)))
 
-        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+              eventualYoutubeCategories.flatMap { youtubeCategories =>
+                sessionInformation.youtubeURL.fold {
+                  Future.successful(Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, None)))
+                } { videoURL =>
+                  val videoId = videoURL.split("/")(2)
+                  (youtubeUploaderManager ? GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
+                    .map { videoDetails =>
+                      Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, videoDetails))
+                    }
+                }
+              }
+            }
+        case None                     =>
+          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
       }
   }
 
@@ -397,8 +418,27 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
         updateSessionForm.bindFromRequest.fold(
           formWithErrors => {
+            val eventualYoutubeCategories =
+              (youtubeUploaderManager ? GetCategories)
+                .mapTo[List[VideoCategory]]
+                .map(_.map(videoCategory => VideoCategories(videoCategory.getId, videoCategory.getSnippet.getTitle)))
+
             Logger.error(s"Received a bad request for getByEmail session $formWithErrors")
-            Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds)))
+
+            eventualYoutubeCategories.flatMap { youtubeCategories =>
+              val youtubeURL = formWithErrors.value.fold[Option[String]](None)(_.youtubeURL)
+
+              youtubeURL.fold {
+                Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, None)))
+              } { url =>
+                val videoId = url.split("/")(2)
+                (youtubeUploaderManager ? GetDetails(videoId))
+                  .mapTo[Option[UpdateVideoDetails]]
+                  .map { videoDetails =>
+                    Ok(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, videoDetails))
+                  }
+              }
+            }
           },
           updateSessionInfo => {
             val expirationMillis = sessionExpirationMillis(updateSessionInfo.date, updateSessionInfo.feedbackExpirationDays)
@@ -446,6 +486,20 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
+  }
+
+  def storeVideoURL(sessionId: String, youtubeURL: String): Action[AnyContent] = action.async { implicit request =>
+    Logger.info(s"Updating video URL for session $sessionId")
+
+    sessionsRepository
+      .updateVideoURL(sessionId, youtubeURL)
+      .map { result =>
+        if (result.ok) {
+          Ok("Video stored successfully!")
+        } else {
+          BadRequest("Something went wrong while storing the video")
+        }
+      }
   }
 
   def getCategory: Action[AnyContent] = action.async { implicit request =>

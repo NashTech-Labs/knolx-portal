@@ -3,7 +3,7 @@ package actors
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
-import controllers.{TestEmailActor, TestEnvironment}
+import helpers.{TestEmailActor, TestEnvironment}
 import org.apache.commons.mail.EmailException
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
 import org.specs2.execute.{AsResult, Result}

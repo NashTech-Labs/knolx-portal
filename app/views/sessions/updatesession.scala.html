@@ -1,46 +1,32 @@
-@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], youtubeCategories: List[VideoCategories], videoDetails: Option[UpdateVideoDetails])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
 
-    <div class="row update-error">
-        <div class="col-md-4" ></div>
-        <div class="col-md-4" >
-            @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("category").hasErrors || sessionInfo("subCategory").hasErrors || sessionInfo("feedbackFormId").hasErrors || sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
-            <div class="alert alert-danger fade in ">
-                @flash.get("message").fold("")(message => message)
-                @sessionInfo("date").error.map(error => messages(error.message))
-                @sessionInfo("category").error.map(error => messages(error.message))
-                @sessionInfo("subCategory").error.map(error => messages(error.message))
-                @sessionInfo("feedbackFormId").error.map(error => messages(error.message))
-                @sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))
-                @sessionInfo.globalError.map(_.message)
-            </div>
-            }
+    <div class="row ">
+        <div class="header-container">
+            <h2 style="margin-top:10px;">Update Session</h2>
         </div>
-        <div class="col-md-4" ></div>
     </div>
 
     <div class="row">
-
-        <div class="col-md-4" ></div>
-        <div class="col-md-4 update-outer">
+        <div class="col-md-12 create-outer">
             <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
             @helper.CSRF.formField
 
                 <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <input id="primary-category" value='@sessionInfo.data.get("category")' type="hidden" />
                 <input id="sub-category" value='@sessionInfo.data.get("subCategory")' type="hidden" />
 
-                <div class="col-md-12" >
-                    <div class="col-md-1" ></div>
+                <div class="col-md-12" style="margin-top: 20px;">
+                    <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10 " >
                         <input type="datetime-local" value='@sessionInfo.data.get("date")' name="date" id="date" placeholder="Date" required class="update-field reg"/>
                     </div>
-                    <div class="col-md-1" ></div>
                 </div>
 
                 <div class="col-md-12 login-second login-third update-second">
-                    <div class="col-md-1" ></div>
+                    <label class="col-md-2 control-label">Session</label>
                     <div class="col-md-10 ">
                         <select name="session" id="session" class="update-field login-second">
                         @for((value, key) <- SessionValues.Sessions) {
@@ -53,31 +39,28 @@
                         }
                         </select>
                     </div>
-                    <div class="col-md-1" ></div>
                 </div>
 
                 <div class="col-md-12 login-second login-third update-second">
-                    <div class="col-md-1"></div>
+                    <label class="col-md-2 control-label">Category</label>
                     <div class="col-md-10 ">
                         <select name="category" id="category" class="update-field login-second">
                             <option selected value="">! Select Category Please</option>
                         </select>
                     </div>
-                    <div class="col-md-1"></div>
                 </div>
 
                 <div class="col-md-12 login-second login-third update-second">
-                    <div class="col-md-1"></div>
+                    <label class="col-md-2 control-label">Sub Category</label>
                     <div class="col-md-10 ">
                         <select name="subCategory" id="subCategory" class="update-field login-second">
                             <option selected value="">! Select Sub Category Please</option>
                         </select>
                     </div>
-                    <div class="col-md-1"></div>
                 </div>
 
                 <div class="col-md-12 login-second login-third update-second">
-                    <div class="col-md-1"></div>
+                    <label class="col-md-2 control-label">Feedback Form</label>
 
                     <div class="col-md-8 ">
                         <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
@@ -94,53 +77,50 @@
                         </select>
                     </div>
                     <div class="col-md-2"><i class="fa fa-eye preview" id="previewId"></i></div>
-                    <div class="col-md-1"></div>
                 </div>
 
-                <div class="col-md-12 login-third update-second">
-                    <div class="col-md-1" ></div>
+                <div class="col-md-12 login-third update-second form-group">
+                    <label class="col-md-2 control-label">Topic</label>
                     <div class="col-md-10 " >
                         <input type="text" name="topic" id="topic" value='@sessionInfo.data.get("topic")' placeholder="Topic" required class="update-field"/>
                     </div>
-                    <div class="col-md-1" ></div>
                 </div>
 
-                <div class="col-md-12 ">
-                    <div class="col-md-1"></div>
-                    <div class="col-md-10 feedback-duration">
-                        <div class="col-md-12 duration-title">Feedback form expiration duration</div>
-                        <div class="col-md-6 feedback-expiration">
+                <div class="col-md-12 form-group">
+                    <label class="col-md-2 control-label">Feedback form expiration duration</label>
+                    <div class="col-md-10 feedback-duration ">
+                        <div class="col-md-4 feedback-expiration">
                             <label class="radio-button default-radio">
-                                <input type='radio' name='feedbackExpirationDays' id='disableDays' class='custom-checkbox' value='0' checked="checked"/>
+                                <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0' checked="checked"/>
                                 <span class="lab_text"></span>
                                 <p class="checkbox-text radio-style">Default</p>
                             </label>
                         </div>
-                        <div class="col-md-6 days-outer" >
+                        <div class="col-md-8 days-outer" >
                             <label class="radio-button">
-                            @if(sessionInfo.data.get("feedbackExpirationDays").nonEmpty && !sessionInfo.data.get("feedbackExpirationDays").contains("0")) {
-                                <input type='radio' name='feedbackExpirationDays' id='radio-days' class='custom-checkbox' value='@sessionInfo.data.get("feedbackExpirationDays")' checked="checked" />
+                                @if(sessionInfo.data.get("feedbackExpirationDays").nonEmpty && !sessionInfo.data.get("feedbackExpirationDays").contains("0")) {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
                                 <span class="lab_text"></span>
                                 <p class="checkbox-text radio-style-days">
                                     <input type="number" min="1" max="31" value="@sessionInfo.data.get("feedbackExpirationDays")" class="days" id="days">
                                     day/s
                                 </p>
-                            } else {
-                                <input type='radio' name='feedbackExpirationDays'  id='radio-days' class='custom-checkbox' value='1'/>
+                                } else {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1'/>
                                 <span class="lab_text"></span>
                                 <p class="checkbox-text radio-style-days">
-                                    <input type="number" disabled min="1" max="32" value="1" class="days" id="days">
+                                    <input type="number" disabled min="1" max="32" value="1" class="days" id="days" >
                                     day/s
                                 </p>
-                            }
+                                }
+
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-1"></div>
                 </div>
 
                 <div class="col-md-12 login-third">
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-2" ></div>
                     <div class="col-md-10 " >
                         <label class="checkbox-outer" >
                             <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'
@@ -148,14 +128,13 @@
                                 """checked="checked""""
                             })/>
                             <span class="label_text"></span>
-                            <p class="checkbox-text">Is Meetup ?</p>
+                            <p class="checkbox-text">Is session a Meetup ?</p>
                         </label>
                     </div>
-                    <div class="col-md-1" ></div>
                 </div>
 
                 <div class="col-md-12 login-third">
-                    <div class="col-md-1" ></div>
+                    <div class="col-md-2" ></div>
                     <div class="col-md-10 " >
                         <label class="checkbox-outer" >
                             <input type='checkbox' name='cancelled' id='cancelled' class='custom-checkbox' value='true'
@@ -163,45 +142,217 @@
                             """checked="checked""""
                             })/>
                             <span class="label_text"></span>
-                            <p class="checkbox-text">Is Cancelled ?</p>
+                            <p class="checkbox-text">Is session Cancelled ?</p>
                         </label>
                     </div>
-                    <div class="col-md-1" ></div>
+                </div>
+
+                <div class="col-md-12">
+                <div class="col-md-2" ></div>
+                <div class="col-md-4" >
+                    @if(sessionInfo.hasGlobalErrors || sessionInfo("date").hasErrors || sessionInfo("category").hasErrors ||
+                    sessionInfo("subCategory").hasErrors || sessionInfo("feedbackFormId").hasErrors ||
+                    sessionInfo("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+                    <div class="alert alert-danger fade in ">
+                        <ul>
+                            @if(sessionInfo.hasGlobalErrors) {
+                                <li>@sessionInfo.globalError.map(_.message)</li>
+                            }
+                            @if(!flash.isEmpty) {
+                                <li>@flash.get("message").fold("")(message => message)</li>
+                            }
+                            @if(sessionInfo("date").hasErrors) {
+                                <li>@sessionInfo("date").error.map(error => messages(error.message))</li>
+                            }
+                            @if(sessionInfo("category").hasErrors) {
+                                <li>@sessionInfo("category").error.map(error => messages(error.message))</li>
+                            }
+                            @if(sessionInfo("subCategory").hasErrors) {
+                                <li>@sessionInfo("subCategory").error.map(error => messages(error.message))</li>
+                            }
+                            @if(sessionInfo("feedbackFormId").hasErrors) {
+                                <li>@sessionInfo("feedbackFormId").error.map(error => messages(error.message))</li>
+                            }
+                            @if(sessionInfo("feedbackExpirationDays").hasErrors) {
+                                <li>@sessionInfo("feedbackExpirationDays").error.map(error => messages(error.message))</li>
+                            }
+                        </ul>
+                    </div>
+                    }
                 </div>
 
                 <div class="col-md-12 login-third update-second">
-                    <div class="col-md-1" ></div>
+                    <label class="col-md-2 control-label">Embed Youtube URL</label>
                     <div class="col-md-10 " >
                         <input type="text" name="youtubeURL" id="youtubeURL" value='@sessionInfo.data.get("youtubeURL")' placeholder="Embed YouTube URL" class="update-field"/>
                     </div>
-                    <div class="col-md-1" ></div>
                 </div>
 
                 <div class="col-md-12 login-third update-second">
-                    <div class="col-md-1" ></div>
+                    <label class="col-md-2 control-label">Embed Slideshare URL</label>
                     <div class="col-md-10 " >
                         <input type="text" name="slideShareURL" id="slideShareURL" value='@sessionInfo.data.get("slideShareURL")' placeholder="Embed SlideShare URL" class="update-field"/>
                     </div>
-                    <div class="col-md-1" ></div>
                 </div>
 
-                <div class="col-md-12 update-second-field login-four" >
-                    <div class="col-md-1" ></div>
-                    <div class="col-md-10 " >
-                        <input type="submit" value="Save" class="input-field update-button"/>
-                    </div>
-                    <div class="col-md-1" ></div>
+                <div class="col-md-6" ></div>
                 </div>
+                <div class="col-md-12 login-four">
+                    <div class="hr-line-dashed"></div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2 loader-outer">
+                        <input type="submit" value="Save" class="btn btn-success" style="background-color: #1ab394;" />
+                    </div>
+                    <div class="col-md-6"></div>
+                </div>
+
             </form>
-            <div class="col-md-12 create-footer"></div>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-md-12 create-outer">
+
+        <div class="col-md-12 login-third update-second form-group" id="youtube-dropzone">
+            <label class="col-md-2 control-label">Upload Video</label>
+            <div class="col-md-10 " >
+                <div id="youtubeVideo" class="dropzone" ></div>
+            </div>
         </div>
 
-        <div class="col-md-4" ></div>
+        <div class="col-md-12 login-third update-second" id="show-progress" style="display:none;">
+            <label class="col-md-2 control-label">Upload Video</label>
+            <div class="col-md-10 " >
+                <div class="progress">
+                    <div id="progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-success alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The upload of video was cancelled!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="upload-success-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-success alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The video has been successfully uploaded</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="upload-failure-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The video was not uploaded</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="no-upload-cancel" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>There is no upload going on right now!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="already-upload" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>There is already an upload going on right now!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-four" id="cancel-video-button">
+            <div class="col-md-2"></div>
+            <div class="col-md-2 loader-outer">
+                <input type="button" id="cancelVideo" value="Cancel" class="btn btn-success" style="background-color: #1ab394;"/>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="update-youtube-details">
+            <label class="col-md-2 control-label">Title</label>
+            <div class="col-md-10 form-group" >
+                <input type="text" name="title" id="youtube-title" value='@videoDetails.fold("")(_.title)' placeholder="Video title" class="update-field"/>
+            </div>
+            <label class="col-md-2 control-label">Description</label>
+            <div class="col-md-10 form-group" >
+                <input type="text" name="description" id="youtube-description"  value='@videoDetails.fold("")(_.description.fold("")(identity))' placeholder="Video description" class="update-field"/>
+            </div>
+            <label class="col-md-2 control-label">Video tags</label>
+            <div class="col-md-10 form-group" >
+                <input type="text" name="tags" id="youtube-tags" data-role="tagsinput" value='@videoDetails.fold("")(_.tags.mkString(","))' placeholder="Video tags" class="update-field"/>
+            </div>
+            <label class="col-md-2 control-label">Video Category</label>
+            <div class="col-md-10 form-group" >
+                <select name="category" id="youtube-category" class="update-field">
+                    @for(youtubeCategory <- youtubeCategories) {
+                    <option value="@youtubeCategory.id"
+                        @if(videoDetails.fold("")(_.category) == youtubeCategory.id) {
+                            selected
+                        }
+                    >@youtubeCategory.name</option>
+                    }
+                </select>
+            </div>
+            <label class="col-md-2 control-label">Video Status</label>
+            <div class="col-md-10 form-group" >
+                <select name="status" id="youtube-status" class="update-field login-second">
+                    <option value="private"
+                        @if(videoDetails.fold("")(_.status) == "private") {
+                            selected
+                    }
+                    >Private</option>
+                    <option value="public"
+                        @if(videoDetails.fold("")(_.status) == "public") {
+                            selected
+                    }
+                    >Public</option>
+                </select>
+            </div>
+
+            <div class="col-md-12 login-third update-second" id="successful-update" style="display:none;">
+                <div class="col-md-2" ></div>
+                <div class="col-md-10 alert alert-success alert-dismissable" >
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <p>The video has been successfully updated</p>
+                </div>
+            </div>
+
+            <div class="col-md-12 login-third update-second" id="unsuccessful-update" style="display:none;">
+                <div class="col-md-2" ></div>
+                <div class="col-md-10 alert alert-success alert-dismissable" >
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <p>Something went wrong and the video was not able to be updated</p>
+                </div>
+            </div>
+
+            <div class="col-md-12 login-four">
+                <div class="hr-line-dashed"></div>
+                <div class="col-md-2"></div>
+                <div class="col-md-2 loader-outer">
+                    <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
+                </div>
+                <div class="col-md-6"></div>
+            </div>
+        </div>
+
     </div>
+</div>
+
 
     @feedbackforms.feedbackformpreview()
 
     <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/expirationdays.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/createsession.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="@routes.Assets.versioned("javascripts/updatesession.js")"></script>
+
 }

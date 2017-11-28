@@ -142,7 +142,6 @@ $(function () {
         e.preventDefault();
     });
 
-
     function showResult(id, targetId, renderResult) {
         var keyword = $(id).val().toLowerCase();
         if (keyword == "") {
@@ -215,19 +214,6 @@ $(function () {
             $('#mod-results-outer').hide()
     });
 
-    var newSubCategoryName = "";
-    $("html").delegate(".mod-result", "mousedown", function () {
-        var attribute = $(this).attr('id');
-        var splits = attribute.split('-');
-        console.log("splits = " + splits);
-        oldSubCategoryName = splits[0];
-        categoryName = splits[1];
-        $("#mod-datalist").val(splits[0]);
-        $("#new-sub-category").show();
-        $("#mod-pair").val(attribute);
-        $('#mod-results-outer').hide();
-    });
-
     $("html").delegate(".mod-result", "mouseover", function () {
         $(this).addClass('over');
     });
@@ -275,6 +261,7 @@ function scrollToTop() {
 }
 
 function addCategory(categoryName) {
+
     jsRoutes.controllers.SessionsCategoryController.addPrimaryCategory(categoryName).ajax(
         {
             type: 'GET',
@@ -299,6 +286,7 @@ function addCategory(categoryName) {
 }
 
 function addSubCategory(categoryName, subCategory) {
+
     jsRoutes.controllers.SessionsCategoryController.addSubCategory(categoryName, subCategory).ajax(
         {
             type: 'GET',
@@ -345,7 +333,6 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
 
 function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName) {
 
-    console.log(categoryName + "----" + oldSubCategoryName + "----" + newSubCategoryName)
     jsRoutes.controllers.SessionsCategoryController.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).ajax(
         {
             type: 'GET',
@@ -428,6 +415,7 @@ function subCategoryByPrimaryCategory(categoryName) {
 }
 
 function topicMatchedWithCategory(categoryName, subCategoryName) {
+
     jsRoutes.controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName, subCategoryName).ajax(
         {
             type: 'GET',
@@ -461,8 +449,6 @@ function topicMatchedWithCategory(categoryName, subCategoryName) {
 }
 
 function deleteSubCategory(categoryName, subCategoryName) {
-
-    console.log("inside delete sub category js fun" + categoryName + "bbbbbb " + subCategoryName)
 
     jsRoutes.controllers.SessionsCategoryController.deleteSubCategory(categoryName, subCategoryName).ajax(
         {

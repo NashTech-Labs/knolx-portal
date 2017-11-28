@@ -150,7 +150,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
               .flatMap { session =>
                 if (session.ok) {
                   categoriesRepository
-                    .modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName)
+                    .modifySubCategory(categoryName, oldSubCategoryName, cleanSubCategory)
                     .map {
                       result =>
                         if (result.ok) {

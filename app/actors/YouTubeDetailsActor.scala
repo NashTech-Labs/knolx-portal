@@ -16,7 +16,7 @@ object ConfiguredYouTubeDetailsActor {
 
 }
 
-case object Categories
+case object GetCategories
 
 case class VideoDetails(videoId: String,
                         title: String,
@@ -30,7 +30,7 @@ case class GetDetails(videoId: String)
 class YouTubeDetailsActor @Inject()(youtubeService: YoutubeService) extends Actor {
 
   override def receive: Receive = {
-    case Categories                  => sender() ! returnCategoryList
+    case GetCategories               => sender() ! returnCategoryList
     case videoDetails: VideoDetails  => sender() ! update(videoDetails)
     case GetDetails(videoId: String) => sender() ! getVideoDetails(videoId)
   }

@@ -36,18 +36,18 @@ class YouTubeUploaderManager @Inject()(
       } else {
         sender() ! "Cant upload any more videos parallely."
       }
-    case Done => noOfActors-=1
-    case Cancel => noOfActors-=1
-    case request: VideoDetails =>
+    case Done                            => noOfActors-=1
+    case Cancel                          => noOfActors-=1
+    case request: VideoDetails           =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request
-    case Categories                                                                       =>
+    case GetCategories                   =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      youTubeDetailsActor forward Categories
-    case request: GetDetails =>
+      youTubeDetailsActor forward GetCategories
+    case request: GetDetails             =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request
-    case msg                                                                                       =>
+    case msg                             =>
       Logger.info(s"Received a message in YouTubeUploaderManager that cannot be handled $msg")
   }
 }

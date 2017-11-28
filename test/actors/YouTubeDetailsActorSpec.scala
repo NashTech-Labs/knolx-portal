@@ -30,7 +30,7 @@ class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: Act
     "return list of categories" in new TestScope {
       youtubeService.getCategoryList returns List(new VideoCategory().setId("12"))
 
-      youtubeDetailsActor ! Categories
+      youtubeDetailsActor ! GetCategories
 
       expectMsgPF() {
         case listOfVideoCategory: List[VideoCategory] =>

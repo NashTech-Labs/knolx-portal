@@ -97,7 +97,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     }
 
     "forward request to youtube category actor" in new UnitTestScope {
-      youtubeUploaderManager ! Categories
+      youtubeUploaderManager ! GetCategories
 
       expectMsg(List())
     }
@@ -161,7 +161,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     }
 
     "return categories" in new IntegrationTestScope {
-      youtubeUploaderManager ! Categories
+      youtubeUploaderManager ! GetCategories
 
       expectMsg(List())
     }

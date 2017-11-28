@@ -171,40 +171,42 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   }
 
   def deletePrimaryCategory(categoryId: String): Action[AnyContent] = superUserAction.async { implicit request =>
-    if (categoryId.trim().isEmpty) {
+    if (categoryId.isEmpty) {
       Future.successful(BadRequest("Please select a valid primary category"))
     } else {
-      categoriesRepository.getCategories.flatMap {
-        categories =>
-          val category = categories.find {
-            c =>
-              c._id.toString() == categoryId
-          }
+      categoriesRepository
+        .getCategories
+        .flatMap { categories =>
+          val category = categories.find(_._id.toString() == categoryId)
+
           category.fold {
             Future.successful(BadRequest("No such primary category exists"))
           } { category =>
-            val subCategoryList = category.subCategory
-            if (subCategoryList.isEmpty) {
-              sessionsRepository.updateCategoryOnChange(category.categoryName, "").flatMap { session =>
-                if (session.ok) {
-                  categoriesRepository.deletePrimaryCategory(category._id.stringify).map { result =>
-                    if (result.ok) {
-                      Logger.info(s"Primary category with categoryId $categoryId was successfully deleted")
-                      Ok("Primary category was successfully deleted")
-                    } else {
-                      Logger.error(s"Something went wrong while deleting primary category with category Id $categoryId")
-                      BadRequest("Got an error while deleting")
-                    }
+            if (category.subCategory.isEmpty) {
+              sessionsRepository
+                .updateCategoryOnChange(category.categoryName, "")
+                .flatMap { session =>
+                  if (session.ok) {
+                    categoriesRepository
+                      .deletePrimaryCategory(category._id.stringify)
+                      .map { result =>
+                        if (result.ok) {
+                          Logger.info(s"Primary category with categoryId $categoryId was successfully deleted")
+                          Ok("Primary category was successfully deleted")
+                        } else {
+                          Logger.error(s"Something went wrong while deleting primary category with category Id $categoryId")
+                          BadRequest("Got an error while deleting")
+                        }
+                      }
+                  } else {
+                    Future.successful(BadRequest("Got an error in session table"))
                   }
-                } else {
-                  Future.successful(BadRequest("Got an error in session table"))
                 }
-              }
             } else {
               Future.successful(BadRequest("First delete all its sub category"))
             }
           }
-      }
+        }
     }
   }
 

@@ -4,14 +4,12 @@ import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
-import actors.{Categories, GetDetails}
 import actors.SessionsScheduler._
-import actors.UsersBanScheduler._
+import actors.{Categories, GetDetails}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
-import com.google.api.services.youtube.YouTube
-import com.google.api.services.youtube.model.{VideoCategory, VideoCategoryListResponse}
+import com.google.api.services.youtube.model.VideoCategory
 import controllers.EmailHelper._
 import models._
 import play.api.Logger

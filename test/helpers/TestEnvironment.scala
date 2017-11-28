@@ -136,7 +136,6 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("YouTubeUploaderManager"))
           .toInstance(youtubeUploaderManager)
-        //bindActor[YouTubeUploaderManager]("YouTubeUploaderManager")
 
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("YouTubeUploadManager"))

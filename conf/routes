@@ -24,12 +24,12 @@ POST        /user/changepassword                    controllers.UsersController.
 
 # Upload
 + nocsrf
-POST        /youtube/:sessionId/upload           controllers.YoutubeController.upload(sessionId: String)
-GET         /youtube/:sessionId/videoid          controllers.YoutubeController.getVideoId(sessionId: String)
-GET         /youtube/:sessionId/progress         controllers.YoutubeController.getPercentageUploaded(sessionId: String)
-POST        /youtube/:sessionId/update           controllers.YoutubeController.updateVideo(sessionId)
+POST        /youtube/:sessionId/upload              controllers.YoutubeController.upload(sessionId: String)
+GET         /youtube/:sessionId/videoid             controllers.YoutubeController.getVideoId(sessionId: String)
+GET         /youtube/:sessionId/progress            controllers.YoutubeController.getPercentageUploaded(sessionId: String)
+POST        /youtube/:sessionId/update              controllers.YoutubeController.updateVideo(sessionId)
 + nocsrf
-GET         /youtube/:sessionId/cancel           controllers.YoutubeController.cancel(sessionId: String)
+GET         /youtube/:sessionId/cancel              controllers.YoutubeController.cancel(sessionId: String)
 
 # Session
 GET         /session                                controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])

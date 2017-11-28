@@ -52,7 +52,6 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
     bind(classOf[KnolxControllerComponents])
       .to(classOf[DefaultKnolxControllerComponents])
       .asEagerSingleton()
-
   }
 
 }

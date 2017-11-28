@@ -29,7 +29,7 @@ object YouTubeUploader {
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
-                               @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
+                                @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
                                 youtubeService: YoutubeService) extends Actor {
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty

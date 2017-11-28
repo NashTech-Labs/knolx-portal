@@ -9,6 +9,8 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model._
 import controllers.UpdateVideoDetails
 import play.api.Logger
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class YoutubeService @Inject()(
                                 @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
@@ -27,14 +29,14 @@ class YoutubeService @Inject()(
     youtubeConfig.getVideoDetails(listToExecute).headOption
   }
 
-  def getCategoryList: List[VideoCategory] = {
-    val listToExecute = youtube
+  def getCategoryList: List[VideoCategory] =
+    youtube
       .videoCategories()
       .list("snippet")
       .setRegionCode("IN")
-
-    youtubeConfig.executeCategoryList(listToExecute)
-  }
+      .execute()
+      .getItems
+      .toList
 
   def upload(sessionId: String,
              is: InputStream,

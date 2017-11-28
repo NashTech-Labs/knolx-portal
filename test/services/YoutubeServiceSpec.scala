@@ -52,62 +52,6 @@ class YoutubeServiceSpec extends Specification {
 
   "Youtube Service" should {
 
-    "return list of categories" in new WithTestApplication {
-      val videoCategories = mock[YouTube#VideoCategories]
-      val videoCategoriesList = mock[YouTube#VideoCategories#List]
-
-      youtubeConfig.youtube returns youtube
-      youtube.videoCategories() returns videoCategories
-      videoCategories.list("snippet") returns videoCategoriesList
-
-      videoCategoriesList.setRegionCode("IN") returns videoCategoriesList
-      youtubeConfig.executeCategoryList(videoCategoriesList) returns List[VideoCategory]()
-
-      val result = service.getCategoryList
-
-      result must be equalTo List()
-    }
-
-    "return video after uploading" in new WithTestApplication {
-      val fileSize = 10L
-      val chunkSize = 256 * 0x400
-
-      val isc = new InputStreamContent("", new InputStream {
-        override def read(): Int = 1
-      })
-      val videoInsert = mock[YouTube#Videos#Insert]
-
-      val abstractIS = mock[AbstractInputStreamContent]
-      val httpReqInit = mock[HttpRequestInitializer]
-      val mockActor = mock[ActorRef]
-
-      val uploader = new MediaHttpUploader(abstractIS, netHttpTransport, httpReqInit)
-
-      youtubeConfig.getVideoSnippet(titleOfVideo, Some(description), tags) returns videoSnippet
-      youtubeConfig.getVideo(videoSnippet, "private") returns video
-      youtubeConfig.getInputStreamContent(inputStream, fileSize) returns isc
-
-      youtubeConfig.youtube returns youtube
-      youtube.videos() returns videos
-      youtubeConfig.part returns "part"
-
-      videos.insert("part", video, isc) returns videoInsert
-      youtubeConfig.getMediaHttpUploader(videoInsert, chunkSize) returns uploader
-      videoInsert.execute() returns video
-
-      val result =
-        service
-          .upload(sessionId,
-            inputStream,
-            titleOfVideo,
-            Some(description),
-            tags,
-            fileSize,
-            youtubeUploadManager)
-
-      result must be equalTo video
-    }
-
     "update video details" in new WithTestApplication {
       val videoUpdate = mock[YouTube#Videos#Update]
       val videoDetails = VideoDetails("videoId", titleOfVideo, Some(description), tags, "public", "category")

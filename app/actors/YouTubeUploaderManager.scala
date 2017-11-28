@@ -22,22 +22,22 @@ class YouTubeUploaderManager @Inject()(
 
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {
-      case ex: Exception      =>
+      case ex: Exception =>
         Logger.error(s"Got an unknown exception from $sender while processing youtube request, $ex")
         Stop
     }
 
   override def receive: Receive = {
     case request: YouTubeUploader.Upload =>
-      if(noOfActors < limit) {
+      if (noOfActors < limit) {
         val youTubeUploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
-        noOfActors+=1
+        noOfActors += 1
         youTubeUploader forward request
       } else {
         sender() ! "Cant upload any more videos parallely."
       }
-    case Done                            => noOfActors-=1
-    case Cancel                          => noOfActors-=1
+    case Done                            => noOfActors -= 1
+    case Cancel                          => noOfActors -= 1
     case request: VideoDetails           =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request

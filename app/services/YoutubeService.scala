@@ -16,7 +16,7 @@ class YoutubeService @Inject()(
                               ) {
 
   private lazy val youtube = youtubeConfig.youtube
-  private val chunkSize = 256 * 0x400
+  private val chunkSize = 1024 * 0x400
   lazy val part: String = youtubeConfig.part
 
   private val status = "private"

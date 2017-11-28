@@ -14,7 +14,7 @@ window.onbeforeunload = function() {
 $(function () {
     var sessionId = $('input[name^="sessionId"]').val();
 
-    var myDropzone = new Dropzone("#youtubeVideo", {
+    var youtubeDropzone = new Dropzone("#youtubeVideo", {
         url: "/youtube/" + sessionId + "/upload",
         maxFilesize: 2048,
         dictDefaultMessage: "Drop your file here to upload(or click)",
@@ -24,25 +24,25 @@ $(function () {
         }
     });
 
-    myDropzone.on("sending", function(file, xhr, formData) {
+    youtubeDropzone.on("sending", function(file, xhr, formData) {
         redirect = false;
         console.log("File size = " + file.size);
         xhr.setRequestHeader("filesize", file.size);
     });
 
-    myDropzone.on("complete", function(file) {
+    youtubeDropzone.on("complete", function(file) {
         redirect = true;
         uploading = true;
         $("#cancel-message").hide();
         console.log("File uploading completed");
     });
 
-    myDropzone.on("success", function(file, response) {
+    youtubeDropzone.on("success", function(file, response) {
         console.log("Showing progress now");
         $("#show-progress").show();
         $("#cancel-video-button").show();
         cancel = false;
-        $("#youtubeVideo").hide();
+        $("#youtube-dropzone").hide();
         showProgress(sessionId);
     })
 
@@ -63,7 +63,7 @@ $(function () {
                 $("#cancel-message").hide();
                 $("#show-progress").show();
                 $("#cancel-video-button").show();
-                $("#youtubeVideo").hide();
+                $("#youtube-dropzone").hide();
                 uploading = true;
                 showProgress(sessionId);
             }
@@ -136,7 +136,8 @@ function showProgress(sessionId) {
                         $("#progress").width('0%');
                         $("#progress").text('0%');
                         uploading = false;
-                        $("#youtubeVideo").show();
+                        $("#youtube-dropzone").show();
+                        $("#cancel-video-button").hide();
                         fillYoutubeEmbedURL(sessionId);
                     } else {
                     var percentageUploaded = data;
@@ -167,7 +168,7 @@ function cancelVideo(sessionId) {
                 $("#progress").width('0%');
                 $("#progress").text('0%');
                 $("#cancel-message").show();
-                $("#youtubeVideo").show();
+                $("#youtube-dropzone").show();
                 $("#cancel-video-button").hide();
             },
             error: function(er) {
@@ -194,7 +195,7 @@ function fillYoutubeEmbedURL(sessionId) {
                 $("#youtubeURL").val("www.youtube.com/embed/" + videoId);
                 $("#videoId").val(videoId);
                 $("#update-youtube-details").show();
-                $("#youtubeVideo").show();
+                $("#youtube-dropzone").show();
                 storeVideoURL(sessionId);
             },
             error: function(er) {

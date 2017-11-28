@@ -5,6 +5,7 @@
   vertical-align: middle;
   max-width: 100%;
   cursor: text;
+  padding: 4px 6px;
 }
 .bootstrap-tagsinput input {
   border: none;

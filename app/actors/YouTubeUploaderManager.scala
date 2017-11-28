@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, OneForOneStrategy}
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.libs.concurrent.InjectedActorSupport
 
 case object Done
@@ -13,11 +13,12 @@ case object Cancel
 
 class YouTubeUploaderManager @Inject()(
                                         configuredYouTubeUploader: ConfiguredYouTubeUploader.Factory,
-                                        configuredYouTubeDetailsActor: ConfiguredYouTubeDetailsActor.Factory
+                                        configuredYouTubeDetailsActor: ConfiguredYouTubeDetailsActor.Factory,
+                                        configuration: Configuration
                                       ) extends Actor with InjectedActorSupport {
 
   var noOfActors = 0
-  val limit = 5
+  val limit = configuration.get[Int]("youtube.actors.limit")
 
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {

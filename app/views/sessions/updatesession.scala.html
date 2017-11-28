@@ -211,15 +211,70 @@
 <div class="row">
     <div class="col-md-12 create-outer">
 
-        <div class="col-md-12 login-third update-second form-group">
+        <div class="col-md-12 login-third update-second form-group" id="youtube-dropzone">
             <label class="col-md-2 control-label">Upload Video</label>
             <div class="col-md-10 " >
                 <div id="youtubeVideo" class="dropzone" ></div>
             </div>
         </div>
 
-        <!--<input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
-        <input name ="videoId" type="hidden" value='@sessionInfo.data.get("youtubeURL")'/>-->
+        <div class="col-md-12 login-third update-second" id="show-progress" style="display:none;">
+            <label class="col-md-2 control-label">Upload Video</label>
+            <div class="col-md-10 " >
+                <div class="progress">
+                    <div id="progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-success alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The upload of video was cancelled!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="upload-success-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-success alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The video has been successfully uploaded</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="upload-failure-message" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>The video was not uploaded</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="no-upload-cancel" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>There is no upload going on right now!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-third update-second" id="already-upload" style="display:none;">
+            <div class="col-md-2" ></div>
+            <div class="col-md-10 alert alert-danger alert-dismissable" >
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <p>There is already an upload going on right now!</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 login-four" id="cancel-video-button">
+            <div class="col-md-2"></div>
+            <div class="col-md-2 loader-outer">
+                <input type="button" id="cancelVideo" value="Cancel" class="btn btn-success" style="background-color: #1ab394;"/>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+
         <div class="col-md-12 login-third update-second" id="update-youtube-details">
             <label class="col-md-2 control-label">Title</label>
             <div class="col-md-10 form-group" >
@@ -285,63 +340,6 @@
                 </div>
                 <div class="col-md-6"></div>
             </div>
-        </div>
-
-        <div class="col-md-12 login-third update-second" id="upload-success-message" style="display:none;">
-            <div class="col-md-2" ></div>
-            <div class="col-md-10 alert alert-success alert-dismissable" >
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <p>The video has been successfully uploaded</p>
-            </div>
-        </div>
-
-        <div class="col-md-12 login-third update-second" id="upload-failure-message" style="display:none;">
-            <div class="col-md-2" ></div>
-            <div class="col-md-10 alert alert-danger alert-dismissable" >
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <p>The video was not uploaded</p>
-            </div>
-        </div>
-
-        <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
-            <div class="col-md-2" ></div>
-            <div class="col-md-10 alert alert-success alert-dismissable" >
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <p>The upload of video was cancelled!</p>
-            </div>
-        </div>
-
-        <div class="col-md-12 login-third update-second" id="no-upload-cancel" style="display:none;">
-            <div class="col-md-2" ></div>
-            <div class="col-md-10 alert alert-danger alert-dismissable" >
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <p>There is no upload going on right now!</p>
-            </div>
-        </div>
-
-        <div class="col-md-12 login-third update-second" id="already-upload" style="display:none;">
-            <div class="col-md-2" ></div>
-            <div class="col-md-10 alert alert-danger alert-dismissable" >
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <p>There is already an upload going on right now!</p>
-            </div>
-        </div>
-
-        <div class="col-md-12 login-third update-second" id="show-progress" style="display:none;">
-            <div class="col-md-2" ></div>
-            <div class="col-md-10 " >
-                <div class="progress">
-                    <div id="progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-12 login-four" id="cancel-video-button">
-            <div class="col-md-2"></div>
-            <div class="col-md-2 loader-outer">
-                <input type="button" id="cancelVideo" value="Cancel" class="btn btn-success" style="background-color: #1ab394;"/>
-            </div>
-            <div class="col-md-6"></div>
         </div>
 
     </div>

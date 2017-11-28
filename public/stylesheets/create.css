@@ -20,6 +20,9 @@
     border-radius: 0px !important;
     color: #676a6c !important;
 }
+.select2-selection__rendered {
+    color: #676a6c !important;
+}
 
 .control-label {
     padding-top: 4px;

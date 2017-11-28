@@ -52,7 +52,6 @@ function columnChart(startDate, EndDate) {
             },
             success: function (data) {
 
-
                 var subCategoryData = [];
                 var columnGraphXAxis = [];
 
@@ -71,6 +70,10 @@ function columnChart(startDate, EndDate) {
 
                     subtitle: {
                         text: 'Plain'
+                    },
+
+                    credits: {
+                            enabled: false
                     },
 
                     xAxis: {
@@ -105,8 +108,8 @@ function pieChart(startDate, EndDate) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                console.log(data);
 
+                console.log(data);
                 var items = [];
                 var series = [];
 
@@ -151,7 +154,9 @@ function pieChart(startDate, EndDate) {
                             showInLegend: true
                         }
                     },
-
+                    credits: {
+                        enabled: false
+                    },
                     tooltip: {
                         headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
                         pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.percentage:.1f}%</b> of total<br/>'
@@ -181,7 +186,6 @@ function pieChart(startDate, EndDate) {
         })
 }
 
-
 function lineGraph(startDate, EndDate) {
 
     var formData = {
@@ -200,7 +204,6 @@ function lineGraph(startDate, EndDate) {
             },
             success: function (data) {
 
-
                 var seriesData = [];
                 var xAxisData = [];
                 for (var i = 0; i < data.length; i++) {
@@ -214,6 +217,9 @@ function lineGraph(startDate, EndDate) {
                     },
                     title: {
                         text: 'Knolx'
+                    },
+                    credits: {
+                        enabled: false
                     },
                     xAxis: {
                         categories: xAxisData
@@ -238,9 +244,6 @@ function lineGraph(startDate, EndDate) {
                             lineColor: '#66FF66',
                             lineWidth: 2,
                             marker: {
-
-
-
                                 lineWidth: 2,
                                 lineColor: '#ff6666'
                             }

@@ -14,23 +14,24 @@
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
     <div class="row analysis-container">
-    <div class="col-md-12 date-range-picker filter-padding-right">
+        <div class="col-md-12 date-range-picker filter-padding-right">
             <label>Date Range :</label>
             <input id="demo" type="text" />
         </div>
+
         <div class="col-md-12" style="margin-top: 10px;">
 
-            <div class = "col-md-6 filter-padding-left" style="margin-bottom: 40px;">
-                <div id="pie-chart" class="graph-panel" ></div>
-            </div>
-
-            <div class = "col-md-6 filter-padding-right" style="margin-bottom: 40px;">
-                <div id="column-graph" class="graph-panel"></div>
+            <div class = "col-md-12 filter-padding-right" style="margin-bottom: 40px;">
+                <div id="column-graph" class="graph-panel graph-panel-custom"></div>
             </div>
 
         </div>
 
         <div class="col-md-12">
+            <div class = "col-md-6 filter-padding-left" style="margin-bottom: 40px;">
+                <div id="pie-chart" class="graph-panel" ></div>
+            </div>
+
             <div class = "col-md-6 filter-padding-left">
                 <div id="line-graph" class="graph-panel"></div>
             </div>

@@ -232,24 +232,30 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   }
 
   def deleteSubCategory(categoryName: String, subCategory: String): Action[AnyContent] = adminAction.async { implicit request =>
-    if (subCategory.trim.isEmpty) {
+    val cleanedSubCategory = subCategory.trim
+
+    if (cleanedSubCategory.isEmpty) {
       Future.successful(BadRequest("Sub-category cannot be empty"))
     } else {
-      sessionsRepository.updateSubCategoryOnChange(subCategory, "").flatMap { sessions =>
-        if (sessions.ok) {
-          categoriesRepository.deleteSubCategory(categoryName, subCategory).flatMap { result =>
-            if (result.ok) {
-              Logger.info(s"Sub-category was successfully deleted $subCategory")
-              Future.successful(Ok("Sub-category was successfully deleted"))
-            } else {
-              Logger.error(s"Something went wrong while deleting $subCategory")
-              Future.successful(BadRequest("Something went wrong! unable to delete category"))
-            }
+      sessionsRepository
+        .updateSubCategoryOnChange(subCategory, "")
+        .flatMap { sessions =>
+          if (sessions.ok) {
+            categoriesRepository
+              .deleteSubCategory(categoryName, cleanedSubCategory)
+              .flatMap { result =>
+                if (result.ok) {
+                  Logger.info(s"Sub-category was successfully deleted $subCategory")
+                  Future.successful(Ok("Sub-category was successfully deleted"))
+                } else {
+                  Logger.error(s"Something went wrong while deleting $subCategory")
+                  Future.successful(BadRequest("Something went wrong! unable to delete category"))
+                }
+              }
+          } else {
+            Future.successful(BadRequest("Got an error while deleting"))
           }
-        } else {
-          Future.successful(BadRequest("Got an error while deleting"))
         }
-      }
     }
   }
 
@@ -257,21 +263,23 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
     if (subCategory.trim.isEmpty) {
       Future.successful(BadRequest("Please select a valid sub-category"))
     } else {
-      sessionsRepository.sessions.map { sessionInformation =>
-        val sessionTopicList = sessionInformation.filter {
-          session => session.subCategory == subCategory && session.category == categoryName
-        }.map {
-          _.topic
+      sessionsRepository
+        .sessions
+        .map { sessionInformation =>
+          val sessionTopicList =
+            sessionInformation.filter(session => session.subCategory == subCategory && session.category == categoryName).map(_.topic)
+          Ok(Json.toJson(sessionTopicList).toString())
         }
-        Ok(Json.toJson(sessionTopicList).toString())
-      }
     }
   }
 
   def getCategory: Action[AnyContent] = action.async { implicit request =>
-    categoriesRepository.getCategories.map { categories =>
-      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.stringify, category.categoryName, category.subCategory))
-      Ok(Json.toJson(listOfCategoryInfo).toString)
-    }
+    categoriesRepository
+      .getCategories
+      .map { categories =>
+        val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.stringify, category.categoryName, category.subCategory))
+        Ok(Json.toJson(listOfCategoryInfo).toString)
+      }
   }
+  
 }

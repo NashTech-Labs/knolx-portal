@@ -24,7 +24,7 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
   private val category = "category"
 
   private val inputStream = new InputStream {
-    override def read(): Int = ???
+    override def read(): Int = 1
   }
 
   def this() = this(ActorSystem("MySpec"))

@@ -73,7 +73,7 @@ class YoutubeServiceSpec extends Specification {
       val chunkSize = 256 * 0x400
 
       val isc = new InputStreamContent("", new InputStream {
-        override def read(): Int = ???
+        override def read(): Int = 1
       })
       val videoInsert = mock[YouTube#Videos#Insert]
 

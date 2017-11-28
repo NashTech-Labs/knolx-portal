@@ -25,7 +25,7 @@ class YouTubeUploadManagerSpec(_system: ActorSystem) extends TestKit(_system: Ac
   private val sessionId = "SessionId"
 
   private val abstractIS = new InputStreamContent("", new InputStream {
-    override def read(): Int = ???
+    override def read(): Int = 1
   })
 
   private val requestInitializer = new HttpRequestInitializer {

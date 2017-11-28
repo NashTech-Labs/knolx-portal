@@ -1,17 +1,14 @@
 package controllers
 
-import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.actor.ActorRef
 import models._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

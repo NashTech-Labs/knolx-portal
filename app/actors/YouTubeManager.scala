@@ -27,16 +27,6 @@ class YouTubeManager @Inject()(
     Router(RoundRobinRoutingLogic(), uploaders)
   }
 
-  var youtubeUploader = {
-    val uploaders = Vector.fill(limit) {
-      val uploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
-      context watch uploader
-      ActorRefRoutee(uploader)
-    }
-
-    Router(RoundRobinRoutingLogic(), uploaders)
-  }
-
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {
       case ex: Exception =>
@@ -45,25 +35,25 @@ class YouTubeManager @Inject()(
     }
 
   override def receive: Receive = {
-    case request: YouTubeUploader.Upload =>
+    case request: YouTubeUploader.Upload                 =>
       Logger.info(s"Forwarding request to upload video to one of the YouTubeUploader for session ${request.sessionId}")
       youtubeUploader.route(request, sender())
-    case Terminated(uploader)            =>
+    case Terminated(uploader)                            =>
       Logger.info(s"Removing YouTubeUploader $uploader")
       youtubeUploader = youtubeUploader.removeRoutee(uploader)
       val newUploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
       context watch newUploader
       youtubeUploader = youtubeUploader.addRoutee(newUploader)
-    case request: UpdateVideoDetails     =>
+    case request: YouTubeDetailsActor.UpdateVideoDetails =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request
-    case GetCategories                   =>
+    case YouTubeDetailsActor.GetCategories               =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      youTubeDetailsActor forward GetCategories
-    case request: GetDetails             =>
+      youTubeDetailsActor forward YouTubeDetailsActor.GetCategories
+    case request: YouTubeDetailsActor.GetDetails         =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request
-    case msg                             =>
+    case msg                                             =>
       Logger.info(s"Received a message in YouTubeManager that cannot be handled $msg")
   }
 }

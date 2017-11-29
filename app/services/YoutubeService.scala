@@ -3,14 +3,14 @@ package services
 import java.io.InputStream
 import javax.inject.{Inject, Named}
 
-import actors.{UpdateVideoDetails, YouTubeProgressManager}
+import actors.{YouTubeDetailsActor, YouTubeProgressManager}
 import akka.actor.ActorRef
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model._
 import controllers.UpdateVideoDetails
 import play.api.Logger
+
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 
 class YoutubeService @Inject()(
                                 @Named("YouTubeProgressManager") youtubeProgressManager: ActorRef,
@@ -64,7 +64,7 @@ class YoutubeService @Inject()(
     video
   }
 
-  def update(videoDetails: UpdateVideoDetails): String = {
+  def update(videoDetails: YouTubeDetailsActor.UpdateVideoDetails): String = {
     val snippet =
       youtubeConfig.getVideoSnippet(
         videoDetails.title,

@@ -6,10 +6,8 @@ import akka.actor.Actor
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.{Video, VideoCategory, VideoSnippet, VideoStatus}
 import controllers.UpdateVideoDetails
-import services.YoutubeService
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 
 object ConfiguredYouTubeDetailsActor {
 
@@ -19,25 +17,29 @@ object ConfiguredYouTubeDetailsActor {
 
 }
 
-case object GetCategories
+object YouTubeDetailsActor {
 
-case class UpdateVideoDetails(videoId: String,
-                              title: String,
-                              description: Option[String],
-                              tags: List[String],
-                              status: String,
-                              category: String)
+  case object GetCategories
 
-case class GetDetails(videoId: String)
+  case class UpdateVideoDetails(videoId: String,
+                                title: String,
+                                description: Option[String],
+                                tags: List[String],
+                                status: String,
+                                category: String)
+
+  case class GetDetails(videoId: String)
+
+}
 
 class YouTubeDetailsActor @Inject()(youtube: YouTube) extends Actor {
 
   private val part = "snippet,statistics,status"
 
   override def receive: Receive = {
-    case GetCategories                    => sender() ! returnCategoryList
-    case videoDetails: UpdateVideoDetails => sender() ! update(videoDetails)
-    case GetDetails(videoId: String)      => sender() ! getVideoDetails(videoId)
+    case YouTubeDetailsActor.GetCategories                    => sender() ! returnCategoryList
+    case videoDetails: YouTubeDetailsActor.UpdateVideoDetails => sender() ! update(videoDetails)
+    case YouTubeDetailsActor.GetDetails(videoId: String)      => sender() ! getVideoDetails(videoId)
   }
 
   def returnCategoryList: List[VideoCategory] =
@@ -49,7 +51,7 @@ class YouTubeDetailsActor @Inject()(youtube: YouTube) extends Actor {
       .getItems
       .toList
 
-  def update(videoDetails: UpdateVideoDetails): Video = {
+  def update(videoDetails: YouTubeDetailsActor.UpdateVideoDetails): Video = {
     val snippet =
       getVideoSnippet(
         videoDetails.title,

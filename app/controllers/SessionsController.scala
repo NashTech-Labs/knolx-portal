@@ -5,7 +5,7 @@ import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.SessionsScheduler._
-import actors.{GetCategories, GetDetails}
+import actors.YouTubeDetailsActor
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
@@ -390,7 +390,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
                 sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
               val eventualYoutubeCategories =
-                (youtubeManager ? GetCategories)
+                (youtubeManager ? YouTubeDetailsActor.GetCategories)
                   .mapTo[List[VideoCategory]]
                   .map(_.map(videoCategory => VideoCategories(videoCategory.getId, videoCategory.getSnippet.getTitle)))
 
@@ -399,7 +399,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   Future.successful(Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, None)))
                 } { videoURL =>
                   val videoId = videoURL.split("/")(2)
-                  (youtubeManager ? GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
+                  (youtubeManager ? YouTubeDetailsActor.GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
                     .map { videoDetails =>
                       Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, videoDetails))
                     }
@@ -419,7 +419,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         updateSessionForm.bindFromRequest.fold(
           formWithErrors => {
             val eventualYoutubeCategories =
-              (youtubeManager ? GetCategories)
+              (youtubeManager ? YouTubeDetailsActor.GetCategories)
                 .mapTo[List[VideoCategory]]
                 .map(_.map(videoCategory => VideoCategories(videoCategory.getId, videoCategory.getSnippet.getTitle)))
 
@@ -432,7 +432,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, None)))
               } { url =>
                 val videoId = url.split("/")(2)
-                (youtubeManager ? GetDetails(videoId))
+                (youtubeManager ? YouTubeDetailsActor.GetDetails(videoId))
                   .mapTo[Option[UpdateVideoDetails]]
                   .map { videoDetails =>
                     Ok(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, videoDetails))

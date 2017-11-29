@@ -14,7 +14,7 @@ $(function () {
     $('#show-entries').on('change', function () {
         var filter = $('input[name="user-filter"]:checked').val();
         var keyword = $('#search-text').val();
-        slide(keyword, 1, filter, this.val());
+        slide(keyword, 1, filter, this.value);
     });
 });
 
@@ -129,7 +129,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
                             var filter = $('input[name="user-filter"]:checked').val();
-                            slide(keyword, this.id, filter);
+                            slide(keyword, this.id, filter, pageSize);
                         });
                     }
                 } else {

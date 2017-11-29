@@ -132,32 +132,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   )
 
 
-  def sessions(pageNumber: Int = 1, keyword: Option[String] = None, pageSize: Int): Action[AnyContent] = action.async { implicit request =>
-    sessionsRepository
-      .paginate(pageNumber, keyword, pageSize)
-      .flatMap { sessionInfo =>
-        val knolxSessions = sessionInfo map { session =>
-          KnolxSession(session._id.stringify,
-            session.userId,
-            new Date(session.date.value),
-            session.session,
-            session.topic,
-            session.email,
-            session.meetup,
-            session.cancelled,
-            "",
-            completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
-            expired = new Date(session.expirationDate.value)
-              .before(new java.util.Date(dateTimeUtility.nowMillis)))
-        }
-
-        sessionsRepository
-          .activeCount(keyword)
-          .map { count =>
-            val pages = Math.ceil(count / 10D).toInt
-            Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber, 10))
-          }
-      }
+  def sessions: Action[AnyContent] = action.async { implicit request =>
+            Future.successful(Ok(views.html.sessions.sessions()))
   }
 
   def searchSessions: Action[AnyContent] = action.async { implicit request =>
@@ -188,8 +164,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             sessionsRepository
               .activeCount(sessionInformation.email)
               .map { count =>
-                val pages = Math.ceil(count / 10D).toInt
-
+                val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
+  Logger.error("helllo")
                 Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
               }
           }
@@ -230,7 +206,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           sessionsRepository
             .activeCount(keyword)
             .map { count =>
-              val pages = Math.ceil(count / 10D).toInt
+              val pages = Math.ceil(count.toDouble / pageSize).toInt
               Ok(views.html.sessions.managesessions(sessions, pages, pageNumber, pageSize))
             }
         }
@@ -276,7 +252,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               sessionsRepository
                 .activeCount(sessionInformation.email)
                 .map { count =>
-                  val pages = Math.ceil(count / 10D).toInt
+                  val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
 
                   Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
                 }
@@ -440,11 +416,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
     if (id.length != 24) {
-      Future.successful(Redirect(routes.SessionsController.sessions(1, None, 10)).flashing("message" -> "Session Not Found"))
+      Future.successful(Redirect(routes.SessionsController.sessions()).flashing("message" -> "Session Not Found"))
     } else {
       val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
       eventualMaybeSession.flatMap(maybeSession =>
-        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None, 10)).flashing("message" -> "Session Not Found")))
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions()).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
@@ -452,7 +428,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   def getCategory: Action[AnyContent] = action.async { implicit request =>
     categoriesRepository.getCategories.map { categories =>
       val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category.categoryName, category.subCategory))
-      Ok(Json.toJson(listOfCategoryInfo).toString)
+      Ok(Json.toJson(listOfCategoryInfo))
     }
   }
 

@@ -23,7 +23,7 @@ GET         /user/changepassword                    controllers.UsersController.
 POST        /user/changepassword                    controllers.UsersController.changePassword
 
 # Session
-GET         /session                                controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String], pageSize: Int)
+GET         /session                                controllers.SessionsController.sessions
 POST        /session/search                         controllers.SessionsController.searchSessions
 GET         /session/manage/:pageNumber             controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String], pageSize: Int)
 POST        /session/manage/search                  controllers.SessionsController.searchManageSession

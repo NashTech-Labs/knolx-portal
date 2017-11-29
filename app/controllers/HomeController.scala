@@ -7,7 +7,7 @@ import play.api.mvc._
 class HomeController @Inject()(controllerComponents: KnolxControllerComponents) extends KnolxAbstractController(controllerComponents) {
 
   def index: Action[AnyContent] = action { implicit request =>
-    Redirect(routes.SessionsController.sessions(1, None, 10))
+    Redirect(routes.SessionsController.sessions())
   }
 
 }

@@ -256,7 +256,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         usersRepository
           .userCountWithKeyword(keyword)
           .map { count =>
-            val pages = Math.ceil(count / 10D).toInt
+            val pages = Math.ceil(count.toDouble / pageSize).toInt
 
             Ok(views.html.users.manageusers(users, pages, pageNumber, pageSize, keyword))
           }
@@ -286,7 +286,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             usersRepository
               .userCountWithKeyword(userInformation.email, userInformation.filter)
               .map { count =>
-                val pages = Math.ceil(count / 10D).toInt
+                val pages = Math.ceil(count.toDouble / userInformation.pageSize).toInt
 
                 Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""), request.user.superUser)).toString)
               }
@@ -486,7 +486,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 .map { result =>
                   if (result.ok) {
                     Logger.info(s"Password successfully updated for ${user.email}")
-                    Redirect(routes.SessionsController.sessions(1, None, 10)).flashing("message" -> "Password reset successfully!")
+                    Redirect(routes.SessionsController.sessions()).flashing("message" -> "Password reset successfully!")
                   } else {
                     InternalServerError("Something went wrong!")
                   }

@@ -1,4 +1,7 @@
-$(function () {
+$(document).ready(function () {
+
+    slide("", 1, 10);
+
     $('#search-text').keyup(function () {
         var pageSize = $('#show-entries').val();
         slide(this.value, 1, pageSize);
@@ -6,14 +9,13 @@ $(function () {
 
     $('#show-entries').on('change', function () {
         var keyword = $('#search-text').val();
-        slide(keyword, 1, this.val());
+        slide(keyword, 1, this.value);
     });
 
 });
 
 function slide(keyword, pageNumber, pageSize) {
     var email = keyword;
-
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
@@ -31,6 +33,7 @@ function slide(keyword, pageNumber, pageSize) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
+                console.log("hello");
                 var sessionInfo = JSON.parse(data);
                 var sessions = sessionInfo["sessions"];
                 var page = sessionInfo["page"];
@@ -86,7 +89,7 @@ function slide(keyword, pageNumber, pageSize) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id);
+                            slide(keyword, this.id, pageSize);
                         });
                     }
                 } else {

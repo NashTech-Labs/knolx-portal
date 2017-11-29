@@ -10,7 +10,7 @@
     <nav class="navbar navbar-fixed-top" role="navigation" style="margin-bottom: 0">
         <div class="navbar-header" style="height: 50px;">
             <span class="main-logo" >
-                <a href="@routes.SessionsController.sessions(1, None, 10)" class="pull-left logo">
+                <a href="@routes.SessionsController.sessions()" class="pull-left logo">
                     <img src='@routes.Assets.versioned("images/logo3.png")' style="padding-left: 15px;">
                 </a>
             </span>
@@ -53,7 +53,7 @@
 
         <ul class="list-unstyled components" style="border-bottom: none;">
             <li class="@activeLink("/session") alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
-                <a href="@routes.SessionsController.sessions(1, None, 10)">
+                <a href="@routes.SessionsController.sessions()">
                     <i class="fa fa-clock-o"></i>
                     <span>Sessions</span></a>
             </li>

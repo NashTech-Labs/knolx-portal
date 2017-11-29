@@ -6,7 +6,7 @@ $(function () {
 
     $('#show-entries').on('change', function () {
         var keyword = $('#search-text').val();
-        slide(keyword, 1, this.val());
+        slide(keyword, 1, this.value);
     });
 });
 
@@ -108,7 +108,7 @@ function slide(keyword, pageNumber, pageSize) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id);
+                            slide(keyword, this.id, pageSize);
                         });
                     }
                 } else {

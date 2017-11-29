@@ -115,13 +115,13 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get paginated sessions when serched with empty string" in new TestScope {
-      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1))
+      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, pageSize = 10))
 
       paginatedSessions must beEqualTo(List(sessionInfo.copy(session = "updatedSession", topic = "updatedTopic", meetup = false)))
     }
 
     "get paginated sessions when serched with some string" in new TestScope {
-      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, Some("test")))
+      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, Some("test"), pageSize = 10))
 
       paginatedSessions must beEqualTo(List(sessionInfo.copy(session = "updatedSession", topic = "updatedTopic", meetup = false)))
     }

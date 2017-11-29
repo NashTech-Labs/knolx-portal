@@ -56,77 +56,77 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
 
     "get paginated user when searched with empty string and `all` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, None))
+      val paginatedUsers = await(usersRepository.paginate(1, None, pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with empty string and `banned` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, None, "banned"))
+      val paginatedUsers = await(usersRepository.paginate(1, None, "banned", pageSize = 10))
 
       paginatedUsers must beEqualTo(Nil)
     }
 
     "get paginated user when searched with empty string and `allowed` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, None, "allowed"))
+      val paginatedUsers = await(usersRepository.paginate(1, None, "allowed", pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with empty string and `active` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, None, "active"))
+      val paginatedUsers = await(usersRepository.paginate(1, None, "active", pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with empty string and `suspended` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, None, "suspended"))
+      val paginatedUsers = await(usersRepository.paginate(1, None, "suspended", pageSize = 10))
 
       paginatedUsers must beEqualTo(Nil)
     }
 
     "get all paginated user when searched with empty string and invalid filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, None, "invalid"))
+      val paginatedUsers = await(usersRepository.paginate(1, None, "invalid", pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with some string and `all` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, Some("test")))
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with some string and `banned` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "banned"))
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "banned", pageSize = 10))
 
       paginatedUsers must beEqualTo(Nil)
     }
 
     "get paginated user when searched with some string and `allowed` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "allowed"))
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "allowed", pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with some string and `active` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "active"))
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "active", pageSize = 10))
 
       paginatedUsers must beEqualTo(List(document))
     }
 
     "get paginated user when searched with some string and `suspended` filter" in {
       dateTimeUtility.nowMillis returns currentMillis
-      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "suspended"))
+      val paginatedUsers = await(usersRepository.paginate(1, Some("test"), "suspended", pageSize = 10))
 
       paginatedUsers must beEqualTo(Nil)
     }

@@ -347,7 +347,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember,userInformation.admin, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None                  =>
-          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None, 10)).flashing("message" -> "Something went wrong!"))
+          Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Something went wrong!"))
       }
   }
 

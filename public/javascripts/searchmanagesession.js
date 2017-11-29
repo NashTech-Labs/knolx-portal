@@ -1,4 +1,7 @@
 $(function () {
+
+    slide("", 1, 10);
+
     $('#search-text').keyup(function () {
         var pageSize = $('#show-entries').val();
         slide(this.value, 1, pageSize);

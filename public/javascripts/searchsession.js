@@ -62,7 +62,7 @@ function slide(keyword, pageNumber) {
                                     "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
                                     "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a></td>";
                             } else {
-                                usersFound += "<td><span class='label label-warning'>Not Available</span></td>";
+                                usersFound += "<td><span class='label label-danger'>Not Available</span></td>";
                             }
                         } else if(sessions[session].cancelled) {
                             usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span></td>";

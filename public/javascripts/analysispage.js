@@ -105,8 +105,6 @@ function pieChart(startDate, EndDate) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                console.log(data);
-
                 var items = [];
                 var series = [];
 

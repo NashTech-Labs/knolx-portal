@@ -1,4 +1,7 @@
 $(function () {
+
+    slide("", 1, "all", 10);
+
     $('#search-text').keyup(function () {
         var filter = $('input[name="user-filter"]:checked').val();
         var pageSize = $('#show-entries').val();

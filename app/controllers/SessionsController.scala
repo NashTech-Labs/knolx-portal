@@ -169,7 +169,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               .activeCount(sessionInformation.email)
               .map { count =>
                 val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
-  Logger.error("helllo")
                 Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
               }
           }
@@ -222,7 +221,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 .activeCount(sessionInformation.email)
                 .map { count =>
                   val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
-
                   Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
                 }
             }

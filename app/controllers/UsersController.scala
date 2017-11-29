@@ -239,28 +239,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     Redirect(routes.HomeController.index()).withNewSession
   }
 
-  def manageUser(pageNumber: Int = 1, keyword: Option[String] = None, pageSize: Int): Action[AnyContent] = adminAction.async { implicit request =>
-    usersRepository
-      .paginate(pageNumber, keyword,"all", pageSize)
-      .flatMap { userInfo =>
-        val users = userInfo map (user =>
-          ManageUserInfo(user.email,
-            user.active,
-            user._id.stringify,
-            new Date(user.banTill.value).toString,
-            user.admin,
-            user.superUser,
-            user.coreMember,
-            new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
-
-        usersRepository
-          .userCountWithKeyword(keyword)
-          .map { count =>
-            val pages = Math.ceil(count.toDouble / pageSize).toInt
-
-            Ok(views.html.users.manageusers(users, pages, pageNumber, pageSize, keyword))
-          }
-      }
+  def manageUser: Action[AnyContent] = adminAction.async { implicit request =>
+    Future.successful(Ok(views.html.users.manageusers()))
   }
 
   def searchUser: Action[AnyContent] = adminAction.async { implicit request =>
@@ -307,7 +287,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
-              Future.successful(Redirect(routes.UsersController.manageUser(1, None, 10))
+              Future.successful(Redirect(routes.UsersController.manageUser())
                 .flashing("message" -> s"Details successfully updated for $email"))
             } else {
               Future.successful(InternalServerError("Something went wrong!"))
@@ -328,7 +308,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
-              Future.successful(Redirect(routes.UsersController.manageUser(1, None, 10))
+              Future.successful(Redirect(routes.UsersController.manageUser())
                 .flashing("message" -> s"Details successfully updated for $email"))
             } else {
               Future.successful(InternalServerError("Something went wrong!"))
@@ -358,10 +338,10 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .delete(cleanedEmail)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete user with email $cleanedEmail")
-        Future.successful(Redirect(routes.UsersController.manageUser(1, None, 10)).flashing("error" -> "Something went wrong!"))
+        Future.successful(Redirect(routes.UsersController.manageUser()).flashing("error" -> "Something went wrong!"))
       } { user =>
         Logger.info(s"user with email: $cleanedEmail has been successfully deleted")
-        Future.successful(Redirect(routes.UsersController.manageUser(1, None, 10))
+        Future.successful(Redirect(routes.UsersController.manageUser())
           .flashing("success" -> s"User with email ${user.email} has been successfully deleted!"))
       })
   }

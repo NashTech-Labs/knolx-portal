@@ -42,7 +42,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
     }
 
     "modify a sub-category" in {
-      val update = await(categoriesRepository.modifySubCategory("Front-End","D3JS","D3 JS"))
+      val update = await(categoriesRepository.modifySubCategory(categoryId.stringify,"D3JS","D3 JS"))
 
       update.ok must beEqualTo(true)
     }

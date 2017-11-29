@@ -174,13 +174,13 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "not modify primary category when is does not exist" in new WithTestApplication {
+    "not modify primary category when it does not exist" in new WithTestApplication {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-      categoriesRepository.modifyPrimaryCategory(categoryId.stringify, "front end") returns updateWriteResult
+      categoriesRepository.modifyPrimaryCategory(categoryId.stringify, "backend") returns updateWriteResult
       val categories: List[CategoryInfo] = List(CategoryInfo("Backend",List("Angular JS","HTML"),categoryId))
-      sessionsRepository.updateCategoryOnChange("Backend", "backend") returns updateWriteResult
+      sessionsRepository.updateCategoryOnChange("Backend", "") returns updateWriteResult
       categoriesRepository.getCategories returns  Future(categories)
       val result = controller.modifyPrimaryCategory(categoryId.stringify, "backend")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
@@ -259,6 +259,7 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End",List("Angular JS","HTML"),categoryId))
       categoriesRepository.getCategories returns  Future(categories)
+      categoriesRepository.getCategoryNameById(categoryId.stringify) returns Future(Some("Front End"))
       sessionsRepository.updateSubCategoryOnChange("HTML", "") returns updateWriteResult
       categoriesRepository.deleteSubCategory("Front End","HTML") returns updateWriteResult
 
@@ -273,6 +274,7 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End",List("Angular JS","HTML"),categoryId))
       categoriesRepository.getCategories returns  Future(categories)
+      categoriesRepository.getCategoryNameById(categoryId.stringify) returns Future(Some("Front End"))
       sessionsRepository.updateSubCategoryOnChange("React", "") returns updateWriteResult
       categoriesRepository.deleteSubCategory("Front End","React") returns updateWriteResult
 
@@ -287,7 +289,7 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       val sessionInfo = List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
         1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id))
-      sessionsRepository.sessions returns Future(sessionInfo)
+      sessionsRepository.getSessionByCategory("category", "subCategory") returns Future(sessionInfo)
 
       val result = controller.getTopicsBySubCategory("category", "subCategory")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))

@@ -247,13 +247,25 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       deleteCategory.ok must beEqualTo(true)
     }
 
+    "get sessions by category" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "subCategory",
+      "feedbackFormId", "topic2", 1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000),
+      Some("youtubeURL"), Some("slideShareURL"),reminder = false, notification = false, sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val session = await(sessionsRepository.getSessionByCategory("category", "subCategory"))
+      session must beEqualTo(List(sessionInfo))
+    }
 
     "return session monthly Info" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
 
       val result: List[(String, Int)] = await(sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, startDate, endDate)))
 
-      result must beEqualTo(List(("2017-07", 4)))
+      result.head._1 must beEqualTo("2017-07")
     }
   }
 

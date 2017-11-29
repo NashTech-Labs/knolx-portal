@@ -17,16 +17,22 @@
 
 #no-sessions, #no-subCategory {
     padding-top: 5px;
-    color: red;
+    color: green;
     font-weight: inherit;
 }
 
+ /*{
+    padding-top: 5px;
+    color: green;
+    font-weight: inherit;
+}
+*/
 .category-message {
     text-align: center;
     font-size: 16px;
     overflow-wrap: break-word;
     padding-right: 5px;
-    width: 98.2%;
+    width: 97.8%;
 }
 
 #sub-category-topics {

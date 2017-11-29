@@ -1,4 +1,5 @@
-function Element(subCategory, primaryCategory) {
+function Element(categoryId, subCategory, primaryCategory) {
+    this.categoryId = categoryId;
     this.subCategory = subCategory;
     this.primaryCategory = primaryCategory;
 }
@@ -47,7 +48,7 @@ $(function () {
 
     $("#modify-sub-category-btn").click(function () {
         var newSubCategoryName = $("#new-sub-category").val();
-        modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName);
+        modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName);
     });
 
     $("#delete-primary-category").on('input change', function () {
@@ -71,7 +72,7 @@ $(function () {
     });
 
     $("#delete-sub-category-btn").on('click', function () {
-        deleteSubCategory(categoryName, subCategoryName);
+        deleteSubCategory(categoryId, subCategoryName);
     });
 
     $("#mod-sub-category-hover").mouseover(function () {
@@ -121,10 +122,11 @@ $(function () {
         if (!keyword) {
             $("#topic-linked-subcategory-message").hide();
             $("#subcategory-sessions").hide();
+            $("#no-sessions").hide();
         }
         fields.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
-                result = result + '<div class="' + renderResult + '" id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
+                result = result + '<div class="' + renderResult + '" name = "'+element.categoryId+'"id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
             }
         });
         $(targetId).html(result);
@@ -171,11 +173,12 @@ $(function () {
     });
 
     $("html").delegate(".result", "mousedown", function () {
-        var attribute = $(this).attr('id');
+        var attribute = $(this).attr('id') +"-"+$(this).attr('name')
         var splits = attribute.split('-');
         console.log("splits = " + splits);
         subCategoryName = splits[0];
         categoryName = splits[1];
+        categoryId = splits[2];
         $("#datalist").val(splits[0]);
         topicMatchedWithCategory(categoryName, subCategoryName)
         $("#subcategory-sessions").show();
@@ -185,11 +188,12 @@ $(function () {
 
     var newSubCategoryName = "";
     $("html").delegate(".mod-result", "mousedown", function () {
-        var attribute = $(this).attr('id');
+        var attribute = $(this).attr('id')+"-"+$(this).attr('name');
         var splits = attribute.split('-');
         console.log("splits = " + splits);
         oldSubCategoryName = splits[0];
         categoryName = splits[1];
+        categoryId = splits[2];
         $("#mod-datalist").val(splits[0]);
         $("#new-sub-category").show();
         $("#mod-pair").val(attribute);
@@ -231,14 +235,12 @@ function listSubCategoryWithPrimaryCategory() {
             type: 'GET',
             processData: false,
             contentType: 'application/json',
-            success: function (data) {
-                var values = JSON.parse(data);
-                var listOfData = [];
+            success: function (values) {
                 console.log(values[0].subCategory);
                 for (var i = 0; i < values.length; i++) {
                     for (var j = 0; j < values[i].subCategory.length; j++) {
 
-                        var elem = new Element(values[i].subCategory[j], values[i].categoryName);
+                        var elem = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
                         fields.push(elem);
                     }
                 }
@@ -331,9 +333,9 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
     )
 }
 
-function modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName) {
+function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
 
-    jsRoutes.controllers.SessionsCategoryController.modifySubCategory(categoryName, oldSubCategoryName, newSubCategoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName).ajax(
         {
             type: 'GET',
             processData: false,
@@ -389,9 +391,8 @@ function subCategoryByPrimaryCategory(categoryName) {
             type: 'GET',
             processData: false,
             contentType: 'application/json',
-            success: function (data) {
+            success: function (subCategories) {
                 $("#no-subCategory").remove();
-                var subCategories = JSON.parse(data);
                 if (subCategories.length) {
                     console.log("Sub category = " + subCategories);
                     var subCategoryList = '<ul id="list-sessions">'
@@ -406,7 +407,7 @@ function subCategoryByPrimaryCategory(categoryName) {
             },
             error: function (er) {
                 $("#no-subCategory").remove();
-                var noSubCategory = '<label id="no-subCategory">No sub-category exists!</label>'
+                var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>'
                 $("#category-sessions").before(noSubCategory);
                 $("#category-sessions").hide();
             }
@@ -421,9 +422,9 @@ function topicMatchedWithCategory(categoryName, subCategoryName) {
             type: 'GET',
             processData: false,
             contentType: 'application/json',
-            success: function (data) {
+            success: function (topics) {
                 $("#no-sessions").remove();
-                var topics = JSON.parse(data);
+                /*var topics = JSON.parse(data);*/
                 console.log("topics = " + topics);
                 if (topics.length) {
                     var sessions = '<ul id="list-sessions">';
@@ -448,9 +449,9 @@ function topicMatchedWithCategory(categoryName, subCategoryName) {
     )
 }
 
-function deleteSubCategory(categoryName, subCategoryName) {
+function deleteSubCategory(categoryId, subCategoryName) {
 
-    jsRoutes.controllers.SessionsCategoryController.deleteSubCategory(categoryName, subCategoryName).ajax(
+    jsRoutes.controllers.SessionsCategoryController.deleteSubCategory(categoryId, subCategoryName).ajax(
         {
             type: 'GET',
             processData: false,

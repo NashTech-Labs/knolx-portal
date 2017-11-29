@@ -10,12 +10,12 @@ import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import models.CategoriesJsonFormats._
 import play.api.Logger
-import play.api.libs.json.JsArray
+import play.api.libs.json.{JsArray, JsValue, Json}
 import models.CategoriesJsonFormats._
-import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -68,9 +68,9 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector,modifier))
   }
 
-  def modifySubCategory(categoryName: String, oldSubCategoryName: String,
+  def modifySubCategory(categoryId: String, oldSubCategoryName: String,
                         newSubCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("categoryName" -> categoryName,"subCategory" -> oldSubCategoryName)
+    val selector = BSONDocument("_id" ->  BSONDocument("$oid" -> categoryId),"subCategory" -> oldSubCategoryName)
     val modifier = BSONDocument("$set" -> BSONDocument(
       "subCategory.$" -> newSubCategoryName
     ))
@@ -82,22 +82,26 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.remove(selector))
   }
 
-  def getSubCategoryByPrimaryCategory(categoryName: String)(implicit ex: ExecutionContext): Future[Option[JsArray]] = {
-    val selector = BSONDocument("categoryName" -> categoryName)
-    val projection = BSONDocument("_id" -> 0 , "subCategory" -> 1)
+  def deleteSubCategory(categoryId: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
+    val modifier = BSONDocument("$pull" -> BSONDocument(
+      "subCategory"-> subCategory))
+    collection.flatMap(_.update(selector, modifier, multi = true))
+  }
+
+  def getCategoryNameById(categoryId: String): Future[Option[String]] = {
+    Logger.info("Inside category repository")
+    Logger.info("category id " + categoryId)
+    val condition = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
+    val projection = BSONDocument("_id" -> 0, "categoryName" -> 1)
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(selector,projection)
-          .cursor[JsArray](ReadPreference.primary).headOption)
-  }
-
-  def deleteSubCategory(categoryName: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("categoryName" -> categoryName)
-    val modifier = BSONDocument("$pull" -> BSONDocument(
-      "subCategory"-> subCategory))
-    Logger.info("At end delete sub category")
-    collection.flatMap(_.update(selector, modifier, multi = true))
+          .find(condition, projection)
+          .cursor[JsValue](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("categoryName").asOpt[String]).headOption)
   }
 
 }

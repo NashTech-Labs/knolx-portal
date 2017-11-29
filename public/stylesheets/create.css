@@ -44,6 +44,7 @@
 }
 
 .preview {
+    padding-top: 3px;
     font-size: 20px;
     text-align: center;
     cursor: pointer;
@@ -56,6 +57,8 @@
 
 .feedback-duration {
     line-height: 0.5em;
+    padding: 10px 0px;
+    box-shadow: 0 4px 10px -5px #a8a8a8;
 }
 
 .radio-style {
@@ -63,7 +66,7 @@
     font-size: 16px;
     color: #566573;
     font-weight: normal;
-    margin-top: 0;
+    margin-top: 0 !important;
 }
 
 .radio-style-days {
@@ -71,7 +74,7 @@
     font-size: 16px;
     color: #566573;
     font-weight: normal;
-    margin-top: -4px;
+    margin-top: 0 !important;
 }
 
 .days {

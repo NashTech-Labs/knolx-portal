@@ -25,7 +25,8 @@ i, span {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
+    max-height: calc(100% - 51px);
+    min-height: calc(100% - 51px);
     z-index: 999;
     background: #2f4050;
     color: #fff;
@@ -239,7 +240,7 @@ html,body{
     background-color:#eeeeee;
     width: calc(100% - 180px);
     padding-top:0;
-    min-height: 100vh;
+    min-height: calc(100% - 51px);
     position: absolute;
     top: 0;
     right: 0;

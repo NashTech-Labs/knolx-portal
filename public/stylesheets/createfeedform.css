@@ -301,7 +301,7 @@ textarea{
 }
 .comment-section{
     width:100%;
-    text-align:center;
+    text-align:center
     border:none;
     border-bottom: 1px dotted #dcdcdc;
     outline: none;
@@ -323,7 +323,7 @@ textarea{
 }
 
 .feedback-duration .days-outer .days{    width: 40px;
-                                         margin: 0 0 0 -6px;}
+                                         margin: -5px 0 0 -6px;}
  .feedback-duration .days-outer .checkbox-text { white-space:nowrap}
 
  .duration-title {

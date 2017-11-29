@@ -60,7 +60,8 @@ case class KnolxSession(id: String,
                         feedbackFormScheduled: Boolean = false,
                         dateString: String = "",
                         completed: Boolean = false,
-                        expired: Boolean = false)
+                        expired: Boolean = false,
+                        contentAvailable: Boolean)
 
 case class SessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
 case class ModelsCategoryInformation(categoryName: String, subCategory: List[String])
@@ -146,7 +147,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         sessionsRepository
           .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
-            val knolxSessions = sessionInfo map (session =>
+            val knolxSessions = sessionInfo map { session =>
+              val contentAvailable = session.youtubeURL.isDefined || session.slideShareURL.isDefined
               KnolxSession(session._id.stringify,
                 session.userId,
                 new Date(session.date.value),
@@ -159,7 +161,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 dateString = new Date(session.date.value).toString,
                 completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
                 expired = new Date(session.expirationDate.value)
-                  .before(new java.util.Date(dateTimeUtility.nowMillis))))
+                  .before(new java.util.Date(dateTimeUtility.nowMillis)),
+                contentAvailable = contentAvailable)
+            }
 
             sessionsRepository
               .activeCount(sessionInformation.email)
@@ -186,7 +190,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         sessionsRepository
           .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
-            val knolxSessions = sessionInfo map (sessionInfo =>
+            val knolxSessions = sessionInfo map { sessionInfo =>
+              val contentAvailable = sessionInfo.youtubeURL.isDefined || sessionInfo.slideShareURL.isDefined
               KnolxSession(sessionInfo._id.stringify,
                 sessionInfo.userId,
                 new Date(sessionInfo.date.value),
@@ -199,8 +204,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 dateString = new Date(sessionInfo.date.value).toString,
                 completed = new Date(sessionInfo.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
                 expired = new Date(sessionInfo.expirationDate.value)
-                  .before(new java.util.Date(dateTimeUtility.nowMillis))
-              ))
+                  .before(new java.util.Date(dateTimeUtility.nowMillis)),
+                contentAvailable = contentAvailable)
+            }
 
             val eventualScheduledFeedbackForms =
               (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]

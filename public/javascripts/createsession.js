@@ -1,7 +1,6 @@
 $(document).ready(function () {
 
-    $('#category').select2();
-    $('#subCategory').select2();
+    $('#category,#session, #subCategory, #feedbackFormId').select2();
 
     jsRoutes.controllers.SessionsController.getCategory().ajax(
         {
@@ -49,7 +48,6 @@ function showSubCategory(primaryCategory, subCategory, values) {
                 for (var j = 0; j < values[i].subCategory.length; j++) {
                     subCategories += "<option value='" + values[i].subCategory[j] + "'";
                     if (subCategory === values[i].subCategory[j]) {
-                        console.log(subCategory + "-->" + values[i].subCategory[j]);
                         subCategories += "selected";
                     }
                     subCategories+=  ">"+ values[i].subCategory[j] + "</option>";

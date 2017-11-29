@@ -11,11 +11,11 @@ import play.api.libs.concurrent.InjectedActorSupport
 case object Done
 case object Cancel
 
-class YouTubeUploaderManager @Inject()(
-                                        configuredYouTubeUploader: ConfiguredYouTubeUploader.Factory,
-                                        configuredYouTubeDetailsActor: ConfiguredYouTubeDetailsActor.Factory,
-                                        configuration: Configuration
-                                      ) extends Actor with InjectedActorSupport {
+class YouTubeManager @Inject()(
+                                configuredYouTubeUploader: ConfiguredYouTubeUploader.Factory,
+                                configuredYouTubeDetailsActor: ConfiguredYouTubeDetailsActor.Factory,
+                                configuration: Configuration
+                              ) extends Actor with InjectedActorSupport {
 
   var noOfActors = 0
   lazy val limit: Int = configuration.get[Int]("youtube.actors.limit")

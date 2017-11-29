@@ -59,7 +59,7 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
     bind[ActorRef]
       .annotatedWith(Names.named("YouTubeUploadManager"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploadManager], "YouTubeUploadManager", Function.identity())))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeProgressManager], "YouTubeUploadManager", Function.identity())))
       .asEagerSingleton
 
     bindActorFactory[YouTubeUploader, ConfiguredYouTubeUploader.Factory]
@@ -70,7 +70,7 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
     bind[ActorRef]
       .annotatedWith(Names.named("YouTubeUploaderManager"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeUploaderManager], "YouTubeUploaderManager", Function.identity())))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeManager], "YouTubeUploaderManager", Function.identity())))
       .asEagerSingleton
 
     bindActorFactory[YouTubeDetailsActor, ConfiguredYouTubeDetailsActor.Factory]

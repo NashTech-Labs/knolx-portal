@@ -53,14 +53,14 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     }
 
     val youtubeUploaderManager =
-      TestActorRef(new YouTubeUploaderManager(DummyYouTubeUploaderFactory, DummyYouTubeDetailsActorFactory, configuration) with TestInjectedActorSupport)
+      TestActorRef(new YouTubeManager(DummyYouTubeUploaderFactory, DummyYouTubeDetailsActorFactory, configuration) with TestInjectedActorSupport)
   }
 
   abstract class IntegrationTestScope extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
     lazy val configuredYoutubeUploader = app.injector.instanceOf(BindingKey(classOf[ConfiguredYouTubeUploader.Factory]))
     lazy val configuredYoutubeDetailsActor = app.injector.instanceOf(BindingKey(classOf[ConfiguredYouTubeDetailsActor.Factory]))
-    lazy val youtubeUploaderManager = TestActorRef(new YouTubeUploaderManager(configuredYoutubeUploader, configuredYoutubeDetailsActor, configuration))
+    lazy val youtubeUploaderManager = TestActorRef(new YouTubeManager(configuredYoutubeUploader, configuredYoutubeDetailsActor, configuration))
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))

@@ -3,7 +3,7 @@ package services
 import java.io.InputStream
 import javax.inject.{Named, Inject}
 
-import actors.{VideoDetails, YouTubeUploadManager}
+import actors.{VideoDetails, YouTubeProgressManager}
 import akka.actor.ActorRef
 import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.InputStreamContent
@@ -62,12 +62,12 @@ class YoutubeService1 @Inject()(youtube: YouTube) {
     val videoInsert = youtube.videos().insert(part, videoObjectDefiningMetadata, mediaContent)
     val uploader = getMediaHttpUploader(videoInsert, chunkSize)
 
-    uploadManager ! YouTubeUploadManager.RegisterUploadListener(sessionId, uploader)
+    uploadManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
     //sender ! "Uploader set"
 
     val video = videoInsert.execute()
 
-    uploadManager ! YouTubeUploadManager.SessionVideo(sessionId, video)
+    uploadManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
 
     video
   }

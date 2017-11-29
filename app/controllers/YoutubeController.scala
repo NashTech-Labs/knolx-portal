@@ -3,8 +3,8 @@ package controllers
 import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
-import actors.YouTubeUploadManager.VideoUploader
-import actors.{Cancel, VideoDetails, YouTubeUploadManager, YouTubeUploader}
+import actors.YouTubeProgressManager.VideoUploader
+import actors.{Cancel, VideoDetails, YouTubeProgressManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
@@ -97,14 +97,14 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
-    youtubeUploadManager ! YouTubeUploadManager.CancelVideoUpload(sessionId)
+    youtubeUploadManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
     youtubeUploaderManager ! Cancel
 
     Ok("Upload cancelled!")
   }
 
   def getVideoId(sessionId: String): Action[AnyContent] = action.async { implicit request =>
-    (youtubeUploadManager ? YouTubeUploadManager.VideoId(sessionId)).mapTo[Option[Video]]
+    (youtubeUploadManager ? YouTubeProgressManager.VideoId(sessionId)).mapTo[Option[Video]]
       .map { maybeVideo =>
         maybeVideo.fold {
           BadRequest("No Video ID found for the given session")

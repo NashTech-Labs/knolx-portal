@@ -66,12 +66,12 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadMana
     val videoInsert = youtube.videos().insert(part, videoObjectDefiningMetadata, mediaContent)
     val uploader = getMediaHttpUploader(videoInsert, chunkSize)
 
-    youtubeUploadManager ! YouTubeUploadManager.RegisterUploadListener(sessionId, uploader)
+    youtubeUploadManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
     sender ! "Uploader set"
 
     val video = videoInsert.execute()
 
-    youtubeUploadManager ! YouTubeUploadManager.SessionVideo(sessionId, video)
+    youtubeUploadManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
 
     youtubeUploaderManager ! Done
   }

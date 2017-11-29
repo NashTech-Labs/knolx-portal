@@ -38,10 +38,10 @@ class TestEmailActor extends Actor {
 class DummyYouTubeUploadManager extends Actor {
 
   override def receive: Receive = {
-    case YouTubeUploadManager.VideoId(sessionId)               =>
+    case YouTubeProgressManager.VideoId(sessionId)               =>
       Logger.info("Getting from sessionVideos")
       sender() ! Some(new Video)
-    case YouTubeUploadManager.VideoUploader(sessionId: String) => sender() ! Some(50D)
+    case YouTubeProgressManager.VideoUploader(sessionId: String) => sender() ! Some(50D)
   }
 
 }

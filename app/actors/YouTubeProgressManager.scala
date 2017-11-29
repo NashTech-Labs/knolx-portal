@@ -1,6 +1,6 @@
 package actors
 
-import actors.YouTubeUploadManager.YoutubeUploadException
+import actors.YouTubeProgressManager.YoutubeUploadException
 import akka.actor.Actor
 import com.google.api.client.googleapis.media.MediaHttpUploader.UploadState
 import com.google.api.client.googleapis.media.{MediaHttpUploader, MediaHttpUploaderProgressListener}
@@ -9,7 +9,7 @@ import play.api.Logger
 
 import scala.collection.mutable.ListBuffer
 
-object YouTubeUploadManager {
+object YouTubeProgressManager {
 
   // Commands for YouTubeUploadManager actor
   case class RegisterUploadListener(sessionId: String, uploader: MediaHttpUploader)
@@ -27,7 +27,7 @@ object YouTubeUploadManager {
 
 }
 
-class YouTubeUploadManager extends Actor {
+class YouTubeProgressManager extends Actor {
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty
   var sessionUploaders: Map[String, MediaHttpUploader] = Map.empty
@@ -35,21 +35,21 @@ class YouTubeUploadManager extends Actor {
   var sessionVideos: Map[String, Video] = Map.empty
 
   def receive: Receive = {
-    case YouTubeUploadManager.RegisterUploadListener(sessionId, uploader) =>
+    case YouTubeProgressManager.RegisterUploadListener(sessionId, uploader) =>
       Logger.info(s"Registering and uploader for session $sessionId")
       addSessionUploader(sessionId, uploader)
       setProgressListener(sessionId, uploader)
-    case YouTubeUploadManager.CancelVideoUpload(sessionId)                =>
+    case YouTubeProgressManager.CancelVideoUpload(sessionId)                =>
       Logger.info(s"Cancelling video upload for session $sessionId")
       cancelVideoUpload(sessionId)
-    case YouTubeUploadManager.SessionVideo(sessionId, video)              =>
+    case YouTubeProgressManager.SessionVideo(sessionId, video)              =>
       Logger.info("Adding to sessionVideos")
       sessionVideos += sessionId -> video
-    case YouTubeUploadManager.VideoUploader(sessionId: String)            => sender() ! returnPercentage(sessionId: String)
-    case YouTubeUploadManager.VideoId(sessionId)                          =>
+    case YouTubeProgressManager.VideoUploader(sessionId: String)            => sender() ! returnPercentage(sessionId: String)
+    case YouTubeProgressManager.VideoId(sessionId)                          =>
       Logger.info("Getting from sessionVideos")
       sender() ! sessionVideos.get(sessionId)
-    case msg                                                              =>
+    case msg                                                                =>
       Logger.info(s"Received a message in YouTubeUploadManager that cannot be handled $msg")
   }
 

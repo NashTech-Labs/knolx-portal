@@ -1,15 +1,25 @@
-$(function () {
+$(document).ready(function () {
+
+    slide("", 1, 10);
+
     $('#search-text').keyup(function () {
-        slide(this.value, 1);
+        var pageSize = $('#show-entries').val();
+        slide(this.value, 1, pageSize);
     });
+
+    $('#show-entries').on('change', function () {
+        var keyword = $('#search-text').val();
+        slide(keyword, 1, this.value);
+    });
+
 });
 
-function slide(keyword, pageNumber) {
+function slide(keyword, pageNumber, pageSize) {
     var email = keyword;
-
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
+    formData.append("pageSize", pageSize);
 
     jsRoutes.controllers.SessionsController.searchSessions().ajax(
         {
@@ -23,6 +33,7 @@ function slide(keyword, pageNumber) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
+                console.log("hello");
                 var sessionInfo = JSON.parse(data);
                 var sessions = sessionInfo["sessions"];
                 var page = sessionInfo["page"];
@@ -82,7 +93,7 @@ function slide(keyword, pageNumber) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id);
+                            slide(keyword, this.id, pageSize);
                         });
                     }
                 } else {

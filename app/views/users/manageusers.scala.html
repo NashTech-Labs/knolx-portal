@@ -1,11 +1,20 @@
-@(users: List[ManageUserInfo], pages: Int, pageNumber: Int, keyword: Option[String])(implicit request: Request[_], messages: Messages, flash: Flash)
+@()(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Manage User") {
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
             <div class="col-md-12">
-                <div class="col-md-9 filter-outer filter-padding-left">
-                    <div class="col-md-7 filter-padding-left">
+                <label class="col-md-2" style="font-weight: normal">
+                    Show
+                    <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                    @for(value <- List(10,20,30,40,50)) {
+                        <option value="@value">@value</option>
+                    }
+                    </select>
+                    Entries
+                </label>
+                <div class="col-md-7 filter-outer filter-padding-left">
+                    <div class="col-md-9 filter-padding-left">
                         <div class="col-md-1 filter-padding-left filter-padding-right">
                             <label class="checkbox-outer" style="font-weight: normal;">
                                 <input type='radio' name='user-filter' checked class='custom-checkbox' value='all'/>
@@ -47,7 +56,7 @@
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-5 rest">
+                    <div class="col-md-3 rest">
                     </div>
                 </div>
                 <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
@@ -82,101 +91,18 @@
                             </tr>
                         </thead>
                         <tbody id="user-found">
-                        @for(user <- users) {
-                            <tr>
-                                @if(SessionHelper.isSuperUser) {
-                                        @if(user.admin && user.superUser) {
-                                            <td align="center">
-                                                <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
-                                                    <em class="fa fa-pencil"></em>
-                                                </a>
-                                                <a href="" class="btn btn-danger delete disabled">
-                                                    <em class="fa fa-trash"></em>
-                                                </a>
-                                            </td>
-                                        } else if(user.admin && !user.superUser) {
-                                            <td align="center">
-                                                <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
-                                                    <em class="fa fa-pencil"></em>
-                                                </a>
-                                                <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
-                                                    <em class="fa fa-trash"></em>
-                                                </a>
-                                            </td>
-                                        } else {
-                                            <td align="center">
-                                                <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
-                                                    <em class="fa fa-pencil"></em>
-                                                </a>
-                                                <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
-                                                    <em class="fa fa-trash"></em>
-                                                </a>
-                                            </td>
-                                        }
-                                    } else {
-                                        @if(user.admin) {
-                                            <td align="center">
-                                                <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
-                                                    <em class="fa fa-pencil"></em>
-                                                </a>
-                                                <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete disabled">
-                                                    <em class="fa fa-trash"></em>
-                                                </a>
-                                            </td>
-                                        } else {
-                                            <td align="center">
-                                                <a href="@routes.UsersController.getByEmail(user.email)" class="btn btn-default ">
-                                                    <em class="fa fa-pencil"></em>
-                                                </a>
-                                                <a href="@routes.UsersController.deleteUser(user.email)" class="btn btn-danger delete">
-                                                    <em class="fa fa-trash"></em>
-                                                </a>
-                                            </td>
-                                        }
-                                    }
-                                <td>@user.email</td>
-                                @if(user.active) {
-                                    <td class="active-status"><span class="label label-success">Active</span></td>
-                                } else {
-                                    <td class="suspended"><span class="label label-danger">Suspended</span></td>
-                                }
-                                @if(user.ban) {
-                                    <td class="active-status"><span class="label label-danger">
-                                        Banned</span><p class="ban-text">@user.banTill</p></td>
-                                } else {
-                                    <td class="suspended"><span class="label label-info">Allowed</span></td>
-                                }
-
-                                <td class="active-status" style="white-space: nowrap;">
-                                    @if(SessionHelper.isSuperUser) {
-                                        @if(user.superUser && user.admin) {
-                                            <span class="label label-superUser">Super User</span>
-                                        } else if(user.admin && !user.superUser) {
-                                            <span class="label label-warning">Admin</span>
-                                        } else {
-                                            <span class="label label-normalUser">Normal User</span>
-                                        }
-                                    } else {
-                                        @if(user.superUser) {
-                                            <span class="label label-superUser">Super User</span>
-                                        } else if(user.admin) {
-                                            <span class="label label-warning">Admin</span>
-                                        } else {
-                                            <span class="label label-normalUser">Normal User</span>
-                                        }
-                                    }
-
-                                    @if(user.coreMember) {
-                                    <span class="label label-info meetup-session">Core</span>
-                                    }
-                                </td>
-                            </tr>
-                        }
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="col-md-12" style="margin-bottom: 25px;">@pagination(pageNumber, pages, routes.UsersController.manageUser, keyword)</div>
+            <div class="col-md-12" style="margin-bottom: 25px;">
+                <div class="center">
+                    <div class="v-align v-align-mobile">
+                        <ul class="pagination pagination-lg">
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>

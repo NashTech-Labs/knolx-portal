@@ -6,8 +6,7 @@ $(document).ready(function () {
         {
             type: "GET",
             processData: false,
-            success: function (data) {
-                var values = JSON.parse(data);
+            success: function (values) {
                 var categories = "";
                 var primaryCategory = $("#primary-category").val();
                 var subCategory = $("#sub-category").val();

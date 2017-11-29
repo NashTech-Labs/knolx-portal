@@ -240,10 +240,8 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "render manage user page" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.paginate(1, Some("test@knoldus.com")) returns emailObject.map(user => List(user.get))
-      usersRepository.userCountWithKeyword(Some("test@knoldus.com")) returns Future.successful(1)
 
-      val result = controller.manageUser(1, Some("test@knoldus.com"))(FakeRequest(GET, "search")
+      val result = controller.manageUser()(FakeRequest(GET, "search")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
 
       status(result) must be equalTo OK
@@ -251,7 +249,7 @@ class UsersControllerSpec extends PlaySpecification with Results {
 
     "return json for the user searched by email" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.paginate(1, Some("test@knoldus.com"), "banned") returns emailObject.map(user => List(user.get))
+      usersRepository.paginate(1, Some("test@knoldus.com"), "banned", 10) returns emailObject.map(user => List(user.get))
       usersRepository.userCountWithKeyword(Some("test@knoldus.com"), "banned") returns Future.successful(1)
 
       val result = controller.searchUser()(FakeRequest(POST, "search")
@@ -259,7 +257,8 @@ class UsersControllerSpec extends PlaySpecification with Results {
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",
           "page" -> "1",
-          "filter" -> "banned"))
+          "filter" -> "banned",
+          "pageSize" -> "10"))
 
       status(result) must be equalTo OK
     }

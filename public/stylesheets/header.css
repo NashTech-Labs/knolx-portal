@@ -31,8 +31,7 @@ i, span {
     background: #2f4050;
     color: #fff;
     transition: width 0.5s ease-in-out;
-    overflow-x: hidden !important;
-    overflow-y:scroll  ;
+    overflow-y: auto;
 }
 
 #sidebar.active {
@@ -159,6 +158,7 @@ display: block;
     text-align: center;
     padding: 20px 0;
     position: relative;
+    margin-bottom: 30px;
 }
 
 #sidebarCollapse > [class*="fa fa-"] {

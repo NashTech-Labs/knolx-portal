@@ -4,7 +4,7 @@ import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.YouTubeProgressManager.VideoUploader
-import actors.{VideoDetails, YouTubeProgressManager, YouTubeUploader}
+import actors.{UpdateVideoDetails, YouTubeProgressManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
@@ -120,7 +120,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
             Future.successful(BadRequest("No video found for this session"))
           } { videoURL =>
             val videoId = videoURL.split("/")(2)
-            (youtubeManager ? VideoDetails(videoId,
+            (youtubeManager ? UpdateVideoDetails(videoId,
               updateVideoDetails.title,
               updateVideoDetails.description,
               updateVideoDetails.tags,

@@ -46,7 +46,7 @@ class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: Act
       private val status = "public"
       private val category = "category"
 
-      val videoDetails = VideoDetails("videoId",
+      val videoDetails = UpdateVideoDetails("videoId",
         title,
         description,
         tags,

@@ -3,7 +3,7 @@ package services
 import java.io.InputStream
 import java.util
 
-import actors.VideoDetails
+import actors.UpdateVideoDetails
 import akka.actor.{ActorSystem, ActorRef}
 import akka.testkit.{ImplicitSender, TestKit}
 import com.google.api.client.auth.oauth2.Credential
@@ -109,7 +109,7 @@ class YoutubeService1Spec extends TestKit(ActorSystem("MySpec")) with Specificat
       val youtube = mock[YouTube](Mockito.RETURNS_DEEP_STUBS)
       val videoUpdate = mock[YouTube#Videos#Update]
 
-      val videoDetails = VideoDetails("videoId", titleOfVideo, Some(description), tags, "public", "category")
+      val videoDetails = UpdateVideoDetails("videoId", titleOfVideo, Some(description), tags, "public", "category")
       val videoSnippet = new VideoSnippet().setTitle(titleOfVideo).setDescription(description).setTags(tags.asJava)
       val video = new Video().setSnippet(videoSnippet).setStatus(new VideoStatus().setPrivacyStatus("private"))
 

@@ -2,7 +2,7 @@ package services
 
 import java.io.InputStream
 
-import actors.VideoDetails
+import actors.UpdateVideoDetails
 import akka.actor.ActorRef
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.media.MediaHttpUploader
@@ -54,7 +54,7 @@ class YoutubeServiceSpec extends Specification {
 
     "update video details" in new WithTestApplication {
       val videoUpdate = mock[YouTube#Videos#Update]
-      val videoDetails = VideoDetails("videoId", titleOfVideo, Some(description), tags, "public", "category")
+      val videoDetails = UpdateVideoDetails("videoId", titleOfVideo, Some(description), tags, "public", "category")
 
       youtubeConfig.getVideoSnippet(
         videoDetails.title,

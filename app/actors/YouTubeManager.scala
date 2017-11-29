@@ -27,6 +27,16 @@ class YouTubeManager @Inject()(
     Router(RoundRobinRoutingLogic(), uploaders)
   }
 
+  var youtubeUploader = {
+    val uploaders = Vector.fill(limit) {
+      val uploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
+      context watch uploader
+      ActorRefRoutee(uploader)
+    }
+
+    Router(RoundRobinRoutingLogic(), uploaders)
+  }
+
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {
       case ex: Exception =>
@@ -44,7 +54,7 @@ class YouTubeManager @Inject()(
       val newUploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
       context watch newUploader
       youtubeUploader = youtubeUploader.addRoutee(newUploader)
-    case request: VideoDetails           =>
+    case request: UpdateVideoDetails     =>
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request
     case GetCategories                   =>

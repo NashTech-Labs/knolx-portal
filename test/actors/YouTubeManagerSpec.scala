@@ -88,7 +88,7 @@ class YouTubeManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSys
     }
 
     "forward request to youtube uploader to update video details" in new UnitTestScope {
-      val request = VideoDetails("videoId", "title", Some("description"),
+      val request = UpdateVideoDetails("videoId", "title", Some("description"),
         List("tags"), "public", "Education")
 
       youtubeManager ! request
@@ -152,7 +152,7 @@ class YouTubeManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSys
     }
 
     "update video details" in new IntegrationTestScope {
-      val request = VideoDetails("videoId", "title", Some("description"),
+      val request = UpdateVideoDetails("videoId", "title", Some("description"),
         List("tags"), "public", "Education")
 
       youtubeManager ! request

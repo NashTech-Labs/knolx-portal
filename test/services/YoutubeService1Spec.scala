@@ -131,6 +131,85 @@ class YoutubeService1Spec extends TestKit(ActorSystem("MySpec")) with Specificat
       result must be equalTo video
     }
 
+    "return video details" in {
+      val youtube = mock[YouTube](Mockito.RETURNS_DEEP_STUBS)
+
+      val service = new YoutubeService1(youtube)
+      val videoListResponse = new VideoListResponse
+      videoListResponse.setItems(List())
+
+      when(youtube.videos().list("snippet,statistics,status").setId("videoId").execute) thenReturn videoListResponse
+
+      val result = service.getVideoDetails("videoId")
+
+      result must be equalTo List()
+    }
+
+    "return video snippet for no category id" in {
+      val youtube = mock[YouTube](Mockito.RETURNS_DEEP_STUBS)
+      val service = new YoutubeService1(youtube)
+
+      val result = service.getVideoSnippet(titleOfVideo, Some(description), tags)
+
+      result.getTitle must be equalTo titleOfVideo
+    }
+
+    "return video snippet when category id is not empty" in {
+      val youtube = mock[YouTube]
+      val service = new YoutubeService1(youtube)
+
+      val result = service.getVideoSnippet(titleOfVideo, Some(description), tags, "27")
+
+      result.getTitle must be equalTo titleOfVideo
+    }
+
+    "return video for no videoId" in {
+      val youtube = mock[YouTube]
+      val service = new YoutubeService1(youtube)
+      val videoSnippet = new VideoSnippet()
+
+      val result = service.getVideo(videoSnippet, "private")
+
+      result.getStatus.getPrivacyStatus must be equalTo "private"
+    }
+
+    "return video for a given videoId" in {
+      val youtube = mock[YouTube]
+      val service = new YoutubeService1(youtube)
+      val videoSnippet = new VideoSnippet()
+
+      val result = service.getVideo(videoSnippet, "private", "videoId")
+
+      result.getStatus.getPrivacyStatus must be equalTo "private"
+    }
+
+    "return input stream" in {
+      val youtube = mock[YouTube]
+      val service = new YoutubeService1(youtube)
+      val inputStream = mock[InputStream]
+
+      val result = service.getInputStreamContent(inputStream, 10L)
+
+      result.getLength must be equalTo 10L
+    }
+
+    "return media http uploader" in {
+      val youtube = mock[YouTube]
+      val videoInsert = mock[YouTube#Videos#Insert]
+      val abstractIS = mock[AbstractInputStreamContent]
+      val httpReqInit = mock[HttpRequestInitializer]
+
+      val netHttpTransport = new NetHttpTransport
+      val mediaHttpUploader = new MediaHttpUploader(abstractIS, netHttpTransport, httpReqInit)
+      mediaHttpUploader.setDirectUploadEnabled(false).setChunkSize(1024 * 0x400)
+      val service = new YoutubeService1(youtube)
+
+      when(videoInsert.getMediaHttpUploader) thenReturn mediaHttpUploader
+      val result = service.getMediaHttpUploader(videoInsert, 1024 * 0x400)
+
+      result.getChunkSize must be equalTo 1024 * 0x400
+    }
+
   }
 
 }

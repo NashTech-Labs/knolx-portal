@@ -22,6 +22,21 @@ class YoutubeService1 @Inject()(youtube: YouTube) {
   private val videoFileFormat = "video/*"
   private val status = "private"
 
+  def getVideoDetails(videoId: String): List[UpdateVideoDetails] = {
+    youtube
+      .videos()
+      .list(part)
+      .setId(videoId)
+      .execute().getItems.toList.map { video =>
+      val tags: List[String] = Option(video.getSnippet.getTags).fold[List[String]](Nil)(_.toList)
+      UpdateVideoDetails(video.getSnippet.getTitle,
+        Some(video.getSnippet.getDescription),
+        tags,
+        video.getStatus.getPrivacyStatus,
+        video.getSnippet.getCategoryId)
+    }
+  }
+
   def getCategoryList: List[VideoCategory] =
     youtube
       .videoCategories()
@@ -48,8 +63,11 @@ class YoutubeService1 @Inject()(youtube: YouTube) {
     val uploader = getMediaHttpUploader(videoInsert, chunkSize)
 
     uploadManager ! YouTubeUploadManager.RegisterUploadListener(sessionId, uploader)
+    //sender ! "Uploader set"
 
     val video = videoInsert.execute()
+
+    uploadManager ! YouTubeUploadManager.SessionVideo(sessionId, video)
 
     video
   }

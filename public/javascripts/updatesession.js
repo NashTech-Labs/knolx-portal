@@ -44,7 +44,7 @@ $(function () {
         cancel = false;
         $("#youtube-dropzone").hide();
         showProgress(sessionId);
-    })
+    });
 
     console.log("sessionId = " + sessionId);
     $("#upload-success-message").hide();
@@ -68,21 +68,6 @@ $(function () {
                 showProgress(sessionId);
             }
         });
-
-    $("#uploadVideo").click( function () {
-        if(!uploading) {
-            uploading = true;
-            cancel = false;
-            console.log("Calling uploadVideo");
-            $("#upload-success-message").hide();
-            $("#already-upload").hide();
-            $("#no-upload-cancel").hide();
-            uploadVideo(sessionId);
-        } else {
-            uploading = false;
-            $("#already-upload").show();
-        }
-    });
 
     $("#cancelVideo").click( function () {
         if(uploading) {

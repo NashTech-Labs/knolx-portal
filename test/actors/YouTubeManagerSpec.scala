@@ -17,7 +17,7 @@ import play.api.libs.concurrent.InjectedActorSupport
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 
-class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
+class YouTubeManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   with WordSpecLike with DefaultAwaitTimeout with FutureAwaits with MustMatchers
   with Mockito with ImplicitSender with BeforeAndAfterAll {
 
@@ -52,7 +52,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       }
     }
 
-    val youtubeUploaderManager =
+    val youtubeManager =
       TestActorRef(new YouTubeManager(DummyYouTubeUploaderFactory, DummyYouTubeDetailsActorFactory, configuration) with TestInjectedActorSupport)
   }
 
@@ -60,7 +60,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     lazy val app: Application = fakeApp()
     lazy val configuredYoutubeUploader = app.injector.instanceOf(BindingKey(classOf[ConfiguredYouTubeUploader.Factory]))
     lazy val configuredYoutubeDetailsActor = app.injector.instanceOf(BindingKey(classOf[ConfiguredYouTubeDetailsActor.Factory]))
-    lazy val youtubeUploaderManager = TestActorRef(new YouTubeManager(configuredYoutubeUploader, configuredYoutubeDetailsActor, configuration))
+    lazy val youtubeManager = TestActorRef(new YouTubeManager(configuredYoutubeUploader, configuredYoutubeDetailsActor, configuration))
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
@@ -82,7 +82,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager ! request
+      youtubeManager ! request
 
       expectMsg(request)
     }
@@ -91,13 +91,13 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = VideoDetails("videoId", "title", Some("description"),
         List("tags"), "public", "Education")
 
-      youtubeUploaderManager ! request
+      youtubeManager ! request
 
       expectMsg(request)
     }
 
     "forward request to youtube category actor" in new UnitTestScope {
-      youtubeUploaderManager ! GetCategories
+      youtubeManager ! GetCategories
 
       expectMsg(List())
     }
@@ -107,9 +107,9 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager.underlyingActor.noOfActors = 5
+      youtubeManager.underlyingActor.noOfActors = 5
 
-      youtubeUploaderManager ! request
+      youtubeManager ! request
 
       expectMsg("Cant upload any more videos parallely.")
     }
@@ -119,11 +119,11 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager ! request
-      youtubeUploaderManager ! Done
+      youtubeManager ! request
+      youtubeManager ! Done
 
       expectMsg(request)
-      youtubeUploaderManager.underlyingActor.noOfActors mustBe 0
+      youtubeManager.underlyingActor.noOfActors mustBe 0
     }
 
     "decrement no of actors when video upload is cancelled" in new UnitTestScope {
@@ -131,11 +131,11 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager ! request
-      youtubeUploaderManager ! Cancel
+      youtubeManager ! request
+      youtubeManager ! Cancel
 
       expectMsg(request)
-      youtubeUploaderManager.underlyingActor.noOfActors mustBe 0
+      youtubeManager.underlyingActor.noOfActors mustBe 0
     }
 
     // =================================================================================================================
@@ -146,7 +146,7 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager ! request
+      youtubeManager ! request
 
       expectMsg(request)
     }
@@ -155,13 +155,13 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = VideoDetails("videoId", "title", Some("description"),
         List("tags"), "public", "Education")
 
-      youtubeUploaderManager ! request
+      youtubeManager ! request
 
       expectMsg(request)
     }
 
     "return categories" in new IntegrationTestScope {
-      youtubeUploaderManager ! GetCategories
+      youtubeManager ! GetCategories
 
       expectMsg(List())
     }
@@ -171,9 +171,9 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager.underlyingActor.noOfActors = 5
+      youtubeManager.underlyingActor.noOfActors = 5
 
-      youtubeUploaderManager ! request
+      youtubeManager ! request
 
       expectMsg("Cant upload any more videos parallely.")
     }
@@ -183,10 +183,10 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager ! request
-      youtubeUploaderManager ! Done
+      youtubeManager ! request
+      youtubeManager ! Done
 
-      youtubeUploaderManager.underlyingActor.noOfActors mustBe 0
+      youtubeManager.underlyingActor.noOfActors mustBe 0
     }
 
     "make an actor available if an upload is cancelled" in new IntegrationTestScope {
@@ -194,10 +194,10 @@ class YouTubeUploaderManagerSpec(_system: ActorSystem) extends TestKit(_system: 
       val request = YouTubeUploader.Upload(sessionId, new FileInputStream(tempFile), "title", Some("description"),
         List("tags"), 10L)
 
-      youtubeUploaderManager ! request
-      youtubeUploaderManager ! Cancel
+      youtubeManager ! request
+      youtubeManager ! Cancel
 
-      youtubeUploaderManager.underlyingActor.noOfActors mustBe 0
+      youtubeManager.underlyingActor.noOfActors mustBe 0
     }
   }
 

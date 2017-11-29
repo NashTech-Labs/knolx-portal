@@ -63,7 +63,7 @@ class DummyYouTubeDetailsActor extends Actor {
 
 }
 
-class DummyYouTubeUploaderManager extends Actor {
+class DummyYouTubeManager extends Actor {
 
   override def receive: Receive = {
     case request: YouTubeUploader.Upload => sender() ! "Upload started"

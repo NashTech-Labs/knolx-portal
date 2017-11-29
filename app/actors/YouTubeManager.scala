@@ -48,6 +48,6 @@ class YouTubeManager @Inject()(
       val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
       youTubeDetailsActor forward request
     case msg                             =>
-      Logger.info(s"Received a message in YouTubeUploaderManager that cannot be handled $msg")
+      Logger.info(s"Received a message in YouTubeManager that cannot be handled $msg")
   }
 }

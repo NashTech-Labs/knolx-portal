@@ -69,8 +69,8 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
       .asEagerSingleton
 
     bind[ActorRef]
-      .annotatedWith(Names.named("YouTubeUploaderManager"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeManager], "YouTubeUploaderManager", Function.identity())))
+      .annotatedWith(Names.named("YouTubeManager"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeManager], "YouTubeManager", Function.identity())))
       .asEagerSingleton
 
     bindActorFactory[YouTubeDetailsActor, ConfiguredYouTubeDetailsActor.Factory]

@@ -39,7 +39,7 @@ case class UpdateVideoInfo(sessionId: String,
 class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   controllerComponents: KnolxControllerComponents,
                                   sessionsRepository: SessionsRepository,
-                                  @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
+                                  @Named("YouTubeManager") youtubeManager: ActorRef,
                                   @Named("YouTubeProgressManager") youtubeProgressManager: ActorRef
                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
@@ -72,7 +72,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       } { videoFile =>
         val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
 
-        (youtubeUploaderManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
+        (youtubeManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
           .mapTo[String]
           .map { message =>
             if (message.equals("Cant upload any more videos parallely.")) {
@@ -98,7 +98,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
 
   def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
     youtubeProgressManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
-    youtubeUploaderManager ! Cancel
+    youtubeManager ! Cancel
 
     Ok("Upload cancelled!")
   }
@@ -127,7 +127,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
             Future.successful(BadRequest("No video found for this session"))
           } { videoURL =>
             val videoId = videoURL.split("/")(2)
-            (youtubeUploaderManager ? VideoDetails(videoId,
+            (youtubeManager ? VideoDetails(videoId,
               updateVideoDetails.title,
               updateVideoDetails.description,
               updateVideoDetails.tags,

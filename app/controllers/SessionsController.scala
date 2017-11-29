@@ -86,7 +86,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    controllerComponents: KnolxControllerComponents,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
                                    @Named("UsersBanScheduler") usersBanScheduler: ActorRef,
-                                   @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef
+                                   @Named("YouTubeManager") youtubeManager: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val timeout = Timeout(10.seconds)
@@ -390,7 +390,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 sessionInformation.feedbackFormId, sessionInformation.topic, sessionInformation.feedbackExpirationDays,
                 sessionInformation.youtubeURL, sessionInformation.slideShareURL, sessionInformation.cancelled, sessionInformation.meetup))
               val eventualYoutubeCategories =
-                (youtubeUploaderManager ? GetCategories)
+                (youtubeManager ? GetCategories)
                   .mapTo[List[VideoCategory]]
                   .map(_.map(videoCategory => VideoCategories(videoCategory.getId, videoCategory.getSnippet.getTitle)))
 
@@ -399,7 +399,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   Future.successful(Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, None)))
                 } { videoURL =>
                   val videoId = videoURL.split("/")(2)
-                  (youtubeUploaderManager ? GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
+                  (youtubeManager ? GetDetails(videoId)).mapTo[Option[UpdateVideoDetails]]
                     .map { videoDetails =>
                       Ok(views.html.sessions.updatesession(filledForm, formIds, youtubeCategories, videoDetails))
                     }
@@ -419,7 +419,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         updateSessionForm.bindFromRequest.fold(
           formWithErrors => {
             val eventualYoutubeCategories =
-              (youtubeUploaderManager ? GetCategories)
+              (youtubeManager ? GetCategories)
                 .mapTo[List[VideoCategory]]
                 .map(_.map(videoCategory => VideoCategories(videoCategory.getId, videoCategory.getSnippet.getTitle)))
 
@@ -432,7 +432,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 Future.successful(BadRequest(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, None)))
               } { url =>
                 val videoId = url.split("/")(2)
-                (youtubeUploaderManager ? GetDetails(videoId))
+                (youtubeManager ? GetDetails(videoId))
                   .mapTo[Option[UpdateVideoDetails]]
                   .map { videoDetails =>
                     Ok(views.html.sessions.updatesession(formWithErrors, formIds, youtubeCategories, videoDetails))

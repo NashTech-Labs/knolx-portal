@@ -34,7 +34,7 @@ object YouTubeUploader {
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgressManager: ActorRef,
-                                @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
+                                @Named("YouTubeManager") youtubeManager: ActorRef,
                                 youtube: YouTube) extends Actor {
   private val chunkSize = 1024 * 0x400
   private val part = "snippet,statistics,status"
@@ -73,7 +73,7 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
 
     youtubeProgressManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
 
-    youtubeUploaderManager ! Done
+    youtubeManager ! Done
   }
 
   private def getVideoSnippet(title: String,

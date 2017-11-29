@@ -116,7 +116,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
     val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
     val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
     val youtubeProgressManager = system.actorOf(Props(new DummyYouTubeProgressManager))
-    val youtubeUploaderManager = system.actorOf(Props(new DummyYouTubeUploaderManager))
+    val youtubeManager = system.actorOf(Props(new DummyYouTubeManager))
 
     val testModule = Option(new AbstractModule with AkkaGuiceSupport {
       override def configure(): Unit = {
@@ -134,8 +134,8 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
         bindActorFactory[DummyYouTubeUploader, ConfiguredYouTubeUploader.Factory]
         bindActorFactory[DummyYouTubeDetailsActor, ConfiguredYouTubeDetailsActor.Factory]
         bind(classOf[ActorRef])
-          .annotatedWith(Names.named("YouTubeUploaderManager"))
-          .toInstance(youtubeUploaderManager)
+          .annotatedWith(Names.named("YouTubeManager"))
+          .toInstance(youtubeManager)
 
         bind(classOf[ActorRef])
           .annotatedWith(Names.named("YouTubeProgressManager"))

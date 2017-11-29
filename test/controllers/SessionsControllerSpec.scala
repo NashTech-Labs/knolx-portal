@@ -59,8 +59,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
     val usersBanScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
-    val youtubeUploaderManager =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
+    val youtubeManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeManager")))))
 
     lazy val controller =
       new SessionsController(
@@ -73,7 +73,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         knolxControllerComponent,
         sessionsScheduler,
         usersBanScheduler,
-        youtubeUploaderManager)
+        youtubeManager)
   }
 
   override def afterAll(): Unit = {

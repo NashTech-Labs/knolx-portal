@@ -41,14 +41,14 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         knolxControllerComponent.messagesApi,
         knolxControllerComponent,
         sessionsRepository,
-        youtubeUploaderManager,
+        youtubeManager,
         youtubeProgressManager
       )
 
     val youtubeProgressManager =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeProgressManager")))))
-    val youtubeUploaderManager =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
+    val youtubeManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeManager")))))
 
   }
 

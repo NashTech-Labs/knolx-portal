@@ -9,7 +9,7 @@ POST        /login                                  controllers.UsersController.
 GET         /logout                                 controllers.UsersController.logout
 GET         /register                               controllers.UsersController.register
 POST        /register                               controllers.UsersController.createUser
-GET         /users/manage/                          controllers.UsersController.manageUser()
+GET         /users/manage                           controllers.UsersController.manageUser()
 POST        /users/search                           controllers.UsersController.searchUser
 GET         /user/update                            controllers.UsersController.getByEmail(email: String)
 POST        /user/update                            controllers.UsersController.updateUser
@@ -25,7 +25,7 @@ POST        /user/changepassword                    controllers.UsersController.
 # Session
 GET         /session                                controllers.SessionsController.sessions
 POST        /session/search                         controllers.SessionsController.searchSessions
-GET         /session/manage/                        controllers.SessionsController.manageSessions()
+GET         /session/manage                         controllers.SessionsController.manageSessions()
 POST        /session/manage/search                  controllers.SessionsController.searchManageSession
 GET         /session/create                         controllers.SessionsController.create
 POST        /session/create                         controllers.SessionsController.createSession

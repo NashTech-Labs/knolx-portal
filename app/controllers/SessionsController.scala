@@ -134,7 +134,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
 
   def sessions: Action[AnyContent] = action.async { implicit request =>
-            Future.successful(Ok(views.html.sessions.sessions()))
+    Future.successful(Ok(views.html.sessions.sessions()))
   }
 
   def searchSessions: Action[AnyContent] = action.async { implicit request =>
@@ -164,7 +164,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   .before(new java.util.Date(dateTimeUtility.nowMillis)),
                 contentAvailable = contentAvailable)
             }
-
             sessionsRepository
               .activeCount(sessionInformation.email)
               .map { count =>

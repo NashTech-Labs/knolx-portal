@@ -145,7 +145,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .insert(session))
 
-  def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+  def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
     val condition = keyword match {

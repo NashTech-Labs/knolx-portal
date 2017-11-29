@@ -166,7 +166,7 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
             upsert = false)
           .map(_.result[UserInfo]))
 
-  def paginate(pageNumber: Int, keyword: Option[String] = None, filter: String = "all", pageSize: Int)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+  def paginate(pageNumber: Int, keyword: Option[String] = None, filter: String = "all", pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
     val millis = dateTimeUtility.nowMillis
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)

@@ -111,7 +111,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       "page" -> number.verifying("Invalid page number", number => number >= 0),
       "filter" -> nonEmptyText.verifying("Invalid filter",
         filter => filter == "all" || filter == "banned" || filter == "allowed" || filter == "active" || filter == "suspended"),
-      "pageSize" -> number.verifying("Invalid Page Number", number => number >= 0)
+      "pageSize" -> number.verifying("Invalid Page Number", number => number >= 10)
     )(SearchUserByEmailInformation.apply)(SearchUserByEmailInformation.unapply)
   )
 

@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 
 object YouTubeProgressManager {
 
-  // Commands for YouTubeUploadManager actor
+  // Commands for YouTubeProgressManager actor
   case class RegisterUploadListener(sessionId: String, uploader: MediaHttpUploader)
 
   case class CancelVideoUpload(sessionId: String)
@@ -50,7 +50,7 @@ class YouTubeProgressManager extends Actor {
       Logger.info("Getting from sessionVideos")
       sender() ! sessionVideos.get(sessionId)
     case msg                                                                =>
-      Logger.info(s"Received a message in YouTubeUploadManager that cannot be handled $msg")
+      Logger.info(s"Received a message in YouTubeProgressManager that cannot be handled $msg")
   }
 
   def setProgressListener(sessionId: String, uploader: MediaHttpUploader): MediaHttpUploader =

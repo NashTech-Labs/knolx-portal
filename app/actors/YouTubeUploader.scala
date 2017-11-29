@@ -33,7 +33,7 @@ object YouTubeUploader {
 
 }
 
-class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
+class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgressManager: ActorRef,
                                 @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
                                 youtube: YouTube) extends Actor {
   private val chunkSize = 1024 * 0x400
@@ -66,12 +66,12 @@ class YouTubeUploader @Inject()(@Named("YouTubeUploadManager") youtubeUploadMana
     val videoInsert = youtube.videos().insert(part, videoObjectDefiningMetadata, mediaContent)
     val uploader = getMediaHttpUploader(videoInsert, chunkSize)
 
-    youtubeUploadManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
+    youtubeProgressManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
     sender ! "Uploader set"
 
     val video = videoInsert.execute()
 
-    youtubeUploadManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
+    youtubeProgressManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
 
     youtubeUploaderManager ! Done
   }

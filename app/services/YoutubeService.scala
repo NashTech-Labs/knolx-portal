@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
 class YoutubeService @Inject()(
-                                @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef,
+                                @Named("YouTubeProgressManager") youtubeProgressManager: ActorRef,
                                 youtubeConfig: YoutubeConfiguration
                               ) {
 
@@ -54,12 +54,12 @@ class YoutubeService @Inject()(
     val videoInsert = youtube.videos().insert(part, videoObjectDefiningMetadata, mediaContent)
     val uploader = youtubeConfig.getMediaHttpUploader(videoInsert, chunkSize)
 
-    youtubeUploadManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
+    youtubeProgressManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
     sender ! "Uploader set"
 
     val video = videoInsert.execute()
 
-    youtubeUploadManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
+    youtubeProgressManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
 
     video
   }

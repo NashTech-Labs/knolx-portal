@@ -19,7 +19,7 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import scala.concurrent.duration._
 
 
-class YouTubeUploadManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
+class YouTubeProgressManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   with DefaultAwaitTimeout with FutureAwaits with ImplicitSender with TestEnvironment {
 
   private val sessionId = "SessionId"
@@ -48,7 +48,7 @@ class YouTubeUploadManagerSpec(_system: ActorSystem) extends TestKit(_system: Ac
     val emailManager: ActorRef =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
-    val youtubeUploadManager =
+    val youtubeProgressManager =
       TestActorRef(
         new YouTubeProgressManager {
           override def preStart(): Unit = {}
@@ -56,47 +56,47 @@ class YouTubeUploadManagerSpec(_system: ActorSystem) extends TestKit(_system: Ac
 
   }
 
-  "YouTubeUploadManager" should {
+  "YouTubeProgressManager" should {
 
     "register an uploader for session" in new TestScope {
 
-      youtubeUploadManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, mediaHttpUploader)
+      youtubeProgressManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, mediaHttpUploader)
 
-      youtubeUploadManager.underlyingActor.sessionUploaders.keys.head must be equalTo "SessionId"
+      youtubeProgressManager.underlyingActor.sessionUploaders.keys.head must be equalTo "SessionId"
     }
 
     "cancel video upload for given session" in new TestScope {
 
-      youtubeUploadManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
+      youtubeProgressManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
 
-      youtubeUploadManager.underlyingActor.videoCancelStatus.get("SessionId") must be equalTo Some(true)
+      youtubeProgressManager.underlyingActor.videoCancelStatus.get("SessionId") must be equalTo Some(true)
     }
 
     "add video for session to sessionVideos" in new TestScope {
 
-      youtubeUploadManager ! YouTubeProgressManager.SessionVideo(sessionId, new Video().setId("videoId"))
+      youtubeProgressManager ! YouTubeProgressManager.SessionVideo(sessionId, new Video().setId("videoId"))
 
-      youtubeUploadManager.underlyingActor.sessionVideos(sessionId).getId must be equalTo "videoId"
+      youtubeProgressManager.underlyingActor.sessionVideos(sessionId).getId must be equalTo "videoId"
     }
 
     "return no percentage when no video has been uploaded for the session" in new TestScope {
 
-      val result: Option[Double] = await((youtubeUploadManager ? YouTubeProgressManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
+      val result: Option[Double] = await((youtubeProgressManager ? YouTubeProgressManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
 
       result must beNone
     }
 
     "return 100 when video has been uploaded for the session" in new TestScope {
 
-      youtubeUploadManager.underlyingActor.sessionUploadComplete += sessionId
-      val result: Option[Double] = await((youtubeUploadManager ? YouTubeProgressManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
+      youtubeProgressManager.underlyingActor.sessionUploadComplete += sessionId
+      val result: Option[Double] = await((youtubeProgressManager ? YouTubeProgressManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
 
       result must be equalTo Some(100D)
     }
 
     "return video for the session" in new TestScope {
 
-      val result: Option[Video] = await((youtubeUploadManager ? YouTubeProgressManager.VideoId(sessionId))(5.seconds).mapTo[Option[Video]])
+      val result: Option[Video] = await((youtubeProgressManager ? YouTubeProgressManager.VideoId(sessionId))(5.seconds).mapTo[Option[Video]])
 
       result must beNone
     }

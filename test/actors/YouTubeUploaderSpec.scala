@@ -36,15 +36,15 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
   trait TestScope extends Scope {
     lazy val app: Application = fakeApp()
 
-    val youtubeUploadManager: ActorRef =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploadManager")))))
+    val youtubeProgressManager: ActorRef =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeProgressManager")))))
 
     val youtubeUploaderManager: ActorRef =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploaderManager")))))
 
     val youtubeService = mock[YoutubeService]
     val youtubeUploader =
-      TestActorRef(new YouTubeUploader(youtubeUploadManager, youtubeUploaderManager, youtubeService))
+      TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeUploaderManager, youtubeService))
   }
 
   "Youtube Uploader" should {

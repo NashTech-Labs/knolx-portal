@@ -115,7 +115,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
   protected def fakeApp(system: ActorSystem = actorSystem): Application = {
     val sessionsScheduler = system.actorOf(Props(new DummySessionsScheduler))
     val usersBanScheduler = system.actorOf(Props(new DummyUsersBanScheduler))
-    val youtubeUploadManager = system.actorOf(Props(new DummyYouTubeUploadManager))
+    val youtubeProgressManager = system.actorOf(Props(new DummyYouTubeProgressManager))
     val youtubeUploaderManager = system.actorOf(Props(new DummyYouTubeUploaderManager))
 
     val testModule = Option(new AbstractModule with AkkaGuiceSupport {
@@ -138,8 +138,8 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
           .toInstance(youtubeUploaderManager)
 
         bind(classOf[ActorRef])
-          .annotatedWith(Names.named("YouTubeUploadManager"))
-          .toInstance(youtubeUploadManager)
+          .annotatedWith(Names.named("YouTubeProgressManager"))
+          .toInstance(youtubeProgressManager)
 
         bind(classOf[KnolxControllerComponents])
           .toInstance(knolxControllerComponent)

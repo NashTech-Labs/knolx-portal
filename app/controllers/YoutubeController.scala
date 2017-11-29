@@ -40,7 +40,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   controllerComponents: KnolxControllerComponents,
                                   sessionsRepository: SessionsRepository,
                                   @Named("YouTubeUploaderManager") youtubeUploaderManager: ActorRef,
-                                  @Named("YouTubeUploadManager") youtubeUploadManager: ActorRef
+                                  @Named("YouTubeProgressManager") youtubeProgressManager: ActorRef
                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val timeout = Timeout(10.seconds)
@@ -86,7 +86,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def getPercentageUploaded(sessionId: String): Action[AnyContent] = action.async { implicit request =>
-    (youtubeUploadManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
+    (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
       .map { maybePercentage =>
         maybePercentage.fold {
           BadRequest("No video is being uploaded for the given session")
@@ -97,14 +97,14 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
-    youtubeUploadManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
+    youtubeProgressManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
     youtubeUploaderManager ! Cancel
 
     Ok("Upload cancelled!")
   }
 
   def getVideoId(sessionId: String): Action[AnyContent] = action.async { implicit request =>
-    (youtubeUploadManager ? YouTubeProgressManager.VideoId(sessionId)).mapTo[Option[Video]]
+    (youtubeProgressManager ? YouTubeProgressManager.VideoId(sessionId)).mapTo[Option[Video]]
       .map { maybeVideo =>
         maybeVideo.fold {
           BadRequest("No Video ID found for the given session")

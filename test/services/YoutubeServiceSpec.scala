@@ -43,11 +43,11 @@ class YoutubeServiceSpec extends Specification {
 
     val video = new Video()
 
-    val youtubeUploadManager =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeUploadManager")))))
+    val youtubeProgressManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeProgressManager")))))
 
     lazy val service =
-      new YoutubeService(youtubeUploadManager, youtubeConfig)
+      new YoutubeService(youtubeProgressManager, youtubeConfig)
   }
 
   "Youtube Service" should {

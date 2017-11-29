@@ -67,13 +67,10 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
     val uploader = getMediaHttpUploader(videoInsert, chunkSize)
 
     youtubeProgressManager ! YouTubeProgressManager.RegisterUploadListener(sessionId, uploader)
-    sender ! "Uploader set"
 
     val video = videoInsert.execute()
 
     youtubeProgressManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
-
-    youtubeManager ! Done
   }
 
   private def getVideoSnippet(title: String,

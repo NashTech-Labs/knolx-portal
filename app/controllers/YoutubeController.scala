@@ -4,7 +4,7 @@ import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.YouTubeProgressManager.VideoUploader
-import actors.{Cancel, VideoDetails, YouTubeProgressManager, YouTubeUploader}
+import actors.{VideoDetails, YouTubeProgressManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
@@ -72,15 +72,9 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       } { videoFile =>
         val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
 
-        (youtubeManager ? YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize))
-          .mapTo[String]
-          .map { message =>
-            if (message.equals("Cant upload any more videos parallely.")) {
-              BadRequest(message)
-            } else {
-              Ok(message)
-            }
-          }
+        youtubeManager ! YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), "title", Some("description"), List("tags"), fileSize)
+
+        Future.successful(Ok("Uploader Set"))
       }
     }
   }
@@ -98,7 +92,6 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
 
   def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
     youtubeProgressManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
-    youtubeManager ! Cancel
 
     Ok("Upload cancelled!")
   }

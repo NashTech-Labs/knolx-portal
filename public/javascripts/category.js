@@ -9,6 +9,8 @@ var result = "";
 
 $(function () {
 
+    updateDropDown();
+
     var oldCategoryName = "";
     var oldSubCategoryName = "";
     var subCategoryName = "";
@@ -99,7 +101,7 @@ $(function () {
         document.getElementById(id).style.visibility = "hidden";
     }
 
-    listSubCategoryWithPrimaryCategory();
+    /* listSubCategoryWithPrimaryCategory();*/
 
     $("#datalist").keyup(function (e) {
         dropDown('#datalist', '#results-outer', "result");
@@ -126,7 +128,7 @@ $(function () {
         }
         fields.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
-                result = result + '<div class="' + renderResult + '" name = "'+element.categoryId+'"id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
+                result = result + '<div class="' + renderResult + '" name = "' + element.categoryId + '"id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
             }
         });
         $(targetId).html(result);
@@ -173,7 +175,7 @@ $(function () {
     });
 
     $("html").delegate(".result", "mousedown", function () {
-        var attribute = $(this).attr('id') +"-"+$(this).attr('name')
+        var attribute = $(this).attr('id') + "-" + $(this).attr('name')
         var splits = attribute.split('-');
         console.log("splits = " + splits);
         subCategoryName = splits[0];
@@ -188,7 +190,7 @@ $(function () {
 
     var newSubCategoryName = "";
     $("html").delegate(".mod-result", "mousedown", function () {
-        var attribute = $(this).attr('id')+"-"+$(this).attr('name');
+        var attribute = $(this).attr('id') + "-" + $(this).attr('name');
         var splits = attribute.split('-');
         console.log("splits = " + splits);
         oldSubCategoryName = splits[0];
@@ -228,6 +230,8 @@ $(function () {
 
 });
 
+
+/*
 function listSubCategoryWithPrimaryCategory() {
 
     jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
@@ -246,7 +250,7 @@ function listSubCategoryWithPrimaryCategory() {
                 }
             }
         });
-}
+}*/
 
 function successMessageBox() {
     $("#success-message").show();
@@ -274,9 +278,7 @@ function addCategory(categoryName) {
                 $("#primary-category").val("");
                 document.getElementById("disp-success-message").innerHTML = data;
                 scrollToTop();
-                $("#category-drop-down").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
-                $("#categoryList").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
-                $("#category-list-delete").append("<option value='" + categoryName + "'>" + categoryName + "</option>");
+                updateDropDown();
             },
             error: function (er) {
                 wrongMessageBox();
@@ -298,6 +300,7 @@ function addSubCategory(categoryName, subCategory) {
                 successMessageBox()
                 $("#sub-category").val("");
                 document.getElementById("disp-success-message").innerHTML = data;
+                updateDropDown();
                 scrollToTop();
             },
             error: function (er) {
@@ -321,6 +324,7 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
                 successMessageBox();
                 $("#new-primary-category").val("");
                 document.getElementById("disp-success-message").innerHTML = data;
+                updateDropDown();
                 scrollToTop();
             },
             error: function (er) {
@@ -347,6 +351,7 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 document.getElementById("disp-success-message").innerHTML = data;
                 $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
+                updateDropDown();
                 scrollToTop();
             },
             error: function (er) {
@@ -372,6 +377,7 @@ function deletePrimaryCategory(categoryId) {
                 console.log("data is = " + data)
                 document.getElementById("disp-success-message").innerHTML = data;
                 $("category-sessions").hide();
+                updateDropDown();
                 scrollToTop();
             },
             error: function (er) {
@@ -461,6 +467,7 @@ function deleteSubCategory(categoryId, subCategoryName) {
                 $("#datalist").val("");
                 document.getElementById("disp-success-message").innerHTML = data;
                 $("#subcategory-sessions").hide();
+                updateDropDown();
                 scrollToTop();
             },
             error: function (er) {
@@ -471,4 +478,32 @@ function deleteSubCategory(categoryId, subCategoryName) {
             }
         }
     )
+}
+
+function updateDropDown() {
+    
+    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
+        {
+            type: "GET",
+            processData: false,
+            success: function (values) {
+
+                console.log(values);
+                var categories = "";
+                for (var i = 0; i < values.length; i++) {
+                    categories += "<option value='" + values[i].categoryName + "'>" + values[i].categoryName + "</option>";
+                }
+                $("#category-drop-down, #categoryList, #category-list-delete").html(categories);
+
+                fields = [];
+
+                for (var i = 0; i < values.length; i++) {
+                    for (var j = 0; j < values[i].subCategory.length; j++) {
+
+                        var elem = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
+                        fields.push(elem);
+                    }
+                }
+            }
+        })
 }

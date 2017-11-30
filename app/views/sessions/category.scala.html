@@ -1,4 +1,4 @@
-@(categories: List[CategoryInfo])(implicit request: Request[_], flash: Flash)
+@()(implicit request: Request[_], flash: Flash)
 
 @main("Add Category") {
 
@@ -56,9 +56,6 @@
                                 <input list="category-drop-down" id="search-primary-category" type="text"
                                 placeholder="Search/Select a category" class="input-field no-outline reg">
                                 <datalist id="category-drop-down">
-                                @for(category <- categories) {
-                                    <option value="@category.categoryName">@category.categoryName</option>
-                                }
                                 </datalist>
                                 <div>
                                     <input type="text" id="insert-sub-category" name="subcategory"
@@ -92,9 +89,6 @@
                                 <input list="categoryList" id="modify-primary-category" type="text"
                                 placeholder="Search/Select a category" class="input-field no-outline reg">
                                 <datalist id="categoryList">
-                                @for(category <- categories) {
-                                    <option id="@category.categoryName.replace(" ", "")-modify" categoryid="@category._id.stringify" value="@category.categoryName"></option>
-                                }
                                 </datalist>
                                 <div>
                                     <input type="text" id="new-primary-category" name="subcategory" placeholder="Input a new name" class="input-field no-outline reg" required>
@@ -169,9 +163,7 @@
                                 <input list="category-list-delete" id="delete-primary-category" class="input-field no-outline reg"
                                 placeholder="Search/Select a category">
                                 <datalist id="category-list-delete">
-                                @for(category <- categories) {
-                                    <option id="@category.categoryName.replace(" ", "")-delete" deletecategoryid ="@category._id.stringify" value="@category.categoryName"> @category.categoryName</option>
-                                }
+
                                 </datalist>
                                 <div id="subcategory-linked-category-message">
                                     <label class="info-message">

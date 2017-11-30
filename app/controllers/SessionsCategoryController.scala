@@ -25,9 +25,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   def renderCategoryPage: Action[AnyContent] = adminAction.async { implicit request =>
-    categoriesRepository
-      .getCategories
-      .map(category => Ok(views.html.sessions.category(category)))
+      Future.successful(Ok(views.html.sessions.category()))
   }
 
   def addPrimaryCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>

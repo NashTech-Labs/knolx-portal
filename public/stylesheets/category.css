@@ -91,8 +91,9 @@
     background: #eee;
     visibility: hidden;
     width: 21px;
-    height: 12px;
+    height: 20px;
     text-align: center;
+    margin-left: 20px;
 }
 
 .over {

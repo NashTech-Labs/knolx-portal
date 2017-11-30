@@ -430,8 +430,6 @@ function topicMatchedWithCategory(categoryName, subCategoryName) {
             contentType: 'application/json',
             success: function (topics) {
                 $("#no-sessions").remove();
-                /*var topics = JSON.parse(data);*/
-                console.log("topics = " + topics);
                 if (topics.length) {
                     var sessions = '<ul id="list-sessions">';
                     for (var i = 0; i < topics.length; i++) {
@@ -490,11 +488,20 @@ function updateDropDown() {
 
                 console.log(values);
                 var categories = "";
+                var categoriesModify = "";
+                var categoriesDelete = "";
+
                 for (var i = 0; i < values.length; i++) {
                     categories += "<option value='" + values[i].categoryName + "'>" + values[i].categoryName + "</option>";
-                }
-                $("#category-drop-down, #categoryList, #category-list-delete").html(categories);
+                    categoriesModify += "<option id='" + values[i].categoryName.replace(' ', '') + "-modify' categoryid='" +
+                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
 
+                    categoriesDelete += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' categoryid='" +
+                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
+                }
+                $("#category-drop-down").html(categories);
+                $("#categoryList").html(categoriesModify);
+                $("#category-list-delete").html(categoriesDelete);
                 fields = [];
 
                 for (var i = 0; i < values.length; i++) {

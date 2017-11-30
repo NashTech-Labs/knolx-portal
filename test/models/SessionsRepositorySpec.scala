@@ -227,14 +227,6 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       result.ok must beEqualTo(true)
     }
 
-    "return ok as false for an invalid session" in new TestScope {
-      val sessionId: BSONObjectID = BSONObjectID.generate
-
-      val result: UpdateWriteResult = await(sessionsRepository.updateRating(sessionId.stringify, List(90.00)))
-
-      result.ok must beEqualTo(false)
-    }
-
     "update sub category on change" in new TestScope {
       val deleteSubCategory = await(sessionsRepository.updateSubCategoryOnChange("subCategory",""))
 

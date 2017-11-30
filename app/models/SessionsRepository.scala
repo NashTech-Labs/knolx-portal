@@ -5,7 +5,7 @@ import javax.inject.Inject
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
 import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats._
-import play.api.libs.json.{JsArray, JsObject, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}

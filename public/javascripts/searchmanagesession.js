@@ -104,6 +104,14 @@ function slide(keyword, pageNumber, pageSize) {
 
                     $('#user-found').html(usersFound);
 
+                    var totalSessions = sessionInfo["totalSessions"];
+                    var startingRange = (pageSize* (page-1)) + 1;
+                    var endRange = (pageSize*(page-1))+ sessions.length;
+
+                    $('#starting-range').html(startingRange);
+                    $('#ending-range').html(endRange);
+                    $('#total-range').html(totalSessions);
+
                     paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');

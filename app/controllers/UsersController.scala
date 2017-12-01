@@ -52,7 +52,8 @@ case class UserSearchResult(users: List[ManageUserInfo],
                             pages: Int,
                             page: Int,
                             keyword: String,
-                            isSuperUser: Boolean)
+                            isSuperUser: Boolean,
+                            totalUsers: Int)
 
 @Singleton
 class UsersController @Inject()(messagesApi: MessagesApi,
@@ -268,7 +269,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               .map { count =>
                 val pages = Math.ceil(count.toDouble / userInformation.pageSize).toInt
 
-                Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""), request.user.superUser)).toString)
+                Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""),
+                  request.user.superUser, count)).toString)
               }
           }
       }

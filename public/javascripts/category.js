@@ -58,7 +58,7 @@ $(function () {
         if (!(categoryName.trim())) {
             categoryId = "";
             $("#subcategory-linked-category-message").hide();
-            $("#no-subCategory").hide();
+            /*$("#no-subCategory").hide();*/
 
         } else {
             modifiedCategoryName = categoryName.replace(" ", "");
@@ -123,6 +123,8 @@ $(function () {
             $("#topic-linked-subcategory-message").hide();
             $("#subcategory-sessions").hide();
             $("#no-sessions").hide();
+            $("#no-subCategory").hide();
+
         }
         fields.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
@@ -352,6 +354,7 @@ function deletePrimaryCategory(categoryId) {
                 console.log("data is = " + data)
                 document.getElementById("disp-success-message").innerHTML = data;
                 $("category-sessions").hide();
+                $("#no-subCategory").hide();
                 updateDropDown();
                 scrollToTop();
             },
@@ -443,6 +446,7 @@ function deleteSubCategory(categoryId, subCategoryName) {
                 $("#datalist").val("");
                 document.getElementById("disp-success-message").innerHTML = data;
                 $("#subcategory-sessions").hide();
+                $("#no-sessions").hide();
                 updateDropDown();
                 scrollToTop();
             },
@@ -474,7 +478,7 @@ function updateDropDown() {
                     categoriesModify += "<option id='" + values[i].categoryName.replace(' ', '') + "-modify' categoryid='" +
                         values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
 
-                    categoriesDelete += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' categoryid='" +
+                    categoriesDelete += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' deletecategoryid='" +
                         values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
                 }
                 $("#category-drop-down").html(categories);

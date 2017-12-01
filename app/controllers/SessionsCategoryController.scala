@@ -229,11 +229,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
         .map { categories =>
           val subCategoryList =
             categories.filter(category => category.categoryName.toLowerCase == cleanedCategoryName.toLowerCase).flatMap(_.subCategory)
-          if (subCategoryList.isEmpty) {
-            BadRequest(Json.toJson(subCategoryList))
-          } else {
-            Ok(Json.toJson(subCategoryList))
-          }
+          Ok(Json.toJson(subCategoryList))
         }
     }
   }

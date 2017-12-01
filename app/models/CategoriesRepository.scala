@@ -14,7 +14,7 @@ import play.api.libs.json.{JsValue, Json}
 import models.CategoriesJsonFormats._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
@@ -42,8 +42,12 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> category._id.stringify))
-    val modifier = BSONDocument("$set" -> BSONDocument("categoryName" -> category.categoryName), "$addToSet" -> BSONDocument(
-      "subCategory" -> BSONDocument(
+    val modifier =
+      BSONDocument(
+        "$set" -> BSONDocument(
+          "categoryName" -> category.categoryName),
+        "$addToSet" -> BSONDocument(
+          "subCategory" -> BSONDocument(
         "$each" -> category.subCategory)))
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
@@ -62,19 +66,27 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def modifyPrimaryCategory(categoryId: String, newCategoryName: String)(implicit ex : ExecutionContext): Future[UpdateWriteResult] = {
 
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
-    val modifier = BSONDocument("$set" -> BSONDocument(
-      "categoryName" -> newCategoryName
-    ))
+    val modifier =
+      BSONDocument(
+        "$set" -> BSONDocument(
+          "categoryName" -> newCategoryName))
+
     collection.flatMap(_.update(selector,modifier))
   }
 
   def modifySubCategory(categoryId: String,
                         oldSubCategoryName: String,
                         newSubCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" ->  BSONDocument("$oid" -> categoryId),"subCategory" -> oldSubCategoryName)
-    val modifier = BSONDocument("$set" -> BSONDocument(
-      "subCategory.$" -> newSubCategoryName
-    ))
+
+    val selector = BSONDocument(
+      "_id" ->  BSONDocument(
+        "$oid" -> categoryId),
+      "subCategory" -> oldSubCategoryName)
+
+    val modifier =
+      BSONDocument(
+        "$set" -> BSONDocument(
+          "subCategory.$" -> newSubCategoryName))
     collection.flatMap(_.update(selector,modifier))
   }
 
@@ -85,8 +97,10 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def deleteSubCategory(categoryId: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
-    val modifier = BSONDocument("$pull" -> BSONDocument(
-      "subCategory"-> subCategory))
+    val modifier =
+      BSONDocument(
+        "$pull" -> BSONDocument(
+          "subCategory"-> subCategory))
     collection.flatMap(_.update(selector, modifier, multi = true))
   }
 

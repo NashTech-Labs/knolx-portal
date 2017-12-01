@@ -31,8 +31,7 @@ i, span {
     background: #2f4050;
     color: #fff;
     transition: width 0.5s ease-in-out;
-    overflow-x: hidden !important;
-    overflow-y:scroll  ;
+    overflow-y: auto;
 }
 
 #sidebar.active {
@@ -159,6 +158,7 @@ display: block;
     text-align: center;
     padding: 20px 0;
     position: relative;
+    margin-bottom: 30px;
 }
 
 #sidebarCollapse > [class*="fa fa-"] {
@@ -321,4 +321,22 @@ html,body{
 
 .navbar-collapse {
     overflow-x: hidden !important;
+}
+
+
+.scrollbar {
+    float: left;
+    overflow-y: scroll;
+    margin-bottom: 25px;
+}
+
+.scrollbar-primary::-webkit-scrollbar {
+    width: 5px;
+    background: #2f4050;
+}
+
+.scrollbar-primary::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+    background-color: #4285F4;
 }

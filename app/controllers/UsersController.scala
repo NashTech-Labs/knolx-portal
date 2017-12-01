@@ -30,7 +30,7 @@ case class ChangePasswordInformation(currentPassword: String, newPassword: Strin
 
 case class LoginInformation(email: String, password: String)
 
-case class SearchUserByEmailInformation(email: Option[String], page: Int, filter: String)
+case class SearchUserByEmailInformation(email: Option[String], page: Int, filter: String, pageSize: Int)
 
 case class ManageUserInfo(email: String,
                           active: Boolean,
@@ -110,7 +110,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       "email" -> optional(nonEmptyText),
       "page" -> number.verifying("Invalid page number", number => number >= 0),
       "filter" -> nonEmptyText.verifying("Invalid filter",
-        filter => filter == "all" || filter == "banned" || filter == "allowed" || filter == "active" || filter == "suspended")
+        filter => filter == "all" || filter == "banned" || filter == "allowed" || filter == "active" || filter == "suspended"),
+      "pageSize" -> number.verifying("Invalid Page Number", number => number >= 10)
     )(SearchUserByEmailInformation.apply)(SearchUserByEmailInformation.unapply)
   )
 
@@ -238,28 +239,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     Redirect(routes.HomeController.index()).withNewSession
   }
 
-  def manageUser(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = adminAction.async { implicit request =>
-    usersRepository
-      .paginate(pageNumber, keyword)
-      .flatMap { userInfo =>
-        val users = userInfo map (user =>
-          ManageUserInfo(user.email,
-            user.active,
-            user._id.stringify,
-            new Date(user.banTill.value).toString,
-            user.admin,
-            user.superUser,
-            user.coreMember,
-            new Date(user.banTill.value).after(new Date(dateTimeUtility.nowMillis))))
-
-        usersRepository
-          .userCountWithKeyword(keyword)
-          .map { count =>
-            val pages = Math.ceil(count / 10D).toInt
-
-            Ok(views.html.users.manageusers(users, pages, pageNumber, keyword))
-          }
-      }
+  def manageUser: Action[AnyContent] = adminAction.async { implicit request =>
+    Future.successful(Ok(views.html.users.manageusers()))
   }
 
   def searchUser: Action[AnyContent] = adminAction.async { implicit request =>
@@ -270,7 +251,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       userInformation => {
         usersRepository
-          .paginate(userInformation.page, userInformation.email, userInformation.filter)
+          .paginate(userInformation.page, userInformation.email, userInformation.filter, userInformation.pageSize)
           .flatMap { userInfo =>
             val users = userInfo map (user =>
               ManageUserInfo(user.email,
@@ -285,7 +266,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             usersRepository
               .userCountWithKeyword(userInformation.email, userInformation.filter)
               .map { count =>
-                val pages = Math.ceil(count / 10D).toInt
+                val pages = Math.ceil(count.toDouble / userInformation.pageSize).toInt
 
                 Ok(Json.toJson(UserSearchResult(users, pages, userInformation.page, userInformation.email.getOrElse(""), request.user.superUser)).toString)
               }
@@ -306,7 +287,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
-              Future.successful(Redirect(routes.UsersController.manageUser(1, None))
+              Future.successful(Redirect(routes.UsersController.manageUser())
                 .flashing("message" -> s"Details successfully updated for $email"))
             } else {
               Future.successful(InternalServerError("Something went wrong!"))
@@ -327,7 +308,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
-              Future.successful(Redirect(routes.UsersController.manageUser(1, None))
+              Future.successful(Redirect(routes.UsersController.manageUser())
                 .flashing("message" -> s"Details successfully updated for $email"))
             } else {
               Future.successful(InternalServerError("Something went wrong!"))
@@ -346,7 +327,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
             UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember,userInformation.admin, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None                  =>
-          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+          Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Something went wrong!"))
       }
   }
 
@@ -357,10 +338,10 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       .delete(cleanedEmail)
       .flatMap(_.fold {
         Logger.error(s"Failed to delete user with email $cleanedEmail")
-        Future.successful(Redirect(routes.UsersController.manageUser(1, None)).flashing("error" -> "Something went wrong!"))
+        Future.successful(Redirect(routes.UsersController.manageUser()).flashing("error" -> "Something went wrong!"))
       } { user =>
         Logger.info(s"user with email: $cleanedEmail has been successfully deleted")
-        Future.successful(Redirect(routes.UsersController.manageUser(1, None))
+        Future.successful(Redirect(routes.UsersController.manageUser())
           .flashing("success" -> s"User with email ${user.email} has been successfully deleted!"))
       })
   }
@@ -485,7 +466,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                 .map { result =>
                   if (result.ok) {
                     Logger.info(s"Password successfully updated for ${user.email}")
-                    Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Password reset successfully!")
+                    Redirect(routes.SessionsController.sessions()).flashing("message" -> "Password reset successfully!")
                   } else {
                     InternalServerError("Something went wrong!")
                   }

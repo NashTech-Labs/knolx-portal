@@ -1,9 +1,19 @@
-@(knolxSessions: List[KnolxSession], pages: Int, pageNumber: Int)(implicit request: Request[_], flash: Flash)
+@()(implicit request: Request[_], flash: Flash)
+
 
 @main("Sessions") {
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-            <div class="col-md-9"></div>
+            <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+            Show
+                <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                    @for(value <- List(10,20,30,40,50)) {
+                        <option value="@value">@value</option>
+                    }
+                    </select>
+            Entries
+            </label>
+            <div class="col-md-7"></div>
             <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
                 Search
                 <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
@@ -40,57 +50,18 @@
                             </tr>
                         </thead>
                         <tbody id="user-found">
-                        @knolxSessions.map { knolxSession =>
-                            <tr>
-                                <td>@knolxSession.date</td>
-                                <td>@knolxSession.session</td>
-                                <td>@knolxSession.topic</td>
-                                <td>@knolxSession.email</td>
-                                <td><span class="label @if(knolxSession.meetup) {
-                                    label-info meetup-session">Meetup</span></td>
-                                }else{
-                                label-info knolx-session">Knolx</span> </td>
-                            }
-
-                                @(if(knolxSession.cancelled) {
-                                        <td class='suspended'>Yes</td>
-                                }
-                                else {
-                                        <td class='active-status'>No</td>
-                                })
-                                <td>@if(knolxSession.completed && !knolxSession.cancelled) {
-                                    <span class="label label-success">Completed</span>
-                                } else if(knolxSession.cancelled) {
-                                    <span class="label label-warning cancelled-session">Cancelled</span>
-                                } else if(!knolxSession.completed) {
-                                    <span class="label label-warning">Pending</span>
-                                }
-                                </td>
-
-                                @if(knolxSession.completed && !knolxSession.cancelled) {
-                                    @if(knolxSession.contentAvailable) {
-                                        <td title="Click here for slides & videos" class='clickable-row'>
-                                            <a href='@routes.SessionsController.shareContent(knolxSession.id)'
-                                            style="text-decoration: none;"><span class="label more-detail-session">
-                                                Click here</span></a>
-                                    } else {
-                                        <td><span class="label label-danger">Not Available</span></td>
-                                    }
-                                } else if(knolxSession.cancelled) {
-                                <td title="The session has been cancelled">
-                                    <span class="label label-warning cancelled-session">Cancelled</span>
-                                    } else if(!knolxSession.completed) {
-                            <td title="Wait for session to be completed">
-                                <span class="label label-warning">Pending</span>
-                                }
-                            </td>
-                            </tr>
-                        }
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="col-md-12" style="margin-bottom: 25px;">@pagination(pageNumber, pages, routes.SessionsController.sessions)</div>
+            <div class="col-md-12" style="margin-bottom: 25px;">
+                <div class="center">
+                    <div class="v-align v-align-mobile">
+                        <ul class="pagination pagination-lg">
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

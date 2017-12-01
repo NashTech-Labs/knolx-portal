@@ -42,11 +42,12 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def upsert(category: CategoryInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("categoryName" -> category.categoryName)
-    val modifier = BSONDocument("$addToSet" -> BSONDocument(
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> category._id.stringify))
+    val modifier = BSONDocument("$set" -> BSONDocument("categoryName" -> category.categoryName), "$addToSet" -> BSONDocument(
       "subCategory" -> BSONDocument(
         "$each" -> category.subCategory)))
-    collection.flatMap(_.update(selector, modifier))
+
+    collection.flatMap(_.update(selector, modifier, upsert = true))
 
   }
 
@@ -90,11 +91,9 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def getCategoryNameById(categoryId: String): Future[Option[String]] = {
-    Logger.info("Inside category repository")
-    Logger.info("category id " + categoryId)
     val condition = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
     val projection = BSONDocument("_id" -> 0, "categoryName" -> 1)
-
+    println("Category Id  >>> " + categoryId)
     collection
       .flatMap(jsonCollection =>
         jsonCollection

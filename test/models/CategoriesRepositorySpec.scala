@@ -4,6 +4,7 @@ import play.api.test.PlaySpecification
 import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class CategoriesRepositorySpec extends PlaySpecification {
 
@@ -26,13 +27,15 @@ class CategoriesRepositorySpec extends PlaySpecification {
       created must beEqualTo(true)
     }
 
-    "get category list" in {
-      val insertCategoryInfo = CategoryInfo("Backend",List("scala"),BSONObjectID.generate)
-      val insert = await(categoriesRepository.insertCategory("Backend"))
-      val subCategory = await(categoriesRepository.upsert(insertCategoryInfo))
-      val categoriesList: List[CategoryInfo] = await(categoriesRepository.getCategories)
+    "get category name by its Id" in {
+      val categoryName = await(categoriesRepository.getCategoryNameById(categoryId.stringify))
 
-      categoriesList.head.subCategory must beEqualTo (List("scala"))
+      categoryName must beEqualTo(Some("Front-End"))
+    }
+
+    "get category list" in {
+      val categoriesList: List[CategoryInfo] = await(categoriesRepository.getCategories)
+      categoriesList.reverse.head.subCategory must beEqualTo (List("Angular Js","D3JS"))
     }
 
     "modify a primary category" in {
@@ -54,7 +57,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
     }
 
     "delete sub Category" in {
-      val deleteSubCategory = await(categoriesRepository.deleteSubCategory("Front-End","Angular Js"))
+      val deleteSubCategory = await(categoriesRepository.deleteSubCategory(categoryId.stringify,"Angular Js"))
 
       deleteSubCategory.ok must beEqualTo(true)
     }

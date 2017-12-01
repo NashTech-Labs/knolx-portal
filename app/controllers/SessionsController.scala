@@ -68,7 +68,8 @@ case class ModelsCategoryInformation(categoryName: String, subCategory: List[Str
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
-                               keyword: String)
+                               keyword: String,
+                               totalSessions: Int)
 
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
@@ -168,7 +169,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               .activeCount(sessionInformation.email)
               .map { count =>
                 val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
-                Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
+                Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""), count)).toString)
               }
           }
       })
@@ -220,7 +221,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 .activeCount(sessionInformation.email)
                 .map { count =>
                   val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
-                  Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
+                  Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""), count)).toString)
                 }
             }
           }

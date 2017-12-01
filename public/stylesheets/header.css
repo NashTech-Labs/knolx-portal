@@ -53,7 +53,6 @@ i, span {
 
 #sidebar.active ul li a i {
     margin-right:  0;
-    display: block;
     font-size: 1.1em;
     margin-bottom: 5px;
 }
@@ -162,15 +161,16 @@ display: block;
 }
 
 #sidebarCollapse > [class*="fa fa-"] {
-        display: inline-block;
-        cursor: pointer;
-        font-size: 15px;
-        color: white;
-        border: 1px solid #1ab394;
-        line-height: 18px;
-        border-radius: 16px;
-        background-color: #1ab394;
-        position: relative;
+    width: 18px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 15px;
+    color: white;
+    border: 1px solid #1ab394;
+    line-height: 18px;
+    border-radius: 50%;
+    background-color: #1ab394;
+    position: relative;
 }
 
 #sidebarCollapse:before {

@@ -101,8 +101,6 @@ $(function () {
         document.getElementById(id).style.visibility = "hidden";
     }
 
-    /* listSubCategoryWithPrimaryCategory();*/
-
     $("#datalist").keyup(function (e) {
         dropDown('#datalist', '#results-outer', "result");
     });
@@ -230,28 +228,6 @@ $(function () {
 
 });
 
-
-/*
-function listSubCategoryWithPrimaryCategory() {
-
-    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
-        {
-            type: 'GET',
-            processData: false,
-            contentType: 'application/json',
-            success: function (values) {
-                console.log(values[0].subCategory);
-                for (var i = 0; i < values.length; i++) {
-                    for (var j = 0; j < values[i].subCategory.length; j++) {
-
-                        var elem = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
-                        fields.push(elem);
-                    }
-                }
-            }
-        });
-}*/
-
 function successMessageBox() {
     $("#success-message").show();
     $("#wrong-message").hide();
@@ -349,10 +325,9 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 successMessageBox();
                 $("#new-sub-category").show();
                 document.getElementById("disp-success-message").innerHTML = data;
-                $("#subcategories").append("<option value='" + newSubCategoryName + "'>" + categoryName + "</option>");
                 $("#new-sub-category").val("");
-                updateDropDown();
                 scrollToTop();
+                updateDropDown();
             },
             error: function (er) {
                 wrongMessageBox();
@@ -409,12 +384,15 @@ function subCategoryByPrimaryCategory(categoryName) {
                     $("#subcategory-linked-category-message").show();
                     $("#category-sessions").html(subCategoryList);
                     $("#category-sessions").show();
+                } else {
+                    $("#no-subCategory").remove();
+                    var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>'
+                    $("#category-sessions").before(noSubCategory);
+                    $("#category-sessions").hide();
                 }
+
             },
             error: function (er) {
-                $("#no-subCategory").remove();
-                var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>'
-                $("#category-sessions").before(noSubCategory);
                 $("#category-sessions").hide();
             }
         }

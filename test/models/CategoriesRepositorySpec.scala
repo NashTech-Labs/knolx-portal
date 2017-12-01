@@ -4,7 +4,6 @@ import play.api.test.PlaySpecification
 import reactivemongo.bson.BSONObjectID
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class CategoriesRepositorySpec extends PlaySpecification {
 
@@ -35,6 +34,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
 
     "get category list" in {
       val categoriesList: List[CategoryInfo] = await(categoriesRepository.getCategories)
+
       categoriesList.reverse.head.subCategory must beEqualTo (List("Angular Js","D3JS"))
     }
 

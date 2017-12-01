@@ -90,9 +90,13 @@ function slide(keyword, pageNumber, pageSize) {
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
-                            usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
-                                          "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                                          "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
+                            if (sessions[session].contentAvailable) {
+                                usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
+                                    "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                                    "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
+                            } else {
+                                usersFound += "<td><span class='label label-danger'>Not Available</span>";
+                            }
                         } else if(sessions[session].cancelled) {
                             usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
                         }

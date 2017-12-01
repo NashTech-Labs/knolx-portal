@@ -117,7 +117,6 @@ $(function () {
     }
 
     function prepareResult(keyword, targetId, renderResult) {
-        console.log("Keyword =" + keyword + " +++ " + targetId);
 
         if (!keyword) {
             $("#topic-linked-subcategory-message").hide();
@@ -177,7 +176,6 @@ $(function () {
     $("html").delegate(".result", "mousedown", function () {
         var attribute = $(this).attr('id') + "-" + $(this).attr('name')
         var splits = attribute.split('-');
-        console.log("splits = " + splits);
         subCategoryName = splits[0];
         categoryName = splits[1];
         categoryId = splits[2];
@@ -468,7 +466,6 @@ function updateDropDown() {
             processData: false,
             success: function (values) {
 
-                console.log(values);
                 var categories = "";
                 var categoriesModify = "";
                 var categoriesDelete = "";

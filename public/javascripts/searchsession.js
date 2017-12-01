@@ -1,15 +1,25 @@
-$(function () {
+$(document).ready(function () {
+
+    slide("", 1, 10);
+
     $('#search-text').keyup(function () {
-        slide(this.value, 1);
+        var pageSize = $('#show-entries').val();
+        slide(this.value, 1, pageSize);
     });
+
+    $('#show-entries').on('change', function () {
+        var keyword = $('#search-text').val();
+        slide(keyword, 1, this.value);
+    });
+
 });
 
-function slide(keyword, pageNumber) {
+function slide(keyword, pageNumber, pageSize) {
     var email = keyword;
-
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
+    formData.append("pageSize", pageSize);
 
     jsRoutes.controllers.SessionsController.searchSessions().ajax(
         {
@@ -57,9 +67,13 @@ function slide(keyword, pageNumber) {
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
-                           usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
-                            "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                            "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a></td>";
+                            if (sessions[session].contentAvailable) {
+                                usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
+                                    "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                                    "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a></td>";
+                            } else {
+                                usersFound += "<td><span class='label label-danger'>Not Available</span></td>";
+                            }
                         } else if(sessions[session].cancelled) {
                             usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span></td>";
                         }
@@ -71,6 +85,14 @@ function slide(keyword, pageNumber) {
 
                     $('#user-found').html(usersFound);
 
+                    var totalSessions = sessionInfo["totalSessions"];
+                    var startingRange = (pageSize * (page - 1)) + 1;
+                    var endRange = (pageSize * (page - 1)) + sessions.length;
+
+                    $('#starting-range').html(startingRange);
+                    $('#ending-range').html(endRange);
+                    $('#total-range').html(totalSessions);
+
                     paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');
@@ -78,7 +100,7 @@ function slide(keyword, pageNumber) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id);
+                            slide(keyword, this.id, pageSize);
                         });
                     }
                 } else {

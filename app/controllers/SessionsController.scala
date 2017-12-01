@@ -63,13 +63,15 @@ case class KnolxSession(id: String,
                         feedbackFormScheduled: Boolean = false,
                         dateString: String = "",
                         completed: Boolean = false,
-                        expired: Boolean = false)
+                        expired: Boolean = false,
+                        contentAvailable: Boolean)
 
-case class SessionEmailInformation(email: Option[String], page: Int)
+case class SessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
-                               keyword: String)
+                               keyword: String,
+                               totalSessions: Int)
 
 object SessionValues {
   val Sessions: IndexedSeq[(String, String)] = 1 to 5 map (number => (s"session $number", s"Session $number"))
@@ -92,7 +94,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   val sessionSearchForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number.verifying("Invalid feedback form expiration days selected", _ >= 1)
+      "page" -> number.verifying("Invalid Page Number", _ >= 1),
+      "pageSize" -> number.verifying("Invalid Page size", _>=10)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
@@ -131,32 +134,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   )
 
 
-  def sessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = action.async { implicit request =>
-    sessionsRepository
-      .paginate(pageNumber, keyword)
-      .flatMap { sessionInfo =>
-        val knolxSessions = sessionInfo map { session =>
-          KnolxSession(session._id.stringify,
-            session.userId,
-            new Date(session.date.value),
-            session.session,
-            session.topic,
-            session.email,
-            session.meetup,
-            session.cancelled,
-            "",
-            completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
-            expired = new Date(session.expirationDate.value)
-              .before(new java.util.Date(dateTimeUtility.nowMillis)))
-        }
-
-        sessionsRepository
-          .activeCount(keyword)
-          .map { count =>
-            val pages = Math.ceil(count / 10D).toInt
-            Ok(views.html.sessions.sessions(knolxSessions, pages, pageNumber))
-          }
-      }
+  def sessions: Action[AnyContent] = action.async { implicit request =>
+    Future.successful(Ok(views.html.sessions.sessions()))
   }
 
   def searchSessions: Action[AnyContent] = action.async { implicit request =>
@@ -167,9 +146,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       },
       sessionInformation => {
         sessionsRepository
-          .paginate(sessionInformation.page, sessionInformation.email)
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
-            val knolxSessions = sessionInfo map (session =>
+            val knolxSessions = sessionInfo map { session =>
+              val contentAvailable = session.youtubeURL.isDefined || session.slideShareURL.isDefined
               KnolxSession(session._id.stringify,
                 session.userId,
                 new Date(session.date.value),
@@ -182,58 +162,21 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 dateString = new Date(session.date.value).toString,
                 completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
                 expired = new Date(session.expirationDate.value)
-                  .before(new java.util.Date(dateTimeUtility.nowMillis))))
-
+                  .before(new java.util.Date(dateTimeUtility.nowMillis)),
+                contentAvailable = contentAvailable)
+            }
             sessionsRepository
               .activeCount(sessionInformation.email)
               .map { count =>
-                val pages = Math.ceil(count / 10D).toInt
-
-                Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
+                val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
+                Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""), count)).toString)
               }
           }
       })
   }
 
-  def manageSessions(pageNumber: Int = 1, keyword: Option[String] = None): Action[AnyContent] = adminAction.async { implicit request =>
-    sessionsRepository
-      .paginate(pageNumber, keyword)
-      .flatMap { sessionsInfo =>
-        val knolxSessions =
-          sessionsInfo map (sessionInfo =>
-            KnolxSession(sessionInfo._id.stringify,
-              sessionInfo.userId,
-              new Date(sessionInfo.date.value),
-              sessionInfo.session,
-              sessionInfo.topic,
-              sessionInfo.email,
-              sessionInfo.meetup,
-              sessionInfo.cancelled,
-              sessionInfo.rating,
-              completed = new Date(sessionInfo.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
-              expired = new Date(sessionInfo.expirationDate.value)
-                .before(new java.util.Date(dateTimeUtility.nowMillis))))
-
-        val eventualScheduledFeedbackForms =
-          (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
-
-        val eventualKnolxSessions = eventualScheduledFeedbackForms map { scheduledFeedbackForms =>
-          knolxSessions map { session =>
-            val scheduled = scheduledFeedbackForms.sessionIds.contains(session.id)
-
-            session.copy(feedbackFormScheduled = scheduled)
-          }
-        }
-
-        eventualKnolxSessions flatMap { sessions =>
-          sessionsRepository
-            .activeCount(keyword)
-            .map { count =>
-              val pages = Math.ceil(count / 10D).toInt
-              Ok(views.html.sessions.managesessions(sessions, pages, pageNumber))
-            }
-        }
-      }
+  def manageSessions: Action[AnyContent] = adminAction.async { implicit request =>
+    Future.successful(Ok(views.html.sessions.managesessions()))
   }
 
   def searchManageSession: Action[AnyContent] = adminAction.async { implicit request =>
@@ -244,9 +187,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       },
       sessionInformation => {
         sessionsRepository
-          .paginate(sessionInformation.page, sessionInformation.email)
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
-            val knolxSessions = sessionInfo map (sessionInfo =>
+            val knolxSessions = sessionInfo map { sessionInfo =>
+              val contentAvailable = sessionInfo.youtubeURL.isDefined || sessionInfo.slideShareURL.isDefined
               KnolxSession(sessionInfo._id.stringify,
                 sessionInfo.userId,
                 new Date(sessionInfo.date.value),
@@ -259,8 +203,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 dateString = new Date(sessionInfo.date.value).toString,
                 completed = new Date(sessionInfo.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
                 expired = new Date(sessionInfo.expirationDate.value)
-                  .before(new java.util.Date(dateTimeUtility.nowMillis))
-              ))
+                  .before(new java.util.Date(dateTimeUtility.nowMillis)),
+                contentAvailable = contentAvailable)
+            }
 
             val eventualScheduledFeedbackForms =
               (sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions]
@@ -275,9 +220,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               sessionsRepository
                 .activeCount(sessionInformation.email)
                 .map { count =>
-                  val pages = Math.ceil(count / 10D).toInt
-
-                  Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""))).toString)
+                  val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
+                  Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""), count)).toString)
                 }
             }
           }
@@ -320,7 +264,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                     sessionsScheduler ! RefreshSessionsSchedulers
-                    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully created!"))
+                    Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully created!"))
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
                     Future.successful(InternalServerError("Something went wrong!"))
@@ -366,7 +310,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       } { _ =>
         Logger.info(s"Knolx session $id successfully deleted")
         sessionsScheduler ! RefreshSessionsSchedulers
-        Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully Deleted!"))
+        Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully Deleted!"))
       })
   }
 
@@ -386,7 +330,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               Ok(views.html.sessions.updatesession(filledForm, formIds))
             }
 
-        case None => Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+        case None => Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Something went wrong!"))
       }
   }
 
@@ -410,7 +354,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   Logger.info(s"Successfully updated session ${updateSessionInfo.id}")
                   sessionsScheduler ! RefreshSessionsSchedulers
                   Logger.error(s"Cannot refresh feedback form actors while updating session ${updateSessionInfo.id}")
-                  Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Session successfully updated"))
+                  Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully updated"))
                 } else {
                   Logger.error(s"Something went wrong when updating a new Knolx session for user  ${updateSessionInfo.id}")
                   Future.successful(InternalServerError("Something went wrong!"))
@@ -423,29 +367,28 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   def cancelScheduledSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     (sessionsScheduler ? CancelScheduledSession(sessionId)) (5.seconds).mapTo[Boolean] map {
       case true  =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
+        Redirect(routes.SessionsController.manageSessions())
           .flashing("message" -> "Scheduled feedback form successfully cancelled!")
       case false =>
-        Redirect(routes.SessionsController.manageSessions(1, None))
+        Redirect(routes.SessionsController.manageSessions())
           .flashing("message" -> "Either feedback form was already sent or Something went wrong while removing scheduled feedback form!")
     }
   }
 
   def scheduleSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsScheduler ! ScheduleSession(sessionId)
-    Future.successful(Redirect(routes.SessionsController.manageSessions(1, None))
+    Future.successful(Redirect(routes.SessionsController.manageSessions())
       .flashing("message" -> "Feedback form schedule initiated"))
   }
 
   def shareContent(id: String): Action[AnyContent] = action.async { implicit request =>
     if (id.length != 24) {
-      Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found"))
+      Future.successful(Redirect(routes.SessionsController.sessions()).flashing("message" -> "Session Not Found"))
     } else {
       val eventualMaybeSession: Future[Option[SessionInfo]] = sessionsRepository.getById(id)
       eventualMaybeSession.flatMap(maybeSession =>
-        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("message" -> "Session Not Found")))
+        maybeSession.fold(Future.successful(Redirect(routes.SessionsController.sessions()).flashing("message" -> "Session Not Found")))
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
-
 }

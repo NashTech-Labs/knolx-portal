@@ -1,13 +1,27 @@
 $(function () {
-    var startDate = moment().subtract(3, 'months').startOf('day').format('YYYY-MM-DD HH:mm').toString();
-    var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
+    var startDate = moment().subtract(1, 'years').startOf('day').format('YYYY-MM-DD HH:mm').toString();
+    var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm').toString();
 
-    analysis(startDate, endDate);
+    if (sessionStorage.startDate === undefined) {
+        sessionStorage.setItem("startDate", startDate);
+    }
+
+    if (sessionStorage.endDate === undefined) {
+        sessionStorage.setItem("endDate", endDate);
+    }
+
+    var startDateSessionStorage = moment(sessionStorage.startDate).startOf('day').format('YYYY-MM-DD HH:mm').toString();
+    var endDateSessionStorage = moment(sessionStorage.endDate).endOf('day').format('YYYY-MM-DD HH:mm').toString();
+
+    analysis(startDateSessionStorage, endDateSessionStorage);
 
     $('#demo').daterangepicker({
-        "startDate": moment().subtract(3, 'months'),
-        "endDate": moment()
-    }, function (start, end, label) {
+        "startDate": new Date(sessionStorage.startDate),
+        "endDate": new Date(sessionStorage.endDate)
+    }, function (start, end) {
+        sessionStorage.setItem("startDate", start);
+        sessionStorage.setItem("endDate", end);
+
         var startDate = start.format('YYYY-MM-DD h:mm A');
         var endDate = end.format('YYYY-MM-DD h:mm A');
 
@@ -52,7 +66,7 @@ function columnChart(startDate, EndDate) {
 
                 var columnGraph = Highcharts.chart('column-graph', {
                     title: {
-                        text: 'Knolx Session Sub-Category Analysis'
+                        text: 'Session Sub-Category Analysis'
                     },
 
                     subtitle: {
@@ -91,8 +105,6 @@ function pieChart(startDate, EndDate) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                console.log(data);
-
                 var items = [];
                 var series = [];
 
@@ -124,7 +136,7 @@ function pieChart(startDate, EndDate) {
                         type: 'pie'
                     },
                     title: {
-                        text: 'Knolx Session Analysis'
+                        text: 'Session Category Analysis'
                     },
                     plotOptions: {
                         pie: {
@@ -143,7 +155,7 @@ function pieChart(startDate, EndDate) {
                         pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.percentage:.1f}%</b> of total<br/>'
                     },
                     series: [{
-                        name: 'Primary Category',
+                        name: 'Category',
                         colorByPoint: true,
                         data: items
                     }],
@@ -199,14 +211,14 @@ function lineGraph(startDate, EndDate) {
                         type: 'area'
                     },
                     title: {
-                        text: 'Knolx'
+                        text: 'Knolx Monthly Analysis'
                     },
                     xAxis: {
                         categories: xAxisData
                     },
                     yAxis: {
                         title: {
-                            text: 'Total Session In Month'
+                            text: 'Total Sessions In Month'
                         },
                         labels: {
                             formatter: function () {

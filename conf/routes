@@ -9,7 +9,7 @@ POST        /login                                  controllers.UsersController.
 GET         /logout                                 controllers.UsersController.logout
 GET         /register                               controllers.UsersController.register
 POST        /register                               controllers.UsersController.createUser
-GET         /users/manage/:pageNumber               controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
+GET         /users/manage                           controllers.UsersController.manageUser()
 POST        /users/search                           controllers.UsersController.searchUser
 GET         /user/update                            controllers.UsersController.getByEmail(email: String)
 POST        /user/update                            controllers.UsersController.updateUser
@@ -23,9 +23,9 @@ GET         /user/changepassword                    controllers.UsersController.
 POST        /user/changepassword                    controllers.UsersController.changePassword
 
 # Session
-GET         /session                                controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
+GET         /session                                controllers.SessionsController.sessions
 POST        /session/search                         controllers.SessionsController.searchSessions
-GET         /session/manage/:pageNumber             controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+GET         /session/manage                         controllers.SessionsController.manageSessions()
 POST        /session/manage/search                  controllers.SessionsController.searchManageSession
 GET         /session/create                         controllers.SessionsController.create
 POST        /session/create                         controllers.SessionsController.createSession
@@ -35,7 +35,6 @@ GET         /session/update                         controllers.SessionsControll
 GET         /session/:sessionId/cancel              controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET         /session/:sessionId/schedule            controllers.SessionsController.scheduleSession(sessionId: String)
 GET         /session/content/:sessionId             controllers.SessionsController.shareContent(sessionId: String)
-GET         /session/categories                     controllers.SessionsCategoryController.getCategory
 
 # Feedback
 GET         /feedbackform/manage/:pageNumber        controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -70,6 +69,8 @@ GET         /deleteprimarycategory              controllers.SessionsCategoryCont
 GET         /getsubcategorybyprimarycategory    controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
 GET         /deletesubcategory                  controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
 GET         /gettopicsbysubcategory             controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
+GET         /session/categories                     controllers.SessionsCategoryController.getCategory
+
 # Analysis
 GET         /knolx/analysis                         controllers.KnolxAnalysisController.renderAnalysisPage
 POST        /knolx/analysis/columnchart             controllers.KnolxAnalysisController.renderColumnChart

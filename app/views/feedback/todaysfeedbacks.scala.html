@@ -17,7 +17,7 @@
                                         } else {
                                             label-success
                                         } custom-label-type">@sessionType</span></div>
-                                        <p>@session.topic</p>
+                                        <p class="report-content-width" title="@session.topic">@session.topic</p>
                                         <p class="feedback-card-presenter">@session.email</p>
                                     </div>
                                     <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
@@ -62,7 +62,7 @@
                                         <div class="session-content">
                                             <div class="col-md-12 feedback-card-topic custom-position expired">
                                                 <div class="session-type"><span class="label label-default custom-label-type">@sessionType</span></div>
-                                                <p>@expiredSession.topic</p>
+                                                <p  class="report-content-width" title="@expiredSession.topic">@expiredSession.topic</p>
                                                 <p class="feedback-card-presenter">@expiredSession.email</p>
                                             </div>
                                             <div class="col-md-12 feedback-card-author"><p>@expiredSession.session</p></div>

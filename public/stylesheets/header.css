@@ -167,7 +167,6 @@ display: block;
         font-size: 15px;
         color: white;
         border: 1px solid #1ab394;
-        padding: 0 5px;
         line-height: 18px;
         border-radius: 16px;
         background-color: #1ab394;
@@ -321,6 +320,10 @@ html,body{
 
 .navbar-collapse {
     overflow-x: hidden !important;
+}
+
+#sidebar i {
+ width:14px;
 }
 
 

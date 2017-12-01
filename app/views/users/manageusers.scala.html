@@ -64,6 +64,17 @@
                     <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
                 </label>
             </div>
+            <div class="col-md-12">
+                <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
+                    Showing
+                    <span id="starting-range"></span>
+                    to
+                    <span id="ending-range"></span>
+                    of
+                    <span id="total-range"></span>
+                    Entries
+                </label>
+            </div>
             @if(flash.get("success").fold("")(identity).nonEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>

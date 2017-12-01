@@ -124,6 +124,14 @@ function slide(keyword, pageNumber, filter, pageSize) {
 
                     $('#user-found').html(usersFound);
 
+                    var totalUsers = userInfo["totalUsers"];
+                    var startingRange = (pageSize * (page - 1)) + 1;
+                    var endRange = (pageSize * (page - 1)) + users.length;
+
+                    $('#starting-range').html(startingRange);
+                    $('#ending-range').html(endRange);
+                    $('#total-range').html(totalUsers);
+
                     paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');

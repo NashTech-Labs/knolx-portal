@@ -55,20 +55,21 @@ GET         /reports/user/responses                 controllers.FeedbackFormsRep
 GET         /reports/manage                         controllers.FeedbackFormsReportController.renderAllFeedbackReports
 GET         /reports/manage/responses               controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
 GET         /reports/manage/response                controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                           controllers.Assets.versioned(path="/public", file: Asset)
 GET         /favicon.ico                            controllers.Assets.at(path="/public/images", file="favicon.png")
 
 #Category
-GET         /category                           controllers.SessionsCategoryController.renderCategoryPage
-GET         /addprimarycategory                 controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
-GET         /addsubcategory                     controllers.SessionsCategoryController.addSubCategory(categoryName: String,subCategory: String)
-GET         /modifyprimarycategory              controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
-GET         /modifysubcategory                  controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
-GET         /deleteprimarycategory              controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
-GET         /getsubcategorybyprimarycategory    controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
-GET         /deletesubcategory                  controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
-GET         /gettopicsbysubcategory             controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
+GET         /category                               controllers.SessionsCategoryController.renderCategoryPage
+GET         /addprimarycategory                     controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
+GET         /addsubcategory                         controllers.SessionsCategoryController.addSubCategory(categoryName: String,subCategory: String)
+GET         /modifyprimarycategory                  controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
+GET         /modifysubcategory                      controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+GET         /deleteprimarycategory                  controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
+GET         /getsubcategorybyprimarycategory        controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
+GET         /deletesubcategory                      controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
+GET         /gettopicsbysubcategory                 controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 GET         /session/categories                     controllers.SessionsCategoryController.getCategory
 
 # Analysis

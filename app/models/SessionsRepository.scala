@@ -278,16 +278,16 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       }
   }
 
-    def upsertRecord(session: SessionInfo, emailType: EmailOnce)(implicit ex: ExecutionContext): Future[WriteResult] = {
-      val selector = BSONDocument("_id" -> BSONDocument("$oid" -> session._id.stringify))
+  def upsertRecord(session: SessionInfo, emailType: EmailOnce)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> session._id.stringify))
 
-      val modifier = emailType match {
-        case Reminder     => BSONDocument("$set" -> BSONDocument("reminder" -> true))
-        case Notification => BSONDocument("$set" -> BSONDocument("notification" -> true))
-      }
-
-      collection.flatMap(_.update(selector, modifier, upsert = true))
+    val modifier = emailType match {
+      case Reminder     => BSONDocument("$set" -> BSONDocument("reminder" -> true))
+      case Notification => BSONDocument("$set" -> BSONDocument("notification" -> true))
     }
+
+    collection.flatMap(_.update(selector, modifier, upsert = true))
+  }
 
   def updateRating(sessionId: String, scores: List[Double]): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))

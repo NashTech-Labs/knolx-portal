@@ -227,7 +227,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   }
 
-  def userSessionsTillNow(email: Option[String] = None): Future[List[SessionInfo]] = {
+  def userSessionsTillNow(email: Option[String] = None, pageNumber: Int)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    val skipN = (pageNumber - 1) * 8
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = 8, flagsN = 0)
     val millis = dateTimeUtility.nowMillis
 
     val condition = email.fold {
@@ -247,9 +249,10 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .options(queryOptions)
           .sort(Json.obj("date" -> -1))
           .cursor[SessionInfo](ReadPreference.primary)
-          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+          .collect[List](8, FailOnError[List[SessionInfo]]()))
 
   }
 

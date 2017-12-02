@@ -45,50 +45,25 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   implicit val feedbackReportFormat: OFormat[FeedbackReport] = Json.format[FeedbackReport]
 
   def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
-    generateSessionFeedbackReport(Some(request.user.email)).map { reportInfo =>
+    val sessionTillNow = sessionsRepository.userSessionsTillNow(Some(request.user.email), 1)
+    generateReport(sessionTillNow).map { reportInfo =>
       Ok(views.html.reports.myreports(reportInfo))
     }
   }
 
   def renderAllFeedbackReports: Action[AnyContent] = adminAction.async { implicit request =>
-    generateSessionFeedbackReport(None).map { reportInfo =>
+    val sessionTillNow = sessionsRepository.userSessionsTillNow(None, 1)
+    generateReport(sessionTillNow).map { reportInfo =>
       Ok(views.html.reports.allreports(reportInfo))
     }
   }
 
-  private def generateSessionFeedbackReport(presenter: Option[String]): Future[List[FeedbackReportHeader]] = {
-    presenter.fold {
-      val activeSessions = sessionsRepository.activeSessions(None)
-      val sessionTillNow = sessionsRepository.userSessionsTillNow(None)
-      generateReport(activeSessions, sessionTillNow)
-    } { email =>
-      val presenterActiveSessions = sessionsRepository.activeSessions(Some(email))
-      val presenterSessionTillNow = sessionsRepository.userSessionsTillNow(Some(email))
-      generateReport(presenterActiveSessions, presenterSessionTillNow)
-    }
-  }
-
-  private def generateReport(eventualActiveSessions: Future[List[SessionInfo]],
-                             sessionsTillNow: Future[List[SessionInfo]]): Future[List[FeedbackReportHeader]] = {
-    eventualActiveSessions flatMap {
-      case _ :: _ =>
-        sessionsTillNow flatMap {
-          case allUserSessionsTillNow@(_ :: _) =>
-            eventualActiveSessions map { activeSessions =>
-              allUserSessionsTillNow map { session =>
-                if (activeSessions.contains(session)) {
-                  generateSessionReportHeader(session, active = true)
-                } else {
-                  generateSessionReportHeader(session, active = false)
-                }
-              }
-            }
-          case Nil                             => Future.successful(List.empty)
-        }
-      case Nil    =>
-        sessionsTillNow map {
-          case first :: rest => (first +: rest) map (session => generateSessionReportHeader(session, active = false))
-          case Nil           => List.empty
+  private def generateReport(sessionsTillNow: Future[List[SessionInfo]]): Future[List[FeedbackReportHeader]] = {
+    sessionsTillNow map { allUserSessionsTillNow =>
+      Logger.error("----->" + allUserSessionsTillNow.length)
+        allUserSessionsTillNow map { session =>
+          val active = dateTimeUtility.nowMillis < session.expirationDate.value
+          generateSessionReportHeader(session, active)
         }
     }
   }

@@ -292,7 +292,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def updateRating(sessionId: String, scores: List[Double]): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val scoresWithoutZero = scores.filterNot(_ == 0)
-    val sessionScore = if(scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
+    val sessionScore = if (scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
 
     val updatedRating = sessionScore match {
       case good if sessionScore >= 60.00    => "Good"
@@ -359,16 +359,17 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           }
       }
   }
-  def updateSubCategoryOnChange(subCategory : String,updateSubCategory: String): Future[UpdateWriteResult] = {
+
+  def updateSubCategoryOnChange(subCategory: String, updateSubCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("subCategory" -> subCategory)
     val modifier = BSONDocument("$set" -> BSONDocument("subCategory" -> updateSubCategory))
-    collection.flatMap(_.update(selector,modifier,multi=true))
+    collection.flatMap(_.update(selector, modifier, multi = true))
   }
 
-  def updateCategoryOnChange(category : String,updateCategory: String): Future[UpdateWriteResult] = {
+  def updateCategoryOnChange(category: String, updateCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("category" -> category)
     val modifier = BSONDocument("$set" -> BSONDocument("category" -> updateCategory))
-    collection.flatMap(_.update(selector,modifier,multi=true))
+    collection.flatMap(_.update(selector, modifier, multi = true))
   }
 
   def getSessionByCategory(category: String, subCategory: String): Future[List[SessionInfo]] = {

@@ -8,7 +8,6 @@ import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import models.CategoriesJsonFormats._
 
 import play.api.libs.json.{JsValue, Json}
 import models.CategoriesJsonFormats._
@@ -23,16 +22,19 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class CategoryInfo(categoryName: String, subCategory: List[String], _id: BSONObjectID = BSONObjectID.generate)
 
 object CategoriesJsonFormats {
+
   import play.api.libs.json.Json
+
   implicit val categoriesFormat = Json.format[CategoryInfo]
 }
 
 class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
+
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("categories"))
 
-  def insertCategory(categoryName: String)(implicit ex: ExecutionContext): Future[WriteResult] ={
+  def insertCategory(categoryName: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val categoryInfo = CategoryInfo(categoryName, List())
     collection
       .flatMap(jsonCollection =>
@@ -44,14 +46,10 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> category._id.stringify))
     val modifier =
       BSONDocument(
-        "$set" -> BSONDocument(
-          "categoryName" -> category.categoryName),
-        "$addToSet" -> BSONDocument(
-          "subCategory" -> BSONDocument(
-        "$each" -> category.subCategory)))
+        "$set" -> BSONDocument("categoryName" -> category.categoryName),
+        "$addToSet" -> BSONDocument("subCategory" -> BSONDocument("$each" -> category.subCategory)))
 
     collection.flatMap(_.update(selector, modifier, upsert = true))
-
   }
 
   def getCategories(implicit ex: ExecutionContext): Future[List[CategoryInfo]] = {
@@ -63,50 +61,39 @@ class CategoriesRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[CategoryInfo]]()))
   }
 
-  def modifyPrimaryCategory(categoryId: String, newCategoryName: String)(implicit ex : ExecutionContext): Future[UpdateWriteResult] = {
-
+  def modifyPrimaryCategory(categoryId: String, newCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
-    val modifier =
-      BSONDocument(
-        "$set" -> BSONDocument(
-          "categoryName" -> newCategoryName))
+    val modifier = BSONDocument("$set" -> BSONDocument("categoryName" -> newCategoryName))
 
-    collection.flatMap(_.update(selector,modifier))
+    collection.flatMap(_.update(selector, modifier))
   }
 
   def modifySubCategory(categoryId: String,
                         oldSubCategoryName: String,
                         newSubCategoryName: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId), "subCategory" -> oldSubCategoryName)
+    val modifier = BSONDocument("$set" -> BSONDocument("subCategory.$" -> newSubCategoryName))
 
-    val selector = BSONDocument(
-      "_id" ->  BSONDocument(
-        "$oid" -> categoryId),
-      "subCategory" -> oldSubCategoryName)
-
-    val modifier =
-      BSONDocument(
-        "$set" -> BSONDocument(
-          "subCategory.$" -> newSubCategoryName))
-    collection.flatMap(_.update(selector,modifier))
+    collection.flatMap(_.update(selector, modifier))
   }
 
   def deletePrimaryCategory(categoryId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
+
     collection.flatMap(_.remove(selector))
   }
 
   def deleteSubCategory(categoryId: String, subCategory: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
-    val modifier =
-      BSONDocument(
-        "$pull" -> BSONDocument(
-          "subCategory"-> subCategory))
+    val modifier = BSONDocument("$pull" -> BSONDocument("subCategory" -> subCategory))
+
     collection.flatMap(_.update(selector, modifier, multi = true))
   }
 
   def getCategoryNameById(categoryId: String): Future[Option[String]] = {
     val condition = BSONDocument("_id" -> BSONDocument("$oid" -> categoryId))
     val projection = BSONDocument("_id" -> 0, "categoryName" -> 1)
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection

@@ -58,7 +58,7 @@ $(function () {
         if (!(categoryName.trim())) {
             categoryId = "";
             $("#subcategory-linked-category-message").hide();
-            /*$("#no-subCategory").hide();*/
+            $("#category-sessions").hide();
 
         } else {
             modifiedCategoryName = categoryName.replace(" ", "");
@@ -123,7 +123,6 @@ $(function () {
             $("#subcategory-sessions").hide();
             $("#no-sessions").hide();
             $("#no-subCategory").hide();
-            $("#category-sessions").hide();
 
         }
         fields.forEach(function (element) {

@@ -123,6 +123,7 @@ $(function () {
             $("#subcategory-sessions").hide();
             $("#no-sessions").hide();
             $("#no-subCategory").hide();
+            $("#category-sessions").hide();
 
         }
         fields.forEach(function (element) {

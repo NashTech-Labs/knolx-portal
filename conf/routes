@@ -62,15 +62,15 @@ GET         /favicon.ico                            controllers.Assets.at(path="
 
 #Category
 GET         /category                               controllers.SessionsCategoryController.renderCategoryPage
-GET         /addprimarycategory                     controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
-GET         /addsubcategory                         controllers.SessionsCategoryController.addSubCategory(categoryName: String,subCategory: String)
-GET         /modifyprimarycategory                  controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String,newCategoryName: String)
-GET         /modifysubcategory                      controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
-GET         /deleteprimarycategory                  controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
-GET         /getsubcategorybyprimarycategory        controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
-GET         /deletesubcategory                      controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
-GET         /gettopicsbysubcategory                 controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
-GET         /session/categories                     controllers.SessionsCategoryController.getCategory
+GET         /category/add                           controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
+GET         /category/update                        controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)
+GET         /category/delete                        controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
+GET         /category/all                           controllers.SessionsCategoryController.getCategory
+GET         /category/subcategories                 controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
+GET         /subcategory/delete                     controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
+GET         /subcategory/add                        controllers.SessionsCategoryController.addSubCategory(categoryName: String, subCategory: String)
+GET         /subcategory/update                     controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+GET         /subcategory/topics                     controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 
 # Analysis
 GET         /knolx/analysis                         controllers.KnolxAnalysisController.renderAnalysisPage

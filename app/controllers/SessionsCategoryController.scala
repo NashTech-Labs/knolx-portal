@@ -25,7 +25,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
   implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   def renderCategoryPage: Action[AnyContent] = adminAction.async { implicit request =>
-      Future.successful(Ok(views.html.sessions.category()))
+    Future.successful(Ok(views.html.sessions.category()))
   }
 
   def addPrimaryCategory(categoryName: String): Action[AnyContent] = superUserAction.async { implicit request =>
@@ -150,28 +150,28 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
             .contains(newSubCategoryName.toLowerCase)
           if (!subCategoryExists) {
             Future.successful(BadRequest("No sub-category found"))
-          } else if(newSubCategoryExists) {
+          } else if (newSubCategoryExists) {
             Future.successful(BadRequest("Sub-category already exists"))
           } else {
             categoriesRepository
               .modifySubCategory(categoryId, oldSubCategoryName, cleanedSubCategory)
               .flatMap { result =>
-                  if (result.ok) {
-                    sessionsRepository
-                      .updateSubCategoryOnChange(oldSubCategoryName, newSubCategoryName)
-                      .map { session =>
-                        if (session.ok) {
-                          Logger.info(s"Sub-category was successfully modified $newSubCategoryName")
-                          Ok("Sub-category was successfully modified")
-                        } else {
-                          Logger.error(s"Something went wrong while modifying sub-category $newSubCategoryName")
-                          BadRequest("Sub-category cannot be modified due to some error")
-                        }
+                if (result.ok) {
+                  sessionsRepository
+                    .updateSubCategoryOnChange(oldSubCategoryName, newSubCategoryName)
+                    .map { session =>
+                      if (session.ok) {
+                        Logger.info(s"Sub-category was successfully modified $newSubCategoryName")
+                        Ok("Sub-category was successfully modified")
+                      } else {
+                        Logger.error(s"Something went wrong while modifying sub-category $newSubCategoryName")
+                        BadRequest("Sub-category cannot be modified due to some error")
                       }
-                  }
-                  else {
-                    Future.successful(BadRequest("Something went wrong when updating sub-category"))
-                  }
+                    }
+                }
+                else {
+                  Future.successful(BadRequest("Something went wrong when updating sub-category"))
+                }
               }
           }
         }
@@ -276,8 +276,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
       sessionsRepository
         .getSessionByCategory(categoryName, subCategory)
         .map { sessionInformation =>
-          val sessionTopicList =
-            sessionInformation.map(_.topic)
+          val sessionTopicList = sessionInformation.map(_.topic)
           Ok(Json.toJson(sessionTopicList))
         }
     }
@@ -287,9 +286,9 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
     categoriesRepository
       .getCategories
       .map { categories =>
-        val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.stringify,category.categoryName, category.subCategory))
+        val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category._id.stringify, category.categoryName, category.subCategory))
         Ok(Json.toJson(listOfCategoryInfo))
       }
   }
-  
+
 }

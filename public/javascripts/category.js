@@ -245,6 +245,10 @@ function addCategory(categoryName) {
             type: 'PUT',
             processData: false,
             contentType: false,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 successMessageBox();
                 $("#primary-category").val("");
@@ -268,6 +272,10 @@ function addSubCategory(categoryName, subCategory) {
             type: 'PUT',
             processData: false,
             contentType: false,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 successMessageBox()
                 $("#sub-category").val("");
@@ -291,7 +299,10 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
             type: 'POST',
             processData: false,
             contentType: false,
-
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 successMessageBox();
                 $("#new-primary-category").val("");
@@ -316,6 +327,10 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
             type: 'POST',
             processData: false,
             contentType: false,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 console.log(data);
                 successMessageBox();
@@ -342,6 +357,10 @@ function deletePrimaryCategory(categoryId) {
             type: 'DELETE',
             processData: false,
             contentType: 'application/json',
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 successMessageBox();
                 $("#delete-primary-category").val("");
@@ -435,6 +454,10 @@ function deleteSubCategory(categoryId, subCategoryName) {
             type: 'DELETE',
             processData: false,
             contentType: false,
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (data) {
                 successMessageBox();
                 $("#datalist").val("");

@@ -1,6 +1,6 @@
 @()(implicit request: Request[_], flash: Flash)
 
-@main("Add Category") {
+@main("Categories") {
 
     <div class="row top-row-adjust"></div>
     <div class="col-md-12 category-message">
@@ -167,7 +167,8 @@
                                 </datalist>
                                 <div id="subcategory-linked-category-message">
                                     <label class="info-message">
-                                        This category is tagged to the following sub-category, deleting it would un-tag it from all session(s)</label>
+                                        Following sub-categories exists under this category, please delete all its sub-categories before deleting a primary category.
+                                        Deleting a category would un-tag it from all session(s)</label>
                                 </div>
                                 <div id="category-sessions"></div>
                             </div>

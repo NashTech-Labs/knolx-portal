@@ -149,7 +149,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
             .filterNot(_ == oldSubCategoryName.toLowerCase)
             .contains(newSubCategoryName.toLowerCase)
           if (!subCategoryExists) {
-            Future.successful(BadRequest("Sub-category already exists"))
+            Future.successful(BadRequest("No sub-category found"))
           } else if(newSubCategoryExists) {
             Future.successful(BadRequest("Sub-category already exists"))
           } else {

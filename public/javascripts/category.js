@@ -4,8 +4,8 @@ function Element(categoryId, subCategory, primaryCategory) {
     this.primaryCategory = primaryCategory;
 }
 
-var fields = [];
-var result = "";
+var subCategorySearchResult = [];
+var subCategoryOption = "";
 
 $(function () {
 
@@ -29,12 +29,6 @@ $(function () {
         $("#insert-sub-category").show();
     });
 
-    $("#add-sub-category").click(function () {
-        var categoryName = $("#search-primary-category").val();
-        subCategory = $("#insert-sub-category").val();
-        addSubCategory(categoryName, subCategory);
-    });
-
     $("#modify-primary-category").on('input', function () {
         $("#new-primary-category").show();
         oldCategoryName = $("#modify-primary-category").val();
@@ -48,18 +42,12 @@ $(function () {
         modifyPrimaryCategory(categoryId, newCategoryName);
     });
 
-    $("#modify-sub-category-btn").click(function () {
-        var newSubCategoryName = $("#new-sub-category").val();
-        modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName);
-    });
-
     $("#delete-primary-category").on('input change', function () {
         categoryName = $(this).val();
         if (!(categoryName.trim())) {
             categoryId = "";
             $("#subcategory-linked-category-message").hide();
             $("#category-sessions").hide();
-
         } else {
             modifiedCategoryName = categoryName.replace(" ", "");
             categoryId = $("#" + modifiedCategoryName + "-delete").attr('deletecategoryid');
@@ -69,8 +57,18 @@ $(function () {
     });
 
     $("#delete-primary-category-btn").click(function () {
-        console.log("---------------" + categoryName);
         deletePrimaryCategory(categoryId);
+    });
+
+    $("#add-sub-category").click(function () {
+        var categoryName = $("#search-primary-category").val();
+        subCategory = $("#insert-sub-category").val();
+        addSubCategory(categoryName, subCategory);
+    });
+
+    $("#modify-sub-category-btn").click(function () {
+        var newSubCategoryName = $("#new-sub-category").val();
+        modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName);
     });
 
     $("#delete-sub-category-btn").on('click', function () {
@@ -112,7 +110,7 @@ $(function () {
     function dropDown(id, targetId, renderResult) {
         console.log(id)
         var keyword = $(id).val().toLowerCase();
-        result = "";
+        subCategoryOption = "";
         prepareResult(keyword, targetId, renderResult)
     }
 
@@ -125,14 +123,14 @@ $(function () {
             $("#no-subCategory").hide();
 
         }
-        fields.forEach(function (element) {
+        subCategorySearchResult.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
-                result = result + '<div class="' + renderResult + '" name = "' + element.categoryId + '"id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
+                subCategoryOption = subCategoryOption + '<div class="' + renderResult + '" name = "' + element.categoryId + '"id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
             }
         });
-        $(targetId).html(result);
+        $(targetId).html(subCategoryOption);
         $(targetId).show();
-        result = "";
+        subCategoryOption = "";
     }
 
     $("#drop-btn").click(function (e) {
@@ -179,22 +177,20 @@ $(function () {
         subCategoryName = splits[0];
         categoryName = splits[1];
         categoryId = splits[2];
-        $("#datalist").val(splits[0]);
-        topicMatchedWithCategory(categoryName, subCategoryName)
+        $("#datalist").val(subCategoryName);
+        topicBySubCategory(categoryName, subCategoryName)
         $("#subcategory-sessions").show();
         $("#pair").val(attribute);
         $('#results-outer').hide();
     });
 
-    var newSubCategoryName = "";
     $("html").delegate(".mod-result", "mousedown", function () {
         var attribute = $(this).attr('id') + "-" + $(this).attr('name');
         var splits = attribute.split('-');
-        console.log("splits = " + splits);
         oldSubCategoryName = splits[0];
         categoryName = splits[1];
         categoryId = splits[2];
-        $("#mod-datalist").val(splits[0]);
+        $("#mod-datalist").val(oldSubCategoryName);
         $("#new-sub-category").show();
         $("#mod-pair").val(attribute);
         $('#mod-results-outer').hide();
@@ -246,7 +242,7 @@ function addCategory(categoryName) {
 
     jsRoutes.controllers.SessionsCategoryController.addPrimaryCategory(categoryName).ajax(
         {
-            type: 'GET',
+            type: 'PUT',
             processData: false,
             contentType: false,
             success: function (data) {
@@ -269,7 +265,7 @@ function addSubCategory(categoryName, subCategory) {
 
     jsRoutes.controllers.SessionsCategoryController.addSubCategory(categoryName, subCategory).ajax(
         {
-            type: 'GET',
+            type: 'PUT',
             processData: false,
             contentType: false,
             success: function (data) {
@@ -292,7 +288,7 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
 
     jsRoutes.controllers.SessionsCategoryController.modifyPrimaryCategory(categoryId, newCategoryName).ajax(
         {
-            type: 'GET',
+            type: 'POST',
             processData: false,
             contentType: false,
 
@@ -317,7 +313,7 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
 
     jsRoutes.controllers.SessionsCategoryController.modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName).ajax(
         {
-            type: 'GET',
+            type: 'POST',
             processData: false,
             contentType: false,
             success: function (data) {
@@ -343,7 +339,7 @@ function deletePrimaryCategory(categoryId) {
 
     jsRoutes.controllers.SessionsCategoryController.deletePrimaryCategory(categoryId).ajax(
         {
-            type: 'GET',
+            type: 'DELETE',
             processData: false,
             contentType: 'application/json',
             success: function (data) {
@@ -400,7 +396,7 @@ function subCategoryByPrimaryCategory(categoryName) {
     )
 }
 
-function topicMatchedWithCategory(categoryName, subCategoryName) {
+function topicBySubCategory(categoryName, subCategoryName) {
 
     jsRoutes.controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName, subCategoryName).ajax(
         {
@@ -436,7 +432,7 @@ function deleteSubCategory(categoryId, subCategoryName) {
 
     jsRoutes.controllers.SessionsCategoryController.deleteSubCategory(categoryId, subCategoryName).ajax(
         {
-            type: 'GET',
+            type: 'DELETE',
             processData: false,
             contentType: false,
             success: function (data) {
@@ -481,13 +477,13 @@ function updateDropDown() {
                 $("#category-drop-down").html(categories);
                 $("#categoryList").html(categoriesModify);
                 $("#category-list-delete").html(categoriesDelete);
-                fields = [];
+                subCategorySearchResult = [];
 
                 for (var i = 0; i < values.length; i++) {
                     for (var j = 0; j < values[i].subCategory.length; j++) {
 
                         var elem = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
-                        fields.push(elem);
+                        subCategorySearchResult.push(elem);
                     }
                 }
             }

@@ -86,3 +86,8 @@
     background-color:rgb(125, 158, 192);
     border-radius:0px;
 }
+
+.report-pagination {
+    margin-bottom: 25px;
+    padding-right: 15px !important;
+}

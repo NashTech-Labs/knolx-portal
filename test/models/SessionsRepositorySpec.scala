@@ -132,20 +132,32 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       count must beEqualTo(1)
     }
 
+    "get active and uncancelled sessions count when serched with empty string" in new TestScope {
+      val count: Int = await(sessionsRepository.activeUncancelledCount(None))
+
+      count must beEqualTo(1)
+    }
+
     "get users session till now for a particular user" in new TestScope {
-      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com")))
+      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com"), 1))
 
       response contains sessionInfo
     }
 
     "get users session till now for all users" in new TestScope {
-      val response = await(sessionsRepository.userSessionsTillNow(None))
+      val response = await(sessionsRepository.userSessionsTillNow(None, 1))
 
       response contains sessionInfo
     }
 
     "get active sessions count when serched with some string" in new TestScope {
       val count: Int = await(sessionsRepository.activeCount(Some("test")))
+
+      count must beEqualTo(1)
+    }
+
+    "get active and cancelled sessions count when serched with some string" in new TestScope {
+      val count: Int = await(sessionsRepository.activeUncancelledCount(Some("test")))
 
       count must beEqualTo(1)
     }

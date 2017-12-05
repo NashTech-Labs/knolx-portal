@@ -9,6 +9,10 @@ var subCategoryOption = "";
 
 $(function () {
 
+    $('#search-primary-category').select2({
+        dropdownCssClass: "akshansh"
+    });
+
     updateDropDown();
 
     var oldCategoryName = "";
@@ -25,11 +29,15 @@ $(function () {
         e.preventDefault();
     });
 
-    $("#search-primary-category").on('input change', function () {
+    console.log(">>>>>>>>>>>>>>  >>>>>>");
+    $(".akshansh").click(function () {
+        console.log("Search primary category");
+        updateAddPrimaryCategoryDropDown();
         $("#insert-sub-category").show();
     });
 
-    $("#modify-primary-category").on('input', function () {
+    $("#modify-primary-category").on('focus', function () {
+        updateModifyPrimaryCategoryDropDown();
         $("#new-primary-category").show();
         oldCategoryName = $("#modify-primary-category").val();
         modifiedCategoryName = oldCategoryName.replace(" ", "");
@@ -43,6 +51,7 @@ $(function () {
     });
 
     $("#delete-primary-category").on('input change', function () {
+        updateDeletePrimaryCategoryDropDown();
         categoryName = $(this).val();
         if (!(categoryName.trim())) {
             categoryId = "";
@@ -51,7 +60,6 @@ $(function () {
         } else {
             modifiedCategoryName = categoryName.replace(" ", "");
             categoryId = $("#" + modifiedCategoryName + "-delete").attr('deletecategoryid');
-            console.log("CategoryId = " + categoryId);
             subCategoryByPrimaryCategory(categoryName);
         }
     });
@@ -226,12 +234,12 @@ $(function () {
 
 function successMessageBox() {
     $("#success-message").show();
-    $("#wrong-message").hide();
+    $("#failure-message").hide();
 }
 
 function wrongMessageBox() {
     $("#success-message").hide();
-    $("#wrong-message").show();
+    $("#failure-message").show();
 }
 
 function scrollToTop() {
@@ -252,13 +260,13 @@ function addCategory(categoryName) {
             success: function (data) {
                 successMessageBox();
                 $("#primary-category").val("");
-                document.getElementById("disp-success-message").innerHTML = data;
+                document.getElementById("display-success-message").innerHTML = data;
                 scrollToTop();
                 updateDropDown();
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
+                document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -279,13 +287,12 @@ function addSubCategory(categoryName, subCategory) {
             success: function (data) {
                 successMessageBox()
                 $("#sub-category").val("");
-                document.getElementById("disp-success-message").innerHTML = data;
-                updateDropDown();
+                document.getElementById("display-success-message").innerHTML = data;
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
+                document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -306,14 +313,13 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
             success: function (data) {
                 successMessageBox();
                 $("#new-primary-category").val("");
-                document.getElementById("disp-success-message").innerHTML = data;
-                updateDropDown();
+                document.getElementById("display-success-message").innerHTML = data;
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
                 $("#new-primary-category").val("");
-                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
+                document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -335,14 +341,14 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 console.log(data);
                 successMessageBox();
                 $("#new-sub-category").show();
-                document.getElementById("disp-success-message").innerHTML = data;
+                document.getElementById("display-success-message").innerHTML = data;
                 $("#new-sub-category").val("");
                 scrollToTop();
                 updateDropDown();
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
+                document.getElementById("display-failure-message").innerHTML = er.responseText;
                 $("#new-sub-category").val("");
                 scrollToTop();
             },
@@ -364,17 +370,14 @@ function deletePrimaryCategory(categoryId) {
             success: function (data) {
                 successMessageBox();
                 $("#delete-primary-category").val("");
-                console.log("data is = " + data)
-                document.getElementById("disp-success-message").innerHTML = data;
+                document.getElementById("display-success-message").innerHTML = data;
                 $("category-sessions").hide();
                 $("#no-subCategory").hide();
-                updateDropDown();
                 scrollToTop();
             },
             error: function (er) {
                 wrongMessageBox();
-                console.log("error is  = " + er.responseText)
-                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
+                document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
         }
@@ -461,7 +464,7 @@ function deleteSubCategory(categoryId, subCategoryName) {
             success: function (data) {
                 successMessageBox();
                 $("#datalist").val("");
-                document.getElementById("disp-success-message").innerHTML = data;
+                document.getElementById("display-success-message").innerHTML = data;
                 $("#subcategory-sessions").hide();
                 $("#no-sessions").hide();
                 updateDropDown();
@@ -469,13 +472,78 @@ function deleteSubCategory(categoryId, subCategoryName) {
             },
             error: function (er) {
                 wrongMessageBox();
-                document.getElementById("disp-wrong-message").innerHTML = er.responseText;
+                document.getElementById("display-failure-message").innerHTML = er.responseText;
                 $("#delete-sub-category").val("");
                 scrollToTop();
             }
         }
     )
 }
+
+function updateAddPrimaryCategoryDropDown() {
+
+    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
+        {
+            type: "GET",
+            processData: false,
+            success: function (values) {
+                var categories = "";
+                console.log(values);
+                var primaryCategory = $("#primary-category").val();
+                for (var i = 0; i < values.length; i++) {
+                    console.log("........");
+                    categories += "<option value='" + values[i].categoryId + "'";
+                    if (values[i].categoryName === primaryCategory) {
+                        categories += "selected";
+                    }
+                    categories+=    ">" + values[i].categoryName + "</option>";
+                }
+                alert("categories list >>> " + categories);
+                $("#search-primary-category").html(categories);
+            }
+        }
+    )
+}
+
+function updateModifyPrimaryCategoryDropDown() {
+
+    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
+        {
+            type: "GET",
+            processData: false,
+            success: function (values) {
+
+                var modifyCategoryList = "";
+                for (var i = 0; i < values.length; i++) {
+                    modifyCategoryList += "<option id='" + values[i].categoryName.replace(' ', '') + "-modify' categoryid='" +
+                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
+                }
+                $("#categories-list-modify").html(modifyCategoryList);
+            }
+        }
+    )
+}
+
+function updateDeletePrimaryCategoryDropDown() {
+
+    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
+        {
+            type: "GET",
+            processData: false,
+            success: function (values) {
+
+                var deleteCategoryList = "";
+                for (var i = 0; i < values.length; i++) {
+                    deleteCategoryList += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' deletecategoryid='" +
+                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
+                }
+                $("#categories-list-delete").html(deleteCategoryList);
+            }
+        }
+    )
+}
+
+
 
 function updateDropDown() {
     
@@ -497,16 +565,14 @@ function updateDropDown() {
                     categoriesDelete += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' deletecategoryid='" +
                         values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
                 }
-                $("#category-drop-down").html(categories);
-                $("#categoryList").html(categoriesModify);
-                $("#category-list-delete").html(categoriesDelete);
+
                 subCategorySearchResult = [];
 
                 for (var i = 0; i < values.length; i++) {
                     for (var j = 0; j < values[i].subCategory.length; j++) {
 
-                        var elem = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
-                        subCategorySearchResult.push(elem);
+                        var option = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
+                        subCategorySearchResult.push(option);
                     }
                 }
             }

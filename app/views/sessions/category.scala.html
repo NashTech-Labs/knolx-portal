@@ -7,12 +7,12 @@
         <div id="success-message" class=" alert alert-success alert-dismissable">
             <a href="#" class="close" data-dismiss="alert" aria-label="close">
                 x</a>
-            <p id="disp-success-message"></p>
+            <p id="display-success-message"></p>
         </div>
-        <div id="wrong-message" class="alert alert-danger alert-dismissable">
+        <div id="failure-message" class="alert alert-danger alert-dismissable">
             <a href="#" class="close" data-dismiss="alert" aria-label="close">
                 x</a>
-            <p id="disp-wrong-message"></p>
+            <p id="display-failure-message"></p>
         </div>
     </div>
     <div class ="row">
@@ -55,10 +55,14 @@
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
                                 <label class="category-label">Sub-Category</label>
-                                <input list="category-drop-down" id="search-primary-category" type="text"
+                                <!--<input list="categories-list-add" id="search-primary-category" type="text"
                                 placeholder="Search/Select a category" class="input-field no-outline reg">
-                                <datalist id="category-drop-down">
-                                </datalist>
+                                <datalist id="categories-list-add">
+                                </datalist>-->
+                                <select name="category" id="search-primary-category" class="update-field login-second" type="text">
+                                    <option selected value="">! Select Category Please</option>
+                                </select>
+
                                 <div>
                                     <input type="text" id="insert-sub-category" name="subcategory"
                                     placeholder="Input a new name" class="input-field no-outline reg"
@@ -89,9 +93,9 @@
                             <div class="form-group">
                                 <label class="category-label">Category</label>
 
-                                <input list="categoryList" id="modify-primary-category" type="text"
+                                <input list="categories-list-modify" id="modify-primary-category" type="text"
                                 placeholder="Search/Select a category" class="input-field no-outline reg">
-                                <datalist id="categoryList">
+                                <datalist id="categories-list-modify">
                                 </datalist>
                                 <div>
                                     <input type="text" id="new-primary-category" name="subcategory" placeholder="Input a new name" class="input-field no-outline reg" required>
@@ -165,9 +169,9 @@
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
                                 <label class="category-label">Category</label>
-                                <input list="category-list-delete" id="delete-primary-category" class="input-field no-outline reg"
+                                <input list="categories-list-delete" id="delete-primary-category" class="input-field no-outline reg"
                                 placeholder="Search/Select a category">
-                                <datalist id="category-list-delete">
+                                <datalist id="categories-list-delete">
 
                                 </datalist>
                                 <div id="subcategory-linked-category-message">

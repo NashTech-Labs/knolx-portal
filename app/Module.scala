@@ -5,8 +5,6 @@ import java.util.function.Function
 import actors._
 import akka.actor.ActorRef
 import com.google.api.client.auth.oauth2.{Credential, StoredCredential, TokenResponse}
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -98,9 +96,13 @@ class Module(environment: Environment,
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
         .setCredentialDataStore(dataStore).build()
 
-    val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
+    val refreshToken = configuration.get[String]("youtube.refreshToken")
 
-    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("ak")
+    val response = new TokenResponse
+
+    response.setRefreshToken(refreshToken)
+
+    flow.createAndStoreCredential(response, "user")
   }
 
 }

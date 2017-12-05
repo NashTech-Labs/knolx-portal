@@ -9,9 +9,7 @@ var subCategoryOption = "";
 
 $(function () {
 
-    $('#search-primary-category').select2({
-        dropdownCssClass: "akshansh"
-    });
+    $('#search-primary-category').select2();
 
     updateDropDown();
 
@@ -29,8 +27,7 @@ $(function () {
         e.preventDefault();
     });
 
-    console.log(">>>>>>>>>>>>>>  >>>>>>");
-    $(".akshansh").click(function () {
+    $("#select2-search-primary-category-container").click(function () {
         console.log("Search primary category");
         updateAddPrimaryCategoryDropDown();
         $("#insert-sub-category").show();
@@ -237,7 +234,7 @@ function successMessageBox() {
     $("#failure-message").hide();
 }
 
-function wrongMessageBox() {
+function failureMessageBox() {
     $("#success-message").hide();
     $("#failure-message").show();
 }
@@ -265,7 +262,7 @@ function addCategory(categoryName) {
                 updateDropDown();
             },
             error: function (er) {
-                wrongMessageBox();
+                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
@@ -291,7 +288,7 @@ function addSubCategory(categoryName, subCategory) {
                 scrollToTop();
             },
             error: function (er) {
-                wrongMessageBox();
+                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
@@ -317,7 +314,7 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
                 scrollToTop();
             },
             error: function (er) {
-                wrongMessageBox();
+                failureMessageBox();
                 $("#new-primary-category").val("");
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
@@ -347,7 +344,7 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 updateDropDown();
             },
             error: function (er) {
-                wrongMessageBox();
+                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 $("#new-sub-category").val("");
                 scrollToTop();
@@ -376,7 +373,7 @@ function deletePrimaryCategory(categoryId) {
                 scrollToTop();
             },
             error: function (er) {
-                wrongMessageBox();
+                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 scrollToTop();
             }
@@ -471,7 +468,7 @@ function deleteSubCategory(categoryId, subCategoryName) {
                 scrollToTop();
             },
             error: function (er) {
-                wrongMessageBox();
+                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 $("#delete-sub-category").val("");
                 scrollToTop();

@@ -268,6 +268,22 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       result.ok must beEqualTo(true)
     }
+
+    "get temporary video URL for a session" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "subCategory", "feedbackFormId", "topic2",
+        1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), Some("youtube/embed/URL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val insertTemporaryUrl = await(sessionsRepository.storeTemporaryVideoURL(sessionId.stringify, "youtube/embed/URL"))
+      insertTemporaryUrl.ok must beEqualTo(true)
+
+      val result: List[String] = await(sessionsRepository.getTemporaryVideoURL(sessionId.stringify))
+
+      result.head must beEqualTo("youtube/embed/URL")
+    }
   }
 
 }

@@ -29,7 +29,7 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
       controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
       controllers.routes.javascript.KnolxAnalysisController.renderLineChart,
-      controllers.routes.javascript.FeedbackFormsReportController.renderAllFeedbackReportsJson,
+      controllers.routes.javascript.FeedbackFormsReportController.manageAllFeedbackReports,
       controllers.routes.javascript.FeedbackFormsReportController.fetchAllResponsesBySessionId
     )).as("text/javascript")
   }

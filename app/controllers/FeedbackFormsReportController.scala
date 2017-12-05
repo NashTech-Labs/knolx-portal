@@ -58,8 +58,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
       Future.successful(Ok(views.html.reports.allreports()))
   }
 
-  def renderAllFeedbackReportsJson(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
-    Logger.error("------->>>")
+  def manageAllFeedbackReports(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
     val sessionTillNow = sessionsRepository.userSessionsTillNow(None, pageNumber)
     generateReport(sessionTillNow).flatMap { reportInfo =>
       sessionsRepository

@@ -54,7 +54,7 @@ GET         /jsRoutes                               controllers.JavascriptRouter
 GET         /reports/user                           controllers.FeedbackFormsReportController.renderUserFeedbackReports
 GET         /reports/user/responses                 controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
 GET         /reports/manage                         controllers.FeedbackFormsReportController.renderAllFeedbackReports
-POST        /reports/json/:pageNumber                           controllers.FeedbackFormsReportController.renderAllFeedbackReportsJson(pageNumber: Int)
+POST        /reports/json/:pageNumber               controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
 GET         /reports/manage/responses               controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
 GET         /reports/manage/response                controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
 # Map static resources from the /public folder to the /assets URL path

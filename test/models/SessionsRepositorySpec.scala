@@ -133,13 +133,13 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get users session till now for a particular user" in new TestScope {
-      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com")))
+      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com"), 1))
 
       response contains sessionInfo
     }
 
     "get users session till now for all users" in new TestScope {
-      val response = await(sessionsRepository.userSessionsTillNow(None))
+      val response = await(sessionsRepository.userSessionsTillNow(None, 1))
 
       response contains sessionInfo
     }

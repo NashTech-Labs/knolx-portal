@@ -1,9 +1,9 @@
 $(function () {
-    ko.applyBindings(new myViewModel(1));
+    ko.applyBindings(new AllReportsModel(1));
 
 });
 
-function myViewModel(pageNumber) {
+function AllReportsModel(pageNumber) {
     var self = this;
     self.feedbackHeaders = ko.observableArray([]);
 

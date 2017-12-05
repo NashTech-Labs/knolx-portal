@@ -59,7 +59,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
     val sessionTillNow = sessionsRepository.userSessionsTillNow(None, pageNumber)
     generateReport(sessionTillNow).flatMap { reportInfo =>
       sessionsRepository
-        .activeCount(None)
+        .activeUncancelledCount(None)
         .map { count =>
           val pages = Math.ceil(count.toDouble / 8).toInt
           Ok(Json.toJson(ReportResult(reportInfo, pageNumber, pages)))
@@ -71,7 +71,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
     val sessionTillNow = sessionsRepository.userSessionsTillNow(Some(request.user.email), pageNumber)
     generateReport(sessionTillNow).flatMap { reportInfo =>
       sessionsRepository
-        .activeCount(Some(request.user.email))
+        .activeUncancelledCount(Some(request.user.email))
         .map { count =>
           val pages = Math.ceil(count.toDouble / 8).toInt
           Ok(Json.toJson(ReportResult(reportInfo, pageNumber, pages)))

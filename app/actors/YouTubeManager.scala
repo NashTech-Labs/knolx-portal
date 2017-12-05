@@ -48,24 +48,26 @@ class YouTubeManager @Inject()(
     case request: YouTubeUploader.Upload                 =>
       Logger.info(s"Forwarding request to upload video to one of the YouTubeUploader for session ${request.sessionId}")
       youtubeUploader.route(request, sender())
-    case Terminated(uploader)                            =>
-      Logger.info(s"Removing YouTubeUploader $uploader")
-      youtubeUploader = youtubeUploader.removeRoutee(uploader)
-      val newUploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
-      context watch newUploader
-      youtubeUploader = youtubeUploader.addRoutee(newUploader)
+    case Terminated(routee)                              =>
+      if (routee.path.name.contains("YouTubeUploader")) {
+        Logger.info(s"Removing YouTubeUploader $routee")
+        youtubeUploader = youtubeUploader.removeRoutee(routee)
+        val newUploader = injectedChild(configuredYouTubeUploader(), s"YouTubeUploader-${UUID.randomUUID}")
+        context watch newUploader
+        youtubeUploader = youtubeUploader.addRoutee(newUploader)
+      } else {
+        Logger.info(s"Removing YouTubeDetailsActor $youtubeDetailsRoutee")
+        youtubeDetailsRoutee = youtubeDetailsRoutee.removeRoutee(routee)
+        val newYoutubeDetailsRoutee = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
+        context watch newYoutubeDetailsRoutee
+        youtubeDetailsRoutee = youtubeDetailsRoutee.addRoutee(newYoutubeDetailsRoutee)
+      }
     case request: YouTubeDetailsActor.UpdateVideoDetails =>
       youtubeDetailsRoutee.route(request, sender())
     case YouTubeDetailsActor.GetCategories               =>
       youtubeDetailsRoutee.route(YouTubeDetailsActor.GetCategories, sender())
     case request: YouTubeDetailsActor.GetDetails         =>
       youtubeDetailsRoutee.route(request, sender())
-    case Terminated(detailsRoutee)                       =>
-      Logger.info(s"Removing YouTubeDetailsActor $youtubeDetailsRoutee")
-      youtubeDetailsRoutee = youtubeDetailsRoutee.removeRoutee(detailsRoutee)
-      val newYoutubeDetailsRoutee = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      context watch newYoutubeDetailsRoutee
-      youtubeDetailsRoutee = youtubeDetailsRoutee.addRoutee(newYoutubeDetailsRoutee)
     case msg                                             =>
       Logger.info(s"Received a message in YouTubeManager that cannot be handled $msg")
   }

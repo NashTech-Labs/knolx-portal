@@ -114,4 +114,15 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
       })
   }
 
+  def leaderBoard = action.async { implicit request =>
+    sessionsRepository.sessions.map{ totalSessions =>
+      val userWithSession: Map[String, List[SessionInfo]] = totalSessions.groupBy(_.email)
+      userWithSession.values.map{ averageScore =>
+        val userAverageScore: Map[String, Double] = averageScore.map(_.score).sum.toDouble / averageScore.length
+
+      }
+    }
+
+  }
+
 }

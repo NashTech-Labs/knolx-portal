@@ -19,12 +19,12 @@ class ErrorHandler extends HttpErrorHandler {
 
     statusCode match {
 
-      case NOT_FOUND                     => Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("error" -> "Page not found!"))
-      case BAD_REQUEST                   => Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("error" -> "Bad request!"))
-      case FORBIDDEN                     => Future.successful(Redirect(routes.SessionsController.sessions(1, None)).flashing("error" -> "Request forbidden!"))
-      case PROXY_AUTHENTICATION_REQUIRED => Future.successful(Redirect(routes.SessionsController.sessions(1, None))
+      case NOT_FOUND                     => Future.successful(Redirect(routes.SessionsController.sessions()).flashing("error" -> "Page not found!"))
+      case BAD_REQUEST                   => Future.successful(Redirect(routes.SessionsController.sessions()).flashing("error" -> "Bad request!"))
+      case FORBIDDEN                     => Future.successful(Redirect(routes.SessionsController.sessions()).flashing("error" -> "Request forbidden!"))
+      case PROXY_AUTHENTICATION_REQUIRED => Future.successful(Redirect(routes.SessionsController.sessions())
         .flashing("error" -> "Proxy authentication required!"))
-      case _                             => Future.successful(Redirect(routes.SessionsController.sessions(1, None))
+      case _                             => Future.successful(Redirect(routes.SessionsController.sessions())
         .flashing("error" -> "Something went wrong!"))
     }
   }
@@ -32,7 +32,7 @@ class ErrorHandler extends HttpErrorHandler {
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
 
     Future.successful(
-      Redirect(routes.SessionsController.sessions(1, None)).flashing("error" -> "Internal server error!")
+      Redirect(routes.SessionsController.sessions()).flashing("error" -> "Internal server error!")
     )
   }
 

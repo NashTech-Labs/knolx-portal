@@ -25,14 +25,13 @@ i, span {
     position: fixed;
     top: 0;
     left: 0;
-    max-height: 95%;
-    min-height: 95%;
+    max-height: calc(100% - 51px);
+    min-height: calc(100% - 51px);
     z-index: 999;
     background: #2f4050;
     color: #fff;
     transition: width 0.5s ease-in-out;
-    overflow-x: hidden !important;
-    overflow-y:scroll  ;
+    overflow-y: auto;
 }
 
 #sidebar.active {
@@ -54,7 +53,6 @@ i, span {
 
 #sidebar.active ul li a i {
     margin-right:  0;
-    display: block;
     font-size: 1.1em;
     margin-bottom: 5px;
 }
@@ -159,19 +157,20 @@ display: block;
     text-align: center;
     padding: 20px 0;
     position: relative;
+    margin-bottom: 30px;
 }
 
 #sidebarCollapse > [class*="fa fa-"] {
-        display: inline-block;
-        cursor: pointer;
-        font-size: 15px;
-        color: white;
-        border: 1px solid #1ab394;
-        padding: 0 5px;
-        line-height: 18px;
-        border-radius: 16px;
-        background-color: #1ab394;
-        position: relative;
+    width: 18px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 15px;
+    color: white;
+    border: 1px solid #1ab394;
+    line-height: 18px;
+    border-radius: 50%;
+    background-color: #1ab394;
+    position: relative;
 }
 
 #sidebarCollapse:before {
@@ -240,7 +239,7 @@ html,body{
     background-color:#eeeeee;
     width: calc(100% - 180px);
     padding-top:0;
-    min-height: 100vh;
+    min-height: calc(100% - 51px);
     position: absolute;
     top: 0;
     right: 0;
@@ -321,4 +320,26 @@ html,body{
 
 .navbar-collapse {
     overflow-x: hidden !important;
+}
+
+#sidebar i {
+ width:14px;
+}
+
+
+.scrollbar {
+    float: left;
+    overflow-y: scroll;
+    margin-bottom: 25px;
+}
+
+.scrollbar-primary::-webkit-scrollbar {
+    width: 5px;
+    background: #2f4050;
+}
+
+.scrollbar-primary::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+    background-color: #4285F4;
 }

@@ -147,7 +147,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns Future(List(("2017-08", 5)))
+      sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns Future(List(("2017-July", 4)))
 
       val result = controller.renderLineChart(
         FakeRequest(POST, "/knolx/analysis/piechart")

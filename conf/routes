@@ -4,23 +4,23 @@
 GET         /                                                     controllers.HomeController.index
 
 # User
-GET         /login                                                controllers.UsersController.login
-POST        /login                                                controllers.UsersController.loginUser
-GET         /logout                                               controllers.UsersController.logout
-GET         /register                                             controllers.UsersController.register
-POST        /register                                             controllers.UsersController.createUser
-GET         /users/manage/:pageNumber                             controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
-POST        /users/search                                         controllers.UsersController.searchUser
-GET         /user/update                                          controllers.UsersController.getByEmail(email: String)
-POST        /user/update                                          controllers.UsersController.updateUser
-POST        /user/manage/update                                   controllers.UsersController.updateUserBySuperUser
-GET         /user/delete                                          controllers.UsersController.deleteUser(email: String)
-GET         /user/forgotpassword                                  controllers.UsersController.renderForgotPassword
-POST        /user/forgotpassword                                  controllers.UsersController.generateForgotPasswordToken
-GET         /user/forgotpassword/validate                         controllers.UsersController.validateForgotPasswordToken(token: String)
-POST        /user/forgotpassword/reset                            controllers.UsersController.resetPassword
-GET         /user/changepassword                                  controllers.UsersController.renderChangePassword
-POST        /user/changepassword                                  controllers.UsersController.changePassword
+GET         /login                                  controllers.UsersController.login
+POST        /login                                  controllers.UsersController.loginUser
+GET         /logout                                 controllers.UsersController.logout
+GET         /register                               controllers.UsersController.register
+POST        /register                               controllers.UsersController.createUser
+GET         /users/manage                           controllers.UsersController.manageUser()
+POST        /users/search                           controllers.UsersController.searchUser
+GET         /user/update                            controllers.UsersController.getByEmail(email: String)
+POST        /user/update                            controllers.UsersController.updateUser
+POST        /user/manage/update                     controllers.UsersController.updateUserBySuperUser
+GET         /user/delete                            controllers.UsersController.deleteUser(email: String)
+GET         /user/forgotpassword                    controllers.UsersController.renderForgotPassword
+POST        /user/forgotpassword                    controllers.UsersController.generateForgotPasswordToken
+GET         /user/forgotpassword/validate           controllers.UsersController.validateForgotPasswordToken(token: String)
+POST        /user/forgotpassword/reset              controllers.UsersController.resetPassword
+GET         /user/changepassword                    controllers.UsersController.renderChangePassword
+POST        /user/changepassword                    controllers.UsersController.changePassword
 
 # Upload
 POST        /youtube/:sessionId/upload                            controllers.YoutubeController.upload(sessionId: String)
@@ -32,7 +32,7 @@ GET         /youtube/:sessionId/cancel                            controllers.Yo
 # Session
 GET         /session                                              controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
 POST        /session/search                                       controllers.SessionsController.searchSessions
-GET         /session/manage/:pageNumber                           controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+GET         /session/manage                           controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
 POST        /session/manage/search                                controllers.SessionsController.searchManageSession
 GET         /session/create                                       controllers.SessionsController.create
 POST        /session/create                                       controllers.SessionsController.createSession

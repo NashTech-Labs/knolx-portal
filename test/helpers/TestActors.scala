@@ -9,6 +9,10 @@ import com.google.api.services.youtube.model.{Video, VideoCategory, VideoCategor
 import org.apache.commons.mail.EmailException
 import play.api.Logger
 
+case class AddSessionUploader(sessionId: String)
+
+case class RemoveSessionUploader(sessionId: String)
+
 class DummySessionsScheduler extends Actor {
 
   def receive: Receive = {
@@ -38,11 +42,15 @@ class TestEmailActor extends Actor {
 
 class DummyYouTubeProgressManager extends Actor {
 
+  var sessionUploaders: Map[String, Double] = Map.empty
+
   override def receive: Receive = {
-    case YouTubeProgressManager.VideoId(sessionId)               =>
+    case YouTubeProgressManager.VideoId(sessionId)       =>
       Logger.info("Getting from sessionVideos")
       sender() ! Some(new Video)
-    case YouTubeProgressManager.VideoUploader(sessionId: String) => sender() ! Some(50D)
+    case AddSessionUploader(sessionId)                   => sessionUploaders += sessionId -> 50D
+    case RemoveSessionUploader(sessionId)                => sessionUploaders -= sessionId
+    case YouTubeProgressManager.VideoUploader(sessionId) => sender() ! sessionUploaders.get(sessionId)
   }
 
 }
@@ -51,7 +59,7 @@ class DummyYouTubeUploader extends Actor {
 
   override def receive: Receive = {
     case request: YouTubeUploader.Upload => sender() ! request
-    case _                               => sender() ! "This shoud not print in DummyYouTubeUploader"
+    case _                               => sender() ! "This should not print in DummyYouTubeUploader"
   }
 
 }

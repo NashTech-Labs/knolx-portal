@@ -2,7 +2,7 @@ package controllers
 
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Names
-import helpers.TestEnvironment
+import helpers.{AddSessionUploader, RemoveSessionUploader, TestEnvironment}
 import models.SessionsRepository
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
@@ -90,7 +90,11 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     }
 
     "return Ok when asked for percentage of file" in new WithTestApplication {
+      youtubeProgressManager ! AddSessionUploader(sessionId)
+
       val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/youtube/sessionId/progress"))
+
+      youtubeProgressManager ! RemoveSessionUploader(sessionId)
 
       status(result) must be equalTo 200
     }
@@ -160,9 +164,19 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     }
 
     "return ok if a video upload is currently going on" in new WithTestApplication {
+      youtubeProgressManager ! AddSessionUploader(sessionId)
+
       val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/youtube/sessionId/checkIfUploading"))
 
+      youtubeProgressManager ! RemoveSessionUploader(sessionId)
+
       status(result) must be equalTo 200
+    }
+
+    "return bad request if a video upload is not currently going on" in new WithTestApplication {
+      val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/youtube/sessionId/checkIfUploading"))
+
+      status(result) must be equalTo 400
     }
 
   }

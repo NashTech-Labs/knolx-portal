@@ -30,6 +30,7 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.YoutubeController.cancel,
       controllers.routes.javascript.YoutubeController.getVideoId,
       controllers.routes.javascript.YoutubeController.updateVideo,
+      controllers.routes.javascript.YoutubeController.checkIfUploading,
       controllers.routes.javascript.SessionsController.getCategory,
       controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
       controllers.routes.javascript.KnolxAnalysisController.renderPieChart,

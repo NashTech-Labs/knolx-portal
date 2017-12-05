@@ -154,7 +154,13 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
 
-      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/:sessionId/update").withBody(jsonBody))
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/sessionId/update").withBody(jsonBody))
+
+      status(result) must be equalTo 200
+    }
+
+    "return ok if a video upload is currently going on" in new WithTestApplication {
+      val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/youtube/sessionId/checkIfUploading"))
 
       status(result) must be equalTo 200
     }

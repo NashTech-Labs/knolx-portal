@@ -53,7 +53,7 @@ $(function () {
     $("#upload-success-message").hide();
     $("#cancel-video-button").hide();
 
-    jsRoutes.controllers.YoutubeController.getPercentageUploaded(sessionId).ajax(
+    jsRoutes.controllers.YoutubeController.checkIfUploading(sessionId).ajax(
         {
             type: 'GET',
             processData: false,
@@ -138,7 +138,7 @@ function showProgress(sessionId) {
                 }
             },
             error: function(er) {
-                console.log("showProgress failed with error = " + er);
+                console.log("showProgress failed with error = " + er.responseText);
             }
         });
 }

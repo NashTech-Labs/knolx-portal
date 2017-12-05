@@ -54,12 +54,6 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         val categoryId = request.headers.get("category").getOrElse("27")
         val status = request.headers.get("status").getOrElse("private")
 
-        Logger.info(s"title of video = $title")
-        Logger.info(s"description of video = $description")
-        Logger.info(s"tags of video = $tags")
-        Logger.info(s"category of video = $categoryId")
-        Logger.info(s"status of video = $status")
-
         youtubeManager ! YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), title, Some(description), tags, categoryId, status, fileSize)
 
         Future.successful(Ok("Uploading has started"))
@@ -71,9 +65,9 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
     (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
       .map { maybePercentage =>
         maybePercentage.fold {
-          BadRequest("No video is being uploaded for the given session")
+          Ok(Json.toJson(0D))
         } { percentage =>
-          Ok(Json.toJson(percentage).toString)
+          Ok(Json.toJson(percentage))
         }
       }
   }
@@ -120,5 +114,16 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         }
       }
     )
+  }
+
+  def checkIfUploading(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+    (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
+      .map { maybePercentage =>
+        maybePercentage.fold {
+          BadRequest("No video is being uploaded for the given session")
+        } { _ =>
+          Ok("Video is currently being uploaded")
+        }
+      }
   }
 }

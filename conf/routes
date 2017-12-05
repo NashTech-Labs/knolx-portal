@@ -28,6 +28,7 @@ GET         /youtube/:sessionId/videoid                           controllers.Yo
 GET         /youtube/:sessionId/progress                          controllers.YoutubeController.getPercentageUploaded(sessionId: String)
 POST        /youtube/:sessionId/update                            controllers.YoutubeController.updateVideo(sessionId)
 GET         /youtube/:sessionId/cancel                            controllers.YoutubeController.cancel(sessionId: String)
+GET         /youtube/:sessionId/checkIfUploading                  controllers.YoutubeController.checkIfUploading(sessionId: String)
 
 # Session
 GET         /session                                              controllers.SessionsController.sessions

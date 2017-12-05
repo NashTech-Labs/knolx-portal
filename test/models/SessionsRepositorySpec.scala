@@ -229,6 +229,45 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       result must beEqualTo(List(("2017-07", 4)))
     }
+
+    "get video URL for a session" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "subCategory", "feedbackFormId", "topic2",
+        1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), Some("youtube/embed/URL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val result: List[String] = await(sessionsRepository.getVideoURL(sessionId.stringify))
+
+      result.head must beEqualTo("youtube/embed/URL")
+    }
+
+    "update video URL for a session" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "subCategory", "feedbackFormId", "topic2",
+        1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), Some("youtube/embed/URL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val result = await(sessionsRepository.updateVideoURL(sessionId.stringify, "youtube/embed/URL"))
+
+      result.ok must beEqualTo(true)
+    }
+
+    "store temporary video URL for a session" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "subCategory", "feedbackFormId", "topic2",
+        1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000), Some("youtube/embed/URL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val result = await(sessionsRepository.storeTemporaryVideoURL(sessionId.stringify, "youtube/embed/URL"))
+
+      result.ok must beEqualTo(true)
+    }
   }
 
 }

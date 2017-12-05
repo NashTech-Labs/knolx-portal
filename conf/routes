@@ -29,6 +29,7 @@ GET         /youtube/:sessionId/progress                          controllers.Yo
 POST        /youtube/:sessionId/update                            controllers.YoutubeController.updateVideo(sessionId)
 GET         /youtube/:sessionId/cancel                            controllers.YoutubeController.cancel(sessionId: String)
 GET         /youtube/:sessionId/checkIfUploading                  controllers.YoutubeController.checkIfUploading(sessionId: String)
+GET         /youtube/:sessionId/checkIfTemporaryUrlExists         controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
 
 # Session
 GET         /session                                              controllers.SessionsController.sessions

@@ -119,6 +119,13 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       status(result) must be equalTo 400
     }
 
+    "return bad request while getting video ID of a session when videoID is an empty string" in new WithTestApplication {
+      sessionsRepository.getTemporaryVideoURL(sessionId) returns Future.successful(List(""))
+      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid"))
+
+      status(result) must be equalTo 400
+    }
+
     "return bad request for wrong json" in new WithTestApplication {
       private val wrongJson = Json.parse("""{"title":"title"} """)
 

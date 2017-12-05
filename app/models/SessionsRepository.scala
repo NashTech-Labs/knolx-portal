@@ -192,7 +192,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "expirationDate" -> updatedRecord.expirationDate,
         "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
         "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL,
-        "cancelled" -> updatedRecord.sessionUpdateFormData.cancelled)
+        "cancelled" -> updatedRecord.sessionUpdateFormData.cancelled,
+        "temporaryVideoURL" -> "")
     )
 
     collection.flatMap(jsonCollection =>
@@ -386,12 +387,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
   def storeTemporaryVideoURL(sessionId: String, temporaryVideoURL: String): Future[UpdateWriteResult] = {
-    Logger.info("Inside storeTemporaryVideoURL")
-    Logger.info(s"Session ID = $sessionId")
+    Logger.info(s"Storing video URL = $temporaryVideoURL and Session ID = $sessionId")
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val modifier = BSONDocument("$set" -> BSONDocument("temporaryVideoURL" -> temporaryVideoURL))
-
-    Logger.info("Storing temporary video URL")
 
     collection
       .flatMap(_.update(selector, modifier))

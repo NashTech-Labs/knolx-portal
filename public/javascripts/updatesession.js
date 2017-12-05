@@ -14,6 +14,7 @@ window.onbeforeunload = function() {
 
 $(function () {
     var sessionId = $('input[name^="sessionId"]').val();
+    checkIfTemporaryUrlExists(sessionId);
 
     var youtubeDropzone = new Dropzone("#youtubeVideo", {
         url: "/youtube/" + sessionId + "/upload",
@@ -179,11 +180,12 @@ function getUpdateURL(sessionId) {
             processData: false,
             contentType: false,
             success: function(data) {
+                console.log("data =>" + data)
                 newVideoURL = data;
                 $("#attach-video").show();
             },
             error: function(er) {
-                console.log("An error was encountered = " + er);
+                getUpdateURL(sessionId);
             }
         });
 }
@@ -225,6 +227,23 @@ function update(sessionId) {
             },
             error: function(er) {
                 $("#unsuccessful-update").show();
+            }
+        });
+}
+
+function checkIfTemporaryUrlExists(sessionId) {
+    jsRoutes.controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId).ajax(
+        {
+            type: 'GET',
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                console.log("data =>" + data)
+                newVideoURL = data;
+                $("#attach-video").show();
+            },
+            error: function(er) {
+                console.log("Bad request received with message =>" + er.responseText);
             }
         });
 }

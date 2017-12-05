@@ -100,7 +100,7 @@ class Module(environment: Environment,
 
     val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
 
-    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("ak")
   }
 
 }

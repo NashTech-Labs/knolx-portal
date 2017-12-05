@@ -84,8 +84,12 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       maybeVideoURL.fold {
         BadRequest("No new video URL found")
       } { videoURL =>
-        val videoId = videoURL.split("/")(2)
-        Ok(videoId)
+        if (videoURL.trim.isEmpty) {
+          BadRequest("No new video URL found")
+        } else {
+          val videoId = videoURL.split("/")(2)
+          Ok(videoId)
+        }
       }
     }
   }
@@ -125,5 +129,21 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
           Ok("Video is currently being uploaded")
         }
       }
+  }
+
+  def checkIfTemporaryUrlExists(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+    sessionsRepository.getTemporaryVideoURL(sessionId).map { listOfURL =>
+      val maybeVideoURL = listOfURL.headOption
+      maybeVideoURL.fold {
+        BadRequest("No new video URL found")
+      } { videoURL =>
+        if (videoURL.trim.isEmpty) {
+          BadRequest("No new video URL found")
+        } else {
+          val videoId = videoURL.split("/")(2)
+          Ok(videoId)
+        }
+      }
+    }
   }
 }

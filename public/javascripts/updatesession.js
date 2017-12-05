@@ -28,7 +28,6 @@ $(function () {
 
     youtubeDropzone.on("sending", function(file, xhr, formData) {
         redirect = false;
-        console.log("File size = " + file.size);
         xhr.setRequestHeader("filesize", file.size);
         xhr.setRequestHeader("title", $("#youtube-title").val());
         xhr.setRequestHeader("description", $("#youtube-description").val());
@@ -41,11 +40,9 @@ $(function () {
         redirect = true;
         uploading = true;
         $("#cancel-message").hide();
-        console.log("File uploading completed");
     });
 
     youtubeDropzone.on("success", function(file, response) {
-        console.log("Showing progress now");
         $("#show-progress").show();
         $("#cancel-video-button").show();
         cancel = false;
@@ -53,7 +50,6 @@ $(function () {
         showProgress(sessionId);
     });
 
-    console.log("sessionId = " + sessionId);
     $("#upload-success-message").hide();
     $("#cancel-video-button").hide();
 
@@ -63,7 +59,6 @@ $(function () {
             processData: false,
             contentType: false,
             success: function (data) {
-            console.log("Coming here");
                 $("#upload-success-message").hide();
                 $("#already-upload").hide();
                 $("#no-upload-cancel").hide();
@@ -136,7 +131,6 @@ function showProgress(sessionId) {
                         getUpdateURL(sessionId);
                     } else {
                     var percentageUploaded = data;
-                    console.log("percentageUploaded = " + percentageUploaded);
                     $("#progress").width(percentageUploaded + '%');
                     $("#progress").text(Math.ceil(percentageUploaded) * 1  + '%');
                     showProgress(sessionId);
@@ -179,7 +173,6 @@ function cancelVideo(sessionId) {
 }
 
 function getUpdateURL(sessionId) {
-    console.log("Coming inside the function of getUpdateURL");
     jsRoutes.controllers.YoutubeController.getVideoId(sessionId).ajax(
         {
             type: 'GET',
@@ -187,7 +180,6 @@ function getUpdateURL(sessionId) {
             contentType: false,
             success: function(data) {
                 newVideoURL = data;
-                console.log("Setting embedded URL for youtube");
                 $("#attach-video").show();
             },
             error: function(er) {
@@ -230,16 +222,9 @@ function update(sessionId) {
             },
             success: function (data) {
                 $("#successful-update").show();
-                console.log("Successfully Completed & data received was = " + data);
             },
             error: function(er) {
                 $("#unsuccessful-update").show();
-                console.log("Error occurred: " + er);
             }
         });
-
-    console.log("title = " + title);
-    console.log("description = " + description);
-    console.log("tags = " + tags);
-    console.log("status = " + status);
 }

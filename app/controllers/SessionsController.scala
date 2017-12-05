@@ -432,20 +432,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def storeVideoURL(sessionId: String, youtubeURL: String): Action[AnyContent] = action.async { implicit request =>
-    Logger.info(s"Updating video URL for session $sessionId")
-
-    sessionsRepository
-      .updateVideoURL(sessionId, youtubeURL)
-      .map { result =>
-        if (result.ok) {
-          Ok("Video stored successfully!")
-        } else {
-          BadRequest("Something went wrong while storing the video")
-        }
-      }
-  }
-
   def getCategory: Action[AnyContent] = action.async { implicit request =>
     categoriesRepository.getCategories.map { categories =>
       val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category.categoryName, category.subCategory))

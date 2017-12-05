@@ -43,7 +43,6 @@ GET         /session/:sessionId/cancel                            controllers.Se
 GET         /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
 GET         /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
 GET         /session/categories                                   controllers.SessionsController.getCategory
-GET         /session/:sessionId/:videoURL/updateyoutubeurl        controllers.SessionsController.storeVideoURL(sessionId: String, videoURL: String)
 
 # Feedback
 GET         /feedbackform/manage/:pageNumber                      controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)

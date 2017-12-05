@@ -93,12 +93,6 @@ $(function () {
         update(sessionId);
     });
 
-    /*if($("#youtubeURL").val() != '') {
-        $("#update-youtube-details").show();
-    } else {
-        $("#update-youtube-details").hide();
-    }*/
-
     $(".bootstrap-tagsinput").addClass('update-field');
 
     $(".bootstrap-tagsinput input").keypress(function (event) {
@@ -117,35 +111,6 @@ $(function () {
     });
 
 });
-
-/*function uploadVideo(sessionId) {
-    console.log("Inside uploadVideo function")
-    var formData = new FormData();
-    var fileSize = 0;
-    jQuery.each($('input[name^="file"]')[0].files, function(i, file) {
-        fileSize = file.size;
-        console.log("File size = " + fileSize);
-        formData.append("file", file);
-    });
-    console.log("Calling ajax now")
-    jsRoutes.controllers.YoutubeController.upload(sessionId, fileSize).ajax(
-        {
-            type: 'POST',
-            processData: false,
-            contentType: false,
-            data: formData,
-            success: function(data) {
-                console.log("data in uploadVideo function  = " + data);
-                $("#cancel-message").hide();
-                $("#show-progress").show();
-                showProgress(sessionId);
-            },
-            error: function(er) {
-                $("#cancel-message").hide();
-                $("#upload-failure-message").show();
-            }
-        });
-}*/
 
 function showProgress(sessionId) {
     jsRoutes.controllers.YoutubeController.getPercentageUploaded(sessionId).ajax(
@@ -169,7 +134,6 @@ function showProgress(sessionId) {
                         $("#youtube-dropzone").show();
                         $("#cancel-video-button").hide();
                         getUpdateURL(sessionId);
-                        /*$("#update-youtube-details").show();*/
                     } else {
                     var percentageUploaded = data;
                     console.log("percentageUploaded = " + percentageUploaded);
@@ -224,12 +188,7 @@ function getUpdateURL(sessionId) {
             success: function(data) {
                 newVideoURL = data;
                 console.log("Setting embedded URL for youtube");
-                /*$("#youtubeURL").val("www.youtube.com/embed/" + videoId);
-                $("#videoId").val(videoId);
-                $("#update-youtube-details").show();
-                $("#youtube-dropzone").show();*/
                 $("#attach-video").show();
-                //storeVideoURL(sessionId);
             },
             error: function(er) {
                 console.log("An error was encountered = " + er);
@@ -242,22 +201,6 @@ function getUrl(file) {
     var url = "/youtube/" + sessionId + "/" + fileSize + "/upload";
     return url;
 }
-
-/*function storeVideoURL(sessionId) {
-    var youtubeURL = $("#youtubeURL").val();
-    jsRoutes.controllers.SessionsController.storeVideoURL(sessionId, youtubeURL).ajax(
-        {
-            type: 'GET',
-            processData: false,
-            contentType: false,
-            success: function(data) {
-                console.log(data);
-            },
-            error: function(er) {
-                console.log("Error occurred = " + er);
-            }
-        })
-}*/
 
 function update(sessionId) {
     var title = $("#youtube-title").val();

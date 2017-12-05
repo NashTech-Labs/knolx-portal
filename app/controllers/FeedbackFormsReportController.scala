@@ -25,6 +25,8 @@ case class FeedbackReportHeader(sessionId: String,
                                 rating: String,
                                 expired: Boolean)
 
+case class ReportResult(feedbackReportHeaderList: List[FeedbackReportHeader], pageNumber: Int, pages: Int)
+
 case class UserFeedbackResponse(email: String, coreMember: Boolean, questionResponse: List[QuestionResponse])
 
 case class FeedbackReport(reportHeader: Option[FeedbackReportHeader], response: List[UserFeedbackResponse])
@@ -43,6 +45,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   implicit val userFeedbackReportFormat: OFormat[UserFeedbackResponse] = Json.format[UserFeedbackResponse]
   implicit val feedbackReportHeaderFormat: OFormat[FeedbackReportHeader] = Json.format[FeedbackReportHeader]
   implicit val feedbackReportFormat: OFormat[FeedbackReport] = Json.format[FeedbackReport]
+  implicit val reportResult: OFormat[ReportResult] = Json.format[ReportResult]
 
   def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
     val sessionTillNow = sessionsRepository.userSessionsTillNow(Some(request.user.email), 1)
@@ -52,15 +55,24 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   }
 
   def renderAllFeedbackReports: Action[AnyContent] = adminAction.async { implicit request =>
-    val sessionTillNow = sessionsRepository.userSessionsTillNow(None, 1)
-    generateReport(sessionTillNow).map { reportInfo =>
-      Ok(views.html.reports.allreports(reportInfo))
+      Future.successful(Ok(views.html.reports.allreports()))
+  }
+
+  def renderAllFeedbackReportsJson(pageNumber: Int): Action[AnyContent] = adminAction.async { implicit request =>
+    Logger.error("------->>>")
+    val sessionTillNow = sessionsRepository.userSessionsTillNow(None, pageNumber)
+    generateReport(sessionTillNow).flatMap { reportInfo =>
+      sessionsRepository
+        .activeCount(None)
+        .map { count =>
+          val pages = Math.ceil(count.toDouble / 8).toInt
+          Ok(Json.toJson(ReportResult(reportInfo, pageNumber, pages)))
+        }
     }
   }
 
   private def generateReport(sessionsTillNow: Future[List[SessionInfo]]): Future[List[FeedbackReportHeader]] = {
     sessionsTillNow map { allUserSessionsTillNow =>
-      Logger.error("----->" + allUserSessionsTillNow.length)
         allUserSessionsTillNow map { session =>
           val active = dateTimeUtility.nowMillis < session.expirationDate.value
           generateSessionReportHeader(session, active)

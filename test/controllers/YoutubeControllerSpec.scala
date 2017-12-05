@@ -1,28 +1,20 @@
 package controllers
 
-import actors.{ConfiguredEmailActor, EmailManager}
 import akka.actor.{ActorRef, ActorSystem}
-import akka.stream.{ActorMaterializer, Materializer}
-import com.google.inject.AbstractModule
 import com.google.inject.name.Names
-import com.typesafe.config.ConfigFactory
-import helpers.{TestApplication, TestEmailActor, TestEnvironment, TestHelpers}
-import models.{ForgotPasswordRepository, SessionsRepository, UsersRepository}
-import org.specs2.execute.{AsResult, Result}
+import helpers.TestEnvironment
+import models.SessionsRepository
 import org.specs2.mock.Mockito
-import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.{Application, Configuration}
+import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.Files
 import play.api.libs.Files.TemporaryFile
-import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.json.Json
 import play.api.mvc.MultipartFormData.{BadPart, FilePart}
 import play.api.mvc.{MultipartFormData, Results}
 import play.api.test._
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -110,9 +102,17 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     }
 
     "get the video ID of a session" in new WithTestApplication {
+      sessionsRepository.getTemporaryVideoURL(sessionId) returns Future.successful(List("youtube/video/url"))
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid"))
 
       status(result) must be equalTo 200
+    }
+
+    "return bad request while getting video ID of a session when videoID is not found" in new WithTestApplication {
+      sessionsRepository.getTemporaryVideoURL(sessionId) returns Future.successful(List())
+      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid"))
+
+      status(result) must be equalTo 400
     }
 
     "return bad request for wrong json" in new WithTestApplication {

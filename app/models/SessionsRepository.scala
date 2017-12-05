@@ -5,6 +5,7 @@ import javax.inject.Inject
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
 import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats._
+import play.api.Logger
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
@@ -38,6 +39,7 @@ case class SessionInfo(userId: String,
                        expirationDate: BSONDateTime,
                        youtubeURL: Option[String],
                        slideShareURL: Option[String],
+                       temporaryYoutubeURL: Option[String] = None,
                        reminder: Boolean = false,
                        notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate
@@ -383,5 +385,30 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
               .filter { case (date, _) => date != "" }
           }
       }
+  }
+
+  def storeTemporaryVideoURL(sessionId: String, temporaryVideoURL: String): Future[UpdateWriteResult] = {
+    Logger.info("Inside storeTemporaryVideoURL")
+    Logger.info(s"Session ID = $sessionId")
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val modifier = BSONDocument("$set" -> BSONDocument("temporaryVideoURL" -> temporaryVideoURL))
+
+    Logger.info("Storing temporary video URL")
+
+    collection
+      .flatMap(_.update(selector, modifier))
+  }
+
+  def getTemporaryVideoURL(sessionId: String): Future[List[String]] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val projection = Json.obj("temporaryVideoURL" -> 1)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("temporaryVideoURL").asOpt[String]))
   }
 }

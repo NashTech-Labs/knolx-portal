@@ -4,6 +4,7 @@ import java.util.concurrent.TimeoutException
 
 import actors._
 import akka.actor._
+import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.{Video, VideoCategory}
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Module}

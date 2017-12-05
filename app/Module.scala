@@ -5,6 +5,8 @@ import java.util.function.Function
 import actors._
 import akka.actor.ActorRef
 import com.google.api.client.auth.oauth2.{Credential, StoredCredential, TokenResponse}
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.{GoogleAuthorizationCodeFlow, GoogleClientSecrets}
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
@@ -14,14 +16,14 @@ import com.google.common.collect.Lists
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.util.Providers
-import com.typesafe.config.ConfigFactory
 import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.{Configuration, Environment}
 import play.libs.Akka
-import services.YoutubeService
 
-class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
+class Module(environment: Environment,
+              configuration: Configuration) extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
   private val httpTransport = new NetHttpTransport
   private val jsonFactory = new JacksonFactory
@@ -85,7 +87,6 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
     bind[YouTube].toInstance(youtube)
 
-    //bind[YoutubeService].toInstance(new YoutubeService)
   }
 
   private def authorize(scopes: util.List[String]): Credential = {
@@ -97,15 +98,9 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
         .setCredentialDataStore(dataStore).build()
 
-    val configFactory = ConfigFactory.load()
+    val localReceiver = new LocalServerReceiver.Builder().setPort(9001).build()
 
-    val refreshToken = configFactory.getString("youtube.refreshToken")
-
-    val response = new TokenResponse
-
-    response.setRefreshToken(refreshToken)
-
-    flow.createAndStoreCredential(response, "user1066")
+    new AuthorizationCodeInstalledApp(flow, localReceiver).authorize("user")
   }
 
 }

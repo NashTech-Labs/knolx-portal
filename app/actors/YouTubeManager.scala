@@ -27,6 +27,16 @@ class YouTubeManager @Inject()(
     Router(RoundRobinRoutingLogic(), uploaders)
   }
 
+  var youtubeDetailsRoutee = {
+    val detailRoutees = Vector.fill(limit) {
+      val detailRoutee = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
+      context watch detailRoutee
+      ActorRefRoutee(detailRoutee)
+    }
+
+    Router(RoundRobinRoutingLogic(), detailRoutees)
+  }
+
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {
       case ex: Exception =>
@@ -45,14 +55,17 @@ class YouTubeManager @Inject()(
       context watch newUploader
       youtubeUploader = youtubeUploader.addRoutee(newUploader)
     case request: YouTubeDetailsActor.UpdateVideoDetails =>
-      val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      youTubeDetailsActor forward request
+      youtubeDetailsRoutee.route(request, sender())
     case YouTubeDetailsActor.GetCategories               =>
-      val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      youTubeDetailsActor forward YouTubeDetailsActor.GetCategories
+      youtubeDetailsRoutee.route(YouTubeDetailsActor.GetCategories, sender())
     case request: YouTubeDetailsActor.GetDetails         =>
-      val youTubeDetailsActor = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
-      youTubeDetailsActor forward request
+      youtubeDetailsRoutee.route(request, sender())
+    case Terminated(detailsRoutee)                       =>
+      Logger.info(s"Removing YouTubeDetailsActor $youtubeDetailsRoutee")
+      youtubeDetailsRoutee = youtubeDetailsRoutee.removeRoutee(detailsRoutee)
+      val newYoutubeDetailsRoutee = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
+      context watch newYoutubeDetailsRoutee
+      youtubeDetailsRoutee = youtubeDetailsRoutee.addRoutee(newYoutubeDetailsRoutee)
     case msg                                             =>
       Logger.info(s"Received a message in YouTubeManager that cannot be handled $msg")
   }

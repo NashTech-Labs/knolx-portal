@@ -3,6 +3,7 @@ package helpers
 import actors._
 import actors.SessionsScheduler.{CancelScheduledSession, GetScheduledSessions, ScheduleSession, ScheduledSessions}
 import actors.UsersBanScheduler.GetScheduledBannedUsers
+import actors.YouTubeDetailsActor.{GetCategories, GetDetails, UpdateVideoDetails}
 import akka.actor.Actor
 import com.google.api.services.youtube.model.{Video, VideoCategory, VideoCategorySnippet}
 import org.apache.commons.mail.EmailException
@@ -50,6 +51,7 @@ class DummyYouTubeUploader extends Actor {
 
   override def receive: Receive = {
     case request: YouTubeUploader.Upload => sender() ! request
+    case _                               => sender() ! "This shoud not print in DummyYouTubeUploader"
   }
 
 }
@@ -59,6 +61,8 @@ class DummyYouTubeDetailsActor extends Actor {
   override def receive: Receive = {
     case GetCategories               => sender() ! List[VideoCategory]()
     case request: UpdateVideoDetails => sender() ! request
+    case request: GetDetails         => sender() ! request
+    case _                           => Logger.info("Unrecognized Message")
   }
 
 }

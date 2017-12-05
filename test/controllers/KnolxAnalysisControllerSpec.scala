@@ -2,7 +2,7 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.time.{LocalDateTime, ZoneId}
-import java.util.{Date, TimeZone}
+import java.util.TimeZone
 
 import akka.actor.ActorRef
 import com.google.inject.name.Names
@@ -15,13 +15,13 @@ import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results
+import play.api.test.CSRFTokenHelper._
 import play.api.test._
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
-import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
 
@@ -42,7 +42,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       } """)
 
   private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
-    "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+    "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))

@@ -188,6 +188,13 @@
                     </div>
                 </div>
 
+                <div class="col-md-12" id="attach-video" style="display:none">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10">
+                        There's a new video available for this session. <span id="attach-video-link" style="cursor: pointer;"><b>Click here</b></span> to attach it to the session.
+                    </div>
+                </div>
+
                 <div class="col-md-12 login-third update-second">
                     <label class="col-md-2 control-label">Embed Slideshare URL</label>
                     <div class="col-md-10 " >
@@ -213,6 +220,10 @@
 <div class="row">
     <div class="col-md-12 create-outer">
 
+        <div class="ibox-title">
+            <h4>Upload video to youtube</h4>
+        </div>
+
         <div class="col-md-12 login-third update-second form-group" id="youtube-dropzone">
             <label class="col-md-2 control-label">Upload Video</label>
             <div class="col-md-10 " >
@@ -227,6 +238,14 @@
                     <div id="progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">0%</div>
                 </div>
             </div>
+        </div>
+        
+        <div class="col-md-12 login-four" id="cancel-video-button" style="display:none;">
+            <div class="col-md-2"></div>
+            <div class="col-md-2 loader-outer">
+                <input type="button" id="cancelVideo" value="Cancel" class="btn btn-danger" style="background-color: #1ab394;"/>
+            </div>
+            <div class="col-md-6"></div>
         </div>
 
         <div class="col-md-12 login-third update-second" id="cancel-message" style="display:none;">
@@ -267,14 +286,6 @@
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 <p>There is already an upload going on right now!</p>
             </div>
-        </div>
-
-        <div class="col-md-12 login-four" id="cancel-video-button">
-            <div class="col-md-2"></div>
-            <div class="col-md-2 loader-outer">
-                <input type="button" id="cancelVideo" value="Cancel" class="btn btn-success" style="background-color: #1ab394;"/>
-            </div>
-            <div class="col-md-6"></div>
         </div>
 
         <div class="col-md-12 login-third update-second" id="update-youtube-details">
@@ -334,14 +345,34 @@
                 </div>
             </div>
 
-            <div class="col-md-12 login-four">
+            <!--<div class="col-md-12 login-four" id="upload-video-button">
+                <div class="col-md-2"></div>
+                <div class="col-md-2 loader-outer">
+                    <input type="button" id="uploadVideo" value="Upload" class="btn btn-success" style="background-color: #1ab394;"/>
+                </div>
+                <div class="col-md-6"></div>
+            </div>-->
+
+            <div class="col-md-12 login-four" >
                 <div class="hr-line-dashed"></div>
+                <div class="col-md-2"></div>
+                <div class="col-md-2 loader-outer" id="upload-video-button">
+                    <input type="button" id="uploadVideo" value="Upload" class="btn btn-success" style="background-color: #1ab394;"/>
+                    <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
+                </div>
+                <!--<div class="col-md-2 loader-outer">
+                    <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
+                </div>-->
+                <div class="col-md-6"></div>
+            </div>
+
+            <!--<div class="col-md-12 login-four">
                 <div class="col-md-2"></div>
                 <div class="col-md-2 loader-outer">
                     <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
                 </div>
                 <div class="col-md-6"></div>
-            </div>
+            </div>-->
         </div>
 
     </div>

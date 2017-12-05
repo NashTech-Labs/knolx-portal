@@ -8,10 +8,12 @@ import com.google.api.client.googleapis.media.MediaHttpUploader
 import com.google.api.client.http.InputStreamContent
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.{Video, VideoSnippet, VideoStatus}
+import models.SessionsRepository
 import play.api.Logger
-import services.YoutubeService
-import scala.collection.JavaConversions._
+import reactivemongo.api.commands.UpdateWriteResult
+
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 object ConfiguredYouTubeUploader {
 
@@ -26,27 +28,29 @@ object YouTubeUploader {
   // Commands for YouTubeUploader actor
   case class Upload(sessionId: String,
                     is: InputStream,
-                    title: String,
-                    description: Option[String],
-                    tags: List[String],
+                    title: String = "title",
+                    description: Option[String] = None,
+                    tags: List[String] = List("tags"),
+                    categoryId: String = "27",
+                    status:String = "private",
                     fileSize: Long)
 
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgressManager: ActorRef,
                                 @Named("YouTubeManager") youtubeManager: ActorRef,
+                                sessionsRepository: SessionsRepository,
                                 youtube: YouTube) extends Actor {
   private val chunkSize = 1024 * 0x400
   private val part = "snippet,statistics,status"
-  private val status = "private"
   private val videoFileFormat = "video/*"
 
   var videoCancelStatus: Map[String, Boolean] = Map.empty
   var sessionVideos: Map[String, Video] = Map.empty
 
   def receive: Receive = {
-    case YouTubeUploader.Upload(sessionId, is, title, description, tags, fileSize) =>
-      upload(sessionId, is, title, description, tags, fileSize)
+    case YouTubeUploader.Upload(sessionId, is, title, description, tags, categoryId, status, fileSize) =>
+      upload(sessionId, is, title, description, tags, categoryId, status, fileSize)
     case msg                                                                       =>
       Logger.info(s"Received a message in YouTubeUploader that cannot be handled $msg")
   }
@@ -56,10 +60,12 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
              title: String,
              description: Option[String],
              tags: List[String],
-             fileSize: Long): Unit = {
+             categoryId: String,
+             status: String,
+             fileSize: Long): Future[UpdateWriteResult] = {
     Logger.info(s"Starting video upload for session $sessionId")
 
-    val snippet = getVideoSnippet(title, description, tags)
+    val snippet = getVideoSnippet(title, description, tags, categoryId)
     val videoObjectDefiningMetadata = getVideo(snippet, status)
     val mediaContent = getInputStreamContent(is, fileSize)
 
@@ -70,10 +76,14 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
 
     val video = videoInsert.execute()
 
-    youtubeProgressManager ! YouTubeProgressManager.SessionVideo(sessionId, video)
+    val videoURL = "www.youtube.com/embed/" + video.getId
+
+    Logger.info(s"Sending video url $videoURL to the database for updation")
+
+    sessionsRepository.storeTemporaryVideoURL(sessionId, videoURL)
   }
 
-  private def getVideoSnippet(title: String,
+  def getVideoSnippet(title: String,
                       description: Option[String],
                       tags: List[String],
                       categoryId: String = ""): VideoSnippet = {
@@ -86,7 +96,7 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
     if (categoryId.isEmpty) videoSnippet else videoSnippet.setCategoryId(categoryId)
   }
 
-  private def getVideo(snippet: VideoSnippet, status: String, videoId: String = ""): Video = {
+  def getVideo(snippet: VideoSnippet, status: String, videoId: String = ""): Video = {
     val video =
       new Video()
         .setSnippet(snippet)
@@ -95,10 +105,10 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
     if (videoId.isEmpty) video else video.setId(videoId)
   }
 
-  private def getInputStreamContent(is: InputStream, fileSize: Long): InputStreamContent =
+  def getInputStreamContent(is: InputStream, fileSize: Long): InputStreamContent =
     new InputStreamContent(videoFileFormat, is).setLength(fileSize)
 
-  private def getMediaHttpUploader(videoInsert: YouTube#Videos#Insert, chunkSize: Int): MediaHttpUploader =
+  def getMediaHttpUploader(videoInsert: YouTube#Videos#Insert, chunkSize: Int): MediaHttpUploader =
     videoInsert
       .getMediaHttpUploader
       .setDirectUploadEnabled(false)

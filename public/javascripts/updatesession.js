@@ -1,6 +1,7 @@
 var cancel = false;
 var uploading = false;
 var redirect = true;
+var newVideoURL = "";
 
 Dropzone.autoDiscover = false;
 
@@ -21,13 +22,19 @@ $(function () {
         uploadMultiple: false,
         headers: {
             'CSRF-Token': document.getElementById('csrfToken').value
-        }
+        },
+        autoProcessQueue: false
     });
 
     youtubeDropzone.on("sending", function(file, xhr, formData) {
         redirect = false;
         console.log("File size = " + file.size);
         xhr.setRequestHeader("filesize", file.size);
+        xhr.setRequestHeader("title", $("#youtube-title").val());
+        xhr.setRequestHeader("description", $("#youtube-description").val());
+        xhr.setRequestHeader("tags", $("#youtube-tags").val());
+        xhr.setRequestHeader("category", $("#youtube-category").val());
+        xhr.setRequestHeader("status", $("#youtube-status").val());
     });
 
     youtubeDropzone.on("complete", function(file) {
@@ -86,11 +93,11 @@ $(function () {
         update(sessionId);
     });
 
-    if($("#youtubeURL").val() != '') {
+    /*if($("#youtubeURL").val() != '') {
         $("#update-youtube-details").show();
     } else {
         $("#update-youtube-details").hide();
-    }
+    }*/
 
     $(".bootstrap-tagsinput").addClass('update-field');
 
@@ -100,7 +107,45 @@ $(function () {
         }
     });
 
+    $("#uploadVideo").click( function () {
+        youtubeDropzone.processQueue();
+        $("#upload-video-button").hide();
+    });
+
+    $("#attach-video-link").click(function () {
+        $("#youtubeURL").val("www.youtube.com/embed/" + newVideoURL);
+    });
+
 });
+
+/*function uploadVideo(sessionId) {
+    console.log("Inside uploadVideo function")
+    var formData = new FormData();
+    var fileSize = 0;
+    jQuery.each($('input[name^="file"]')[0].files, function(i, file) {
+        fileSize = file.size;
+        console.log("File size = " + fileSize);
+        formData.append("file", file);
+    });
+    console.log("Calling ajax now")
+    jsRoutes.controllers.YoutubeController.upload(sessionId, fileSize).ajax(
+        {
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function(data) {
+                console.log("data in uploadVideo function  = " + data);
+                $("#cancel-message").hide();
+                $("#show-progress").show();
+                showProgress(sessionId);
+            },
+            error: function(er) {
+                $("#cancel-message").hide();
+                $("#upload-failure-message").show();
+            }
+        });
+}*/
 
 function showProgress(sessionId) {
     jsRoutes.controllers.YoutubeController.getPercentageUploaded(sessionId).ajax(
@@ -123,7 +168,8 @@ function showProgress(sessionId) {
                         uploading = false;
                         $("#youtube-dropzone").show();
                         $("#cancel-video-button").hide();
-                        fillYoutubeEmbedURL(sessionId);
+                        getUpdateURL(sessionId);
+                        /*$("#update-youtube-details").show();*/
                     } else {
                     var percentageUploaded = data;
                     console.log("percentageUploaded = " + percentageUploaded);
@@ -155,6 +201,7 @@ function cancelVideo(sessionId) {
                 $("#cancel-message").show();
                 $("#youtube-dropzone").show();
                 $("#cancel-video-button").hide();
+                $("#upload-video-button").show();
             },
             error: function(er) {
                 $("#upload-success-message").hide();
@@ -167,21 +214,22 @@ function cancelVideo(sessionId) {
         })
 }
 
-function fillYoutubeEmbedURL(sessionId) {
-    console.log("Coming inside the function of fillYoutubeEmbedURL");
+function getUpdateURL(sessionId) {
+    console.log("Coming inside the function of getUpdateURL");
     jsRoutes.controllers.YoutubeController.getVideoId(sessionId).ajax(
         {
             type: 'GET',
             processData: false,
             contentType: false,
             success: function(data) {
-                var videoId = JSON.parse(data);
-                console.log("Setting embedded URL for youtube")
-                $("#youtubeURL").val("www.youtube.com/embed/" + videoId);
+                newVideoURL = data;
+                console.log("Setting embedded URL for youtube");
+                /*$("#youtubeURL").val("www.youtube.com/embed/" + videoId);
                 $("#videoId").val(videoId);
                 $("#update-youtube-details").show();
-                $("#youtube-dropzone").show();
-                storeVideoURL(sessionId);
+                $("#youtube-dropzone").show();*/
+                $("#attach-video").show();
+                //storeVideoURL(sessionId);
             },
             error: function(er) {
                 console.log("An error was encountered = " + er);
@@ -195,7 +243,7 @@ function getUrl(file) {
     return url;
 }
 
-function storeVideoURL(sessionId) {
+/*function storeVideoURL(sessionId) {
     var youtubeURL = $("#youtubeURL").val();
     jsRoutes.controllers.SessionsController.storeVideoURL(sessionId, youtubeURL).ajax(
         {
@@ -209,7 +257,7 @@ function storeVideoURL(sessionId) {
                 console.log("Error occurred = " + er);
             }
         })
-}
+}*/
 
 function update(sessionId) {
     var title = $("#youtube-title").val();

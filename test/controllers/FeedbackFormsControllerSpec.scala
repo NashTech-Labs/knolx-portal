@@ -2,10 +2,9 @@ package controllers
 
 import java.text.SimpleDateFormat
 
-import actors.{ConfiguredEmailActor, EmailManager}
 import com.google.inject.AbstractModule
 import com.typesafe.config.ConfigFactory
-import helpers.{TestEmailActor, TestHelpers}
+import helpers.TestHelpers
 import models._
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
@@ -32,7 +31,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
     active = true, BSONObjectID.parse("5943cdd60900000900409b26").get)
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
 
   trait TestScope extends Scope {
     val mailerClient = mock[MailerClient]

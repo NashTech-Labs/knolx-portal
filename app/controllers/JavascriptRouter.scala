@@ -19,7 +19,6 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.searchManageSession,
       controllers.routes.javascript.SessionsController.searchSessions,
       controllers.routes.javascript.SessionsController.shareContent,
-      controllers.routes.javascript.SessionsController.storeVideoURL,
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,

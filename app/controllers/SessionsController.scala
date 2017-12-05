@@ -351,7 +351,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               }
             }
         case None                     =>
-          Future.successful(Redirect(routes.SessionsController.manageSessions(1, None)).flashing("message" -> "Something went wrong!"))
+          Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Something went wrong!"))
       }
   }
 

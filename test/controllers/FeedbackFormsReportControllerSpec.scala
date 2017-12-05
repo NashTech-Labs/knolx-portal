@@ -69,10 +69,6 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     "render reports page for a particular user if user has active sessions and also has feedbacks" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns sessionObject
-
-
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -98,6 +94,19 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       sessionsRepository.userSessionsTillNow(None, 1) returns sessionObject
 
       val response = controller.manageAllFeedbackReports(1)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "send json data while rendering users reports page" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns sessionObject
+
+      val response = controller.manageUserFeedbackReports(1)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -204,6 +213,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
     "send json data for responses of CoreMember or All" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
 
       val response = controller.searchAllResponsesBySessionId(_id.stringify)(

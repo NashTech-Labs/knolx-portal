@@ -48,10 +48,7 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
   implicit val reportResult: OFormat[ReportResult] = Json.format[ReportResult]
 
   def renderUserFeedbackReports: Action[AnyContent] = userAction.async { implicit request =>
-    val sessionTillNow = sessionsRepository.userSessionsTillNow(Some(request.user.email), 1)
-    generateReport(sessionTillNow).map { reportInfo =>
-      Ok(views.html.reports.myreports(reportInfo))
-    }
+      Future.successful(Ok(views.html.reports.myreports()))
   }
 
   def renderAllFeedbackReports: Action[AnyContent] = adminAction.async { implicit request =>
@@ -63,6 +60,18 @@ class FeedbackFormsReportController @Inject()(messagesApi: MessagesApi,
     generateReport(sessionTillNow).flatMap { reportInfo =>
       sessionsRepository
         .activeCount(None)
+        .map { count =>
+          val pages = Math.ceil(count.toDouble / 8).toInt
+          Ok(Json.toJson(ReportResult(reportInfo, pageNumber, pages)))
+        }
+    }
+  }
+
+  def manageUserFeedbackReports(pageNumber: Int): Action[AnyContent] = userAction.async { implicit request =>
+    val sessionTillNow = sessionsRepository.userSessionsTillNow(Some(request.user.email), pageNumber)
+    generateReport(sessionTillNow).flatMap { reportInfo =>
+      sessionsRepository
+        .activeCount(Some(request.user.email))
         .map { count =>
           val pages = Math.ceil(count.toDouble / 8).toInt
           Ok(Json.toJson(ReportResult(reportInfo, pageNumber, pages)))

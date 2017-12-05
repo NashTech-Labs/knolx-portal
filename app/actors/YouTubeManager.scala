@@ -56,7 +56,7 @@ class YouTubeManager @Inject()(
         context watch newUploader
         youtubeUploader = youtubeUploader.addRoutee(newUploader)
       } else {
-        Logger.info(s"Removing YouTubeDetailsActor $youtubeDetailsRoutee")
+        Logger.info(s"Removing YouTubeDetailsActor $routee")
         youtubeDetailsRoutee = youtubeDetailsRoutee.removeRoutee(routee)
         val newYoutubeDetailsRoutee = injectedChild(configuredYouTubeDetailsActor(), s"YouTubeDetailsActor-${UUID.randomUUID}")
         context watch newYoutubeDetailsRoutee

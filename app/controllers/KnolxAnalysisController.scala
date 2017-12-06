@@ -114,15 +114,27 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def leaderBoard = action.async { implicit request =>
-    sessionsRepository.sessions.map{ totalSessions =>
-      val userWithSession: Map[String, List[SessionInfo]] = totalSessions.groupBy(_.email)
-      userWithSession.values.map{ averageScore =>
-        val userAverageScore: Map[String, Double] = averageScore.map(_.score).sum.toDouble / averageScore.length
+  def leaderBoard: Action[AnyContent] = action.async { implicit request =>
+    sessionsRepository.sessions.map { totalSessions =>
 
+      if(totalSessions.nonEmpty) {
+        val userWithSession: Map[String, List[SessionInfo]] = totalSessions.groupBy(_.email)
+        val userAverageScore: Map[String, Double] = userWithSession.map { case (user, userSessions) =>
+          val sum = userSessions.map(_.score).sum
+
+          val averageScore = sum / userSessions.length.toDouble
+          val sessionScore = (userSessions.length.toDouble / totalSessions.length) * 2.5
+          val ratingScore = (averageScore.toDouble / 100D) * 7.5
+          val userScore = sessionScore + ratingScore
+          (user, userScore)
+        }
+        val topUsers = userAverageScore.toList.sortWith(_._2 > _._2).toMap.keys.take(10)
+        Ok(Json.toJson(topUsers))
+
+      } else {
+        Logger.info("No recors found")
+        BadRequest("OOPS ! No record found")
       }
     }
-
   }
-
 }

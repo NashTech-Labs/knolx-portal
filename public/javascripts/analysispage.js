@@ -27,6 +27,9 @@ $(function () {
 
         analysis(startDate, endDate);
     });
+
+    leaderBoard();
+
 });
 
 function analysis(startDate, EndDate) {
@@ -256,4 +259,30 @@ function lineGraph(startDate, EndDate) {
                 });
             }
         })
+}
+
+function leaderBoard() {
+
+    jsRoutes.controllers.KnolxAnalysisController.leaderBoard().ajax(
+        {
+            type: 'GET',
+            processData: false,
+            contentType: 'application/json',
+            success: function (users) {
+                console.log("Users ->>>>>>>>> " + users);
+                var usersFound = "";
+                for(var user = 0; user < users.length; user++) {
+                    usersFound += '<tr class="table-header-color">' +
+                                 '<td>' + users[user] + '</td>' +
+                                 '</tr>';
+                }
+                $('#leaderBoard').html(usersFound);
+            },
+            error: function(er) {
+                $('#leaderBoard').html(
+                    "<tr><td align='center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>" + er.responseText + "</span></td></tr>"
+                );
+            }
+        }
+    )
 }

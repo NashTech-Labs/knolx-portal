@@ -156,6 +156,22 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
+    "work" in new WithTestApplication {
+      private val sessionObject1 = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
+        "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 50.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate()),
+        SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
+          "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 60.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate()),
+        SessionInfo(_id.stringify, "email1", BSONDateTime(date1.getTime),
+          "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 70.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate())
+      ))
+
+      sessionsRepository.sessions returns sessionObject1
+
+      val result = controller.leaderBoard(FakeRequest(GET, "knolx/analysis/leaderboard"))
+
+      status(result) must be equalTo OK
+    }
+
   }
 
 }

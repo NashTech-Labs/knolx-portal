@@ -36,7 +36,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
 
   implicit val questionInformationFormat: OFormat[UpdateVideoDetails] = Json.format[UpdateVideoDetails]
 
-  def upload(sessionId: String): Action[AnyContent] = action.async { request =>
+  def upload(sessionId: String): Action[AnyContent] = adminAction.async { request =>
     request.body.asMultipartFormData.fold {
       Logger.error(s"Something went wrong when getting multipart form data")
 
@@ -61,7 +61,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def getPercentageUploaded(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+  def getPercentageUploaded(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
       .map { maybePercentage =>
         maybePercentage.fold {
@@ -72,13 +72,13 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def cancel(sessionId: String): Action[AnyContent] = action { implicit request =>
+  def cancel(sessionId: String): Action[AnyContent] = adminAction { implicit request =>
     youtubeProgressManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
 
     Ok("Upload cancelled!")
   }
 
-  def getVideoId(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+  def getVideoId(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository.getTemporaryVideoURL(sessionId).map { listOfURL =>
       val maybeVideoURL = listOfURL.headOption
       maybeVideoURL.fold {
@@ -94,7 +94,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def updateVideo(sessionId: String): Action[JsValue] = action(parse.json).async { implicit request =>
+  def updateVideo(sessionId: String): Action[JsValue] = adminAction(parse.json).async { implicit request =>
     request.body.validate[UpdateVideoDetails].fold(
       jsonValidationError => {
         Logger.error("Json validation error occurred ----- " + jsonValidationError)
@@ -120,7 +120,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def checkIfUploading(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+  def checkIfUploading(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
       .map { maybePercentage =>
         maybePercentage.fold {
@@ -131,7 +131,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def checkIfTemporaryUrlExists(sessionId: String): Action[AnyContent] = action.async { implicit request =>
+  def checkIfTemporaryUrlExists(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository.getTemporaryVideoURL(sessionId).map { listOfURL =>
       val maybeVideoURL = listOfURL.headOption
       maybeVideoURL.fold {

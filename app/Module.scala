@@ -8,6 +8,7 @@ import com.google.inject.util.Providers
 import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.concurrent.AkkaGuiceSupport
+import play.api.libs.mailer.{MailerClient, SMTPMailer}
 import play.libs.Akka
 
 class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
@@ -29,6 +30,10 @@ class Module extends AbstractModule with ScalaModule with AkkaGuiceSupport {
     bind(classOf[KnolxControllerComponents])
       .to(classOf[DefaultKnolxControllerComponents])
       .asEagerSingleton()
+
+    /*bind(classOf[MailerClient])
+        .to(classOf[SMTPMailer])
+      .asEagerSingleton()*/
   }
 
 }

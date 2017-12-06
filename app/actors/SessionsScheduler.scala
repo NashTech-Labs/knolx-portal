@@ -226,7 +226,7 @@ class SessionsScheduler @Inject()(sessionsRepository: SessionsRepository,
 
   def defaultHandler: Receive = {
     case msg: Any =>
-      Logger.error(s"Received a message $msg in Sessions Scheduler which cannot be handled")
+      Logger.error(s"Received a message $msg from $sender in Sessions Scheduler which cannot be handled")
   }
 
   def reminderEmailHandler(sessions: List[SessionInfo], sessionsEmailInfo: List[EmailInfo], emails: List[String]): Unit = {

@@ -480,4 +480,12 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       })
   }
 
+  def dummyFunction: Action[AnyContent] = action { implicit request =>
+    for (i <- 1 to 100) {
+      emailManager ! EmailActor.SendEmail(List(s"rocking${i}akshansh@gmail.com"), "akshansh95jain@gmail.com", "subject", "body")
+    }
+
+    Ok("Done")
+  }
+
 }

@@ -4,14 +4,20 @@ function Element(categoryId, subCategory, primaryCategory) {
     this.primaryCategory = primaryCategory;
 }
 
+function primaryElement(categoryId, primaryCategory) {
+    this.categoryId = categoryId;
+    this.primaryCategory = primaryCategory;
+}
+
+var categorySearchResult = [];
+var categoryOption = "";
 var subCategorySearchResult = [];
 var subCategoryOption = "";
 
 $(function () {
 
-    $('#search-primary-category').select2();
-
     updateDropDown();
+    updatePrimaryCategoryDropDown();
 
     var oldCategoryName = "";
     var oldSubCategoryName = "";
@@ -27,47 +33,11 @@ $(function () {
         e.preventDefault();
     });
 
-    $("#select2-search-primary-category-container").click(function () {
-        console.log("Search primary category");
-        updateAddPrimaryCategoryDropDown();
-        $("#insert-sub-category").show();
-    });
-
-    $("#modify-primary-category").on('focus', function () {
-        updateModifyPrimaryCategoryDropDown();
-        $("#new-primary-category").show();
-        oldCategoryName = $("#modify-primary-category").val();
-        modifiedCategoryName = oldCategoryName.replace(" ", "");
-        categoryId = $("#" + modifiedCategoryName + "-modify").attr('categoryid');
-    });
-
-    $("#modify-primary-category-btn").click(function () {
-        $("#modify-primary-category").val("");
-        var newCategoryName = $("#new-primary-category").val();
-        modifyPrimaryCategory(categoryId, newCategoryName);
-    });
-
-    $("#delete-primary-category").on('input change', function () {
-        updateDeletePrimaryCategoryDropDown();
-        categoryName = $(this).val();
-        if (!(categoryName.trim())) {
-            categoryId = "";
-            $("#subcategory-linked-category-message").hide();
-            $("#category-sessions").hide();
-        } else {
-            modifiedCategoryName = categoryName.replace(" ", "");
-            categoryId = $("#" + modifiedCategoryName + "-delete").attr('deletecategoryid');
-            subCategoryByPrimaryCategory(categoryName);
-        }
-    });
-
     $("#delete-primary-category-btn").click(function () {
         deletePrimaryCategory(categoryId);
     });
 
     $("#add-sub-category").click(function () {
-        var categoryName = $("#search-primary-category").val();
-        subCategory = $("#insert-sub-category").val();
         addSubCategory(categoryName, subCategory);
     });
 
@@ -105,14 +75,14 @@ $(function () {
     }
 
     $("#datalist").keyup(function (e) {
-        dropDown('#datalist', '#results-outer', "result");
+        subCategoryDropDown('#datalist', '#results-outer', "result");
     });
 
     $("#mod-datalist").keyup(function (e) {
-        dropDown('#mod-datalist', '#mod-results-outer', "mod-result");
+        subCategoryDropDown('#mod-datalist', '#mod-results-outer', "mod-result");
     });
 
-    function dropDown(id, targetId, renderResult) {
+    function subCategoryDropDown(id, targetId, renderResult) {
         console.log(id)
         var keyword = $(id).val().toLowerCase();
         subCategoryOption = "";
@@ -130,7 +100,7 @@ $(function () {
         }
         subCategorySearchResult.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
-                subCategoryOption = subCategoryOption + '<div class="' + renderResult + '" name = "' + element.categoryId + '"id="' + element.subCategory + '-' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
+                subCategoryOption = subCategoryOption + '<div class="' + renderResult + '" name = "' + element.subCategory + '"id="' + element.categoryId + '" categoryValue ="' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
             }
         });
         $(targetId).html(subCategoryOption);
@@ -177,27 +147,22 @@ $(function () {
     });
 
     $("html").delegate(".result", "mousedown", function () {
-        var attribute = $(this).attr('id') + "-" + $(this).attr('name')
-        var splits = attribute.split('-');
-        subCategoryName = splits[0];
-        categoryName = splits[1];
-        categoryId = splits[2];
-        $("#datalist").val(subCategoryName);
+        categoryId = $(this).attr('id')
+        subCategoryName = $(this).attr('name')
+        categoryName = $(this).attr('categoryValue')
         topicBySubCategory(categoryName, subCategoryName)
+        $("#datalist").val(subCategoryName);
         $("#subcategory-sessions").show();
-        $("#pair").val(attribute);
+        $("#hidden-sub-category").val(subCategoryName);
         $('#results-outer').hide();
     });
 
     $("html").delegate(".mod-result", "mousedown", function () {
-        var attribute = $(this).attr('id') + "-" + $(this).attr('name');
-        var splits = attribute.split('-');
-        oldSubCategoryName = splits[0];
-        categoryName = splits[1];
-        categoryId = splits[2];
+        categoryId = $(this).attr('id')
+        oldSubCategoryName = $(this).attr('name')
         $("#mod-datalist").val(oldSubCategoryName);
         $("#new-sub-category").show();
-        $("#mod-pair").val(attribute);
+        $("#old-sub-category").val(oldCategoryName);
         $('#mod-results-outer').hide();
     });
 
@@ -226,6 +191,34 @@ $(function () {
     $("html").delegate(".mod-result", "mouseleave", function () {
         $(this).removeClass('over');
     });
+
+    /*for primary category search*/
+
+    $("#search-primary-category-add").keyup(function (e) {
+        primaryCategoryDropDown('#search-primary-category-add', '#primary-options-outer', "result");
+    });
+
+    function primaryCategoryDropDown(id, targetId, renderResult) {
+        console.log(id)
+        var keyword = $(id).val().toLowerCase();
+        subCategoryOption = "";
+        searchPrimaryCategory(keyword, targetId, renderResult)
+    }
+
+    function searchPrimaryCategory(keyword, targetId, renderResult){
+
+        categorySearchResult.forEach(function (element) {
+           if(element.primaryCategory.toLowerCase().includes(keyword)){
+              result = result + '<div class="result" id="'+ element.categoryId +'"><div class="primary-category wordwrap"><strong>'+element.primaryCategory+'</strong></div></div>'
+           }
+        });
+        $(targetId).html(result);
+        $(targetId).show();
+        result = "";
+    }
+
+
+
 
 });
 
@@ -468,16 +461,16 @@ function deleteSubCategory(categoryId, subCategoryName) {
                 scrollToTop();
             },
             error: function (er) {
-                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 $("#delete-sub-category").val("");
+                failureMessageBox();
                 scrollToTop();
             }
         }
     )
 }
 
-function updateAddPrimaryCategoryDropDown() {
+function updatePrimaryCategoryDropDown() {
 
     jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
         {
@@ -486,61 +479,17 @@ function updateAddPrimaryCategoryDropDown() {
             success: function (values) {
                 var categories = "";
                 console.log(values);
-                var primaryCategory = $("#primary-category").val();
+
+                categorySearchResult = [];
+
                 for (var i = 0; i < values.length; i++) {
-                    console.log("........");
-                    categories += "<option value='" + values[i].categoryId + "'";
-                    if (values[i].categoryName === primaryCategory) {
-                        categories += "selected";
-                    }
-                    categories+=    ">" + values[i].categoryName + "</option>";
+                    var option = new primaryElement(values[i].categoryId, values[i].categoryName);
+                    categorySearchResult.push(option);
                 }
-                alert("categories list >>> " + categories);
-                $("#search-primary-category").html(categories);
             }
         }
     )
 }
-
-function updateModifyPrimaryCategoryDropDown() {
-
-    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
-        {
-            type: "GET",
-            processData: false,
-            success: function (values) {
-
-                var modifyCategoryList = "";
-                for (var i = 0; i < values.length; i++) {
-                    modifyCategoryList += "<option id='" + values[i].categoryName.replace(' ', '') + "-modify' categoryid='" +
-                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
-                }
-                $("#categories-list-modify").html(modifyCategoryList);
-            }
-        }
-    )
-}
-
-function updateDeletePrimaryCategoryDropDown() {
-
-    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
-        {
-            type: "GET",
-            processData: false,
-            success: function (values) {
-
-                var deleteCategoryList = "";
-                for (var i = 0; i < values.length; i++) {
-                    deleteCategoryList += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' deletecategoryid='" +
-                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
-                }
-                $("#categories-list-delete").html(deleteCategoryList);
-            }
-        }
-    )
-}
-
-
 
 function updateDropDown() {
     
@@ -554,15 +503,6 @@ function updateDropDown() {
                 var categoriesModify = "";
                 var categoriesDelete = "";
 
-                for (var i = 0; i < values.length; i++) {
-                    categories += "<option value='" + values[i].categoryName + "'>" + values[i].categoryName + "</option>";
-                    categoriesModify += "<option id='" + values[i].categoryName.replace(' ', '') + "-modify' categoryid='" +
-                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
-
-                    categoriesDelete += "<option id='" + values[i].categoryName.replace(' ', '') + "-delete' deletecategoryid='" +
-                        values[i].categoryId + "'value='" + values[i].categoryName + "'></option>";
-                }
-
                 subCategorySearchResult = [];
 
                 for (var i = 0; i < values.length; i++) {
@@ -572,6 +512,7 @@ function updateDropDown() {
                         subCategorySearchResult.push(option);
                     }
                 }
+
             }
         })
 }

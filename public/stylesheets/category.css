@@ -33,7 +33,7 @@
     height: 25px;
 }
 
-#datalist, #mod-datalist {
+#datalist, #mod-datalist, #search-primary-category-add {
     border: none;
     outline: none;
     width: 90%;
@@ -202,7 +202,7 @@ h5 {
     display: none;
 }
 
-#mod-sub-category-hover, #sub-category-hover {
+#mod-sub-category-hover, #sub-category-hover, #add-sub-category-hover {
     border: 1px solid #e5e6e7;
     width: 100%;
 }

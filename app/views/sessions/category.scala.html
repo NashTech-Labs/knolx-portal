@@ -52,24 +52,30 @@
                         <h5>Add Sub-Category</h5>
                     </div>
                     <div class="ibox-content">
-                        <form class="form-horizontal" autocomplete="off">
-                            <div class="form-group">
-                                <label class="category-label">Sub-Category</label>
-                                <!--<input list="categories-list-add" id="search-primary-category" type="text"
-                                placeholder="Search/Select a category" class="input-field no-outline reg">
-                                <datalist id="categories-list-add">
-                                </datalist>-->
-                                <select name="category" id="search-primary-category" class="update-field login-second" type="text">
-                                    <option selected value="">! Select Category Please</option>
-                                </select>
-
-                                <div>
-                                    <input type="text" id="insert-sub-category" name="subcategory"
-                                    placeholder="Input a new name" class="input-field no-outline reg"
-                                    required>
+                        <div class="col-md-12">
+                            <label class="category-label category-label-custom">Sub-Category</label>
+                        </div>
+                        <div class="col-md-12">
+                            <form class="form-horizontal" autocomplete="off">
+                                <div class="form-group">
+                                    <div id="add-holder">
+                                        <input type="hidden" id="old-sub-category"/>
+                                        <div id="add-sub-category-hover">
+                                            <input type="text" id="search-primary-category-add" placeholder="Search/Select a category"/>
+                                            <button id="search-add-drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                        </div>
+                                        <div id="primary-options-outer">
+                                            <!-- results goes here -->
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="insert-sub-category" name="subcategory"
+                                        placeholder="Input a new name" class="input-field no-outline reg"
+                                        required>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                     <div class="col-md-12 btn-footer">
                         <div class="hr-line-dashed"></div>
@@ -130,7 +136,7 @@
                             <form class="form-horizontal" autocomplete="off">
                                 <div class="form-group">
                                     <div id="mod-holder">
-                                        <input type="hidden" id="mod-pair"/>
+                                        <input type="hidden" id="old-sub-category"/>
                                         <div id="mod-sub-category-hover">
                                             <input type="text" id="mod-datalist" placeholder="Search/Select a sub-category"/>
                                             <button id="mod-drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
@@ -210,7 +216,7 @@
                                 <div class="form-group">
                                     <div id="holder">
                                         <div id="sub-category-hover">
-                                            <input type="hidden" id="pair"/>
+                                            <input type="hidden" id="hidden-sub-category"/>
                                             <input type="text" id="datalist" placeholder="Search/Select a sub-category"/>
                                             <button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
                                         </div>

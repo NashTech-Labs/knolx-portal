@@ -67,3 +67,5 @@ GET         /knolx/analysis                         controllers.KnolxAnalysisCon
 POST        /knolx/analysis/columnchart             controllers.KnolxAnalysisController.renderColumnChart
 POST        /knolx/analysis/piechart                controllers.KnolxAnalysisController.renderPieChart
 POST        /knolx/analysis/linechart               controllers.KnolxAnalysisController.renderLineChart
+GET         /knolx/analysis/users                   controllers.KnolxUserAnalysisController.renderUserAnalyticsPage
+POST        /knolx/analysis/users                   controllers.KnolxUserAnalysisController.userAnalysis(email: String)

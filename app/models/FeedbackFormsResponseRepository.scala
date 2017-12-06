@@ -127,4 +127,12 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
       ).map(_.flatMap(_ ("score").asOpt[Double]))
   }
 
+  def userCountDidNotAttendSession(email: String): Future[Int] = {
+    val condition = Some(Json.obj("email" -> email, "score" -> 0D))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(condition))
+  }
+
 }

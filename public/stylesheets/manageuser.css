@@ -2,33 +2,6 @@
     margin-bottom: 0px;
 }
 
-/*
-.search-bar {
-    height: 50px;
-    border: 1px solid #9E9E9E;
-    box-shadow: 0 4px 6px -5px #333;
-    border-radius: 4px;
-    margin-bottom: 50px;
-}
-
-.search-text {
-    height: 100%;
-    width: 90%;
-    border: none;
-    background-color: transparent;
-    outline: none;
-    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 18px;
-    text-align: center;
-    letter-spacing: 2px;
-    padding-left: 40px;
-    color: #616161;
-    font-weight: bold;
-    float:left;
-    margin-left: -25px;
-}
-*/
-
 .search-icon{
     padding-left: 10px;
     color: #9E9E9E;

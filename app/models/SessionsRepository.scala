@@ -375,4 +375,23 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           }
       }
   }
+
+  def userSession(email: String): Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+      val condition = Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "email" -> email,
+        "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .sort(Json.obj("date" -> -1))
+          .cursor[SessionInfo](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+
+  }
 }

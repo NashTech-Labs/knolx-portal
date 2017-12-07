@@ -1,10 +1,84 @@
-@(users:List[String])(implicit request: Request[_], messages: Messages, flash: Flash)
+@()(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Analysis") {
 
-  <div class="row ">
-    <div class="header-container">
-      <h2 style="margin-top: 10px;">Knolx Analysis</h2>
+    <div class="row ">
+        <div class="header-container">
+            <h2 style="margin-top: 10px;">Knolx User Analysis</h2>
+        </div>
     </div>
-  </div>
+    <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-3 filter-padding-left" style="background-color: white;padding: 10px; height: 450px">
+            <div class="col-md-12 text-center">
+                <input class="search-text" placeholder="Search User" autocomplete="off" name="email" id="search-user" style="margin: 15px;
+                    width: 85%;"/>
+            </div>
+            <div class="col-md-12">
+                <table class="table table-responsive table-bordered" style="overflow-y: auto !important;">
+                    <tbody data-bind="foreach: emailList">
+                        <tr> <td data-bind="text: $data , value: $data, click: $parent.userDataHandler" style="cursor:pointer"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-9 filter-padding-right">
+            <div class="col-md-12 user-title" id="user"></div>
+            <div class="col-md-12">
+                    <!-- Ban count -->
+                <div class="col-md-3 filter-padding-left">
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>Ban Count</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <h3 class="no-margins" id="ban-count">30</h3>
+                        </div>
+                    </div>
+                </div>
+                    <!-- Did not attend count -->
+                <div class="col-md-3 filter-padding-left">
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>Sessions Didn't Attend</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <h3 class="no-margins" id="did-not-attend">40</h3>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Comparison Between Reviews -->
+                <div class="col-md-6 filter-padding-left filter-padding-right">
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>Response Comparison</h5>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="no-margins" id="response-comparison"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 ibox">
+                <table class="table table-hover">
+                    <thead >
+                        <tr>
+                            <th>Topic</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>vgbvf</td>
+                            <td>gvbv</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <script src="@routes.Assets.versioned("javascripts/useranalytics.js")" type="text/javascript"></script>
 }

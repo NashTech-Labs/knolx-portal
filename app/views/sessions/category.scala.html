@@ -3,7 +3,7 @@
 @main("Categories") {
 
 <div class="row top-row-adjust"></div>
-<div class="col-md-12 category-message">
+<div class="col-md-12 category-page-message">
     <div id="success-message" class=" alert alert-success alert-dismissable">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">
             x</a>
@@ -45,7 +45,7 @@
         }
 
         <!--Add sub category-->
-        <div class="col-md-6">
+        <div class="col-md-6" >
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
             <div class="ibox">
                 <div class="ibox-title">
@@ -58,14 +58,13 @@
                     <div class="col-md-12">
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
-
-                                <select name="category" id="add-sub-category-dropdown" class="update-field login-second">
+                                <select name="category" id="categories-list-add" class="update-field login-second">
                                     <option selected value="">! Select Category Please</option>
                                 </select>
                                 <div>
-                                    <input type="text" id="insert-sub-category" name="subcategory"
-                                           placeholder="Input a new name" class="input-field no-outline reg"
-                                           required>
+                                <input type="text" id="insert-sub-category" name="subcategory"
+                                       placeholder="Input a new name" class="input-field no-outline reg"
+                                       required>
                                 </div>
                             </div>
                         </form>
@@ -74,7 +73,7 @@
                 <div class="col-md-12 btn-footer">
                     <div class="hr-line-dashed"></div>
                     <div class="category-btn">
-                        <button id="add-sub-category" class="btn btn-success">Add</button>
+                        <button id="add-sub-category-btn" class="btn btn-success">Add</button>
                     </div>
                 </div>
             </div>
@@ -92,14 +91,13 @@
                     <form class="form-horizontal" autocomplete="off">
                         <div class="form-group">
                             <label class="category-label">Category</label>
-
                             <select name="category" id="categories-list-modify" class="update-field login-second">
                                 <option selected value="">! Select Category Please</option>
                             </select>
-                        </div>
-                        <input type="text" id="modify-primary-category" name=primary-category"
+                            <input type="text" id="new-primary-category" name="primary-category"
                                placeholder="Input a new name" class="input-field no-outline reg"
                                required>
+                        </div>
                     </form>
                 </div>
                 <div class="col-md-12 btn-footer">
@@ -127,13 +125,13 @@
                     <div class="col-md-12">
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
-                                <div id="mod-holder">
+                                <div id="sub-categories-container-modify">
                                     <input type="hidden" id="old-sub-category"/>
-                                    <div id="mod-sub-category-hover">
-                                        <input type="text" id="mod-datalist" placeholder="Search/Select a sub-category"/>
-                                        <button id="mod-drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                    <div id="input-box-modify-sub-category">
+                                        <input type="text" id="sub-categories-list-modify" placeholder="Search/Select a sub-category"/>
+                                        <button id="drop-down-btn-modify" class="fa fa-caret-down" aria-hidden="true"></button>
                                     </div>
-                                    <div id="mod-results-outer">
+                                    <div id="sub-categories-container-result-modify">
                                         <!-- results goes here -->
                                     </div>
                                 </div>
@@ -167,18 +165,13 @@
                     <form class="form-horizontal" autocomplete="off">
                         <div class="form-group">
                             <label class="category-label">Category</label>
-                            <!--<input list="categories-list-delete" id="delete-primary-category" class="input-field no-outline reg"
-                            placeholder="Search/Select a category">
-                            <datalist id="categories-list-delete">
-
-                            </datalist>-->
-                            <select name="category" id="delete-primary-category" class="update-field login-second"></select>
+                            <select name="category" id="categories-list-delete" class="update-field login-second"></select>
                             <div id="subcategory-linked-category-message">
                                 <label class="info-message">
                                     Following sub-categories exists under this category, please delete all its sub-categories before deleting a primary category.
                                     Deleting a category would un-tag it from all session(s)</label>
                             </div>
-                            <div id="category-sessions"></div>
+                            <div id="sub-categories-exists"></div>
                         </div>
                     </form>
                 </div>
@@ -207,13 +200,13 @@
                     <div class="col-md-12">
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
-                                <div id="holder">
-                                    <div id="sub-category-hover">
+                                <div id="sub-categories-container-delete">
+                                    <div id="input-box-delete-sub-category">
                                         <input type="hidden" id="hidden-sub-category"/>
-                                        <input type="text" id="datalist" placeholder="Search/Select a sub-category"/>
-                                        <button id="drop-btn" class="fa fa-caret-down" aria-hidden="true"></button>
+                                        <input type="text" id="sub-categories-list-delete" placeholder="Search/Select a sub-category"/>
+                                        <button id="drop-down-btn-delete" class="fa fa-caret-down" aria-hidden="true"></button>
                                     </div>
-                                    <div id="results-outer">
+                                    <div id="sub-categories-container-result-delete">
                                         <!-- results goes here -->
                                     </div>
                                 </div>
@@ -221,7 +214,7 @@
                                     <label class="info-message">
                                         This sub-category is tagged to the following session(s), deleting it would un-tag it from all session(s)</label>
                                 </div>
-                                <div id="subcategory-sessions"></div>
+                                <div id="topics-exists"></div>
                             </div>
                         </form>
                     </div>

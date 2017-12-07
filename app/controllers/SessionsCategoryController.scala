@@ -56,7 +56,7 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def addSubCategory(categoryName: String, subCategory: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def addSubCategory(categoryId: String, subCategory: String): Action[AnyContent] = adminAction.async { implicit request =>
     val cleanedSubCategoryName = subCategory.trim
 
     if (cleanedSubCategoryName.isEmpty) {
@@ -65,29 +65,36 @@ class SessionsCategoryController @Inject()(messagesApi: MessagesApi,
       categoriesRepository
         .getCategories
         .flatMap { categories =>
-          categories.find(_.categoryName == categoryName)
-            .fold {
-              Logger.info(s"No primary category found for category name $categoryName")
-              Future.successful(BadRequest("No primary category found"))
-            } { categoryInfo =>
-              val newSubCategory = categoryInfo.subCategory.find(_.toLowerCase == cleanedSubCategoryName.toLowerCase)
-              newSubCategory.fold {
-                val subCategoryInfo = CategoryInfo(categoryName, List(cleanedSubCategoryName), categoryInfo._id)
-                categoriesRepository
-                  .upsert(subCategoryInfo)
-                  .map { result =>
-                    if (result.ok) {
-                      Logger.info(s"Sub-category was successfully added $subCategory")
-                      Ok("Sub-category was successfully added")
-                    } else {
-                      Logger.error(s"Something went wrong while adding sub-category $subCategory")
-                      BadRequest("Sub-category cannot be added due to some error")
+
+          val mayBeCategory = categories.find(_._id.stringify == categoryId)
+          mayBeCategory.fold {
+            Logger.info(s"No primary category found for category Id $categoryId")
+            Future.successful(BadRequest("No primary category found"))
+          } { categoryInfo =>
+            val newSubCategory = categoryInfo.subCategory.find(_.toLowerCase == cleanedSubCategoryName.toLowerCase)
+            newSubCategory.fold {
+              categoriesRepository.getCategoryNameById(categoryId).flatMap {
+                _.fold {
+                  Future.successful(BadRequest(s"No primary category found"))
+                } { categoryName =>
+                  val subCategoryInfo = CategoryInfo(categoryName, List(cleanedSubCategoryName), categoryInfo._id)
+                  categoriesRepository
+                    .upsert(subCategoryInfo)
+                    .map { result =>
+                      if (result.ok) {
+                        Logger.info(s"Sub-category was successfully added $subCategory")
+                        Ok("Sub-category was successfully added")
+                      } else {
+                        Logger.error(s"Something went wrong while adding sub-category $subCategory")
+                        BadRequest("Sub-category cannot be added due to some error")
+                      }
                     }
-                  }
-              } { _ =>
-                Future.successful(BadRequest("Sub-category already exists"))
+                }
               }
+            } { _ =>
+              Future.successful(BadRequest("Sub-category already exists"))
             }
+          }
         }
     }
   }

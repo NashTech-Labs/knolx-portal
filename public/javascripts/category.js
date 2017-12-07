@@ -6,11 +6,11 @@ function Element(categoryId, subCategory, primaryCategory) {
 
 var subCategorySearchResult = [];
 var subCategoryOption = "";
+var searchCategoryPlaceholder = "<span class='select2-selection__placeholder'>Select/Search a category</span>";
 
 $(function () {
 
-    updateDropDown();
-    updatePrimaryCategoryDropDown();
+    updateSubCategoryDropDown();
 
     var oldCategoryName = "";
     var oldSubCategoryName = "";
@@ -26,20 +26,20 @@ $(function () {
         e.preventDefault();
     });
 
+    $("#modify-primary-category-btn").click(function () {
+        categoryName = $("#categories-list-modify").val();
+        var newCategoryName = $("#new-primary-category").val();
+        modifyPrimaryCategory(categoryName, newCategoryName);
+    });
+
     $("#delete-primary-category-btn").click(function () {
         deletePrimaryCategory(categoryId);
     });
 
-    $("#add-sub-category").click(function () {
-        categoryName = $("#add-sub-category-dropdown").val();
+    $("#add-sub-category-btn").click(function () {
+        categoryName = $("#categories-list-add").val();
         subCategory = $("#insert-sub-category").val();
         addSubCategory(categoryName, subCategory);
-    });
-
-    $("#modify-primary-category-btn").click(function () {
-        categoryName = $("#categories-list-modify").val();
-        var newCategoryName = $("#modify-primary-category").val();
-        modifyPrimaryCategory(categoryName, newCategoryName);
     });
 
     $("#modify-sub-category-btn").click(function () {
@@ -51,23 +51,7 @@ $(function () {
         deleteSubCategory(categoryId, subCategoryName);
     });
 
-    $("#mod-sub-category-hover").mouseover(function () {
-        showIt('mod-drop-btn');
-    });
-
-    $("#mod-sub-category-hover").mouseleave(function () {
-        hideIt('mod-drop-btn');
-    });
-
-    $("#sub-category-hover").mouseover(function () {
-        showIt('drop-btn');
-    });
-
-    $("#sub-category-hover").mouseleave(function () {
-        hideIt('drop-btn');
-    });
-
-    $("#add-sub-category-dropdown").select2({
+    $("#categories-list-add").select2({
         ajax: {
             url: "/category/all",
             dataType: "json",
@@ -75,18 +59,18 @@ $(function () {
               var processedData = [];
               for(var i=0 ; i<data.length ; i++) {
                 if(params.term == undefined) {
-                    processedData.push(data[i].categoryName);
+                    processedData.push(data[i]);
                 }
-                else if(params.term != "" && data[i].categoryName.toLowerCase.indexOf(params.term) >= 0) {
-                  processedData.push(data[i].categoryName);
+                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                  processedData.push(data[i]);
                   }
                 else if(params.term == "") {
-                  processedData.push(data[i].categoryName);
+                  processedData.push(data[i]);
                   }
               }
               return {
                 results: $.map(processedData, function(obj) {
-                    return  { id: obj, text: obj };
+                    return  { id: obj.categoryId, text: obj.categoryName };
                 })
               };
             }
@@ -105,7 +89,7 @@ $(function () {
                 if(params.term == undefined) {
                     processedData.push(data[i]);
                 }
-                else if(params.term != "" && data[i].categoryName.toLowerCase.indexOf(params.term) >= 0) {
+                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
                   processedData.push(data[i]);
                   }
                 else if(params.term == "") {
@@ -120,10 +104,11 @@ $(function () {
             }
         },
         containerCssClass: "category-select2",
-        placeholder: "Select/Search a category"
+        placeholder: "Select/Search a category",
+        allowClear: true
     });
 
-    $("#delete-primary-category").select2({
+    $("#categories-list-delete").select2({
         ajax: {
             url: "/category/all",
             dataType: "json",
@@ -133,7 +118,7 @@ $(function () {
                 if(params.term == undefined) {
                     processedData.push(data[i]);
                 }
-                else if(params.term != "" && data[i].categoryName.toLowerCase.indexOf(params.term) >= 0) {
+                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
                   processedData.push(data[i]);
                   }
                 else if(params.term == "") {
@@ -151,48 +136,30 @@ $(function () {
         placeholder: "Select/Search a category"
     });
 
-    $('#add-sub-category-dropdown').on("select2:selecting", function(e) {
-        console.log("Something has been selected");
+    $('#categories-list-add').on("select2:selecting", function(e) {
        $("#insert-sub-category").show();
     });
 
     $('#categories-list-modify').on("select2:selecting", function(e) {
-        console.log("Something has been selected");
-       $("#modify-primary-category").show();
+       $("#new-primary-category").show();
     });
 
-    $('#delete-primary-category').on("change", function(e) {
+    $('#categories-list-delete').on("change", function(e) {
         categoryId = $(this).val();
         categoryName = $("option[value='"+ categoryId +"']").html();
-        console.log("Primary category " + categoryName + "has been selected");
-        console.log("categoryId = " + categoryId);
-       subCategoryByPrimaryCategory(categoryName)
+        subCategoryByPrimaryCategory(categoryName);
     });
 
-    function showIt(id) {
-        document.getElementById(id).style.visibility = "visible";
-    }
-
-    function hideIt(id) {
-        document.getElementById(id).style.visibility = "hidden";
-    }
-
-    $("#datalist").keyup(function (e) {
-        subCategoryDropDown('#datalist', '#results-outer', "result");
+    $("#sub-categories-list-delete").keyup(function (e) {
+        subCategoryDropDown('#sub-categories-list-delete', '#sub-categories-container-result-delete', "sub-categories-row-delete");
     });
 
-    $("#search-primary-category-add").keyup(function (e) {
-        subCategoryDropDown('#search-primary-category-add', '#primary-options-outer', "result");
-    });
-
-    $("#mod-datalist").keyup(function (e) {
-        subCategoryDropDown('#mod-datalist', '#mod-results-outer', "mod-result");
+    $("#sub-categories-list-modify").keyup(function (e) {
+        subCategoryDropDown('#sub-categories-list-modify', '#sub-categories-container-result-modify', "sub-categories-row-modify");
     });
 
     function subCategoryDropDown(id, targetId, renderResult) {
-        console.log(id)
         var keyword = $(id).val().toLowerCase();
-        console.log("Keyword = " + keyword);
         subCategoryOption = "";
         prepareResult(keyword, targetId, renderResult)
     }
@@ -201,7 +168,7 @@ $(function () {
 
         if (!keyword) {
             $("#topic-linked-subcategory-message").hide();
-            $("#subcategory-sessions").hide();
+            $("#topics-exists").hide();
             $("#no-sessions").hide();
             $("#no-subCategory").hide();
 
@@ -216,13 +183,13 @@ $(function () {
         subCategoryOption = "";
     }
 
-    $("#drop-btn").click(function (e) {
-        showResult("#datalist", "#results-outer", "result");
+    $("#drop-down-btn-delete").click(function (e) {
+        showResult("#sub-categories-list-delete", "#sub-categories-container-result-delete", "sub-categories-row-delete");
         e.preventDefault();
     });
 
-    $("#mod-drop-btn").click(function (e) {
-        showResult("#mod-datalist", "#mod-results-outer", "mod-result");
+    $("#drop-down-btn-modify").click(function (e) {
+        showResult("#sub-categories-list-modify", "#sub-categories-container-result-modify", "sub-categories-row-modify");
         e.preventDefault();
     });
 
@@ -244,89 +211,61 @@ $(function () {
         }
     }
 
-    $("#datalist").blur(function () {
-        $('#results-outer').hide()
+    $("#sub-categories-list-delete").blur(function () {
+        $('#sub-categories-container-result-delete').hide()
     });
 
     $(document).mouseup(function (e) {
-        var container = $("#holder");
+        var container = $("#sub-categories-container-delete");
         if (!container.is(e.target) && container.has(e.target).length === 0)
-            $('#results-outer').hide()
+            $('#sub-categories-container-result-delete').hide()
     });
 
-    $("html").delegate(".result", "mousedown", function () {
+    $("html").delegate(".sub-categories-row-delete", "mousedown", function () {
         categoryId = $(this).attr('id')
         subCategoryName = $(this).attr('name')
         categoryName = $(this).attr('categoryValue')
         topicBySubCategory(categoryName, subCategoryName)
-        $("#datalist").val(subCategoryName);
-        $("#subcategory-sessions").show();
+        $("#sub-categories-list-delete").val(subCategoryName);
+        $("#topics-exists").show();
         $("#hidden-sub-category").val(subCategoryName);
-        $('#results-outer').hide();
+        $('#sub-categories-container-result-delete').hide();
     });
 
-    $("html").delegate(".mod-result", "mousedown", function () {
+    $("html").delegate(".sub-categories-row-modify", "mousedown", function () {
         categoryId = $(this).attr('id')
         oldSubCategoryName = $(this).attr('name')
-        $("#mod-datalist").val(oldSubCategoryName);
+        $("#sub-categories-list-modify").val(oldSubCategoryName);
         $("#new-sub-category").show();
         $("#old-sub-category").val(oldCategoryName);
-        $('#mod-results-outer').hide();
+        $('#sub-categories-container-result-modify').hide();
     });
 
-    $("html").delegate(".result", "mouseover", function () {
-        $(this).addClass('over');
+    $("html").delegate(".sub-categories-row-delete", "mouseover", function () {
+        $(this).addClass('hover');
     });
 
-    $("html").delegate(".result", "mouseleave", function () {
-        $(this).removeClass('over');
+    $("html").delegate(".sub-categories-row-delete", "mouseleave", function () {
+        $(this).removeClass('hover');
     });
 
-    $("#mod-datalist").blur(function () {
-        $('#mod-results-outer').hide()
+    $("#sub-categories-list-modify").blur(function () {
+        $('#sub-categories-container-result-modify').hide()
     });
 
     $(document).mouseup(function (e) {
-        var container = $("#mod-holder");
+        var container = $("#sub-categories-container-modify");
         if (!container.is(e.target) && container.has(e.target).length === 0)
-            $('#mod-results-outer').hide()
+            $('#sub-categories-container-result-modify').hide()
     });
 
-    $("html").delegate(".mod-result", "mouseover", function () {
-        $(this).addClass('over');
+    $("html").delegate(".sub-categories-row-modify", "mouseover", function () {
+        $(this).addClass('hover');
     });
 
-    $("html").delegate(".mod-result", "mouseleave", function () {
-        $(this).removeClass('over');
+    $("html").delegate(".sub-categories-row-modify", "mouseleave", function () {
+        $(this).removeClass('hover');
     });
-
-    /*for primary category search*/
-
-    $("#search-primary-category-add").click(function () {
-        primaryCategoryDropDown('#search-primary-category-add', '#primary-options-outer', "result");
-    });
-
-    function primaryCategoryDropDown(id, targetId, renderResult) {
-        console.log(id)
-        var keyword = $(id).val().toLowerCase();
-        subCategoryOption = "";
-        searchPrimaryCategory(keyword, targetId, renderResult)
-    }
-
-    function searchPrimaryCategory(keyword, targetId, renderResult){
-
-        categorySearchResult.forEach(function (element) {
-           if(element.primaryCategory.toLowerCase().includes(keyword)){
-              categoryOption = categoryOption + '<div class="result" id="'+ element.categoryId +'"><div class="primary-category wordwrap"><strong>'+element.primaryCategory+'</strong></div></div>'
-           }
-        });
-        $(targetId).html(categoryOption);
-        $(targetId).show();
-        categoryOption = "";
-    }
-
-
-
 
 });
 
@@ -372,7 +311,6 @@ function addCategory(categoryName) {
 }
 
 function addSubCategory(categoryName, subCategory) {
-console.log("Sending primary category = " + categoryName + "sub category = " + subCategory);
 
     jsRoutes.controllers.SessionsCategoryController.addSubCategory(categoryName, subCategory).ajax(
         {
@@ -384,14 +322,16 @@ console.log("Sending primary category = " + categoryName + "sub category = " + s
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                successMessageBox()
-                $("#sub-category").val("");
+                $("#select2-categories-list-add-container").html(searchCategoryPlaceholder);
+                $("#insert-sub-category").val("");
+                $("#categories-list-add").val("");
                 document.getElementById("display-success-message").innerHTML = data;
+                successMessageBox();
                 scrollToTop();
             },
             error: function (er) {
-                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
+                failureMessageBox();
                 scrollToTop();
             }
         }
@@ -410,9 +350,10 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                successMessageBox();
+                $("#select2-categories-list-modify-container").html(searchCategoryPlaceholder);
                 $("#new-primary-category").val("");
                 document.getElementById("display-success-message").innerHTML = data;
+                successMessageBox();
                 scrollToTop();
             },
             error: function (er) {
@@ -437,7 +378,6 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                console.log(data);
                 successMessageBox();
                 $("#new-sub-category").show();
                 document.getElementById("display-success-message").innerHTML = data;
@@ -467,11 +407,12 @@ function deletePrimaryCategory(categoryId) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                successMessageBox();
-                $("#delete-primary-category").val("");
+                $("#select2-categories-list-delete-container").html(searchCategoryPlaceholder);
+                $("#categories-list-delete").val("");
                 document.getElementById("display-success-message").innerHTML = data;
-                $("category-sessions").hide();
+                $("#sub-categories-exists").hide();
                 $("#no-subCategory").hide();
+                successMessageBox();
                 scrollToTop();
             },
             error: function (er) {
@@ -493,26 +434,25 @@ function subCategoryByPrimaryCategory(categoryName) {
             success: function (subCategories) {
                 $("#no-subCategory").remove();
                 if (subCategories.length) {
-                    console.log("Sub category = " + subCategories);
                     var subCategoryList = '<ul id="list-sessions">'
                     for (var i = 0; i < subCategories.length; i++) {
                         subCategoryList += '<li ="sub-category-topics">' + subCategories[i] + '</li>';
                     }
                     subCategoryList += '</ul>';
                     $("#subcategory-linked-category-message").show();
-                    $("#category-sessions").html(subCategoryList);
-                    $("#category-sessions").show();
+                    $("#sub-categories-exists").html(subCategoryList);
+                    $("#sub-categories-exists").show();
                 } else {
                     $("#no-subCategory").remove();
                     var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>'
-                    $("#category-sessions").before(noSubCategory);
-                    $("#category-sessions").hide();
+                    $("#sub-categories-exists").before(noSubCategory);
+                    $("#sub-categories-exists").hide();
                     $("#subcategory-linked-category-message").hide();
                 }
 
             },
             error: function (er) {
-                $("#category-sessions").hide();
+                $("#sub-categories-exists").hide();
             }
         }
     )
@@ -534,17 +474,17 @@ function topicBySubCategory(categoryName, subCategoryName) {
                     }
                     sessions += "</ul>";
                     $("#topic-linked-subcategory-message").show();
-                    $("#subcategory-sessions").html(sessions);
+                    $("#topics-exists").html(sessions);
                 } else {
                     $("#no-sessions").remove();
                     var noSessions = '<label id= "no-sessions">No sessions exists!</label>'
                     $(".topic-subcategory-message").hide();
-                    $("#subcategory-sessions").before(noSessions);
-                    $("#subcategory-sessions").hide();
+                    $("#topics-exists").before(noSessions);
+                    $("#topics-exists").hide();
                 }
             },
             error: function (er) {
-                $("#subcategory-sessions").hide();
+                $("#topics-exists").hide();
             }
         }
     )
@@ -563,9 +503,9 @@ function deleteSubCategory(categoryId, subCategoryName) {
             },
             success: function (data) {
                 successMessageBox();
-                $("#datalist").val("");
+                $("#sub-categories-list-delete").val("");
                 document.getElementById("display-success-message").innerHTML = data;
-                $("#subcategory-sessions").hide();
+                $("#topics-exists").hide();
                 $("#no-sessions").hide();
                 updateDropDown();
                 scrollToTop();
@@ -580,39 +520,13 @@ function deleteSubCategory(categoryId, subCategoryName) {
     )
 }
 
-function updatePrimaryCategoryDropDown() {
+function updateSubCategoryDropDown() {
 
     jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
         {
             type: "GET",
             processData: false,
             success: function (values) {
-                var categories = "";
-                console.log(values);
-
-                categorySearchResult = [];
-
-                for (var i = 0; i < values.length; i++) {
-                    var option = new primaryElement(values[i].categoryId, values[i].categoryName);
-                    categorySearchResult.push(option);
-                }
-            }
-        }
-    )
-}
-
-function updateDropDown() {
-
-    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
-        {
-            type: "GET",
-            processData: false,
-            success: function (values) {
-
-                var categories = "";
-                var categoriesModify = "";
-                var categoriesDelete = "";
-
                 subCategorySearchResult = [];
 
                 for (var i = 0; i < values.length; i++) {

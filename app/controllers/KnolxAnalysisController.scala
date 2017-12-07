@@ -18,13 +18,9 @@ import scala.concurrent.Future
 
 // Knolx related analytics classes
 case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
-
 case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
-
 case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
-
 case class KnolxMonthlyInfo(monthName: String, total: Int)
-
 case class KnolxAnalysisDateRange(startDate: String, endDate: String)
 
 // User knolx related analytics classes

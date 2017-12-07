@@ -127,7 +127,6 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         }
         val topUsers = userAverageScore.toList.sortWith(_._2 > _._2).toMap.keys.take(10)
         Ok(Json.toJson(topUsers))
-
       } else {
         Logger.info(s"No records found $totalSessions")
         BadRequest("OOPS ! No record found")

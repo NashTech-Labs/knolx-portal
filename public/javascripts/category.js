@@ -4,13 +4,6 @@ function Element(categoryId, subCategory, primaryCategory) {
     this.primaryCategory = primaryCategory;
 }
 
-function primaryElement(categoryId, primaryCategory) {
-    this.categoryId = categoryId;
-    this.primaryCategory = primaryCategory;
-}
-
-var categorySearchResult = [];
-var categoryOption = "";
 var subCategorySearchResult = [];
 var subCategoryOption = "";
 
@@ -38,7 +31,15 @@ $(function () {
     });
 
     $("#add-sub-category").click(function () {
+        categoryName = $("#add-sub-category-dropdown").val();
+        subCategory = $("#insert-sub-category").val();
         addSubCategory(categoryName, subCategory);
+    });
+
+    $("#modify-primary-category-btn").click(function () {
+        categoryName = $("#categories-list-modify").val();
+        var newCategoryName = $("#modify-primary-category").val();
+        modifyPrimaryCategory(categoryName, newCategoryName);
     });
 
     $("#modify-sub-category-btn").click(function () {
@@ -66,6 +67,108 @@ $(function () {
         hideIt('drop-btn');
     });
 
+    $("#add-sub-category-dropdown").select2({
+        ajax: {
+            url: "/category/all",
+            dataType: "json",
+            processResults: function (data, params) {
+              var processedData = [];
+              for(var i=0 ; i<data.length ; i++) {
+                if(params.term == undefined) {
+                    processedData.push(data[i].categoryName);
+                }
+                else if(params.term != "" && data[i].categoryName.toLowerCase.indexOf(params.term) >= 0) {
+                  processedData.push(data[i].categoryName);
+                  }
+                else if(params.term == "") {
+                  processedData.push(data[i].categoryName);
+                  }
+              }
+              return {
+                results: $.map(processedData, function(obj) {
+                    return  { id: obj, text: obj };
+                })
+              };
+            }
+        },
+        containerCssClass: "category-select2",
+        placeholder: "Select/Search a category"
+    });
+
+    $("#categories-list-modify").select2({
+        ajax: {
+            url: "/category/all",
+            dataType: "json",
+            processResults: function (data, params) {
+              var processedData = [];
+              for(var i=0 ; i<data.length ; i++) {
+                if(params.term == undefined) {
+                    processedData.push(data[i]);
+                }
+                else if(params.term != "" && data[i].categoryName.toLowerCase.indexOf(params.term) >= 0) {
+                  processedData.push(data[i]);
+                  }
+                else if(params.term == "") {
+                  processedData.push(data[i]);
+                  }
+              }
+              return {
+                results: $.map(processedData, function(obj) {
+                    return  { id: obj.categoryId, text: obj.categoryName };
+                })
+              };
+            }
+        },
+        containerCssClass: "category-select2",
+        placeholder: "Select/Search a category"
+    });
+
+    $("#delete-primary-category").select2({
+        ajax: {
+            url: "/category/all",
+            dataType: "json",
+            processResults: function (data, params) {
+              var processedData = [];
+              for(var i=0 ; i<data.length ; i++) {
+                if(params.term == undefined) {
+                    processedData.push(data[i]);
+                }
+                else if(params.term != "" && data[i].categoryName.toLowerCase.indexOf(params.term) >= 0) {
+                  processedData.push(data[i]);
+                  }
+                else if(params.term == "") {
+                  processedData.push(data[i]);
+                  }
+              }
+              return {
+                results: $.map(processedData, function(obj) {
+                    return  { id: obj.categoryId, text: obj.categoryName };
+                })
+              };
+            }
+        },
+        containerCssClass: "category-select2",
+        placeholder: "Select/Search a category"
+    });
+
+    $('#add-sub-category-dropdown').on("select2:selecting", function(e) {
+        console.log("Something has been selected");
+       $("#insert-sub-category").show();
+    });
+
+    $('#categories-list-modify').on("select2:selecting", function(e) {
+        console.log("Something has been selected");
+       $("#modify-primary-category").show();
+    });
+
+    $('#delete-primary-category').on("change", function(e) {
+        categoryId = $(this).val();
+        categoryName = $("option[value='"+ categoryId +"']").html();
+        console.log("Primary category " + categoryName + "has been selected");
+        console.log("categoryId = " + categoryId);
+       subCategoryByPrimaryCategory(categoryName)
+    });
+
     function showIt(id) {
         document.getElementById(id).style.visibility = "visible";
     }
@@ -78,6 +181,10 @@ $(function () {
         subCategoryDropDown('#datalist', '#results-outer', "result");
     });
 
+    $("#search-primary-category-add").keyup(function (e) {
+        subCategoryDropDown('#search-primary-category-add', '#primary-options-outer', "result");
+    });
+
     $("#mod-datalist").keyup(function (e) {
         subCategoryDropDown('#mod-datalist', '#mod-results-outer', "mod-result");
     });
@@ -85,6 +192,7 @@ $(function () {
     function subCategoryDropDown(id, targetId, renderResult) {
         console.log(id)
         var keyword = $(id).val().toLowerCase();
+        console.log("Keyword = " + keyword);
         subCategoryOption = "";
         prepareResult(keyword, targetId, renderResult)
     }
@@ -194,7 +302,7 @@ $(function () {
 
     /*for primary category search*/
 
-    $("#search-primary-category-add").keyup(function (e) {
+    $("#search-primary-category-add").click(function () {
         primaryCategoryDropDown('#search-primary-category-add', '#primary-options-outer', "result");
     });
 
@@ -209,12 +317,12 @@ $(function () {
 
         categorySearchResult.forEach(function (element) {
            if(element.primaryCategory.toLowerCase().includes(keyword)){
-              result = result + '<div class="result" id="'+ element.categoryId +'"><div class="primary-category wordwrap"><strong>'+element.primaryCategory+'</strong></div></div>'
+              categoryOption = categoryOption + '<div class="result" id="'+ element.categoryId +'"><div class="primary-category wordwrap"><strong>'+element.primaryCategory+'</strong></div></div>'
            }
         });
-        $(targetId).html(result);
+        $(targetId).html(categoryOption);
         $(targetId).show();
-        result = "";
+        categoryOption = "";
     }
 
 
@@ -264,6 +372,7 @@ function addCategory(categoryName) {
 }
 
 function addSubCategory(categoryName, subCategory) {
+console.log("Sending primary category = " + categoryName + "sub category = " + subCategory);
 
     jsRoutes.controllers.SessionsCategoryController.addSubCategory(categoryName, subCategory).ajax(
         {
@@ -398,6 +507,7 @@ function subCategoryByPrimaryCategory(categoryName) {
                     var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>'
                     $("#category-sessions").before(noSubCategory);
                     $("#category-sessions").hide();
+                    $("#subcategory-linked-category-message").hide();
                 }
 
             },
@@ -492,7 +602,7 @@ function updatePrimaryCategoryDropDown() {
 }
 
 function updateDropDown() {
-    
+
     jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
         {
             type: "GET",

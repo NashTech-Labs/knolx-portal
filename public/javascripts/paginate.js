@@ -1,6 +1,5 @@
 function paginate(pageNumber, pages) {
     var pagination = "";
-
     if (pages >= pageNumber) {
         switch (true) {
             case (pages > 5 && pageNumber < 5) : {

@@ -1,6 +1,6 @@
 $(function () {
     var startDate = moment().subtract(1, 'years').startOf('day').format('YYYY-MM-DD HH:mm').toString();
-    var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm ').toString();
+    var endDate = moment().endOf('day').format('YYYY-MM-DD HH:mm').toString();
 
     if (sessionStorage.startDate === undefined) {
         sessionStorage.setItem("startDate", startDate);
@@ -68,7 +68,7 @@ function columnChart(startDate, EndDate) {
 
                 var columnGraph = Highcharts.chart('column-graph', {
                     title: {
-                        text: 'Knolx Session Sub-Category Analysis'
+                        text: 'Session Sub-Category Analysis'
                     },
 
                     subtitle: {
@@ -111,8 +111,6 @@ function pieChart(startDate, EndDate) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-
-                console.log(data);
                 var items = [];
                 var series = [];
 
@@ -144,7 +142,7 @@ function pieChart(startDate, EndDate) {
                         type: 'pie'
                     },
                     title: {
-                        text: 'Knolx Session Analysis'
+                        text: 'Session Category Analysis'
                     },
                     plotOptions: {
                         pie: {
@@ -165,7 +163,7 @@ function pieChart(startDate, EndDate) {
                         pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.percentage:.1f}%</b> of total<br/>'
                     },
                     series: [{
-                        name: 'Primary Category',
+                        name: 'Category',
                         colorByPoint: true,
                         data: items
                     }],
@@ -219,7 +217,7 @@ function lineGraph(startDate, EndDate) {
                         type: 'area'
                     },
                     title: {
-                        text: 'Knolx'
+                        text: 'Knolx Monthly Analysis'
                     },
                     credits: {
                         enabled: false
@@ -229,7 +227,7 @@ function lineGraph(startDate, EndDate) {
                     },
                     yAxis: {
                         title: {
-                            text: 'Total Session In Month'
+                            text: 'Total Sessions In Month'
                         },
                         labels: {
                             formatter: function () {
@@ -269,7 +267,6 @@ function leaderBoard() {
             processData: false,
             contentType: 'application/json',
             success: function (users) {
-                console.log("Users ->>>>>>>>> " + users);
                 var usersFound = "";
                 for(var user = 0; user < users.length; user++) {
                     usersFound += '<tr class="table-header-color">' +

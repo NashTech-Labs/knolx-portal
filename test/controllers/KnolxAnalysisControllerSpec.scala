@@ -146,7 +146,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
+      sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns Future(List(("2017-July", 4)))
 
       val result = controller.renderLineChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -156,8 +156,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "work" in new WithTestApplication {
-      private val sessionObject1 = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
+    "leaderBoard with non-empty session list" in new WithTestApplication {
+      private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
         "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 50.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate()),
         SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
           "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 60.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate()),
@@ -165,11 +165,20 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
           "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 70.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate())
       ))
 
-      sessionsRepository.sessions returns sessionObject1
+      sessionsRepository.sessions returns sessionObject
 
       val result = controller.leaderBoard(FakeRequest(GET, "knolx/analysis/leaderboard"))
 
       status(result) must be equalTo OK
+    }
+
+    "leaderBoard with empty session list" in new WithTestApplication {
+      private val sessionObject = Future.successful(List())
+      sessionsRepository.sessions returns sessionObject
+
+      val result = controller.leaderBoard(FakeRequest(GET, "knolx/analysis/leaderboard"))
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
   }

@@ -9,7 +9,7 @@ POST        /login                                  controllers.UsersController.
 GET         /logout                                 controllers.UsersController.logout
 GET         /register                               controllers.UsersController.register
 POST        /register                               controllers.UsersController.createUser
-GET         /users/manage/:pageNumber               controllers.UsersController.manageUser(pageNumber: Int, keyword: Option[String])
+GET         /users/manage                           controllers.UsersController.manageUser()
 POST        /users/search                           controllers.UsersController.searchUser
 GET         /user/update                            controllers.UsersController.getByEmail(email: String)
 POST        /user/update                            controllers.UsersController.updateUser
@@ -23,9 +23,9 @@ GET         /user/changepassword                    controllers.UsersController.
 POST        /user/changepassword                    controllers.UsersController.changePassword
 
 # Session
-GET         /session                                controllers.SessionsController.sessions(pageNumber: Int, keyword: Option[String])
+GET         /session                                controllers.SessionsController.sessions
 POST        /session/search                         controllers.SessionsController.searchSessions
-GET         /session/manage/:pageNumber             controllers.SessionsController.manageSessions(pageNumber:Int, keyword: Option[String])
+GET         /session/manage                         controllers.SessionsController.manageSessions()
 POST        /session/manage/search                  controllers.SessionsController.searchManageSession
 GET         /session/create                         controllers.SessionsController.create
 POST        /session/create                         controllers.SessionsController.createSession
@@ -52,8 +52,10 @@ GET         /jsRoutes                               controllers.JavascriptRouter
 
 # Reports
 GET         /reports/user                           controllers.FeedbackFormsReportController.renderUserFeedbackReports
+POST        /reports/user                           controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
 GET         /reports/user/responses                 controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
 GET         /reports/manage                         controllers.FeedbackFormsReportController.renderAllFeedbackReports
+POST        /reports/manage                         controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
 GET         /reports/manage/responses               controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
 GET         /reports/manage/response                controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
 # Map static resources from the /public folder to the /assets URL path

@@ -1,6 +1,11 @@
 @(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
+    <div class="row ">
+        <div class="header-container">
+            <h2 style="margin-top:10px;">Update Session</h2>
+        </div>
+    </div>
 
     <div class="row update-error">
         <div class="col-md-4" ></div>
@@ -21,13 +26,13 @@
     </div>
 
     <div class="row">
-
-        <div class="col-md-4" ></div>
-        <div class="col-md-4 update-outer">
+        <div class="col-md-12 update-outer">
             <form class="UpdateForm" action="@routes.SessionsController.updateSession()" method="post">
             @helper.CSRF.formField
 
                 <input name ="sessionId" type="hidden" value='@sessionInfo.data.get("sessionId")'/>
+                <input id="primary-category" value='@sessionInfo.data.get("category")' type="hidden" />
+                <input id="sub-category" value='@sessionInfo.data.get("subCategory")' type="hidden" />
 
                 <div class="col-md-12" >
                     <div class="col-md-1" ></div>
@@ -191,10 +196,7 @@
                     <div class="col-md-1" ></div>
                 </div>
             </form>
-            <div class="col-md-12 create-footer"></div>
         </div>
-
-        <div class="col-md-4" ></div>
     </div>
 
     @feedbackforms.feedbackformpreview()

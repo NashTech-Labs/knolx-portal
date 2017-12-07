@@ -10,6 +10,20 @@
     padding-bottom: 10px;
 }
 
+.selection{
+   width:100%;
+}
+
+.select2-container--default .select2-selection--single {
+    background-color: #fff;
+    border: 1px solid #ccc !important;
+    border-radius: 0px !important;
+    color: #676a6c !important;
+}
+.select2-selection__rendered {
+    color: #676a6c !important;
+}
+
 .control-label {
     padding-top: 4px;
     margin-bottom: 0;
@@ -30,6 +44,7 @@
 }
 
 .preview {
+    padding-top: 3px;
     font-size: 20px;
     text-align: center;
     cursor: pointer;
@@ -42,7 +57,7 @@
 
 .feedback-duration {
     line-height: 0.5em;
-    padding: 20px 0px;
+    padding: 10px 0px;
     box-shadow: 0 4px 10px -5px #a8a8a8;
 }
 
@@ -51,7 +66,7 @@
     font-size: 16px;
     color: #566573;
     font-weight: normal;
-    margin-top: 15px;
+    margin-top: 0 !important;
 }
 
 .radio-style-days {
@@ -59,7 +74,7 @@
     font-size: 16px;
     color: #566573;
     font-weight: normal;
-    margin-top: 10px;
+    margin-top: 0 !important;
 }
 
 .days {
@@ -104,7 +119,7 @@
 }
 
 .feedback-expiration {
-    padding-top: 4px;
+    padding-top: 15px;
 }
 
 .pin_text {

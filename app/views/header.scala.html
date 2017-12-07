@@ -10,7 +10,7 @@
     <nav class="navbar navbar-fixed-top" role="navigation" style="margin-bottom: 0">
         <div class="navbar-header" style="height: 50px;">
             <span class="main-logo" >
-                <a href="@routes.SessionsController.sessions(1, None)" class="pull-left logo">
+                <a href="@routes.SessionsController.sessions()" class="pull-left logo">
                     <img src='@routes.Assets.versioned("images/logo3.png")' style="padding-left: 15px;">
                 </a>
             </span>
@@ -28,7 +28,7 @@
         } else {
             <li class="dropdown alignLinks">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-right: 30px;">
-                    <i class="fa fa-user-circle-o"></i> <span>@SessionHelper.email.split("@")(0).split('.')(0)
+                    <i class="fa fa-user-circle-o"></i> <span>@SessionHelper.email.split("@")(0).split('.')(0).capitalize
                 </span>
                     <b class="caret"></b>
                 </a>
@@ -48,12 +48,12 @@
 
         </ul>
     </nav>
-    <nav id="sidebar">
+    <nav id="sidebar" class="scrollbar scrollbar-primary">
         <script src="@routes.Assets.versioned("javascripts/activesidebar.js")" type="text/javascript"></script>
 
         <ul class="list-unstyled components" style="border-bottom: none;">
             <li class="@activeLink("/session") alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
-                <a href="@routes.SessionsController.sessions(1, None)">
+                <a href="@routes.SessionsController.sessions()">
                     <i class="fa fa-clock-o"></i>
                     <span>Sessions</span></a>
             </li>
@@ -88,29 +88,29 @@
                         <b class="caret"></b>
                     </a>
 
-                    <ul class="collapse list-unstyled" id="manageSubmenu">
-                        <li class="@activeLink(routes.SessionsController.manageSessions(1, None).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
-                            <a href="@routes.SessionsController.manageSessions(1, None)">
-                                <i class="fa fa-hourglass-end" aria-hidden="true"></i>
-                                <span>Sessions</span></a>
-                        </li>
-                        <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
-                            <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">
-                                <i class="fa fa-file" aria-hidden="true"></i>
-                                <span>Feedback Forms</span></a>
-                        </li>
-                        <li class="@activeLink(routes.UsersController.manageUser(1, None).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
-                            <a href="@routes.UsersController.manageUser(1, None)">
-                                <i class="fa fa-users" aria-hidden="true"></i>
-                                <span>Users</span></a>
-                        </li>
-                        <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Reports">
-                            <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()">
-                                <i class="fa fa-folder-open" aria-hidden="true"></i>
-                                <span>Reports</span></a>
-                        </li>
-                    </ul>
-                </li>
+                <ul class="collapse list-unstyled" id="manageSubmenu">
+                    <li class="@activeLink(routes.SessionsController.manageSessions().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
+                        <a href="@routes.SessionsController.manageSessions()">
+                            <i class="fa fa-hourglass-end" aria-hidden="true"></i>
+                            <span>Sessions</span></a>
+                    </li>
+                    <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
+                        <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">
+                            <i class="fa fa-file" aria-hidden="true"></i>
+                            <span>Feedback Forms</span></a>
+                    </li>
+                    <li class="@activeLink(routes.UsersController.manageUser().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
+                        <a href="@routes.UsersController.manageUser()">
+                            <i class="fa fa-users" aria-hidden="true"></i>
+                            <span>Users</span></a>
+                    </li>
+                    <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Reports">
+                        <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()">
+                            <i class="fa fa-folder-open" aria-hidden="true"></i>
+                            <span>Reports</span></a>
+                    </li>
+                </ul>
+            </li>
 
             }
         </ul>

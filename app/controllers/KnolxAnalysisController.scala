@@ -18,9 +18,13 @@ import scala.concurrent.Future
 
 // Knolx related analytics classes
 case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
+
 case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
+
 case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
+
 case class KnolxMonthlyInfo(monthName: String, total: Int)
+
 case class KnolxAnalysisDateRange(startDate: String, endDate: String)
 
 // User knolx related analytics classes
@@ -116,15 +120,12 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
 
   def leaderBoard: Action[AnyContent] = action.async { implicit request =>
     sessionsRepository.sessions.map { totalSessions =>
-
-      if(totalSessions.nonEmpty) {
+      if (totalSessions.nonEmpty) {
         val userWithSession: Map[String, List[SessionInfo]] = totalSessions.groupBy(_.email)
         val userAverageScore: Map[String, Double] = userWithSession.map { case (user, userSessions) =>
-          val sum = userSessions.map(_.score).sum
-
-          val averageScore = sum / userSessions.length.toDouble
+          val averageScore = userSessions.map(_.score).sum / userSessions.length
           val sessionScore = (userSessions.length.toDouble / totalSessions.length) * 2.5
-          val ratingScore = (averageScore.toDouble / 100D) * 7.5
+          val ratingScore = (averageScore / 100) * 7.5
           val userScore = sessionScore + ratingScore
           (user, userScore)
         }
@@ -132,7 +133,7 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         Ok(Json.toJson(topUsers))
 
       } else {
-        Logger.info("No recors found")
+        Logger.info(s"No records found $totalSessions")
         BadRequest("OOPS ! No record found")
       }
     }

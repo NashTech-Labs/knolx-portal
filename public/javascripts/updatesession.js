@@ -180,7 +180,6 @@ function getUpdateURL(sessionId) {
             processData: false,
             contentType: false,
             success: function (data) {
-                console.log("data =>" + data)
                 newVideoURL = data;
                 $("#attach-video").show();
             },

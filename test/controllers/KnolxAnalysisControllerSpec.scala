@@ -2,7 +2,7 @@ package controllers
 
 import java.text.SimpleDateFormat
 import java.time.{LocalDateTime, ZoneId}
-import java.util.{Date, TimeZone}
+import java.util.TimeZone
 
 import akka.actor.ActorRef
 import com.google.inject.name.Names
@@ -14,34 +14,27 @@ import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results
+import play.api.test.CSRFTokenHelper._
 import play.api.test._
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
-import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
 
   private val date1 = new SimpleDateFormat("yyyy-MM-dd").parse("2017-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
 
-  private val jsonData: JsValue = Json.parse(
-    """
-  {
-    "startDate":"2017-07-15 00:00",
-    "endDate":"2017-10-15 23:59"
-  }"""
-  )
-  private val wrongJsonData: JsValue = Json.parse(
-    """
-      {
-      "endDate":"2017-10-15 23:59"
-      } """)
+  private val jsonData: JsValue = Json.parse("""{"startDate":"2017-07-15 00:00","endDate":"2017-10-15 23:59"}""")
+  private val wrongJsonData: JsValue = Json.parse("""{"endDate":"2017-10-15 23:59"}""")
 
-  private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
-    "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+  private val sessionObject =
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
+      "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false,
+      active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+      notification = false, _id)))
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
@@ -98,7 +91,9 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
+      sessionsRepository
+        .sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(sessionObject)
 
       val result = controller.renderPieChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -122,7 +117,9 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
+      sessionsRepository
+        .sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(sessionObject)
 
       val result = controller.renderColumnChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -146,7 +143,9 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns Future(List(("2017-July", 4)))
+      sessionsRepository
+        .getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(Future.successful(List(("2017-July", 4))))
 
       val result = controller.renderLineChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -157,13 +156,21 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
     }
 
     "leaderBoard with non-empty session list" in new WithTestApplication {
-      private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
-        "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 50.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate()),
-        SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
-          "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 60.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate()),
-        SessionInfo(_id.stringify, "email1", BSONDateTime(date1.getTime),
-          "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 70.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, BSONObjectID.generate())
-      ))
+      val sessionObject =
+        Future.successful(
+          List(
+            SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
+              "feedbackFormId", "topic", 1, meetup = true, "rating", 50.00, cancelled = false, active = true,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+              notification = false, BSONObjectID.generate()),
+            SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
+              "feedbackFormId", "topic", 1, meetup = true, "rating", 60.00, cancelled = false, active = true,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+              notification = false, BSONObjectID.generate()),
+            SessionInfo(_id.stringify, "email1", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
+              "feedbackFormId", "topic", 1, meetup = true, "rating", 70.00, cancelled = false, active = true,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+              notification = false, BSONObjectID.generate())))
 
       sessionsRepository.sessions returns sessionObject
 

@@ -114,8 +114,8 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
       ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
-  def getScoresOfCoreMembers(sessionId: String)(implicit ex: ExecutionContext): Future[List[Double]] = {
-    val query = Json.obj("sessionId" -> sessionId, "coreMember" -> true)
+  def getScoresOfMembers(sessionId: String, isCoreMember: Boolean)(implicit ex: ExecutionContext): Future[List[Double]] = {
+    val query = Json.obj("sessionId" -> sessionId, "coreMember" -> isCoreMember)
     val projection = Json.obj("score" -> 1)
 
     collection

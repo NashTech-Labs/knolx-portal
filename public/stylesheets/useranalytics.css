@@ -9,14 +9,35 @@
     padding: 10px;
 }
 
-.ibox {
+.user-analytics-table-div {
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 20px;"
+}
+
+.user-analytics-table{
+    overflow-y: auto;
+    max-height:400px;
+}
+
+#user-analytics {
+    display: none;
+}
+
+.user-analytics-input {
+    margin: 15px;
+    width: 85%;
+    text-align: center;
+}
+
+.user-analytics-ibox {
     clear: both;
     margin-bottom: 25px;
     margin-top: 0;
     padding: 0;
     background-color: #FFFFFF;
 }
-.ibox-title {
+.user-analytics-title {
     -moz-border-bottom-colors: none;
     -moz-border-left-colors: none;
     -moz-border-right-colors: none;
@@ -36,7 +57,7 @@
     clear: both;
 }
 
-.ibox-content {
+.user-analytics-content {
     background-color: #ffffff;
     color: inherit;
     padding: 15px 20px 20px 20px;

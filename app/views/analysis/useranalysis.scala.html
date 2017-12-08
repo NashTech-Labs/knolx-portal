@@ -9,73 +9,71 @@
     </div>
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
     <div class="row" style="margin-top: 20px;">
-        <div class="col-md-3 filter-padding-left" style="background-color: white;padding: 10px; height: 450px">
+        <div class="col-md-3 filter-padding-left user-analytics-table-div">
             <div class="col-md-12 text-center">
-                <input class="search-text" placeholder="Search User" autocomplete="off" name="email" id="search-user" style="margin: 15px;
-                    width: 85%;"/>
+                <input class="user-analytics-input" placeholder="Search User" autocomplete="off" name="email" id="search-user" />
             </div>
-            <div class="col-md-12">
-                <table class="table table-responsive table-bordered" style="overflow-y: auto !important;">
+            <div class="col-md-12 user-analytics-table">
+                <table class="table table-responsive table-bordered">
                     <tbody data-bind="foreach: emailList">
-                        <tr> <td data-bind="text: $data , value: $data, click: $parent.userDataHandler" style="cursor:pointer"></td></tr>
+                        <tr> <td data-bind="text: $data , value: $data, click: $parent.userDataHandler" style="cursor: pointer"></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="col-md-9 filter-padding-right">
-            <div class="col-md-12 user-title" id="user"></div>
+        <div class="col-md-9 filter-padding-right" id="user-analytics">
+            <div class="col-md-12 user-title" data-bind="text: email"></div>
             <div class="col-md-12">
                     <!-- Ban count -->
                 <div class="col-md-3 filter-padding-left">
-                    <div class="ibox">
-                        <div class="ibox-title">
+                    <div class="user-analytics-ibox">
+                        <div class="user-analytics-title">
                             <h5>Ban Count</h5>
                         </div>
-                        <div class="ibox-content">
-                            <h3 class="no-margins" id="ban-count">30</h3>
+                        <div class="user-analytics-content">
+                            <h3 class="no-margins" data-bind="text: banCount">30</h3>
                         </div>
                     </div>
                 </div>
                     <!-- Did not attend count -->
                 <div class="col-md-3 filter-padding-left">
-                    <div class="ibox">
-                        <div class="ibox-title">
+                    <div class="user-analytics-ibox">
+                        <div class="user-analytics-title">
                             <h5>Sessions Didn't Attend</h5>
                         </div>
-                        <div class="ibox-content">
-                            <h3 class="no-margins" id="did-not-attend">40</h3>
+                        <div class="user-analytics-content">
+                            <h3 class="no-margins" data-bind="text: sessionNotAttend" ></h3>
                         </div>
                     </div>
                 </div>
 
-                    <!-- Comparison Between Reviews -->
-                <div class="col-md-6 filter-padding-left filter-padding-right">
-                    <div class="ibox">
-                        <div class="ibox-title">
-                            <h5>Response Comparison</h5>
+
+                    <!-- Total knolx -->
+                <div class="col-md-3 filter-padding-left">
+                    <div class="user-analytics-ibox">
+                        <div class="user-analytics-title">
+                            <h5>Knolx</h5>
                         </div>
-                        <div class="ibox-content">
-                            <div class="no-margins" id="response-comparison"></div>
+                        <div class="user-analytics-content">
+                            <h3 class="no-margins" data-bind="text: totalKnolx"></h3>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- total Meetups -->
+                <div class="col-md-3 filter-padding-left filter-padding-right">
+                    <div class="user-analytics-ibox">
+                        <div class="user-analytics-title">
+                            <h5>Meet Ups</h5>
+                        </div>
+                        <div class="user-analytics-content">
+                            <h3 class="no-margins" data-bind="text: totalMeetups"></h3>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-12 ibox">
-                <table class="table table-hover">
-                    <thead >
-                        <tr>
-                            <th>Topic</th>
-                            <th>Rating</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>vgbvf</td>
-                            <td>gvbv</td>
-                        </tr>
-                    </tbody>
-
-                </table>
+            <div class="col-md-12 filter-padding-left filter-padding-right">
+                <div class="no-margins" id="response-comparison"></div>
             </div>
         </div>
 

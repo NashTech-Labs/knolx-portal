@@ -13,17 +13,16 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class SessionsInformation(topic: String, rating: Double)
+case class SessionsInformation(topic: String,
+                               coreMemberResponse: Double,
+                               nonCoreMemberResponse: Double)
 
 case class UserAnalysisInformation(email: String,
                                    sessions: List[SessionsInformation],
                                    didNotAttendCount: Int,
-                                   BanCount: Int,
+                                   banCount: Int,
                                    totalMeetUps: Int,
-                                   totalKnolx: Int,
-                                   coreMemberResponse: Double,
-                                   nonCoreMemberResponse: Double
-                                  )
+                                   totalKnolx: Int)
 
 @Singleton
 class KnolxUserAnalysisController @Inject()(messagesApi: MessagesApi,
@@ -56,30 +55,28 @@ class KnolxUserAnalysisController @Inject()(messagesApi: MessagesApi,
       } { userInfo =>
         sessionsRepository.userSession(email).flatMap { sessions =>
           if (sessions.nonEmpty) {
-            val sessionsInformation = sessions.map(session => SessionsInformation(session.topic, session.score))
             val totalMeetUps = sessions.count(_.meetup)
             val totalKnolx = sessions.count(!_.meetup)
 
-            val nonCoreMemberResponsePerSession = sessions.map { session =>
-              feedbackFormsResponseRepository.allResponsesBySession(session._id.stringify, Some(email))
-                .map { response =>
-                  if (response.nonEmpty) response.filterNot(_.coreMember).map(_.score).sum / response.length else 0D
+            val sessionsInformation = sessions.map { session =>
+              feedbackFormsResponseRepository.getScoresOfMembers(session._id.stringify, false)
+                .map { scores =>
+                  val scoresWithoutZero = scores.filterNot(_ == 0)
+                  val sessionScore = if (scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
+                  SessionsInformation(session.topic, session.score, sessionScore)
                 }
             }
-            val nonCoreMemberResponse = Future.sequence(nonCoreMemberResponsePerSession)
 
-            val coreMemberResponseSum = sessions.map(_.score).sum / sessions.length
-            nonCoreMemberResponse.flatMap { sessionsResponse =>
-
-              val nonCoreMemberResponseAverage = sessionsResponse.sum / sessions.length
-
+            val sessionsInformationList = Future.sequence(sessionsInformation)
+            sessionsInformationList.flatMap { sessionsList =>
               feedbackFormsResponseRepository.userCountDidNotAttendSession(email).map { count =>
-                Ok(Json.toJson(UserAnalysisInformation(email, sessionsInformation, count, userInfo.banCount,
-                  totalMeetUps, totalKnolx, coreMemberResponseSum, nonCoreMemberResponseAverage)))
+                Ok(Json.toJson(UserAnalysisInformation(email, sessionsList, count, userInfo.banCount,
+                  totalMeetUps, totalKnolx)))
               }
             }
-          } else {
-            Future.successful(Ok(Json.toJson(UserAnalysisInformation(email, Nil, 0, 0, 0, 0, 0, 0))))
+          }
+          else {
+            Future.successful(Ok(Json.toJson(UserAnalysisInformation(email, Nil, 0, 0, 0, 0))))
           }
         }
       }

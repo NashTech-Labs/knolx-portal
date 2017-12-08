@@ -26,14 +26,28 @@ $(function () {
         e.preventDefault();
     });
 
+    $('#categories-list-modify').on("change", function(e) {
+       $("#new-primary-category").show();
+    });
+
     $("#modify-primary-category-btn").click(function () {
         categoryName = $("#categories-list-modify").val();
         var newCategoryName = $("#new-primary-category").val();
         modifyPrimaryCategory(categoryName, newCategoryName);
     });
 
+    $('#categories-list-delete').on("change", function(e) {
+        categoryId = $(this).val();
+        categoryName = $("option[value='"+ categoryId +"']").html();
+        subCategoryByPrimaryCategory(categoryName);
+    });
+
     $("#delete-primary-category-btn").click(function () {
         deletePrimaryCategory(categoryId);
+    });
+
+    $('#categories-list-add').on("change", function(e) {
+       $("#insert-sub-category").show();
     });
 
     $("#add-sub-category-btn").click(function () {
@@ -136,20 +150,6 @@ $(function () {
         placeholder: "Select/Search a category"
     });
 
-    $('#categories-list-add').on("select2:selecting", function(e) {
-       $("#insert-sub-category").show();
-    });
-
-    $('#categories-list-modify').on("select2:selecting", function(e) {
-       $("#new-primary-category").show();
-    });
-
-    $('#categories-list-delete').on("change", function(e) {
-        categoryId = $(this).val();
-        categoryName = $("option[value='"+ categoryId +"']").html();
-        subCategoryByPrimaryCategory(categoryName);
-    });
-
     $("#sub-categories-list-delete").keyup(function (e) {
         subCategoryDropDown('#sub-categories-list-delete', '#sub-categories-container-result-delete', "sub-categories-row-delete");
     });
@@ -160,18 +160,17 @@ $(function () {
 
     function subCategoryDropDown(id, targetId, renderResult) {
         var keyword = $(id).val().toLowerCase();
+        updateSubCategoryDropDown();
         subCategoryOption = "";
         prepareResult(keyword, targetId, renderResult)
     }
 
     function prepareResult(keyword, targetId, renderResult) {
-
         if (!keyword) {
             $("#topic-linked-subcategory-message").hide();
             $("#topics-exists").hide();
             $("#no-sessions").hide();
             $("#no-subCategory").hide();
-
         }
         subCategorySearchResult.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
@@ -195,6 +194,7 @@ $(function () {
 
     function showResult(id, targetId, renderResult) {
         var keyword = $(id).val().toLowerCase();
+        updateSubCategoryDropDown();
         if (keyword == "") {
             if ($(targetId).is(":visible")) {
                 $(targetId).hide();
@@ -249,6 +249,14 @@ $(function () {
         $(this).removeClass('hover');
     });
 
+    $("html").delegate(".sub-categories-row-modify", "mouseover", function () {
+        $(this).addClass('hover');
+    });
+
+    $("html").delegate(".sub-categories-row-modify", "mouseleave", function () {
+        $(this).removeClass('hover');
+    });
+
     $("#sub-categories-list-modify").blur(function () {
         $('#sub-categories-container-result-modify').hide()
     });
@@ -257,14 +265,6 @@ $(function () {
         var container = $("#sub-categories-container-modify");
         if (!container.is(e.target) && container.has(e.target).length === 0)
             $('#sub-categories-container-result-modify').hide()
-    });
-
-    $("html").delegate(".sub-categories-row-modify", "mouseover", function () {
-        $(this).addClass('hover');
-    });
-
-    $("html").delegate(".sub-categories-row-modify", "mouseleave", function () {
-        $(this).removeClass('hover');
     });
 
 });
@@ -295,15 +295,14 @@ function addCategory(categoryName) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                successMessageBox();
                 $("#primary-category").val("");
                 document.getElementById("display-success-message").innerHTML = data;
+                successMessageBox();
                 scrollToTop();
-                updateDropDown();
             },
             error: function (er) {
-                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
+                failureMessageBox();
                 scrollToTop();
             }
         }
@@ -326,6 +325,7 @@ function addSubCategory(categoryName, subCategory) {
                 $("#insert-sub-category").val("");
                 $("#categories-list-add").val("");
                 document.getElementById("display-success-message").innerHTML = data;
+                updateSubCategoryDropDown();
                 successMessageBox();
                 scrollToTop();
             },
@@ -357,9 +357,9 @@ function modifyPrimaryCategory(categoryId, newCategoryName) {
                 scrollToTop();
             },
             error: function (er) {
-                failureMessageBox();
                 $("#new-primary-category").val("");
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
+                failureMessageBox();
                 scrollToTop();
             }
         }
@@ -378,17 +378,16 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                successMessageBox();
                 $("#new-sub-category").show();
                 document.getElementById("display-success-message").innerHTML = data;
                 $("#new-sub-category").val("");
+                successMessageBox();
                 scrollToTop();
-                updateDropDown();
             },
             error: function (er) {
-                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
                 $("#new-sub-category").val("");
+                failureMessageBox();
                 scrollToTop();
             },
         }
@@ -416,8 +415,8 @@ function deletePrimaryCategory(categoryId) {
                 scrollToTop();
             },
             error: function (er) {
-                failureMessageBox();
                 document.getElementById("display-failure-message").innerHTML = er.responseText;
+                failureMessageBox();
                 scrollToTop();
             }
         }
@@ -502,12 +501,11 @@ function deleteSubCategory(categoryId, subCategoryName) {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (data) {
-                successMessageBox();
                 $("#sub-categories-list-delete").val("");
                 document.getElementById("display-success-message").innerHTML = data;
                 $("#topics-exists").hide();
                 $("#no-sessions").hide();
-                updateDropDown();
+                successMessageBox();
                 scrollToTop();
             },
             error: function (er) {

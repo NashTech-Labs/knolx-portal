@@ -59,8 +59,8 @@ class Module(environment: Environment,
       .asEagerSingleton
 
     bind[ActorRef]
-      .annotatedWith(Names.named("YouTubeProgressManager"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeProgressManager], "YouTubeProgressManager", Function.identity())))
+      .annotatedWith(Names.named("YouTubeManager"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeManager], "YouTubeManager", Function.identity())))
       .asEagerSingleton
 
     bindActorFactory[YouTubeUploader, ConfiguredYouTubeUploader.Factory]
@@ -70,8 +70,8 @@ class Module(environment: Environment,
       .asEagerSingleton
 
     bind[ActorRef]
-      .annotatedWith(Names.named("YouTubeManager"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeManager], "YouTubeManager", Function.identity())))
+      .annotatedWith(Names.named("YouTubeProgressManager"))
+      .toProvider(Providers.guicify(Akka.providerOf(classOf[YouTubeProgressManager], "YouTubeProgressManager", Function.identity())))
       .asEagerSingleton
 
     bindActorFactory[YouTubeDetailsActor, ConfiguredYouTubeDetailsActor.Factory]

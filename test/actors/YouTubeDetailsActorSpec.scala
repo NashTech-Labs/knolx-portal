@@ -19,7 +19,6 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
-
 class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   with DefaultAwaitTimeout with FutureAwaits with ImplicitSender with MockitoSugar
   with SpecificationLike {
@@ -35,12 +34,6 @@ class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: Act
 
   trait TestScope extends Scope {
     val youtube = mock[YouTube](Mockito.RETURNS_DEEP_STUBS)
-
-    val testModule = Option(new AbstractModule with AkkaGuiceSupport {
-      override def configure(): Unit = {
-        bind(classOf[YouTube]).toInstance(youtube)
-      }
-    })
   }
 
   "YouTube Details Actor" should {

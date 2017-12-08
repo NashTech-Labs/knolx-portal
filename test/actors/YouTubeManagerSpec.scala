@@ -18,7 +18,6 @@ import play.api.libs.Files
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
-
 class YouTubeManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   with WordSpecLike with DefaultAwaitTimeout with FutureAwaits with MustMatchers
   with Mockito with ImplicitSender with BeforeAndAfterAll {

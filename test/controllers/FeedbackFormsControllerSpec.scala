@@ -53,7 +53,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
 
     lazy val controller =
       new FeedbackFormsController(
-        TestHelpers.stubMessagesApi(),
+        knolxControllerComponent.messagesApi,
         mailerClient,
         feedbackFormsRepository,
         sessionsRepository,

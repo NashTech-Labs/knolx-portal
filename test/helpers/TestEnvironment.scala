@@ -68,22 +68,6 @@ trait TestStubControllerComponentsFactory extends StubPlayBodyParsersFactory wit
 // =====================================================================================================================
 // =====================================================================================================================
 
-abstract class TestApplication(system: ActorSystem) extends SpecificationLike with BeforeAllAfterAll {
-
-  protected def fakeApp(testModule: Option[AbstractModule] = None): Application =
-    new GuiceApplicationBuilder()
-      .overrides(testModule.map(GuiceableModule.guiceable).toSeq: _*)
-      .disable[Module]
-      .build
-
-}
-
-// =====================================================================================================================
-// =====================================================================================================================
-// =====================================================================================================================
-// =====================================================================================================================
-// =====================================================================================================================
-
 trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mockito {
 
   val usersRepository: UsersRepository = mock[UsersRepository]

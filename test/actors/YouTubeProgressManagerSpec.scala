@@ -18,7 +18,6 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 import scala.concurrent.duration._
 
-
 class YouTubeProgressManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSystem)
   with DefaultAwaitTimeout with FutureAwaits with ImplicitSender with TestEnvironment {
 

@@ -26,8 +26,8 @@ $(function () {
         e.preventDefault();
     });
 
-    $('#categories-list-modify').on("change", function(e) {
-       $("#new-primary-category").show();
+    $('#categories-list-modify').on("change", function (e) {
+        $("#new-primary-category").show();
     });
 
     $("#modify-primary-category-btn").click(function () {
@@ -36,9 +36,9 @@ $(function () {
         modifyPrimaryCategory(categoryName, newCategoryName);
     });
 
-    $('#categories-list-delete').on("change", function(e) {
+    $('#categories-list-delete').on("change", function (e) {
         categoryId = $(this).val();
-        categoryName = $("option[value='"+ categoryId +"']").html();
+        categoryName = $("option[value='" + categoryId + "']").html();
         subCategoryByPrimaryCategory(categoryName);
     });
 
@@ -46,8 +46,8 @@ $(function () {
         deletePrimaryCategory(categoryId);
     });
 
-    $('#categories-list-add').on("change", function(e) {
-       $("#insert-sub-category").show();
+    $('#categories-list-add').on("change", function (e) {
+        $("#insert-sub-category").show();
     });
 
     $("#add-sub-category-btn").click(function () {
@@ -70,23 +70,23 @@ $(function () {
             url: "/category/all",
             dataType: "json",
             processResults: function (data, params) {
-              var processedData = [];
-              for(var i=0 ; i<data.length ; i++) {
-                if(params.term == undefined) {
-                    processedData.push(data[i]);
+                var processedData = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (params.term == undefined) {
+                        processedData.push(data[i]);
+                    }
+                    else if (params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                        processedData.push(data[i]);
+                    }
+                    else if (params.term == "") {
+                        processedData.push(data[i]);
+                    }
                 }
-                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
-                  processedData.push(data[i]);
-                  }
-                else if(params.term == "") {
-                  processedData.push(data[i]);
-                  }
-              }
-              return {
-                results: $.map(processedData, function(obj) {
-                    return  { id: obj.categoryId, text: obj.categoryName };
-                })
-              };
+                return {
+                    results: $.map(processedData, function (obj) {
+                        return {id: obj.categoryId, text: obj.categoryName};
+                    })
+                };
             }
         },
         containerCssClass: "category-select2",
@@ -98,23 +98,23 @@ $(function () {
             url: "/category/all",
             dataType: "json",
             processResults: function (data, params) {
-              var processedData = [];
-              for(var i=0 ; i<data.length ; i++) {
-                if(params.term == undefined) {
-                    processedData.push(data[i]);
+                var processedData = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (params.term == undefined) {
+                        processedData.push(data[i]);
+                    }
+                    else if (params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                        processedData.push(data[i]);
+                    }
+                    else if (params.term == "") {
+                        processedData.push(data[i]);
+                    }
                 }
-                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
-                  processedData.push(data[i]);
-                  }
-                else if(params.term == "") {
-                  processedData.push(data[i]);
-                  }
-              }
-              return {
-                results: $.map(processedData, function(obj) {
-                    return  { id: obj.categoryId, text: obj.categoryName };
-                })
-              };
+                return {
+                    results: $.map(processedData, function (obj) {
+                        return {id: obj.categoryId, text: obj.categoryName};
+                    })
+                };
             }
         },
         containerCssClass: "category-select2",
@@ -127,23 +127,23 @@ $(function () {
             url: "/category/all",
             dataType: "json",
             processResults: function (data, params) {
-              var processedData = [];
-              for(var i=0 ; i<data.length ; i++) {
-                if(params.term == undefined) {
-                    processedData.push(data[i]);
+                var processedData = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (params.term == undefined) {
+                        processedData.push(data[i]);
+                    }
+                    else if (params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                        processedData.push(data[i]);
+                    }
+                    else if (params.term == "") {
+                        processedData.push(data[i]);
+                    }
                 }
-                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
-                  processedData.push(data[i]);
-                  }
-                else if(params.term == "") {
-                  processedData.push(data[i]);
-                  }
-              }
-              return {
-                results: $.map(processedData, function(obj) {
-                    return  { id: obj.categoryId, text: obj.categoryName };
-                })
-              };
+                return {
+                    results: $.map(processedData, function (obj) {
+                        return {id: obj.categoryId, text: obj.categoryName};
+                    })
+                };
             }
         },
         containerCssClass: "category-select2",
@@ -201,8 +201,7 @@ $(function () {
             } else {
                 prepareResult("", targetId, renderResult);
             }
-        }
-        else {
+        } else {
             if ($(targetId).is(":visible")) {
                 $(targetId).hide();
             } else {

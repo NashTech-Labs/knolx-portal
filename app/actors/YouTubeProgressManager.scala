@@ -16,7 +16,7 @@ object YouTubeProgressManager {
 
   case class CancelVideoUpload(sessionId: String)
 
-  case class GetUploadPRogress(sessionId: String)
+  case class GetUploadProgress(sessionId: String)
 
   case class SessionVideo(sessionId: String, video: Video)
 
@@ -45,8 +45,8 @@ class YouTubeProgressManager extends Actor {
     case YouTubeProgressManager.SessionVideo(sessionId, video)              =>
       Logger.info("Adding to sessionVideos")
       sessionVideos += sessionId -> video
-    case YouTubeProgressManager.GetUploadPRogress(sessionId: String)        =>
-      sender() ! returnPercentage(sessionId: String)
+    case YouTubeProgressManager.GetUploadProgress(sessionId: String)        =>
+      sender() ! uploadProgress(sessionId: String)
     case YouTubeProgressManager.VideoId(sessionId)                          =>
       Logger.info("Getting from sessionVideos")
       sender() ! sessionVideos.get(sessionId)
@@ -104,7 +104,7 @@ class YouTubeProgressManager extends Actor {
   def removeSessionUploader(sessionId: String): Unit =
     sessionUploaders -= sessionId
 
-  def returnPercentage(sessionId: String): Option[Double] = {
+  def uploadProgress(sessionId: String): Option[Double] = {
     sessionUploaders.get(sessionId).fold {
       if (sessionUploadComplete.contains(sessionId)) {
         sessionUploadComplete -= sessionId

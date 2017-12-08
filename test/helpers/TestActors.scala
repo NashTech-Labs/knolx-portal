@@ -50,7 +50,7 @@ class DummyYouTubeProgressManager extends Actor {
       sender() ! Some(new Video)
     case AddSessionUploader(sessionId)                       => sessionUploaders += sessionId -> 50D
     case RemoveSessionUploader(sessionId)                    => sessionUploaders -= sessionId
-    case YouTubeProgressManager.GetUploadPRogress(sessionId) => sender() ! sessionUploaders.get(sessionId)
+    case YouTubeProgressManager.GetUploadProgress(sessionId) => sender() ! sessionUploaders.get(sessionId)
   }
 
 }

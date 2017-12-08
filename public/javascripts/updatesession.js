@@ -5,12 +5,12 @@ var newVideoURL = "";
 
 Dropzone.autoDiscover = false;
 
-window.onbeforeunload = function() {
-    if(!redirect) {
+window.onbeforeunload = function () {
+    if (!redirect) {
         return 'The file upload is still going on. If you leave the page now your upload' +
-        'will be cancelled. Are you sure you want to leave the page?';
+            'will be cancelled. Are you sure you want to leave the page?';
     }
-}
+};
 
 $(function () {
     var sessionId = $('input[name^="sessionId"]').val();
@@ -27,7 +27,7 @@ $(function () {
         autoProcessQueue: false
     });
 
-    youtubeDropzone.on("sending", function(file, xhr, formData) {
+    youtubeDropzone.on("sending", function (file, xhr, formData) {
         redirect = false;
         xhr.setRequestHeader("filesize", file.size);
         xhr.setRequestHeader("title", $("#youtube-title").val());
@@ -37,13 +37,13 @@ $(function () {
         xhr.setRequestHeader("status", $("#youtube-status").val());
     });
 
-    youtubeDropzone.on("complete", function(file) {
+    youtubeDropzone.on("complete", function (file) {
         redirect = true;
         uploading = true;
         $("#cancel-message").hide();
     });
 
-    youtubeDropzone.on("success", function(file, response) {
+    youtubeDropzone.on("success", function (file, response) {
         $("#show-progress").show();
         $("#cancel-video-button").show();
         cancel = false;
@@ -72,8 +72,8 @@ $(function () {
             }
         });
 
-    $("#cancelVideo").click( function () {
-        if(uploading) {
+    $("#cancelVideo").click(function () {
+        if (uploading) {
             cancel = true;
             uploading = false;
             $("#upload-success-message").hide();
@@ -85,7 +85,7 @@ $(function () {
         }
     });
 
-    $("#updateVideo").click( function () {
+    $("#updateVideo").click(function () {
         update(sessionId);
     });
 
@@ -97,7 +97,7 @@ $(function () {
         }
     });
 
-    $("#uploadVideo").click( function () {
+    $("#uploadVideo").click(function () {
         youtubeDropzone.processQueue();
         $("#upload-video-button").hide();
     });
@@ -119,9 +119,9 @@ function showProgress(sessionId) {
 
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
-            success: function(data) {
-                if(!cancel) {
-                    if(data == 100) {
+            success: function (data) {
+                if (!cancel) {
+                    if (data == 100) {
                         $("#upload-success-message").show();
                         $("#show-progress").hide();
                         $("#progress").width('0%');
@@ -131,14 +131,14 @@ function showProgress(sessionId) {
                         $("#cancel-video-button").hide();
                         getUpdateURL(sessionId);
                     } else {
-                    var percentageUploaded = data;
-                    $("#progress").width(percentageUploaded + '%');
-                    $("#progress").text(Math.ceil(percentageUploaded) * 1  + '%');
-                    showProgress(sessionId);
+                        var percentageUploaded = data;
+                        $("#progress").width(percentageUploaded + '%');
+                        $("#progress").text(Math.ceil(percentageUploaded) * 1 + '%');
+                        showProgress(sessionId);
                     }
                 }
             },
-            error: function(er) {
+            error: function (er) {
                 console.log("showProgress failed with error = " + er.responseText);
             }
         });
@@ -151,7 +151,7 @@ function cancelVideo(sessionId) {
             type: 'GET',
             processData: false,
             contentType: false,
-            success: function(data) {
+            success: function (data) {
                 $("#upload-success-message").hide();
                 $("#upload-failure-message").hide();
                 $("#show-progress").hide();
@@ -162,7 +162,7 @@ function cancelVideo(sessionId) {
                 $("#cancel-video-button").hide();
                 $("#upload-video-button").show();
             },
-            error: function(er) {
+            error: function (er) {
                 $("#upload-success-message").hide();
                 $("#upload-failure-message").hide();
                 $("#show-progress").hide();
@@ -179,12 +179,12 @@ function getUpdateURL(sessionId) {
             type: 'GET',
             processData: false,
             contentType: false,
-            success: function(data) {
+            success: function (data) {
                 console.log("data =>" + data)
                 newVideoURL = data;
                 $("#attach-video").show();
             },
-            error: function(er) {
+            error: function (er) {
                 getUpdateURL(sessionId);
             }
         });
@@ -225,7 +225,7 @@ function update(sessionId) {
             success: function (data) {
                 $("#successful-update").show();
             },
-            error: function(er) {
+            error: function (er) {
                 $("#unsuccessful-update").show();
             }
         });
@@ -237,12 +237,11 @@ function checkIfTemporaryUrlExists(sessionId) {
             type: 'GET',
             processData: false,
             contentType: false,
-            success: function(data) {
-                console.log("data =>" + data)
+            success: function (data) {
                 newVideoURL = data;
                 $("#attach-video").show();
             },
-            error: function(er) {
+            error: function (er) {
                 console.log("Bad request received with message =>" + er.responseText);
             }
         });

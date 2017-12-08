@@ -37,13 +37,6 @@ class YouTubeManager @Inject()(
     Router(RoundRobinRoutingLogic(), detailRoutees)
   }
 
-  override val supervisorStrategy: OneForOneStrategy =
-    OneForOneStrategy() {
-      case ex: Exception =>
-        Logger.error(s"Got an unknown exception from $sender while processing youtube request, $ex")
-        Stop
-    }
-
   override def receive: Receive = {
     case request: YouTubeUploader.Upload                 =>
       Logger.info(s"Forwarding request to upload video to one of the YouTubeUploader for session ${request.sessionId}")

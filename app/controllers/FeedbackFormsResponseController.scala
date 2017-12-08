@@ -218,7 +218,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                                        header: ResponseHeader): Future[Result] = {
     if (userInfo.coreMember) {
       Logger.info(s"Feedback form response successfully stored for session ${feedbackFormResponse.sessionId} for user ${request.user.email}")
-      feedbackResponseRepository.getScoresOfMembers(feedbackFormResponse.sessionId, true).flatMap { scores =>
+      feedbackResponseRepository.getScoresOfMembers(feedbackFormResponse.sessionId, isCoreMember = true).flatMap { scores =>
         sessionsRepository.updateRating(feedbackFormResponse.sessionId, scores).map { result =>
           if (result.ok) {
             emailManager ! EmailActor.SendEmail(

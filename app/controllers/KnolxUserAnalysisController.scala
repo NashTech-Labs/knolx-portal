@@ -40,10 +40,8 @@ class KnolxUserAnalysisController @Inject()(messagesApi: MessagesApi,
     Future.successful(Ok(views.html.analysis.useranalysis()))
   }
 
-  def sendUserList(email: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
-    usersRepository.userListSearch(email).map { usersList =>
-      Ok(Json.toJson(usersList))
-    }
+  def users(email: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+    usersRepository.userListSearch(email) map (users => Ok(Json.toJson(users)))
   }
 
   def userAnalysis(email: String): Action[AnyContent] = adminAction.async { implicit request =>
@@ -57,7 +55,7 @@ class KnolxUserAnalysisController @Inject()(messagesApi: MessagesApi,
             val totalKnolx = sessions.count(!_.meetup)
 
             val sessionsInformation = sessions.map { session =>
-              feedbackFormsResponseRepository.getScoresOfMembers(session._id.stringify, false)
+              feedbackFormsResponseRepository.getScoresOfMembers(session._id.stringify, isCoreMember = false)
                 .map { scores =>
                   val scoresWithoutZero = scores.filterNot(_ == 0)
                   val sessionScore = if (scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00

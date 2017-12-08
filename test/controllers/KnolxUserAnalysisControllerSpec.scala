@@ -75,7 +75,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.userListSearch(Some("test")) returns Future(List("test@knoldus.com"))
 
-      val result = controller.sendUserList(Some("test"))(
+      val result = controller.users(Some("test"))(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

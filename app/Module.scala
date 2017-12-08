@@ -21,12 +21,13 @@ import play.api.{Configuration, Environment}
 import play.libs.Akka
 
 class Module(environment: Environment,
-              configuration: Configuration) extends AbstractModule with ScalaModule with AkkaGuiceSupport {
+             configuration: Configuration) extends AbstractModule with ScalaModule with AkkaGuiceSupport {
 
   private val httpTransport = new NetHttpTransport
   private val jsonFactory = new JacksonFactory
 
-  private val clientSecretReader = new InputStreamReader(new FileInputStream("/home/knoldus/Downloads/clients_secrets.json"))
+  private val youTubeCredentails = configuration.get[String]("youtube.credentials")
+  private val clientSecretReader = new InputStreamReader(new FileInputStream(youTubeCredentails))
   private val clientSecrets = GoogleClientSecrets.load(jsonFactory, clientSecretReader)
 
   private val credentialsDirectory = ".oauth-credentials"
@@ -96,7 +97,7 @@ class Module(environment: Environment,
       .Builder(httpTransport, jsonFactory, clientSecrets, scopes)
         .setCredentialDataStore(dataStore).build()
 
-    val refreshToken = configuration.get[String]("youtube.refreshToken")
+    val refreshToken = configuration.get[String]("youtube.refreshtoken")
 
     val response = new TokenResponse
 

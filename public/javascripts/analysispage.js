@@ -134,11 +134,6 @@ function pieChart(startDate, EndDate) {
                     title: {
                         text: 'Session(s) Category Analysis'
                     },
-                    yAxis: {
-                        title: {
-                            text: 'Total Sessions In Month'
-                        }
-                    },
                     plotOptions: {
                         pie: {
                             allowPointSelect: true,

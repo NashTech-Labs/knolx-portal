@@ -90,8 +90,9 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def getVideoId(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    sessionsRepository.getTemporaryVideoURL(sessionId).map { listOfURL =>
-      val maybeVideoURL = listOfURL.headOption
+    sessionsRepository.getTemporaryVideoURL(sessionId) map { videoURLs =>
+      val maybeVideoURL = videoURLs.headOption
+
       maybeVideoURL.fold {
         BadRequest("No new video URL found")
       } { videoURL =>
@@ -108,16 +109,18 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   def updateVideo(sessionId: String): Action[JsValue] = adminAction(parse.json).async { implicit request =>
     request.body.validate[UpdateVideoDetails].fold(
       jsonValidationError => {
-        Logger.error("Json validation error occurred ----- " + jsonValidationError)
+        Logger.error("Json validation error occurred " + jsonValidationError)
         Future.successful(BadRequest("Something went wrong while updating the form"))
       },
       updateVideoDetails => {
-        sessionsRepository.getVideoURL(sessionId).flatMap { listOfVideoIds =>
-          val maybeVideoId = listOfVideoIds.headOption
-          maybeVideoId.fold {
+        sessionsRepository.getVideoURL(sessionId).flatMap { videoURLs =>
+          val maybeVideoURL = videoURLs.headOption
+
+          maybeVideoURL.fold {
             Future.successful(BadRequest("No video found for this session"))
           } { videoURL =>
             val videoId = videoURL.split("/")(2)
+
             (youtubeManager ? YouTubeDetailsActor.UpdateVideoDetails(videoId,
               updateVideoDetails.title,
               updateVideoDetails.description,
@@ -132,8 +135,9 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def checkIfTemporaryUrlExists(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    sessionsRepository.getTemporaryVideoURL(sessionId).map { listOfURL =>
-      val maybeVideoURL = listOfURL.headOption
+    sessionsRepository.getTemporaryVideoURL(sessionId).map { videoURLs =>
+      val maybeVideoURL = videoURLs.headOption
+
       maybeVideoURL.fold {
         BadRequest("No new video URL found")
       } { videoURL =>
@@ -146,4 +150,5 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       }
     }
   }
+  
 }

@@ -3,7 +3,7 @@ package controllers
 import java.io.FileInputStream
 import javax.inject.{Inject, Named, Singleton}
 
-import actors.YouTubeProgressManager.VideoUploader
+import actors.YouTubeProgressManager.GetUploadPRogress
 import actors.{YouTubeDetailsActor, YouTubeProgressManager, YouTubeUploader}
 import akka.actor.ActorRef
 import akka.pattern.ask
@@ -62,7 +62,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def getPercentageUploaded(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
+    (youtubeProgressManager ? YouTubeProgressManager.GetUploadPRogress(sessionId)).mapTo[Option[Double]]
       .map { maybePercentage =>
         maybePercentage.fold {
           Ok(Json.toJson(0D))
@@ -121,7 +121,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def checkIfUploading(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (youtubeProgressManager ? VideoUploader(sessionId)).mapTo[Option[Double]]
+    (youtubeProgressManager ? GetUploadPRogress(sessionId)).mapTo[Option[Double]]
       .map { maybePercentage =>
         maybePercentage.fold {
           BadRequest("No video is being uploaded for the given session")

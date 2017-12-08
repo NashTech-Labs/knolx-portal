@@ -81,7 +81,7 @@ class YouTubeProgressManagerSpec(_system: ActorSystem) extends TestKit(_system: 
 
     "return no percentage when no video has been uploaded for the session" in new TestScope {
 
-      val result: Option[Double] = await((youtubeProgressManager ? YouTubeProgressManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
+      val result: Option[Double] = await((youtubeProgressManager ? YouTubeProgressManager.GetUploadPRogress(sessionId)) (5.seconds).mapTo[Option[Double]])
 
       result must beNone
     }
@@ -89,7 +89,7 @@ class YouTubeProgressManagerSpec(_system: ActorSystem) extends TestKit(_system: 
     "return 100 when video has been uploaded for the session" in new TestScope {
 
       youtubeProgressManager.underlyingActor.sessionUploadComplete += sessionId
-      val result: Option[Double] = await((youtubeProgressManager ? YouTubeProgressManager.VideoUploader(sessionId)) (5.seconds).mapTo[Option[Double]])
+      val result: Option[Double] = await((youtubeProgressManager ? YouTubeProgressManager.GetUploadPRogress(sessionId)) (5.seconds).mapTo[Option[Double]])
 
       result must be equalTo Some(100D)
     }

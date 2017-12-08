@@ -16,7 +16,7 @@ object YouTubeProgressManager {
 
   case class CancelVideoUpload(sessionId: String)
 
-  case class VideoUploader(sessionId: String)
+  case class GetUploadPRogress(sessionId: String)
 
   case class SessionVideo(sessionId: String, video: Video)
 
@@ -45,7 +45,7 @@ class YouTubeProgressManager extends Actor {
     case YouTubeProgressManager.SessionVideo(sessionId, video)              =>
       Logger.info("Adding to sessionVideos")
       sessionVideos += sessionId -> video
-    case YouTubeProgressManager.VideoUploader(sessionId: String)            =>
+    case YouTubeProgressManager.GetUploadPRogress(sessionId: String)        =>
       sender() ! returnPercentage(sessionId: String)
     case YouTubeProgressManager.VideoId(sessionId)                          =>
       Logger.info("Getting from sessionVideos")

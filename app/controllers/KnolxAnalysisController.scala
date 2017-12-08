@@ -115,20 +115,28 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
   }
 
   def leaderBoard: Action[AnyContent] = action.async { implicit request =>
-    sessionsRepository.sessions.map { totalSessions =>
-      if (totalSessions.nonEmpty) {
-        val userWithSession: Map[String, List[SessionInfo]] = totalSessions.groupBy(_.email)
-        val userAverageScore: Map[String, Double] = userWithSession.map { case (user, userSessions) =>
-          val averageScore = userSessions.map(_.score).sum / userSessions.length
-          val sessionScore = (userSessions.length.toDouble / totalSessions.length) * 2.5
-          val ratingScore = (averageScore / 100) * 7.5
-          val userScore = sessionScore + ratingScore
-          (user, userScore)
-        }
-        val topUsers = userAverageScore.toList.sortWith(_._2 > _._2).toMap.keys.take(10)
+    sessionsRepository.sessions map { sessions =>
+      if (sessions.nonEmpty) {
+        val userWithSession = sessions.groupBy(_.email)
+        val userAverageScore =
+          userWithSession map { case (email, userSessions) =>
+            val averageScore = userSessions.map(_.score).sum / userSessions.length
+            val sessionScore = (userSessions.length.toDouble / sessions.length) * 2.5
+            val ratingScore = (averageScore / 100) * 7.5
+            val userScore = sessionScore + ratingScore
+            (email, userScore)
+          }
+        val topUsers =
+          userAverageScore
+            .toList
+            .sortBy { case (_, userScore) => userScore }
+            .map { case (email, _) => email }
+            .reverse
+            .take(10)
+
         Ok(Json.toJson(topUsers))
       } else {
-        Logger.info(s"No records found $totalSessions")
+        Logger.info(s"No records found $sessions")
         BadRequest("OOPS ! No record found")
       }
     }

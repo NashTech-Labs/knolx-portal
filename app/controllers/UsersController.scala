@@ -481,9 +481,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def dummyFunction: Action[AnyContent] = action { implicit request =>
-    for (i <- 1 to 100) {
-      emailManager ! EmailActor.SendEmail(List(s"rocking${i}akshansh@gmail.com"), "akshansh95jain@gmail.com", "subject", "body")
+    Logger.info("------------------------------------Email manager ActorRef = " + emailManager)
+    //val l = 1 to 30
+    //val l1 = l.map(num => s"rocking${num}akshansh@gmail.com").toList
+    for (i <- 1 to 50) {
+    emailManager ! EmailActor.SendEmail(List(s"rockingakshansh@gmail.com"), "akshansh95jain@gmail.com", "subject", "body")
     }
+
+    //emailManager ! EmailActor.SendEmail(l1, "akshansh95jain@gmail.com", "subject", "body")
 
     Ok("Done")
   }

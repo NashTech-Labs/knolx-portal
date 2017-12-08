@@ -29,6 +29,9 @@ class EmailActor @Inject()(mailerClient: MailerClient) extends Actor {
   override def receive: Receive = {
     case SendEmail(to, from, subject, body) =>
       Logger.info(s"Got a request in $self to send email $to from $from with subject $subject")
+      Logger.info(s"===========================================================================")
+      Logger.info(s"===========================================================================")
+      Logger.info(s"Mailer client for sending email $to from $from with subject $subject is $mailerClient")
       val email = Email(subject, from, bcc = to, bodyHtml = Some(body))
       val response = Option(mailerClient.send(email))
       sender ! response

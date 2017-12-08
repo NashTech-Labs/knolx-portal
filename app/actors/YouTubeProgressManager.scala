@@ -45,8 +45,8 @@ class YouTubeProgressManager extends Actor {
     case YouTubeProgressManager.SessionVideo(sessionId, video)              =>
       Logger.info("Adding to sessionVideos")
       sessionVideos += sessionId -> video
-    case YouTubeProgressManager.GetUploadProgress(sessionId: String)        =>
-      sender() ! uploadProgress(sessionId: String)
+    case YouTubeProgressManager.GetUploadProgress(sessionId)                =>
+      sender() ! uploadProgress(sessionId)
     case YouTubeProgressManager.VideoId(sessionId)                          =>
       Logger.info("Getting from sessionVideos")
       sender() ! sessionVideos.get(sessionId)
@@ -104,7 +104,11 @@ class YouTubeProgressManager extends Actor {
   def removeSessionUploader(sessionId: String): Unit =
     sessionUploaders -= sessionId
 
-  def uploadProgress(sessionId: String): Option[Double] = {
+  /**
+    * None means no upload is currently going on for a particular session.
+    * None can also mean that a uploader is not yet registered but the upload might have been initialized by a user
+    */
+  def uploadProgress(sessionId: String): Option[Double] =
     sessionUploaders.get(sessionId).fold {
       if (sessionUploadComplete.contains(sessionId)) {
         sessionUploadComplete -= sessionId
@@ -118,5 +122,5 @@ class YouTubeProgressManager extends Actor {
         case _                          => Some(uploader.getProgress * 100)
       }
     }
-  }
+
 }

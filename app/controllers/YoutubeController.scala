@@ -72,6 +72,17 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       }
   }
 
+  def checkIfUploading(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    (youtubeProgressManager ? GetUploadProgress(sessionId)).mapTo[Option[Double]]
+      .map { maybePercentage =>
+        maybePercentage.fold {
+          BadRequest("No video is being uploaded for the given session")
+        } { _ =>
+          Ok("Video is currently being uploaded")
+        }
+      }
+  }
+
   def cancel(sessionId: String): Action[AnyContent] = adminAction { implicit request =>
     youtubeProgressManager ! YouTubeProgressManager.CancelVideoUpload(sessionId)
 
@@ -118,17 +129,6 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         }
       }
     )
-  }
-
-  def checkIfUploading(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    (youtubeProgressManager ? GetUploadProgress(sessionId)).mapTo[Option[Double]]
-      .map { maybePercentage =>
-        maybePercentage.fold {
-          BadRequest("No video is being uploaded for the given session")
-        } { _ =>
-          Ok("Video is currently being uploaded")
-        }
-      }
   }
 
   def checkIfTemporaryUrlExists(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>

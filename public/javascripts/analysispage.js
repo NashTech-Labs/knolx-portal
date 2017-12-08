@@ -66,11 +66,7 @@ function columnChart(startDate, EndDate) {
 
                 var columnGraph = Highcharts.chart('column-graph', {
                     title: {
-                        text: 'Session Sub-Category Analysis'
-                    },
-
-                    subtitle: {
-                        text: 'Plain'
+                        text: 'Session(s) Sub-Category Analysis'
                     },
 
                     xAxis: {
@@ -136,7 +132,12 @@ function pieChart(startDate, EndDate) {
                         type: 'pie'
                     },
                     title: {
-                        text: 'Session Category Analysis'
+                        text: 'Session(s) Category Analysis'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total Sessions In Month'
+                        }
                     },
                     plotOptions: {
                         pie: {
@@ -211,7 +212,7 @@ function lineGraph(startDate, EndDate) {
                         type: 'area'
                     },
                     title: {
-                        text: 'Knolx Monthly Analysis'
+                        text: 'Session(s) Monthly Analysis'
                     },
                     xAxis: {
                         categories: xAxisData
@@ -228,7 +229,7 @@ function lineGraph(startDate, EndDate) {
                     },
                     tooltip: {
                         split: true,
-                        valueSuffix: ' Sessions'
+                        valueSuffix: ' Session(s)'
                     },
                     plotOptions: {
                         area: {

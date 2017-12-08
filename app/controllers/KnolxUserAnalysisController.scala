@@ -30,8 +30,6 @@ class KnolxUserAnalysisController @Inject()(messagesApi: MessagesApi,
                                             sessionsRepository: SessionsRepository,
                                             feedbackFormsResponseRepository: FeedbackFormsResponseRepository,
                                             feedbackFormsRepository: FeedbackFormsRepository,
-                                            categoriesRepository: CategoriesRepository,
-                                            dateTimeUtility: DateTimeUtility,
                                             controllerComponents: KnolxControllerComponents
                                            ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 

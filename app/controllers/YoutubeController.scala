@@ -150,5 +150,5 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       }
     }
   }
-  
+
 }

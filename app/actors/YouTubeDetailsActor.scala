@@ -37,12 +37,12 @@ class YouTubeDetailsActor @Inject()(youtube: YouTube) extends Actor {
   private val part = "snippet,statistics,status"
 
   override def receive: Receive = {
-    case YouTubeDetailsActor.GetCategories                    => sender() ! returnCategoryList
+    case YouTubeDetailsActor.GetCategories                    => sender() ! categories
     case videoDetails: YouTubeDetailsActor.UpdateVideoDetails => sender() ! update(videoDetails)
-    case YouTubeDetailsActor.GetDetails(videoId: String)      => sender() ! getVideoDetails(videoId)
+    case YouTubeDetailsActor.GetDetails(videoId)              => sender() ! videoDetails(videoId)
   }
 
-  def returnCategoryList: List[VideoCategory] =
+  def categories: List[VideoCategory] =
     youtube
       .videoCategories()
       .list("snippet")
@@ -66,13 +66,14 @@ class YouTubeDetailsActor @Inject()(youtube: YouTube) extends Actor {
     videoUpdate.execute()
   }
 
-  def getVideoDetails(videoId: String): Option[UpdateVideoDetails] =
+  def videoDetails(videoId: String): Option[UpdateVideoDetails] =
     youtube
       .videos()
       .list(part)
       .setId(videoId)
       .execute().getItems.toList.map { video =>
       val tags: List[String] = Option(video.getSnippet.getTags).fold[List[String]](Nil)(_.toList)
+
       UpdateVideoDetails(video.getSnippet.getTitle,
         Some(video.getSnippet.getDescription),
         tags,

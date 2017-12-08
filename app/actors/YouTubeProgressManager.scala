@@ -60,10 +60,10 @@ class YouTubeProgressManager extends Actor {
         uploader.getUploadState match {
           case UploadState.INITIATION_STARTED  => Logger.info(s"Video upload for session $sessionId initiated")
           case UploadState.INITIATION_COMPLETE =>
-            addVideoUploadStatus(sessionId)
+            addVideoCancelStatus(sessionId)
             if (videoCancelStatus(sessionId)) {
               Logger.info(s"Stopping video upload for session $sessionId")
-              removeVideoUploadStatus(sessionId)
+              removeVideoCancelStatus(sessionId)
               removeSessionUploader(sessionId)
               // this is bad but the only way to cancel video upload for now
               throw new YoutubeUploadException(s"Video upload cancelled for session $sessionId")
@@ -74,14 +74,14 @@ class YouTubeProgressManager extends Actor {
 
             if (videoCancelStatus(sessionId)) {
               Logger.info(s"Stopping video upload for session $sessionId")
-              removeVideoUploadStatus(sessionId)
+              removeVideoCancelStatus(sessionId)
               removeSessionUploader(sessionId)
               // this is bad but the only way to cancel video upload for now
               throw new YoutubeUploadException(s"Video upload cancelled for session $sessionId")
             }
           case UploadState.MEDIA_COMPLETE      =>
             Logger.info(s"Video upload for session $sessionId completed")
-            removeVideoUploadStatus(sessionId)
+            removeVideoCancelStatus(sessionId)
             sessionUploadComplete += sessionId
             removeSessionUploader(sessionId)
           case UploadState.NOT_STARTED         => Logger.info(s"Video upload for session $sessionId not started")
@@ -89,13 +89,13 @@ class YouTubeProgressManager extends Actor {
       }
     })
 
-  def addVideoUploadStatus(sessionId: String): Unit =
+  def addVideoCancelStatus(sessionId: String): Unit =
     videoCancelStatus += sessionId -> false
 
   def cancelVideoUpload(sessionId: String): Unit =
     videoCancelStatus += sessionId -> true
 
-  def removeVideoUploadStatus(sessionId: String): Unit =
+  def removeVideoCancelStatus(sessionId: String): Unit =
     videoCancelStatus -= sessionId
 
   def addSessionUploader(sessionId: String, uploader: MediaHttpUploader): Unit =

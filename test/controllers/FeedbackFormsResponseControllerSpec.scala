@@ -49,7 +49,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Results
     "session1",
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
-    0.00,
+    score=0.0,
     _id)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {

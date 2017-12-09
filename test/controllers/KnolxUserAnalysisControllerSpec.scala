@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
+class KnolxuserSessionsResponseComparisonControllerSpec extends PlaySpecification with Results {
 
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
@@ -40,7 +40,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
     lazy val app: Application = fakeApp()
 
     lazy val controller =
-      new KnolxUserAnalysisController(
+      new KnolxuserSessionsResponseComparisonController(
         knolxControllerComponent.messagesApi,
         usersRepository,
         sessionsRepository,
@@ -75,7 +75,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.userListSearch(Some("test")) returns Future(List("test@knoldus.com"))
 
-      val result = controller.sendUserList(Some("test"))(
+      val result = controller.usersList(Some("test"))(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -87,7 +87,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getByEmail("test@example.com") returns Future(None)
 
-      val result = controller.userAnalysis("test@example.com")(
+      val result = controller.userSessionsResponseComparison("test@example.com")(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -99,7 +99,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.userSession("test@knoldus.com") returns Future(Nil)
 
-      val result = controller.userAnalysis("test@knoldus.com")(
+      val result = controller.userSessionsResponseComparison("test@knoldus.com")(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -113,7 +113,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
       feedbackFormsResponseRepository.getScoresOfMembers(_id.stringify, false) returns Future(List(0.0D))
       feedbackFormsResponseRepository.userCountDidNotAttendSession("test@knoldus.com") returns Future(0)
 
-      val result = controller.userAnalysis("test@knoldus.com")(
+      val result = controller.userSessionsResponseComparison("test@knoldus.com")(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

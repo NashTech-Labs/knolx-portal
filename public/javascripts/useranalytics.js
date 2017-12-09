@@ -14,8 +14,106 @@ function UserAnalytics() {
     FetchEmailList(null);
 
     self.userDataHandler = function (email) {
-        console.log("email--->" + email);
-        jsRoutes.controllers.KnolxUserAnalysisController.userAnalysis(email).ajax({
+        self.email(email);
+        fetchBanCount(email);
+        fetchResponseRatingForComparison(email);
+        fetchUserDidNotAttendSessionCount(email);
+        fetchUserTotalKnolx(email);
+        fetchUserTotalMeetUps(email);
+
+    };
+
+    $('#search-user').keyup(function () {
+        FetchEmailList(this.value);
+    });
+
+    function FetchEmailList(email) {
+        jsRoutes.controllers.UsersController.usersList(email).ajax(
+            {
+                type: "POST",
+                processData: false,
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (values) {
+                    self.emailList(values);
+                }
+            }
+        )
+    }
+
+    function fetchBanCount(email) {
+        jsRoutes.controllers.KnolxUserAnalysisController.getBanCount(email).ajax(
+            {
+                type: "POST",
+                processData: false,
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (values) {
+                    self.banCount(values["banCount"]);
+                }
+            }
+        )
+    }
+
+    function fetchUserTotalKnolx(email) {
+        jsRoutes.controllers.KnolxUserAnalysisController.getUserTotalKnolx(email).ajax(
+            {
+                type: "POST",
+                processData: false,
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (values) {
+                    self.totalKnolx(values["totalKnolx"]);
+                }
+            }
+        )
+    }
+
+    function fetchUserTotalMeetUps(email) {
+        jsRoutes.controllers.KnolxUserAnalysisController.getUserTotalMeetUps(email).ajax(
+            {
+                type: "POST",
+                processData: false,
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (values) {
+                    self.totalMeetups(values["totalMeetUps"]);
+                }
+            }
+        )
+    }
+
+    function fetchUserDidNotAttendSessionCount(email) {
+        jsRoutes.controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email).ajax(
+            {
+                type: "POST",
+                processData: false,
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (values) {
+                    self.sessionNotAttend(values["didNotAttendCount"]);
+                }
+            }
+        )
+    }
+
+    function fetchResponseRatingForComparison(email) {
+        jsRoutes.controllers.KnolxUserAnalysisController.userSessionsResponseComparison(email).ajax({
             type: "POST",
             processData: false,
             beforeSend: function (request) {
@@ -23,24 +121,17 @@ function UserAnalytics() {
 
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
-            success: function (values) {
+            success: function (sessions) {
                 $('#user-analytics').show();
-                console.log("user data--->" + JSON.stringify(values));
-                self.email(values["email"]);
-                self.banCount(values["banCount"]);
-                self.sessionNotAttend(values["didNotAttendCount"]);
-                self.totalKnolx(values["totalKnolx"]);
-                self.totalMeetups(values["totalMeetUps"]);
 
-                var sessions = values["sessions"];
                 var xaxisData = [];
                 var coreMemberResponse = [];
                 var nonCoreMemberResponse = [];
 
                 for (var i = 0; i < sessions.length; i++) {
                     var session = sessions[i].topic;
-                    var coreResponse = sessions[i].coreMemberResponse;
-                    var nonCoreResponse = sessions[i].nonCoreMemberResponse;
+                    var coreResponse = sessions[i].coreMemberRating;
+                    var nonCoreResponse = sessions[i].nonCoreMemberRating;
 
                     xaxisData.push(session);
                     coreMemberResponse.push(coreResponse);
@@ -100,29 +191,7 @@ function UserAnalytics() {
                 console.log(er);
             }
         })
-    };
 
-    $('#search-user').keyup(function () {
-        FetchEmailList(this.value);
-    });
-
-    function FetchEmailList(email) {
-        jsRoutes.controllers.KnolxUserAnalysisController.sendUserList(email).ajax(
-            {
-                type: "POST",
-                processData: false,
-                beforeSend: function (request) {
-                    var csrfToken = document.getElementById('csrfToken').value;
-
-                    return request.setRequestHeader('CSRF-Token', csrfToken);
-                },
-                success: function (values) {
-                    console.log(values);
-                    self.emailList(values);
-                }
-            }
-        )
     }
-
 
 }

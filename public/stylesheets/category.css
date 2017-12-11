@@ -173,7 +173,6 @@ h5 {
 .btn-footer {
     background-color: #fff;
     padding-bottom: 20px;
-    margin-bottom: 25px;
 }
 
 .btn-footer-custom {
@@ -206,7 +205,7 @@ h5 {
 }
 
 .top-row-adjust {
-    margin-bottom: 50px;
+    margin-bottom: 16px;
 }
 
 #categories-list-delete + span > span > span.category-select2 {

@@ -273,13 +273,13 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     for ((question, response) <- questions zip responses) yield {
 
       (question.questionType, question.mandatory) match {
-        case ("MCQ", true)     => if (question.options.contains(response) && response.nonEmpty) {
+        case ("MCQ", true)      => if (question.options.contains(response) && response.nonEmpty) {
           Some(QuestionResponse(question.question, question.options, response))
         }
         else {
           None
         }
-        case ("COMMENT", true) => if (response.nonEmpty) {
+        case ("COMMENT", true)  => if (response.nonEmpty) {
           Some(QuestionResponse(question.question, question.options, response))
         } else {
           None

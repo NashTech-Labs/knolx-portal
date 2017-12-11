@@ -9,21 +9,15 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
 import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 // Knolx related analytics classes
 case class SubCategoryInformation(subCategoryName: String, totalSessionSubCategory: Int)
-
 case class CategoryInformation(categoryName: String, totalSessionCategory: Int, subCategoryInfo: List[SubCategoryInformation])
-
 case class KnolxSessionInformation(totalSession: Int, categoryInformation: List[CategoryInformation])
-
 case class KnolxMonthlyInfo(monthName: String, total: Int)
-
 case class KnolxAnalysisDateRange(startDate: String, endDate: String)
 
 // User knolx related analytics classes

@@ -72,6 +72,11 @@ function columnChart(startDate, EndDate) {
                     xAxis: {
                         categories: subCategoryData
                     },
+                    yAxis: {
+                        title: {
+                            text: 'Total Sessions In Month'
+                        }
+                    },
 
                     series: [{
                         type: 'column',
@@ -134,6 +139,7 @@ function pieChart(startDate, EndDate) {
                     title: {
                         text: 'Session(s) Category Analysis'
                     },
+
                     plotOptions: {
                         pie: {
                             allowPointSelect: true,

@@ -25,14 +25,29 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
       controllers.routes.javascript.FeedbackFormsReportController.searchAllResponsesBySessionId,
-      controllers.routes.javascript.SessionsController.getCategory,
+      controllers.routes.javascript.SessionsCategoryController.addPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.addSubCategory,
+      controllers.routes.javascript.SessionsCategoryController.modifyPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.modifySubCategory,
+      controllers.routes.javascript.SessionsCategoryController.getCategory,
+      controllers.routes.javascript.SessionsCategoryController.deletePrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.getSubCategoryByPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.deleteSubCategory,
+      controllers.routes.javascript.SessionsCategoryController.getTopicsBySubCategory,
       controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
       controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
       controllers.routes.javascript.KnolxAnalysisController.renderLineChart,
+      controllers.routes.javascript.KnolxAnalysisController.leaderBoard,
       controllers.routes.javascript.FeedbackFormsReportController.manageAllFeedbackReports,
       controllers.routes.javascript.FeedbackFormsReportController.manageUserFeedbackReports,
       controllers.routes.javascript.FeedbackFormsReportController.fetchAllResponsesBySessionId,
-      controllers.routes.javascript.FeedbackFormsReportController.fetchUserResponsesBySessionId
+      controllers.routes.javascript.FeedbackFormsReportController.fetchUserResponsesBySessionId,
+      controllers.routes.javascript.UsersController.usersList,
+      controllers.routes.javascript.KnolxUserAnalysisController.userSessionsResponseComparison,
+      controllers.routes.javascript.KnolxUserAnalysisController.getBanCount,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserDidNotAttendSessionCount,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalKnolx,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalMeetUps
     )).as("text/javascript")
   }
 

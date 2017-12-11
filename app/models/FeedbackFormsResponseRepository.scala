@@ -114,8 +114,8 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
       ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
-  def getScoresOfCoreMembers(sessionId: String)(implicit ex: ExecutionContext): Future[List[Double]] = {
-    val query = Json.obj("sessionId" -> sessionId, "coreMember" -> true)
+  def getScoresOfMembers(sessionId: String, isCoreMember: Boolean)(implicit ex: ExecutionContext): Future[List[Double]] = {
+    val query = Json.obj("sessionId" -> sessionId, "coreMember" -> isCoreMember)
     val projection = Json.obj("score" -> 1)
 
     collection
@@ -125,6 +125,14 @@ class FeedbackFormsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoA
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
       ).map(_.flatMap(_ ("score").asOpt[Double]))
+  }
+
+  def userCountDidNotAttendSession(email: String): Future[Int] = {
+    val condition = Some(Json.obj("email" -> email, "score" -> 0D))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(condition))
   }
 
 }

@@ -216,4 +216,20 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
         jsonCollection.count(condition))
   }
 
+  def userListSearch(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[List[String]] = {
+
+    val condition = keyword match {
+      case Some(key) => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
+      case None => Json.obj("active" -> true)
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("email").asOpt[String]))
+  }
+
 }

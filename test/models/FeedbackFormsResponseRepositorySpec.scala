@@ -25,7 +25,7 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
     "session1",
     List(questionResponseInformation),
     BSONDateTime(date.getTime),
-    0.00,
+    1.00,
     _id)
 
   "Feedback forms response repository" should {
@@ -51,6 +51,23 @@ class FeedbackFormsResponseRepositorySpec extends PlaySpecification {
       val response = await(feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None))
       response.size must beEqualTo(1)
       response.head.feedbackResponse must beEqualTo(List(questionResponseInformation))
+    }
+
+    "fetch all responses email" in {
+      val response = await(feedbackFormsResponseRepository.getAllResponseEmailsPerSession(_id.stringify))
+      response.size must beEqualTo(1)
+      response must beEqualTo(List(feedbackResponse.email))
+    }
+
+    "fetch all scores of core Member of particular session" in {
+      val response = await(feedbackFormsResponseRepository.getScoresOfMembers(_id.stringify, false))
+      response.size must beEqualTo(1)
+      response must beEqualTo(List(feedbackResponse.score))
+    }
+
+    "fetch didn't attend session count of particular user" in {
+      val response = await(feedbackFormsResponseRepository.userCountDidNotAttendSession("test@example.com"))
+      response must beEqualTo(0)
     }
 
   }

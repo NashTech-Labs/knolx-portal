@@ -140,7 +140,7 @@ font-size: 15px;
 display: block;
 }
 
-.fa-comments, .fa-home, .fa-wrench, .fa-line-chart, .fa-table  {
+.fa-comments, .fa-home, .fa-wrench, .fa-line-chart, .fa-table, .fa-area-chart  {
     color: #fff;
     text-shadow: 0 0 10px #85929E;
 }

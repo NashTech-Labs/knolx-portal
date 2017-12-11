@@ -16,12 +16,18 @@
             <div class="col-md-12 user-analytics-table">
                 <table class="table table-responsive table-bordered">
                     <tbody data-bind="foreach: emailList">
-                        <tr> <td data-bind="text: $data , value: $data, click: $parent.userDataHandler" style="cursor: pointer"></td></tr>
+                        <tr> <td data-bind="text: $data , value: $data, id: $data, click: $parent.userDataHandler" style="cursor: pointer"></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
         <div class="col-md-9 filter-padding-right" id="user-analytics">
+            <div data-bind="if: (emailList().length) == 0">
+                <div class="col-md-12 empty-reports" ><i class="fa fa-folder-open" aria-hidden="true"></i>
+                    <p class="empty-reports_text">No Record found!</p>
+                </div>
+            </div>
+            <div data-bind="if: (emailList().length)!= 0">
             <div class="col-md-12 user-title" data-bind="text: email"></div>
             <div class="col-md-12">
                     <!-- Ban count -->
@@ -39,7 +45,7 @@
                 <div class="col-md-3 filter-padding-left">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
-                            <h5>Sessions Didn't Attend</h5>
+                            <h5>Sessions Not Attended</h5>
                         </div>
                         <div class="user-analytics-content">
                             <h3 class="no-margins" data-bind="text: sessionNotAttend" ></h3>
@@ -52,7 +58,7 @@
                 <div class="col-md-3 filter-padding-left">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
-                            <h5>Knolx</h5>
+                            <h5>Knolx Given</h5>
                         </div>
                         <div class="user-analytics-content">
                             <h3 class="no-margins" data-bind="text: totalKnolx"></h3>
@@ -64,7 +70,7 @@
                 <div class="col-md-3 filter-padding-left filter-padding-right">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
-                            <h5>Meet Ups</h5>
+                            <h5>Meetups Given</h5>
                         </div>
                         <div class="user-analytics-content">
                             <h3 class="no-margins" data-bind="text: totalMeetups"></h3>
@@ -76,7 +82,9 @@
                 <div class="no-margins" id="response-comparison"></div>
             </div>
         </div>
+        </div>
 
     </div>
+    <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/useranalytics.js")" type="text/javascript"></script>
 }

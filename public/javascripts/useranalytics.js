@@ -15,6 +15,7 @@ function UserAnalytics() {
 
     self.userDataHandler = function (email) {
         self.email(email);
+        $('#user-analytics').show();
         fetchBanCount(email);
         fetchResponseRatingForComparison(email);
         fetchUserDidNotAttendSessionCount(email);
@@ -39,6 +40,7 @@ function UserAnalytics() {
                 },
                 success: function (values) {
                     self.emailList(values);
+                    self.userDataHandler(values[0]);
                 },
                 error: function (er) {
                     console.log(er);
@@ -137,7 +139,6 @@ function UserAnalytics() {
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
             success: function (sessions) {
-                $('#user-analytics').show();
 
                 var xaxisData = [];
                 var coreMemberResponse = [];

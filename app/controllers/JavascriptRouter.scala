@@ -41,7 +41,13 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.FeedbackFormsReportController.manageAllFeedbackReports,
       controllers.routes.javascript.FeedbackFormsReportController.manageUserFeedbackReports,
       controllers.routes.javascript.FeedbackFormsReportController.fetchAllResponsesBySessionId,
-      controllers.routes.javascript.FeedbackFormsReportController.fetchUserResponsesBySessionId
+      controllers.routes.javascript.FeedbackFormsReportController.fetchUserResponsesBySessionId,
+      controllers.routes.javascript.UsersController.usersList,
+      controllers.routes.javascript.KnolxUserAnalysisController.userSessionsResponseComparison,
+      controllers.routes.javascript.KnolxUserAnalysisController.getBanCount,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserDidNotAttendSessionCount,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalKnolx,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalMeetUps
     )).as("text/javascript")
   }
 

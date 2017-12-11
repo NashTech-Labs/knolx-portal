@@ -287,6 +287,24 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       result must beEqualTo(updateWriteResult)
     }
 
+    "search User" in {
+      val result = await(usersRepository.userListSearch(Some("test")))
+
+      result must beEqualTo(List(document.email))
+    }
+
+    "get all active emails" in {
+      val result = await(usersRepository.getAllActiveEmails)
+
+      result must beEqualTo(List(document.email))
+    }
+
+    "ban user" in {
+      val result = await(usersRepository.ban("test@knoldus.com"))
+
+      result must beEqualTo(updateWriteResult)
+    }
+
   }
 
 }

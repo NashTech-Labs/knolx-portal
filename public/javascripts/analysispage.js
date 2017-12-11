@@ -67,10 +67,7 @@ function columnChart(startDate, EndDate) {
 
                 var columnGraph = Highcharts.chart('column-graph', {
                     title: {
-                        text: 'Session Sub-Category Analysis'
-                    },
-                    subtitle: {
-                        text: 'Plain'
+                        text: 'Session(s) Sub-Category Analysis'
                     },
                     credits: {
                             enabled: false
@@ -78,6 +75,12 @@ function columnChart(startDate, EndDate) {
                     xAxis: {
                         categories: subCategoryData
                     },
+                    yAxis: {
+                        title: {
+                            text: 'Total Sessions In Month'
+                        }
+                    },
+
                     series: [{
                         type: 'column',
                         colorByPoint: true,
@@ -137,8 +140,9 @@ function pieChart(startDate, EndDate) {
                         type: 'pie'
                     },
                     title: {
-                        text: 'Session Category Analysis'
+                        text: 'Session(s) Category Analysis'
                     },
+
                     plotOptions: {
                         pie: {
                             allowPointSelect: true,
@@ -212,7 +216,7 @@ function lineGraph(startDate, EndDate) {
                         type: 'area'
                     },
                     title: {
-                        text: 'Knolx Monthly Analysis'
+                        text: 'Session(s) Monthly Analysis'
                     },
                     credits: {
                         enabled: false
@@ -232,7 +236,7 @@ function lineGraph(startDate, EndDate) {
                     },
                     tooltip: {
                         split: true,
-                        valueSuffix: ' Sessions'
+                        valueSuffix: ' Session(s)'
                     },
                     plotOptions: {
                         area: {

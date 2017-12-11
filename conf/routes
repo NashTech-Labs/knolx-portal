@@ -1,82 +1,91 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET         /                                       controllers.HomeController.index
+GET           /                                                     controllers.HomeController.index
 
 # User
-GET         /login                                  controllers.UsersController.login
-POST        /login                                  controllers.UsersController.loginUser
-GET         /logout                                 controllers.UsersController.logout
-GET         /register                               controllers.UsersController.register
-POST        /register                               controllers.UsersController.createUser
-GET         /users/manage                           controllers.UsersController.manageUser()
-POST        /users/search                           controllers.UsersController.searchUser
-GET         /user/update                            controllers.UsersController.getByEmail(email: String)
-POST        /user/update                            controllers.UsersController.updateUser
-POST        /user/manage/update                     controllers.UsersController.updateUserBySuperUser
-GET         /user/delete                            controllers.UsersController.deleteUser(email: String)
-GET         /user/forgotpassword                    controllers.UsersController.renderForgotPassword
-POST        /user/forgotpassword                    controllers.UsersController.generateForgotPasswordToken
-GET         /user/forgotpassword/validate           controllers.UsersController.validateForgotPasswordToken(token: String)
-POST        /user/forgotpassword/reset              controllers.UsersController.resetPassword
-GET         /user/changepassword                    controllers.UsersController.renderChangePassword
-POST        /user/changepassword                    controllers.UsersController.changePassword
+GET           /login                                                controllers.UsersController.login
+POST          /login                                                controllers.UsersController.loginUser
+GET           /logout                                               controllers.UsersController.logout
+GET           /register                                             controllers.UsersController.register
+POST          /register                                             controllers.UsersController.createUser
+GET           /users/manage                                         controllers.UsersController.manageUser()
+POST          /users/search                                         controllers.UsersController.searchUser
+GET           /user/update                                          controllers.UsersController.getByEmail(email: String)
+POST          /user/update                                          controllers.UsersController.updateUser
+POST          /user/manage/update                                   controllers.UsersController.updateUserBySuperUser
+GET           /user/delete                                          controllers.UsersController.deleteUser(email: String)
+GET           /user/forgotpassword                                  controllers.UsersController.renderForgotPassword
+POST          /user/forgotpassword                                  controllers.UsersController.generateForgotPasswordToken
+GET           /user/forgotpassword/validate                         controllers.UsersController.validateForgotPasswordToken(token: String)
+POST          /user/forgotpassword/reset                            controllers.UsersController.resetPassword
+GET           /user/changepassword                                  controllers.UsersController.renderChangePassword
+POST          /user/changepassword                                  controllers.UsersController.changePassword
+POST          /user/userList                                        controllers.UsersController.usersList(email: Option[String])
+
+#User Analysis
+GET           /user/knolx/analysis                                  controllers.KnolxUserAnalysisController.renderUserAnalyticsPage
+POST          /user/knolx/analysis                                  controllers.KnolxUserAnalysisController.userSessionsResponseComparison(email: String)
+POST          /user/knolx/analysis/bancount                         controllers.KnolxUserAnalysisController.getBanCount(email: String)
+POST          /user/knolx/analysis/totalknolx                       controllers.KnolxUserAnalysisController.getUserTotalKnolx(email: String)
+POST          /user/knolx/analysis/totalmeetups                     controllers.KnolxUserAnalysisController.getUserTotalMeetUps(email: String)
+POST          /user/knolx/analysis/totaldidnotattendsessions        controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email: String)
 
 # Session
-GET         /session                                controllers.SessionsController.sessions
-POST        /session/search                         controllers.SessionsController.searchSessions
-GET         /session/manage                         controllers.SessionsController.manageSessions()
-POST        /session/manage/search                  controllers.SessionsController.searchManageSession
-GET         /session/create                         controllers.SessionsController.create
-POST        /session/create                         controllers.SessionsController.createSession
-GET         /session/delete                         controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
-POST        /session/update                         controllers.SessionsController.updateSession
-GET         /session/update                         controllers.SessionsController.update(id: String)
-GET         /session/:sessionId/cancel              controllers.SessionsController.cancelScheduledSession(sessionId: String)
-GET         /session/:sessionId/schedule            controllers.SessionsController.scheduleSession(sessionId: String)
-GET         /session/content/:sessionId             controllers.SessionsController.shareContent(sessionId: String)
+GET           /session                                              controllers.SessionsController.sessions
+POST          /session/search                                       controllers.SessionsController.searchSessions
+GET           /session/manage                                       controllers.SessionsController.manageSessions()
+POST          /session/manage/search                                controllers.SessionsController.searchManageSession
+GET           /session/create                                       controllers.SessionsController.create
+POST          /session/create                                       controllers.SessionsController.createSession
+GET           /session/delete                                       controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
+POST          /session/update                                       controllers.SessionsController.updateSession
+GET           /session/update                                       controllers.SessionsController.update(id: String)
+GET           /session/:sessionId/cancel                            controllers.SessionsController.cancelScheduledSession(sessionId: String)
+GET           /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
+GET           /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
 
 # Feedback
-GET         /feedbackform/manage/:pageNumber        controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
-GET         /feedbackform/create                    controllers.FeedbackFormsController.feedbackForm
-POST        /feedbackform/create                    controllers.FeedbackFormsController.createFeedbackForm
-GET         /feedbackform/update                    controllers.FeedbackFormsController.update(id: String)
-POST        /feedbackform/update                    controllers.FeedbackFormsController.updateFeedbackForm
-GET         /feedbackform/delete                    controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
-GET         /feedbackform/preview                   controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
-POST        /feedbackform/submit                    controllers.FeedbackFormsResponseController.storeFeedbackFormResponse
-GET         /feedbackform/response                  controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
-GET         /feedbackresponse/fetch                 controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse(id: String)
-GET         /jsRoutes                               controllers.JavascriptRouter.jsRoutes
+GET           /feedbackform/manage/:pageNumber                      controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
+GET           /feedbackform/create                                  controllers.FeedbackFormsController.feedbackForm
+POST          /feedbackform/create                                  controllers.FeedbackFormsController.createFeedbackForm
+GET           /feedbackform/update                                  controllers.FeedbackFormsController.update(id: String)
+POST          /feedbackform/update                                  controllers.FeedbackFormsController.updateFeedbackForm
+GET           /feedbackform/delete                                  controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
+GET           /feedbackform/preview                                 controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
+POST          /feedbackform/submit                                  controllers.FeedbackFormsResponseController.storeFeedbackFormResponse
+GET           /feedbackform/response                                controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
+GET           /feedbackresponse/fetch                               controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse(id: String)
+GET           /jsRoutes                                             controllers.JavascriptRouter.jsRoutes
 
 # Reports
-GET         /reports/user                           controllers.FeedbackFormsReportController.renderUserFeedbackReports
-POST        /reports/user                           controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
-GET         /reports/user/responses                 controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
-GET         /reports/manage                         controllers.FeedbackFormsReportController.renderAllFeedbackReports
-POST        /reports/manage                         controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
-GET         /reports/manage/responses               controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
-GET         /reports/manage/response                controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
+GET           /reports/user                                         controllers.FeedbackFormsReportController.renderUserFeedbackReports
+POST          /reports/user                                         controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
+GET           /reports/user/responses                               controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
+GET           /reports/manage                                       controllers.FeedbackFormsReportController.renderAllFeedbackReports
+POST          /reports/manage                                       controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
+GET           /reports/manage/responses                             controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
+GET           /reports/manage/response                              controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                           controllers.Assets.versioned(path="/public", file: Asset)
-GET         /favicon.ico                            controllers.Assets.at(path="/public/images", file="favicon.png")
+GET           /assets/*file                                         controllers.Assets.versioned(path="/public", file: Asset)
+GET           /favicon.ico                                          controllers.Assets.at(path="/public/images", file="favicon.png")
 
 #Category
-GET         /category                               controllers.SessionsCategoryController.renderCategoryPage
-PUT         /category/add                           controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
-POST        /category/update                        controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)
-DELETE      /category/delete                        controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
-GET         /category/all                           controllers.SessionsCategoryController.getCategory
-GET         /category/subcategories                 controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
-PUT         /subcategory/add                        controllers.SessionsCategoryController.addSubCategory(categoryName: String, subCategory: String)
-POST        /subcategory/update                     controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
-DELETE      /subcategory/delete                     controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
-GET         /subcategory/topics                     controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
+GET           /category                                             controllers.SessionsCategoryController.renderCategoryPage
+PUT           /category/add                                         controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
+POST          /category/update                                      controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)
+DELETE        /category/delete                                      controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
+GET           /category/all                                         controllers.SessionsCategoryController.getCategory
+GET           /category/subcategories                               controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
+PUT           /subcategory/add                                      controllers.SessionsCategoryController.addSubCategory(categoryName: String, subCategory: String)
+POST          /subcategory/update                                   controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+DELETE        /subcategory/delete                                   controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
+GET           /subcategory/topics                                   controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 
 # Analysis
-GET         /knolx/analysis                         controllers.KnolxAnalysisController.renderAnalysisPage
-POST        /knolx/analysis/columnchart             controllers.KnolxAnalysisController.renderColumnChart
-POST        /knolx/analysis/piechart                controllers.KnolxAnalysisController.renderPieChart
-POST        /knolx/analysis/linechart               controllers.KnolxAnalysisController.renderLineChart
-POST        /knolx/analysis/leaderboard             controllers.KnolxAnalysisController.leaderBoard
+GET           /knolx/analysis                                       controllers.KnolxAnalysisController.renderAnalysisPage
+POST          /knolx/analysis/columnchart                           controllers.KnolxAnalysisController.renderColumnChart
+POST          /knolx/analysis/piechart                              controllers.KnolxAnalysisController.renderPieChart
+POST          /knolx/analysis/linechart                             controllers.KnolxAnalysisController.renderLineChart
+POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard

@@ -274,8 +274,9 @@ function leaderBoard(startDate, EndDate) {
                 var usersFound = "";
                 for(var user = 0; user < users.length; user++) {
                     usersFound += '<tr class="table-header-color">' +
-                                 '<td>' + users[user] + '</td>' +
-                                 '</tr>';
+                                  '<td>' + (user+1) + '</td>' +
+                                  '<td style="text-align: left;"><i class="fa fa-user-circle-o"></i>  ' + users[user] + '</td>' +
+                                  '</tr>';
                 }
                 $('#leaderBoard').html(usersFound);
             },

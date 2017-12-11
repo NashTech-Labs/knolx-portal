@@ -38,15 +38,11 @@ object YouTubeUploader {
 }
 
 class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgressManager: ActorRef,
-                                @Named("YouTubeManager") youtubeManager: ActorRef,
                                 sessionsRepository: SessionsRepository,
                                 youtube: YouTube) extends Actor {
   private val chunkSize = 1024 * 0x400
   private val part = "snippet,statistics,status"
   private val videoFileFormat = "video/*"
-
-  var videoCancelStatus: Map[String, Boolean] = Map.empty
-  var sessionVideos: Map[String, Video] = Map.empty
 
   def receive: Receive = {
     case YouTubeUploader.Upload(sessionId, is, title, description, tags, categoryId, status, fileSize) =>
@@ -86,23 +82,18 @@ class YouTubeUploader @Inject()(@Named("YouTubeProgressManager") youtubeProgress
   def getVideoSnippet(title: String,
                       description: Option[String],
                       tags: List[String],
-                      categoryId: String = ""): VideoSnippet = {
-    val videoSnippet =
+                      categoryId: String): VideoSnippet = {
       new VideoSnippet()
         .setTitle(title)
         .setDescription(description.getOrElse(""))
         .setTags(tags.asJava)
-
-    if (categoryId.isEmpty) videoSnippet else videoSnippet.setCategoryId(categoryId)
+        .setCategoryId(categoryId)
   }
 
-  def getVideo(snippet: VideoSnippet, status: String, videoId: String = ""): Video = {
-    val video =
+  def getVideo(snippet: VideoSnippet, status: String): Video = {
       new Video()
         .setSnippet(snippet)
         .setStatus(new VideoStatus().setPrivacyStatus(status))
-
-    if (videoId.isEmpty) video else video.setId(videoId)
   }
 
   def getInputStreamContent(is: InputStream, fileSize: Long): InputStreamContent =

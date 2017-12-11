@@ -45,9 +45,7 @@ class DummyYouTubeProgressManager extends Actor {
   var sessionUploaders: Map[String, Double] = Map.empty
 
   override def receive: Receive = {
-    case YouTubeProgressManager.VideoId(sessionId)           =>
-      Logger.info("Getting from sessionVideos")
-      sender() ! Some(new Video)
+    case YouTubeProgressManager.VideoId(sessionId)           => sender() ! Some(new Video)
     case AddSessionUploader(sessionId)                       => sessionUploaders += sessionId -> 50D
     case RemoveSessionUploader(sessionId)                    => sessionUploaders -= sessionId
     case YouTubeProgressManager.GetUploadProgress(sessionId) => sender() ! sessionUploaders.get(sessionId)

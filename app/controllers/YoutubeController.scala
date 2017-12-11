@@ -10,6 +10,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import models.SessionsRepository
 import play.api.Logger
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc._
@@ -24,6 +26,12 @@ case class UpdateVideoDetails(title: String,
                               status: String,
                               category: String)
 
+case class VideoInfo(title: String,
+                     description: String,
+                     tags: List[String],
+                     status: String,
+                     category: String)
+
 @Singleton
 class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   controllerComponents: KnolxControllerComponents,
@@ -32,33 +40,61 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
                                   @Named("YouTubeProgressManager") youtubeProgressManager: ActorRef
                                  ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
+  val videoDetailsForm = Form(
+    mapping(
+      "title" -> nonEmptyText,
+      "description" -> nonEmptyText,
+      "tags" -> list(nonEmptyText),
+      "status" -> nonEmptyText,
+      "category" -> nonEmptyText
+    )(VideoInfo.apply)(VideoInfo.unapply)
+  )
+
   implicit val timeout = Timeout(10.seconds)
 
   implicit val questionInformationFormat: OFormat[UpdateVideoDetails] = Json.format[UpdateVideoDetails]
 
-  def upload(sessionId: String): Action[AnyContent] = adminAction.async { request =>
-    request.body.asMultipartFormData.fold {
-      Logger.error(s"Something went wrong when getting multipart form data")
+  def upload(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    videoDetailsForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
+        if(formWithErrors("title").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for title"))
+        } else if(formWithErrors("description").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for description"))
+        } else if(formWithErrors("tags").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for tags"))
+        } else if(formWithErrors("status").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for status"))
+        } else {
+          Future.successful(BadRequest(" Please provide a value for category"))
+        }
+      },
+      videoDetails => {
+        request.body.asMultipartFormData.fold {
+          Logger.error(s"Something went wrong when getting multipart form data")
 
-      Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
-    } { multiPartFormData =>
-      multiPartFormData.file("file").fold {
-        Logger.error(s"Something went wrong when getting file part from multipart form data")
+          Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
+        } { multiPartFormData =>
+          multiPartFormData.file("file").fold {
+            Logger.error(s"Something went wrong when getting file part from multipart form data")
 
-        Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
-      } { videoFile =>
-        val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
-        val title = request.headers.get("title").getOrElse("title")
-        val description = request.headers.get("description").getOrElse("description")
-        val tags = request.headers.get("tags").getOrElse("tags").split(",").toList
-        val categoryId = request.headers.get("category").getOrElse("27")
-        val status = request.headers.get("status").getOrElse("private")
+            Future.successful(BadRequest("Something went wrong while uploading the file. Please try again!"))
+          } { videoFile =>
+            val fileSize = request.headers.get("fileSize").getOrElse("0").toLong
+            val title = videoDetails.title
+            val description = videoDetails.description
+            val tags = videoDetails.tags
+            val categoryId = videoDetails.category
+            val status = videoDetails.status
 
-        youtubeManager ! YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), title, Some(description), tags, categoryId, status, fileSize)
+            youtubeManager ! YouTubeUploader.Upload(sessionId, new FileInputStream(videoFile.ref), title, Some(description), tags, categoryId, status, fileSize)
 
-        Future.successful(Ok("Uploading has started"))
+            Future.successful(Ok("Uploading has started"))
+          }
+        }
       }
-    }
+    )
   }
 
   def getPercentageUploaded(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
@@ -94,10 +130,10 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
       val maybeVideoURL = videoURLs.headOption
 
       maybeVideoURL.fold {
-        BadRequest("No new video URL found")
+        Ok("No new video URL found")
       } { videoURL =>
         if (videoURL.trim.isEmpty) {
-          BadRequest("No new video URL found")
+          Ok("No new video URL found")
         } else {
           val videoId = videoURL.split("/")(2)
           Ok(videoId)
@@ -107,10 +143,20 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
   }
 
   def updateVideo(sessionId: String): Action[JsValue] = adminAction(parse.json).async { implicit request =>
-    request.body.validate[UpdateVideoDetails].fold(
-      jsonValidationError => {
-        Logger.error("Json validation error occurred " + jsonValidationError)
-        Future.successful(BadRequest("Something went wrong while updating the form"))
+    videoDetailsForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
+        if(formWithErrors("title").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for title"))
+        } else if(formWithErrors("description").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for description"))
+        } else if(formWithErrors("tags").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for tags"))
+        } else if(formWithErrors("status").hasErrors) {
+          Future.successful(BadRequest(" Please provide a value for status"))
+        } else {
+          Future.successful(BadRequest(" Please provide a value for category"))
+        }
       },
       updateVideoDetails => {
         sessionsRepository.getVideoURL(sessionId).flatMap { videoURLs =>
@@ -123,7 +169,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
 
             (youtubeManager ? YouTubeDetailsActor.UpdateVideoDetails(videoId,
               updateVideoDetails.title,
-              updateVideoDetails.description,
+              Some(updateVideoDetails.description),
               updateVideoDetails.tags,
               updateVideoDetails.status,
               updateVideoDetails.category)).mapTo[String]

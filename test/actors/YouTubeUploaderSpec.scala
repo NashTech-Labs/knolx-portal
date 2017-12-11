@@ -49,9 +49,6 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
     val youtubeProgressManager: ActorRef =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeProgressManager")))))
 
-    val youtubeManager: ActorRef =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeManager")))))
-
     val sessionsRepository = mock[SessionsRepository]
   }
 
@@ -75,13 +72,13 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val uploader = new MediaHttpUploader(abstractIS, netHttpTransport, httpReqInit)
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube){
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube){
           override def getVideoSnippet(title: String,
                                        description: Option[String],
                                        tags: List[String],
                                        categoryId: String = ""): VideoSnippet = videoSnippet
 
-          override def getVideo(snippet: VideoSnippet, status: String, videoId: String = ""): Video = video
+          override def getVideo(snippet: VideoSnippet, status: String): Video = video
 
           override def getInputStreamContent(is: InputStream, fileSize: Long): InputStreamContent = inputStreamContent
 
@@ -103,7 +100,7 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val youtube = mock[YouTube]
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
       youtubeUploader ! "random message"
 
@@ -114,9 +111,9 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val youtube = mock[YouTube]
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
-      val result = youtubeUploader.underlyingActor.getVideoSnippet(titleOfVideo, Some(description), tags)
+      val result = youtubeUploader.underlyingActor.getVideoSnippet(titleOfVideo, Some(description), tags, category)
 
       result.getTitle must be equalTo titleOfVideo
     }
@@ -125,7 +122,7 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val youtube = mock[YouTube]
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
       val result = youtubeUploader.underlyingActor.getVideoSnippet(titleOfVideo, Some(description), tags, "27")
 
@@ -137,7 +134,7 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val videoSnippet = new VideoSnippet()
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
       val result = youtubeUploader.underlyingActor.getVideo(videoSnippet, "private")
 
@@ -149,9 +146,9 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val videoSnippet = new VideoSnippet()
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
-      val result = youtubeUploader.underlyingActor.getVideo(videoSnippet, "private", "videoId")
+      val result = youtubeUploader.underlyingActor.getVideo(videoSnippet, "private")
 
       result.getStatus.getPrivacyStatus must be equalTo "private"
     }
@@ -161,7 +158,7 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val inputStream = mock[InputStream]
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
       val result = youtubeUploader.underlyingActor.getInputStreamContent(inputStream, 10L)
 
@@ -186,7 +183,7 @@ class YouTubeUploaderSpec(_system: ActorSystem) extends TestKit(_system: ActorSy
       val uploader = new MediaHttpUploader(abstractIS, netHttpTransport, httpReqInit)
 
       val youtubeUploader =
-        TestActorRef(new YouTubeUploader(youtubeProgressManager, youtubeManager, sessionsRepository, youtube))
+        TestActorRef(new YouTubeUploader(youtubeProgressManager, sessionsRepository, youtube))
 
       when(youtube.videos().insert("snippet,statistics,status", video, inputStreamContent)) thenReturn videoInsert
       when(videoInsert.execute()) thenReturn video

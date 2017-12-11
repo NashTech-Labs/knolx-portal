@@ -84,22 +84,18 @@ class YouTubeDetailsActor @Inject()(youtube: YouTube) extends Actor {
   def getVideoSnippet(title: String,
                       description: Option[String],
                       tags: List[String],
-                      categoryId: String = ""): VideoSnippet = {
-    val videoSnippet =
+                      categoryId: String): VideoSnippet = {
       new VideoSnippet()
         .setTitle(title)
         .setDescription(description.getOrElse(""))
         .setTags(tags.asJava)
-
-    if (categoryId.isEmpty) videoSnippet else videoSnippet.setCategoryId(categoryId)
+        .setCategoryId(categoryId)
   }
 
-  def getVideo(snippet: VideoSnippet, status: String, videoId: String = ""): Video = {
-    val video =
+  def getVideo(snippet: VideoSnippet, status: String, videoId: String): Video = {
       new Video()
         .setSnippet(snippet)
         .setStatus(new VideoStatus().setPrivacyStatus(status))
-
-    if (videoId.isEmpty) video else video.setId(videoId)
+        .setId(videoId)
   }
 }

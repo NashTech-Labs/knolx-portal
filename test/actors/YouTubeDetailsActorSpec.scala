@@ -7,13 +7,11 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model._
-import com.google.inject.AbstractModule
 import org.mockito.Mockito.when
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.mock.MockitoSugar
 import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
-import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 import scala.collection.JavaConversions._
@@ -106,15 +104,6 @@ class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: Act
       expectMsg(None)
     }
 
-    "return video snippet for no category id" in new TestScope {
-      val youtubeDetailsActor =
-        TestActorRef(new YouTubeDetailsActor(youtube))
-
-      val result = youtubeDetailsActor.underlyingActor.getVideoSnippet(titleOfVideo, Some(description), tags)
-
-      result.getTitle must be equalTo titleOfVideo
-    }
-
     "return video snippet when category id is not empty" in new TestScope {
       val youtubeDetailsActor =
         TestActorRef(new YouTubeDetailsActor(youtube))
@@ -122,17 +111,6 @@ class YouTubeDetailsActorSpec(_system: ActorSystem) extends TestKit(_system: Act
       val result = youtubeDetailsActor.underlyingActor.getVideoSnippet(titleOfVideo, Some(description), tags, "27")
 
       result.getTitle must be equalTo titleOfVideo
-    }
-
-    "return video for no videoId" in new TestScope {
-      val videoSnippet = new VideoSnippet()
-
-      val youtubeDetailsActor =
-        TestActorRef(new YouTubeDetailsActor(youtube))
-
-      val result = youtubeDetailsActor.underlyingActor.getVideo(videoSnippet, "private")
-
-      result.getStatus.getPrivacyStatus must be equalTo "private"
     }
 
     "return video for a given videoId" in new TestScope {

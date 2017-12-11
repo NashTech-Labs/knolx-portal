@@ -2,6 +2,7 @@ var cancel = false;
 var uploading = false;
 var redirect = true;
 var newVideoURL = "";
+var files = 0;
 
 Dropzone.autoDiscover = false;
 
@@ -24,17 +25,25 @@ $(function () {
         headers: {
             'CSRF-Token': document.getElementById('csrfToken').value
         },
-        autoProcessQueue: false
+        autoProcessQueue: false,
+        maxFiles: 1,
+        init: function() {
+          this.on("maxfilesexceeded", function(file) {
+                this.removeAllFiles();
+                this.addFile(file);
+          });
+    }
     });
 
     youtubeDropzone.on("sending", function (file, xhr, formData) {
         redirect = false;
+        $("#upload-video-button").hide();
         xhr.setRequestHeader("filesize", file.size);
-        xhr.setRequestHeader("title", $("#youtube-title").val());
-        xhr.setRequestHeader("description", $("#youtube-description").val());
-        xhr.setRequestHeader("tags", $("#youtube-tags").val());
-        xhr.setRequestHeader("category", $("#youtube-category").val());
-        xhr.setRequestHeader("status", $("#youtube-status").val());
+        formData.append("title", $("#youtube-title").val());
+        formData.append("description", $("#youtube-description").val());
+        formData.append("tags", $("#youtube-tags").val());
+        formData.append("category", $("#youtube-category").val());
+        formData.append("status", $("#youtube-status").val());
     });
 
     youtubeDropzone.on("complete", function (file) {
@@ -50,6 +59,15 @@ $(function () {
         $("#youtube-dropzone").hide();
         showProgress(sessionId);
     });
+
+    youtubeDropzone.on("error", function (file, response) {
+        $("#upload-video-button").show();
+        files -= 1;
+    });
+
+    youtubeDropzone.on("addedfile", function(file) {
+        files += 1;
+    })
 
     $("#upload-success-message").hide();
     $("#cancel-video-button").hide();
@@ -76,6 +94,7 @@ $(function () {
         if (uploading) {
             cancel = true;
             uploading = false;
+            files -= 1;
             $("#upload-success-message").hide();
             cancelVideo(sessionId);
         } else {
@@ -86,6 +105,7 @@ $(function () {
     });
 
     $("#updateVideo").click(function () {
+        $("#unsuccessful-update").hide();
         update(sessionId);
     });
 
@@ -98,8 +118,11 @@ $(function () {
     });
 
     $("#uploadVideo").click(function () {
-        youtubeDropzone.processQueue();
-        $("#upload-video-button").hide();
+        if(files >= 1) {
+            youtubeDropzone.processQueue();
+        } else {
+            $("#no-file-added").show();
+        }
     });
 
     $("#attach-video-link").click(function () {
@@ -180,11 +203,15 @@ function getUpdateURL(sessionId) {
             processData: false,
             contentType: false,
             success: function (data) {
-                newVideoURL = data;
-                $("#attach-video").show();
+                if(data == "No new video URL found") {
+                    getUpdateURL(sessionId);
+                } else {
+                    newVideoURL = data;
+                    $("#attach-video").show();
+                }
             },
             error: function (er) {
-                getUpdateURL(sessionId);
+                console.log("Couldn't find a new URL")
             }
         });
 }
@@ -237,11 +264,9 @@ function checkIfTemporaryUrlExists(sessionId) {
             processData: false,
             contentType: false,
             success: function (data) {
+            console.log("Received temporary URL => " + data);
                 newVideoURL = data;
                 $("#attach-video").show();
-            },
-            error: function (er) {
-                console.log("Bad request received with message =>" + er.responseText);
             }
         });
 }

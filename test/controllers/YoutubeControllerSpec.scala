@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Names
-import helpers.{AddSessionUploader, RemoveSessionUploader, TestEnvironment}
+import helpers.{AddSessionUploader, TestEnvironment}
 import models.{SessionsRepository, UserInfo}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
@@ -56,7 +56,11 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
   "Youtube Controller" should {
 
     "upload video file" in new WithTestApplication {
-      val parameters = Map[String, Seq[String]]("" -> Seq(""), "" -> Seq(""))
+      val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
+        "description" -> Seq("description"),
+        "tags" -> Seq("tag1"),
+        "status" -> Seq("private"),
+        "category" -> Seq("category"))
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val files = Seq[FilePart[TemporaryFile]](FilePart("file", "file", Some("multipart/form-data"), tempFile))
       val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
@@ -75,7 +79,58 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     }
 
     "send bad request if video file not found in the request" in new WithTestApplication {
-      val parameters = Map[String, Seq[String]]("" -> Seq(""), "" -> Seq(""))
+      val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
+        "description" -> Seq("description"),
+        "tags" -> Seq("tag1"),
+        "status" -> Seq("private"),
+        "category" -> Seq("category"))
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
+      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withHeaders(("fileSize", "10"))
+          .withMultipartFormDataBody(multipartBody)
+          .withFormUrlEncodedBody(("title", "title"),
+            ("description", "description"),
+            ("tags", "tag1, tag2"),
+            ("status", "private"),
+            ("category", "27"))
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo 400
+    }
+
+    "send bad request if multipart form data is corrupted in the request" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withHeaders(("fileSize", "10"))
+          .withFormUrlEncodedBody(("title", "title"),
+            ("description", "description"),
+            ("tags", "tag1, tag2"),
+            ("status", "private"),
+            ("category", "27"))
+
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo 400
+    }
+
+    "send bad request if one of the mandatory field is not provided" in new WithTestApplication {
+      val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
+        "description" -> Seq("description"),
+        "tags" -> Seq("tag1"),
+        "status" -> Seq("private"),
+        "category" -> Seq("category"))
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
       val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
@@ -93,20 +148,6 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       status(result) must be equalTo 400
     }
 
-    "send bad request if multipart form data is corrupted in the request" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-
-      val request =
-        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withHeaders(("fileSize", "10"))
-
-
-      val result = controller.upload(sessionId)(request)
-
-      status(result) must be equalTo 400
-    }
-
     "return Ok when asked for percentage of file" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
@@ -114,8 +155,6 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/youtube/sessionId/progress")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
-
-      youtubeProgressManager ! RemoveSessionUploader(sessionId)
 
       status(result) must be equalTo 200
     }
@@ -146,7 +185,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo 200
     }
 
     "return bad request while getting video ID of a session when videoID is an empty string" in new WithTestApplication {
@@ -156,7 +195,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo 200
     }
 
     "return bad request for wrong json" in new WithTestApplication {
@@ -220,8 +259,6 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/youtube/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
-
-      youtubeProgressManager ! RemoveSessionUploader(sessionId)
 
       status(result) must be equalTo 200
     }

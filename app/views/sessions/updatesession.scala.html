@@ -290,15 +290,15 @@
         <div class="col-md-12 login-third update-second" id="update-youtube-details">
             <label class="col-md-2 control-label">Title</label>
             <div class="col-md-10 form-group" >
-                <input type="text" name="title" id="youtube-title" value='@videoDetails.fold("")(_.title)' placeholder="Video title" class="update-field"/>
+                <input type="text" name="title" id="youtube-title" value='@videoDetails.fold("")(_.title)' placeholder="Video title" class="update-field" required/>
             </div>
             <label class="col-md-2 control-label">Description</label>
             <div class="col-md-10 form-group" >
-                <input type="text" name="description" id="youtube-description"  value='@videoDetails.fold("")(_.description.fold("")(identity))' placeholder="Video description" class="update-field"/>
+                <input type="text" name="description" id="youtube-description"  value='@videoDetails.fold("")(_.description.fold("")(identity))' placeholder="Video description" class="update-field" required/>
             </div>
             <label class="col-md-2 control-label">Video tags</label>
             <div class="col-md-10 form-group" >
-                <input type="text" name="tags" id="youtube-tags" data-role="tagsinput" value='@videoDetails.fold("")(_.tags.mkString(","))' placeholder="Video tags" class="update-field"/>
+                <input type="text" name="tags" id="youtube-tags" data-role="tagsinput" value='@videoDetails.fold("")(_.tags.mkString(","))' placeholder="Video tags" class="update-field" required/>
             </div>
             <label class="col-md-2 control-label">Video Category</label>
             <div class="col-md-10 form-group" >
@@ -338,19 +338,19 @@
 
             <div class="col-md-12 login-third update-second" id="unsuccessful-update" style="display:none;">
                 <div class="col-md-2" ></div>
-                <div class="col-md-10 alert alert-success alert-dismissable" >
+                <div class="col-md-10 alert alert-danger alert-dismissable" >
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                     <p>Something went wrong and the video was not able to be updated</p>
                 </div>
             </div>
 
-            <!--<div class="col-md-12 login-four" id="upload-video-button">
-                <div class="col-md-2"></div>
-                <div class="col-md-2 loader-outer">
-                    <input type="button" id="uploadVideo" value="Upload" class="btn btn-success" style="background-color: #1ab394;"/>
+            <div class="col-md-12 login-third update-second" id="no-file-added" style="display:none;">
+                <div class="col-md-2" ></div>
+                <div class="col-md-10 alert alert-danger alert-dismissable" >
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <p>Please add a file to the dropzone.</p>
                 </div>
-                <div class="col-md-6"></div>
-            </div>-->
+            </div>
 
             <div class="col-md-12 login-four" >
                 <div class="hr-line-dashed"></div>
@@ -359,21 +359,9 @@
                     <input type="button" id="uploadVideo" value="Upload" class="btn btn-success" style="background-color: #1ab394;"/>
                     <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
                 </div>
-                <!--<div class="col-md-2 loader-outer">
-                    <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
-                </div>-->
                 <div class="col-md-6"></div>
             </div>
-
-            <!--<div class="col-md-12 login-four">
-                <div class="col-md-2"></div>
-                <div class="col-md-2 loader-outer">
-                    <input type="button" id="updateVideo" value="Update" class="btn btn-success" style="background-color: #1ab394;"/>
-                </div>
-                <div class="col-md-6"></div>
-            </div>-->
         </div>
-
     </div>
 </div>
 

@@ -313,7 +313,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
   def getVideoURL(sessionId: String): Future[List[String]] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId),
+                                "youtubeURL" -> BSONDocument("$exists" -> true))
     val projection = Json.obj("youtubeURL" -> 1)
 
     collection
@@ -396,8 +397,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
   def getTemporaryVideoURL(sessionId: String): Future[List[String]] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
-    val projection = Json.obj("temporaryVideoURL" -> 1)
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId),
+                                "temporaryVideoURL" -> BSONDocument("$exists" -> true))
+    val projection = Json.obj("temporaryVideoURL" -> 1, "_id" -> 0)
 
     collection
       .flatMap(jsonCollection =>

@@ -24,19 +24,18 @@ POST        /user/changepassword                           controllers.UsersCont
 POST        /user/userList                                 controllers.UsersController.usersList(email: Option[String])
 
 # Session
-GET         /session                                       controllers.SessionsController.sessions
-POST        /session/search                                controllers.SessionsController.searchSessions
-GET         /session/manage                                controllers.SessionsController.manageSessions()
-POST        /session/manage/search                         controllers.SessionsController.searchManageSession
-GET         /session/create                                controllers.SessionsController.create
-POST        /session/create                                controllers.SessionsController.createSession
-GET         /session/delete                                controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
-POST        /session/update                                controllers.SessionsController.updateSession
-GET         /session/update                                controllers.SessionsController.update(id: String)
-GET         /session/:sessionId/cancel                     controllers.SessionsController.cancelScheduledSession(sessionId: String)
-GET         /session/:sessionId/schedule                   controllers.SessionsController.scheduleSession(sessionId: String)
-GET         /session/content/:sessionId                    controllers.SessionsController.shareContent(sessionId: String)
-GET         /session/categories                            controllers.SessionsController.getCategory
+GET         /session                                controllers.SessionsController.sessions
+POST        /session/search                         controllers.SessionsController.searchSessions
+GET         /session/manage                         controllers.SessionsController.manageSessions()
+POST        /session/manage/search                  controllers.SessionsController.searchManageSession
+GET         /session/create                         controllers.SessionsController.create
+POST        /session/create                         controllers.SessionsController.createSession
+GET         /session/delete                         controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
+POST        /session/update                         controllers.SessionsController.updateSession
+GET         /session/update                         controllers.SessionsController.update(id: String)
+GET         /session/:sessionId/cancel              controllers.SessionsController.cancelScheduledSession(sessionId: String)
+GET         /session/:sessionId/schedule            controllers.SessionsController.scheduleSession(sessionId: String)
+GET         /session/content/:sessionId             controllers.SessionsController.shareContent(sessionId: String)
 
 # Feedback
 GET         /feedbackform/manage/:pageNumber               controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -52,16 +51,29 @@ GET         /feedbackresponse/fetch                        controllers.FeedbackF
 GET         /jsRoutes                                      controllers.JavascriptRouter.jsRoutes
 
 # Reports
-GET         /reports/user                                  controllers.FeedbackFormsReportController.renderUserFeedbackReports
-POST        /reports/user                                  controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
-GET         /reports/user/responses                        controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
-GET         /reports/manage                                controllers.FeedbackFormsReportController.renderAllFeedbackReports
-POST        /reports/manage                                controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
-GET         /reports/manage/responses                      controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
-GET         /reports/manage/response                       controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
+GET         /reports/user                           controllers.FeedbackFormsReportController.renderUserFeedbackReports
+POST        /reports/user                           controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
+GET         /reports/user/responses                 controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
+GET         /reports/manage                         controllers.FeedbackFormsReportController.renderAllFeedbackReports
+POST        /reports/manage                         controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
+GET         /reports/manage/responses               controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
+GET         /reports/manage/response                controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                                  controllers.Assets.versioned(path="/public", file: Asset)
 GET         /favicon.ico                                   controllers.Assets.at(path="/public/images", file="favicon.png")
+
+#Category
+GET         /category                               controllers.SessionsCategoryController.renderCategoryPage
+PUT         /category/add                           controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
+POST        /category/update                        controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)
+DELETE      /category/delete                        controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
+GET         /category/all                           controllers.SessionsCategoryController.getCategory
+GET         /category/subcategories                 controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
+PUT         /subcategory/add                        controllers.SessionsCategoryController.addSubCategory(categoryName: String, subCategory: String)
+POST        /subcategory/update                     controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+DELETE      /subcategory/delete                     controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
+GET         /subcategory/topics                     controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 
 # Analysis
 GET         /knolx/analysis                                controllers.KnolxAnalysisController.renderAnalysisPage

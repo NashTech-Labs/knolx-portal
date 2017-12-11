@@ -95,6 +95,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           youtubeURL = Some("youtubeURL"),
           slideShareURL = Some("slideShareURL"),
           _id = sessionId))
+
     val maybeFeedbackForm =
       Option(FeedbackForm(
         name = "Feedback Form Template 1",

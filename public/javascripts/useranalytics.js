@@ -39,6 +39,9 @@ function UserAnalytics() {
                 },
                 success: function (values) {
                     self.emailList(values);
+                },
+                error: function (er) {
+                    console.log(er);
                 }
             }
         )
@@ -56,6 +59,9 @@ function UserAnalytics() {
                 },
                 success: function (values) {
                     self.banCount(values["banCount"]);
+                },
+                error: function (er) {
+                    console.log(er);
                 }
             }
         )
@@ -73,6 +79,9 @@ function UserAnalytics() {
                 },
                 success: function (values) {
                     self.totalKnolx(values["totalKnolx"]);
+                },
+                error: function (er) {
+                    console.log(er);
                 }
             }
         )
@@ -90,6 +99,9 @@ function UserAnalytics() {
                 },
                 success: function (values) {
                     self.totalMeetups(values["totalMeetUps"]);
+                },
+                error: function (er) {
+                    console.log(er);
                 }
             }
         )
@@ -107,6 +119,9 @@ function UserAnalytics() {
                 },
                 success: function (values) {
                     self.sessionNotAttend(values["didNotAttendCount"]);
+                },
+                error: function (er) {
+                    console.log(er);
                 }
             }
         )
@@ -187,7 +202,8 @@ function UserAnalytics() {
                     }]
                 });
 
-            }, error: function (er) {
+            },
+            error: function (er) {
                 console.log(er);
             }
         })

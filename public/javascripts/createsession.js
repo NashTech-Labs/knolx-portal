@@ -2,7 +2,7 @@ $(document).ready(function () {
 
     $('#category,#session, #subCategory, #feedbackFormId').select2();
 
-    jsRoutes.controllers.SessionsController.getCategory().ajax(
+    jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
         {
             type: "GET",
             processData: false,

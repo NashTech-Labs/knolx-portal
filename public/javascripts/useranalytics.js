@@ -191,7 +191,6 @@ function UserAnalytics() {
                 console.log(er);
             }
         })
-
     }
 
 }

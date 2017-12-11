@@ -28,14 +28,13 @@ $(function () {
         analysis(startDate, endDate);
     });
 
-    leaderBoard();
-
 });
 
 function analysis(startDate, EndDate) {
     pieChart(startDate, EndDate);
     columnChart(startDate, EndDate);
     lineGraph(startDate, EndDate);
+    leaderBoard(startDate, EndDate);
 }
 
 function columnChart(startDate, EndDate) {
@@ -259,13 +258,22 @@ function lineGraph(startDate, EndDate) {
         })
 }
 
-function leaderBoard() {
+function leaderBoard(startDate, EndDate) {
 
+    var formData = {
+            "startDate": startDate,
+            "endDate": EndDate
+    };
     jsRoutes.controllers.KnolxAnalysisController.leaderBoard().ajax(
         {
-            type: 'GET',
+            type: 'POST',
             processData: false,
             contentType: 'application/json',
+            data: JSON.stringify(formData),
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
             success: function (users) {
                 var usersFound = "";
                 for(var user = 0; user < users.length; user++) {

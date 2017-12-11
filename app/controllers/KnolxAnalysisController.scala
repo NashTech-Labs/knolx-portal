@@ -118,7 +118,6 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
   }
 
   def leaderBoard: Action[JsValue] = action(parse.json).async { implicit request =>
-    Logger.info("Inside Leader Board")
     request.body.validate[KnolxAnalysisDateRange].fold(
       jsonValidationErrors => {
         Logger.error(s"Received a bad request for filtering sessions " + jsonValidationErrors)
@@ -127,22 +126,28 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
         val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
         val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
 
-        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)).map { totalSessions =>
-          Logger.info("Session List >>>>>>  >>  " + totalSessions)
-          if (totalSessions.nonEmpty) {
-            val userWithSession: Map[String, List[SessionInfo]] = totalSessions.groupBy(_.email)
-            val userAverageScore: Map[String, Double] = userWithSession.map { case (user, userSessions) =>
-              val averageScore = userSessions.map(_.score).sum / userSessions.length
-              val sessionScore = (userSessions.length.toDouble / totalSessions.length) * 2.5
-              val ratingScore = (averageScore / 100) * 7.5
-              val userScore = sessionScore + ratingScore
-              (user, userScore)
-            }
-            val topUsers = userAverageScore.toList.sortWith(_._2 > _._2).toMap.keys.take(10)
-            Logger.info("Top users >>>>> " + topUsers)
-            Ok(Json.toJson(topUsers.toList))
+        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)) map { sessions =>
+          if (sessions.nonEmpty) {
+            val userWithSession = sessions.groupBy(_.email)
+            val userAverageScore =
+              userWithSession map { case (email, userSessions) =>
+                val averageScore = userSessions.map(_.score).sum / userSessions.length
+                val sessionScore = (userSessions.length.toDouble / sessions.length) * 2.5
+                val ratingScore = (averageScore / 100) * 7.5
+                val userScore = sessionScore + ratingScore
+                (email, userScore)
+              }
+            val topUsers =
+              userAverageScore
+                .toList
+                .sortBy { case (_, userScore) => userScore }
+                .map { case (email, _) => email }
+                .reverse
+                .take(10)
+
+            Ok(Json.toJson(topUsers))
           } else {
-            Logger.info(s"No records found $totalSessions")
+            Logger.info(s"No records found $sessions")
             BadRequest("OOPS ! No record found")
           }
         }

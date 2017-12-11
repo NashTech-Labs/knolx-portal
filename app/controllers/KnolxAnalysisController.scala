@@ -6,9 +6,9 @@ import akka.actor.ActorRef
 import models._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import utilities.DateTimeUtility
+import play.api.libs.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -111,4 +111,40 @@ class KnolxAnalysisController @Inject()(messagesApi: MessagesApi,
       })
   }
 
+  def leaderBoard: Action[JsValue] = action(parse.json).async { implicit request =>
+    request.body.validate[KnolxAnalysisDateRange].fold(
+      jsonValidationErrors => {
+        Logger.error(s"Received a bad request for filtering sessions " + jsonValidationErrors)
+        Future.successful(BadRequest(JsError.toJson(jsonValidationErrors)))
+      }, knolxAnalysisDateRange => {
+        val startDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.startDate)
+        val endDate: Long = dateTimeUtility.parseDateStringToIST(knolxAnalysisDateRange.endDate)
+
+        sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)) map { sessions =>
+          if (sessions.nonEmpty) {
+            val userWithSession = sessions.groupBy(_.email)
+            val userAverageScore =
+              userWithSession map { case (email, userSessions) =>
+                val averageScore = userSessions.map(_.score).sum / userSessions.length
+                val sessionScore = (userSessions.length.toDouble / sessions.length) * 2.5
+                val ratingScore = (averageScore / 100) * 7.5
+                val userScore = sessionScore + ratingScore
+                (email, userScore)
+              }
+            val topUsers =
+              userAverageScore
+                .toList
+                .sortBy { case (_, userScore) => userScore }
+                .map { case (email, _) => email }
+                .reverse
+                .take(10)
+
+            Ok(Json.toJson(topUsers))
+          } else {
+            Logger.info(s"No records found $sessions")
+            BadRequest("OOPS ! No record found")
+          }
+        }
+      })
+  }
 }

@@ -177,6 +177,19 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection.count(condition))
   }
 
+  def activeUncancelledCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
+    val condition = keyword match {
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
+        "active" -> true,
+        "cancelled" -> false))
+      case None => Some(Json.obj("active" -> true, "cancelled" -> false))
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(condition))
+  }
+
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
     val modifier = BSONDocument(
@@ -230,7 +243,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   }
 
-  def userSessionsTillNow(email: Option[String] = None): Future[List[SessionInfo]] = {
+  def userSessionsTillNow(email: Option[String] = None, pageNumber: Int)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    val skipN = (pageNumber - 1) * 8
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = 8, flagsN = 0)
     val millis = dateTimeUtility.nowMillis
 
     val condition = email.fold {
@@ -250,9 +265,10 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .options(queryOptions)
           .sort(Json.obj("date" -> -1))
           .cursor[SessionInfo](ReadPreference.primary)
-          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+          .collect[List](8, FailOnError[List[SessionInfo]]()))
 
   }
 
@@ -295,7 +311,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   def updateRating(sessionId: String, scores: List[Double]): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val scoresWithoutZero = scores.filterNot(_ == 0)
-    val sessionScore = if(scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
+    val sessionScore = if (scoresWithoutZero.nonEmpty) scoresWithoutZero.sum / scoresWithoutZero.length else 0.00
 
     val updatedRating = sessionScore match {
       case good if sessionScore >= 60.00    => "Good"
@@ -409,4 +425,27 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .collect[List](-1, FailOnError[List[JsValue]]())
       ).map(_.flatMap(_ ("temporaryVideoURL").asOpt[String]))
   }
+
+  def updateSubCategoryOnChange(subCategory: String, updateSubCategory: String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("subCategory" -> subCategory)
+    val modifier = BSONDocument("$set" -> BSONDocument("subCategory" -> updateSubCategory))
+    collection.flatMap(_.update(selector, modifier, multi = true))
+  }
+
+  def updateCategoryOnChange(category: String, updateCategory: String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("category" -> category)
+    val modifier = BSONDocument("$set" -> BSONDocument("category" -> updateCategory))
+    collection.flatMap(_.update(selector, modifier, multi = true))
+  }
+
+  def getSessionByCategory(category: String, subCategory: String): Future[List[SessionInfo]] = {
+    val condition = BSONDocument("category" -> category, "subCategory" -> subCategory)
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .cursor[SessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+  }
+
 }

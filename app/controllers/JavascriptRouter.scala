@@ -21,11 +21,19 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.shareContent,
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession,
-      controllers.routes.javascript.SessionsController.getCategory,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
       controllers.routes.javascript.FeedbackFormsReportController.searchAllResponsesBySessionId,
+      controllers.routes.javascript.SessionsCategoryController.addPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.addSubCategory,
+      controllers.routes.javascript.SessionsCategoryController.modifyPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.modifySubCategory,
+      controllers.routes.javascript.SessionsCategoryController.getCategory,
+      controllers.routes.javascript.SessionsCategoryController.deletePrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.getSubCategoryByPrimaryCategory,
+      controllers.routes.javascript.SessionsCategoryController.deleteSubCategory,
+      controllers.routes.javascript.SessionsCategoryController.getTopicsBySubCategory,
       controllers.routes.javascript.YoutubeController.upload,
       controllers.routes.javascript.YoutubeController.getPercentageUploaded,
       controllers.routes.javascript.YoutubeController.cancel,
@@ -35,7 +43,11 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.YoutubeController.checkIfTemporaryUrlExists,
       controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
       controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
-      controllers.routes.javascript.KnolxAnalysisController.renderLineChart
+      controllers.routes.javascript.KnolxAnalysisController.renderLineChart,
+      controllers.routes.javascript.FeedbackFormsReportController.manageAllFeedbackReports,
+      controllers.routes.javascript.FeedbackFormsReportController.manageUserFeedbackReports,
+      controllers.routes.javascript.FeedbackFormsReportController.fetchAllResponsesBySessionId,
+      controllers.routes.javascript.FeedbackFormsReportController.fetchUserResponsesBySessionId
     )).as("text/javascript")
   }
 

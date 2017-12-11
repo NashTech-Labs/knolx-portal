@@ -101,7 +101,8 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
     "getByEmail session" in new TestScope {
       val updatedSession = UpdateSessionInfo(UpdateSessionInformation(sessionId.stringify, currentDate,
-        "updatedSession", "category","subCategory", "feedbackFormId", "updatedTopic", 1, Some("youtubeURL"), Some("slideShareURL"),cancelled = false), BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
+        "updatedSession", "category","subCategory", "feedbackFormId", "updatedTopic", 1, Some("youtubeURL"),
+        Some("slideShareURL"),cancelled = false), BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
 
       val updated: Boolean = await(sessionsRepository.update(updatedSession).map(_.ok))
 
@@ -114,38 +115,50 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       response contains sessionInfo
     }
 
-    "get paginated sessions when serched with empty string" in new TestScope {
+    "get paginated sessions when searched with empty string" in new TestScope {
       val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1))
 
       paginatedSessions must beEqualTo(List(sessionInfo.copy(session = "updatedSession", topic = "updatedTopic", meetup = false)))
     }
 
-    "get paginated sessions when serched with some string" in new TestScope {
+    "get paginated sessions when searched with some string" in new TestScope {
       val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, Some("test")))
 
       paginatedSessions must beEqualTo(List(sessionInfo.copy(session = "updatedSession", topic = "updatedTopic", meetup = false)))
     }
 
-    "get active sessions count when serched with empty string" in new TestScope {
+    "get active sessions count when searched with empty string" in new TestScope {
       val count: Int = await(sessionsRepository.activeCount(None))
 
       count must beEqualTo(1)
     }
 
+    "get active and uncancelled sessions count when serched with empty string" in new TestScope {
+      val count: Int = await(sessionsRepository.activeUncancelledCount(None))
+
+      count must beEqualTo(1)
+    }
+
     "get users session till now for a particular user" in new TestScope {
-      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com")))
+      val response = await(sessionsRepository.userSessionsTillNow(Some("test@example.com"), 1))
 
       response contains sessionInfo
     }
 
     "get users session till now for all users" in new TestScope {
-      val response = await(sessionsRepository.userSessionsTillNow(None))
+      val response = await(sessionsRepository.userSessionsTillNow(None, 1))
 
       response contains sessionInfo
     }
 
-    "get active sessions count when serched with some string" in new TestScope {
+    "get active sessions count when searched with some string" in new TestScope {
       val count: Int = await(sessionsRepository.activeCount(Some("test")))
+
+      count must beEqualTo(1)
+    }
+
+    "get active and cancelled sessions count when serched with some string" in new TestScope {
+      val count: Int = await(sessionsRepository.activeUncancelledCount(Some("test")))
 
       count must beEqualTo(1)
     }
@@ -222,12 +235,37 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       result.ok must beEqualTo(true)
     }
 
+    "update sub category on change" in new TestScope {
+      val deleteSubCategory = await(sessionsRepository.updateSubCategoryOnChange("subCategory",""))
+
+      deleteSubCategory.ok must beEqualTo(true)
+    }
+
+    "update category on delete" in new TestScope {
+      val deleteCategory = await(sessionsRepository.updateCategoryOnChange("category",""))
+
+      deleteCategory.ok must beEqualTo(true)
+    }
+
+    "get sessions by category" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+      val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category", "subCategory",
+      "feedbackFormId", "topic2", 1, meetup = true, "", 0.00, cancelled = false, active = true, BSONDateTime(currentMillis + 23 * 60 * 60 * 1000),
+      Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporaryYoutubeURL"), reminder = false, notification = false, sessionId)
+
+      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
+      created must beEqualTo(true)
+
+      val session = await(sessionsRepository.getSessionByCategory("category", "subCategory"))
+      session must beEqualTo(List(sessionInfo))
+    }
+
     "return session monthly Info" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
 
       val result: List[(String, Int)] = await(sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, startDate, endDate)))
 
-      result must beEqualTo(List(("2017-07", 4)))
+      result.head._1 must beEqualTo("2017-07")
     }
 
     "get video URL for a session" in new TestScope {

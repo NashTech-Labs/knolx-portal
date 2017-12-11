@@ -68,7 +68,6 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         usersRepository,
         sessionsRepository,
         feedbackFormsRepository,
-        categoriesRepository,
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
@@ -674,6 +673,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
       status(result) must be equalTo SEE_OTHER
     }
+
   }
 
 }

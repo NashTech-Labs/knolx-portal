@@ -1,73 +1,59 @@
-@(sessionIds: List[FeedbackReportHeader])(implicit request: Request[_], messages: Messages, flash: Flash)
+@()(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("All reports") {
     <div class="row">
-        <div class="col-md-12 feedback-form-display-container">
+        <div class="col-md-12 feedback-form-display-container" >
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            @if(sessionIds.nonEmpty) {
-                @for(session <- sessionIds) {
-                    @if(session.active) {
-                        <div class="col-md-3 filter-padding-left">
-                            <div class="col-md-12">
-                                <div id="parent" class="feedback-response-sessions custom-position">
-                                    <div class="card-body card-custom-padding">
-                                        <div class="fold">
-                                            <div class="accepting-response"><span class="label label-danger live">
-                                                Live</span></div>
-                                        </div>
-                                            <div class="col-md-12 feedback-card-topic custom-position">
-                                                <div class="session-type"><span class="label @if(session.meetUp) {
-                                                    label-info meetup-session custom-label-type">Meetup</span></div>
-                                                } else {
-                                                    label-info knolx-session custom-label-type">Knolx </span></div>
-                                                }
-                                                <div>
-                                                    <p class="report-content-width" title="@session.topic">@session.topic</p>
-                                                    <p class="feedback-card-presenter">@session.presenter</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
-                                            <div class="col-md-12 feedback-card-by">held on</div>
-                                            <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
-                                            <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
-                                                view</a>
-                                        </div>
+            <div data-bind="foreach: feedbackHeaders" id="#report">
+                <div class="col-md-3 filter-padding-left">
+                    <div class="col-md-12">
+                        <div id="parent" class="feedback-response-sessions custom-position">
+                            <div class="card-body card-custom-padding">
+                                <div class="fold" data-bind="if: active">
+                                    <div class="accepting-response"><span class="label label-danger live">
+                                        Live</span></div>
                                 </div>
-                            </div>
-                        </div>
-                    } else {
-                        <div class="col-md-3 filter-padding-left">
-                            <div class="col-md-12">
-                                <div id="parent" class="feedback-response-sessions custom-position">
-                                    <div class="card-body card-custom-padding">
-                                        <div class="col-md-12 feedback-card-topic custom-position">
-                                            <div class="session-type"><span class="label @if(session.meetUp) {
-                                                label-info meetup-session custom-label-type">Meetup</span></div>
-                                            } else {
-                                            label-info knolx-session custom-label-type">Knolx</span></div>
-                                        }
-                                        <div>
-                                                <p class="report-content-width" title="@session.topic">@session.topic</p>
-                                                <p class="feedback-card-presenter">@session.presenter</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 feedback-card-author"><p>@session.session</p></div>
-                                        <div class="col-md-12 feedback-card-by">held on</div>
-                                        <div class="col-md-12 feedback-card-author"><p>@session.date</p></div>
-                                        <a href="@routes.FeedbackFormsReportController.fetchAllResponsesBySessionId(session.sessionId)" target="_blank" class="btn feedback-card-button fillFeedback">
-                                            view</a>
+                                <div class="col-md-12 feedback-card-topic custom-position">
+                                    <div class="session-type" data-bind="if: meetUp">
+                                        <span class="label
+                                            label-info meetup-session custom-label-type">Meetup
+                                        </span>
+                                    </div>
+                                    <div class="session-type" data-bind="if: !meetUp">
+                                        <span class="label label-info knolx-session custom-label-type">
+                                            Knolx
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p class="report-content-width" data-bind="text: topic"></p>
+                                        <p class="feedback-card-presenter" data-bind="text: presenter"></p>
                                     </div>
                                 </div>
+                                <div class="col-md-12 feedback-card-author" ><p data-bind="text: session"></p></div>
+                                <div class="col-md-12 feedback-card-by">held on</div>
+                                <div class="col-md-12 feedback-card-author"><p data-bind="text: date"></p></div>
+                                <a data-bind="attr: { href: url }" target="_blank" class="btn feedback-card-button fillFeedback">
+                                View
+                                </a>
                             </div>
                         </div>
-                    }
-                }
-            } else {
-                <div class="empty-reports"><i class="fa fa-folder-open" aria-hidden="true"></i>
-                    <p class="empty-reports_text">No feedback reports found!</p>
+                    </div>
                 </div>
-            }
+            </div>
+            <div class="col-md-12 report-pagination">
+                <div class="center">
+                    <div class="v-align v-align-mobile">
+                        <ul class="pagination pagination-lg">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="empty-reports" data-bind="if: (feedbackHeaders().length) == 0"><i class="fa fa-folder-open" aria-hidden="true"></i>
+                <p class="empty-reports_text">No feedback reports found!</p>
+            </div>
         </div>
     </div>
     <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/allreport.js")" type="text/javascript"></script>
 }

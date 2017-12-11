@@ -26,6 +26,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+
 case class CreateSessionInformation(email: String,
                                     date: Date,
                                     session: String,
@@ -65,7 +69,6 @@ case class KnolxSession(id: String,
                         contentAvailable: Boolean)
 
 case class SessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
-case class ModelsCategoryInformation(categoryName: String, subCategory: List[String])
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
@@ -83,7 +86,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
-                                   categoriesRepository: CategoriesRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    controllerComponents: KnolxControllerComponents,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
@@ -95,7 +97,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
-  implicit val modelsCategoriesFormat: OFormat[ModelsCategoryInformation] = Json.format[ModelsCategoryInformation]
 
   val sessionSearchForm = Form(
     mapping(
@@ -431,12 +432,4 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
-
-  def getCategory: Action[AnyContent] = action.async { implicit request =>
-    categoriesRepository.getCategories.map { categories =>
-      val listOfCategoryInfo = categories.map(category => ModelsCategoryInformation(category.categoryName, category.subCategory))
-      Ok(Json.toJson(listOfCategoryInfo))
-    }
-  }
-
 }

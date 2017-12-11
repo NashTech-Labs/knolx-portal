@@ -77,7 +77,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "received Bad Request in renedering Pie Chart" in new WithTestApplication {
+    "received Bad Request in rendering Pie Chart" in new WithTestApplication {
       val result = controller.renderPieChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
@@ -103,7 +103,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "received Bad Request in renedering Column Chart" in new WithTestApplication {
+    "received Bad Request in rendering Column Chart" in new WithTestApplication {
       val result = controller.renderColumnChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
@@ -129,7 +129,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "received Bad Request in renedering Line Chart" in new WithTestApplication {
+    "received Bad Request in rendering Line Chart" in new WithTestApplication {
       val result = controller.renderLineChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
@@ -205,7 +205,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
     }
 
     "received Bad Request in displaying LeaderBoard" in new WithTestApplication {
-      val result = controller.renderLineChart(
+      val result = controller.leaderBoard(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
           .withCSRFToken)

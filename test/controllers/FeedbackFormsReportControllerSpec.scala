@@ -90,7 +90,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
     "send json data while rendering all users reports page" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.activeCount(None) returns Future.successful(1)
+      sessionsRepository.activeUncancelledCount(None) returns Future.successful(1)
       sessionsRepository.userSessionsTillNow(None, 1) returns sessionObject
 
       val response = controller.manageAllFeedbackReports(1)(
@@ -103,7 +103,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
 
     "send json data while rendering users reports page" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionsRepository.activeUncancelledCount(Some("test@knoldus.com")) returns Future.successful(1)
       sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns sessionObject
 
       val response = controller.manageUserFeedbackReports(1)(

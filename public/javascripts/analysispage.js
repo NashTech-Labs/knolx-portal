@@ -69,19 +69,15 @@ function columnChart(startDate, EndDate) {
                     title: {
                         text: 'Session Sub-Category Analysis'
                     },
-
                     subtitle: {
                         text: 'Plain'
                     },
-
                     credits: {
                             enabled: false
                     },
-
                     xAxis: {
                         categories: subCategoryData
                     },
-
                     series: [{
                         type: 'column',
                         colorByPoint: true,

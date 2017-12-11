@@ -103,7 +103,7 @@ class Module(environment: Environment,
 
     response.setRefreshToken(refreshToken)
 
-    flow.createAndStoreCredential(response, "ua")
+    flow.createAndStoreCredential(response, "user")
 
   }
 

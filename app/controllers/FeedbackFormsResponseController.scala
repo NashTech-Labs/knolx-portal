@@ -119,7 +119,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
                     val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
 
                     Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
-                  case None =>
+                  case None       =>
                     Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
                     None
                 }
@@ -263,7 +263,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             } else {
               None
             }
-          case None => None
+          case None               => None
         }
       }
     }
@@ -273,7 +273,7 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
     for ((question, response) <- questions zip responses) yield {
 
       (question.questionType, question.mandatory) match {
-        case ("MCQ", true) => if (question.options.contains(response) && response.nonEmpty) {
+        case ("MCQ", true)     => if (question.options.contains(response) && response.nonEmpty) {
           Some(QuestionResponse(question.question, question.options, response))
         }
         else {
@@ -284,9 +284,9 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
         } else {
           None
         }
-        case ("MCQ", false) => None
+        case ("MCQ", false)     => None
         case ("COMMENT", false) => Some(QuestionResponse(question.question, question.options, response))
-        case _ => None
+        case _                  => None
 
       }
     }

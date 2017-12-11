@@ -27,12 +27,14 @@ $(function () {
 
         analysis(startDate, endDate);
     });
+
 });
 
 function analysis(startDate, EndDate) {
     pieChart(startDate, EndDate);
     columnChart(startDate, EndDate);
     lineGraph(startDate, EndDate);
+    leaderBoard(startDate, EndDate);
 }
 
 function columnChart(startDate, EndDate) {
@@ -52,7 +54,6 @@ function columnChart(startDate, EndDate) {
             },
             success: function (data) {
 
-
                 var subCategoryData = [];
                 var columnGraphXAxis = [];
 
@@ -68,7 +69,9 @@ function columnChart(startDate, EndDate) {
                     title: {
                         text: 'Session(s) Sub-Category Analysis'
                     },
-
+                    credits: {
+                            enabled: false
+                    },
                     xAxis: {
                         categories: subCategoryData
                     },
@@ -151,7 +154,9 @@ function pieChart(startDate, EndDate) {
                             showInLegend: true
                         }
                     },
-
+                    credits: {
+                        enabled: false
+                    },
                     tooltip: {
                         headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
                         pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.percentage:.1f}%</b> of total<br/>'
@@ -181,7 +186,6 @@ function pieChart(startDate, EndDate) {
         })
 }
 
-
 function lineGraph(startDate, EndDate) {
 
     var formData = {
@@ -200,7 +204,6 @@ function lineGraph(startDate, EndDate) {
             },
             success: function (data) {
 
-
                 var seriesData = [];
                 var xAxisData = [];
                 for (var i = 0; i < data.length; i++) {
@@ -214,6 +217,9 @@ function lineGraph(startDate, EndDate) {
                     },
                     title: {
                         text: 'Session(s) Monthly Analysis'
+                    },
+                    credits: {
+                        enabled: false
                     },
                     xAxis: {
                         categories: xAxisData
@@ -238,9 +244,6 @@ function lineGraph(startDate, EndDate) {
                             lineColor: '#66FF66',
                             lineWidth: 2,
                             marker: {
-
-
-
                                 lineWidth: 2,
                                 lineColor: '#ff6666'
                             }
@@ -253,4 +256,38 @@ function lineGraph(startDate, EndDate) {
                 });
             }
         })
+}
+
+function leaderBoard(startDate, EndDate) {
+
+    var formData = {
+            "startDate": startDate,
+            "endDate": EndDate
+    };
+    jsRoutes.controllers.KnolxAnalysisController.leaderBoard().ajax(
+        {
+            type: 'POST',
+            processData: false,
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            beforeSend: function (request) {
+                var csrfToken = document.getElementById('csrfToken').value;
+                return request.setRequestHeader('CSRF-Token', csrfToken);
+            },
+            success: function (users) {
+                var usersFound = "";
+                for(var user = 0; user < users.length; user++) {
+                    usersFound += '<tr class="table-header-color">' +
+                                 '<td>' + users[user] + '</td>' +
+                                 '</tr>';
+                }
+                $('#leaderBoard').html(usersFound);
+            },
+            error: function(er) {
+                $('#leaderBoard').html(
+                    "<tr><td align='center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>" + er.responseText + "</span></td></tr>"
+                );
+            }
+        }
+    )
 }

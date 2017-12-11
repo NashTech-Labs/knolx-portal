@@ -17,12 +17,12 @@ case class SessionsInformation(topic: String,
 
 @Singleton
 class KnolxUserAnalysisController @Inject()(messagesApi: MessagesApi,
-                                                              usersRepository: UsersRepository,
-                                                              sessionsRepository: SessionsRepository,
-                                                              feedbackFormsResponseRepository: FeedbackFormsResponseRepository,
-                                                              feedbackFormsRepository: FeedbackFormsRepository,
-                                                              controllerComponents: KnolxControllerComponents
-                                                             ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
+                                            usersRepository: UsersRepository,
+                                            sessionsRepository: SessionsRepository,
+                                            feedbackFormsResponseRepository: FeedbackFormsResponseRepository,
+                                            feedbackFormsRepository: FeedbackFormsRepository,
+                                            controllerComponents: KnolxControllerComponents
+                                           ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val sessionInformation: OFormat[SessionsInformation] = Json.format[SessionsInformation]
 

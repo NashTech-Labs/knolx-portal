@@ -36,7 +36,6 @@ class EmailActor @Inject()(mailerClient: MailerClient) extends Actor {
       val response = Option(mailerClient.send(email))
       sender ! response
 
-      context stop self
     case msg                                => Logger.warn(s"Got an unhandled message $msg")
   }
 

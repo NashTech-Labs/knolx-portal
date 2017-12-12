@@ -14,9 +14,13 @@
 .graph-panel {
     min-width: 300px;
     height: 250px;
-    max-width: 600px;
     margin: 0 auto;
 }
+
+.graph-panel-custom {
+    min-width: 100%;
+}
+
 .date-range-picker {
     text-align: right;
     margin-top: 10px;

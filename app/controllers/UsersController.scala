@@ -480,4 +480,10 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       })
   }
 
+  def usersList(email: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+    usersRepository.userListSearch(email).map { usersList =>
+      Ok(Json.toJson(usersList))
+    }
+  }
+
 }

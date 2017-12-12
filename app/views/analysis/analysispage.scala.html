@@ -1,6 +1,6 @@
 @()(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Analysis") {
+@main("Knolx Analysis") {
 
     <div class="row ">
         <div class="header-container">
@@ -10,31 +10,51 @@
 
     <script src="@routes.Assets.versioned("javascripts/analysispage.js")" type="text/javascript"></script>
 
-
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-
     <div class="row analysis-container">
-    <div class="col-md-12 date-range-picker filter-padding-right">
+        <div class="col-md-12 date-range-picker filter-padding-right">
             <label>Date Range :</label>
             <input id="demo" type="text" />
         </div>
+
         <div class="col-md-12" style="margin-top: 10px;">
 
-            <div class = "col-md-6 filter-padding-left" style="margin-bottom: 40px;">
-                <div id="pie-chart" class="graph-panel" ></div>
-            </div>
-
-            <div class = "col-md-6 filter-padding-right" style="margin-bottom: 40px;">
-                <div id="column-graph" class="graph-panel"></div>
+            <div class = "col-md-12 filter-padding-right" style="margin-bottom: 40px;">
+                <div id="column-graph" class="graph-panel graph-panel-custom"></div>
             </div>
 
         </div>
 
         <div class="col-md-12">
-            <div class = "col-md-6 filter-padding-left">
+            <div class = "col-md-6 filter-padding-left" style="margin-bottom: 40px;">
+                <div id="pie-chart" class="graph-panel" ></div>
+            </div>
+
+            <div class = "col-md-6 filter-padding-right" style="margin-bottom: 40px; background-color: white; text-align: center;">
                 <div id="line-graph" class="graph-panel"></div>
             </div>
         </div>
 
-    </div>
+        <div class="col-md-6 filter-padding-left">
+            <div class = "col-md-12" style ="background-color: white;">
+                <div style= "padding: 2px;">
+                    <h4 style ="text-align: center;" id ="leaderBoard-title">Leaderboard</h2>
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10">
+                        <table class="table table-responsive table-striped">
+                            <thead>
+                                <tr class="table-header-color">
+                                    <th>Position</th>
+                                    <th style="text-align: left; padding-left: 75px;">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderBoard">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+            </div>
+        </div>
 }

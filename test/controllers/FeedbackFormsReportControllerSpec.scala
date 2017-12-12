@@ -21,7 +21,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = true, BSONDateTime(date.getTime), 0, _id)))
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
       1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
@@ -69,10 +69,6 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     "render reports page for a particular user if user has active sessions and also has feedbacks" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns sessionObject
-
-
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -84,11 +80,33 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
     "render reports page with all users report, if user is admin" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      sessionsRepository.activeSessions(None) returns sessionObject
-      sessionsRepository.userSessionsTillNow(None) returns sessionObject
-
-
       val response = controller.renderAllFeedbackReports()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "send json data while rendering all users reports page" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.activeUncancelledCount(None) returns Future.successful(1)
+      sessionsRepository.userSessionsTillNow(None, 1) returns sessionObject
+
+      val response = controller.manageAllFeedbackReports(1)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "send json data while rendering users reports page" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.activeUncancelledCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns sessionObject
+
+      val response = controller.manageUserFeedbackReports(1)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -100,7 +118,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns Future.successful(List())
-      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns Future.successful(List())
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns Future.successful(List())
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
@@ -114,7 +132,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns sessionObject.map(_.map(_.copy(_id = BSONObjectID.generate())))
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns sessionObject.map(_.map(_.copy(_id = BSONObjectID.generate())))
 
 
       val response = controller.renderUserFeedbackReports()(
@@ -129,7 +147,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns Future.successful(List())
-      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns sessionObject
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns sessionObject
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
@@ -144,7 +162,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.activeSessions(Some("test@knoldus.com")) returns sessionObject
-      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com")) returns Future.successful(List())
+      sessionsRepository.userSessionsTillNow(Some("test@knoldus.com"), 1) returns Future.successful(List())
 
       val response = controller.renderUserFeedbackReports()(
         FakeRequest()
@@ -186,6 +204,19 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with TestEnvir
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "send json data for responses of CoreMember or All" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
+      feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
+
+      val response = controller.searchAllResponsesBySessionId(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

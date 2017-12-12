@@ -91,4 +91,5 @@ POST          /knolx/analysis/linechart                             controllers.
 POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard
 
 #Recommendation
-GET         /recommendation                         controllers.RecommendationController.renderRecommendationPage
+GET           /recommendation                                       controllers.RecommendationController.renderRecommendationPage
+POST          /recommendation/add                                   controllers.RecommendationController.addRecommendation

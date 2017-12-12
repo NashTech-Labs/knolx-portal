@@ -15,7 +15,7 @@ class EmailManager @Inject()(
                               configuration: Configuration
                             ) extends Actor with InjectedActorSupport {
 
-  lazy val limit: Int = configuration.get[Int]("youtube.actors.limit")
+  lazy val limit: Int = configuration.get[Int]("knolx.actors.limit")
 
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {
@@ -39,7 +39,7 @@ class EmailManager @Inject()(
   override def receive: Receive = {
     case request: EmailActor.SendEmail =>
       emailActor.route(request, sender())
-    case Terminated(emailRoutee) =>
+    case Terminated(emailRoutee)       =>
       emailActor = emailActor.removeRoutee(emailRoutee)
       val newEmailActor = injectedChild(emailChildFactory(), s"EmailActor-${UUID.randomUUID}")
       context watch newEmailActor

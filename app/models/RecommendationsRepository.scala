@@ -2,6 +2,7 @@ package models
 
 import javax.inject.Inject
 
+import models.RecommendationsJsonFormats._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
@@ -9,9 +10,13 @@ import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class RecommendationInfo(email: String,
                               recommendation: String,
@@ -60,7 +65,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.
         find(Json.obj()).
           cursor[RecommendationInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[RecommendationInfo]]())))
+          .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
   }
 
 }

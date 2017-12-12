@@ -89,3 +89,6 @@ POST          /knolx/analysis/columnchart                           controllers.
 POST          /knolx/analysis/piechart                              controllers.KnolxAnalysisController.renderPieChart
 POST          /knolx/analysis/linechart                             controllers.KnolxAnalysisController.renderLineChart
 POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard
+
+#Recommendation
+GET         /recommendation                         controllers.RecommendationController.renderRecommendationPage

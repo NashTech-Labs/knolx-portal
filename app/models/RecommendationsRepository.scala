@@ -20,7 +20,7 @@ case class RecommendationInfo(email: String,
 
 object RecommendationsJsonFormats {
   import play.api.libs.json.Json
-  implicit val recommendationsFormat = Json.format[CategoryInfo]
+  implicit val recommendationsFormat = Json.format[RecommendationInfo]
 }
 
 class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {

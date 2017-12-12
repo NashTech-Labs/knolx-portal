@@ -27,7 +27,7 @@ class EmailManager @Inject()(
         Stop
     }
 
-  var emailActor = {
+  var emailActor: Router = {
     val emailActors = Vector.fill(limit) {
       val emailChild = injectedChild(emailChildFactory(), s"EmailActor-${UUID.randomUUID}")
       context watch emailChild

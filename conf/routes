@@ -66,7 +66,3 @@ POST        /knolx/analysis/columnchart             controllers.KnolxAnalysisCon
 POST        /knolx/analysis/piechart                controllers.KnolxAnalysisController.renderPieChart
 POST        /knolx/analysis/linechart               controllers.KnolxAnalysisController.renderLineChart
 
-
-
-
-GET        /knolx/dummy/route               controllers.UsersController.dummyFunction

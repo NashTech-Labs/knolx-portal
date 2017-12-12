@@ -480,33 +480,4 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def dummyFunction: Action[AnyContent] = action { implicit request =>
-    Logger.info("------------------------------------Email manager ActorRef = " + emailManager)
-    //val l = 1 to 30
-    //val l1 = l.map(num => s"rocking${num}akshansh@gmail.com").toList
-    /*for (i <- 1 to 50) {
-    emailManager ! EmailActor.SendEmail(List(s"rockingakshansh@gmail.com"), "akshansh95jain@gmail.com", "subject", "body")
-    }*/
-
-    var l = List("rocking.akshansh@gmail.com",
-      "akshansh.jain@knoldus.in",
-      "umang.kesari@knoldus.in",
-    "akshansh95jain@gmail.com",
-    "arjun.singhalhahaha@gmail.com",
-    "isanythingallowed999@gmail.com",
-      "isanythingallowed998@gmail.com",
-      "isanythingallowed997@gmail.com",
-      "isanythingallowed996@gmail.com",
-    "umang.kesari17@gmail.com",
-    "jain.akash309@gmail.com",
-    "aakashjain9913103653@gmail.com",
-    "benaamkamchalau@gmail.com")
-
-    l.foreach(l1 => emailManager ! EmailActor.SendEmail(List(l1), "akshansh95jain@gmail.com", "subject", "body"))
-
-    //emailManager ! EmailActor.SendEmail(l1, "akshansh95jain@gmail.com", "subject", "body")
-
-    Ok("Done")
-  }
-
 }

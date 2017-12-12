@@ -19,16 +19,11 @@ class Module(environment: Environment,
 
   override def configure(): Unit = {
     bindActorFactory[EmailActor, ConfiguredEmailActor.Factory]
-    //bindActor[EmailManager]("EmailManager")
+    bindActor[EmailManager]("EmailManager")
 
     bind[ActorRef]
       .annotatedWith(Names.named("SessionsScheduler"))
       .toProvider(Providers.guicify(Akka.providerOf(classOf[SessionsScheduler], "SessionsScheduler", Function.identity())))
-      .asEagerSingleton
-
-    bind[ActorRef]
-      .annotatedWith(Names.named("EmailManager"))
-      .toProvider(Providers.guicify(Akka.providerOf(classOf[EmailManager], "EmailManager", Function.identity())))
       .asEagerSingleton
 
     bind[ActorRef]
@@ -40,16 +35,8 @@ class Module(environment: Environment,
       .to(classOf[DefaultKnolxControllerComponents])
       .asEagerSingleton()
 
-    /*bind(classOf[MailerClient]).to(classOf[SMTPDynamicMailer])
-    bind(classOf[JMailerClient]).to(classOf[MailerClient])
-    bind(classOf[MailerClient]).annotatedWith(Names.named("mock")).to(classOf[MockMailer])
-    bind(classOf[JMailerClient]).annotatedWith(Names.named("mock")).to(classOf[MockMailer])*/
-
     bind(classOf[MailerClient]).to(classOf[SMTPDynamicMailer]).asEagerSingleton()
 
-    /*bind(classOf[MailerClient])
-        .to(classOf[SMTPMailer])
-      .asEagerSingleton()*/
   }
 
 }

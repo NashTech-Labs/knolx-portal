@@ -1,6 +1,5 @@
 $(function () {
-    ko.applyBindings(new AllReportsModel(1));
-
+    ko.applyBindings(new AllReportsModel(1))
 });
 
 function AllReportsModel(pageNumber) {

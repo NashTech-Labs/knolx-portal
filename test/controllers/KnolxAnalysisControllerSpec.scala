@@ -28,18 +28,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
   private val date1 = new SimpleDateFormat("yyyy-MM-dd").parse("2017-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
 
-  private val jsonData: JsValue = Json.parse(
-    """
-  {
-    "startDate":"2017-07-15 00:00",
-    "endDate":"2017-10-15 23:59"
-  }"""
-  )
-  private val wrongJsonData: JsValue = Json.parse(
-    """
-      {
-      "endDate":"2017-10-15 23:59"
-      } """)
+  private val jsonData: JsValue = Json.parse("""{"startDate":"2017-07-15 00:00","endDate":"2017-10-15 23:59"}""")
+  private val wrongJsonData: JsValue = Json.parse("""{"endDate":"2017-10-15 23:59"}""")
 
   private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
     "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
@@ -85,7 +75,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "received Bad Request in renedering Pie Chart" in new WithTestApplication {
+    "received Bad Request in rendering Pie Chart" in new WithTestApplication {
       val result = controller.renderPieChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
@@ -99,7 +89,9 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
+      sessionsRepository
+        .sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(sessionObject)
 
       val result = controller.renderPieChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -109,7 +101,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "received Bad Request in renedering Column Chart" in new WithTestApplication {
+    "received Bad Request in rendering Column Chart" in new WithTestApplication {
       val result = controller.renderColumnChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
@@ -123,7 +115,9 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns sessionObject
+      sessionsRepository
+        .sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(sessionObject)
 
       val result = controller.renderColumnChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -133,7 +127,7 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "received Bad Request in renedering Line Chart" in new WithTestApplication {
+    "received Bad Request in rendering Line Chart" in new WithTestApplication {
       val result = controller.renderLineChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
           .withBody(wrongJsonData)
@@ -147,7 +141,9 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
       dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
       categoriesRepository.getCategories returns categoryList
-      sessionsRepository.getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate)) returns Future(List(("2017-July", 4)))
+      sessionsRepository
+        .getMonthlyInfoSessions(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(Future.successful(List(("2017-July", 4))))
 
       val result = controller.renderLineChart(
         FakeRequest(POST, "/knolx/analysis/piechart")
@@ -155,6 +151,64 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
           .withCSRFToken)
 
       status(result) must be equalTo OK
+    }
+
+    "leaderBoard with non-empty session list" in new WithTestApplication {
+
+      dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
+      dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
+      val sessionObject =
+        Future.successful(
+          List(
+            SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
+              "feedbackFormId", "topic", 1, meetup = true, "rating", 50.00, cancelled = false, active = true,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false,
+              notification = false, BSONObjectID.generate()),
+            SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
+              "feedbackFormId", "topic", 1, meetup = true, "rating", 60.00, cancelled = false, active = true,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false,
+              notification = false, BSONObjectID.generate()),
+            SessionInfo(_id.stringify, "email1", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
+              "feedbackFormId", "topic", 1, meetup = true, "rating", 70.00, cancelled = false, active = true,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false,
+              notification = false, BSONObjectID.generate())))
+
+      sessionsRepository
+        .sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(sessionObject)
+
+      val result = controller.leaderBoard(
+        FakeRequest(POST, "knolx/analysis/leaderboard")
+        .withBody(jsonData)
+        .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "leaderBoard with empty session list" in new WithTestApplication {
+
+      dateTimeUtility.parseDateStringToIST("2017-07-15 00:00") returns parseStartDate
+      dateTimeUtility.parseDateStringToIST("2017-10-15 23:59") returns parseEndDate
+      private val sessionObject = Future.successful(List())
+      sessionsRepository
+        .sessionsInTimeRange(FilterUserSessionInformation(None, parseStartDate, parseEndDate))
+        .returns(sessionObject)
+
+      val result = controller.leaderBoard(
+        FakeRequest(POST, "knolx/analysis/leaderboard")
+          .withBody(jsonData)
+          .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "received Bad Request in displaying LeaderBoard" in new WithTestApplication {
+      val result = controller.leaderBoard(
+        FakeRequest(POST, "/knolx/analysis/piechart")
+          .withBody(wrongJsonData)
+          .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
   }

@@ -2,233 +2,234 @@
 
 @main("Categories") {
 
-<div class="row top-row-adjust"></div>
-<div class="col-md-12 category-page-message">
-    <div id="success-message" class=" alert alert-success alert-dismissable">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">
-            x</a>
-        <p id="display-success-message"></p>
+    <div class="row top-row-adjust"></div>
+    <div class="col-md-12 category-page-message">
+        <div id="success-message" class=" alert alert-success alert-dismissable">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">
+                x</a>
+            <p id="display-success-message"></p>
+        </div>
+        <div id="failure-message" class="alert alert-danger alert-dismissable">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">
+                x</a>
+            <p id="display-failure-message"></p>
+        </div>
     </div>
-    <div id="failure-message" class="alert alert-danger alert-dismissable">
-        <a href="#" class="close" data-dismiss="alert" aria-label="close">
-            x</a>
-        <p id="display-failure-message"></p>
-    </div>
-</div>
-<div class ="row">
+    <div class ="row">
 
-    <div class="col-md-12">
-        <!--Add Category -->
-        @if(SessionHelper.isSuperUser) {
-        <div class="col-md-6">
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="ibox">
-                <div class="ibox-title">
-                    <h5>Add Primary Category</h5>
-                </div>
-                <div class="ibox-content">
-                    <form class="form-horizontal" autocomplete="off">
-                        <div class="form-group">
-                            <label class="category-label">Category</label>
-                            <input id="primary-category" type="text" placeholder="Category" class="input-field no-outline reg">
+        <div class="col-md-12 ">
+            <!--Add Category -->
+            @if(SessionHelper.isSuperUser) {
+            <div class="col-md-6 filter-padding-left">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>Add Primary Category</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <form class="form-horizontal" autocomplete="off">
+                            <div class="form-group">
+                                <label class="category-label">Category</label>
+                                <input id="primary-category" type="text" placeholder="Category" class="input-field no-outline reg">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-12 btn-footer">
+                        <div class="hr-line-dashed"></div>
+                        <div class="category-btn">
+                            <button id="add-primary-category" class="btn btn-success">Add</button>
                         </div>
-                    </form>
-                </div>
-                <div class="col-md-12 btn-footer">
-                    <div class="hr-line-dashed"></div>
-                    <div class="category-btn">
-                        <button id="add-primary-category" class="btn btn-success">Add</button>
                     </div>
                 </div>
             </div>
-        </div>
-        }
+            }
 
-        <!--Add sub category-->
-        <div class="col-md-6" >
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="ibox">
-                <div class="ibox-title">
-                    <h5>Add Sub-Category</h5>
-                </div>
-                <div class="ibox-content">
-                    <div class="col-md-12">
-                        <label class="category-label category-label-custom">Sub-Category</label>
+            <!--Add sub category-->
+            <div class="col-md-6" >
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>Add Sub-Category</h5>
                     </div>
-                    <div class="col-md-12">
+                    <div class="ibox-content">
+                        <div class="col-md-12">
+                            <label class="category-label category-label-custom">Sub-Category</label>
+                        </div>
+                        <div class="col-md-12">
+                            <form class="form-horizontal" autocomplete="off">
+                                <div class="form-group">
+                                    <select name="category" id="categories-list-add" class="update-field login-second">
+                                        <option selected value="">! Select Category Please</option>
+                                    </select>
+                                    <div>
+                                    <input type="text" id="insert-sub-category" name="subcategory"
+                                           placeholder="Input a new name" class="input-field no-outline reg"
+                                           required>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-12 btn-footer">
+                        <div class="hr-line-dashed"></div>
+                        <div class="category-btn">
+                            <button id="add-sub-category-btn" class="btn btn-success">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Modify category-->
+            @if(SessionHelper.isSuperUser) {
+            <div class="col-md-6 filter-padding-left">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>Modify Primary Category</h5>
+                    </div>
+                    <div class="ibox-content">
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
-                                <select name="category" id="categories-list-add" class="update-field login-second">
+                                <label class="category-label">Category</label>
+                                <select name="category" id="categories-list-modify" class="update-field login-second">
                                     <option selected value="">! Select Category Please</option>
                                 </select>
-                                <div>
-                                <input type="text" id="insert-sub-category" name="subcategory"
-                                       placeholder="Input a new name" class="input-field no-outline reg"
-                                       required>
-                                </div>
+                                <input type="text" id="new-primary-category" name="primary-category"
+                                   placeholder="Input a new name" class="input-field no-outline reg"
+                                   required>
                             </div>
                         </form>
                     </div>
-                </div>
-                <div class="col-md-12 btn-footer">
-                    <div class="hr-line-dashed"></div>
-                    <div class="category-btn">
-                        <button id="add-sub-category-btn" class="btn btn-success">Add</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!--Modify category-->
-        @if(SessionHelper.isSuperUser) {
-        <div class="col-md-6">
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <h5>Modify Primary Category</h5>
-                </div>
-                <div class="ibox-content">
-                    <form class="form-horizontal" autocomplete="off">
-                        <div class="form-group">
-                            <label class="category-label">Category</label>
-                            <select name="category" id="categories-list-modify" class="update-field login-second">
-                                <option selected value="">! Select Category Please</option>
-                            </select>
-                            <input type="text" id="new-primary-category" name="primary-category"
-                               placeholder="Input a new name" class="input-field no-outline reg"
-                               required>
+                    <div class="col-md-12 btn-footer">
+                        <div class="hr-line-dashed"></div>
+                        <div class="category-btn">
+                            <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify
+                            </button>
                         </div>
-                    </form>
-                </div>
-                <div class="col-md-12 btn-footer">
-                    <div class="hr-line-dashed"></div>
-                    <div class="category-btn">
-                        <button type="button" id="modify-primary-category-btn" class="btn btn-info">Modify
-                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-        }
+            }
 
-        <!--Modify sub-category-->
-        <div class="col-md-6">
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="ibox">
-                <div class="ibox-title">
-                    <h5>Modify Sub-Category</h5>
-                </div>
-                <div class="ibox-content">
-                    <div class="col-md-12">
-                        <label class="category-label category-label-custom">Sub-Category</label>
+            <!--Modify sub-category-->
+            <div class="col-md-6">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>Modify Sub-Category</h5>
                     </div>
-                    <div class="col-md-12">
+                    <div class="ibox-content">
+                        <div class="col-md-12">
+                            <label class="category-label category-label-custom">Sub-Category</label>
+                        </div>
+                        <div class="col-md-12">
+                            <form class="form-horizontal" autocomplete="off">
+                                <div class="form-group">
+                                    <div id="sub-categories-container-modify">
+                                        <input type="hidden" id="old-sub-category"/>
+                                        <div id="input-box-modify-sub-category">
+                                            <input type="text" id="sub-categories-list-modify" placeholder="Search/Select a sub-category"/>
+                                            <button id="drop-down-btn-modify" class="fa fa-caret-down" aria-hidden="true"></button>
+                                        </div>
+                                        <div id="sub-categories-container-result-modify">
+                                            <!-- results goes here -->
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="new-sub-category" name="subcategory" placeholder="Input a new name"
+                                               class="input-field no-outline reg" required>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-12 btn-footer">
+                        <div class="hr-line-dashed"></div>
+                        <div class="category-btn">
+                            <button type="button" id="modify-sub-category-btn" class="btn btn-info">Modify
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Delete category-->
+            @if(SessionHelper.isSuperUser) {
+            <div class="col-md-6 filter-padding-left">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>Delete Primary Category</h5>
+                    </div>
+                    <div class="ibox-content">
                         <form class="form-horizontal" autocomplete="off">
                             <div class="form-group">
-                                <div id="sub-categories-container-modify">
-                                    <input type="hidden" id="old-sub-category"/>
-                                    <div id="input-box-modify-sub-category">
-                                        <input type="text" id="sub-categories-list-modify" placeholder="Search/Select a sub-category"/>
-                                        <button id="drop-down-btn-modify" class="fa fa-caret-down" aria-hidden="true"></button>
-                                    </div>
-                                    <div id="sub-categories-container-result-modify">
-                                        <!-- results goes here -->
-                                    </div>
-                                </div>
-                                <div>
-                                    <input type="text" id="new-sub-category" name="subcategory" placeholder="Input a new name"
-                                           class="input-field no-outline reg" required>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-md-12 btn-footer">
-                    <div class="hr-line-dashed"></div>
-                    <div class="category-btn">
-                        <button type="button" id="modify-sub-category-btn" class="btn btn-info">Modify
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!--Delete category-->
-        @if(SessionHelper.isSuperUser) {
-        <div class="col-md-6">
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <h5>Delete Primary Category</h5>
-                </div>
-                <div class="ibox-content">
-                    <form class="form-horizontal" autocomplete="off">
-                        <div class="form-group">
-                            <label class="category-label">Category</label>
-                            <select name="category" id="categories-list-delete" class="update-field login-second"></select>
-                            <div id="subcategory-linked-category-message">
-                                <label class="info-message">
-                                    Following sub-categories exists under this category, please delete all its sub-categories before deleting a primary category.
-                                    Deleting a category would un-tag it from all session(s)</label>
-                            </div>
-                            <div id="sub-categories-exists"></div>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-12 btn-footer btn-footer-custom">
-                    <div class="hr-line-dashed"></div>
-                    <div class="category-btn">
-                        <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        }
-
-        <!--Delete Sub-category-->
-        <div class="col-md-6">
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="ibox ">
-                <div class="ibox-title">
-                    <h5>Delete Sub-Category</h5>
-                </div>
-                <div class="ibox-content">
-                    <div class="col-md-12">
-                        <label class="category-label category-label-custom">Sub-Category</label>
-                    </div>
-                    <div class="col-md-12">
-                        <form class="form-horizontal" autocomplete="off">
-                            <div class="form-group">
-                                <div id="sub-categories-container-delete">
-                                    <div id="input-box-delete-sub-category">
-                                        <input type="hidden" id="hidden-sub-category"/>
-                                        <input type="text" id="sub-categories-list-delete" placeholder="Search/Select a sub-category"/>
-                                        <button id="drop-down-btn-delete" class="fa fa-caret-down" aria-hidden="true"></button>
-                                    </div>
-                                    <div id="sub-categories-container-result-delete">
-                                        <!-- results goes here -->
-                                    </div>
-                                </div>
-                                <div id="topic-linked-subcategory-message">
+                                <label class="category-label">Category</label>
+                                <select name="category" id="categories-list-delete" class="update-field login-second"></select>
+                                <div id="subcategory-linked-category-message">
                                     <label class="info-message">
-                                        This sub-category is tagged to the following session(s), deleting it would un-tag it from all session(s)</label>
+                                        Following sub-categories exists under this category, please delete all its sub-categories before deleting a primary category.
+                                        Deleting a category would un-tag it from all session(s)</label>
                                 </div>
-                                <div id="topics-exists"></div>
+                                <div id="sub-categories-exists"></div>
                             </div>
                         </form>
                     </div>
-                </div>
-                <div class="col-md-12 btn-footer btn-footer-custom">
-                    <div class="hr-line-dashed"></div>
-                    <div class="category-btn">
-                        <button type="button" class="btn btn-danger" id="delete-sub-category-btn">Delete
-                        </button>
+                    <div class="col-md-12 btn-footer btn-footer-custom">
+                        <div class="hr-line-dashed"></div>
+                        <div class="category-btn">
+                            <button type="button" class="btn btn-danger" id="delete-primary-category-btn">Delete
+                            </button>
+                        </div>
                     </div>
+                </div>
+            </div>
+            }
 
+            <!--Delete Sub-category-->
+            <div class="col-md-6">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>Delete Sub-Category</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="col-md-12">
+                            <label class="category-label category-label-custom">Sub-Category</label>
+                        </div>
+                        <div class="col-md-12">
+                            <form class="form-horizontal" autocomplete="off">
+                                <div class="form-group">
+                                    <div id="sub-categories-container-delete">
+                                        <div id="input-box-delete-sub-category">
+                                            <input type="hidden" id="hidden-sub-category"/>
+                                            <input type="text" id="sub-categories-list-delete" placeholder="Search/Select a sub-category"/>
+                                            <button id="drop-down-btn-delete" class="fa fa-caret-down" aria-hidden="true"></button>
+                                        </div>
+                                        <div id="sub-categories-container-result-delete">
+                                            <!-- results goes here -->
+                                        </div>
+                                    </div>
+                                    <div id="topic-linked-subcategory-message">
+                                        <label class="info-message">
+                                            This sub-category is tagged to the following session(s), deleting it would un-tag it from all session(s)</label>
+                                    </div>
+                                    <div id="topics-exists"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-12 btn-footer btn-footer-custom">
+                        <div class="hr-line-dashed"></div>
+                        <div class="category-btn">
+                            <button type="button" class="btn btn-danger" id="delete-sub-category-btn">Delete
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
 }

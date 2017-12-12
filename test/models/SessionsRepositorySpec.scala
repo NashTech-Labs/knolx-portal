@@ -260,6 +260,15 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       session must beEqualTo(List(sessionInfo))
     }
 
+
+    "return session in Time Range" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+
+      val result: List[SessionInfo] = await(sessionsRepository.sessionsInTimeRange(FilterUserSessionInformation(None, startDate, endDate)))
+
+      result.size must beEqualTo(5)
+    }
+
     "return session monthly Info" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
 
@@ -321,6 +330,14 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       val result: List[String] = await(sessionsRepository.getTemporaryVideoURL(sessionId.stringify))
 
       result.head must beEqualTo("youtube/embed/URL")
+    }
+
+    "fetch particular user's sessions List" in new TestScope {
+      val sessionId: BSONObjectID = BSONObjectID.generate
+
+      val result: List[SessionInfo] = await(sessionsRepository.userSession("test@example.com"))
+
+      result must beEqualTo(Nil)
     }
   }
 

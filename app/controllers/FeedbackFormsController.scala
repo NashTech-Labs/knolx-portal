@@ -106,7 +106,6 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
 @Singleton
 class FeedbackFormsController @Inject()(messagesApi: MessagesApi,
                                         mailerClient: MailerClient,
-                                        usersRepository: UsersRepository,
                                         feedbackRepository: FeedbackFormsRepository,
                                         sessionsRepository: SessionsRepository,
                                         dateTimeUtility: DateTimeUtility,

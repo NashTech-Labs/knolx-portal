@@ -32,8 +32,7 @@ class EmailActor @Inject()(mailerClient: MailerClient) extends Actor {
       val email = Email(subject, from, bcc = to, bodyHtml = Some(body))
       val response = Option(mailerClient.send(email))
       sender ! response
-
-    case msg => Logger.warn(s"Got an unhandled message $msg")
+    case msg                                => Logger.warn(s"Got an unhandled message $msg")
   }
 
 }

@@ -85,7 +85,6 @@ function columnChart(startDate, EndDate) {
                         showInLegend: false
                     }]
                 });
-                columnGraph.setSize(columnChart.width())
             }
         });
 }
@@ -169,7 +168,6 @@ function pieChart(startDate, EndDate) {
                     responsive: {
                         rules: [{
                             condition: {
-                                minWidth: 500,
                                 maxWidth: 500
                             },
                             chartOptions: {

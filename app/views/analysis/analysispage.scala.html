@@ -11,7 +11,7 @@
     <script src="@routes.Assets.versioned("javascripts/analysispage.js")" type="text/javascript"></script>
 
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-    <div class="row analysis-container" style="overflow-x: hidden;">
+    <div class="row analysis-container">
         <div class="col-md-12 date-range-picker filter-padding-right">
             <label>Date Range :</label>
             <input id="demo" type="text" />
@@ -27,15 +27,11 @@
 
         <div class="col-md-12">
             <div class = "col-md-6 filter-padding-left" style="margin-bottom: 40px;">
-
-                    <div id="pie-chart" style="background: white;" class="graph-panel" ></div>
-
+                <div id="pie-chart" style="background: white;" class="graph-panel" ></div>
             </div>
 
-            <div class = "col-md-6 filter-padding-left filter-padding-right" style="margin-bottom: 40px; text-align: center; background-color:white;">
-
+            <div class = "col-md-6 filter-padding-left filter-padding-right" style="margin-bottom: 40px; background-color:white;">
                 <div id="line-graph" class="graph-panel"></div>
-
             </div>
         </div>
 

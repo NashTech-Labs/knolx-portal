@@ -1,5 +1,4 @@
 import java.util.function.Function
-import javax.inject.{Inject, Provider}
 
 import actors._
 import akka.actor.ActorRef
@@ -12,7 +11,6 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.mailer._
 import play.api.{Configuration, Environment}
 import play.libs.Akka
-import play.libs.mailer.{MailerClient => JMailerClient}
 
 class Module(environment: Environment,
              configuration: Configuration) extends AbstractModule with ScalaModule with AkkaGuiceSupport {

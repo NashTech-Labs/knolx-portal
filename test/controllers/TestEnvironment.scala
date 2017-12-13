@@ -17,7 +17,7 @@ import org.specs2.mutable.SpecificationLike
 import play.api.http._
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.libs.concurrent.AkkaGuiceSupport
-import play.api.libs.mailer.{MailerClient, SMTPDynamicMailer}
+import play.api.libs.mailer.MailerClient
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{BodyParser, _}
 import play.api.test._
@@ -74,7 +74,7 @@ trait TestEnvironment extends SpecificationLike with BeforeAllAfterAll with Mock
 
         bind(classOf[KnolxControllerComponents])
           .toInstance(knolxControllerComponent)
-        
+
         bind(classOf[MailerClient]).toInstance(mailerClient)
       }
     })

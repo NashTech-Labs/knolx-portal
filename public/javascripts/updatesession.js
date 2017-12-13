@@ -38,7 +38,8 @@ $(function () {
 
     youtubeDropzone.on("sending", function (file, xhr, formData) {
         redirect = false;
-        $("#upload-video-button").hide();
+        $("#uploadVideo").attr('disabled', true);
+        $("#updateVideo").attr('disabled', true);
         xhr.setRequestHeader("filesize", file.size);
         formData.append("title", $("#youtube-title").val());
         formData.append("description", $("#youtube-description").val());

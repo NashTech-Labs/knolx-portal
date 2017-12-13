@@ -133,7 +133,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 login-third">
+                <div class="col-md-12 ">
                     <div class="col-md-2" ></div>
                     <div class="col-md-10 " >
                         <label class="checkbox-outer" >
@@ -302,7 +302,7 @@
             </div>
             <label class="col-md-2 control-label">Video Category</label>
             <div class="col-md-10 form-group" >
-                <select name="category" id="youtube-category" class="update-field">
+                <select name="category" id="youtube-category" class="update-field select-height">
                     @for(youtubeCategory <- youtubeCategories) {
                     <option value="@youtubeCategory.id"
                         @if(videoDetails.fold("")(_.category) == youtubeCategory.id) {
@@ -314,7 +314,7 @@
             </div>
             <label class="col-md-2 control-label">Video Status</label>
             <div class="col-md-10 form-group" >
-                <select name="status" id="youtube-status" class="update-field login-second">
+                <select name="status" id="youtube-status" class="update-field login-second select-height">
                     <option value="private"
                         @if(videoDetails.fold("")(_.status) == "private") {
                             selected

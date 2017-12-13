@@ -27,6 +27,7 @@ $(function () {
         },
         autoProcessQueue: false,
         maxFiles: 1,
+        acceptedFiles: ".mov, .mpeg4, .mp4, .avi, .wmv, .mpegps, .flv, .3gpp, .webm",
         init: function() {
           this.on("maxfilesexceeded", function(file) {
                 this.removeAllFiles();
@@ -37,7 +38,8 @@ $(function () {
 
     youtubeDropzone.on("sending", function (file, xhr, formData) {
         redirect = false;
-        $("#upload-video-button").hide();
+        $("#uploadVideo").attr('disabled', true);
+        $("#updateVideo").attr('disabled', true);
         xhr.setRequestHeader("filesize", file.size);
         formData.append("title", $("#youtube-title").val());
         formData.append("description", $("#youtube-description").val());

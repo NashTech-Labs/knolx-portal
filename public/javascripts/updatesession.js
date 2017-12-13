@@ -27,6 +27,7 @@ $(function () {
         },
         autoProcessQueue: false,
         maxFiles: 1,
+        acceptedFiles: ".mov, .mpeg4, .mp4, .avi, .wmv, .mpegps, .flv, .3gpp, .webm",
         init: function() {
           this.on("maxfilesexceeded", function(file) {
                 this.removeAllFiles();

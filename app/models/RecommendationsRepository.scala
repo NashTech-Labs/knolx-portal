@@ -1,5 +1,6 @@
 package models
 
+import java.util.Date
 import javax.inject.Inject
 
 import models.RecommendationsJsonFormats._
@@ -18,19 +19,29 @@ import scala.concurrent.{ExecutionContext, Future}
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
-case class RecommendationInfo(email: String,
+case class RecommendationInfo(email: Option[String],
                               recommendation: String,
-                              approved: Boolean =false,
-                              _id: BSONObjectID = BSONObjectID.generate())
+                              submissionDate: Date,
+                              updateDate: Date,
+                              approved: Boolean = false,
+                              decline: Boolean = false,
+                              pending: Boolean = true,
+                              done: Boolean = false,
+                              upVotes: Int,
+                              downVotes: Int,
+                              id: String)
 
 object RecommendationsJsonFormats {
+
   import play.api.libs.json.Json
+
   implicit val recommendationsFormat = Json.format[RecommendationInfo]
 }
 
 class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
+
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("recommendations"))
 
   def insert(recommendationInfo: RecommendationInfo)(implicit ex: ExecutionContext): Future[WriteResult] =
@@ -63,7 +74,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.
-        find(Json.obj()).
+          find(Json.obj()).
           cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
   }

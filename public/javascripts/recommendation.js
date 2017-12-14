@@ -7,14 +7,20 @@ function Recommendation() {
     $('.custom-checkbox').click(function () {
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         FetchRecommendationList(1, filter);
-
     });
 
     $('#add-button').popover({
         html: true,
-        content: function() {
+        content: function () {
             return $('#add-recommend').html();
         }
+    });
+
+    $('body').on("click", '#add-recommend-button', function () {
+        console.log("aaaaaaa");
+        var text = $('.popover-content #recommend-text').val();
+        console.log("-------->" + text);
+        addRecommend(text);
     });
 
 
@@ -92,4 +98,25 @@ function Recommendation() {
             }
         )
     }
+
+    function addRecommend(text) {
+        jsRoutes.controllers.RecommendationController.addRecommendation(text).ajax(
+            {
+                type: "POST",
+                processData: false,
+                beforeSend: function (request) {
+                    var csrfToken = document.getElementById('csrfToken').value;
+
+                    return request.setRequestHeader('CSRF-Token', csrfToken);
+                },
+                success: function (values) {
+                    FetchRecommendationList(1, "all");
+                },
+                error: function (er) {
+                    console.log(er);
+                }
+            }
+        )
+    }
 }
+

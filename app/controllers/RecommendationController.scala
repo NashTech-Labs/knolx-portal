@@ -44,7 +44,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     ) (RecommendationForm.apply, unlift(RecommendationForm.unapply))*/
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
-  def renderRecommendationPage: Action[AnyContent] = userAction { implicit request =>
+  def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
     Ok(views.html.recommendations.recommendation())
   }
 
@@ -104,7 +104,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def downVote(email: String): Action[AnyContent] = userAction.async { implicit request =>
+ /* def downVote(email: String): Action[AnyContent] = userAction.async { implicit request =>
     recommendationsResponseRepository.getVote(email) map { vote =>
       if (vote == "downvote") {
         recommendationsRepository.downVote(true)
@@ -122,6 +122,6 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         recommendationsRepository.upVote(false)
       }
     }
-  }
+  }*/
 
 }

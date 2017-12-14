@@ -19,7 +19,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Recommendation(email: Option[String],
+case class Recommendation(email: String,
                           recommendation: String,
                           submissionDate: LocalDate,
                           updateDate: LocalDate,
@@ -69,7 +69,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
     recommendationsRepository.paginate(pageNumber, filter) map { recommendations =>
       val recommendationList = recommendations map { recommendation =>
-        Recommendation(recommendation.email,
+        val email = recommendation.email.fold("Anonymous")(identity)
+        Recommendation(email,
           recommendation.recommendation,
           dateTimeUtility.toLocalDate(recommendation.submissionDate.value),
           dateTimeUtility.toLocalDate(recommendation.updateDate.value),
@@ -105,6 +106,23 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
+  def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+    Logger.info(s"Upvoting recommendation => $recommendationId")
+    recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
+      val recommendationResponse = RecommendationResponseRepositoryInfo(email,
+        recommendationId,
+        upVote = true,
+        downVote = false)
+      if (vote.equals("downvote")) {
+        recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
+      } else {
+        recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
+      }
+      recommendationResponseRepository.upsert(recommendationResponse)
+      Ok("Upvoted")
+    }
+  }
+
   def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Downvoting recommendation => $recommendationId")
     recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
@@ -122,20 +140,23 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    Logger.info(s"Upvoting recommendation => $recommendationId")
-    recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
-      val recommendationResponse = RecommendationResponseRepositoryInfo(email,
-        recommendationId,
-        upVote = true,
-        downVote = false)
-      if (vote.equals("downvote")) {
-        recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
+  def doneRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    recommendationsRepository.doneRecommendation(recommendationId).map { result =>
+      if (result.ok) {
+        Ok(Json.toJson("Recommendation has been marked as Done"))
       } else {
-        recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
+        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Done"))
       }
-      recommendationResponseRepository.upsert(recommendationResponse)
-      Ok("Upvoted")
+    }
+  }
+
+  def pendingRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    recommendationsRepository.pendingRecommendation(recommendationId).map { result =>
+      if (result.ok) {
+        Ok(Json.toJson("Recommendation has been marked as Pending"))
+      } else {
+        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Pending"))
+      }
     }
   }
 

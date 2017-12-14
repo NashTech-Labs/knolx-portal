@@ -71,16 +71,15 @@
 
 .textbox-recommend-main {
     background-color: white;
-    width: 120px;
+    width: 150px;
     resize: vertical;
     border: none;
     border-top: None;
     outline: none;
     box-shadow: 0 4px 6px -5px #333;
-    font-weight: bold;
+    font-weight: normal;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
-    letter-spacing: 1px;
     color: #7F8C8D;
     min-height: 50px;
     overflow-y: auto;

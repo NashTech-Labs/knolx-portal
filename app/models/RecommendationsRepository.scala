@@ -8,13 +8,11 @@ import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-import utilities.DateTimeUtility
 
-import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -104,6 +102,24 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .options(queryOptions)
           .cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))
+  }
+
+  def updateDate(id: String,updateDate: Date)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+    val modifier = BSONDocument("updateDate" -> updateDate)
+
+    collection
+      .flatMap(jsonCollection =>
+      jsonCollection.update(selector,modifier))
+  }
+
+  def upVotes(id: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+    val modifier = BSONDocument("$inc" -> BSONDocument("upVotes" -> 1))
+
+    collection
+      .flatMap(jsonCollection =>
+      jsonCollection.update(selector, modifier))
   }
 
 }

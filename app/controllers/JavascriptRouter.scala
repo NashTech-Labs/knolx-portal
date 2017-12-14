@@ -34,9 +34,27 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsCategoryController.getSubCategoryByPrimaryCategory,
       controllers.routes.javascript.SessionsCategoryController.deleteSubCategory,
       controllers.routes.javascript.SessionsCategoryController.getTopicsBySubCategory,
+      controllers.routes.javascript.YoutubeController.upload,
+      controllers.routes.javascript.YoutubeController.getPercentageUploaded,
+      controllers.routes.javascript.YoutubeController.cancel,
+      controllers.routes.javascript.YoutubeController.getVideoId,
+      controllers.routes.javascript.YoutubeController.updateVideo,
+      controllers.routes.javascript.YoutubeController.checkIfUploading,
+      controllers.routes.javascript.YoutubeController.checkIfTemporaryUrlExists,
       controllers.routes.javascript.KnolxAnalysisController.renderColumnChart,
       controllers.routes.javascript.KnolxAnalysisController.renderPieChart,
-      controllers.routes.javascript.KnolxAnalysisController.renderLineChart
+      controllers.routes.javascript.KnolxAnalysisController.renderLineChart,
+      controllers.routes.javascript.KnolxAnalysisController.leaderBoard,
+      controllers.routes.javascript.FeedbackFormsReportController.manageAllFeedbackReports,
+      controllers.routes.javascript.FeedbackFormsReportController.manageUserFeedbackReports,
+      controllers.routes.javascript.FeedbackFormsReportController.fetchAllResponsesBySessionId,
+      controllers.routes.javascript.FeedbackFormsReportController.fetchUserResponsesBySessionId,
+      controllers.routes.javascript.UsersController.usersList,
+      controllers.routes.javascript.KnolxUserAnalysisController.userSessionsResponseComparison,
+      controllers.routes.javascript.KnolxUserAnalysisController.getBanCount,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserDidNotAttendSessionCount,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalKnolx,
+      controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalMeetUps
     )).as("text/javascript")
   }
 

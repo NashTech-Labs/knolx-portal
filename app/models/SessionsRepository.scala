@@ -5,7 +5,8 @@ import javax.inject.Inject
 import actors.SessionsScheduler.{EmailOnce, Notification, Reminder}
 import controllers.{FilterUserSessionInformation, UpdateSessionInformation}
 import models.SessionJsonFormats._
-import play.api.libs.json.{JsObject, Json}
+import play.api.Logger
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
@@ -38,6 +39,7 @@ case class SessionInfo(userId: String,
                        expirationDate: BSONDateTime,
                        youtubeURL: Option[String],
                        slideShareURL: Option[String],
+                       temporaryYoutubeURL: Option[String] = None,
                        reminder: Boolean = false,
                        notification: Boolean = false,
                        _id: BSONObjectID = BSONObjectID.generate
@@ -175,6 +177,19 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection.count(condition))
   }
 
+  def activeUncancelledCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
+    val condition = keyword match {
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
+        "active" -> true,
+        "cancelled" -> false))
+      case None => Some(Json.obj("active" -> true, "cancelled" -> false))
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(condition))
+  }
+
   def update(updatedRecord: UpdateSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> updatedRecord.sessionUpdateFormData.id))
     val modifier = BSONDocument(
@@ -190,7 +205,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         "expirationDate" -> updatedRecord.expirationDate,
         "youtubeURL" -> updatedRecord.sessionUpdateFormData.youtubeURL,
         "slideShareURL" -> updatedRecord.sessionUpdateFormData.slideShareURL,
-        "cancelled" -> updatedRecord.sessionUpdateFormData.cancelled)
+        "cancelled" -> updatedRecord.sessionUpdateFormData.cancelled,
+        "temporaryVideoURL" -> "")
     )
 
     collection.flatMap(jsonCollection =>
@@ -227,7 +243,9 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
 
   }
 
-  def userSessionsTillNow(email: Option[String] = None): Future[List[SessionInfo]] = {
+  def userSessionsTillNow(email: Option[String] = None, pageNumber: Int)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    val skipN = (pageNumber - 1) * 8
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = 8, flagsN = 0)
     val millis = dateTimeUtility.nowMillis
 
     val condition = email.fold {
@@ -247,9 +265,10 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .options(queryOptions)
           .sort(Json.obj("date" -> -1))
           .cursor[SessionInfo](ReadPreference.primary)
-          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+          .collect[List](8, FailOnError[List[SessionInfo]]()))
 
   }
 
@@ -309,6 +328,30 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       }
   }
 
+  def getVideoURL(sessionId: String): Future[List[String]] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId),
+                                "youtubeURL" -> BSONDocument("$exists" -> true))
+    val projection = Json.obj("youtubeURL" -> 1)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("youtubeURL").asOpt[String]))
+  }
+
+  def updateVideoURL(sessionId: String, youtubeURL: String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument("youtubeURL" -> youtubeURL)
+    )
+
+    collection.flatMap(jsonCollection =>
+      jsonCollection.update(selector, modifier))
+  }
+
   def sessionsInTimeRange(filterUserSessionInformation: FilterUserSessionInformation): Future[List[SessionInfo]] = {
 
     val selector = filterUserSessionInformation.email match {
@@ -360,6 +403,29 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       }
   }
 
+  def storeTemporaryVideoURL(sessionId: String, temporaryVideoURL: String): Future[UpdateWriteResult] = {
+    Logger.info(s"Storing video URL = $temporaryVideoURL and Session ID = $sessionId")
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val modifier = BSONDocument("$set" -> BSONDocument("temporaryVideoURL" -> temporaryVideoURL))
+
+    collection
+      .flatMap(_.update(selector, modifier))
+  }
+
+  def getTemporaryVideoURL(sessionId: String): Future[List[String]] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId),
+                                "temporaryVideoURL" -> BSONDocument("$exists" -> true))
+    val projection = Json.obj("temporaryVideoURL" -> 1, "_id" -> 0)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector, projection)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("temporaryVideoURL").asOpt[String]))
+  }
+
   def updateSubCategoryOnChange(subCategory: String, updateSubCategory: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("subCategory" -> subCategory)
     val modifier = BSONDocument("$set" -> BSONDocument("subCategory" -> updateSubCategory))
@@ -382,4 +448,23 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }
 
+
+  def userSession(email: String): Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
+
+      val condition = Json.obj(
+        "active" -> true,
+        "cancelled" -> false,
+        "email" -> email,
+        "date" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .sort(Json.obj("date" -> -1))
+          .cursor[SessionInfo](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
+
+  }
 }

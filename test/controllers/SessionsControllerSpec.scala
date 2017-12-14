@@ -1,54 +1,67 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDateTime, ZoneId, LocalTime, Instant}
-import java.util.{TimeZone, Date}
+import java.time.{Instant, LocalDateTime, LocalTime, ZoneId}
+import java.util.{Date, TimeZone}
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Names
-import com.typesafe.config.ConfigFactory
+import helpers._
 import models._
-import org.specs2.execute.{AsResult, Result}
-import org.specs2.mutable.Around
+import org.specs2.mock.Mockito
+import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
-import play.api.{Configuration, Application}
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.{JsBoolean, JsObject, JsString}
-import play.api.mvc.Results
+import play.api.test.CSRFTokenHelper._
 import play.api.test._
 import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
-import play.api.test.CSRFTokenHelper._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class SessionsControllerSpec extends PlaySpecification with Results {
+class SessionsControllerSpec extends PlaySpecification with Mockito with SpecificationLike with BeforeAllAfterAll {
+
+  private val system = ActorSystem()
 
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtube/URL/id"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
 
   private val optionOfSessionObject =
     Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtube/URL/id"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
 
-
-  private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = true, BSONDateTime(date.getTime), 0, _id)))
-
+  private val emailObject =
+    Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
+      "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
 
   private val emptyEmailObject = Future.successful(None)
 
-  abstract class WithTestApplication extends Around with Scope with TestEnvironment {
-    lazy val app: Application = fakeApp()
+  abstract class WithTestApplication extends TestEnvironment with Scope {
+    val sessionsRepository = mock[SessionsRepository]
+    val feedbackFormsRepository = mock[FeedbackFormsRepository]
+    val categoriesRepository = mock[CategoriesRepository]
+
+    val dateTimeUtility = mock[DateTimeUtility]
+
+    lazy val app = fakeApp()
+
+    val sessionsScheduler =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
+    val usersBanScheduler =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
+    val youtubeManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("YouTubeManager")))))
+
     lazy val controller =
       new SessionsController(
         knolxControllerComponent.messagesApi,
@@ -58,17 +71,12 @@ class SessionsControllerSpec extends PlaySpecification with Results {
         dateTimeUtility,
         knolxControllerComponent,
         sessionsScheduler,
-        usersBanScheduler)
-    val sessionsRepository = mock[SessionsRepository]
-    val feedbackFormsRepository = mock[FeedbackFormsRepository]
-    val dateTimeUtility = mock[DateTimeUtility]
-    val sessionsScheduler =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
-    val usersBanScheduler =
-      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("UsersBanScheduler")))))
-    override def around[T: AsResult](t: => T): Result = {
-      TestHelpers.running(app)(AsResult.effectively(t))
-    }
+        usersBanScheduler,
+        youtubeManager)
+  }
+
+  override def afterAll(): Unit = {
+    system.terminate()
   }
 
   "Session Controller" should {
@@ -312,7 +320,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val feedbackForms = List(FeedbackForm("Test Form", List(Question("How good is knolx portal ?", List("1", "2", "3"), "MCQ", mandatory = true))))
 
       feedbackFormsRepository.getAll returns Future(feedbackForms)
-       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getByEmail("test2@example.com") returns Future.successful(None)
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -367,8 +375,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
       val sessionInfo = Future.successful(Some(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "session 1", "category",
-        "subCategory", "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime),
-        Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id)))
+        "subCategory", "feedbackFormId", "topic", 1, meetup = false, "", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtube/URL/id"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getById(_id.stringify) returns sessionInfo
@@ -422,6 +429,7 @@ class SessionsControllerSpec extends PlaySpecification with Results {
       val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
       val expirationDate = localDateTimeEndOfDay.plusDays(1)
       val expirationMillis = localDateTimeEndOfDay.toEpochSecond(ZoneOffset) * 1000
+
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
       val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
 

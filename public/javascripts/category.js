@@ -26,8 +26,8 @@ $(function () {
         e.preventDefault();
     });
 
-    $('#categories-list-modify').on("change", function(e) {
-       $("#new-primary-category").show();
+    $('#categories-list-modify').on("change", function (e) {
+        $("#new-primary-category").show();
     });
 
     $("#modify-primary-category-btn").click(function () {
@@ -36,9 +36,9 @@ $(function () {
         modifyPrimaryCategory(categoryName, newCategoryName);
     });
 
-    $('#categories-list-delete').on("change", function(e) {
+    $('#categories-list-delete').on("change", function (e) {
         categoryId = $(this).val();
-        categoryName = $("option[value='"+ categoryId +"']").html();
+        categoryName = $("option[value='" + categoryId + "']").html();
         subCategoryByPrimaryCategory(categoryName);
     });
 
@@ -46,8 +46,8 @@ $(function () {
         deletePrimaryCategory(categoryId);
     });
 
-    $('#categories-list-add').on("change", function(e) {
-       $("#insert-sub-category").show();
+    $('#categories-list-add').on("change", function (e) {
+        $("#insert-sub-category").show();
     });
 
     $("#add-sub-category-btn").click(function () {
@@ -70,23 +70,22 @@ $(function () {
             url: "/category/all",
             dataType: "json",
             processResults: function (data, params) {
-              var processedData = [];
-              for(var i=0 ; i<data.length ; i++) {
-                if(params.term == undefined) {
-                    processedData.push(data[i]);
+                var processedData = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (params.term == undefined) {
+                        processedData.push(data[i]);
+                    } else if (params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                        processedData.push(data[i]);
+                    } else if (params.term == "") {
+                        processedData.push(data[i]);
+                    }
                 }
-                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
-                  processedData.push(data[i]);
-                  }
-                else if(params.term == "") {
-                  processedData.push(data[i]);
-                  }
-              }
-              return {
-                results: $.map(processedData, function(obj) {
-                    return  { id: obj.categoryId, text: obj.categoryName };
-                })
-              };
+
+                return {
+                    results: $.map(processedData, function (obj) {
+                        return {id: obj.categoryId, text: obj.categoryName};
+                    })
+                };
             }
         },
         containerCssClass: "category-select2",
@@ -98,23 +97,22 @@ $(function () {
             url: "/category/all",
             dataType: "json",
             processResults: function (data, params) {
-              var processedData = [];
-              for(var i=0 ; i<data.length ; i++) {
-                if(params.term == undefined) {
-                    processedData.push(data[i]);
+                var processedData = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (params.term == undefined) {
+                        processedData.push(data[i]);
+                    } else if (params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                        processedData.push(data[i]);
+                    } else if (params.term == "") {
+                        processedData.push(data[i]);
+                    }
                 }
-                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
-                  processedData.push(data[i]);
-                  }
-                else if(params.term == "") {
-                  processedData.push(data[i]);
-                  }
-              }
-              return {
-                results: $.map(processedData, function(obj) {
-                    return  { id: obj.categoryId, text: obj.categoryName };
-                })
-              };
+
+                return {
+                    results: $.map(processedData, function (obj) {
+                        return {id: obj.categoryId, text: obj.categoryName};
+                    })
+                };
             }
         },
         containerCssClass: "category-select2",
@@ -127,23 +125,22 @@ $(function () {
             url: "/category/all",
             dataType: "json",
             processResults: function (data, params) {
-              var processedData = [];
-              for(var i=0 ; i<data.length ; i++) {
-                if(params.term == undefined) {
-                    processedData.push(data[i]);
+                var processedData = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (params.term == undefined) {
+                        processedData.push(data[i]);
+                    } else if (params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
+                        processedData.push(data[i]);
+                    } else if (params.term == "") {
+                        processedData.push(data[i]);
+                    }
                 }
-                else if(params.term != "" && (data[i].categoryName.toLowerCase().indexOf(params.term.toLowerCase())) >= 0) {
-                  processedData.push(data[i]);
-                  }
-                else if(params.term == "") {
-                  processedData.push(data[i]);
-                  }
-              }
-              return {
-                results: $.map(processedData, function(obj) {
-                    return  { id: obj.categoryId, text: obj.categoryName };
-                })
-              };
+
+                return {
+                    results: $.map(processedData, function (obj) {
+                        return {id: obj.categoryId, text: obj.categoryName};
+                    })
+                };
             }
         },
         containerCssClass: "category-select2",
@@ -172,13 +169,16 @@ $(function () {
             $("#no-sessions").hide();
             $("#no-subCategory").hide();
         }
+
         subCategorySearchResult.forEach(function (element) {
             if (element.subCategory.toLowerCase().includes(keyword)) {
                 subCategoryOption = subCategoryOption + '<div class="' + renderResult + '" name = "' + element.subCategory + '"id="' + element.categoryId + '" categoryValue ="' + element.primaryCategory + '"><div class="sub-category wordwrap"><strong>' + element.subCategory + '</strong></div><div class="primary-category">' + element.primaryCategory + '</div> </div>'
             }
         });
+
         $(targetId).html(subCategoryOption);
         $(targetId).show();
+
         subCategoryOption = "";
     }
 
@@ -201,8 +201,7 @@ $(function () {
             } else {
                 prepareResult("", targetId, renderResult);
             }
-        }
-        else {
+        } else {
             if ($(targetId).is(":visible")) {
                 $(targetId).hide();
             } else {
@@ -222,10 +221,10 @@ $(function () {
     });
 
     $("html").delegate(".sub-categories-row-delete", "mousedown", function () {
-        categoryId = $(this).attr('id')
-        subCategoryName = $(this).attr('name')
-        categoryName = $(this).attr('categoryValue')
-        topicBySubCategory(categoryName, subCategoryName)
+        categoryId = $(this).attr('id');
+        subCategoryName = $(this).attr('name');
+        categoryName = $(this).attr('categoryValue');
+        topicBySubCategory(categoryName, subCategoryName);
         $("#sub-categories-list-delete").val(subCategoryName);
         $("#topics-exists").show();
         $("#hidden-sub-category").val(subCategoryName);
@@ -233,8 +232,8 @@ $(function () {
     });
 
     $("html").delegate(".sub-categories-row-modify", "mousedown", function () {
-        categoryId = $(this).attr('id')
-        oldSubCategoryName = $(this).attr('name')
+        categoryId = $(this).attr('id');
+        oldSubCategoryName = $(this).attr('name');
         $("#sub-categories-list-modify").val(oldSubCategoryName);
         $("#new-sub-category").show();
         $("#old-sub-category").val(oldCategoryName);
@@ -390,7 +389,7 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 $("#new-sub-category").val("");
                 failureMessageBox();
                 scrollToTop();
-            },
+            }
         }
     )
 }
@@ -434,7 +433,7 @@ function subCategoryByPrimaryCategory(categoryName) {
             success: function (subCategories) {
                 $("#no-subCategory").remove();
                 if (subCategories.length) {
-                    var subCategoryList = '<ul id="list-sessions">'
+                    var subCategoryList = '<ul id="list-sessions">';
                     for (var i = 0; i < subCategories.length; i++) {
                         subCategoryList += '<li ="sub-category-topics">' + subCategories[i] + '</li>';
                     }
@@ -444,7 +443,7 @@ function subCategoryByPrimaryCategory(categoryName) {
                     $("#sub-categories-exists").show();
                 } else {
                     $("#no-subCategory").remove();
-                    var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>'
+                    var noSubCategory = '<label id="no-subCategory">No sub-category exists</label>';
                     $("#sub-categories-exists").before(noSubCategory);
                     $("#sub-categories-exists").hide();
                     $("#subcategory-linked-category-message").hide();
@@ -477,7 +476,7 @@ function topicBySubCategory(categoryName, subCategoryName) {
                     $("#topics-exists").html(sessions);
                 } else {
                     $("#no-sessions").remove();
-                    var noSessions = '<label id= "no-sessions">No sessions exists!</label>'
+                    var noSessions = '<label id= "no-sessions">No sessions exists!</label>';
                     $(".topic-subcategory-message").hide();
                     $("#topics-exists").before(noSessions);
                     $("#topics-exists").hide();
@@ -532,7 +531,6 @@ function updateSubCategoryDropDown() {
 
                 for (var i = 0; i < values.length; i++) {
                     for (var j = 0; j < values[i].subCategory.length; j++) {
-
                         var option = new Element(values[i].categoryId, values[i].subCategory[j], values[i].categoryName);
                         subCategorySearchResult.push(option);
                     }

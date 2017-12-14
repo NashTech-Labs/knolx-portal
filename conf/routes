@@ -101,8 +101,7 @@ POST          /knolx/analysis/leaderboard                           controllers.
 
 #Recommendation
 GET           /recommendation                                       controllers.RecommendationController.renderRecommendationPage
-POST          /recommendation                                       controllers.RecommendationController.recommendationList
-POST          /recommendation/user                                  controllers.RecommendationController.userRecommendation
-POST          /recommendation/add                                   controllers.RecommendationController.addRecommendation
+POST          /recommendation                                       controllers.RecommendationController.recommendationList(pageNumber: Int, filter: String)
+POST          /recommendation/add                                   controllers.RecommendationController.addRecommendation(recommendationId: String)
 POST          /recommendation/approve                               controllers.RecommendationController.approveRecommendation(recommendationId: String)
 POST          /recommendation/decline                               controllers.RecommendationController.declineRecommendation(recommendationId: String)

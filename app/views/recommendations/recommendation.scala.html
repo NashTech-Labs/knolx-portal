@@ -10,7 +10,56 @@
 
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
-    <div class="row">
+    @*<div class="row">
+
+        <div class="col-md-12 filter-padding-left" style="margin-top: 20px;">
+            <div class="col-md-2"></div>
+            <div class="col-md-1">
+                <div class="col-md-8"></div>
+                <div class="col-md-4">
+                    <label class="checkbox-outer" style="font-weight: normal;">
+                        <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>
+
+                        <span class="filter-label_text"></span>
+                        <p class="filter-checkbox-text">All</p>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <label class="checkbox-outer" style="font-weight: normal;">
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='approved'/>
+
+                    <span class="filter-label_text"></span>
+                    <p class="filter-checkbox-text">Approved</p>
+                </label>
+            </div>
+            <div class="col-md-1" style="padding-left: 30px !important;">
+                <label class="checkbox-outer" style="font-weight: normal;">
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='decline'/>
+
+                    <span class="filter-label_text"></span>
+                    <p class="filter-checkbox-text">Decline</p>
+                </label>
+            </div>
+            <div class="col-md-1" style="padding-left: 45px !important;">
+                <label class="checkbox-outer" style="font-weight: normal;">
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='pending'/>
+
+                    <span class="filter-label_text"></span>
+                    <p class="filter-checkbox-text">Pending</p>
+                </label>
+            </div>
+            <div class="col-md-1" style="padding-left: 45px !important;">
+                <label class="checkbox-outer" style="font-weight: normal;">
+                    <input type='radio' name='user-recommend-filter' id="pp" class='custom-checkbox' value='done'/>
+
+                    <span class="filter-label_text" id="aa" ></span>
+                    <p class="filter-checkbox-text">Done</p>
+                </label>
+            </div>
+        </div>
+
+
         <div class="col-md-12">
             <div data-bind="foreach: recommendation">
                 <div class="col-md-3 filter-padding-left" style="margin-top: 20px;">
@@ -18,16 +67,11 @@
                         <div id="parent" class="feedback-response-sessions custom-position">
                             <div class="card-body card-custom-padding">
                                 <div class="col-md-12 feedback-card-topic custom-position">
-                                    @*<div class="session-type" data-bind="if: meetUp">
-                                    <span class="label
-                                    label-info meetup-session custom-label-type">Meetup
+                                    <div class="session-type" data-bind="if: meetUp">
+                                    <span class="custom-label-type">
+                                        <i class="fa fa-ellipsis-v"></i>
                                     </span>
                                     </div>
-                                    <div class="session-type" data-bind="if: !meetUp">
-                                    <span class="label label-info knolx-session custom-label-type">
-                                    Knolx
-                                    </span>
-                                    </div>*@
                                     <div>
                                         <p class="report-content-width" data-bind="text: email"></p>
                                     </div>
@@ -39,17 +83,15 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>*@
 
     <a class="add-recommend" data-toggle="popover" data-container="body" data-placement="left" type="button" title="Add Recommendation" data-html="true" href="#" id="add-button">
         <i class="fa fa-plus fa-plus-content" aria-hidden="true"></i>
     </a>
 
     <div class="textbox-recommend hide" id="add-recommend">
-        <textarea class="textbox-recommend-main" maxlength="140" rows="2" cols="8"></textarea>
-        <p>
-            <button class="btn btn-success">Add</button>
-        </p>
+        <textarea id="recommend-text" class="textbox-recommend-main" minlength="10" maxlength="140" rows="6" cols="10"></textarea>
+            <a class="btn btn-success" id="add-recommend-button">Add</a>
     </div>
     <script src="@routes.Assets.versioned("javascripts/recommendation.js")" type="text/javascript"></script>
 }

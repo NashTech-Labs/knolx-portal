@@ -1,15 +1,16 @@
 package models
 
+import java.util.Date
 import javax.inject.Inject
 
-import play.api.libs.json.{JsValue, Json}
+import models.RecommendationsJsonFormats._
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import models.RecommendationsJsonFormats._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,10 +18,17 @@ import scala.concurrent.{ExecutionContext, Future}
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
-case class RecommendationInfo(email: String,
+case class RecommendationInfo(email: Option[String],
                               recommendation: String,
+                              submissionDate: Date,
+                              updateDate: Date,
                               approved: Boolean = false,
-                              _id: BSONObjectID = BSONObjectID.generate())
+                              decline: Boolean = false,
+                              pending: Boolean = true,
+                              done: Boolean = false,
+                              upVotes: Int,
+                              downVotes: Int,
+                              _id: BSONObjectID)
 
 object RecommendationsJsonFormats {
 
@@ -68,18 +76,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           find(Json.obj()).
           cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
-  }
-
-
-  def getUserRecommendation(email: String)(implicit ex: ExecutionContext): Future[List[String]] = {
-    val condition = Json.obj("email" -> email)
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(condition)
-          .cursor[JsValue](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[JsValue]]())
-      ).map(_.flatMap(_ ("recommendation").asOpt[String]))
   }
 
 }

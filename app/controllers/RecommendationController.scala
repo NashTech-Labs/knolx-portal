@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 case class RecommendationForm(email: String, recommendation: String)
 
-case class Recommendation(email: String,
+case class Recommendation(email: Option[String],
                           recommendation: String,
                           submissionDate: Date,
                           updateDate: Date,
@@ -75,8 +75,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       val recommendationList = recommendations map { recommendation =>
         Recommendation(recommendation.email,
           recommendation.recommendation,
-          recommendation.dateSubmitted,
-          recommendation.updationDate,
+          recommendation.submissionDate,
+          recommendation.updateDate,
           recommendation.approved,
           recommendation.decline,
           recommendation.pending,

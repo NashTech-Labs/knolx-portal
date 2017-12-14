@@ -11,6 +11,7 @@ import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
+import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +39,7 @@ object RecommendationsJsonFormats {
   implicit val recommendationsFormat = Json.format[RecommendationInfo]
 }
 
-class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtitlity: DateTimeUtility) {
 
   import play.modules.reactivemongo.json._
 
@@ -53,7 +54,12 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def approveRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-    val modifier = BSONDocument("$set" -> BSONDocument("approved" -> true))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "approved" -> true,
+        "decline" -> false,
+        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)
+    ))
 
     collection
       .flatMap(jsonCollection =>
@@ -63,7 +69,12 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def declineRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-    val modifier = BSONDocument("$set" -> BSONDocument("decline" -> false))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "approved" -> false,
+        "decline" -> true,
+        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)
+    ))
 
     collection
       .flatMap(jsonCollection =>
@@ -141,6 +152,34 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
+  }
+
+  def pendingRecommendation(id: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    val modifier = BSONDocument(
+      "$set"-> BSONDocument(
+        "pending" -> true,
+        "done" -> false,
+        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def doneRecommendation(id: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    val modifier = BSONDocument(
+      "$set"-> BSONDocument(
+        "pending" -> false,
+        "done" -> true,
+        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+
+    collection
+      .flatMap(jsonCollection =>
+      jsonCollection.update(selector, modifier))
   }
 
 }

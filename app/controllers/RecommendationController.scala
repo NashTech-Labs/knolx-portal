@@ -5,7 +5,7 @@ import java.util.Date
 import javax.inject.{Inject, Singleton}
 
 import EmailHelper.isValidEmail
-import models.{RecommendationInfo, RecommendationsRepository}
+import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
 import play.api.Logger
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -106,32 +106,34 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    recommendationsResponseRepository.getVote(email) map { vote =>
+    recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
-        false,
-        true)
+        upVote = false,
+        downVote = true)
       if (vote.equals("upvote")) {
-        recommendationsRepository.downVote(true)
+        recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
       } else {
-        recommendationsRepository.downVote(false)
+        recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
       }
-      recommendationsResponseRepository.upsert(recommendationResponse)
+      recommendationResponseRepository.upsert(recommendationResponse)
+      Ok("Downvoted")
     }
   }
 
   def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    recommendationsResponseRepository.getVote(email) map { vote =>
+    recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
-        true,
-        false)
+        upVote = true,
+        downVote = false)
       if (vote.equals("downvote")) {
-        recommendationsRepository.upVote(true)
+        recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
       } else {
-        recommendationsRepository.upVote(false)
+        recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
       }
-      recommendationsResponseRepository.upsert(recommendationResponse)
+      recommendationResponseRepository.upsert(recommendationResponse)
+      Ok("Upvoted")
     }
   }
 

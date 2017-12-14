@@ -20,6 +20,11 @@ import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class RecommendationForm(email: String, recommendation: String)
 
+case class Recommendation(email: String,
+                          recommendation: String,
+                          approved: Boolean,
+                          id: String)
+
 @Singleton
 class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationsRepository: RecommendationsRepository,
@@ -30,7 +35,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     (JsPath \ "email").format[String](verifying[String](isValidEmail)) and
       (JsPath \ "recommendation").format[String](minLength[String](10) keepAnd maxLength[String](10))
     ) (RecommendationForm.apply, unlift(RecommendationForm.unapply))
-  implicit val recommendationsFormat: OFormat[RecommendationInfo] = Json.format[RecommendationInfo]
+  implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
   def renderRecommendationPage: Action[AnyContent] = userAction { implicit request =>
     Ok(views.html.recommendations.recommendation())
@@ -60,20 +65,13 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def renderUserRecommendationPage: Action[AnyContent] = userAction { implicit request =>
-    Ok(views.html.recommendations.userrecommendation())
-  }
-
-  def approvedRecommendationList: Action[AnyContent] = userAction.async { implicit request =>
-    recommendationsRepository.getAllRecommendations map { recommendation =>
-      val approvedRecommendation = recommendation.filter(_.approved)
-      Ok(Json.toJson(approvedRecommendation))
-    }
-  }
-
-  def recommendationList: Action[AnyContent] = adminAction.async { implicit request =>
+  def recommendationList: Action[AnyContent] = userAction.async { implicit request =>
     recommendationsRepository.getAllRecommendations map { recommendations =>
-      Ok(Json.toJson(recommendations))
+      val recommendationList = recommendations map { recommendation =>
+        Recommendation(recommendation.email, recommendation.recommendation, recommendation.approved, recommendation._id.stringify)
+
+      }
+      Ok(Json.toJson(recommendationList))
     }
   }
 
@@ -94,6 +92,12 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       } else {
         BadRequest(Json.toJson("Get Internal Server Error During Approval"))
       }
+    }
+  }
+
+  def userRecommendation: Action[AnyContent] = userAction.async { implicit request =>
+    recommendationsRepository.getUserRecommendation(request.user.email).map { recommendations =>
+      Ok(Json.toJson(recommendations))
     }
   }
 

@@ -78,6 +78,11 @@
                         <i class="fa fa-table"></i>
                         <span>Knolx reports</span></a>
                 </li>
+                <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Analysis">
+                    <a href="@routes.RecommendationController.renderRecommendationPage">
+                        <i class="fa fa-line-chart"></i>
+                        <span>Recommendation</span></a>
+                </li>
             }
 
             @if(SessionHelper.isAdmin) {

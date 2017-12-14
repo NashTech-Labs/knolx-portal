@@ -1,0 +1,87 @@
+.custom-checkbox:checked + .approved-label_text:before {
+    content: "\f00c";
+    font-family: "FontAwesome";
+    display: inline-block;
+    text-shadow: 1px 1px 3px #888888;
+    animation: tick 150ms ease-in;
+}
+
+.approved-label_text:before {
+    content: "\f096";
+    font-family: "FontAwesome";
+    display: inline-block;
+    width: 10px;
+    color: #676a6c;
+    font-size: 15px;
+    margin-right: 8px;
+}
+
+.recommendationList
+{
+    padding: 0 !important;
+    list-style-type: none;
+}
+
+.add-recommend {
+    position: absolute;
+    bottom: 40px;
+    right: 30px;
+    background-color: #db4437;
+    border: none;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box;
+    -webkit-box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: inline-block;
+    fill: #fff;
+    height: 56px;
+    outline: none;
+    overflow: hidden;
+    text-align: center;
+    width: 56px;
+    z-index: 4000;
+}
+
+
+.fa-plus-content {
+    padding-top: 15px;
+    position: relative;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-rendering: optimizeLegibility;
+    text-transform: none;
+    display: inline-block;
+    word-wrap: normal;
+    color: #fff;
+}
+
+.textbox-recommend {
+    bottom: 98px;
+    left: 0%;
+    right: 0px;
+    position: relative;
+    float: right;
+}
+
+.textbox-recommend-main {
+    background-color: white;
+    width: 120px;
+    resize: vertical;
+    border: none;
+    border-top: None;
+    outline: none;
+    box-shadow: 0 4px 6px -5px #333;
+    font-weight: bold;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: #7F8C8D;
+    min-height: 50px;
+    overflow-y: auto;
+ }

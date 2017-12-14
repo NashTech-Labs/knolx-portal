@@ -17,6 +17,17 @@
     margin: 0 auto;
 }
 
+.graph-panel .highcharts-container {
+    min-width:100% !important;
+    max-width:100% !important;
+}
+
+.highcharts-container .highcharts-background, .highcharts-container .highcharts-root {
+    min-width:100% !important;
+    max-width:100% !important;
+}
+
+
 .graph-panel-custom {
     min-width: 100%;
 }

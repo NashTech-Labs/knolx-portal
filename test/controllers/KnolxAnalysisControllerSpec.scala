@@ -6,6 +6,7 @@ import java.util.TimeZone
 
 import akka.actor.ActorRef
 import com.google.inject.name.Names
+import helpers.TestEnvironment
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
@@ -30,11 +31,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
   private val jsonData: JsValue = Json.parse("""{"startDate":"2017-07-15 00:00","endDate":"2017-10-15 23:59"}""")
   private val wrongJsonData: JsValue = Json.parse("""{"endDate":"2017-10-15 23:59"}""")
 
-  private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
-      "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false,
-      active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
-      notification = false, _id)))
+  private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime),
+    "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
@@ -164,15 +162,15 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
           List(
             SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
               "feedbackFormId", "topic", 1, meetup = true, "rating", 50.00, cancelled = false, active = true,
-              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false,
               notification = false, BSONObjectID.generate()),
             SessionInfo(_id.stringify, "email", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
               "feedbackFormId", "topic", 1, meetup = true, "rating", 60.00, cancelled = false, active = true,
-              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false,
               notification = false, BSONObjectID.generate()),
             SessionInfo(_id.stringify, "email1", BSONDateTime(date1.getTime), "sessions", "category", "subCategory",
               "feedbackFormId", "topic", 1, meetup = true, "rating", 70.00, cancelled = false, active = true,
-              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false,
+              BSONDateTime(date1.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false,
               notification = false, BSONObjectID.generate())))
 
       sessionsRepository

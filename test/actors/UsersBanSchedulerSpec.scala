@@ -4,7 +4,7 @@ import actors.UsersBanScheduler.{SendEmail, _}
 import akka.actor.{ActorRef, ActorSystem, Scheduler}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import com.google.inject.name.Names
-import controllers.TestEnvironment
+import helpers.TestEnvironment
 import models._
 import org.mockito.Mockito.verify
 import org.specs2.specification.Scope
@@ -26,7 +26,7 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
   def this() = this(ActorSystem("MySpec"))
 
   override def afterAll() {
-    TestKit.shutdownActorSystem(system)
+    system.terminate()
   }
 
   trait TestScope extends Scope {

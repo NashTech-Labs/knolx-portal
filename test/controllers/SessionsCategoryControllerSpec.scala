@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.TimeZone
 
+import helpers.TestEnvironment
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
@@ -318,7 +319,7 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       val sessionInfo = List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-        1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), reminder = false, notification = false, _id))
+        1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporaryYoutubeURL"), reminder = false, notification = false, _id))
       sessionsRepository.getSessionByCategory("category", "subCategory") returns Future(sessionInfo)
 
       val result = controller.getTopicsBySubCategory("category", "subCategory")(FakeRequest()

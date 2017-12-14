@@ -15,7 +15,7 @@ class EmailManager @Inject()(
                               configuration: Configuration
                             ) extends Actor with InjectedActorSupport {
 
-  lazy val limit: Int = configuration.get[Int]("knolx.actors.limit")
+  lazy val limit: Int = configuration.get[Int]("youtube.actors.limit")
 
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {

@@ -70,8 +70,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  def recommendationList: Action[AnyContent] = userAction.async { implicit request =>
-    recommendationsRepository.getAllRecommendations map { recommendations =>
+  def recommendationList(pageNumber: Int, filter: String="all"): Action[AnyContent] = userAction.async { implicit request =>
+
+    recommendationsRepository.paginate(pageNumber, filter) map { recommendations =>
       val recommendationList = recommendations map { recommendation =>
         Recommendation(recommendation.email,
           recommendation.recommendation,

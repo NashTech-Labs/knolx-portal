@@ -7,11 +7,14 @@ import models.RecommendationsJsonFormats._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import utilities.DateTimeUtility
 
+import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -28,7 +31,7 @@ case class RecommendationInfo(email: Option[String],
                               done: Boolean = false,
                               upVotes: Int,
                               downVotes: Int,
-                              _id: BSONObjectID)
+                              _id: BSONObjectID = BSONObjectID.generate())
 
 object RecommendationsJsonFormats {
 
@@ -62,7 +65,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def declineRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-    val modifier = BSONDocument("$set" -> BSONDocument("approved" -> false))
+    val modifier = BSONDocument("$set" -> BSONDocument("decline" -> false))
 
     collection
       .flatMap(jsonCollection =>
@@ -76,6 +79,31 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           find(Json.obj()).
           cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
+  }
+
+  def paginate(pageNumber: Int,
+               filter: String = "all",
+               pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
+
+    val skipN = (pageNumber - 1) * pageSize
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+
+    val condition = filter match {
+      case "all"      => Json.obj()
+      case "approved" => Json.obj("approved" -> true)
+      case "decline"  => Json.obj("decline" -> true)
+      case "pending"  => Json.obj("pending" -> true)
+      case "done"     => Json.obj("done" -> true)
+      case _          => Json.obj()
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .options(queryOptions)
+          .cursor[RecommendationInfo](ReadPreference.Primary)
+          .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))
   }
 
 }

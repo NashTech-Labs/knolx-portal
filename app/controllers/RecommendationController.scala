@@ -1,8 +1,9 @@
 package controllers
 
+import java.util.Date
 import javax.inject.{Inject, Singleton}
-import EmailHelper.isValidEmail
 
+import EmailHelper.isValidEmail
 import models.{RecommendationInfo, RecommendationsRepository}
 import play.api.Logger
 import play.api.libs.json.Reads._
@@ -15,14 +16,18 @@ import play.api.mvc.{Action, AnyContent}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-// this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-
 case class RecommendationForm(email: String, recommendation: String)
 
 case class Recommendation(email: String,
                           recommendation: String,
+                          submissionDate: Date,
+                          updateDate: Date,
                           approved: Boolean,
+                          decline: Boolean,
+                          pending: Boolean,
+                          done: Boolean,
+                          upVotes: Int,
+                          downVotes: Int,
                           id: String)
 
 @Singleton
@@ -68,8 +73,17 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def recommendationList: Action[AnyContent] = userAction.async { implicit request =>
     recommendationsRepository.getAllRecommendations map { recommendations =>
       val recommendationList = recommendations map { recommendation =>
-        Recommendation(recommendation.email, recommendation.recommendation, recommendation.approved, recommendation._id.stringify)
-
+        Recommendation(recommendation.email,
+          recommendation.recommendation,
+          recommendation.dateSubmitted,
+          recommendation.updationDate,
+          recommendation.approved,
+          recommendation.decline,
+          recommendation.pending,
+          recommendation.done,
+          recommendation.upVotes,
+          recommendation.downVotes,
+          recommendation._id.stringify)
       }
       Ok(Json.toJson(recommendationList))
     }

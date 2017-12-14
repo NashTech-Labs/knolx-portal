@@ -19,7 +19,7 @@ import utilities.DateTimeUtility
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class Recommendation(email: Option[String],
+case class Recommendation(email: String,
                           recommendation: String,
                           submissionDate: LocalDate,
                           updateDate: LocalDate,
@@ -65,11 +65,12 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = userAction.async { implicit request =>
+  def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = action.async { implicit request =>
 
     recommendationsRepository.paginate(pageNumber, filter) map { recommendations =>
       val recommendationList = recommendations map { recommendation =>
-        Recommendation(recommendation.email,
+        val email = recommendation.email.fold("Anonymous")(identity)
+        Recommendation(email,
           recommendation.recommendation,
           dateTimeUtility.toLocalDate(recommendation.submissionDate.value),
           dateTimeUtility.toLocalDate(recommendation.updateDate.value),

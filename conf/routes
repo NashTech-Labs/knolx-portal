@@ -105,3 +105,5 @@ POST          /recommendation                                       controllers.
 POST          /recommendation/add                                   controllers.RecommendationController.addRecommendation(recommendationId: String)
 POST          /recommendation/approve                               controllers.RecommendationController.approveRecommendation(recommendationId: String)
 POST          /recommendation/decline                               controllers.RecommendationController.declineRecommendation(recommendationId: String)
+POST          /recommendation/upvote                                controllers.RecommendationController.upVote(email: String, recommendationId: String)
+POST          /recommendation/downvote                              controllers.RecommendationController.downVote(email: String, recommendationId: String)

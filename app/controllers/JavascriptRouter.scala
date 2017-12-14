@@ -58,7 +58,9 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.RecommendationController.recommendationList,
       controllers.routes.javascript.RecommendationController.addRecommendation,
       controllers.routes.javascript.RecommendationController.approveRecommendation,
-      controllers.routes.javascript.RecommendationController.declineRecommendation
+      controllers.routes.javascript.RecommendationController.declineRecommendation,
+      controllers.routes.javascript.RecommendationController.upVote,
+      controllers.routes.javascript.RecommendationController.downVote
     )).as("text/javascript")
   }
 

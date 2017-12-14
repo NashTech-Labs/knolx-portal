@@ -31,6 +31,15 @@ POST          /user/knolx/analysis/totalknolx                       controllers.
 POST          /user/knolx/analysis/totalmeetups                     controllers.KnolxUserAnalysisController.getUserTotalMeetUps(email: String)
 POST          /user/knolx/analysis/totaldidnotattendsessions        controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email: String)
 
+# Upload
+POST        /youtube/:sessionId/upload                            controllers.YoutubeController.upload(sessionId: String)
+GET         /youtube/:sessionId/videoid                           controllers.YoutubeController.getVideoId(sessionId: String)
+GET         /youtube/:sessionId/progress                          controllers.YoutubeController.getPercentageUploaded(sessionId: String)
+POST        /youtube/:sessionId/update                            controllers.YoutubeController.updateVideo(sessionId)
+GET         /youtube/:sessionId/cancel                            controllers.YoutubeController.cancel(sessionId: String)
+GET         /youtube/:sessionId/checkifuploading                  controllers.YoutubeController.checkIfUploading(sessionId: String)
+GET         /youtube/:sessionId/checkiftemporaryurlexists         controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
+
 # Session
 GET           /session                                              controllers.SessionsController.sessions
 POST          /session/search                                       controllers.SessionsController.searchSessions

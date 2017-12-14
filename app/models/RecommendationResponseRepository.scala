@@ -42,7 +42,7 @@ class RecommendationResponseRepository @Inject()(reactiveMongoApi: ReactiveMongo
 
   def upsert(recommendationResponseRepositoryInfo: RecommendationResponseRepositoryInfo): Future[UpdateWriteResult] = {
     val selector = BSONDocument("email" -> recommendationResponseRepositoryInfo.email,
-      "_id" -> BSONDocument("$oid" -> recommendationResponseRepositoryInfo.recommendationId))
+      "recommendationId" -> recommendationResponseRepositoryInfo.recommendationId)
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(

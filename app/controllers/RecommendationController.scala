@@ -106,6 +106,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+    Logger.info(s"Downvoting recommendation => $recommendationId")
     recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
@@ -122,6 +123,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+    Logger.info(s"Upvoting recommendation => $recommendationId")
     recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,

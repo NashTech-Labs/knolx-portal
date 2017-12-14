@@ -10,7 +10,7 @@
 
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
-    @*<div class="row">
+    <div class="row">
 
         <div class="col-md-12 filter-padding-left" style="margin-top: 20px;">
             <div class="col-md-2"></div>
@@ -62,28 +62,27 @@
 
         <div class="col-md-12">
             <div data-bind="foreach: recommendation">
-                <div class="col-md-3 filter-padding-left" style="margin-top: 20px;">
+                <div class="col-md-3 filter-padding-left" style="margin-bottom: 20px;">
                     <div class="col-md-12">
-                        <div id="parent" class="feedback-response-sessions custom-position">
-                            <div class="card-body card-custom-padding">
-                                <div class="col-md-12 feedback-card-topic custom-position">
-                                    <div class="session-type" data-bind="if: meetUp">
-                                    <span class="custom-label-type">
-                                        <i class="fa fa-ellipsis-v"></i>
-                                    </span>
+                        <div class="feedback-response-sessions custom-position">
+                                <div class="col-md-12 recommendation-card-topic">
+                                    <div class="session-type">
+                                        <span>
+                                            <i class="fa fa-ellipsis-v"></i>
+                                        </span>
                                     </div>
                                     <div>
-                                        <p class="report-content-width" data-bind="text: email"></p>
+                                        <p class="feedback-card-presenter" data-bind="text: email"></p>
                                     </div>
                                 </div>
-                                <div class="col-md-12 feedback-card-author"><p data-bind="text: recommendation"></p></div>
+                                <div class="col-md-12 recommendation-content" data-bind="text: recommendation">
+                                </div>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>*@
+    </div>
 
     <a class="add-recommend" data-toggle="popover" data-container="body" data-placement="left" type="button" title="Add Recommendation" data-html="true" href="#" id="add-button">
         <i class="fa fa-plus fa-plus-content" aria-hidden="true"></i>

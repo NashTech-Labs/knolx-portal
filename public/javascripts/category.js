@@ -381,6 +381,7 @@ function modifySubCategory(categoryId, oldSubCategoryName, newSubCategoryName) {
                 $("#new-sub-category").show();
                 document.getElementById("display-success-message").innerHTML = data;
                 $("#new-sub-category").val("");
+                updateSubCategoryDropDown();
                 successMessageBox();
                 scrollToTop();
             },
@@ -505,6 +506,7 @@ function deleteSubCategory(categoryId, subCategoryName) {
                 document.getElementById("display-success-message").innerHTML = data;
                 $("#topics-exists").hide();
                 $("#no-sessions").hide();
+                updateSubCategoryDropDown();
                 successMessageBox();
                 scrollToTop();
             },
@@ -526,6 +528,7 @@ function updateSubCategoryDropDown() {
             processData: false,
             success: function (values) {
                 subCategorySearchResult = [];
+                console.log("Values >>>>>>>>>>>>>>>>>>>>>>" + JSON.stringify(values))
 
                 for (var i = 0; i < values.length; i++) {
                     for (var j = 0; j < values[i].subCategory.length; j++) {

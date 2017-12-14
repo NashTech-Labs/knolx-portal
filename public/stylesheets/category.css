@@ -36,7 +36,7 @@
 #sub-categories-list-delete, #sub-categories-list-modify {
     border: none;
     outline: none;
-    width: 90%;
+    width: 86%;
     padding: 6px 12px;
 }
 
@@ -85,6 +85,8 @@
     width: 21px;
     height: 20px;
     text-align: center;
+    padding-left: 9%;
+    margin-left: 0;
 }
 
 .fa-caret-down {

@@ -24,7 +24,7 @@
 
 .add-recommend {
     position: absolute;
-    bottom: 40px;
+    bottom: 100px;
     right: 30px;
     background-color: #db4437;
     border: none;
@@ -62,7 +62,7 @@
 }
 
 .textbox-recommend {
-    bottom: 98px;
+    bottom: 110px;
     left: 0%;
     right: 0px;
     position: relative;
@@ -85,3 +85,7 @@
     min-height: 50px;
     overflow-y: auto;
  }
+
+.popover-content {
+    background-color: #f7f7f7;
+}

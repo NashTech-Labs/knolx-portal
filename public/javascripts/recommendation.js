@@ -4,6 +4,12 @@ $(function () {
 
 function Recommendation() {
 
+    $('.custom-checkbox').click(function () {
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        FetchRecommendationList(1, filter);
+
+    });
+
     $('#add-button').popover({
         html: true,
         content: function() {
@@ -24,12 +30,11 @@ function Recommendation() {
         }
     };
 
-    FetchRecommendationList();
-    userHistory();
+    FetchRecommendationList(1, "all");
 
-    function FetchRecommendationList() {
+    function FetchRecommendationList(pageNumber, filter) {
 
-        jsRoutes.controllers.RecommendationController.recommendationList().ajax(
+        jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter).ajax(
             {
                 type: "POST",
                 processData: false,
@@ -40,27 +45,6 @@ function Recommendation() {
                 },
                 success: function (values) {
                     self.recommendation(values);
-                },
-                error: function (er) {
-                    console.log(er);
-                }
-            }
-        )
-    }
-
-    function userHistory() {
-
-        jsRoutes.controllers.RecommendationController.userRecommendation().ajax(
-            {
-                type: "POST",
-                processData: false,
-                beforeSend: function (request) {
-                    var csrfToken = document.getElementById('csrfToken').value;
-
-                    return request.setRequestHeader('CSRF-Token', csrfToken);
-                },
-                success: function (values) {
-                    self.userRecommendationList(values);
                 },
                 error: function (er) {
                     console.log(er);

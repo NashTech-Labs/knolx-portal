@@ -1,8 +1,10 @@
 package controllers
 
+import java.time.LocalDate
+import java.util.Date
 import javax.inject.{Inject, Singleton}
-import EmailHelper.isValidEmail
 
+import EmailHelper.isValidEmail
 import models.{RecommendationInfo, RecommendationsRepository}
 import play.api.Logger
 import play.api.libs.json.Reads._
@@ -11,65 +13,72 @@ import play.api.libs.functional.syntax._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.JsPath
 import play.api.mvc.{Action, AnyContent}
+import reactivemongo.bson.BSONDateTime
+import utilities.DateTimeUtility
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-// this is not an unused import contrary to what intellij suggests, do not optimize
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
-
-case class RecommendationForm(email: String, recommendation: String)
-
-case class Recommendation(email: String,
+case class Recommendation(email: Option[String],
                           recommendation: String,
+                          submissionDate: LocalDate,
+                          updateDate: LocalDate,
                           approved: Boolean,
+                          decline: Boolean,
+                          pending: Boolean,
+                          done: Boolean,
+                          upVotes: Int,
+                          downVotes: Int,
                           id: String)
 
 @Singleton
 class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationsRepository: RecommendationsRepository,
-                                         controllerComponents: KnolxControllerComponents
+                                         controllerComponents: KnolxControllerComponents,
+                                         dateTimeUtility: DateTimeUtility
                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  implicit val recommendationFormReads: Format[RecommendationForm] = (
+  /*implicit val recommendationFormReads: Format[RecommendationForm] = (
     (JsPath \ "email").format[String](verifying[String](isValidEmail)) and
       (JsPath \ "recommendation").format[String](minLength[String](10) keepAnd maxLength[String](10))
-    ) (RecommendationForm.apply, unlift(RecommendationForm.unapply))
+    ) (RecommendationForm.apply, unlift(RecommendationForm.unapply))*/
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
   def renderRecommendationPage: Action[AnyContent] = userAction { implicit request =>
     Ok(views.html.recommendations.recommendation())
   }
 
-  def addRecommendation(): Action[JsValue] = userAction(parse.json).async { implicit request =>
-    request.body.validate[RecommendationForm].fold(
-      jsonValidationErrors => {
-        Logger.error(s"Received a bad request during adding recommendation " + jsonValidationErrors)
-        Future.successful(BadRequest(JsError.toJson(jsonValidationErrors)))
-      },
-      recommendationForm => {
-        if (recommendationForm.email.equals(request.user.email)) {
-          val recommendationInfo = RecommendationInfo(request.user.email, recommendationForm.recommendation)
+  def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
+    val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
+    val recommendationInfo = RecommendationInfo(email,
+      recommendation,
+      BSONDateTime(dateTimeUtility.nowMillis),
+      BSONDateTime(dateTimeUtility.nowMillis))
 
-          recommendationsRepository.insert(recommendationInfo).map { result =>
-            if (result.ok) {
-              Ok(Json.toJson("Your Recommendation has been successfully received"))
-            } else {
-              BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
-            }
-          }
-        } else {
-          Future.successful(BadRequest(Json.toJson("Invalid Email")))
-        }
+    recommendationsRepository.insert(recommendationInfo).map { result =>
+      if (result.ok) {
+        Ok(Json.toJson("Your Recommendation has been successfully received"))
+      } else {
+        BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
       }
-    )
+    }
   }
 
-  def recommendationList: Action[AnyContent] = userAction.async { implicit request =>
-    recommendationsRepository.getAllRecommendations map { recommendations =>
-      val recommendationList = recommendations map { recommendation =>
-        Recommendation(recommendation.email, recommendation.recommendation, recommendation.approved, recommendation._id.stringify)
+  def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = userAction.async { implicit request =>
 
+    recommendationsRepository.paginate(pageNumber, filter) map { recommendations =>
+      val recommendationList = recommendations map { recommendation =>
+        Recommendation(recommendation.email,
+          recommendation.recommendation,
+          dateTimeUtility.toLocalDate(recommendation.submissionDate.value),
+          dateTimeUtility.toLocalDate(recommendation.updateDate.value),
+          recommendation.approved,
+          recommendation.decline,
+          recommendation.pending,
+          recommendation.done,
+          recommendation.upVotes,
+          recommendation.downVotes,
+          recommendation._id.stringify)
       }
       Ok(Json.toJson(recommendationList))
     }
@@ -95,9 +104,23 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def userRecommendation: Action[AnyContent] = userAction.async { implicit request =>
-    recommendationsRepository.getUserRecommendation(request.user.email).map { recommendations =>
-      Ok(Json.toJson(recommendations))
+  def downVote(email: String): Action[AnyContent] = userAction.async { implicit request =>
+    recommendationsResponseRepository.getVote(email) map { vote =>
+      if (vote == "downvote") {
+        recommendationsRepository.downVote(true)
+      } else {
+        recommendationsRepository.downVote(false)
+      }
+    }
+  }
+
+  def upVote(email: String): Action[AnyContent] = userAction.async { implicit request =>
+    recommendationsResponseRepository.getVote(email) map { vote =>
+      if (vote == "upvote") {
+        recommendationsRepository.upVote(true)
+      } else {
+        recommendationsRepository.upVote(false)
+      }
     }
   }
 

@@ -1,15 +1,17 @@
 package models
 
+import java.util.Date
 import javax.inject.Inject
 
-import play.api.libs.json.{JsValue, Json}
+import models.RecommendationsJsonFormats._
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.api.{QueryOpts, ReadPreference}
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
+import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import models.RecommendationsJsonFormats._
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,9 +19,16 @@ import scala.concurrent.{ExecutionContext, Future}
 // this is not an unused import contrary to what intellij suggests, do not optimize
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
-case class RecommendationInfo(email: String,
+case class RecommendationInfo(email: Option[String],
                               recommendation: String,
+                              submissionDate: BSONDateTime,
+                              updateDate: BSONDateTime,
                               approved: Boolean = false,
+                              decline: Boolean = false,
+                              pending: Boolean = true,
+                              done: Boolean = false,
+                              upVotes: Int = 0,
+                              downVotes: Int = 0,
                               _id: BSONObjectID = BSONObjectID.generate())
 
 object RecommendationsJsonFormats {
@@ -54,7 +63,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def declineRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-    val modifier = BSONDocument("$set" -> BSONDocument("approved" -> false))
+    val modifier = BSONDocument("$set" -> BSONDocument("decline" -> false))
 
     collection
       .flatMap(jsonCollection =>
@@ -70,16 +79,68 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
   }
 
+  def paginate(pageNumber: Int,
+               filter: String = "all",
+               pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
 
-  def getUserRecommendation(email: String)(implicit ex: ExecutionContext): Future[List[String]] = {
-    val condition = Json.obj("email" -> email)
+    val skipN = (pageNumber - 1) * pageSize
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+
+    val condition = filter match {
+      case "all"      => Json.obj()
+      case "approved" => Json.obj("approved" -> true)
+      case "decline"  => Json.obj("decline" -> true)
+      case "pending"  => Json.obj("pending" -> true)
+      case "done"     => Json.obj("done" -> true)
+      case _          => Json.obj()
+    }
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
-          .cursor[JsValue](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[JsValue]]())
-      ).map(_.flatMap(_ ("recommendation").asOpt[String]))
+          .options(queryOptions)
+          .cursor[RecommendationInfo](ReadPreference.Primary)
+          .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))
+  }
+
+  def updateDate(id: String, updateDate: Date)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+    val modifier = BSONDocument("updateDate" -> updateDate)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def upVote(id: String, alreadyVoted: Boolean)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    val modifier =
+      if (alreadyVoted) {
+        BSONDocument("$inc" -> BSONDocument("upVotes" -> 1, "downVotes" -> -1))
+      } else {
+        BSONDocument("$inc" -> BSONDocument("upVotes" -> 1))
+      }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def downVote(id: String, alreadyVoted: Boolean)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    val modifier =
+      if (alreadyVoted) {
+        BSONDocument("$inc" -> BSONDocument("upVotes" -> -1, "downVotes" -> 1))
+      } else {
+        BSONDocument("$inc" -> BSONDocument("downVotes" -> 1))
+      }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
   }
 
 }

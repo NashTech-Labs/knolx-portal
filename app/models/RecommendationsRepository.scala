@@ -23,14 +23,14 @@ import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 
 case class RecommendationInfo(email: Option[String],
                               recommendation: String,
-                              submissionDate: Date,
-                              updateDate: Date,
+                              submissionDate: BSONDateTime,
+                              updateDate: BSONDateTime,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               pending: Boolean = true,
                               done: Boolean = false,
-                              upVotes: Int,
-                              downVotes: Int,
+                              upVotes: Int = 0,
+                              downVotes: Int = 0,
                               _id: BSONObjectID = BSONObjectID.generate())
 
 object RecommendationsJsonFormats {

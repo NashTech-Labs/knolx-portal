@@ -35,7 +35,8 @@ case class Recommendation(email: Option[String],
 class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationsRepository: RecommendationsRepository,
                                          controllerComponents: KnolxControllerComponents,
-                                         dateTimeUtility: DateTimeUtility
+                                         dateTimeUtility: DateTimeUtility,
+                                         recommendationResponseRepository: RecommendationResponseRepository
                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   /*implicit val recommendationFormReads: Format[RecommendationForm] = (
@@ -44,7 +45,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     ) (RecommendationForm.apply, unlift(RecommendationForm.unapply))*/
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
-  def renderRecommendationPage: Action[AnyContent] = userAction { implicit request =>
+  def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
     Ok(views.html.recommendations.recommendation())
   }
 
@@ -104,23 +105,33 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def downVote(email: String): Action[AnyContent] = userAction.async { implicit request =>
+  def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     recommendationsResponseRepository.getVote(email) map { vote =>
-      if (vote == "downvote") {
+      val recommendationResponse = RecommendationResponseRepositoryInfo(email,
+        recommendationId,
+        false,
+        true)
+      if (vote.equals("upvote")) {
         recommendationsRepository.downVote(true)
       } else {
         recommendationsRepository.downVote(false)
       }
+      recommendationsResponseRepository.upsert(recommendationResponse)
     }
   }
 
-  def upVote(email: String): Action[AnyContent] = userAction.async { implicit request =>
+  def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     recommendationsResponseRepository.getVote(email) map { vote =>
-      if (vote == "upvote") {
+      val recommendationResponse = RecommendationResponseRepositoryInfo(email,
+        recommendationId,
+        true,
+        false)
+      if (vote.equals("downvote")) {
         recommendationsRepository.upVote(true)
       } else {
         recommendationsRepository.upVote(false)
       }
+      recommendationsResponseRepository.upsert(recommendationResponse)
     }
   }
 

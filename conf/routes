@@ -32,13 +32,13 @@ POST          /user/knolx/analysis/totalmeetups                     controllers.
 POST          /user/knolx/analysis/totaldidnotattendsessions        controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email: String)
 
 # Upload
-POST        /youtube/:sessionId/upload                            controllers.YoutubeController.upload(sessionId: String)
-GET         /youtube/:sessionId/videoid                           controllers.YoutubeController.getVideoId(sessionId: String)
-GET         /youtube/:sessionId/progress                          controllers.YoutubeController.getPercentageUploaded(sessionId: String)
-POST        /youtube/:sessionId/update                            controllers.YoutubeController.updateVideo(sessionId)
-GET         /youtube/:sessionId/cancel                            controllers.YoutubeController.cancel(sessionId: String)
-GET         /youtube/:sessionId/checkifuploading                  controllers.YoutubeController.checkIfUploading(sessionId: String)
-GET         /youtube/:sessionId/checkiftemporaryurlexists         controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
+POST          /uploadapi/:sessionId/upload                          controllers.YoutubeController.upload(sessionId: String)
+GET           /uploadapi/:sessionId/videoid                         controllers.YoutubeController.getVideoId(sessionId: String)
+GET           /uploadapi/:sessionId/progress                        controllers.YoutubeController.getPercentageUploaded(sessionId: String)
+POST          /uploadapi/:sessionId/update                          controllers.YoutubeController.updateVideo(sessionId)
+GET           /uploadapi/:sessionId/cancel                          controllers.YoutubeController.cancel(sessionId: String)
+GET           /uploadapi/:sessionId/checkifuploading                controllers.YoutubeController.checkIfUploading(sessionId: String)
+GET           /uploadapi/:sessionId/checkiftemporaryurlexists       controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
 
 # Session
 GET           /session                                              controllers.SessionsController.sessions

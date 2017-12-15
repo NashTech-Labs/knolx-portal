@@ -86,7 +86,8 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     collection
       .flatMap(jsonCollection =>
         jsonCollection.
-          find(Json.obj()).
+          find(Json.obj(
+            "$orderby" -> BSONDocument("submissionDate" -> -1))).
           cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
   }
@@ -100,10 +101,18 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
     val condition = filter match {
       case "all"      => Json.obj()
-      case "approved" => Json.obj("approved" -> true)
-      case "decline"  => Json.obj("decline" -> true)
-      case "pending"  => Json.obj("pending" -> true)
-      case "done"     => Json.obj("done" -> true)
+      case "approved" => Json.obj(
+        "approved" -> true,
+        "$orderby" -> BSONDocument("submissionDate" -> -1))
+      case "decline"  => Json.obj(
+        "decline" -> true,
+        "$orderby" -> BSONDocument("submissionDate" -> -1))
+      case "pending"  => Json.obj(
+        "pending" -> true,
+        "$orderby" -> BSONDocument("submissionDate" -> -1))
+      case "done"     => Json.obj(
+        "done" -> true,
+        "$orderby" -> BSONDocument("submissionDate" -> -1))
       case _          => Json.obj()
     }
 
@@ -114,15 +123,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
           .options(queryOptions)
           .cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))
-  }
-
-  def updateDate(id: String, updateDate: Date)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-    val modifier = BSONDocument("updateDate" -> updateDate)
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection.update(selector, modifier))
   }
 
   def upVote(id: String, alreadyVoted: Boolean)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {

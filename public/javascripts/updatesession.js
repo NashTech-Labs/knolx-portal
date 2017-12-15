@@ -18,7 +18,7 @@ $(function () {
     checkIfTemporaryUrlExists(sessionId);
 
     var youtubeDropzone = new Dropzone("#youtubeVideo", {
-        url: "/youtube/" + sessionId + "/upload",
+        url: jsRoutes.controllers.YoutubeController.upload(sessionId).url,
         maxFilesize: 2048,
         dictDefaultMessage: "Drop your file here to upload(or click)",
         uploadMultiple: false,

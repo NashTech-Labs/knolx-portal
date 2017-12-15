@@ -1,6 +1,5 @@
 package models
 
-import java.util.Date
 import javax.inject.Inject
 
 import models.RecommendationsJsonFormats._
@@ -87,8 +86,8 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       .flatMap(jsonCollection =>
         jsonCollection.
           find(Json.obj(
-            "$orderby" -> BSONDocument("submissionDate" -> -1))).
-          cursor[RecommendationInfo](ReadPreference.Primary)
+            "submissionDate" -> -1))
+          .cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
   }
 

@@ -108,7 +108,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
   def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Upvoting recommendation => $recommendationId")
-    recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
+    recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
         upVote = true,
@@ -118,14 +118,19 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       } else {
         recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
       }
-      recommendationResponseRepository.upsert(recommendationResponse)
-      Ok("Upvoted")
+      recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+        if(result.ok) {
+          Ok("Upvoted")
+        } else {
+          BadRequest("Something went wrong while upvoting the recommendation.")
+        }
+      }
     }
   }
 
   def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Downvoting recommendation => $recommendationId")
-    recommendationResponseRepository.getVote(email, recommendationId) map { vote =>
+    recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
         upVote = false,
@@ -135,8 +140,13 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       } else {
         recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
       }
-      recommendationResponseRepository.upsert(recommendationResponse)
-      Ok("Downvoted")
+      recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+        if(result.ok) {
+          Ok("Downvoted")
+        } else {
+          BadRequest("Something went wrong while downvoting the recommendation.")
+        }
+      }
     }
   }
 

@@ -4,6 +4,8 @@ $(function () {
 
 function Recommendation() {
 
+    FetchRecommendationList(1, "all");
+
     $('.custom-checkbox').click(function () {
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         FetchRecommendationList(1, filter);
@@ -36,8 +38,6 @@ function Recommendation() {
         }
     };
 
-    FetchRecommendationList(1, "all");
-
     function FetchRecommendationList(pageNumber, filter) {
 
         jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter).ajax(
@@ -50,6 +50,7 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    console.log(values);
                     self.recommendation(values);
                 },
                 error: function (er) {
@@ -110,6 +111,7 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    $('#add-button').popover('hide');
                     FetchRecommendationList(1, "all");
                 },
                 error: function (er) {

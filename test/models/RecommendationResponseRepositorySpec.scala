@@ -1,15 +1,14 @@
 package models
 
-import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
 import reactivemongo.bson.BSONObjectID
 
-class RecommendationResponseRepositorySpec extends PlaySpecification with Mockito {
+class RecommendationResponseRepositorySpec extends PlaySpecification {
 
   val recommendationResponseId = BSONObjectID.generate()
   val recommendationId = BSONObjectID.generate()
 
-  val recommendationResponseRepository  = new RecommendationResponseRepository(TestDb.reactiveMongoApi)
+  val recommendationResponseRepository = new RecommendationResponseRepository(TestDb.reactiveMongoApi)
   val recommendationResponseInfo = RecommendationResponseRepositoryInfo("email", recommendationId.stringify, true, false,
     recommendationResponseId)
 
@@ -17,9 +16,16 @@ class RecommendationResponseRepositorySpec extends PlaySpecification with Mockit
 
     "upsert a recommendation response for the user" in {
 
-      val upserted = await(recommendationResponseRepository.upsert(recommendationResponseInfo).map(_.ok))
+      val upserted = await(recommendationResponseRepository.upsert(recommendationResponseInfo))
 
-      upserted must beEqualTo(true)
+      upserted.ok must beEqualTo(true)
+    }
+
+    "get vote for the user who already voted for the particular recommendation" in {
+
+      val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+
+      getVote must beEqualTo("upvote")
     }
   }
 

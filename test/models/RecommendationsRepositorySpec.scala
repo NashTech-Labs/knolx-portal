@@ -1,13 +1,10 @@
 package models
 
 import java.text.SimpleDateFormat
-
 import org.specs2.mock.Mockito
-import play.api.Logger
 import play.api.test.PlaySpecification
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
@@ -17,10 +14,10 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   private val submissionDateString = "2017-07-12T14:30:00"
   private val updateDateString = "2017-07-10T14:30:00"
   private val submissionDate = formatter.parse(submissionDateString).getTime
-  private val updateDate =formatter.parse(updateDateString).getTime
+  private val updateDate = formatter.parse(updateDateString).getTime
 
   val dateTimeUtility: DateTimeUtility = new DateTimeUtility()
-  val recommendationRepository  = new RecommendationsRepository(TestDb.reactiveMongoApi, dateTimeUtility)
+  val recommendationRepository = new RecommendationsRepository(TestDb.reactiveMongoApi, dateTimeUtility)
 
   val recommendationInfo = RecommendationInfo(Some("email"), "recommendation", BSONDateTime(submissionDate),
     BSONDateTime(updateDate), approved = true, decline = false, pending = true, done = false, upVotes = 10,
@@ -29,7 +26,6 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   "Recommendations Respository" should {
 
     "insert recommendation" in {
-
       val inserted = await(recommendationRepository.insert(recommendationInfo).map(_.ok))
 
       inserted must beEqualTo(true)
@@ -49,22 +45,10 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       decline.ok must beEqualTo(true)
     }
 
-    "get all recommendations" in {
-      val recommendationInfoo = RecommendationInfo(Some("email"), "recommendation", BSONDateTime(submissionDate),
-        BSONDateTime(updateDate), approved = true, decline = false, pending = true, done = false, upVotes = 10,
-        downVotes = 15, BSONObjectID.generate())
-
-      val inserted = await(recommendationRepository.insert(recommendationInfoo).map(_.ok))
-      val recommendationsList: List[RecommendationInfo] = await(recommendationRepository.getAllRecommendations)
-
-      Logger.info("Get all recommendation list ->>>>> " + recommendationsList)
-      recommendationsList must beEqualTo (Nil)
-    }
-
     "get paginated recommendation" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1))
 
-      paginatedRecommendation.head.recommendation must beEqualTo ("recommendation")
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
     "upvote a recommendation" in {

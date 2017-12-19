@@ -64,9 +64,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = action.async { implicit request =>
-    recommendationsRepository.paginate(pageNumber, filter) map { recommendations =>
+    recommendationsRepository.paginate(pageNumber, filter) flatMap { recommendations =>
       if (SessionHelper.isSuperUser || SessionHelper.isAdmin) {
-        val recommendationList = recommendations map { recommendation =>
+        Future.sequence(recommendations map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             val email = recommendation.email.fold("Anonymous")(identity)
             Recommendation(Some(email),
@@ -83,10 +83,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               downVote = if(recommendationVote.equals("downvote")) true else false,
               recommendation._id.stringify)
           }
-        }
-        Ok(Json.toJson(recommendationList))
+        }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
       } else {
-        val recommendationList = recommendations map { recommendation =>
+        Future.sequence(recommendations map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             Recommendation(None,
               recommendation.recommendation,
@@ -102,8 +101,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               downVote = if(recommendationVote.equals("downvote") && SessionHelper.isLoggedIn) true else false,
               recommendation._id.stringify)
           }
-        }
-        Ok(Json.toJson(recommendationList))
+        }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
       }
     }
   }

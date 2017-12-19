@@ -174,12 +174,9 @@
 }
 
 .recommendation-label {
-    color: #2b542c;
-    font-size: 25px !important;
-    position: absolute;
-    top: 20px;
-    right: 6px;
+    font-size: 16px !important;
+    position: relative;
+    bottom: 21px;
+    left: 77%;
     z-index: 777;
-    border-radius: 0px;
-    margin: 0;
 }

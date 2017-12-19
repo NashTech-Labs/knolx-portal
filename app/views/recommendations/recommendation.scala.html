@@ -63,13 +63,13 @@
         <div class="col-md-12">
 
             <div data-bind="foreach: recommendation">
-                <div data-bind="if: isLoggedIn">
-                    <div class="col-md-3 filter-padding-left" style="margin-bottom: 20px;">
-                        <div class="col-md-12">
-                            <div class="feedback-response-sessions custom-position">
+                <div class="col-md-3 filter-padding-left" style="margin-bottom: 20px;">
+                    <div class="col-md-12">
+                        <div class="feedback-response-sessions custom-position">
+                            <div data-bind="if: isLoggedIn">
                                 <div class="col-md-12 recommendation-card-topic">
-                                    <div class="recommendation-dropdown dropdown" style="float:right;">
-                                            <i class="fa fa-ellipsis-v"></i>
+                                    <div class="recommendation-dropdown dropdown" style="float: right;">
+                                        <i class="fa fa-ellipsis-v"></i>
                                         <div class="dropdown-content">
                                             <span href="#">Pending</span>
                                             <span href="#">Done</span>
@@ -77,16 +77,24 @@
                                             <span href="#">Decline</span>
                                         </div>
                                     </div>
-                                        <p class="recommendation-presenter" data-bind="text: email"></p>
-                                        <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
+                                    <p class="recommendation-presenter" data-bind="text: email"></p>
+                                    <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
                                 </div>
-                                <div class="col-md-12 recommendation-content" data-bind="text: recommendation">
-                                    <div class="session-type" data-bind="if: done">
-                                        <span class="label label-success custom-label-type">
-                                            Done
-                                        </span>
-                                    </div>
-                                </div>
+                            </div>
+                            <div class="col-md-12 recommendation-content" data-bind="text: recommendation">
+                            </div>
+                            <div class="col-md-12">
+
+                            </div>
+                            <div class="recommendation-label" data-bind="if: pending">
+                                <span class="label label-warning custom-label-type">
+                                    Pending
+                                </span>
+                            </div>
+                            <div class="recommendation-label" data-bind="if: done">
+                                <span class="label label-success custom-label-type">
+                                    Done
+                                </span>
                             </div>
                         </div>
                     </div>

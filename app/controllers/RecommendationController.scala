@@ -95,10 +95,10 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               None,
               recommendation.pending,
               recommendation.done,
-              isLoggedIn = SessionHelper.isLoggedIn,
+              isLoggedIn = !SessionHelper.isLoggedIn,
               recommendation.upVotes - recommendation.downVotes,
-              upVote = if(recommendationVote.equals("upvote") && SessionHelper.isLoggedIn) true else false,
-              downVote = if(recommendationVote.equals("downvote") && SessionHelper.isLoggedIn) true else false,
+              upVote = if(recommendationVote.equals("upvote") && !SessionHelper.isLoggedIn) true else false,
+              downVote = if(recommendationVote.equals("downvote") && !SessionHelper.isLoggedIn) true else false,
               recommendation._id.stringify)
           }
         }) map { recommendationList => Ok(Json.toJson(recommendationList)) }

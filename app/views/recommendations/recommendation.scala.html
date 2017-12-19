@@ -61,25 +61,28 @@
 
 
         <div class="col-md-12">
+
             <div data-bind="foreach: recommendation">
-                <div class="col-md-3 filter-padding-left" style="margin-bottom: 20px;">
-                    <div class="col-md-12">
-                        <div class="feedback-response-sessions custom-position">
+                <div data-bind="if: isLoggedIn">
+                    <div class="col-md-3 filter-padding-left" style="margin-bottom: 20px;">
+                        <div class="col-md-12">
+                            <div class="feedback-response-sessions custom-position">
                                 <div class="col-md-12 recommendation-card-topic">
                                     <div class="session-type">
                                         <span>
                                             <i class="fa fa-ellipsis-v"></i>
                                         </span>
                                     </div>
-                                    <div>
-                                        <p class="feedback-card-presenter" data-bind="text: email"></p>
-                                    </div>
+                                        <p class="recommendation-presenter" data-bind="text: email"></p>
+                                        <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
                                 </div>
                                 <div class="col-md-12 recommendation-content" data-bind="text: recommendation">
                                 </div>
                             </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -90,7 +93,7 @@
 
     <div class="textbox-recommend hide" id="add-recommend">
         <textarea id="recommend-text" class="textbox-recommend-main" minlength="10" maxlength="140" rows="6" cols="10"></textarea>
-            <a class="btn btn-success" id="add-recommend-button">Add</a>
+        <a class="btn btn-success" id="add-recommend-button">Add</a>
     </div>
     <script src="@routes.Assets.versioned("javascripts/recommendation.js")" type="text/javascript"></script>
 }

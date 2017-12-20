@@ -53,6 +53,7 @@ GET           /session/update                                       controllers.
 GET           /session/:sessionId/cancel                            controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET           /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
 GET           /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
+GET           /session/sendemail                                    controllers.SessionsController.sendEmailToPresenter(sessionId: String)
 
 # Feedback
 GET           /feedbackform/manage/:pageNumber                      controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)

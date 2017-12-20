@@ -50,7 +50,7 @@ function slide(keyword, pageNumber, pageSize) {
                             "<em class='fa fa-trash'></em>" +
                             "</a> " +
                             "<a href='" + jsRoutes.controllers.SessionsController.sendEmailToPresenter(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' "+
-                            "data-toggle='tooltip' data-placement='top' title='Send Email'>" +
+                            "data-toggle='tooltip' data-placement='top' title='Send Instructions Email'>" +
                             "<em class='fa fa-envelope-o'></em>" +
                             "</a>" +
                             "</td>" +

@@ -21,3 +21,11 @@ a.btn.btn-sm.btn-primary.btn-create {
 .label-success {
     background-color: #27ae60
 }
+
+.manage-btn {
+    padding: 4px 8px !important;
+}
+
+.manage-session-btn {
+    display: flex;
+}

@@ -126,8 +126,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+  def upVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Upvoting recommendation => $recommendationId")
+    val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
@@ -152,8 +153,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+  def downVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Downvoting recommendation => $recommendationId")
+    val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,

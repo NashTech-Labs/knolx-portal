@@ -215,7 +215,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       recommendationsRepository.upVote(recommendationId, alreadyVoted = true) returns updateWriteResult
       recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
 
-      val result = controller.upVote(email, recommendationId)(
+      val result = controller.upVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -229,7 +229,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("upvote")
 
-      val result = controller.upVote(email, recommendationId)(
+      val result = controller.upVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -246,7 +246,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
       recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
 
-      val result = controller.upVote(email, recommendationId)(
+      val result = controller.upVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -264,7 +264,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
       recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns wrongUpdateWriteResult
 
-      val result = controller.upVote(email, recommendationId)(
+      val result = controller.upVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -281,7 +281,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       recommendationsRepository.upVote(recommendationId, alreadyVoted = true) returns updateWriteResult
       recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
 
-      val result = controller.downVote(email, recommendationId)(
+      val result = controller.downVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -296,7 +296,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("downvote")
 
-      val result = controller.downVote(email, recommendationId)(
+      val result = controller.downVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -313,7 +313,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
       recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
 
-      val result = controller.downVote(email, recommendationId)(
+      val result = controller.downVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )
@@ -331,7 +331,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
       recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns wrongUpdateWriteResult
 
-      val result = controller.downVote(email, recommendationId)(
+      val result = controller.downVote(recommendationId)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )

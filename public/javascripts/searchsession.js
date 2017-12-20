@@ -70,7 +70,7 @@ function slide(keyword, pageNumber, pageSize) {
                             if (sessions[session].contentAvailable) {
                                 usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
                                     "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                                    "' style='text-decoration: none;'  target='_blank'><span class='label more-detail-session'>Click here</span></a></td>";
+                                    "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Click here</span></a></td>";
                             } else {
                                 usersFound += "<td><span class='label label-danger'>Not Available</span></td>";
                             }

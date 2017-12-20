@@ -276,7 +276,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                     sessionsScheduler ! RefreshSessionsSchedulers
-                    Logger.info(s"Sending mail to presenter $presenterEmail for scheduled session information")
                     Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully created!"))
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")

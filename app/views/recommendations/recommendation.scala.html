@@ -75,25 +75,27 @@
                 <div class="col-md-3 filter-padding-left" style="margin-bottom: 25px;">
                     <div class="col-md-12">
                         <div class="feedback-response-sessions custom-position">
-                            <div data-bind="if: isLoggedIn">
-                                <div class="col-md-12 recommendation-card-topic">
-                                    <div class="recommendation-dropdown dropdown" style="float: right;">
-                                        <i class="fa fa-ellipsis-v"></i>
-                                        <div class="dropdown-content">
-                                            <span data-bind="click: pending ? null: function($id) { $root.pendingByAdmin(id)}">
-                                                Pending</span>
-                                            <span data-bind="click: done ? null: function($id) { $root.doneByAdmin(id)}">
-                                                Done</span>
-                                            <span data-bind="click: approved ? null: function($id) { $root.approveByAdmin(id)}">
-                                                Approved</span>
-                                            <span data-bind="click: decline ? null: function($id) { $root.declineByAdmin(id)}">
-                                                Decline</span>
+                            @if(SessionHelper.isAdmin) {
+                                <div data-bind="if: isLoggedIn">
+                                    <div class="col-md-12 recommendation-card-topic">
+                                        <div class="recommendation-dropdown dropdown" style="float: right;">
+                                            <i class="fa fa-ellipsis-v"></i>
+                                            <div class="dropdown-content">
+                                                <span data-bind="click: pending ? null: function($id) { $root.pendingByAdmin(id)}">
+                                                    Pending</span>
+                                                <span data-bind="click: done ? null: function($id) { $root.doneByAdmin(id)}">
+                                                    Done</span>
+                                                <span data-bind="click: approved ? null: function($id) { $root.approveByAdmin(id)}">
+                                                    Approved</span>
+                                                <span data-bind="click: decline ? null: function($id) { $root.declineByAdmin(id)}">
+                                                    Decline</span>
+                                            </div>
                                         </div>
+                                        <p class="recommendation-presenter" data-bind="text: email"></p>
+                                        <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
                                     </div>
-                                    <p class="recommendation-presenter" data-bind="text: email"></p>
-                                    <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
                                 </div>
-                            </div>
+                            }
                             <table class="col-md-12">
                                 <tbody>
                                     <tr style="background-color: white">

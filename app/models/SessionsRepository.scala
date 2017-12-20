@@ -152,7 +152,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
     val condition = keyword match {
       case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
-        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "") + ".*"), "$options" -> "i"))), "active" -> true)
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "active" -> true)
       case None      => Json.obj("active" -> true)
     }
 

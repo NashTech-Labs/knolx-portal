@@ -137,8 +137,8 @@
     color: #2b542c;
     font-size: 25px !important;
     position: absolute;
-    top: 20px;
-    right: 6px;
+    top: 12px;
+    right: -2px;
     z-index: 777;
     border-radius: 0px;
     margin: 0;
@@ -160,14 +160,15 @@
 }
 
 .dropdown-content span {
-    font-size: 10px;
+    font-size: 12px;
     color: black;
     padding: 3px;
     text-decoration: none;
     display: block;
+    cursor: pointer;
 }
 
-.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-content span:hover {background-color: #f1f1f1}
 
 .dropdown:hover .dropdown-content {
     display: block;
@@ -178,7 +179,7 @@
     position: relative;
     bottom: 21px;
     left: 77%;
-    z-index: 777;
+    width: fit-content;
 }
 
 .recommendation-vote {

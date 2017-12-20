@@ -12,20 +12,17 @@
 
     <div class="row">
 
-        <div class="col-md-12 filter-padding-left" style="margin-top: 20px;">
-            <div class="col-md-2"></div>
-            <div class="col-md-1">
-                <div class="col-md-8"></div>
-                <div class="col-md-4">
+        <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
+            <div class="col-md-7"></div>
+            <div class="col-md-1 filter-padding-right" style="width: fit-content">
                     <label class="checkbox-outer" style="font-weight: normal;">
                         <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>
 
                         <span class="filter-label_text"></span>
                         <p class="filter-checkbox-text">All</p>
                     </label>
-                </div>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-1" style="padding-left: 20px !important;">
                 <label class="checkbox-outer" style="font-weight: normal;">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='approved'/>
 
@@ -33,7 +30,7 @@
                     <p class="filter-checkbox-text">Approved</p>
                 </label>
             </div>
-            <div class="col-md-1" style="padding-left: 30px !important;">
+            <div class="col-md-1" style="padding-left: 40px !important;">
                 <label class="checkbox-outer" style="font-weight: normal;">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='decline'/>
 
@@ -49,7 +46,7 @@
                     <p class="filter-checkbox-text">Pending</p>
                 </label>
             </div>
-            <div class="col-md-1" style="padding-left: 45px !important;">
+            <div class="col-md-1 filter-padding-right" style="padding-left: 55px !important;">
                 <label class="checkbox-outer" style="font-weight: normal;">
                     <input type='radio' name='user-recommend-filter' id="pp" class='custom-checkbox' value='done'/>
 
@@ -61,9 +58,8 @@
 
 
         <div class="col-md-12">
-
             <div data-bind="foreach: recommendation">
-                <div class="col-md-3 filter-padding-left" style="margin-bottom: 20px;">
+                <div class="col-md-3 filter-padding-left" style="margin-bottom: 25px;">
                     <div class="col-md-12">
                         <div class="feedback-response-sessions custom-position">
                             <div data-bind="if: isLoggedIn">
@@ -90,9 +86,9 @@
                                     <tr style="background-color: white">
                                         <td class="recommendation-vote">
                                             <div >
-                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'back'}, click: isLoggedIn? function($id){ $root.upVoteByUser(id)}:null"></span>
+                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'back'}, click: (isLoggedIn && !upVote)? function($id){ $root.upVoteByUser(id)}:null"></span>
                                                 <span data-bind="text: votes"></span>
-                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'green':'black'}, click: isLoggedIn ? function($id) { $root.downVoteByUser(id)} :null"></span>
+                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'green':'black'}, click: (isLoggedIn && !downVote) ? function($id) { $root.downVoteByUser(id)}:null"></span>
                                             </div>
                                         </td>
                                         <td>
@@ -107,7 +103,7 @@
                                     Pending
                                 </span>
                             </div>
-                            <div class="recommendation-label" data-bind="if: done">
+                            <div class="recommendation-label" data-bind="if: done" style="left: 84% !important;">
                                 <span class="label label-success custom-label-type">
                                     Done
                                 </span>

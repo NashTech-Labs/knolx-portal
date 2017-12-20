@@ -685,7 +685,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
       dateTimeUtility.toLocalDateTime(date.getTime) returns localDateTime
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
-      val result = controller.sendEmail(_id.stringify)(
+      val result = controller.sendEmailToPresenter(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -701,7 +701,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       dateTimeUtility.toLocalDateTime(date.getTime) returns localDateTime
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.sendEmail("wrongemail")(
+      val result = controller.sendEmailToPresenter(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

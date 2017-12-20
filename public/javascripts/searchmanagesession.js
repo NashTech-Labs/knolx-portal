@@ -49,7 +49,7 @@ function slide(keyword, pageNumber, pageSize) {
                             "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a> " +
-                            "<a href='" + jsRoutes.controllers.SessionsController.sendEmail(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' "+
+                            "<a href='" + jsRoutes.controllers.SessionsController.sendEmailToPresenter(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' "+
                             "data-toggle='tooltip' data-placement='top' title='Send Email'>" +
                             "<em class='fa fa-envelope-o'></em>" +
                             "</a>" +

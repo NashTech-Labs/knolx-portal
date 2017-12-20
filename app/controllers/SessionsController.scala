@@ -288,7 +288,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def sendEmail(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def sendEmailToPresenter(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionsRepository
       .getById(sessionId)
       .flatMap(_.fold {

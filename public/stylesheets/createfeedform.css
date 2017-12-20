@@ -358,23 +358,23 @@ textarea{
     display:block
 }
 
-.comments-content {
+.comment-content {
     font-size: 18px;
     font-weight: normal !important;
     text-align: left;
     overflow-y: auto;
 }
 
-.comments-content::-webkit-input-placeholder {
+.comment-content::-webkit-input-placeholder {
     text-align: center;
 }
 
-.comments-content::-moz-placeholder {
+.comment-content::-moz-placeholder {
     /* Mozilla Firefox 19+ */
     text-align: center;
 }
 
-.comments-content:-ms-input-placeholder {
+.comment-content:-ms-input-placeholder {
     /* Internet Explorer 10-11 */
     text-align: center;
 }

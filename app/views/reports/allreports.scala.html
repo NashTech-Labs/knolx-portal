@@ -1,6 +1,6 @@
 @()(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("All reports") {
+@main("Reports") {
     <div class="row">
         <div class="col-md-12 feedback-form-display-container" >
             <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>

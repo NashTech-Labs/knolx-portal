@@ -71,21 +71,37 @@
                                     <div class="recommendation-dropdown dropdown" style="float: right;">
                                         <i class="fa fa-ellipsis-v"></i>
                                         <div class="dropdown-content">
-                                            <span href="#">Pending</span>
-                                            <span href="#">Done</span>
-                                            <span href="#">Approved</span>
-                                            <span href="#">Decline</span>
+                                            <span data-bind="click: pending ? null: function($id) { $root.pendingByAdmin(id)}">
+                                                Pending</span>
+                                            <span data-bind="click: done ? null: function($id) { $root.doneByAdmin(id)}">
+                                                Done</span>
+                                            <span data-bind="click: approved ? null: function($id) { $root.approveByAdmin(id)}">
+                                                Approved</span>
+                                            <span data-bind="click: decline ? null: function($id) { $root.declineByAdmin(id)}">
+                                                Decline</span>
                                         </div>
                                     </div>
                                     <p class="recommendation-presenter" data-bind="text: email"></p>
                                     <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
                                 </div>
                             </div>
-                            <div class="col-md-12 recommendation-content" data-bind="text: recommendation">
-                            </div>
-                            <div class="col-md-12">
-
-                            </div>
+                            <table class="col-md-12">
+                                <tbody>
+                                    <tr style="background-color: white">
+                                        <td class="recommendation-vote">
+                                            <div >
+                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'back'}, click: isLoggedIn? function($id){ $root.upVoteByUser(id)}:null"></span>
+                                                <span data-bind="text: votes"></span>
+                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'green':'black'}, click: isLoggedIn ? function($id) { $root.downVoteByUser(id)} :null"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="recommendation-content" data-bind="text: recommendation">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             <div class="recommendation-label" data-bind="if: pending">
                                 <span class="label label-warning custom-label-type">
                                     Pending

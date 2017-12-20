@@ -180,3 +180,22 @@
     left: 77%;
     z-index: 777;
 }
+
+.recommendation-vote {
+    padding-left: 10px;
+    width: 30px;
+}
+
+.recommendation-up:before {
+    content: "\f0d8";
+    font-family: "FontAwesome";
+    width: 10px;
+    font-size: 30px;
+}
+
+.recommendation-down:before {
+    content: "\f0d7";
+    font-family: "FontAwesome";
+    width: 10px;
+    font-size: 30px;
+}

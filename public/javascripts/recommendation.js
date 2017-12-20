@@ -4,6 +4,16 @@ $(function () {
 
 function Recommendation() {
 
+    function successMessageBox() {
+        $("#success-message").show();
+        $("#failure-message").hide();
+    }
+
+    function failureMessageBox() {
+        $("#success-message").hide();
+        $("#failure-message").show();
+    }
+
     FetchRecommendationList(1, "all");
 
     $('.custom-checkbox').click(function () {
@@ -40,11 +50,14 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -62,11 +75,14 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -83,11 +99,14 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -104,11 +123,14 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -126,11 +148,14 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -148,11 +173,14 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -171,11 +199,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    console.log(values);
                     self.recommendation(values);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )
@@ -192,12 +220,15 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    document.getElementById("display-success-message").innerHTML = values;
+                    successMessageBox();
                     $('#add-button').popover('hide');
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    console.log(er);
+                    document.getElementById("display-failure-message").innerHTML = er.responseText;
+                    failureMessageBox();
                 }
             }
         )

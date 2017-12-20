@@ -1,23 +1,18 @@
 package controllers
 
 import java.time.LocalDate
-import java.util.Date
 import javax.inject.{Inject, Singleton}
 
-import EmailHelper.isValidEmail
 import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
 import play.api.Logger
-import play.api.libs.json.Reads._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.JsPath
+import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 case class Recommendation(email: Option[String],
                           recommendation: String,

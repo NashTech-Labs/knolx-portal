@@ -80,7 +80,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           }
         }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
       } else {
-        Future.sequence(recommendations map { recommendation =>
+        Future.sequence(recommendations filter (_.approved) map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             Recommendation(None,
               recommendation.recommendation,

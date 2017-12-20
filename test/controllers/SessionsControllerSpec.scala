@@ -678,6 +678,37 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       status(result) must be equalTo SEE_OTHER
     }
 
+    "sent email to the presenter once added to the portal" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getById(_id.stringify) returns optionOfSessionObject
+
+      val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
+      dateTimeUtility.toLocalDateTime(date.getTime) returns localDateTime
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      val result = controller.sendEmail(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not sent email to the presenter when wrong id is specified" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getById(_id.stringify) returns Future(None)
+
+      val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
+      dateTimeUtility.toLocalDateTime(date.getTime) returns localDateTime
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.sendEmail("wrongemail")(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
   }
 
 }

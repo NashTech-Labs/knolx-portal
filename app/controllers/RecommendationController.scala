@@ -79,8 +79,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               recommendation.done,
               isLoggedIn = true,
               recommendation.upVotes - recommendation.downVotes,
-              upVote = if(recommendationVote.equals("upvote")) true else false,
-              downVote = if(recommendationVote.equals("downvote")) true else false,
+              upVote = if (recommendationVote.equals("upvote")) true else false,
+              downVote = if (recommendationVote.equals("downvote")) true else false,
               recommendation._id.stringify)
           }
         }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
@@ -95,10 +95,10 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               None,
               recommendation.pending,
               recommendation.done,
-              isLoggedIn = SessionHelper.isLoggedIn,
+              isLoggedIn = !SessionHelper.isLoggedIn,
               recommendation.upVotes - recommendation.downVotes,
-              upVote = if(recommendationVote.equals("upvote") && SessionHelper.isLoggedIn) true else false,
-              downVote = if(recommendationVote.equals("downvote") && SessionHelper.isLoggedIn) true else false,
+              upVote = if (recommendationVote.equals("upvote") && !SessionHelper.isLoggedIn) true else false,
+              downVote = if (recommendationVote.equals("downvote") && !SessionHelper.isLoggedIn) true else false,
               recommendation._id.stringify)
           }
         }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
@@ -133,16 +133,20 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         recommendationId,
         upVote = true,
         downVote = false)
-      if (vote.equals("downvote")) {
-        recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
+      if (vote.equals("upvote")) {
+        Future.successful(BadRequest("You have already upvoted the recommendation."))
       } else {
-        recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
-      }
-      recommendationResponseRepository.upsert(recommendationResponse) map { result =>
-        if (result.ok) {
-          Ok("Upvoted")
+        if (vote.equals("downvote")) {
+          recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
         } else {
-          BadRequest("Something went wrong while upvoting the recommendation.")
+          recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
+        }
+        recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+          if (result.ok) {
+            Ok("Upvoted")
+          } else {
+            BadRequest("Something went wrong while upvoting the recommendation.")
+          }
         }
       }
     }
@@ -155,16 +159,20 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         recommendationId,
         upVote = false,
         downVote = true)
-      if (vote.equals("upvote")) {
-        recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
+      if (vote.equals("downvote")) {
+        Future.successful(BadRequest("You have already downvoted the recommendation"))
       } else {
-        recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
-      }
-      recommendationResponseRepository.upsert(recommendationResponse) map { result =>
-        if (result.ok) {
-          Ok("Downvoted")
+        if (vote.equals("upvote")) {
+          recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
         } else {
-          BadRequest("Something went wrong while downvoting the recommendation.")
+          recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
+        }
+        recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+          if (result.ok) {
+            Ok("Downvoted")
+          } else {
+            BadRequest("Something went wrong while downvoting the recommendation.")
+          }
         }
       }
     }

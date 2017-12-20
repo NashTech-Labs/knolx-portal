@@ -160,7 +160,7 @@ function loadFeedbackForm(values, sessionId) {
             optionsLoaded += "<div class='row option-questions ' style='width: auto !important;'>" +
                 "<div class='col-md-1'></div>" +
                 "<div class='col-md-10'>" +
-                "​<textarea class='comments' rows='2' id='option-" + questionNumber + "' cols='70' placeholder='Edit Comment Here!'></textarea>" +
+                "​<textarea class='comments comments-content' rows='2' id='option-" + questionNumber + "' cols='70' placeholder='Edit Comment Here!'></textarea>" +
                 "</div>";
             if (!required) {
                 optionsLoaded += '<div id="parent" class="add-option-parent"><div>' +

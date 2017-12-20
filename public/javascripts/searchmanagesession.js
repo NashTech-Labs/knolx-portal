@@ -46,6 +46,9 @@ function slide(keyword, pageNumber, pageSize) {
                             "</a> " +
                             "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete'>" +
                             "<em class='fa fa-trash'></em>" +
+                            "</a> " +
+                            "<a href='" + jsRoutes.controllers.SessionsController.sendEmail(sessions[session].id])['url'] + "' class='btn btn-info'>" +
+                            "<em class='fa fa-envelope-o'></em>" +
                             "</a>" +
                             "</td>" +
                             "<td>" + sessions[session].dateString + "</td>" +

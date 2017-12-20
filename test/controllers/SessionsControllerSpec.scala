@@ -55,6 +55,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
     lazy val app = fakeApp()
 
+    val emailManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
     val sessionsScheduler =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("SessionsScheduler")))))
     val usersBanScheduler =
@@ -69,7 +71,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         sessionsRepository,
         feedbackFormsRepository,
         dateTimeUtility,
+        config,
         knolxControllerComponent,
+        emailManager,
         sessionsScheduler,
         usersBanScheduler,
         youtubeManager)

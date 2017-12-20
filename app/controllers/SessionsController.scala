@@ -1,18 +1,19 @@
 package controllers
 
+import java.text.SimpleDateFormat
 import java.time._
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.SessionsScheduler._
-import actors.YouTubeDetailsActor
+import actors.{EmailActor, YouTubeDetailsActor}
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
 import com.google.api.services.youtube.model.VideoCategory
 import controllers.EmailHelper._
 import models._
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -87,7 +88,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    dateTimeUtility: DateTimeUtility,
+                                   configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
+                                   @Named("EmailManager") emailManager: ActorRef,
                                    @Named("SessionsScheduler") sessionsScheduler: ActorRef,
                                    @Named("UsersBanScheduler") usersBanScheduler: ActorRef,
                                    @Named("YouTubeManager") youtubeManager: ActorRef
@@ -97,6 +100,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
   implicit val sessionSearchResultInfoFormat: OFormat[SessionSearchResult] = Json.format[SessionSearchResult]
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val sessionSearchForm = Form(
     mapping(
@@ -255,8 +259,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors, formIds)))
           },
           createSessionInfo => {
+            val presenterEmail = createSessionInfo.email.toLowerCase
             usersRepository
-              .getByEmail(createSessionInfo.email.toLowerCase)
+              .getByEmail(presenterEmail)
               .flatMap(_.fold {
                 Future.successful(
                   BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
@@ -271,6 +276,11 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   if (result.ok) {
                     Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                     sessionsScheduler ! RefreshSessionsSchedulers
+                    Logger.info(s"Sending mail to presenter $presenterEmail for scheduled session information")
+                    val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+                    /*emailManager ! EmailActor.SendEmail(
+                      List(presenterEmail), fromEmail, "Session Scheduled!",
+                      views.html.emails.presenternotification(session.topic, formatter.parse(dateTimeUtility.toLocalDateTime(session.date.value))).toString)*/
                     Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully created!"))
                   } else {
                     Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
@@ -280,6 +290,23 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               })
           })
       }
+  }
+
+  def sendEmail(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+  sessionsRepository
+    .getById(sessionId)
+    .flatMap { session =>
+    session.fold {
+      Future.successful(BadRequest("No session found"))
+    } { sessionInfo =>
+    val presenterEmail = sessionInfo.email
+    val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+    emailManager ! EmailActor.SendEmail(
+      List(presenterEmail), fromEmail, "Session Scheduled!",
+      views.html.emails.presenternotification(sessionInfo.topic, formatter.parse(dateTimeUtility.toLocalDateTime(sessionInfo.date.value).toString)).toString)
+    Future.successful(Ok("Email has been sent to the user"))
+    }
+    }
   }
 
   private def sessionExpirationMillis(date: Date, customDays: Int): Long =

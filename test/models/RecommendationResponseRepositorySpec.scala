@@ -5,39 +5,44 @@ import reactivemongo.bson.BSONObjectID
 
 class RecommendationResponseRepositorySpec extends PlaySpecification {
 
-  val recommendationResponseId = BSONObjectID.generate()
   val recommendationId = BSONObjectID.generate()
 
   val recommendationResponseRepository = new RecommendationResponseRepository(TestDb.reactiveMongoApi)
-  val recommendationResponseInfo = RecommendationResponseRepositoryInfo("email", recommendationId.stringify, true, false,
-    recommendationResponseId)
+  val recommendationResponseInfoForUpVote = RecommendationResponseRepositoryInfo("emailUpVote", recommendationId.stringify, true, false,
+    BSONObjectID.generate())
+  val recommendationResponseInfoForDownVote = RecommendationResponseRepositoryInfo("emailDownVote", recommendationId.stringify, false, true,
+    BSONObjectID.generate())
+  val recommendationResponseInfoForNoVote = RecommendationResponseRepositoryInfo("emailNoVote", recommendationId.stringify, false, false,
+    BSONObjectID.generate())
 
   "Recommendation Response" should {
 
     "upsert a recommendation response for the user" in {
 
-      val upserted = await(recommendationResponseRepository.upsert(recommendationResponseInfo))
+      val upsertedUpVote = await(recommendationResponseRepository.upsert(recommendationResponseInfoForUpVote))
+      val upsertedDownVote = await(recommendationResponseRepository.upsert(recommendationResponseInfoForDownVote))
+      val upsertedNoVote = await(recommendationResponseRepository.upsert(recommendationResponseInfoForNoVote))
 
-      upserted.ok must beEqualTo(true)
+      upsertedUpVote.ok must beEqualTo(true)
     }
 
     "get vote for the user who upvoted for the particular recommendation" in {
 
-      val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+      val getVote = await(recommendationResponseRepository.getVote("emailUpVote", recommendationId.stringify))
 
       getVote must beEqualTo("upvote")
     }
 
     "get vote for the user who downvoted for the particular recommendation" in {
 
-      val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+      val getVote = await(recommendationResponseRepository.getVote("emailDownVote", recommendationId.stringify))
 
       getVote must beEqualTo("downvote")
     }
 
     "get vote for unmatched case" in {
 
-      val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+      val getVote = await(recommendationResponseRepository.getVote("emailNoVote", recommendationId.stringify))
 
       getVote must beEqualTo("")
     }
@@ -46,7 +51,7 @@ class RecommendationResponseRepositorySpec extends PlaySpecification {
 
       val getVote = await(recommendationResponseRepository.getVote("", recommendationId.stringify))
 
-      getVote must beEqualTo("upvote")
+      getVote must beEqualTo("")
     }
   }
 

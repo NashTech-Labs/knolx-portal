@@ -20,15 +20,21 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   val recommendationRepository = new RecommendationsRepository(TestDb.reactiveMongoApi, dateTimeUtility)
 
   val recommendationInfo = RecommendationInfo(Some("email"), "recommendation", BSONDateTime(submissionDate),
-    BSONDateTime(updateDate), approved = true, decline = false, pending = true, done = false, upVotes = 10,
+    BSONDateTime(updateDate), approved = true, decline = false, pending = false, done = true, upVotes = 10,
     downVotes = 15, recommendationId)
-
+  
   "Recommendations Respository" should {
 
     "insert recommendation" in {
       val inserted = await(recommendationRepository.insert(recommendationInfo).map(_.ok))
 
       inserted must beEqualTo(true)
+    }
+
+    "get all recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
     "approved recommendation" in {
@@ -38,6 +44,12 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       approve.ok must beEqualTo(true)
     }
 
+    "get approved recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "approved"))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
     "decline recommendation" in {
 
       val decline = await(recommendationRepository.declineRecommendation(recommendationId.stringify))
@@ -45,38 +57,38 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       decline.ok must beEqualTo(true)
     }
 
-    "get all recommendation" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1))
-
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
-    }
-
-    "get approved recommendation" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1,"approved"))
-
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
-    }
-
     "get decline recommendation" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1,"decline"))
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "decline"))
 
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
+    "update pending recommendation value" in {
+      val pending = await(recommendationRepository.pendingRecommendation(recommendationId.stringify))
+
+      pending.ok must beEqualTo(true)
     }
 
     "get pending recommendation" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1,"pending"))
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "pending"))
 
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
+    "update done recommendation value" in {
+      val done = await(recommendationRepository.doneRecommendation(recommendationId.stringify))
+
+      done.ok must beEqualTo(true)
+    }
+
     "get done recommendation" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1,"done"))
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "done"))
 
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
     "get recommendation for unmatched string" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1,"unmatched"))
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "unmatched"))
 
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
@@ -105,17 +117,6 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       upVote.ok must beEqualTo(true)
     }
 
-    "update pending recommendation value" in {
-      val pending = await(recommendationRepository.pendingRecommendation(recommendationId.stringify))
-
-      pending.ok must beEqualTo(true)
-    }
-
-    "update done recommendation value" in {
-      val done = await(recommendationRepository.doneRecommendation(recommendationId.stringify))
-
-      done.ok must beEqualTo(true)
-    }
   }
 
 }

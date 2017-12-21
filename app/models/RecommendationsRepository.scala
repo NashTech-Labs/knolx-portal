@@ -90,18 +90,10 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
     val condition = filter match {
       case "all"      => Json.obj()
-      case "approved" => Json.obj(
-        "approved" -> true,
-        "submissionDate" -> -1)
-      case "decline"  => Json.obj(
-        "decline" -> true,
-        "submissionDate" -> -1)
-      case "pending"  => Json.obj(
-        "pending" -> true,
-        "submissionDate" -> -1)
-      case "done"     => Json.obj(
-        "done" -> true,
-        "submissionDate" -> -1)
+      case "approved" => Json.obj("approved" -> true)
+      case "decline"  => Json.obj("decline" -> true)
+      case "pending"  => Json.obj("pending" -> true)
+      case "done"     => Json.obj("done" -> true)
       case _          => Json.obj()
     }
 
@@ -109,6 +101,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .sort(Json.obj("submissionDate" -> -1))
           .options(queryOptions)
           .cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))

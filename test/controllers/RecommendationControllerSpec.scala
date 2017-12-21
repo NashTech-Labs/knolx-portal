@@ -1,7 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import helpers.TestEnvironment
 import models._
@@ -24,7 +24,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val email = "test@knoldus.com"
   private val _id: BSONObjectID = BSONObjectID.generate()
-  private val localDate = LocalDate.now()
+  private val localDate = LocalDateTime.now()
 
   private val emailObject =
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
@@ -116,7 +116,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
 
       recommendationsRepository.paginate(pageNumber, filter) returns recommendations
       recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
-      dateTimeUtility.toLocalDate(date.getTime) returns localDate
+      dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
 
       val result = controller.recommendationList(pageNumber, filter)(
         FakeRequest()

@@ -62,14 +62,14 @@ class RecommendationResponseRepository @Inject()(reactiveMongoApi: ReactiveMongo
           .cursor[RecommendationResponseRepositoryInfo](ReadPreference.Primary)
           .headOption)
 
-    eventualRecommendationResponse.map{ maybeRecommendationResponse =>
-      maybeRecommendationResponse.fold ("") { recommendationResponse =>
-      (recommendationResponse.upVote,recommendationResponse.downVote) match {
-        case (true, false) => "upvote"
-        case (false, true) => "downvote"
-        case _ => ""
-      }
-        
+    eventualRecommendationResponse.map { maybeRecommendationResponse =>
+      maybeRecommendationResponse.fold("") { recommendationResponse =>
+        (recommendationResponse.upVote, recommendationResponse.downVote) match {
+          case (true, false) => "upvote"
+          case (false, true) => "downvote"
+          case _             => ""
+        }
+
       }
     }
   }

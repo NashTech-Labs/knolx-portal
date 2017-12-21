@@ -1,34 +1,31 @@
 package controllers
 
 import java.time.LocalDate
-import java.util.Date
 import javax.inject.{Inject, Singleton}
 
-import EmailHelper.isValidEmail
 import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
 import play.api.Logger
-import play.api.libs.json.Reads._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.JsPath
+import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-case class Recommendation(email: String,
+case class Recommendation(email: Option[String],
                           recommendation: String,
-                          submissionDate: LocalDate,
-                          updateDate: LocalDate,
-                          approved: Boolean,
-                          decline: Boolean,
+                          submissionDate: Option[LocalDate],
+                          updateDate: Option[LocalDate],
+                          approved: Option[Boolean],
+                          decline: Option[Boolean],
                           pending: Boolean,
                           done: Boolean,
-                          upVotes: Int,
-                          downVotes: Int,
+                          isLoggedIn: Boolean,
+                          votes: Int,
+                          upVote: Boolean,
+                          downVote: Boolean,
                           id: String)
 
 @Singleton
@@ -39,10 +36,6 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationResponseRepository: RecommendationResponseRepository
                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  /*implicit val recommendationFormReads: Format[RecommendationForm] = (
-    (JsPath \ "email").format[String](verifying[String](isValidEmail)) and
-      (JsPath \ "recommendation").format[String](minLength[String](10) keepAnd maxLength[String](10))
-    ) (RecommendationForm.apply, unlift(RecommendationForm.unapply))*/
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
@@ -66,23 +59,45 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = action.async { implicit request =>
-
-    recommendationsRepository.paginate(pageNumber, filter) map { recommendations =>
-      val recommendationList = recommendations map { recommendation =>
-        val email = recommendation.email.fold("Anonymous")(identity)
-        Recommendation(email,
-          recommendation.recommendation,
-          dateTimeUtility.toLocalDate(recommendation.submissionDate.value),
-          dateTimeUtility.toLocalDate(recommendation.updateDate.value),
-          recommendation.approved,
-          recommendation.decline,
-          recommendation.pending,
-          recommendation.done,
-          recommendation.upVotes,
-          recommendation.downVotes,
-          recommendation._id.stringify)
+    recommendationsRepository.paginate(pageNumber, filter) flatMap { recommendations =>
+      if (SessionHelper.isSuperUser || SessionHelper.isAdmin) {
+        Future.sequence(recommendations map { recommendation =>
+          recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
+            val email = recommendation.email.fold("Anonymous")(identity)
+            Recommendation(Some(email),
+              recommendation.recommendation,
+              Some(dateTimeUtility.toLocalDate(recommendation.submissionDate.value)),
+              Some(dateTimeUtility.toLocalDate(recommendation.updateDate.value)),
+              Some(recommendation.approved),
+              Some(recommendation.decline),
+              recommendation.pending,
+              recommendation.done,
+              isLoggedIn = true,
+              recommendation.upVotes - recommendation.downVotes,
+              upVote = if (recommendationVote.equals("upvote")) true else false,
+              downVote = if (recommendationVote.equals("downvote")) true else false,
+              recommendation._id.stringify)
+          }
+        }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
+      } else {
+        Future.sequence(recommendations filter (_.approved) map { recommendation =>
+          recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
+            Recommendation(None,
+              recommendation.recommendation,
+              None,
+              None,
+              None,
+              None,
+              recommendation.pending,
+              recommendation.done,
+              isLoggedIn = !SessionHelper.isLoggedIn,
+              recommendation.upVotes - recommendation.downVotes,
+              upVote = if (recommendationVote.equals("upvote") && !SessionHelper.isLoggedIn) true else false,
+              downVote = if (recommendationVote.equals("downvote") && !SessionHelper.isLoggedIn) true else false,
+              recommendation._id.stringify)
+          }
+        }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
       }
-      Ok(Json.toJson(recommendationList))
     }
   }
 
@@ -106,45 +121,55 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def upVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+  def upVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Upvoting recommendation => $recommendationId")
+    val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
         upVote = true,
         downVote = false)
-      if (vote.equals("downvote")) {
-        recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
+      if (vote.equals("upvote")) {
+        Future.successful(BadRequest("You have already upvoted the recommendation."))
       } else {
-        recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
-      }
-      recommendationResponseRepository.upsert(recommendationResponse) map { result =>
-        if(result.ok) {
-          Ok("Upvoted")
+        if (vote.equals("downvote")) {
+          recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
         } else {
-          BadRequest("Something went wrong while upvoting the recommendation.")
+          recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
+        }
+        recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+          if (result.ok) {
+            Ok("Upvoted")
+          } else {
+            BadRequest("Something went wrong while upvoting the recommendation.")
+          }
         }
       }
     }
   }
 
-  def downVote(email: String, recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
+  def downVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info(s"Downvoting recommendation => $recommendationId")
+    val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
         recommendationId,
         upVote = false,
         downVote = true)
-      if (vote.equals("upvote")) {
-        recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
+      if (vote.equals("downvote")) {
+        Future.successful(BadRequest("You have already downvoted the recommendation"))
       } else {
-        recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
-      }
-      recommendationResponseRepository.upsert(recommendationResponse) map { result =>
-        if(result.ok) {
-          Ok("Downvoted")
+        if (vote.equals("upvote")) {
+          recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
         } else {
-          BadRequest("Something went wrong while downvoting the recommendation.")
+          recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
+        }
+        recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+          if (result.ok) {
+            Ok("Downvoted")
+          } else {
+            BadRequest("Something went wrong while downvoting the recommendation.")
+          }
         }
       }
     }

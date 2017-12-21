@@ -178,6 +178,8 @@ $(function () {
 
         $(targetId).html(subCategoryOption);
         $(targetId).show();
+        var width = $("#sub-categories-container-modify").width();
+        $(targetId).css('width', width);
 
         subCategoryOption = "";
     }
@@ -195,6 +197,7 @@ $(function () {
     function showResult(id, targetId, renderResult) {
         var keyword = $(id).val().toLowerCase();
         updateSubCategoryDropDown();
+        console.log(">>>>>>>>>>>>>>>>>>>>>This should be printed after data is returned");
         if (keyword == "") {
             if ($(targetId).is(":visible")) {
                 $(targetId).hide();
@@ -525,6 +528,7 @@ function updateSubCategoryDropDown() {
         {
             type: "GET",
             processData: false,
+            async: false,
             success: function (values) {
                 subCategorySearchResult = [];
                 console.log("Values >>>>>>>>>>>>>>>>>>>>>>" + JSON.stringify(values))

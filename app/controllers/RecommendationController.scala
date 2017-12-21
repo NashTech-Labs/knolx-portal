@@ -1,6 +1,6 @@
 package controllers
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.{Inject, Singleton}
 
 import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
@@ -16,8 +16,8 @@ import scala.concurrent.Future
 
 case class Recommendation(email: Option[String],
                           recommendation: String,
-                          submissionDate: Option[LocalDate],
-                          updateDate: Option[LocalDate],
+                          submissionDate: Option[LocalDateTime],
+                          updateDate: Option[LocalDateTime],
                           approved: Option[Boolean],
                           decline: Option[Boolean],
                           pending: Boolean,
@@ -67,8 +67,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
             val email = recommendation.email.fold("Anonymous")(identity)
             Recommendation(Some(email),
               recommendation.recommendation,
-              Some(dateTimeUtility.toLocalDate(recommendation.submissionDate.value)),
-              Some(dateTimeUtility.toLocalDate(recommendation.updateDate.value)),
+              Some(dateTimeUtility.toLocalDateTime(recommendation.submissionDate.value)),
+              Some(dateTimeUtility.toLocalDateTime(recommendation.updateDate.value)),
               Some(recommendation.approved),
               Some(recommendation.decline),
               recommendation.pending,
@@ -81,7 +81,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           }
         }) map { recommendationList => Ok(Json.toJson(recommendationList)) }
       } else {
-        Future.sequence(recommendations map { recommendation =>
+        Future.sequence(recommendations filter (_.approved) map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             Recommendation(None,
               recommendation.recommendation,

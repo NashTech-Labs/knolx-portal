@@ -203,6 +203,7 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    $('.wrapper').height($('#content').height());
                     self.recommendation(values);
                 },
                 error: function (er) {

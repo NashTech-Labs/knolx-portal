@@ -128,6 +128,10 @@
                 </div>
             </div>
         </div>
+        <div class="empty-reports" data-bind="if: (recommendation().length) == 0">
+            <i class="fa fa-folder-open" aria-hidden="true"></i>
+            <p class="empty-reports_text">No Recommendations found!</p>
+        </div>
     </div>
 
     <a class="add-recommend" data-toggle="popover" data-container="body" data-placement="left" type="button" title="Add Recommendation" data-html="true" href="#" id="add-button">

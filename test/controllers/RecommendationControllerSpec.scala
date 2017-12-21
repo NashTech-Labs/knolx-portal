@@ -1,7 +1,7 @@
 package controllers
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
 import helpers.TestEnvironment
 import models._
@@ -93,6 +93,22 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       )
 
       status(result) must be equalTo OK
+    }
+
+    "not store empty recommendation" in new WithTestApplication {
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation("")(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not store recommendation" in new WithTestApplication {

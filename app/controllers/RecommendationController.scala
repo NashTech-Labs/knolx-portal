@@ -43,18 +43,22 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
-    val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
-    val recommendationInfo = RecommendationInfo(email,
-      recommendation,
-      BSONDateTime(dateTimeUtility.nowMillis),
-      BSONDateTime(dateTimeUtility.nowMillis))
+    if (recommendation.nonEmpty) {
+      val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
+      val recommendationInfo = RecommendationInfo(email,
+        recommendation,
+        BSONDateTime(dateTimeUtility.nowMillis),
+        BSONDateTime(dateTimeUtility.nowMillis))
 
-    recommendationsRepository.insert(recommendationInfo).map { result =>
-      if (result.ok) {
-        Ok(Json.toJson("Your Recommendation has been successfully received"))
-      } else {
-        BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+      recommendationsRepository.insert(recommendationInfo).map { result =>
+        if (result.ok) {
+          Ok("Your Recommendation has been successfully received")
+        } else {
+          BadRequest("Get Internal Server Error During Insertion")
+        }
       }
+    } else {
+      Future.successful(BadRequest("Recommendation cannot be empty"))
     }
   }
 
@@ -104,9 +108,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def approveRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.approveRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation Successfully Approved"))
+        Ok("Recommendation Successfully Approved")
       } else {
-        BadRequest(Json.toJson("Get Internal Server Error During Approval"))
+        BadRequest("Get Internal Server Error During Approval")
       }
     }
   }
@@ -114,9 +118,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def declineRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.declineRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation Successfully Approved"))
+        Ok("Recommendation Successfully Approved")
       } else {
-        BadRequest(Json.toJson("Get Internal Server Error During Approval"))
+        BadRequest("Get Internal Server Error During Approval")
       }
     }
   }
@@ -178,9 +182,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def doneRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.doneRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation has been marked as Done"))
+        Ok("Recommendation has been marked as Done")
       } else {
-        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Done"))
+        BadRequest("Got Internal Server Error while marking the recommendation as Done")
       }
     }
   }
@@ -188,9 +192,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def pendingRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.pendingRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation has been marked as Pending"))
+        Ok("Recommendation has been marked as Pending")
       } else {
-        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Pending"))
+        BadRequest("Got Internal Server Error while marking the recommendation as Pending")
       }
     }
   }

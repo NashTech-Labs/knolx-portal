@@ -21,9 +21,30 @@ class RecommendationResponseRepositorySpec extends PlaySpecification {
       upserted.ok must beEqualTo(true)
     }
 
-    "get vote for the user who already voted for the particular recommendation" in {
+    "get vote for the user who upvoted for the particular recommendation" in {
 
       val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+
+      getVote must beEqualTo("upvote")
+    }
+
+    "get vote for the user who downvoted for the particular recommendation" in {
+
+      val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+
+      getVote must beEqualTo("downvote")
+    }
+
+    "get vote for unmatched case" in {
+
+      val getVote = await(recommendationResponseRepository.getVote("email", recommendationId.stringify))
+
+      getVote must beEqualTo("")
+    }
+
+    "get vote for wrong user for the particular recommendation" in {
+
+      val getVote = await(recommendationResponseRepository.getVote("", recommendationId.stringify))
 
       getVote must beEqualTo("upvote")
     }

@@ -81,17 +81,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
         jsonCollection.update(selector, modifier))
   }
 
-  /*
-    def getAllRecommendations(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
-      collection
-        .flatMap(jsonCollection =>
-          jsonCollection.
-            find(Json.obj(
-              "submissionDate" -> -1))
-            .cursor[RecommendationInfo](ReadPreference.Primary)
-            .collect[List](-1, FailOnError[List[RecommendationInfo]]()))
-    }*/
-
   def paginate(pageNumber: Int,
                filter: String = "all",
                pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
@@ -103,16 +92,16 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       case "all"      => Json.obj()
       case "approved" => Json.obj(
         "approved" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
+        "submissionDate" -> -1)
       case "decline"  => Json.obj(
         "decline" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
+        "submissionDate" -> -1)
       case "pending"  => Json.obj(
         "pending" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
+        "submissionDate" -> -1)
       case "done"     => Json.obj(
         "done" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
+        "submissionDate" -> -1)
       case _          => Json.obj()
     }
 

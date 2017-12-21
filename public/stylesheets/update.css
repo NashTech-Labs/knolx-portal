@@ -147,3 +147,7 @@ label {
 .select-height {
     height: 28px;
 }
+
+#progress-message {
+    margin-bottom: 10px;
+}

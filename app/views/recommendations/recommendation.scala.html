@@ -13,18 +13,18 @@
     <div class="row">
 
         @*<div class="col-md-12 category-page-message" style="margin-top: 20px;">
-            <div id="success-message" class=" alert alert-success alert-dismissable">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">
-                    x</a>
-                <p id="display-success-message"></p>
-            </div>
-            <div id="failure-message" class="alert alert-danger alert-dismissable">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">
-                    x</a>
-                <p id="display-failure-message"></p>
-            </div>
+        <div id="success-message" class=" alert alert-success alert-dismissable">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">
+        x</a>
+        <p id="display-success-message"></p>
         </div>
-*@
+        <div id="failure-message" class="alert alert-danger alert-dismissable">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">
+        x</a>
+        <p id="display-failure-message"></p>
+        </div>
+        </div>
+        *@
         <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
             <div class="col-md-7"></div>
             <div class="col-md-1 filter-padding-right" style="width: fit-content">
@@ -69,7 +69,6 @@
             </div>
         </div>
 
-
         <div class="col-md-12">
             <div data-bind="foreach: recommendation">
                 <div class="col-md-3 filter-padding-left" style="margin-bottom: 25px;">
@@ -102,7 +101,8 @@
                                         <td class="recommendation-vote">
                                             <div >
                                                 <span class="recommendation-up" data-bind="style:{color: upVote?'green':'back'}, click: isLoggedIn ? function($id){ $root.upVoteByUser(id)}:null"></span>
-                                                <span data-bind="text: votes"></span>
+                                                <span data-bind="text: votes" style="text-align: center;
+                                                    width: 20px;"></span>
                                                 <span class="recommendation-down" data-bind="style:{color: downVote ?'green':'black'}, click: isLoggedIn ? function($id) { $root.downVoteByUser(id)}:null"></span>
                                             </div>
                                         </td>

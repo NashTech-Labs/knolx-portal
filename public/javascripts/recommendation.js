@@ -4,7 +4,7 @@ $(function () {
 
 function Recommendation() {
 
-    var page = 0;
+    var page = 1;
 
     function getDocumentHeight() {
         const body = document.body;
@@ -22,20 +22,27 @@ function Recommendation() {
 
     window.onscroll = function () {
         if (getScrollTop() < getDocumentHeight() - window.innerHeight) return;
-        console.log("4444444444")
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        FetchRecommendationList(++page, filter);
     };
 
-    FetchRecommendationList(1, "all");
+    FetchRecommendationList(page, "all");
 
     $('.custom-checkbox').click(function () {
         var filter = $('input[name="user-recommend-filter"]:checked').val();
-        FetchRecommendationList(1, filter);
+        page = 1;
+        FetchRecommendationList(page, filter);
     });
 
     $('#add-button').popover({
         html: true,
         content: function () {
+            var tempScrollTop = $(window).scrollTop;
+            $(window).scrollTop(tempScrollTop);
+            console.log("aaaaaaaa" + $(window).scrollTop);
+            /*window.scrollTo(0, document.body.scrollHeight);*/
             return $('#add-recommend').html();
+
         }
     });
 
@@ -62,7 +69,7 @@ function Recommendation() {
                 },
                 success: function (values) {
                       var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);
@@ -84,7 +91,7 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);
@@ -105,7 +112,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);
@@ -126,7 +134,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);
@@ -148,7 +157,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);
@@ -170,7 +180,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);
@@ -214,7 +225,7 @@ function Recommendation() {
                 success: function (values) {
                     $('#add-button').popover('hide');
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    FetchRecommendationList(page, filter);
                 },
                 error: function (er) {
                     console.log(er);

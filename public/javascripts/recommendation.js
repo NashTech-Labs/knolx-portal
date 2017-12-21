@@ -4,15 +4,26 @@ $(function () {
 
 function Recommendation() {
 
-    function successMessageBox() {
-        $("#success-message").show();
-        $("#failure-message").hide();
+    var page = 0;
+
+    function getDocumentHeight() {
+        const body = document.body;
+        const html = document.documentElement;
+
+        return Math.max(
+            body.scrollHeight, body.offsetHeight,
+            html.clientHeight, html.scrollHeight, html.offsetHeight
+        );
     }
 
-    function failureMessageBox() {
-        $("#success-message").hide();
-        $("#failure-message").show();
+    function getScrollTop() {
+        return (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
     }
+
+    window.onscroll = function () {
+        if (getScrollTop() < getDocumentHeight() - window.innerHeight) return;
+        console.log("4444444444")
+    };
 
     FetchRecommendationList(1, "all");
 
@@ -50,14 +61,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
-                    var filter = $('input[name="user-recommend-filter"]:checked').val();
+                      var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -75,14 +83,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -99,14 +104,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -123,14 +125,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -148,14 +147,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -173,14 +169,11 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -202,8 +195,7 @@ function Recommendation() {
                     self.recommendation(values);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )
@@ -220,15 +212,12 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                    document.getElementById("display-success-message").innerHTML = values;
-                    successMessageBox();
                     $('#add-button').popover('hide');
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     FetchRecommendationList(1, filter);
                 },
                 error: function (er) {
-                    document.getElementById("display-failure-message").innerHTML = er.responseText;
-                    failureMessageBox();
+                    console.log(er);
                 }
             }
         )

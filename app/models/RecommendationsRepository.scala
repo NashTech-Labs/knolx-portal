@@ -120,7 +120,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = (alreadyVoted: @switch) match {
       case true => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1, "downVotes" -> -1))
 
-      case false => BSONDocument("$inc" -> BSONDocument("downVotes" -> 1))
+      case false => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1))
     }
 
     collection

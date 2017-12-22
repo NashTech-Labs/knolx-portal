@@ -101,14 +101,13 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val sortBy = viewBy match {
       case "latest" => Json.obj("submission" -> -1)
       case "recent" => Json.obj("updateDate" -> -1)
-      case "votes" => Json.obj("$subtract" -> List("upVotes", "downVotes"))
     }
 
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
-          .sort(Json.obj("submissionDate" -> -1, "updateDate" -> -1))
+          .sort(sortBy)
           .options(queryOptions)
           .cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))

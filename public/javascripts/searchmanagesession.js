@@ -40,12 +40,18 @@ function slide(keyword, pageNumber, pageSize) {
                 var usersFound = "";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
-                        usersFound += "<tr><td align='center'>" +
-                            "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default'>" +
+                        usersFound += "<tr><td align='center' class='manage-session-btn'>" +
+                            "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default manage-btn' "+
+                            "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Edit' >" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete'>" +
+                            "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete manage-btn'"+
+                            "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Delete'>" +
                             "<em class='fa fa-trash'></em>" +
+                            "</a> " +
+                            "<a href='" + jsRoutes.controllers.SessionsController.sendEmailToPresenter(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' "+
+                            "data-toggle='tooltip' data-placement='top' title='Send Instructions Email'>" +
+                            "<em class='fa fa-envelope-o'></em>" +
                             "</a>" +
                             "</td>" +
                             "<td>" + sessions[session].dateString + "</td>" +
@@ -93,7 +99,7 @@ function slide(keyword, pageNumber, pageSize) {
                             if (sessions[session].contentAvailable) {
                                 usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
                                     "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
-                                    "' style='text-decoration: none;'><span class='label more-detail-session'>Click here</span></a>";
+                                    "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Click here</span></a>";
                             } else {
                                 usersFound += "<td><span class='label label-danger'>Not Available</span>";
                             }

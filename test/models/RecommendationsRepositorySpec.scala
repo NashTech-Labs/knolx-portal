@@ -94,25 +94,25 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "upvote a recommendation when already voted" in {
-      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, true))
+      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, alreadyVoted = true))
 
       upVote.ok must beEqualTo(true)
     }
 
     "upvote a recommendation user did not voted earlier" in {
-      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, false))
+      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, alreadyVoted = false))
 
       upVote.ok must beEqualTo(true)
     }
 
     "downvote a recommendation when already voted" in {
-      val downVote = await(recommendationRepository.downVote(recommendationId.stringify, true))
+      val downVote = await(recommendationRepository.downVote(recommendationId.stringify, alreadyVoted = true))
 
       downVote.ok must beEqualTo(true)
     }
 
     "downvote a recommendation user did not voted earlier" in {
-      val upVote = await(recommendationRepository.downVote(recommendationId.stringify, false))
+      val upVote = await(recommendationRepository.downVote(recommendationId.stringify, alreadyVoted = false))
 
       upVote.ok must beEqualTo(true)
     }

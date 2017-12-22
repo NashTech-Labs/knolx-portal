@@ -83,7 +83,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
   def paginate(pageNumber: Int,
                filter: String = "all",
-               viewBy: String,
+               viewBy: String = "latest",
                pageSize: Int = 8)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
 
     val total = pageNumber * pageSize

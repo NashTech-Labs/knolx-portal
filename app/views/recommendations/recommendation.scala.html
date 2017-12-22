@@ -99,8 +99,8 @@
                                                 <span class="recommendation-down" data-bind="style:{color: downVote ?'red':'black'}, click: isLoggedIn ? function($id) { $root.downVoteByUser(id)}:null"></span>
                                             </div>
                                         </td>
-                                        <td>
-                                            <div class="recommendation-content" data-bind="text: recommendation">
+                                        <td class="recommendation-content">
+                                            <div  data-bind="text: recommendation">
                                             </div>
                                         </td>
                                     </tr>

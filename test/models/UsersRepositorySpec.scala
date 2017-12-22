@@ -321,10 +321,12 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "update when user is banned" in {
+      val banTillDateString = "2018-07-12T14:30:00"
+      val banTill = formatter.parse(banTillDateString)
       val bannedUserInfo = UserInfo("test1@knoldus.com", "password", "encryptedpassword", active = true, admin = false,
-        coreMember = false, superUser = false, BSONDateTime(millis))
+        coreMember = false, superUser = false, BSONDateTime(banTill.getTime))
       usersRepository.insert(bannedUserInfo)
-      val notUpdateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None)
+      val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
       val userTOUpdate = UpdatedUserInfo("test1@knoldus.com", active = false, ban = false, coreMember = false, admin = false, None)
       val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
       val localDateTime = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime

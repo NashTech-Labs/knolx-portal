@@ -23,15 +23,23 @@ function Recommendation() {
     window.onscroll = function () {
         if (getScrollTop() < getDocumentHeight() - window.innerHeight) return;
         var filter = $('input[name="user-recommend-filter"]:checked').val();
-        FetchRecommendationList(++page, filter);
+        var sort = $('#show-entries').val();
+        FetchRecommendationList(++page, filter, sort);
     };
 
-    FetchRecommendationList(page, "all");
+    var sort = $('#show-entries').val();
+    FetchRecommendationList(page, "all", sort);
 
     $('.custom-checkbox').click(function () {
+        var sort = $('#show-entries').val();
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         page = 1;
-        FetchRecommendationList(page, filter);
+        FetchRecommendationList(page, filter, sort);
+    });
+
+    $('#sort-entries').on('change', function () {
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        FetchRecommendationList(page, filter, this.value);
     });
 
     $('#add-button').popover({
@@ -39,8 +47,6 @@ function Recommendation() {
         content: function () {
             var tempScrollTop = $(window).scrollTop;
             $(window).scrollTop(tempScrollTop);
-            console.log("aaaaaaaa" + $(window).scrollTop);
-            /*window.scrollTo(0, document.body.scrollHeight);*/
             return $('#add-recommend').html();
 
         }
@@ -69,7 +75,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                       var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -91,7 +98,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -113,7 +121,8 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -135,7 +144,8 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -158,7 +168,8 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -181,7 +192,8 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -191,9 +203,9 @@ function Recommendation() {
     };
 
 
-    function FetchRecommendationList(pageNumber, filter) {
+    function FetchRecommendationList(pageNumber, filter, sortBy) {
 
-        jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter).ajax(
+        jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter, sortBy).ajax(
             {
                 type: "POST",
                 processData: false,
@@ -226,7 +238,8 @@ function Recommendation() {
                 success: function (values) {
                     $('#add-button').popover('hide');
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(page, filter);
+                    var sort = $('#show-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);

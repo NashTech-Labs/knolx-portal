@@ -59,8 +59,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = action.async { implicit request =>
-    recommendationsRepository.paginate(pageNumber, filter) flatMap { recommendations =>
+  def recommendationList(pageNumber: Int, filter: String = "all", sortBy: String): Action[AnyContent] = action.async { implicit request =>
+    recommendationsRepository.paginate(pageNumber, filter, sortBy) flatMap { recommendations =>
       if (SessionHelper.isSuperUser || SessionHelper.isAdmin) {
         Future.sequence(recommendations map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>

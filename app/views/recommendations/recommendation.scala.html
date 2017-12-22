@@ -26,7 +26,14 @@
         </div>
         *@
         <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
-            <div class="col-md-7"></div>
+            <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+                Sort By
+                <select name="Show" id="sort-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                    <option value="latest" selected>Submission Date</option>
+                    <option value="recent">Updated Date</option>
+                </select>
+            </label>
+            <div class="col-md-5"></div>
             <div class="col-md-1 filter-padding-right" style="width: fit-content">
                 <label class="checkbox-outer" style="font-weight: normal;">
                     <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>

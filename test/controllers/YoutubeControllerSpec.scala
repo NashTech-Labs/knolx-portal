@@ -86,7 +86,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         "category" -> Seq("category"))
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
-      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+      val multipartBody = MultipartFormData(parameters, Seq[FilePart[Files.TemporaryFile]](), Seq[BadPart]())
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
@@ -95,11 +95,6 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withHeaders(("fileSize", "10"))
           .withMultipartFormDataBody(multipartBody)
-          .withFormUrlEncodedBody(("title", "title"),
-            ("description", "description"),
-            ("tags", "tag1, tag2"),
-            ("status", "private"),
-            ("category", "27"))
 
       val result = controller.upload(sessionId)(request)
 
@@ -115,9 +110,9 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
           .withHeaders(("fileSize", "10"))
           .withFormUrlEncodedBody(("title", "title"),
             ("description", "description"),
-            ("tags", "tag1, tag2"),
+            ("tags[]", "tag1, tag2"),
             ("status", "private"),
-            ("category", "27"))
+            ("category", "education"))
 
 
       val result = controller.upload(sessionId)(request)
@@ -236,7 +231,16 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       status(result) must be equalTo 400
     }
 
-    "return Ok when asked for percentage of file" in new WithTestApplication {
+    "return 0 percentage if upload of file hasn't yet started" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/progress")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo 200
+    }
+
+    "return percentage when asked for percentage of file" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       youtubeProgressManager ! AddSessionUploader(sessionId)

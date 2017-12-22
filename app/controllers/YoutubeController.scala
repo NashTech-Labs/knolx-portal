@@ -159,8 +159,6 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
         }
       },
       updateVideoDetails => {
-        Logger.info("---------------------------------")
-        Logger.info("---------------------------------tags = " + updateVideoDetails.tags)
         sessionsRepository.getVideoURL(sessionId).flatMap { videoURLs =>
           val maybeVideoURL = videoURLs.headOption
 

@@ -42,9 +42,12 @@ $(function () {
         $("#uploadVideo").attr('disabled', true);
         $("#updateVideo").attr('disabled', true);
         xhr.setRequestHeader("filesize", file.size);
+        var tags = $("#youtube-tags").val().split(",");
+        for(var i=0 ; i<tags.length ; i++) {
+            formData.append("tags[]", tags[i]);
+        }
         formData.append("title", $("#youtube-title").val());
         formData.append("description", $("#youtube-description").val());
-        formData.append("tags", $("#youtube-tags").val());
         formData.append("category", $("#youtube-category").val());
         formData.append("status", $("#youtube-status").val());
     });

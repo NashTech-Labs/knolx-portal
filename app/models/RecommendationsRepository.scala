@@ -83,6 +83,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
   def paginate(pageNumber: Int,
                filter: String = "all",
+               viewBy: String,
                pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
 
     val skipN = (pageNumber - 1) * pageSize
@@ -97,11 +98,17 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       case _          => Json.obj()
     }
 
+    val sortBy = viewBy match {
+      case "latest" => Json.obj("submission" -> -1)
+      case "recent" => Json.obj("updateDate" -> -1)
+      case "votes" => Json.obj("$subtract" -> List("upVotes", "downVotes"))
+    }
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
-          .sort(Json.obj("submissionDate" -> -1))
+          .sort(Json.obj("submissionDate" -> -1, "updateDate" -> -1))
           .options(queryOptions)
           .cursor[RecommendationInfo](ReadPreference.Primary)
           .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))

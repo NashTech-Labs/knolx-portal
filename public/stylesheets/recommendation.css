@@ -23,8 +23,8 @@
 }
 
 .add-recommend {
-    position: absolute;
-    bottom: 90px;
+    position: fixed;
+    bottom: 40px;
     right: 30px;
     background-color: #db4437;
     border: none;
@@ -46,12 +46,14 @@
 }
 
 
-.fa-plus-content {
-    padding-top: 15px;
+.fa-plus-content:before {
+    content: '\002b';
+    font-family: "Glyphicons Halflings";
+    padding-top: 10px;
     position: relative;
     font-weight: normal;
     font-style: normal;
-    font-size: 24px;
+    font-size: 40px;
     line-height: 1;
     letter-spacing: normal;
     text-rendering: optimizeLegibility;
@@ -70,8 +72,9 @@
 }
 
 .textbox-recommend-main {
+    text-align: left;
     background-color: white;
-    width: 150px;
+    width: 90%;
     resize: vertical;
     border: none;
     border-top: None;
@@ -189,6 +192,7 @@
 
 .recommendation-up:before {
     content: "\f0d8";
+    cursor: pointer;
     font-family: "FontAwesome";
     width: 10px;
     font-size: 30px;
@@ -196,6 +200,7 @@
 
 .recommendation-down:before {
     content: "\f0d7";
+    cursor: pointer;
     font-family: "FontAwesome";
     width: 10px;
     font-size: 30px;

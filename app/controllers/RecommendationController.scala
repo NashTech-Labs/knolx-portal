@@ -51,8 +51,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
     recommendationsRepository.insert(recommendationInfo).map { result =>
       if (result.ok) {
-        Logger.info("aaaaaaaa------------>")
-        Ok(Json.toJson("Your Recommendation has been successfully received"))
+        Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
       } else {
         BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
       }

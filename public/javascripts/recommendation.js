@@ -23,15 +23,68 @@ function Recommendation() {
     window.onscroll = function () {
         if (getScrollTop() < getDocumentHeight() - window.innerHeight) return;
         var filter = $('input[name="user-recommend-filter"]:checked').val();
-        var sort = $('#show-entries').val();
+        var sort = $('#sort-entries').val();
         FetchRecommendationList(++page, filter, sort);
     };
 
-    var sort = $('#show-entries').val();
+    $('#add-button').confirm({
+        title: 'Add Recommendation!',
+        content: '' +
+        '<form action="" class="formName">' +
+        '<div class="form-group">' +
+        '<textarea id="recommend-text" class="textbox-recommend-main form-control" minlength="10" maxlength="140" rows="6" cols="10"></textarea>' +
+        '</div>' +
+        '</form>',
+        buttons: {
+            formSubmit: {
+                text: 'Add',
+                btnClass: 'btn-blue',
+                action: function () {
+                    var recommendation = this.$content.find('#recommend-text').val();
+                    if (!recommendation) {
+                        $.alert('Provide a valid Recommendation');
+                        return false;
+                    }
+                    jsRoutes.controllers.RecommendationController.addRecommendation(recommendation).ajax(
+                        {
+                            type: "POST",
+                            processData: false,
+                            beforeSend: function (request) {
+                                var csrfToken = document.getElementById('csrfToken').value;
+
+                                return request.setRequestHeader('CSRF-Token', csrfToken);
+                            },
+                            success: function (values) {
+                                $.alert(values);
+                                var filter = $('input[name="user-recommend-filter"]:checked').val();
+                                var sort = $('#sort-entries').val();
+                                FetchRecommendationList(page, filter, sort);
+                            },
+                            error: function (er) {
+                                console.log(er);
+                            }
+                        }
+                    )
+                }
+            },
+            cancel: function () {
+                //close
+            },
+        },
+        onContentReady: function () {
+            var jc = this;
+            this.$content.find('form').on('submit', function (e) {
+                e.preventDefault();
+                jc.$$formSubmit.trigger('click'); // reference the button and click it
+            });
+        }
+    });
+
+    var sort = $('#sort-entries').val();
     FetchRecommendationList(page, "all", sort);
 
     $('.custom-checkbox').click(function () {
-        var sort = $('#show-entries').val();
+        var sort = $('#sort-entries').val();
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         page = 1;
         FetchRecommendationList(page, filter, sort);
@@ -41,22 +94,6 @@ function Recommendation() {
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         FetchRecommendationList(page, filter, this.value);
     });
-
-    $('#add-button').popover({
-        html: true,
-        content: function () {
-            var tempScrollTop = $(window).scrollTop;
-            $(window).scrollTop(tempScrollTop);
-            return $('#add-recommend').html();
-
-        }
-    });
-
-    $('body').on("click", '#add-recommend-button', function () {
-        var text = $('.popover-content #recommend-text').val();
-        addRecommend(text);
-    });
-
 
     var self = this;
     self.recommendation = ko.observableArray([]);
@@ -74,8 +111,8 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                      var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    var sort = $('#show-entries').val();
+                    var filter = $('input[name="user-recommend-filter"]:checked').val();
+                    var sort = $('#sort-entries').val();
                     FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
@@ -98,7 +135,7 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    var sort = $('#show-entries').val();
+                    var sort = $('#sort-entries').val();
                     FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
@@ -121,7 +158,7 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    var sort = $('#show-entries').val();
+                    var sort = $('#sort-entries').val();
                     FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
@@ -144,7 +181,7 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    var sort = $('#show-entries').val();
+                    var sort = $('#sort-entries').val();
                     FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
@@ -168,7 +205,7 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    var sort = $('#show-entries').val();
+                    var sort = $('#sort-entries').val();
                     FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
@@ -192,7 +229,7 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
-                    var sort = $('#show-entries').val();
+                    var sort = $('#sort-entries').val();
                     FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
@@ -225,27 +262,5 @@ function Recommendation() {
         )
     }
 
-    function addRecommend(text) {
-        jsRoutes.controllers.RecommendationController.addRecommendation(text).ajax(
-            {
-                type: "POST",
-                processData: false,
-                beforeSend: function (request) {
-                    var csrfToken = document.getElementById('csrfToken').value;
-
-                    return request.setRequestHeader('CSRF-Token', csrfToken);
-                },
-                success: function (values) {
-                    $('#add-button').popover('hide');
-                    var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    var sort = $('#show-entries').val();
-                    FetchRecommendationList(page, filter, sort);
-                },
-                error: function (er) {
-                    console.log(er);
-                }
-            }
-        )
-    }
 }
 

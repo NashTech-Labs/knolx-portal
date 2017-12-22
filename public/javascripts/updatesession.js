@@ -58,6 +58,7 @@ $(function () {
     youtubeDropzone.on("success", function (file, response) {
         $("#show-progress").show();
         $("#cancel-video-button").show();
+        $("#progress-message").show();
         cancel = false;
         $("#youtube-dropzone").hide();
         showProgress(sessionId);
@@ -155,6 +156,9 @@ function showProgress(sessionId) {
                         uploading = false;
                         $("#youtube-dropzone").show();
                         $("#cancel-video-button").hide();
+                        $("#progress-message").hide();
+                        $("#uploadVideo").attr('disabled', false);
+                        $("#updateVideo").attr('disabled', false);
                         getUpdateURL(sessionId);
                     } else {
                         var percentageUploaded = data;
@@ -187,6 +191,8 @@ function cancelVideo(sessionId) {
                 $("#youtube-dropzone").show();
                 $("#cancel-video-button").hide();
                 $("#upload-video-button").show();
+                $("#uploadVideo").attr('disabled', false);
+                $("#updateVideo").attr('disabled', false);
             },
             error: function (er) {
                 $("#upload-success-message").hide();

@@ -44,6 +44,7 @@ class DummyUsersBanScheduler extends Actor {
 class TestEmailActor extends Actor {
 
   def receive: Receive = {
+    case EmailActor.SendEmail(_, _, subject, _) if subject == "Exception" => throw new Exception
     case EmailActor.SendEmail(_, _, subject, _) if subject == "crash" => throw new EmailException
     case request: EmailActor.SendEmail                                => sender ! request
   }

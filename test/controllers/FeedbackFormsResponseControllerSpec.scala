@@ -10,7 +10,6 @@ import models._
 import org.specs2.mock.Mockito
 import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
-import play.api.Logger
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient

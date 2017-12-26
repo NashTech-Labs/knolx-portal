@@ -75,7 +75,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "send bad request if video file not found in the request" in new WithTestApplication {
@@ -98,7 +98,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if multipart form data is corrupted in the request" in new WithTestApplication {
@@ -117,7 +117,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if status field is not provided" in new WithTestApplication {
@@ -139,7 +139,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if category field is not provided" in new WithTestApplication {
@@ -161,7 +161,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if tags field is not provided" in new WithTestApplication {
@@ -183,7 +183,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if title field is not provided" in new WithTestApplication {
@@ -206,7 +206,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if description field is not provided" in new WithTestApplication {
@@ -228,7 +228,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return 0 percentage if upload of file hasn't yet started" in new WithTestApplication {
@@ -237,7 +237,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/progress")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return percentage when asked for percentage of file" in new WithTestApplication {
@@ -248,7 +248,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/progress")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "cancel the upload of a video" in new WithTestApplication {
@@ -257,7 +257,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.cancel(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/cancel")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "get the video ID of a session" in new WithTestApplication {
@@ -267,7 +267,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request while getting video ID of a session when videoID is not found" in new WithTestApplication {
@@ -277,7 +277,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request while getting video ID of a session when videoID is an empty string" in new WithTestApplication {
@@ -287,7 +287,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request for wrong json" in new WithTestApplication {
@@ -299,7 +299,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(wrongJson)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return bad request if no video URL is found for the session" in new WithTestApplication {
@@ -320,7 +320,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "update video details" in new WithTestApplication {
@@ -341,7 +341,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "not update video details if title is not provided" in new WithTestApplication {
@@ -361,7 +361,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not update video details if description is not provided" in new WithTestApplication {
@@ -381,7 +381,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not update video details if tags are not provided" in new WithTestApplication {
@@ -401,7 +401,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not update video details if status is not provided" in new WithTestApplication {
@@ -421,7 +421,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not update video details if category is not provided" in new WithTestApplication {
@@ -441,7 +441,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not update video details if no video URL exists" in new WithTestApplication {
@@ -462,7 +462,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return ok if a video upload is currently going on" in new WithTestApplication {
@@ -473,7 +473,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request if a video upload is not currently going on" in new WithTestApplication {
@@ -482,7 +482,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return ok if temporary URL exists" in new WithTestApplication {
@@ -493,7 +493,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfTemporaryUrlExists(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkiftemporaryurlexists")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request if temporary URL does not exist" in new WithTestApplication {
@@ -504,7 +504,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfTemporaryUrlExists(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkiftemporaryurlexists")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return bad request if temporary URL exists as an ampty string in DB" in new WithTestApplication {
@@ -515,7 +515,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfTemporaryUrlExists(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkiftemporaryurlexists")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
   }

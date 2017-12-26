@@ -87,20 +87,6 @@ case class FeedbackFormInformation(name: String, questions: List[QuestionInforma
       Some("Options must not be empty!")
     }
 
-  def validateType: Option[String] =
-    if (questions.flatMap(_.questionType).contains("MCQ") || questions.flatMap(_.questionType).contains("COMMENT")) {
-      None
-    } else {
-      Some("Server couldn't understand this request")
-    }
-
-  def validateMandatory: Option[String] =
-    if (questions.map(_.mandatory) == true || questions.map(_.mandatory) == false) {
-      None
-    } else {
-      Some("Server couldn't understand this request")
-    }
-
 }
 
 @Singleton

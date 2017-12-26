@@ -9,7 +9,7 @@ import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.{Application, Logger}
 import play.api.mvc.Results
 import play.api.test.{FakeRequest, PlaySpecification}
 import reactivemongo.api.commands.UpdateWriteResult
@@ -280,7 +280,7 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "not modify primary category when DB updation was unsuccessful" in new WithTestApplication {
+    "not modify primary category when DB updation for modifyPrimaryCategory was unsuccessful" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
 
@@ -289,6 +289,24 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       categoriesRepository.modifyPrimaryCategory(categoryId.stringify, "front end") returns updateWriteResult
 
       sessionsRepository.updateCategoryOnChange("Front End", "front end") returns updateWriteResult
+      categoriesRepository.getCategories returns Future(categories)
+
+      val result = controller.modifyPrimaryCategory(categoryId.stringify, "front end")(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not modify primary category when DB updation for updateCategoryOnChange was unsuccessful" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val wrongUpdateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      categoriesRepository.modifyPrimaryCategory(categoryId.stringify, "front end") returns updateWriteResult
+
+      sessionsRepository.updateCategoryOnChange("Front End", "front end") returns wrongUpdateWriteResult
       categoriesRepository.getCategories returns Future(categories)
 
       val result = controller.modifyPrimaryCategory(categoryId.stringify, "front end")(FakeRequest()
@@ -381,12 +399,12 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      categoriesRepository.modifySubCategory(categoryId.stringify, "HTML", "html5") returns updateWriteResult
+      categoriesRepository.modifySubCategory(categoryId.stringify, "HTML", "html") returns updateWriteResult
 
       sessionsRepository.updateSubCategoryOnChange("HTML", "html") returns updateWriteResult
       categoriesRepository.getCategories returns Future(categories)
 
-      val result = controller.modifySubCategory(categoryId.stringify, "HTML", "html")(FakeRequest()
+      val result = controller.modifySubCategory(categoryId.stringify, "HTML", "html5")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo BAD_REQUEST
@@ -430,12 +448,27 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "not delete primary category when it does not exists" in new WithTestApplication {
+    "not delete primary category when primary category is not found" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List(), categoryId))
+
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      categoriesRepository.getCategories returns Future(List())
+
+      val result = controller.deletePrimaryCategory(categoryId.stringify)(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not delete primary category if DB updation for deletePrimaryCategory was unsuccessful" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List(), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       categoriesRepository.getCategories returns Future(categories)
+
       sessionsRepository.updateCategoryOnChange("Front End", "") returns updateWriteResult
       categoriesRepository.deletePrimaryCategory(categoryId.stringify) returns updateWriteResult
 
@@ -444,10 +477,57 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "not delete primary category when it is empty" in new WithTestApplication {
+    "not delete primary category if DB updation for updateCategoryOnChange was unsuccessful" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val wrongUpdateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List(), categoryId))
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      categoriesRepository.getCategories returns Future(categories)
+
+      sessionsRepository.updateCategoryOnChange("Front End", "") returns wrongUpdateWriteResult
+      categoriesRepository.deletePrimaryCategory(categoryId.stringify) returns updateWriteResult
+
+      val result = controller.deletePrimaryCategory(categoryId.stringify)(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not delete primary category if it has sub-categories" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("HTML", "AngularJS"), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      categoriesRepository.getCategories returns Future(categories)
+
+      val result = controller.deletePrimaryCategory(categoryId.stringify)(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not delete primary category when it does not exists" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List(), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      categoriesRepository.getCategories returns Future(categories)
+
+      sessionsRepository.updateCategoryOnChange("Front End", "") returns updateWriteResult
+      categoriesRepository.deletePrimaryCategory(categoryId.stringify) returns updateWriteResult
+
+      val result = controller.deletePrimaryCategory(categoryId.stringify)(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not delete primary category when it is empty" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List(), categoryId))
 
@@ -457,46 +537,92 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
     }
 
     "delete sub-category" in new WithTestApplication {
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       categoriesRepository.getCategories returns Future(categories)
+
       categoriesRepository.getCategoryNameById(categoryId.stringify) returns Future(Some("Front End"))
       sessionsRepository.updateSubCategoryOnChange("Front End", "") returns updateWriteResult
       categoriesRepository.deleteSubCategory(categoryId.stringify, "HTML") returns updateWriteResult
 
       val result = controller.deleteSubCategory(categoryId.stringify, "HTML")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
       status(result) must be equalTo OK
     }
 
-    "not delete sub-category when it does not exists" in new WithTestApplication {
+    "not delete sub-category if DB updation was unsuccessful" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val wrongUpdateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      categoriesRepository.getCategories returns Future(categories)
+
+      categoriesRepository.getCategoryNameById(categoryId.stringify) returns Future(Some("Front End"))
+      sessionsRepository.updateSubCategoryOnChange("Front End", "") returns wrongUpdateWriteResult
+      categoriesRepository.deleteSubCategory(categoryId.stringify, "HTML") returns updateWriteResult
+
+      val result = controller.deleteSubCategory(categoryId.stringify, "HTML")(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not delete sub-category if no primary category for it is not found" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      categoriesRepository.getCategories returns Future(categories)
+
+      categoriesRepository.getCategoryNameById(categoryId.stringify) returns Future(None)
+      sessionsRepository.updateSubCategoryOnChange("Front End", "") returns updateWriteResult
+      categoriesRepository.deleteSubCategory(categoryId.stringify, "HTML") returns updateWriteResult
+
+      val result = controller.deleteSubCategory(categoryId.stringify, "HTML")(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not delete sub-category when it does not exists" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       categoriesRepository.deleteSubCategory(categoryId.stringify, "React") returns updateWriteResult
+
       val result = controller.deleteSubCategory(categoryId.stringify, "React")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
       status(result) must be equalTo BAD_REQUEST
     }
 
     "not delete sub-category when sub-category is empty" in new WithTestApplication {
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       categoriesRepository.getCategories returns Future(categories)
 
       val result = controller.deleteSubCategory(categoryId.stringify, " ")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
       status(result) must be equalTo BAD_REQUEST
     }
 
     "get topics by sub-category" in new WithTestApplication {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       val sessionInfo = List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
         1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporaryYoutubeURL"), reminder = false, notification = false, _id))
@@ -504,13 +630,29 @@ class SessionsCategoryControllerSpec extends PlaySpecification with Results {
 
       val result = controller.getTopicsBySubCategory("category", "subCategory")(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
       status(result) must be equalTo OK
     }
 
-    "get all categories" in new WithTestApplication {
+    "not get topics by sub-category if sub-category is empty" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val sessionInfo = List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
+        1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporaryYoutubeURL"), reminder = false, notification = false, _id))
+
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.getTopicsBySubCategory("category", " ")(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "get all categories" in new WithTestApplication {
       val categories: List[CategoryInfo] = List(CategoryInfo("Front End", List("Angular JS", "HTML"), categoryId))
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
       categoriesRepository.getCategories returns Future(categories)
 
       val result = controller.getCategory()(FakeRequest()

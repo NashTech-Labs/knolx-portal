@@ -5,6 +5,8 @@ import javax.inject.{Inject, Singleton}
 
 import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
 import play.api.Logger
+import play.api.data._
+import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
@@ -15,6 +17,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class Recommendation(email: Option[String],
+                          name: String,
+                          topic: String,
                           recommendation: String,
                           submissionDate: Option[LocalDateTime],
                           updateDate: Option[LocalDateTime],
@@ -28,6 +32,11 @@ case class Recommendation(email: Option[String],
                           downVote: Boolean,
                           id: String)
 
+case class RecommendationInformation(email: Option[String],
+                                     name: String,
+                                     topic: String,
+                                     recommendation: String)
+
 @Singleton
 class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationsRepository: RecommendationsRepository,
@@ -38,6 +47,15 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
+  val recommendationForm = Form(
+    mapping(
+      "email" -> email,
+      "name" -> nonEmptyText.verifying("Name must not be empty", name => name.nonEmpty),
+      "topic" -> nonEmptyText(maxLength = 280),
+      "recommendation" -> nonEmptyText(maxLength = 280)
+    )(RecommendationInformation.apply)(RecommendationInformation.unapply)
+  )
+
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
     Ok(views.html.recommendations.recommendation())
   }
@@ -45,6 +63,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
     val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
     val recommendationInfo = RecommendationInfo(email,
+      name,
+      topic,
       recommendation,
       BSONDateTime(dateTimeUtility.nowMillis),
       BSONDateTime(dateTimeUtility.nowMillis))
@@ -65,6 +85,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             val email = recommendation.email.fold("Anonymous")(identity)
             Recommendation(Some(email),
+              recommendation.name,
+              recommendation.topic,
               recommendation.recommendation,
               Some(dateTimeUtility.toLocalDateTime(recommendation.submissionDate.value)),
               Some(dateTimeUtility.toLocalDateTime(recommendation.updateDate.value)),
@@ -83,6 +105,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         Future.sequence(recommendations filter (_.approved) map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             Recommendation(None,
+              recommendation.name,
+              recommendation.topic,
               recommendation.recommendation,
               None,
               None,

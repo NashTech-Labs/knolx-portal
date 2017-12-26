@@ -507,7 +507,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "return bad request if temporary URL exists as an ampty string in DB" in new WithTestApplication {
+    "return bad request if temporary URL exists as an empty string in DB" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       sessionsRepository.getTemporaryVideoURL(sessionId) returns Future(List(""))

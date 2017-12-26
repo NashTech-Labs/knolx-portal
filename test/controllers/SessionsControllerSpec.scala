@@ -399,7 +399,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       status(result) must be equalTo OK
     }
 
-    "not render update session page when empty youtube url is specified" in new WithTestApplication {
+    "render update session page when youtube url is empty" in new WithTestApplication {
       val date = new SimpleDateFormat("yyyy-MM-dd").parse("2017-06-25")
       val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
 

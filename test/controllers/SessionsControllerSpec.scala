@@ -562,12 +562,25 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
+      sessionsScheduler ! InsertTrue
+
       val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }
 
+    "do not cancel session by wrong session id" in new WithTestApplication {
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      sessionsScheduler ! InsertFalse
+
+      val result = controller.cancelScheduledSession(_id.stringify)(FakeRequest()
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=").withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
 
     "throw a bad request when encountered a invalid value for search session form" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject

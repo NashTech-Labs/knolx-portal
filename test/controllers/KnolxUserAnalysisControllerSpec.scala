@@ -24,10 +24,14 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
-    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = true, BSONDateTime(date.getTime), 0, _id)))
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true,
+    coreMember = false, superUser = true, BSONDateTime(date.getTime), 0, _id)))
 
-  private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime),
-    "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false, notification = false, _id)))
+  private val sessionObject = Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com",
+    BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true,
+    "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"),
+    Some("slideShareURL"), temporaryYoutubeURL = Some("temporary/youtube/url"), reminder = false, notification = false,
+    _id)))
 
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
@@ -93,7 +97,7 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "send when selected user info for some sessions" in new WithTestApplication {
+    "send when selected user info for some sessions score is zero" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.userSession("test@knoldus.com") returns sessionObject
       feedbackFormsResponseRepository.getScoresOfMembers(_id.stringify, false) returns Future(List(0.0D))
@@ -219,6 +223,22 @@ class KnolxUserAnalysisControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
       status(result) must be equalTo OK
+    }
+
+    "send when selected user info for some sessions score is not zero" in new WithTestApplication {
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.userSession("test@knoldus.com") returns sessionObject
+
+      feedbackFormsResponseRepository.getScoresOfMembers(_id.stringify, false) returns Future(List(50.0D))
+
+      val result = controller.userSessionsResponseComparison("test@knoldus.com")(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+
     }
 
   }

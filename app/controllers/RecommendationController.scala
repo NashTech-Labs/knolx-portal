@@ -49,22 +49,20 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
   val recommendationForm = Form(
     mapping(
-      "email" -> email,
+      "email" -> optional(email),
       "name" -> nonEmptyText.verifying("Name must not be empty", name => name.nonEmpty),
-      "topic" -> nonEmptyText(maxLength = 280),
+      "topic" -> nonEmptyText(maxLength = 140),
       "recommendation" -> nonEmptyText(maxLength = 280)
     )(RecommendationInformation.apply)(RecommendationInformation.unapply)
   )
 
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
-    Ok(views.html.recommendations.recommendation())
+    Ok(views.html.recommendations.recommendation(recommendationForm))
   }
 
-  def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
+  /*def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
     val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
     val recommendationInfo = RecommendationInfo(email,
-      name,
-      topic,
       recommendation,
       BSONDateTime(dateTimeUtility.nowMillis),
       BSONDateTime(dateTimeUtility.nowMillis))
@@ -76,6 +74,34 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
       }
     }
+  }*/
+
+  def addRecommendation: Action[AnyContent] = action.async { implicit request =>
+    recommendationForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for adding recommendation $formWithErrors")
+        Future.successful(BadRequest(views.html.recommendations.recommendation(formWithErrors)))
+      },
+      recommendation => {
+        val recommendationInfo = RecommendationInfo(recommendation.email,
+          recommendation.name,
+          recommendation.topic,
+          recommendation.recommendation,
+          BSONDateTime(dateTimeUtility.nowMillis),
+          BSONDateTime(dateTimeUtility.nowMillis))
+
+        recommendationsRepository.insert(recommendationInfo).map { result =>
+        if (result.ok) {
+          Logger.info(s"Recommendation has been successfully received of ${recommendationInfo.name}")
+          Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
+        } else {
+          Logger.info("Recommendation could not be added due to some error")
+          BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+        }
+        }
+      }
+    )
+
   }
 
   def recommendationList(pageNumber: Int, filter: String = "all", sortBy: String): Action[AnyContent] = action.async { implicit request =>

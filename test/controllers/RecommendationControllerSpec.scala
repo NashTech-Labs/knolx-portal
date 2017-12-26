@@ -30,10 +30,15 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
       "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
 
-  private val recommendations = Future.successful(List(RecommendationInfo(Some("test@knoldus.com"),
-  "recommendation",
-    BSONDateTime(date.getTime),
-    BSONDateTime(date.getTime))))
+  private val recommendations = Future.successful(
+    List(
+      RecommendationInfo(Some("test@knoldus.com"),
+        "name",
+        "topic",
+        "recommendation",
+        BSONDateTime(date.getTime),
+        BSONDateTime(date.getTime)
+      )))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -122,7 +127,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=",
-          "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
+            "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
       )
 
       status(result) must be equalTo OK

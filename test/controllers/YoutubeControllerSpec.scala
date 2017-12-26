@@ -8,7 +8,7 @@ import helpers.{AddSessionUploader, TestEnvironment}
 import models.{SessionsRepository, UserInfo}
 import org.specs2.mock.Mockito
 import org.specs2.specification.Scope
-import play.api.{Application, Logger}
+import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.Files
 import play.api.libs.Files.TemporaryFile

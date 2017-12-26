@@ -212,15 +212,12 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
       activeSessions must contain(List(sessionInfo).head)
     }
 
-    /*"get immediate previous expired sessions when there is no session" in new TestScope {
+    "get immediate previous expired sessions when there is no session" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
       val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category",
         "subCategory", "feedbackFormId", "topic2", 1, meetup = true, "", 0.00, cancelled = false, active = true,
         BSONDateTime(currentMillis + 24 * 60 * 60 * 1000), Some("youtubeURL"), Some("slideShareURL"),
         temporaryYoutubeURL = None, reminder = false, notification = false, sessionId)
-
-      val created: Boolean = await(sessionsRepository.insert(sessionInfo).map(_.ok))
-      created must beEqualTo(true)
 
       val greaterThanSessionExpirationMillis: Long = currentMillis + (23 * 60 * 60 * 1000)
 
@@ -230,7 +227,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
 
       expiredSessions must beEqualTo(Nil)
     }
-*/
+
     "get immediate previous expired sessions" in new TestScope {
       val sessionId: BSONObjectID = BSONObjectID.generate
       val sessionInfo = SessionInfo("testId2", "test@example.com", BSONDateTime(currentMillis), "session2", "category",

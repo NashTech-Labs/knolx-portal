@@ -364,7 +364,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns coreMemberObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
       dateTimeUtility.nowMillis returns date.getTime
@@ -382,7 +382,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns coreMemberObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
       dateTimeUtility.nowMillis returns date.getTime

@@ -10,12 +10,13 @@ import models._
 import org.specs2.mock.Mockito
 import org.specs2.mutable.SpecificationLike
 import org.specs2.specification.Scope
+import play.api.Logger
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.libs.mailer.MailerClient
 import play.api.test.CSRFTokenHelper._
 import play.api.test.{FakeRequest, _}
-import reactivemongo.api.commands.DefaultWriteResult
+import reactivemongo.api.commands.{DefaultWriteResult, UpdateWriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
@@ -40,6 +41,9 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
   private val emailObject =
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
       "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
+  private val coreMemberObject =
+    Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
+      "BCrypt", active = true, admin = true, coreMember = true, superUser = false, BSONDateTime(date.getTime), 0, _id)))
   private val feedbackForms =
     FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
       Question("How is the UI?", List("1"), "COMMENT", mandatory = true)), active = true, _id)
@@ -186,7 +190,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse("""{"feedbackFormId":"", "responses":[]}""")))
+        .withBody(Json.parse("""{"feedbackFormId":"", "responses":[], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -195,7 +199,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"", "responses":["a"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"", "responses":["a"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -204,7 +208,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"", "feedbackFormId":"${_id.stringify}", "responses":["a"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -214,7 +218,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":[]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":[], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -225,7 +229,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -238,7 +242,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -250,7 +254,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a","b"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a","b"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -290,7 +294,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["a"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -302,7 +306,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -318,7 +322,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
     }
@@ -352,9 +356,45 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""]}""")))
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2",""], "score":0.00}""")))
 
       status(response) must be equalTo BAD_REQUEST
+    }
+
+    "store feedback form response for core member" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns coreMemberObject
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
+      feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
+      dateTimeUtility.nowMillis returns date.getTime
+      feedbackResponseRepository.getScoresOfMembers(_id.stringify, true) returns Future.successful(List(0D))
+      sessionsRepository.updateRating(_id.stringify, List(0D)) returns updateWriteResult
+
+      val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"], "score":0.00}""")))
+
+      status(response) must be equalTo OK
+    }
+
+    "not store feedback form response for core member if something goes wrong" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns coreMemberObject
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
+      feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
+      dateTimeUtility.nowMillis returns date.getTime
+      feedbackResponseRepository.getScoresOfMembers(_id.stringify, true) returns Future.successful(List(0D))
+      sessionsRepository.updateRating(_id.stringify, List(0D)) returns updateWriteResult
+
+      val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withBody(Json.parse(s"""{"sessionId":"${_id.stringify}", "feedbackFormId":"${_id.stringify}", "responses":["2","some comment"], "score":0.00}""")))
+
+      status(response) must be equalTo INTERNAL_SERVER_ERROR
     }
   }
 

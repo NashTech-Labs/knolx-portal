@@ -31,26 +31,42 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
   private val date = new SimpleDateFormat("yyyy-MM-dd").parse("1947-08-15")
   private val _id = BSONObjectID.generate()
   private val sessionObjectWithSameEmail =
-    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
+    Future.successful(List(SessionInfo(_id.stringify, "test@knoldus.com", BSONDateTime(date.getTime), "sessions",
+      "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false,
+      active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None,
+      reminder = false, notification = false, _id)))
+
   private val sessionObject =
-    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-      1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
+    Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions",
+      "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false,
+      active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None,
+      reminder = false, notification = false, _id)))
+
   private val noActiveSessionObject = Future.successful(Nil)
   private val emailObject =
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
-      "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
+      "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0,
+      _id)))
+
   private val coreMemberObject =
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
       "BCrypt", active = true, admin = true, coreMember = true, superUser = false, BSONDateTime(date.getTime), 0, _id)))
+
   private val feedbackForms =
-    FeedbackForm("form name", List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
-      Question("How is the UI?", List("1"), "COMMENT", mandatory = true)), active = true, _id)
-  private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
+    FeedbackForm(
+      "form name",
+      List(Question("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true),
+      Question("How is the UI?", List("1"), "COMMENT", mandatory = true)),
+      active = true,
+      _id)
+
+  private val questionResponseInformation =
+    QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
+
   private val feedbackResponse =
     FeedbackFormsResponse("test@knoldus.com", false, "presenter@example.com", _id.stringify, _id.stringify, "topic",
-      meetup = false, BSONDateTime(date.getTime), "session1", List(questionResponseInformation), BSONDateTime(date.getTime),
-      0.00, _id)
+      meetup = false, BSONDateTime(date.getTime), "session1", List(questionResponseInformation),
+      BSONDateTime(date.getTime), 0.00, _id)
 
   abstract class WithTestApplication extends TestEnvironment with Scope {
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
@@ -61,7 +77,8 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
     val dateTimeUtility = mock[DateTimeUtility]
 
     lazy val app = fakeApp()
-    lazy val emailManager = app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+    lazy val emailManager =
+      app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
     lazy val controller =
       new FeedbackFormsResponseController(
@@ -100,8 +117,10 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
     "render feedback form for today if session associated feedback form exists and session has not expired" in new WithTestApplication {
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       val sessionObjectWithCurrentDate =
-        Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions", "category", "subCategory", "feedbackFormId", "topic",
-          1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
+        Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(System.currentTimeMillis), "sessions",
+          "category", "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false,
+          active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"),
+          temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate

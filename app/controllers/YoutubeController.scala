@@ -13,7 +13,7 @@ import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.json.{JsArray, JsValue, Json, OFormat}
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,7 +44,7 @@ class YoutubeController @Inject()(messagesApi: MessagesApi,
     mapping(
       "title" -> nonEmptyText,
       "description" -> nonEmptyText,
-      "tags" -> list(nonEmptyText),
+      "tags" -> list(nonEmptyText).verifying(_.nonEmpty),
       "status" -> nonEmptyText,
       "category" -> nonEmptyText
     )(VideoInfo.apply)(VideoInfo.unapply)

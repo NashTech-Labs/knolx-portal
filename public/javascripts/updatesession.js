@@ -42,9 +42,12 @@ $(function () {
         $("#uploadVideo").attr('disabled', true);
         $("#updateVideo").attr('disabled', true);
         xhr.setRequestHeader("filesize", file.size);
+        var tags = $("#youtube-tags").val().split(",");
+        for(var i=0 ; i<tags.length ; i++) {
+            formData.append("tags[]", tags[i]);
+        }
         formData.append("title", $("#youtube-title").val());
         formData.append("description", $("#youtube-description").val());
-        formData.append("tags", $("#youtube-tags").val());
         formData.append("category", $("#youtube-category").val());
         formData.append("status", $("#youtube-status").val());
     });
@@ -58,6 +61,7 @@ $(function () {
     youtubeDropzone.on("success", function (file, response) {
         $("#show-progress").show();
         $("#cancel-video-button").show();
+        $("#progress-message").show();
         cancel = false;
         $("#youtube-dropzone").hide();
         showProgress(sessionId);
@@ -155,6 +159,9 @@ function showProgress(sessionId) {
                         uploading = false;
                         $("#youtube-dropzone").show();
                         $("#cancel-video-button").hide();
+                        $("#progress-message").hide();
+                        $("#uploadVideo").attr('disabled', false);
+                        $("#updateVideo").attr('disabled', false);
                         getUpdateURL(sessionId);
                     } else {
                         var percentageUploaded = data;
@@ -187,6 +194,8 @@ function cancelVideo(sessionId) {
                 $("#youtube-dropzone").show();
                 $("#cancel-video-button").hide();
                 $("#upload-video-button").show();
+                $("#uploadVideo").attr('disabled', false);
+                $("#updateVideo").attr('disabled', false);
             },
             error: function (er) {
                 $("#upload-success-message").hide();

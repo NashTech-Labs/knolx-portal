@@ -179,8 +179,8 @@ class KnolxAnalysisControllerSpec extends PlaySpecification with Results {
 
       val result = controller.leaderBoard(
         FakeRequest(POST, "knolx/analysis/leaderboard")
-        .withBody(jsonData)
-        .withCSRFToken)
+          .withBody(jsonData)
+          .withCSRFToken)
 
       status(result) must be equalTo OK
     }

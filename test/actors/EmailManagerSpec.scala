@@ -102,6 +102,15 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
 
       expectMsg(request)
     }
+
+    "print exception if any exception occur" in new IntegrationTestScope {
+      val badRequest = EmailActor.SendEmail(List("test@example.com"), "test@example.com", "Exception", "Hello World!")
+
+      emailManager ! badRequest
+
+      expectNoMsg
+
+    }
   }
 
 }

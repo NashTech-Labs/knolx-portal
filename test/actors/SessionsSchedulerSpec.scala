@@ -104,7 +104,13 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         _id = feedbackFormId))
     val sessionsScheduler =
       TestActorRef(
-        new SessionsScheduler(sessionsRepository, usersRepository, feedbackFormsRepository, feedbackFormsResponseRepository, config, emailManager, dateTimeUtility) {
+        new SessionsScheduler(sessionsRepository,
+          usersRepository,
+          feedbackFormsRepository,
+          feedbackFormsResponseRepository,
+          config,
+          emailManager,
+          dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def scheduler: Scheduler = mockedScheduler
@@ -172,6 +178,19 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       val result: ScheduledSessions = await((sessionsScheduler ? GetScheduledSessions) (5.seconds).mapTo[ScheduledSessions])
 
       result mustEqual ScheduledSessions(List(sessionId.stringify))
+    }
+
+    "print EventualScheduledEmails" in new TestScope {
+      val cancellable = new Cancellable {
+        def cancel(): Boolean = true
+
+        def isCancelled: Boolean = true
+      }
+
+      val schedule = Map(sessionId.stringify -> cancellable)
+      sessionsScheduler ! EventualScheduledEmails(schedule)
+
+      expectNoMsg()
     }
 
     "send feedback form" in new TestScope {
@@ -243,10 +262,6 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
       }
 
       sessionsScheduler.underlyingActor.scheduledEmails = Map(sessionId.stringify -> cancellable)
-
-      sessionsRepository.sessionsForToday(SchedulingNext) returns Future.successful(sessionsForToday)
-      feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(maybeFeedbackForm)
-
       sessionsScheduler ! CancelScheduledSession(sessionId.stringify)
 
       expectMsg(true)

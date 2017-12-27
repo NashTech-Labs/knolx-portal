@@ -5,6 +5,8 @@ import javax.inject.{Inject, Singleton}
 
 import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
 import play.api.Logger
+import play.api.data._
+import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
@@ -15,6 +17,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class Recommendation(email: Option[String],
+                          name: String,
+                          topic: String,
                           recommendation: String,
                           submissionDate: Option[LocalDateTime],
                           updateDate: Option[LocalDateTime],
@@ -28,6 +32,11 @@ case class Recommendation(email: Option[String],
                           downVote: Boolean,
                           id: String)
 
+case class RecommendationInformation(email: Option[String],
+                                     name: String,
+                                     topic: String,
+                                     recommendation: String)
+
 @Singleton
 class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationsRepository: RecommendationsRepository,
@@ -38,37 +47,72 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
 
+  val recommendationForm = Form(
+    mapping(
+      "email" -> optional(email),
+      "name" -> nonEmptyText.verifying("Name must not be empty", name => name.nonEmpty),
+      "topic" -> nonEmptyText(maxLength = 140),
+      "recommendation" -> nonEmptyText(maxLength = 280)
+    )(RecommendationInformation.apply)(RecommendationInformation.unapply)
+  )
+
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
-    Ok(views.html.recommendations.recommendation())
+    Ok(views.html.recommendations.recommendation(recommendationForm))
   }
 
-  def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
-    if (recommendation.nonEmpty) {
-      val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
-      val recommendationInfo = RecommendationInfo(email,
-        recommendation,
-        BSONDateTime(dateTimeUtility.nowMillis),
-        BSONDateTime(dateTimeUtility.nowMillis))
+  /*def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
+    val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
+    val recommendationInfo = RecommendationInfo(email,
+      recommendation,
+      BSONDateTime(dateTimeUtility.nowMillis),
+      BSONDateTime(dateTimeUtility.nowMillis))
 
-      recommendationsRepository.insert(recommendationInfo).map { result =>
+    recommendationsRepository.insert(recommendationInfo).map { result =>
+      if (result.ok) {
+        Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
+      } else {
+        BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+      }
+    }
+  }*/
+
+  def addRecommendation: Action[AnyContent] = action.async { implicit request =>
+    recommendationForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for adding recommendation $formWithErrors")
+        Future.successful(BadRequest(views.html.recommendations.recommendation(formWithErrors)))
+      },
+      recommendation => {
+        val recommendationInfo = RecommendationInfo(recommendation.email,
+          recommendation.name,
+          recommendation.topic,
+          recommendation.recommendation,
+          BSONDateTime(dateTimeUtility.nowMillis),
+          BSONDateTime(dateTimeUtility.nowMillis))
+
+        recommendationsRepository.insert(recommendationInfo).map { result =>
         if (result.ok) {
-          Ok("Your Recommendation has been successfully received")
+          Logger.info(s"Recommendation has been successfully received of ${recommendationInfo.name}")
+          Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
         } else {
-          BadRequest("Get Internal Server Error During Insertion")
+          Logger.info("Recommendation could not be added due to some error")
+          BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+        }
         }
       }
-    } else {
-      Future.successful(BadRequest("Recommendation cannot be empty"))
-    }
+    )
+
   }
 
-  def recommendationList(pageNumber: Int, filter: String = "all"): Action[AnyContent] = action.async { implicit request =>
-    recommendationsRepository.paginate(pageNumber, filter) flatMap { recommendations =>
+  def recommendationList(pageNumber: Int, filter: String = "all", sortBy: String): Action[AnyContent] = action.async { implicit request =>
+    recommendationsRepository.paginate(pageNumber, filter, sortBy) flatMap { recommendations =>
       if (SessionHelper.isSuperUser || SessionHelper.isAdmin) {
         Future.sequence(recommendations map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             val email = recommendation.email.fold("Anonymous")(identity)
             Recommendation(Some(email),
+              recommendation.name,
+              recommendation.topic,
               recommendation.recommendation,
               Some(dateTimeUtility.toLocalDateTime(recommendation.submissionDate.value)),
               Some(dateTimeUtility.toLocalDateTime(recommendation.updateDate.value)),
@@ -87,6 +131,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         Future.sequence(recommendations filter (_.approved) map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
             Recommendation(None,
+              recommendation.name,
+              recommendation.topic,
               recommendation.recommendation,
               None,
               None,
@@ -108,9 +154,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def approveRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.approveRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok("Recommendation Successfully Approved")
+        Ok(Json.toJson("Recommendation Successfully Approved"))
       } else {
-        BadRequest("Get Internal Server Error During Approval")
+        BadRequest(Json.toJson("Get Internal Server Error During Approval"))
       }
     }
   }
@@ -118,9 +164,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def declineRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.declineRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok("Recommendation Successfully Approved")
+        Ok(Json.toJson("Recommendation Successfully Approved"))
       } else {
-        BadRequest("Get Internal Server Error During Approval")
+        BadRequest(Json.toJson("Get Internal Server Error During Approval"))
       }
     }
   }
@@ -182,9 +228,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def doneRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.doneRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok("Recommendation has been marked as Done")
+        Ok(Json.toJson("Recommendation has been marked as Done"))
       } else {
-        BadRequest("Got Internal Server Error while marking the recommendation as Done")
+        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Done"))
       }
     }
   }
@@ -192,9 +238,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def pendingRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.pendingRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok("Recommendation has been marked as Pending")
+        Ok(Json.toJson("Recommendation has been marked as Pending"))
       } else {
-        BadRequest("Got Internal Server Error while marking the recommendation as Pending")
+        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Pending"))
       }
     }
   }

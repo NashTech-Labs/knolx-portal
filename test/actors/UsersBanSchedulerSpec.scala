@@ -73,7 +73,13 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     val usersBanScheduler =
       TestActorRef(
-        new UsersBanScheduler(sessionsRepository, usersRepository, feedbackFormsResponseRepository, config, emailManager, dateTimeUtility) {
+        new UsersBanScheduler(
+          sessionsRepository,
+          usersRepository,
+          feedbackFormsResponseRepository,
+          config,
+          emailManager,
+          dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def scheduler: Scheduler = mockedScheduler
@@ -118,7 +124,13 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
     "scheduled ban emails" in new TestScope {
       override val usersBanScheduler = TestActorRef(
-        new UsersBanScheduler(sessionsRepository, usersRepository, feedbackFormsResponseRepository, config, emailManager, dateTimeUtility) {
+        new UsersBanScheduler(
+          sessionsRepository,
+          usersRepository,
+          feedbackFormsResponseRepository,
+          config,
+          emailManager,
+          dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def sessionsExpiringToday: Future[List[SessionInfo]] = Future.successful(sessionsForToday)
@@ -155,7 +167,13 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
         def isCancelled: Boolean = true
       }
       override val usersBanScheduler = TestActorRef(
-        new UsersBanScheduler(sessionsRepository, usersRepository, feedbackFormsResponseRepository, config, emailManager, dateTimeUtility) {
+        new UsersBanScheduler(
+          sessionsRepository,
+          usersRepository,
+          feedbackFormsResponseRepository,
+          config,
+          emailManager,
+          dateTimeUtility) {
           override def preStart(): Unit = {}
 
           override def getBanInfo(sessions: List[SessionInfo], emails: List[String]): Future[List[EmailContent]] = {
@@ -170,25 +188,33 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
 
       usersRepository.getAllActiveEmails returns Future.successful(activeEmails)
 
-      usersBanScheduler.underlyingActor.scheduleBanEmails(Future.successful(sessionsForToday)).map( session =>
+      usersBanScheduler.underlyingActor.scheduleBanEmails(Future.successful(sessionsForToday)).map(session =>
         session.mustEqual(Map("test1@example.com" -> cancellable))
       )
     }
 
     "return get Ban info" in new TestScope {
-      feedbackFormsResponseRepository.getAllResponseEmailsPerSession(sessionsForToday.head._id.stringify) returns Future.successful(Nil)
+      feedbackFormsResponseRepository
+        .getAllResponseEmailsPerSession(sessionsForToday.head._id.stringify) returns Future.successful(Nil)
 
-      usersBanScheduler.underlyingActor.getBanInfo(sessionsForToday, activeEmails).map( information =>
-      information.mustEqual(
-        List(EmailContent("test1@example.com",
-          List(EmailBodyInfo("Akka", sessionsForToday.head.email,
-            new Date(sessionsForToday.head.date.value).toString))))))
+      usersBanScheduler.underlyingActor.getBanInfo(sessionsForToday, activeEmails).map(information =>
+        information.mustEqual(
+          List(EmailContent("test1@example.com",
+            List(EmailBodyInfo("Akka", sessionsForToday.head.email,
+              new Date(sessionsForToday.head.date.value).toString))))))
     }
 
     "return ScheduledBannedUsers" in new TestScope {
       override val usersBanScheduler = TestActorRef(
-        new UsersBanScheduler(sessionsRepository, usersRepository, feedbackFormsResponseRepository, config, emailManager, dateTimeUtility) {
+        new UsersBanScheduler(
+          sessionsRepository,
+          usersRepository,
+          feedbackFormsResponseRepository,
+          config,
+          emailManager,
+          dateTimeUtility) {
           override def preStart(): Unit = {}
+
           override def scheduler: Scheduler = mockedScheduler
         })
 

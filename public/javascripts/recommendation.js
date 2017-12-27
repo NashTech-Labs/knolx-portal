@@ -4,7 +4,7 @@ $(function () {
 
 function Recommendation() {
 
-    var page = 0;
+    var page = 1;
 
     function getDocumentHeight() {
         const body = document.body;
@@ -22,28 +22,78 @@ function Recommendation() {
 
     window.onscroll = function () {
         if (getScrollTop() < getDocumentHeight() - window.innerHeight) return;
-        console.log("4444444444")
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        var sort = $('#sort-entries').val();
+        FetchRecommendationList(++page, filter, sort);
     };
 
-    FetchRecommendationList(1, "all");
+    $('#add-button').confirm({
+        title: 'Add Recommendation!',
+        content: '' +
+        '<form action="" class="formName">' +
+        '<div class="form-group">' +
+        '<textarea id="recommend-text" class="textbox-recommend-main form-control" minlength="10" maxlength="140" rows="6" cols="10"></textarea>' +
+        '</div>' +
+        '</form>',
+        buttons: {
+            formSubmit: {
+                text: 'Add',
+                btnClass: 'btn-blue',
+                action: function () {
+                    var recommendation = this.$content.find('#recommend-text').val();
+                    if (!recommendation) {
+                        $.alert('Provide a valid Recommendation');
+                        return false;
+                    }
+                    jsRoutes.controllers.RecommendationController.addRecommendation(recommendation).ajax(
+                        {
+                            type: "POST",
+                            processData: false,
+                            beforeSend: function (request) {
+                                var csrfToken = document.getElementById('csrfToken').value;
 
-    $('.custom-checkbox').click(function () {
-        var filter = $('input[name="user-recommend-filter"]:checked').val();
-        FetchRecommendationList(1, filter);
-    });
-
-    $('#add-button').popover({
-        html: true,
-        content: function () {
-            return $('#add-recommend').html();
+                                return request.setRequestHeader('CSRF-Token', csrfToken);
+                            },
+                            success: function (values) {
+                                $.alert(values);
+                                var filter = $('input[name="user-recommend-filter"]:checked').val();
+                                var sort = $('#sort-entries').val();
+                                FetchRecommendationList(page, filter, sort);
+                            },
+                            error: function (er) {
+                                console.log(er);
+                            }
+                        }
+                    )
+                }
+            },
+            cancel: function () {
+                //close
+            },
+        },
+        onContentReady: function () {
+            var jc = this;
+            this.$content.find('form').on('submit', function (e) {
+                e.preventDefault();
+                jc.$$formSubmit.trigger('click'); // reference the button and click it
+            });
         }
     });
 
-    $('body').on("click", '#add-recommend-button', function () {
-        var text = $('.popover-content #recommend-text').val();
-        addRecommend(text);
+    var sort = $('#sort-entries').val();
+    FetchRecommendationList(page, "all", sort);
+
+    $('.custom-checkbox').click(function () {
+        var sort = $('#sort-entries').val();
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        page = 1;
+        FetchRecommendationList(page, filter, sort);
     });
 
+    $('#sort-entries').on('change', function () {
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        FetchRecommendationList(page, filter, this.value);
+    });
 
     var self = this;
     self.recommendation = ko.observableArray([]);
@@ -61,8 +111,9 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
-                      var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    var filter = $('input[name="user-recommend-filter"]:checked').val();
+                    var sort = $('#sort-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -84,7 +135,8 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    var sort = $('#sort-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -105,7 +157,9 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    var sort = $('#sort-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -126,7 +180,9 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    var sort = $('#sort-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -148,7 +204,9 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    var sort = $('#sort-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -170,7 +228,9 @@ function Recommendation() {
                 },
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
+                    page = 1;
+                    var sort = $('#sort-entries').val();
+                    FetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -180,9 +240,9 @@ function Recommendation() {
     };
 
 
-    function FetchRecommendationList(pageNumber, filter) {
+    function FetchRecommendationList(pageNumber, filter, sortBy) {
 
-        jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter).ajax(
+        jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter, sortBy).ajax(
             {
                 type: "POST",
                 processData: false,
@@ -192,6 +252,7 @@ function Recommendation() {
                     return request.setRequestHeader('CSRF-Token', csrfToken);
                 },
                 success: function (values) {
+                    $('.wrapper').height($('#content').height());
                     self.recommendation(values);
                 },
                 error: function (er) {
@@ -201,26 +262,5 @@ function Recommendation() {
         )
     }
 
-    function addRecommend(text) {
-        jsRoutes.controllers.RecommendationController.addRecommendation(text).ajax(
-            {
-                type: "POST",
-                processData: false,
-                beforeSend: function (request) {
-                    var csrfToken = document.getElementById('csrfToken').value;
-
-                    return request.setRequestHeader('CSRF-Token', csrfToken);
-                },
-                success: function (values) {
-                    $('#add-button').popover('hide');
-                    var filter = $('input[name="user-recommend-filter"]:checked').val();
-                    FetchRecommendationList(1, filter);
-                },
-                error: function (er) {
-                    console.log(er);
-                }
-            }
-        )
-    }
 }
 

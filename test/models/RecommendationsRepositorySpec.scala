@@ -20,15 +20,21 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   val recommendationRepository = new RecommendationsRepository(TestDb.reactiveMongoApi, dateTimeUtility)
 
   val recommendationInfo = RecommendationInfo(Some("email"), "recommendation", BSONDateTime(submissionDate),
-    BSONDateTime(updateDate), approved = true, decline = false, pending = true, done = false, upVotes = 10,
+    BSONDateTime(updateDate), approved = true, decline = false, pending = false, done = true, upVotes = 10,
     downVotes = 15, recommendationId)
-
+  
   "Recommendations Respository" should {
 
     "insert recommendation" in {
       val inserted = await(recommendationRepository.insert(recommendationInfo).map(_.ok))
 
       inserted must beEqualTo(true)
+    }
+
+    "get all recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
     "approved recommendation" in {
@@ -38,29 +44,23 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       approve.ok must beEqualTo(true)
     }
 
-    "decline recommendation" in {
-
-      val decline = await(recommendationRepository.approveRecommendation(recommendationId.stringify))
-
-      decline.ok must beEqualTo(true)
-    }
-
-    "get paginated recommendation" in {
-      val paginatedRecommendation = await(recommendationRepository.paginate(1))
+    "get approved recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "approved"))
 
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
-    "upvote a recommendation" in {
-      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, true))
+    "decline recommendation" in {
 
-      upVote.ok must beEqualTo(true)
+      val decline = await(recommendationRepository.declineRecommendation(recommendationId.stringify))
+
+      decline.ok must beEqualTo(true)
     }
 
-    "downvote a recommendation" in {
-      val downVote = await(recommendationRepository.downVote(recommendationId.stringify, true))
+    "get decline recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "decline"))
 
-      downVote.ok must beEqualTo(true)
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
     "update pending recommendation value" in {
@@ -69,11 +69,54 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       pending.ok must beEqualTo(true)
     }
 
+    "get pending recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "pending"))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
     "update done recommendation value" in {
       val done = await(recommendationRepository.doneRecommendation(recommendationId.stringify))
 
       done.ok must beEqualTo(true)
     }
+
+    "get done recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "done"))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
+    "get recommendation for unmatched string" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "unmatched"))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
+    "upvote a recommendation when already voted" in {
+      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, alreadyVoted = true))
+
+      upVote.ok must beEqualTo(true)
+    }
+
+    "upvote a recommendation user did not voted earlier" in {
+      val upVote = await(recommendationRepository.upVote(recommendationId.stringify, alreadyVoted = false))
+
+      upVote.ok must beEqualTo(true)
+    }
+
+    "downvote a recommendation when already voted" in {
+      val downVote = await(recommendationRepository.downVote(recommendationId.stringify, alreadyVoted = true))
+
+      downVote.ok must beEqualTo(true)
+    }
+
+    "downvote a recommendation user did not voted earlier" in {
+      val upVote = await(recommendationRepository.downVote(recommendationId.stringify, alreadyVoted = false))
+
+      upVote.ok must beEqualTo(true)
+    }
+
   }
 
 }

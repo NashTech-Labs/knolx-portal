@@ -68,7 +68,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       val request =
-        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withHeaders(("fileSize", "10"))
           .withMultipartFormDataBody(multipartBody)
@@ -91,7 +91,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       val request =
-        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withHeaders(("fileSize", "10"))
           .withMultipartFormDataBody(multipartBody)
@@ -110,7 +110,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       val request =
-        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withHeaders(("fileSize", "10"))
           .withFormUrlEncodedBody(("title", "title"),
@@ -138,7 +138,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       val request =
-        FakeRequest(POST, "/youtube/" + sessionId + "/upload")
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withHeaders(("fileSize", "10"))
           .withMultipartFormDataBody(multipartBody)
@@ -153,7 +153,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       youtubeProgressManager ! AddSessionUploader(sessionId)
 
-      val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/youtube/sessionId/progress")
+      val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/progress")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 200
@@ -162,7 +162,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     "cancel the upload of a video" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      val result = controller.cancel(sessionId)(FakeRequest(GET, "/youtube/sessionId/cancel")
+      val result = controller.cancel(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/cancel")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 200
@@ -172,7 +172,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getTemporaryVideoURL(sessionId) returns Future.successful(List("youtube/video/url"))
 
-      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid")
+      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 200
@@ -182,7 +182,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getTemporaryVideoURL(sessionId) returns Future.successful(List())
 
-      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid")
+      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 200
@@ -192,7 +192,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getTemporaryVideoURL(sessionId) returns Future.successful(List(""))
 
-      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/youtube/sessionId/videoid")
+      val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 200
@@ -203,7 +203,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       private val wrongJson = Json.parse("""{"title":"title"} """)
 
-      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/sessionId/update")
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
         .withBody(wrongJson)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
@@ -224,7 +224,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getVideoURL(sessionId) returns Future(List())
 
-      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/:sessionId/update")
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/:sessionId/update")
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
@@ -245,7 +245,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
 
-      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/youtube/sessionId/update")
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
@@ -257,7 +257,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       youtubeProgressManager ! AddSessionUploader(sessionId)
 
-      val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/youtube/sessionId/checkIfUploading")
+      val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 200
@@ -266,7 +266,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     "return bad request if a video upload is not currently going on" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
-      val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/youtube/sessionId/checkIfUploading")
+      val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
       status(result) must be equalTo 400

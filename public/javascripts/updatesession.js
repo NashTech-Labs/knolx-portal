@@ -18,7 +18,7 @@ $(function () {
     checkIfTemporaryUrlExists(sessionId);
 
     var youtubeDropzone = new Dropzone("#youtubeVideo", {
-        url: "/youtube/" + sessionId + "/upload",
+        url: jsRoutes.controllers.YoutubeController.upload(sessionId).url,
         maxFilesize: 2048,
         dictDefaultMessage: "Drop your file here to upload(or click)",
         uploadMultiple: false,
@@ -28,12 +28,13 @@ $(function () {
         autoProcessQueue: false,
         maxFiles: 1,
         acceptedFiles: ".mov, .mpeg4, .mp4, .avi, .wmv, .mpegps, .flv, .3gpp, .webm",
+        timeout: 0,
         init: function() {
           this.on("maxfilesexceeded", function(file) {
                 this.removeAllFiles();
                 this.addFile(file);
           });
-    }
+        }
     });
 
     youtubeDropzone.on("sending", function (file, xhr, formData) {

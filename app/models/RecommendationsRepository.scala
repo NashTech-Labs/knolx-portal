@@ -83,35 +83,34 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
   def paginate(pageNumber: Int,
                filter: String = "all",
-               pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
+               viewBy: String = "latest",
+               pageSize: Int = 8)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
 
-    val skipN = (pageNumber - 1) * pageSize
-    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+    val total = pageNumber * pageSize
+    val queryOptions = new QueryOpts(skipN = 0, batchSizeN = total, flagsN = 0)
 
     val condition = filter match {
       case "all"      => Json.obj()
-      case "approved" => Json.obj(
-        "approved" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
-      case "decline"  => Json.obj(
-        "decline" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
-      case "pending"  => Json.obj(
-        "pending" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
-      case "done"     => Json.obj(
-        "done" -> true,
-        "$orderby" -> BSONDocument("submissionDate" -> -1))
+      case "approved" => Json.obj("approved" -> true)
+      case "decline"  => Json.obj("decline" -> true)
+      case "pending"  => Json.obj("pending" -> true)
+      case "done"     => Json.obj("done" -> true)
       case _          => Json.obj()
+    }
+
+    val sortBy = viewBy match {
+      case "latest" => Json.obj("submissionDate" -> -1)
+      case "recent" => Json.obj("updateDate" -> -1)
     }
 
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(condition)
+          .sort(sortBy)
           .options(queryOptions)
           .cursor[RecommendationInfo](ReadPreference.Primary)
-          .collect[List](pageSize, FailOnError[List[RecommendationInfo]]()))
+          .collect[List](total, FailOnError[List[RecommendationInfo]]()))
   }
 
   def upVote(id: String, alreadyVoted: Boolean)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {

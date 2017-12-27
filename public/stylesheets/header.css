@@ -14,9 +14,10 @@ i, span {
 }
 
 .wrapper {
-    display: flex;
-    align-items: stretch;
-    height:100%;
+    //display: flex;
+    //align-items: stretch;
+    height: auto;
+    overflow: auto;
 }
 
 #sidebar {
@@ -204,7 +205,8 @@ html,body{
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    height: 100%;
+    height: auto;
+    overflow: auto;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -342,4 +344,9 @@ html,body{
     border-radius: 5px;
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
     background-color: #4285F4;
+}
+
+.manage-sub-menu {
+    display: table !important;
+    width: 100%;
 }

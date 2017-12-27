@@ -1,32 +1,25 @@
 @()(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Analysis") {
+@main("Recommendation") {
     <div class="row ">
         <div class="header-container">
             <h2 style="margin-top: 10px;">Recommendation</h2>
-            <p>Sub Heading</p>
+            <p>Here you can recommend topics to Knolders on which you want a Knolx/Meetup to be scheduled on.</p>
         </div>
     </div>
 
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
 
     <div class="row">
-
-        @*<div class="col-md-12 category-page-message" style="margin-top: 20px;">
-            <div id="success-message" class=" alert alert-success alert-dismissable">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">
-                    x</a>
-                <p id="display-success-message"></p>
-            </div>
-            <div id="failure-message" class="alert alert-danger alert-dismissable">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">
-                    x</a>
-                <p id="display-failure-message"></p>
-            </div>
-        </div>
-*@
         <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
-            <div class="col-md-7"></div>
+            <label class="col-md-3 filter-padding-left" style="font-weight: normal">
+                Sort By
+                <select name="Show" id="sort-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                    <option value="latest" selected>Submission Date</option>
+                    <option value="recent">Updated Date</option>
+                </select>
+            </label>
+            <div class="col-md-4"></div>
             <div class="col-md-1 filter-padding-right" style="width: fit-content">
                 <label class="checkbox-outer" style="font-weight: normal;">
                     <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>
@@ -69,7 +62,6 @@
             </div>
         </div>
 
-
         <div class="col-md-12">
             <div data-bind="foreach: recommendation">
                 <div class="col-md-3 filter-padding-left" style="margin-bottom: 25px;">
@@ -101,13 +93,14 @@
                                     <tr style="background-color: white">
                                         <td class="recommendation-vote">
                                             <div >
-                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'back'}, click: isLoggedIn ? function($id){ $root.upVoteByUser(id)}:null"></span>
-                                                <span data-bind="text: votes"></span>
-                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'green':'black'}, click: isLoggedIn ? function($id) { $root.downVoteByUser(id)}:null"></span>
+                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'black'}, click: isLoggedIn ? function($id){ $root.upVoteByUser(id)}:null"></span>
+                                                <span data-bind="text: votes" style="text-align: center;
+                                                    width: 20px;"></span>
+                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'red':'black'}, click: isLoggedIn ? function($id) { $root.downVoteByUser(id)}:null"></span>
                                             </div>
                                         </td>
-                                        <td>
-                                            <div class="recommendation-content" data-bind="text: recommendation">
+                                        <td class="recommendation-content">
+                                            <div  data-bind="text: recommendation">
                                             </div>
                                         </td>
                                     </tr>
@@ -128,15 +121,15 @@
                 </div>
             </div>
         </div>
+        <div class="empty-reports" data-bind="if: (recommendation().length) == 0">
+            <i class="fa fa-folder-open" aria-hidden="true"></i>
+            <p class="empty-reports_text">No Recommendations found!</p>
+        </div>
     </div>
 
-    <a class="add-recommend" data-toggle="popover" data-container="body" data-placement="left" type="button" title="Add Recommendation" data-html="true" href="#" id="add-button">
-        <i class="fa fa-plus fa-plus-content" aria-hidden="true"></i>
+    <a class="add-recommend" title="Add Recommendation" id="add-button">
+        <span class="fa-plus-content" aria-hidden="true"></span>
     </a>
 
-    <div class="textbox-recommend hide" id="add-recommend">
-        <textarea id="recommend-text" class="textbox-recommend-main" minlength="10" maxlength="140" rows="6" cols="10"></textarea>
-        <a class="btn btn-success" id="add-recommend-button">Add</a>
-    </div>
     <script src="@routes.Assets.versioned("javascripts/recommendation.js")" type="text/javascript"></script>
 }

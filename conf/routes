@@ -32,13 +32,13 @@ POST          /user/knolx/analysis/totalmeetups                     controllers.
 POST          /user/knolx/analysis/totaldidnotattendsessions        controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email: String)
 
 # Upload
-POST          /youtube/:sessionId/upload                            controllers.YoutubeController.upload(sessionId: String)
-GET           /youtube/:sessionId/videoid                           controllers.YoutubeController.getVideoId(sessionId: String)
-GET           /youtube/:sessionId/progress                          controllers.YoutubeController.getPercentageUploaded(sessionId: String)
-POST          /youtube/:sessionId/update                            controllers.YoutubeController.updateVideo(sessionId)
-GET           /youtube/:sessionId/cancel                            controllers.YoutubeController.cancel(sessionId: String)
-GET           /youtube/:sessionId/checkifuploading                  controllers.YoutubeController.checkIfUploading(sessionId: String)
-GET           /youtube/:sessionId/checkiftemporaryurlexists         controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
+POST          /uploadapi/:sessionId/upload                          controllers.YoutubeController.upload(sessionId: String)
+GET           /uploadapi/:sessionId/videoid                         controllers.YoutubeController.getVideoId(sessionId: String)
+GET           /uploadapi/:sessionId/progress                        controllers.YoutubeController.getPercentageUploaded(sessionId: String)
+POST          /uploadapi/:sessionId/update                          controllers.YoutubeController.updateVideo(sessionId)
+GET           /uploadapi/:sessionId/cancel                          controllers.YoutubeController.cancel(sessionId: String)
+GET           /uploadapi/:sessionId/checkifuploading                controllers.YoutubeController.checkIfUploading(sessionId: String)
+GET           /uploadapi/:sessionId/checkiftemporaryurlexists       controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
 
 # Session
 GET           /session                                              controllers.SessionsController.sessions
@@ -53,6 +53,7 @@ GET           /session/update                                       controllers.
 GET           /session/:sessionId/cancel                            controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET           /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
 GET           /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
+GET           /session/sendemail                                    controllers.SessionsController.sendEmailToPresenter(sessionId: String)
 
 # Feedback
 GET           /feedbackform/manage/:pageNumber                      controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -101,7 +102,7 @@ POST          /knolx/analysis/leaderboard                           controllers.
 
 #Recommendation
 GET           /recommendation                                       controllers.RecommendationController.renderRecommendationPage
-POST          /recommendation                                       controllers.RecommendationController.recommendationList(pageNumber: Int, filter: String)
+POST          /recommendation                                       controllers.RecommendationController.recommendationList(pageNumber: Int, filter: String, sortBy: String)
 POST          /recommendation/add                                   controllers.RecommendationController.addRecommendation(recommendationId: String)
 POST          /recommendation/approve                               controllers.RecommendationController.approveRecommendation(recommendationId: String)
 POST          /recommendation/decline                               controllers.RecommendationController.declineRecommendation(recommendationId: String)

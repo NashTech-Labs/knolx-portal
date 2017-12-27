@@ -65,7 +65,7 @@
                     <span>Analysis</span></a>
             </li>
 
-            <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Analysis">
+            <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Recommendation">
                 <a href="@routes.RecommendationController.renderRecommendationPage">
                     <i class="fa fa-inbox"></i>
                     <span>Recommendation</span></a>
@@ -97,32 +97,32 @@
 
                 <ul class="collapse list-unstyled" id="manageSubmenu">
                     <li class="@activeLink(routes.SessionsController.manageSessions().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Sessions">
-                        <a href="@routes.SessionsController.manageSessions()">
+                        <a href="@routes.SessionsController.manageSessions()" class ="manage-sub-menu">
                             <i class="fa fa-hourglass-end" aria-hidden="true"></i>
                             <span>Sessions</span></a>
                     </li>
                     <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
-                        <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)">
+                        <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)" class ="manage-sub-menu">
                             <i class="fa fa-file" aria-hidden="true"></i>
                             <span>Feedback Forms</span></a>
                     </li>
                     <li class="@activeLink(routes.UsersController.manageUser().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
-                        <a href="@routes.UsersController.manageUser()">
+                        <a href="@routes.UsersController.manageUser()" class ="manage-sub-menu">
                             <i class="fa fa-users" aria-hidden="true"></i>
                             <span>Users</span></a>
                     </li>
                     <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Reports">
-                        <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()">
+                        <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()" class ="manage-sub-menu">
                             <i class="fa fa-folder-open" aria-hidden="true"></i>
                             <span>Reports</span></a>
                     </li>
-                    <li class="@activeLink(routes.SessionsCategoryController.renderCategoryPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Category">
-                        <a href="@routes.SessionsCategoryController.renderCategoryPage()">
+                    <li class="@activeLink(routes.SessionsCategoryController.renderCategoryPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Categories">
+                        <a href="@routes.SessionsCategoryController.renderCategoryPage()" class ="manage-sub-menu">
                             <i class="fa fa-plus" aria-hidden="true"></i>
                             <span>Categories</span></a>
                     </li>
                     <li class="@activeLink(routes.KnolxUserAnalysisController.renderUserAnalyticsPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="User Analytics">
-                        <a href="@routes.KnolxUserAnalysisController.renderUserAnalyticsPage()">
+                        <a href="@routes.KnolxUserAnalysisController.renderUserAnalyticsPage()" class ="manage-sub-menu">
                             <i class="fa fa-area-chart" aria-hidden="true"></i>
                             <span>User Analytics</span></a>
                     </li>

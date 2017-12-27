@@ -8,7 +8,7 @@ import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.{Application, Logger}
+import play.api.{Application, Logger, mvc}
 import play.api.mvc.Results
 import play.api.test.{FakeRequest, PlaySpecification}
 import play.api.test.CSRFTokenHelper._
@@ -129,12 +129,13 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
     "render recommendationList to admin/super user" in new WithTestApplication {
       val pageNumber = 1
       val filter = "all"
+      val sortBy = "latest"
 
-      recommendationsRepository.paginate(pageNumber, filter) returns recommendations
+      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
       recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
       dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
 
-      val result = controller.recommendationList(pageNumber, filter)(
+      val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=",
           "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
@@ -146,11 +147,12 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
     "render recommendationList to logged in / non-logged in user" in new WithTestApplication {
       val pageNumber = 1
       val filter = "all"
+      val sortBy = "latest"
 
-      recommendationsRepository.paginate(pageNumber, filter) returns recommendations
+      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
       recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
 
-      val result = controller.recommendationList(pageNumber, filter)(
+      val result = controller.recommendationList(pageNumber, filter, sortBy)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
       )

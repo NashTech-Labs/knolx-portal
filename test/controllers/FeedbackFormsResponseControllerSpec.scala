@@ -236,7 +236,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
     "throw a bad request if there is active session available but no feedback form available with feedback form  " +
       "id submitted by form" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(None)
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
@@ -248,7 +248,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
     "throw a bad request if there is more responses then the questions available in the feedback form" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
@@ -260,7 +260,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
     "store feedback form response" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
       dateTimeUtility.nowMillis returns date.getTime
@@ -274,7 +274,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
     "not store feedback form response due to internal server error" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResultFalse
       dateTimeUtility.nowMillis returns date.getTime
@@ -288,7 +288,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
     "throw a bad request if there is responses which are not present as multiple choices in feedback form" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
@@ -300,7 +300,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
 
     "throw a bad request if there is responses of mandatory comment which is empty" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
@@ -316,7 +316,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
         active = true, _id)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")
@@ -332,7 +332,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
         active = true, _id)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
       feedbackResponseRepository.upsert(any[FeedbackFormsResponse])(any[ExecutionContext]) returns writeResult
       dateTimeUtility.nowMillis returns date.getTime
@@ -350,7 +350,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
         active = true, _id)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(x => Some(x.head))
+      sessionsRepository.getActiveById(_id.stringify) returns sessionObject.map(_.headOption)
       feedbackFormsRepository.getByFeedbackFormId(_id.stringify) returns Future.successful(Some(feedbackForms))
 
       val response = controller.storeFeedbackFormResponse()(FakeRequest(POST, "store")

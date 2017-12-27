@@ -30,47 +30,14 @@ function Recommendation() {
     $('#add-button').confirm({
         title: 'Add Recommendation!',
         content: '' +
-        '<form action="" class="formName">' +
+        '<form action="@routes.RecommendationController.addRecommendation()" class="formName">' +
         '<div class="form-group">' +
-        '<textarea id="recommend-text" class="textbox-recommend-main form-control" minlength="10" maxlength="140" rows="6" cols="10"></textarea>' +
+        '<input type="text" id="email" class="update-field login-second" placeholder="Email" />' +
+        '<input type="text" id="user-name" class="update-field login-second" placeholder="Name" />' +
+        '<textarea id="recommend-topic" class="form-control" minlength="10" maxlength="140" rows="6" cols="10" placeholder="Recommendation Topic" ></textarea>' +
+        '<textarea id="recommend-text" class="textbox-recommend-main form-control" minlength="10" maxlength="280" rows="6" cols="10" placeholder="Recommendation Description" ></textarea>' +
         '</div>' +
         '</form>',
-        buttons: {
-            formSubmit: {
-                text: 'Add',
-                btnClass: 'btn-blue',
-                action: function () {
-                    var recommendation = this.$content.find('#recommend-text').val();
-                    if (!recommendation) {
-                        $.alert('Provide a valid Recommendation');
-                        return false;
-                    }
-                    jsRoutes.controllers.RecommendationController.addRecommendation(recommendation).ajax(
-                        {
-                            type: "POST",
-                            processData: false,
-                            beforeSend: function (request) {
-                                var csrfToken = document.getElementById('csrfToken').value;
-
-                                return request.setRequestHeader('CSRF-Token', csrfToken);
-                            },
-                            success: function (values) {
-                                $.alert(values);
-                                var filter = $('input[name="user-recommend-filter"]:checked').val();
-                                var sort = $('#sort-entries').val();
-                                FetchRecommendationList(page, filter, sort);
-                            },
-                            error: function (er) {
-                                console.log(er);
-                            }
-                        }
-                    )
-                }
-            },
-            cancel: function () {
-                //close
-            },
-        },
         onContentReady: function () {
             var jc = this;
             this.$content.find('form').on('submit', function (e) {

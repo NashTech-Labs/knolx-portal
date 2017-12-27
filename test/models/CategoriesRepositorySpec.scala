@@ -10,7 +10,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
   val categoriesRepository = new CategoriesRepository(TestDb.reactiveMongoApi)
 
   private val categoryId = BSONObjectID.generate
-  val categoryInfo = CategoryInfo("Front-End", List("Angular Js","D3JS"),categoryId)
+  val categoryInfo = CategoryInfo("Front-End", List("Angular Js", "D3JS"), categoryId)
 
   "Categories Repository" should {
 
@@ -35,17 +35,17 @@ class CategoriesRepositorySpec extends PlaySpecification {
     "get category list" in {
       val categoriesList: List[CategoryInfo] = await(categoriesRepository.getCategories)
 
-      categoriesList.reverse.head.subCategory must beEqualTo (List("Angular Js","D3JS"))
+      categoriesList.reverse.head.subCategory must beEqualTo(List("Angular Js", "D3JS"))
     }
 
     "modify a primary category" in {
-      val update = await(categoriesRepository.modifyPrimaryCategory(categoryId.stringify,"Front End"))
+      val update = await(categoriesRepository.modifyPrimaryCategory(categoryId.stringify, "Front End"))
 
       update.ok must beEqualTo(true)
     }
 
     "modify a sub-category" in {
-      val update = await(categoriesRepository.modifySubCategory(categoryId.stringify,"D3JS","D3 JS"))
+      val update = await(categoriesRepository.modifySubCategory(categoryId.stringify, "D3JS", "D3 JS"))
 
       update.ok must beEqualTo(true)
     }
@@ -57,7 +57,7 @@ class CategoriesRepositorySpec extends PlaySpecification {
     }
 
     "delete sub Category" in {
-      val deleteSubCategory = await(categoriesRepository.deleteSubCategory(categoryId.stringify,"Angular Js"))
+      val deleteSubCategory = await(categoriesRepository.deleteSubCategory(categoryId.stringify, "Angular Js"))
 
       deleteSubCategory.ok must beEqualTo(true)
     }

@@ -32,7 +32,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
     Future.successful(Some(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category", "subCategory", "feedbackFormId", "topic",
       1, meetup = true, "rating", 0.00, cancelled = false, active = true, BSONDateTime(date.getTime), Some("youtubeURL"), Some("slideShareURL"), temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
   private val questionResponseInformation = QuestionResponse("How good is knolx portal ?", List("1", "2", "3", "4", "5"), "2")
-  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com",false,
+  private val feedbackResponse = FeedbackFormsResponse("test@knoldus.com", false,
     "presenter@example.com",
     _id.stringify, _id.stringify,
     "topic",
@@ -185,7 +185,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
 
     "render report by session id if responses found for admin" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
+      sessionsRepository.getById(_id.stringify) returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List(feedbackResponse))
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
@@ -198,7 +198,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
 
     "render report by session id if responses found for user" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject.map(user => Some(user.get.copy(admin = false)))
-      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
+      sessionsRepository.getById(_id.stringify) returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("test@knoldus.com")) returns Future.successful(List(feedbackResponse))
 
       val response = controller.fetchUserResponsesBySessionId(_id.stringify)(
@@ -211,7 +211,7 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
 
     "render report by session id if no response found" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
+      sessionsRepository.getById(_id.stringify) returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
 
       val response = controller.fetchAllResponsesBySessionId(_id.stringify)(
@@ -224,10 +224,40 @@ class FeedbackFormsReportControllerSpec extends PlaySpecification with Mockito {
 
     "send json data for responses of CoreMember or All" in new TestScope {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.getById(_id.stringify)  returns optionOfSessionObject
+      sessionsRepository.getById(_id.stringify) returns optionOfSessionObject
       feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, None) returns Future.successful(List())
 
       val response = controller.searchAllResponsesBySessionId(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "render report by session id if no session found" in new TestScope {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject.map(user => Some(user.get.copy(admin = false)))
+      sessionsRepository.getById(_id.stringify) returns Future.successful(None)
+      feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("test@knoldus.com")) returns Future.successful(List(feedbackResponse))
+
+      val response = controller.fetchUserResponsesBySessionId(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(response) must be equalTo OK
+    }
+
+    "render report without email by session id when user is not a superuser" in new TestScope {
+      val nonSuperUserEmailObject = Future.successful(Some(UserInfo("test@knoldus.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true,
+        coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
+
+      usersRepository.getByEmail("test@knoldus.com") returns nonSuperUserEmailObject.map(user => Some(user.get.copy(admin = false)))
+      sessionsRepository.getById(_id.stringify) returns Future.successful(None)
+      feedbackFormsResponseRepository.allResponsesBySession(_id.stringify, Some("test@knoldus.com")) returns Future.successful(List(feedbackResponse))
+
+      val response = controller.fetchUserResponsesBySessionId(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

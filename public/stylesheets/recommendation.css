@@ -205,3 +205,18 @@
     width: 10px;
     font-size: 30px;
 }
+
+.recommendation-description-content {
+    font-size: 14px;
+    font-weight: normal !important;
+    text-align: left;
+    overflow-y: auto;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    color: #566573 !important;
+    margin-bottom: 7px !important;
+}
+
+.recommendation-description-content::placeholder {
+    color:#9E9E9E !important;
+}

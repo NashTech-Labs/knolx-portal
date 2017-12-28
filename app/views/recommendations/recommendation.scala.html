@@ -1,4 +1,4 @@
-@(recommendationForm: Form[RecommendationInformation])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(email: Option[String])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Recommendation") {
     <div class="row ">
@@ -9,6 +9,7 @@
     </div>
 
     <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+    <input value="@email.fold("")(identity)" id="user-email" hidden/>
 
     <div class="row">
         <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">

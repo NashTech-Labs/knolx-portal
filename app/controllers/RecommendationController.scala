@@ -35,7 +35,41 @@ case class Recommendation(email: Option[String],
 case class RecommendationInformation(email: Option[String],
                                      name: String,
                                      topic: String,
-                                     recommendation: String)
+                                     recommendation: String) {
+  def validateEmail: Option[String] =
+    email.fold[Option[String]](None) { userEmail =>
+      if (EmailHelper.isValidEmailForGuests(userEmail)) {
+        None
+      } else {
+        Some("Entered email is not valid")
+      }
+    }
+
+  def validateName: Option[String] =
+    if (name.nonEmpty) {
+      None
+    } else {
+      Some("Name must not be empty")
+    }
+
+  def validateTopic: Option[String] =
+    if (topic.isEmpty) {
+      Some("Topic must not be empty")
+    } else if (topic.length > 140) {
+      Some("Topic must be of 140 characters or less")
+    } else {
+      None
+    }
+
+  def validateRecommendation: Option[String] =
+    if (recommendation.isEmpty) {
+      Some("Recommendation must not be empty")
+    } else if (recommendation.length > 280) {
+      Some("Recommendation must be of 140 characters or less")
+    } else {
+      None
+    }
+}
 
 @Singleton
 class RecommendationController @Inject()(messagesApi: MessagesApi,
@@ -46,18 +80,21 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
+  implicit val recommendationInformationFormat: OFormat[RecommendationInformation] = Json.format[RecommendationInformation]
 
-  val recommendationForm = Form(
+  /*val recommendationForm = Form(
     mapping(
       "email" -> optional(email),
       "name" -> nonEmptyText.verifying("Name must not be empty", name => name.nonEmpty),
       "topic" -> nonEmptyText(maxLength = 140),
       "recommendation" -> nonEmptyText(maxLength = 280)
     )(RecommendationInformation.apply)(RecommendationInformation.unapply)
-  )
+  )*/
 
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
-    Ok(views.html.recommendations.recommendation(recommendationForm))
+    val email = if(!SessionHelper.isLoggedIn) Some(SessionHelper.email) else None
+    Logger.info("Email -------------------------------> " + email)
+    Ok(views.html.recommendations.recommendation(email))
   }
 
   /*def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
@@ -76,32 +113,46 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }*/
 
-  def addRecommendation: Action[AnyContent] = action.async { implicit request =>
-    recommendationForm.bindFromRequest.fold(
-      formWithErrors => {
-        Logger.error(s"Received a bad request for adding recommendation $formWithErrors")
-        Future.successful(BadRequest(views.html.recommendations.recommendation(formWithErrors)))
-      },
-      recommendation => {
-        val recommendationInfo = RecommendationInfo(recommendation.email,
-          recommendation.name,
-          recommendation.topic,
-          recommendation.recommendation,
-          BSONDateTime(dateTimeUtility.nowMillis),
-          BSONDateTime(dateTimeUtility.nowMillis))
+  def addRecommendation: Action[JsValue] = action(parse.json).async { implicit request =>
+    request.body.validate[RecommendationInformation].asOpt.fold {
+      Logger.error(s"Received a bad request for adding recommendation")
+      Future.successful(BadRequest("Malformed Data!"))
+    } { recommendation =>
 
-        recommendationsRepository.insert(recommendationInfo).map { result =>
-        if (result.ok) {
-          Logger.info(s"Recommendation has been successfully received of ${recommendationInfo.name}")
-          Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
-        } else {
-          Logger.info("Recommendation could not be added due to some error")
-          BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+      val validatedRecommendation =
+        recommendation.validateEmail orElse
+          recommendation.validateName orElse
+          recommendation.validateTopic orElse
+          recommendation.validateRecommendation
+
+      if ((!SessionHelper.isLoggedIn && SessionHelper.email.equals(recommendation.email.fold("")(identity))) || SessionHelper.isLoggedIn) {
+
+        validatedRecommendation.fold {
+          val recommendationInfo = RecommendationInfo(recommendation.email,
+            recommendation.name,
+            recommendation.topic,
+            recommendation.recommendation,
+            BSONDateTime(dateTimeUtility.nowMillis),
+            BSONDateTime(dateTimeUtility.nowMillis))
+
+          recommendationsRepository.insert(recommendationInfo).map { result =>
+            if (result.ok) {
+              Logger.info(s"Recommendation has been successfully received of ${recommendationInfo.name}")
+              Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
+            } else {
+              Logger.info("Recommendation could not be added due to some error")
+              BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+            }
+          }
+        } { errorMessage =>
+          Logger.error("Recommendation submission unsuccessful with the reason ----> " + errorMessage)
+          Future.successful((BadRequest(errorMessage)))
         }
-        }
+      } else {
+        Logger.error("Entered email did not match the email logged in with")
+        Future.successful(BadRequest("Entered email did not match the email logged in with"))
       }
-    )
-
+    }
   }
 
   def recommendationList(pageNumber: Int, filter: String = "all", sortBy: String): Action[AnyContent] = action.async { implicit request =>

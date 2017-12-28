@@ -63,7 +63,7 @@ case class RecommendationInformation(email: Option[String],
     if (recommendation.isEmpty) {
       Some("Recommendation must not be empty")
     } else if (recommendation.length > 280) {
-      Some("Recommendation must be of 140 characters or less")
+      Some("Recommendation must be of 280 characters or less")
     } else {
       None
     }
@@ -117,7 +117,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
             }
           }
         } { errorMessage =>
-          Logger.error("Recommendation submission unsuccessful with the reason ----> " + errorMessage)
+          Logger.error("Recommendation submission unsuccessful with the reason -> " + errorMessage)
           Future.successful(BadRequest(errorMessage))
         }
       } else {

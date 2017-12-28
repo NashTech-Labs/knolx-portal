@@ -79,10 +79,10 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
     }
 
     "store recommendation when email exists" in new WithTestApplication {
-      dateTimeUtility.nowMillis returns date.getTime
-      dateTimeUtility.nowMillis returns date.getTime
-
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
       val result = controller.addRecommendation()(
@@ -94,7 +94,25 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
-    "store recommendation when email doesn't exist" in new WithTestApplication {
+    "do not store recommendation when malformed data is received" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(
+            s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic",
+               | "recommendation":"recommendation", "malformed":"malformed"}""".stripMargin))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "store recommendation when email is not specified" in new WithTestApplication {
       dateTimeUtility.nowMillis returns date.getTime
       dateTimeUtility.nowMillis returns date.getTime
 
@@ -104,10 +122,111 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"name": "name", "topic":"topic", "recommendation":"recommendation"}"""))
       )
 
       status(result) must be equalTo OK
+    }
+
+    "do not store recommendation when wrong email format is received" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(s"""{"email":"testknolduscom", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "do not store recommendation when name is not specified" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"", "topic":"topic", "recommendation":"recommendation"}"""))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "do not store recommendation when topic is not specified" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"", "recommendation":"recommendation"}"""))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "do not store recommendation when topic length is more than 140 characters" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(
+            s"""{"email":"test@knoldus.com", "name":"name",
+               | "topic":"As recommendation's topic is greater than 140 character so it can stored in database. Please insert recommendation's topic in less than 140 characters",
+               |  "recommendation":"recommendation"}""".stripMargin))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "do not store recommendation when recommendation's description is not specified" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":""}"""))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "do not store recommendation when recommendation's description is greater than 280 characters" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "")
+          .withBody(Json.parse(
+            s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic",
+               | "recommendation":"As recommendation's description is greater than 280 character so it can stored in database. Please insert recommendation's description in less than 280 characters"}""".stripMargin))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "not store empty recommendation" in new WithTestApplication {
@@ -142,13 +261,13 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "render recommendationList to admin/super user" in new WithTestApplication {
+    "render recommendationList to admin/super user and change upvote when it is not upvoted" in new WithTestApplication {
       val pageNumber = 1
       val filter = "all"
       val sortBy = "latest"
 
       recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
-      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
+      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("not upvote")
       dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
 
       val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(

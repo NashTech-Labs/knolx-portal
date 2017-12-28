@@ -1,12 +1,10 @@
 package controllers
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 
 import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
 import play.api.Logger
-import play.api.data._
-import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
@@ -82,41 +80,15 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
   implicit val recommendationInformationFormat: OFormat[RecommendationInformation] = Json.format[RecommendationInformation]
 
-  /*val recommendationForm = Form(
-    mapping(
-      "email" -> optional(email),
-      "name" -> nonEmptyText.verifying("Name must not be empty", name => name.nonEmpty),
-      "topic" -> nonEmptyText(maxLength = 140),
-      "recommendation" -> nonEmptyText(maxLength = 280)
-    )(RecommendationInformation.apply)(RecommendationInformation.unapply)
-  )*/
-
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
     val email = if(!SessionHelper.isLoggedIn) Some(SessionHelper.email) else None
-    Logger.info("Email -------------------------------> " + email)
     Ok(views.html.recommendations.recommendation(email))
   }
-
-  /*def addRecommendation(recommendation: String): Action[AnyContent] = action.async { implicit request =>
-    val email = if (SessionHelper.email.nonEmpty) Some(SessionHelper.email) else None
-    val recommendationInfo = RecommendationInfo(email,
-      recommendation,
-      BSONDateTime(dateTimeUtility.nowMillis),
-      BSONDateTime(dateTimeUtility.nowMillis))
-
-    recommendationsRepository.insert(recommendationInfo).map { result =>
-      if (result.ok) {
-        Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
-      } else {
-        BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
-      }
-    }
-  }*/
 
   def addRecommendation: Action[JsValue] = action(parse.json).async { implicit request =>
     request.body.validate[RecommendationInformation].asOpt.fold {
       Logger.error(s"Received a bad request for adding recommendation")
-      Future.successful(BadRequest("Malformed Data!"))
+      Future.successful(BadRequest("Received a bad request due to malformed data!"))
     } { recommendation =>
 
       val validatedRecommendation =
@@ -146,7 +118,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           }
         } { errorMessage =>
           Logger.error("Recommendation submission unsuccessful with the reason ----> " + errorMessage)
-          Future.successful((BadRequest(errorMessage)))
+          Future.successful(BadRequest(errorMessage))
         }
       } else {
         Logger.error("Entered email did not match the email logged in with")

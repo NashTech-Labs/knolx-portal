@@ -19,11 +19,11 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   val dateTimeUtility: DateTimeUtility = new DateTimeUtility()
   val recommendationRepository = new RecommendationsRepository(TestDb.reactiveMongoApi, dateTimeUtility)
 
-  val recommendationInfo = RecommendationInfo(Some("email"), "recommendation", BSONDateTime(submissionDate),
+  val recommendationInfo = RecommendationInfo(Some("email"), "name", "topic", "recommendation", BSONDateTime(submissionDate),
     BSONDateTime(updateDate), approved = true, decline = false, pending = false, done = true, upVotes = 10,
     downVotes = 15, recommendationId)
   
-  "Recommendations Respository" should {
+  "Recommendations Repository" should {
 
     "insert recommendation" in {
       val inserted = await(recommendationRepository.insert(recommendationInfo).map(_.ok))
@@ -31,8 +31,14 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       inserted must beEqualTo(true)
     }
 
-    "get all recommendation" in {
+    "get all recommendation according to submission date" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
+    "get all recommendation according to update date" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, viewBy = "recent"))
 
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }

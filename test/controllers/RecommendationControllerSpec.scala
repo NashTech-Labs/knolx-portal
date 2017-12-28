@@ -8,7 +8,8 @@ import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.{Application, Logger, mvc}
+import play.api.libs.json.Json
+import play.api.{Application, mvc}
 import play.api.mvc.Results
 import play.api.test.{FakeRequest, PlaySpecification}
 import play.api.test.CSRFTokenHelper._
@@ -62,7 +63,16 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
 
   "Recommendation Controller" should {
 
-    "render recommendation page" in new WithTestApplication {
+    "render recommendation page when user is logged in" in new WithTestApplication {
+      val result = controller.renderRecommendationPage(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "render recommendation page when user is not logged in" in new WithTestApplication {
       val result = controller.renderRecommendationPage(FakeRequest().withCSRFToken)
 
       status(result) must be equalTo OK
@@ -75,10 +85,10 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
-      val result = controller.addRecommendation("Recommendation")(
+      val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withCSRFToken
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
       )
 
       status(result) must be equalTo OK
@@ -91,10 +101,10 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
-      val result = controller.addRecommendation("Recommendation")(
+      val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withCSRFToken
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
       )
 
       status(result) must be equalTo OK
@@ -107,10 +117,10 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
-      val result = controller.addRecommendation("")(
+      val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withCSRFToken
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -123,9 +133,10 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
-      val result = controller.addRecommendation("Recommendation")(
+      val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST

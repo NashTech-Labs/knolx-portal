@@ -14,9 +14,10 @@ i, span {
 }
 
 .wrapper {
-    display: flex;
-    align-items: stretch;
-    height:100%;
+    //display: flex;
+    //align-items: stretch;
+    height: auto;
+    overflow: auto;
 }
 
 #sidebar {
@@ -204,7 +205,8 @@ html,body{
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    height: 100%;
+    height: auto;
+    overflow: auto;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 

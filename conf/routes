@@ -99,3 +99,14 @@ POST          /knolx/analysis/columnchart                           controllers.
 POST          /knolx/analysis/piechart                              controllers.KnolxAnalysisController.renderPieChart
 POST          /knolx/analysis/linechart                             controllers.KnolxAnalysisController.renderLineChart
 POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard
+
+#Recommendation
+GET           /recommendation                                       controllers.RecommendationController.renderRecommendationPage
+POST          /recommendation                                       controllers.RecommendationController.recommendationList(pageNumber: Int, filter: String, sortBy: String)
+POST          /recommendation/add                                   controllers.RecommendationController.addRecommendation
+POST          /recommendation/approve                               controllers.RecommendationController.approveRecommendation(recommendationId: String)
+POST          /recommendation/decline                               controllers.RecommendationController.declineRecommendation(recommendationId: String)
+POST          /recommendation/upvote                                controllers.RecommendationController.upVote(recommendationId: String)
+POST          /recommendation/downvote                              controllers.RecommendationController.downVote(recommendationId: String)
+POST          /recommendation/done                                  controllers.RecommendationController.doneRecommendation(recommendationId: String)
+POST          /recommendation/pending                               controllers.RecommendationController.pendingRecommendation(recommendationId: String)

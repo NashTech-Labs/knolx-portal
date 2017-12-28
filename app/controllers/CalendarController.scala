@@ -19,10 +19,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
-                                   @Named("EmailManager") emailManager: ActorRef,
+                                   @Named("EmailManager") emailManager: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  def renderCalendarPage = Action {
-    Ok(views.html.calendar.calendar)
+  def renderCalendarPage = action { implicit request =>
+    Ok(views.html.calendar.calendar())
   }
 }

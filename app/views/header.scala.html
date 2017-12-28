@@ -68,7 +68,7 @@
             @if(!SessionHelper.isLoggedIn) {
 
 
-                <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback">
+                <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Calendar">
                     <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday">
                         <i class="fa fa-comments"></i>
                         <span>Feedbacks</span></a>
@@ -77,6 +77,11 @@
                     <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
                         <i class="fa fa-table"></i>
                         <span>Knolx reports</span></a>
+                </li>
+                <li class="@activeLink(routes.FeedbackFormsReportController.renderUserFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Knolx Report">
+                    <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
+                        <i class="fa fa-calendar-plus-o"></i>
+                        <span>Calendar</span></a>
                 </li>
             }
 

@@ -1,2 +1,86 @@
-@(createSessionInfo: Form[CreateSessionInfo])(implicit request: Request[_], flash: Flash)
+@(createSessionInfo: Form[CreateSessionInfo])(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@main("Request Session") {
+
+    <div class="row ">
+        <div class="header-container">
+            <h2 style="margin-top:10px;">Add Session</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 create-outer">
+
+            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser()" method="post">
+
+                @helper.CSRF.formField
+                <div class="col-md-12 disp-inline update-second form-group" style="margin-top: 20px;">
+                    <label class="col-md-2 control-label">Email</label>
+                    <div class="col-md-10">
+                        <input type="text" value='@createSessionInfo.data.get("email")' name="email" id="email"
+                               placeholder=" Email" required class="update-field"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Date</label>
+                    <div class="col-md-10">
+                        <input type="datetime-local" value='@createSessionInfo.data.get("date")' name="date" id="date"
+                               placeholder="Date" required class="update-field reg"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 login-third update-second disp-inline form-group">
+                    <label class="col-md-2 control-label">Category</label>
+                    <div class="col-md-10">
+                        <select name="category" id="category" class="update-field login-second">
+                            <option selected value="">! Select Category Please</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Sub-Category</label>
+                    <div class="col-md-10">
+                        <select name="subCategory" id="subCategory" class="update-field login-second">
+                            <option selected value="">! Select Sub Category Please</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Session's Topic</label>
+                    <div class="col-md-10">
+                        <input type="text" name="topic" id="topic" value='@createSessionInfo.data.get("topic")'
+                               placeholder="Topic" required class="update-field"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 ">
+                    <div class="col-md-2"></div>
+                    <label class="checkbox-outer col-md-10">
+                        <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'/>
+
+                        <span class="label_text"></span>
+                        <p class="checkbox-text">Is Session a Meetup ?</p>
+                    </label>
+                </div>
+
+                <div class="col-md-12 login-four">
+                    <div class="hr-line-dashed"></div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2 loader-outer">
+                        <a href="@routes.CalendarController.renderCreateSessionByUser(None)" class="btn" style="color: inherit;
+                                background: white;
+                                border: 1px solid #e7eaec;">Reset</a>
+                        <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"
+                        />
+                    </div>
+                    <div class="col-md-6"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+}
 

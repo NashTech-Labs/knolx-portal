@@ -4,6 +4,7 @@ import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import akka.actor.ActorRef
+import controllers.EmailHelper.isValidEmail
 import models._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -17,13 +18,12 @@ import utilities.DateTimeUtility
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class CreateSessionInfo(date: Date,
-                             session: String,
+case class CreateSessionInfo(email: String,
+                             date: Date,
                              category: String,
                              subCategory: String,
                              topic: String,
-                             meetup: Boolean,
-                             id: String
+                             meetup: Boolean
                             )
 
 case class CalendarSession(id: String,
@@ -47,15 +47,13 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   val createSessionFormByUser = Form(
     mapping(
+      "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone)
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
-      "session" -> nonEmptyText.verifying("Wrong session type specified!",
-        session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
       "category" -> text.verifying("Please attach a category", !_.isEmpty),
       "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "topic" -> nonEmptyText,
-      "meetup" -> boolean,
-      "id" -> nonEmptyText
+      "meetup" -> boolean
     )(CreateSessionInfo.apply)(CreateSessionInfo.unapply)
   )
 
@@ -92,8 +90,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     if (sessionId.isDefined) {
       approvalSessionsRepository.getSession(sessionId.get).map { session =>
         val createSessionInfo = CreateSessionInfo(
+          session.email,
           new Date(session.date.value),
-          session.session,
           session.category,
           session.subCategory,
           session.topic,
@@ -108,7 +106,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def createSessionByUser: Action[AnyContent] = userAction.async { implicit request =>
+  def createSessionByUser(sessionId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
@@ -116,8 +114,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       },
       createSessionInfoByUser => {
         val presenterEmail = request.user.email
-        val session = models.ApproveSessionInfo(presenterEmail, BSONDateTime(createSessionInfoByUser.date.getTime),
-          createSessionInfoByUser.session, createSessionInfoByUser.category,
+        val session = models.ApproveSessionInfo(presenterEmail,
+          BSONDateTime(createSessionInfoByUser.date.getTime),
+           createSessionInfoByUser.category,
           createSessionInfoByUser.subCategory,
           createSessionInfoByUser.topic, createSessionInfoByUser.meetup)
         approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>

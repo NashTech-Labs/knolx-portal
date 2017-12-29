@@ -105,8 +105,8 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
         FakeRequest()
           .withSession("username" -> "")
           .withBody(Json.parse(
-            s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic",
-               | "recommendation":"recommendation", "malformed":"malformed"}""".stripMargin))
+            s"""{"email":"test@knoldus.com", "name":111, "topic":"topic",
+               | "recommendation":"recommendation"}""".stripMargin))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -213,6 +213,9 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
 
     "do not store recommendation when recommendation's description is greater than 280 characters" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+      val recommendationDescription = "As recommendation's description is greater than 280 character so it can be stored in " +
+        "database. Please insert recommendation's description in less than 280 characters.As recommendation's " +
+        "description is greater than 280 character so it can be stored in DB"
 
       dateTimeUtility.nowMillis returns date.getTime
       dateTimeUtility.nowMillis returns date.getTime
@@ -223,7 +226,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "")
           .withBody(Json.parse(
             s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic",
-               | "recommendation":"As recommendation's description is greater than 280 character so it can stored in database. Please insert recommendation's description in less than 280 characters"}""".stripMargin))
+               | "recommendation":"$recommendationDescription"}""".stripMargin))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -261,13 +264,13 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "render recommendationList to admin/super user and change upvote when it is not upvoted" in new WithTestApplication {
+    "render recommendationList to admin/super user" in new WithTestApplication {
       val pageNumber = 1
       val filter = "all"
       val sortBy = "latest"
 
       recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
-      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("not upvote")
+      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
       dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
 
       val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(

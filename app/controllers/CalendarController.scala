@@ -110,10 +110,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           session.meetup,
           sessionId.get)
 
-        Ok(views.html.calendar.createSessionByUser(Some(createSessionInfo)))
+        Ok(views.html.calendar.createsessionbyuser(Some(createSessionInfo)))
       }
     } else {
-      Future.successful(Ok(views.html.calendar.createSessionByUser(None)))
+      Future.successful(Ok(views.html.calendar.createsessionbyuser(None)))
     }
   }
 
@@ -121,7 +121,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
-        Future.successful(BadRequest(views.html.calendar.createSessionByUser(Some(createSessionFormByUser))))
+        Future.successful(BadRequest(views.html.calendar.createsessionbyuser(Some(createSessionForm))))
       },
       createSessionInfoByUser => {
         val presenterEmail = request.user.email

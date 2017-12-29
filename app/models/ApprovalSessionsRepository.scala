@@ -18,7 +18,7 @@ case class ApproveSessionInfo(userId: String,
                               subCategory: String,
                               topic: String,
                               meetup: Boolean,
-                              approve: Boolean = true,
+                              approved: Boolean = true,
                               decline: Boolean = true,
                               _id: BSONObjectID = BSONObjectID.generate
                              )

@@ -60,7 +60,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
-      .map { sessionInfo =>
+      .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map { session =>
           val contentAvailable = session.youtubeURL.isDefined || session.slideShareURL.isDefined
           KnolxSession(session._id.stringify,
@@ -78,7 +78,23 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               .before(new java.util.Date(dateTimeUtility.nowMillis)),
             contentAvailable = contentAvailable)
         }
-        Ok(Json.toJson(knolxSessions))
+
+        approvalSessionsRepository.getAllSession map { pendingSessions =>
+          val pendingSessionForAdmin = pendingSessions map { pendingSession =>
+            KnolxSession(pendingSession._id.stringify,
+              "",
+              new Date(pendingSession.date.value),
+              pendingSession.session,
+              pendingSession.topic,
+              pendingSession.email,
+              pendingSession.meetup,
+              false,
+              "",
+              dateString = new Date(pendingSession.date.value).toString,
+              contentAvailable = false)
+          }
+          Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
+        }
       }
   }
 
@@ -124,5 +140,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       })
   }
-  
+
+  def renderPendingSessionPage: Action[AnyContent] = adminAction { implicit request =>
+    Ok(views.html.sessions.pendingsession())
+  }
+
 }

@@ -18,16 +18,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
-case class ApproveSessionInfo(userId: String,
-                              email: String,
+case class ApproveSessionInfo(email: String,
                               date: BSONDateTime,
                               session: String,
                               category: String,
                               subCategory: String,
                               topic: String,
                               meetup: Boolean,
-                              approved: Boolean = true,
-                              decline: Boolean = true,
+                              approved: Boolean = false,
+                              decline: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
                              )
 
@@ -45,10 +44,31 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("approvesessions"))
 
   def insertSessionForApprove(approveSessionInfo: ApproveSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+
+    val selector = BSONDocument("_id" -> approveSessionInfo._id.stringify)
+    val modifier =
+      BSONDocument(
+        "$set" -> BSONDocument(
+          "email" -> approveSessionInfo.email,
+          "date" -> approveSessionInfo.date,
+          "session" -> approveSessionInfo.session,
+          "category" -> approveSessionInfo.category,
+          "subCategory" -> approveSessionInfo.subCategory,
+          "topic" -> approveSessionInfo.topic,
+          "meetup" -> approveSessionInfo.meetup,
+          "approved" -> approveSessionInfo.approved,
+          "decline" -> approveSessionInfo.decline,
+        ),
+      )
+    collection.flatMap(_.update(selector, modifier, upsert = true))
+  }
+
+  def getSession(sessionId: String): Future[ApproveSessionInfo] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .insert(approveSessionInfo))
+          .find(BSONDocument("_id" -> BSONDocument("$oid" -> sessionId)))
+          .cursor[ApproveSessionInfo](ReadPreference.Primary).head)
   }
 
   def getAllSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {

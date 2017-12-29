@@ -80,6 +80,15 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 
+  def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+    collection.
+      flatMap(jsonCollection =>
+        jsonCollection.
+          find(Json.obj("approved" -> true)).
+          cursor[ApproveSessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+  }
+
   def approveSession(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
     val modifier = BSONDocument(

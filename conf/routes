@@ -102,3 +102,4 @@ POST          /knolx/analysis/leaderboard                           controllers.
 
 #Calendar
 GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage
+GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)

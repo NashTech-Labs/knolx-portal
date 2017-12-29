@@ -2,7 +2,8 @@ package models
 
 import javax.inject.Inject
 
-import play.api.libs.json.Json
+import models.ApproveSessionJsonFormats._
+import play.api.libs.json.{JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
@@ -12,6 +13,10 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+
+// this is not an unused import contrary to what intellij suggests, do not optimize
+import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
+import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class ApproveSessionInfo(userId: String,
                               email: String,

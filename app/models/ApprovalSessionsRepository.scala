@@ -2,7 +2,10 @@ package models
 
 import javax.inject.Inject
 
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.Cursor.FailOnError
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -41,6 +44,15 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .insert(approveSessionInfo))
+  }
+
+  def getAllSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+    collection.
+      flatMap(jsonCollection =>
+        jsonCollection.
+          find(Json.obj()).
+          cursor[ApproveSessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 
   def approveSession(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {

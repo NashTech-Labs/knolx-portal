@@ -57,8 +57,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           "topic" -> approveSessionInfo.topic,
           "meetup" -> approveSessionInfo.meetup,
           "approved" -> approveSessionInfo.approved,
-          "decline" -> approveSessionInfo.decline,
-        ),
+          "decline" -> approveSessionInfo.decline
+        )
       )
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }

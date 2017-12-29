@@ -5,6 +5,17 @@ $(function () {
             console.log("End date -> " + end.toString());
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
+        eventRender: function(event, element){
+            element.popover({
+                html: true,
+                container: 'body',
+                animation:true,
+                delay: 300,
+                content: event.data,
+                placement: 'bottom',
+                trigger: 'hover'
+            });
+        },
         timezone: 'local',
         eventClick: function (event) {
             if (event.url) {
@@ -26,7 +37,8 @@ function getSessions(startDate, endDate, callback) {
                     events.push({
                         title: data[i].topic,
                         start: data[i].date,
-                        color: '#d9534f',
+                        color: '#31b0d5',
+                        data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
                         url: 'knolx.knoldus.com'
                     });
                 }

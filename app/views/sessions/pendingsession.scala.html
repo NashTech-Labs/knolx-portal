@@ -1,82 +1,56 @@
 @()(implicit request: Request[_], flash: Flash)
 
 @main("Pending Session") {
-<div class="row">
-    <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-        <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-            Show
-            <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
-                @for(value <- List(10,20,30,40,50)) {
-                <option value="@value">@value</option>
-                }
-            </select>
-            Entries
-        </label>
-        <div class="col-md-7"></div>
-        <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
-            Search
-            <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
-        </label>
-        <div class="col-md-12">
-            <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
-                Showing
-                <span id="starting-range"></span>
-                to
-                <span id="ending-range"></span>
-                of
-                <span id="total-range"></span>
+    <div class="row">
+        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
+            <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+                Show
+                <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                    @for(value <- List(10,20,30,40,50)) {
+                    <option value="@value">@value</option>
+                    }
+                </select>
                 Entries
             </label>
-        </div>
 
-        @if(!flash.isEmpty) {
-        <div class="alert alert-success  alert-dismissable user-updated-message" style="margin-bottom: 15px;">
-            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            @flash.get("message").fold("")(identity)
-        </div>
-        }
-        <div class="col-md-12 all-users">
-            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-            <div class="col-md-12" id="found-user-details"></div>
-            <div class="manage-user-custom-table-margin">
-                <table class="table table-responsive table-striped">
-                    <thead>
-                    <tr class="table-header-color">
-                        <th>
-                            <div class="col col-xs-6 text-right">
-                                <a href="@routes.SessionsController.create()" class="btn btn-sm btn-primary btn-create">
-                                    <i class="fa fa-plus" aria-hidden="true"></i>
-                                    New
-                                </a>
-                            </div>
-                        </th>
-                        <th>Date</th>
-                        <th>Session</th>
-                        <th>Topic</th>
-                        <th>Email</th>
-                        <th>Type</th>
-                        <th>Cancelled</th>
-                        <th>Rating</th>
-                        <th>Scheduled Status</th>
-                        <th>Slides & Videos</th>
-                    </tr>
-                    </thead>
-                    <tbody id="user-found">
-                    </tbody>
-                </table>
+            @if(!flash.isEmpty) {
+            <div class="alert alert-success  alert-dismissable user-updated-message" style="margin-bottom: 15px;">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                @flash.get("message").fold("")(identity)
             </div>
-        </div>
-        <div class="col-md-12" style="margin-bottom: 25px;">
-            <div class="center">
-                <div class="v-align v-align-mobile">
-                    <ul class="pagination pagination-lg">
-                    </ul>
+            }
+            <div class="col-md-12 all-users">
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                <div class="col-md-12" id="found-user-details"></div>
+                <div class="manage-user-custom-table-margin">
+                    <table class="table table-responsive table-striped">
+                        <thead>
+                        <tr class="table-header-color">
+                            <th>Date</th>
+                            <th>Session</th>
+                            <th>Topic</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Cancelled</th>
+                            <th>Scheduled Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="user-found">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-12" style="margin-bottom: 25px;">
+                <div class="center">
+                    <div class="v-align v-align-mobile">
+                        <ul class="pagination pagination-lg">
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
     <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
-<script src="@routes.Assets.versioned("javascripts/searchmanagesession.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/searchmanagesession.js")" type="text/javascript"></script>
 }

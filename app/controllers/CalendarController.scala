@@ -26,6 +26,12 @@ case class CreateSessionInfo(date: Date,
                              id: String
                             )
 
+case class CalendarSession(id: String,
+                           date: Date,
+                           email: String,
+                           topic: String,
+                           pending: Boolean)
+
 @Singleton
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
@@ -37,7 +43,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                    @Named("EmailManager") emailManager: ActorRef
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
-  implicit val knolxSessionInfoFormat: OFormat[KnolxSession] = Json.format[KnolxSession]
+  implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
 
   val createSessionFormByUser = Form(
     mapping(
@@ -62,36 +68,20 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map { session =>
-          val contentAvailable = session.youtubeURL.isDefined || session.slideShareURL.isDefined
-          KnolxSession(session._id.stringify,
-            session.userId,
+          CalendarSession(session._id.stringify,
             new Date(session.date.value),
-            session.session,
-            session.topic,
             session.email,
-            session.meetup,
-            session.cancelled,
-            "",
-            dateString = new Date(session.date.value).toString,
-            completed = new Date(session.date.value).before(new java.util.Date(dateTimeUtility.nowMillis)),
-            expired = new Date(session.expirationDate.value)
-              .before(new java.util.Date(dateTimeUtility.nowMillis)),
-            contentAvailable = contentAvailable)
+            session.topic,
+            pending = false)
         }
 
-        approvalSessionsRepository.getAllSession map { pendingSessions =>
+        approvalSessionsRepository.getAllApprovedSession map { pendingSessions =>
           val pendingSessionForAdmin = pendingSessions map { pendingSession =>
-            KnolxSession(pendingSession._id.stringify,
-              "",
+            CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
-              pendingSession.session,
-              pendingSession.topic,
               pendingSession.email,
-              pendingSession.meetup,
-              false,
-              "",
-              dateString = new Date(pendingSession.date.value).toString,
-              contentAvailable = false)
+              pendingSession.topic,
+              pending = true)
           }
           Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
         }
@@ -110,10 +100,11 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           session.meetup,
           sessionId.get)
 
-        Ok(views.html.calendar.createsessionbyuser(Some(createSessionInfo)))
+        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo)))
+
       }
     } else {
-      Future.successful(Ok(views.html.calendar.createsessionbyuser(None)))
+      Future.successful(Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser)))
     }
   }
 
@@ -121,7 +112,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
-        Future.successful(BadRequest(views.html.calendar.createsessionbyuser(Some(createSessionForm))))
+        Future.successful(BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser)))
       },
       createSessionInfoByUser => {
         val presenterEmail = request.user.email

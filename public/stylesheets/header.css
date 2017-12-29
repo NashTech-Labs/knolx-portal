@@ -14,8 +14,6 @@ i, span {
 }
 
 .wrapper {
-    //display: flex;
-    //align-items: stretch;
     height: auto;
     overflow: auto;
 }

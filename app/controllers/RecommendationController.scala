@@ -88,7 +88,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def addRecommendation: Action[JsValue] = action(parse.json).async { implicit request =>
     request.body.validate[RecommendationInformation].asOpt.fold {
       Logger.error(s"Received a bad request for adding recommendation")
-      Future.successful(BadRequest("Received a bad request due to malformed data!"))
+      Future.successful(BadRequest("Received a bad request due to malformed data"))
     } { recommendation =>
 
       val validatedRecommendation =
@@ -113,7 +113,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
             } else {
               Logger.info("Recommendation could not be added due to some error")
-              BadRequest(Json.toJson("Get Internal Server Error During Insertion"))
+              BadRequest(Json.toJson("Recommendation could not be added due to some error"))
             }
           }
         } { errorMessage =>
@@ -179,7 +179,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       if (result.ok) {
         Ok(Json.toJson("Recommendation Successfully Approved"))
       } else {
-        BadRequest(Json.toJson("Get Internal Server Error During Approval"))
+        BadRequest(Json.toJson("Recommendation could not be approved due to some error"))
       }
     }
   }
@@ -187,9 +187,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def declineRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.declineRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation Successfully Approved"))
+        Ok(Json.toJson("Recommendation Successfully Declined"))
       } else {
-        BadRequest(Json.toJson("Get Internal Server Error During Approval"))
+        BadRequest(Json.toJson("Recommendation could not be decline due to some error"))
       }
     }
   }

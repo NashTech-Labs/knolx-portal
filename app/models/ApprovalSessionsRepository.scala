@@ -20,7 +20,6 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
 case class ApproveSessionInfo(email: String,
                               date: BSONDateTime,
-                              session: String,
                               category: String,
                               subCategory: String,
                               topic: String,
@@ -51,7 +50,6 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         "$set" -> BSONDocument(
           "email" -> approveSessionInfo.email,
           "date" -> approveSessionInfo.date,
-          "session" -> approveSessionInfo.session,
           "category" -> approveSessionInfo.category,
           "subCategory" -> approveSessionInfo.subCategory,
           "topic" -> approveSessionInfo.topic,

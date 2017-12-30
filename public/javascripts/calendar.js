@@ -6,6 +6,9 @@ $(function () {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
         eventRender: function(event, element){
+            if(event.title === 'Book Now!') {
+                element.find('.fc-time').hide();
+            }
             element.popover({
                 html: true,
                 container: 'body',
@@ -34,27 +37,29 @@ function getSessions(startDate, endDate, callback) {
                 console.log("data ->" + data);
                 var events = [];
                 for(var i=0 ; i<data.length ; i++) {
-                    events.push({
-                        title: data[i].topic,
-                        start: data[i].date,
-                        color: '#31b0d5',
-                        data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
-                        url: 'knolx.knoldus.com'
-                    });
+                    if(data[i].pending) {
+                        events.push({
+                            title: data[i].topic,
+                            start: data[i].date,
+                            color: '#f0ad4e',
+                            data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
+                        });
+                    } else {
+                        console.log("pending --> " + data[i].pending);
+                        events.push({
+                            title: data[i].topic,
+                            start: data[i].date,
+                            color: '#31b0d5',
+                            data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
+                        });
+                    }
                 }
 
-                /*var friday = moment()
-                    .startOf('month')
-                    .day("Friday");*/
                 var startDay = moment(startDate);
                 var endDay = moment(endDate);
                 console.log("Start Date -> " + startDay);
                 console.log("End Date -> " + endDay);
                 var friday = startDay.clone().day(5);
-                    /*.startOf('month')
-                    .day("Friday");*/
-                //if (friday.date() > 7) friday.add(7, 'd');
-                //var month = friday.month();
                 while (friday <= endDay) {
                     console.log(friday.toString());
                     console.log(friday.valueOf());
@@ -74,11 +79,12 @@ function getSessions(startDate, endDate, callback) {
                     if(numberOfEvents <= 2) {
                         var openSlots = 2 - numberOfEvents;
                         for(var i=0 ; i < openSlots ; i++) {
+                            console.log("URL ---> " + jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null).url);
                             events.push({
                                 title: 'Book Now!',
                                 start: friday.valueOf(),
                                 color: '#27ae60',
-                                url: 'knolx.knoldus.com'
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null).url
                             });
                         }
                     }
@@ -91,8 +97,4 @@ function getSessions(startDate, endDate, callback) {
             }
         }
     )
-}
-
-function dummy() {
-    console.log("This is getting called");
 }

@@ -75,7 +75,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             pending = false)
         }
 
-        approvalSessionsRepository.getAllApprovedSession map { pendingSessions =>
+        approvalSessionsRepository.getAllSession map { pendingSessions =>
           val pendingSessionForAdmin = pendingSessions map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),

@@ -15,3 +15,7 @@
     color: black;
     font-weight: normal;
 }
+
+.fc-event{
+    cursor: default;
+}

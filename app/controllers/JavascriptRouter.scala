@@ -56,7 +56,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.KnolxUserAnalysisController.getUserDidNotAttendSessionCount,
       controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalKnolx,
       controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalMeetUps,
-      controllers.routes.javascript.CalendarController.calendarSessions
+      controllers.routes.javascript.CalendarController.calendarSessions,
+      controllers.routes.javascript.CalendarController.renderCreateSessionByUser
     )).as("text/javascript")
   }
 

@@ -76,9 +76,10 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def getAllSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
     collection.
       flatMap(jsonCollection =>
-        jsonCollection.
-          find(Json.obj()).
-          cursor[ApproveSessionInfo](ReadPreference.Primary)
+        jsonCollection
+          .find(Json.obj())
+          .sort()
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 

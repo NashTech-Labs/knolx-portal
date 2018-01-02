@@ -232,4 +232,17 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
       ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
+  def getAllAdminAndSuperUser(implicit ex: ExecutionContext): Future[List[String]] = {
+
+    val condition = Json.obj("$or" -> List(Json.obj("admin" -> true), Json.obj("superUser" -> true)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .cursor[JsValue](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[JsValue]]())
+      ).map(_.flatMap(_ ("email").asOpt[String]))
+
+  }
 }

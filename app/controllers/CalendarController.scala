@@ -196,13 +196,15 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           if (result.ok) {
             Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
 
-            usersRepository.getAllAdminAndSuperUser map  {
+            usersRepository.getAllAdminAndSuperUser map {
               adminAndSuperUser =>
               val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
               emailManager ! EmailActor.SendEmail(
                 adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
                 views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
                   formatter.parse(dateTimeUtility.toLocalDateTime(createSessionInfoByUser.date.getTime).toString)).toString)
+              Logger.error(s"Email has been successfully sent to admin/superUser for session created ${presenterEmail}")
+
             }
 
             Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))

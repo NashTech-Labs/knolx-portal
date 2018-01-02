@@ -27,15 +27,6 @@ case class CreateSessionInfo(email: String,
                              meetup: Boolean
                             )
 
-case class CalendarSession(id: String,
-                           date: Date,
-                           email: String,
-                           topic: String,
-                           meetup: Boolean,
-                           approved: Boolean,
-                           decline: Boolean,
-                           pending: Boolean)
-
 case class UpdateApproveSessionInfo(email: String,
                                     date: BSONDateTime,
                                     category: String,
@@ -46,6 +37,20 @@ case class UpdateApproveSessionInfo(email: String,
                                     approved: Boolean = false,
                                     decline: Boolean = false
                                    )
+
+case class CalendarSession(id: String,
+                           date: Date,
+                           email: String,
+                           topic: String,
+                           meetup: Boolean,
+                           approved: Boolean,
+                           decline: Boolean,
+                           pending: Boolean)
+
+case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession],
+                                         isAdmin: Boolean,
+                                         loggedIn: Boolean,
+                                         email: Option[String])
 
 @Singleton
 class CalendarController @Inject()(messagesApi: MessagesApi,
@@ -60,6 +65,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
+  implicit val calendarSessionsWithAuthorityFormat: OFormat[CalendarSessionsWithAuthority] = Json.format[CalendarSessionsWithAuthority]
 
   val createSessionFormByUser = Form(
     mapping(
@@ -78,6 +84,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
+    val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
+    val email = if(SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
+    val loggedIn = SessionHelper.isLoggedIn
+
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -93,7 +103,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
 
         approvalSessionsRepository.getAllSession map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved && session.decline ) map { pendingSession =>
+          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved && session.decline) map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
               pendingSession.email,
@@ -103,7 +113,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               pendingSession.decline,
               pending = true)
           }
-          Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
+
+          val calendarSessionsWithAuthority = CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
+          Ok(Json.toJson(calendarSessionsWithAuthority))
         }
       }
   }
@@ -219,7 +231,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           pendingSession.meetup,
           pendingSession.approved,
           pendingSession.decline,
-          pending = !pendingSession.approved && !pendingSession.decline )
+          pending = !pendingSession.approved && !pendingSession.decline)
       }
       Ok(Json.toJson(pendingSessionForAdmin))
     }

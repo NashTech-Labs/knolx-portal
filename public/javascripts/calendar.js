@@ -38,25 +38,41 @@ function getSessions(startDate, endDate, callback) {
     jsRoutes.controllers.CalendarController.calendarSessions(startDate, endDate).ajax(
         {
             type: 'GET',
-            success: function (data) {
-                console.log("data ->" + data);
+            success: function (calendarSessionsWithAuthority) {
+                console.log("data ->" + calendarSessionsWithAuthority.calendarSessions);
                 var events = [];
-                for(var i=0 ; i<data.length ; i++) {
-                    if(data[i].pending) {
+                var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
+                for(var i=0 ; i<calendarSessions.length ; i++) {
+                    if(calendarSessions[i].pending) {
+                        if(calendarSessionsWithAuthority.isAdmin) {
+                            events.push({
+                                title: calendarSessions[i].topic,
+                                start: calendarSessions[i].date,
+                                color: '#f0ad4e',
+                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url
+                            });
+                        } else if(calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
+                            events.push({
+                                title: calendarSessions[i].topic,
+                                start: calendarSessions[i].date,
+                                color: '#f0ad4e',
+                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url
+                            });
+                        } else {
+                            events.push({
+                                title: calendarSessions[i].topic,
+                                start: calendarSessions[i].date,
+                                color: '#f0ad4e',
+                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                            });
+                        }} else {
                         events.push({
-                            title: data[i].topic,
-                            start: data[i].date,
-                            color: '#f0ad4e',
-                            data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
-                            url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(data[i].id, data[i].date).url
-                        });
-                    } else {
-                        console.log("pending --> " + data[i].pending);
-                        events.push({
-                            title: data[i].topic,
-                            start: data[i].date,
+                            title: calendarSessions[i].topic,
+                            start: calendarSessions[i].date,
                             color: '#31b0d5',
-                            data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>"
+                            data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
                         });
                     }
                 }
@@ -85,12 +101,12 @@ function getSessions(startDate, endDate, callback) {
                     if(numberOfEvents <= 2) {
                         var openSlots = 2 - numberOfEvents;
                         for(var i=0 ; i < openSlots ; i++) {
-                            events.push({
-                                title: 'Book Now!',
-                                start: friday.valueOf(),
-                                color: '#27ae60',
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, friday.valueOf()).url
-                            });
+                                events.push({
+                                    title: 'Book Now!',
+                                    start: friday.valueOf(),
+                                    color: '#27ae60',
+                                    url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, friday.valueOf()).url
+                                });
                         }
                     }
                     friday.add(7, 'd');

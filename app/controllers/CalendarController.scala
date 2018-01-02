@@ -30,6 +30,7 @@ case class CalendarSession(id: String,
                            date: Date,
                            email: String,
                            topic: String,
+                           meetup: Boolean,
                            pending: Boolean)
 
 case class UpdateApproveSessionInfo(email: String,
@@ -81,6 +82,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             new Date(session.date.value),
             session.email,
             session.topic,
+            session.meetup,
             pending = false)
         }
 
@@ -90,6 +92,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               new Date(pendingSession.date.value),
               pendingSession.email,
               pendingSession.topic,
+              pendingSession.meetup,
               pending = true)
           }
           Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
@@ -159,8 +162,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         formWithErrors.data.get("date").fold {
           Future.successful(BadRequest("Cannot get date from the request"))
         } { date =>
+          Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)))
           Future.successful(
-            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId, dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringToIST(date))))
+            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId,
+              dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date))))
           )
         }
       },
@@ -193,6 +198,20 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     approvalSessionsRepository.getAllSession map { pendingSessions =>
       val pendingSessionsCount = pendingSessions.length
       Ok(Json.toJson(pendingSessionsCount))
+    }
+  }
+
+  def getAllSessionForAdmin: Action[AnyContent] = adminAction.async { implicit request =>
+    approvalSessionsRepository.getAllSession.map { pendingSessions =>
+      val pendingSessionForAdmin = pendingSessions map { pendingSession =>
+        CalendarSession(pendingSession._id.stringify,
+          new Date(pendingSession.date.value),
+          pendingSession.email,
+          pendingSession.topic,
+          pendingSession.meetup,
+          pendingSession.approved)
+      }
+      Ok(Json.toJson(pendingSessionForAdmin))
     }
   }
 

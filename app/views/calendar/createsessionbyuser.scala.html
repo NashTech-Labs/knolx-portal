@@ -17,7 +17,7 @@
                 <input id="sessionId" value="@sessionId.fold("")(identity)" hidden />
                 <input id="primary-category" value="@createSessionInfo.data.get("category")" hidden />
                 <input id="sub-category" value="@createSessionInfo.data.get("subCategory")" hidden />
-                <input id="email" value="@SessionHelper.email" hidden />
+                <input id="email" name="email" value="@SessionHelper.email" hidden />
                 <div class="save-user-changes"></div>
 
                 <div class="col-md-12 disp-inline form-group">

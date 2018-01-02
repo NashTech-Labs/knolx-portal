@@ -159,8 +159,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         formWithErrors.data.get("date").fold {
           Future.successful(BadRequest("Cannot get date from the request"))
         } { date =>
+          Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)) )
           Future.successful(
-            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId, dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringToIST(date))))
+            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId,
+              dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date))))
           )
         }
       },

@@ -7,7 +7,7 @@ $(function () {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
         eventRender: function(event, element){
-            if(event.title === 'Book Now!') {
+            if(event.title === 'Book Now!' || event.color === '#f0ad4e') {
                 element.find('.fc-time').hide();
             }
             element.popover({
@@ -61,7 +61,7 @@ function getSessions(startDate, endDate, callback) {
                     }
                 }
 
-                var startDay = moment(startDate);
+                var startDay = moment(startDate).set({'hour': 0, 'minute': 0, 'second': 0, 'millisecond': 0});
                 var endDay = moment(endDate);
                 console.log("Start Date -> " + startDay);
                 console.log("End Date -> " + endDay);

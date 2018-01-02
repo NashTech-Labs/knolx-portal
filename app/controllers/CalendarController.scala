@@ -3,11 +3,12 @@ package controllers
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.SessionsScheduler.RefreshSessionsSchedulers
 import akka.actor.ActorRef
 import controllers.EmailHelper.isValidEmail
 import models._
 import play.api.data.Form
-import play.api.data.Forms._
+import play.api.data.Forms.{number, _}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
@@ -51,6 +52,7 @@ case class UpdateApproveSessionInfo(email: String,
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
+                                   feedbackFormsRepository: FeedbackFormsRepository,
                                    approvalSessionsRepository: ApprovalSessionsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,

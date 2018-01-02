@@ -1,8 +1,10 @@
 package controllers
 
+import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.EmailActor
 import actors.SessionsScheduler.RefreshSessionsSchedulers
 import akka.actor.ActorRef
 import controllers.EmailHelper.isValidEmail
@@ -192,6 +194,16 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
           if (result.ok) {
             Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
+
+            usersRepository.getAllAdminAndSuperUser map  {
+              adminAndSuperUser =>
+              val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+              emailManager ! EmailActor.SendEmail(
+                adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                views.html.emails.presenternotification(sessionInfo.topic,
+                  formatter.parse(dateTimeUtility.toLocalDateTime(sessionInfo.date.value).toString)).toString)
+            }
+            
             Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
           } else {
             Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")

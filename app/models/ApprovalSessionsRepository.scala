@@ -49,6 +49,7 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.id))
       case _                         => BSONDocument("_id" -> BSONObjectID.generate())
     }
+
     val modifier =
       BSONDocument(
         "$set" -> BSONDocument(

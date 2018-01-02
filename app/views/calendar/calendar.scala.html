@@ -2,6 +2,7 @@
 
 @main("Calendar") {
 
+    <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
     <div id='calendar'></div>
 
     <script type="text/javascript" src="@routes.Assets.versioned("javascripts/calendar.js")"></script>

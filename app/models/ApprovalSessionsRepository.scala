@@ -2,6 +2,7 @@ package models
 
 import javax.inject.Inject
 
+import controllers.UpdateApproveSessionInfo
 import models.ApproveSessionJsonFormats._
 import play.api.libs.json.{JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -42,9 +43,12 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("approvesessions"))
 
-  def insertSessionForApprove(approveSessionInfo: ApproveSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
+  def insertSessionForApprove(approveSessionInfo: UpdateApproveSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
-    val selector = BSONDocument("_id" -> approveSessionInfo._id.stringify)
+    val selector = approveSessionInfo.id match {
+      case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.id))
+      case _                         => BSONDocument("_id" -> BSONObjectID.generate())
+    }
     val modifier =
       BSONDocument(
         "$set" -> BSONDocument(

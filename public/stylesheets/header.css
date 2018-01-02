@@ -348,3 +348,18 @@ html,body{
     display: table !important;
     width: 100%;
 }
+
+.notification-icon {
+    font-size: 20px;
+    border-left: 2px solid;
+    border-right: 2px solid;
+    padding-right: 50px;
+    padding-left: 10px;
+}
+
+.number-circle {
+    border: 1px solid;
+    border-radius: 50%;
+    padding: 0px 5px;
+    font-size: 12px;
+}

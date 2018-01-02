@@ -21,4 +21,20 @@ $(document).ready(function () {
         $('#collapse-button').addClass("fa-angle-double-left").removeClass("fa-angle-double-right");
         $('#content').addClass("");
     }
+
+    getPendingSessions();
 });
+
+function getPendingSessions() {
+    jsRoutes.controllers.CalendarController.getPendingSessions().ajax(
+        {
+            type: "GET",
+            success: function(data) {
+                $(".number-circle").text(data);
+            },
+            error: function(er) {
+                $(".number-circle").text('0');
+            }
+        }
+    )
+}

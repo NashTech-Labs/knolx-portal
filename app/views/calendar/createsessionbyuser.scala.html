@@ -1,4 +1,4 @@
-@(createSessionInfo: Form[CreateSessionInfo])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionInfo: Form[CreateSessionInfo], sessionId: Option[String], date: java.time.LocalDateTime)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Request Session") {
 
@@ -11,21 +11,23 @@
     <div class="row">
         <div class="col-md-12 create-outer">
 
-            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser()" method="post">
+            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId)" method="post">
 
                 @helper.CSRF.formField
-                <div class="col-md-12 disp-inline update-second form-group" style="margin-top: 20px;">
-                    <label class="col-md-2 control-label">Email</label>
-                    <div class="col-md-10">
-                        <input type="text" value='@createSessionInfo.data.get("email")' name="email" id="email"
-                               placeholder=" Email" required class="update-field"/>
-                    </div>
-                </div>
+                <input id="sessionId" value="@sessionId.fold("")(identity)" hidden />
+                <input id="primary-category" value="@createSessionInfo.data.get("category")" hidden />
+                <input id="sub-category" value="@createSessionInfo.data.get("subCategory")" hidden />
+                <input id="email" value="@SessionHelper.email" hidden />
+                <div class="save-user-changes"></div>
 
                 <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
-                        <input type="datetime-local" value='@createSessionInfo.data.get("date")' name="date" id="date"
+                        <input type="datetime-local" value=@if(createSessionInfo.data.get("date").isDefined) {
+                            '@createSessionInfo.data.get("date")'
+                        } else {
+                            '@date'
+                        } name="date" id="date"
                                placeholder="Date" required class="update-field reg"/>
                     </div>
                 </div>
@@ -70,7 +72,7 @@
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
                     <div class="col-md-2 loader-outer">
-                        <a href="@routes.CalendarController.renderCreateSessionByUser(None)" class="btn" style="color: inherit;
+                        <a href="@routes.CalendarController.renderCreateSessionByUser(None, date.toString())" class="btn" style="color: inherit;
                                 background: white;
                                 border: 1px solid #e7eaec;">Reset</a>
                         <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"

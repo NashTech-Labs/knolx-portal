@@ -3,6 +3,7 @@ $(function () {
         events: function(start, end, timezone, callback) {
             console.log("Start date -> " + start.toString());
             console.log("End date -> " + end.toString());
+            console.log("End date -> " + end.toDate());
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
         eventRender: function(event, element){
@@ -23,6 +24,10 @@ $(function () {
         eventClick: function (event) {
             if (event.url) {
                 window.open(event.url);
+                /*openWindowWithPost(event.url, {
+                    date: event.start,
+                    csrfToken: $('#csrfToken').val()
+                });*/
                 return false;
             }
         }
@@ -43,6 +48,7 @@ function getSessions(startDate, endDate, callback) {
                             start: data[i].date,
                             color: '#f0ad4e',
                             data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
+                            url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(data[i].id, data[i].date).url
                         });
                     } else {
                         console.log("pending --> " + data[i].pending);
@@ -50,7 +56,7 @@ function getSessions(startDate, endDate, callback) {
                             title: data[i].topic,
                             start: data[i].date,
                             color: '#31b0d5',
-                            data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>",
+                            data: "<p>Topic: " + data[i].topic + "<br>Email: " + data[i].email + "</p>"
                         });
                     }
                 }
@@ -61,8 +67,8 @@ function getSessions(startDate, endDate, callback) {
                 console.log("End Date -> " + endDay);
                 var friday = startDay.clone().day(5);
                 while (friday <= endDay) {
-                    console.log(friday.toString());
-                    console.log(friday.valueOf());
+                    console.log("friday.toString() ----->" + friday.toString());
+                    console.log("friday.valueOf() ----->" + friday.valueOf());
 
                     var numberOfEvents = 0;
 
@@ -79,12 +85,11 @@ function getSessions(startDate, endDate, callback) {
                     if(numberOfEvents <= 2) {
                         var openSlots = 2 - numberOfEvents;
                         for(var i=0 ; i < openSlots ; i++) {
-                            console.log("URL ---> " + jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null).url);
                             events.push({
                                 title: 'Book Now!',
                                 start: friday.valueOf(),
                                 color: '#27ae60',
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null).url
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, friday.valueOf()).url
                             });
                         }
                     }
@@ -97,4 +102,24 @@ function getSessions(startDate, endDate, callback) {
             }
         }
     )
+}
+
+function openWindowWithPost(url, data) {
+    var form = document.createElement("form");
+    form.target = "_blank";
+    form.method = "POST";
+    form.action = url;
+    form.style.display = "none";
+
+    for (var key in data) {
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = data[key];
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }

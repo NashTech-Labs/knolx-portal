@@ -63,6 +63,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val createSessionFormByUser = Form(
     mapping(
@@ -200,10 +201,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
               emailManager ! EmailActor.SendEmail(
                 adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
-                views.html.emails.presenternotification(sessionInfo.topic,
-                  formatter.parse(dateTimeUtility.toLocalDateTime(sessionInfo.date.value).toString)).toString)
+                views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
+                  formatter.parse(dateTimeUtility.toLocalDateTime(createSessionInfoByUser.date.getTime).toString)).toString)
             }
-            
+
             Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
           } else {
             Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")

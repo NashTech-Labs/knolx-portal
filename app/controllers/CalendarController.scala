@@ -31,6 +31,8 @@ case class CalendarSession(id: String,
                            email: String,
                            topic: String,
                            meetup: Boolean,
+                           approved: Boolean,
+                           decline: Boolean,
                            pending: Boolean)
 
 case class UpdateApproveSessionInfo(email: String,
@@ -83,16 +85,20 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             session.email,
             session.topic,
             session.meetup,
+            approved = true,
+            decline = false,
             pending = false)
         }
 
         approvalSessionsRepository.getAllSession map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions map { pendingSession =>
+          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved && session.decline ) map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
               pendingSession.email,
               pendingSession.topic,
               pendingSession.meetup,
+              pendingSession.approved,
+              pendingSession.decline,
               pending = true)
           }
           Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
@@ -209,7 +215,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           pendingSession.email,
           pendingSession.topic,
           pendingSession.meetup,
-          pendingSession.approved)
+          pendingSession.approved,
+          pendingSession.decline,
+          pending = !pendingSession.approved && !pendingSession.decline )
       }
       Ok(Json.toJson(pendingSessionForAdmin))
     }

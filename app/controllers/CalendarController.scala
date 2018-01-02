@@ -3,11 +3,12 @@ package controllers
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.SessionsScheduler.RefreshSessionsSchedulers
 import akka.actor.ActorRef
 import controllers.EmailHelper.isValidEmail
 import models._
 import play.api.data.Form
-import play.api.data.Forms._
+import play.api.data.Forms.{number, _}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent}
@@ -30,6 +31,9 @@ case class CalendarSession(id: String,
                            date: Date,
                            email: String,
                            topic: String,
+                           meetup: Boolean,
+                           approved: Boolean,
+                           decline: Boolean,
                            pending: Boolean)
 
 case class UpdateApproveSessionInfo(email: String,
@@ -47,6 +51,7 @@ case class UpdateApproveSessionInfo(email: String,
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
+                                   feedbackFormsRepository: FeedbackFormsRepository,
                                    approvalSessionsRepository: ApprovalSessionsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
@@ -81,15 +86,21 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             new Date(session.date.value),
             session.email,
             session.topic,
+            session.meetup,
+            approved = true,
+            decline = false,
             pending = false)
         }
 
         approvalSessionsRepository.getAllSession map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions map { pendingSession =>
+          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved && session.decline ) map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
               pendingSession.email,
               pendingSession.topic,
+              pendingSession.meetup,
+              pendingSession.approved,
+              pendingSession.decline,
               pending = true)
           }
           Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
@@ -159,7 +170,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         formWithErrors.data.get("date").fold {
           Future.successful(BadRequest("Cannot get date from the request"))
         } { date =>
-          Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)) )
+          Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)))
           Future.successful(
             BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId,
               dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date))))
@@ -195,6 +206,22 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     approvalSessionsRepository.getAllSession map { pendingSessions =>
       val pendingSessionsCount = pendingSessions.length
       Ok(Json.toJson(pendingSessionsCount))
+    }
+  }
+
+  def getAllSessionForAdmin: Action[AnyContent] = adminAction.async { implicit request =>
+    approvalSessionsRepository.getAllSession.map { pendingSessions =>
+      val pendingSessionForAdmin = pendingSessions map { pendingSession =>
+        CalendarSession(pendingSession._id.stringify,
+          new Date(pendingSession.date.value),
+          pendingSession.email,
+          pendingSession.topic,
+          pendingSession.meetup,
+          pendingSession.approved,
+          pendingSession.decline,
+          pending = !pendingSession.approved && !pendingSession.decline )
+      }
+      Ok(Json.toJson(pendingSessionForAdmin))
     }
   }
 

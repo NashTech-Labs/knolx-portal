@@ -70,6 +70,7 @@ case class KnolxSession(id: String,
                         contentAvailable: Boolean)
 
 case class SessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
+
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
                                page: Int,
@@ -87,6 +88,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
+                                   approvalSessionsRepository: ApprovalSessionsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
@@ -106,7 +108,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     mapping(
       "email" -> optional(nonEmptyText),
       "page" -> number.verifying("Invalid Page Number", _ >= 1),
-      "pageSize" -> number.verifying("Invalid Page size", _>=10)
+      "pageSize" -> number.verifying("Invalid Page size", _ >= 10)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
@@ -294,14 +296,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         Logger.error(s"Failed to send email to the presenter with id $sessionId")
         Future.successful(InternalServerError("Something went wrong!"))
       } { sessionInfo =>
-          val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
-          emailManager ! EmailActor.SendEmail(
-            List(sessionInfo.email), fromEmail, "Session Scheduled!",
-            views.html.emails.presenternotification(sessionInfo.topic,
-              formatter.parse(dateTimeUtility.toLocalDateTime(sessionInfo.date.value).toString)).toString)
-          Logger.error(s"Email has been successfully sent to the presenter ${sessionInfo.email}")
-          Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Email has been sent to the presenter"))
-        }
+        val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+        emailManager ! EmailActor.SendEmail(
+          List(sessionInfo.email), fromEmail, "Session Scheduled!",
+          views.html.emails.presenternotification(sessionInfo.topic,
+            formatter.parse(dateTimeUtility.toLocalDateTime(sessionInfo.date.value).toString)).toString)
+        Logger.error(s"Email has been successfully sent to the presenter ${sessionInfo.email}")
+        Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Email has been sent to the presenter"))
+      }
       )
   }
 
@@ -455,4 +457,53 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         (session => Future.successful(Ok(views.html.sessions.sessioncontent(session)))))
     }
   }
+
+  def approveSessionByAdmin(sessionApprovedId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    feedbackFormsRepository
+      .getAll
+      .flatMap { feedbackForms =>
+        val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+        createSessionForm.bindFromRequest.fold(
+          formWithErrors => {
+            Logger.error(s"Received a bad request for create session $formWithErrors")
+            Future.successful(BadRequest(views.html.sessions.createsession(formWithErrors, formIds)))
+          },
+          createSessionInfo => {
+            val presenterEmail = createSessionInfo.email.toLowerCase
+            usersRepository
+              .getByEmail(presenterEmail)
+              .flatMap(_.fold {
+                Future.successful(
+                  BadRequest(views.html.sessions.createsession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds)))
+              } { userJson =>
+                val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
+                val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,
+                  BSONDateTime(createSessionInfo.date.getTime), createSessionInfo.session, createSessionInfo.category,
+                  createSessionInfo.subCategory, createSessionInfo.feedbackFormId,
+                  createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
+                  0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None)
+                sessionsRepository.insert(session) flatMap { result =>
+                  if (result.ok) {
+                    Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
+                    sessionsScheduler ! RefreshSessionsSchedulers
+                    val approveSessionInfo = UpdateApproveSessionInfo(createSessionInfo.email, BSONDateTime(createSessionInfo.date.getTime),
+                      createSessionInfo.category, createSessionInfo.subCategory, createSessionInfo.topic, createSessionInfo.meetup,
+                      sessionApprovedId, approved = true)
+                    approvalSessionsRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
+                      if (updatedResult.ok) {
+                        Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully created!")
+                      } else {
+                        InternalServerError("Something went wrong!")
+                      }
+                    }
+                  } else {
+                    Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
+                    Future.successful(InternalServerError("Something went wrong!"))
+                  }
+                }
+              })
+          })
+      }
+  }
+
 }

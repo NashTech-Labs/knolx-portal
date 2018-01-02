@@ -1,0 +1,223 @@
+@(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)], sessionId: String, session: CreateApproveSessionInfo)(implicit request: Request[_], messages: Messages, flash: Flash)
+
+@main("Approve Session") {
+    <div class="row ">
+        <div class="header-container">
+            <h2 style="margin-top:10px;">Approve Session</h2>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+            @if(createSessionForm.hasGlobalErrors || createSessionForm("email").hasErrors ||
+                    createSessionForm("date").hasErrors || createSessionForm("session").hasErrors ||
+                    createSessionForm("feedbackFormId").hasErrors || createSessionForm("category").hasErrors
+                    || createSessionForm("subCategory").hasErrors
+                    || createSessionForm("feedbackExpirationDays").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in " style="margin-bottom: 0!important;">
+                    <ul>
+                        @if(createSessionForm.hasGlobalErrors) {
+                            <li>@createSessionForm.globalError.map(_.message)</li>
+                        }
+                        @if(createSessionForm("email").hasErrors) {
+                            <li>@createSessionForm("email").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("date").hasErrors) {
+                            <li>@createSessionForm("date").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("session").hasErrors) {
+                            <li>@createSessionForm("session").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("feedbackFormId").hasErrors) {
+                            <li>@createSessionForm("feedbackFormId").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("category").hasErrors) {
+                            <li>@createSessionForm("category").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("subCategory").hasErrors) {
+                            <li>@createSessionForm("subCategory").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionForm("feedbackExpirationDays").hasErrors) {
+                            <li>@createSessionForm("feedbackExpirationDays").error.map(error => messages(error.message))</li>
+                        }
+                        @if(!flash.isEmpty) {
+                            <li>@flash.get("message").fold("")(message => message)</li>
+                        }
+                    </ul>
+                </div>
+            }
+            </div>
+            <div class="col-md-3"></div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 create-outer">
+
+            <form class="CreateForm customForm" action="@routes.SessionsController.approveSessionByAdmin(sessionId)" method="post">
+
+                @helper.CSRF.formField
+                <input id="primary-category" value=@if(createSessionForm.data.get("category")) {
+                    '@createSessionForm.data.get("category")'
+                } else {
+                    '@session.category'
+                } hidden />
+                <input id="sub-category" value=@if(createSessionForm.data.get("subCategory")) {
+                    '@createSessionForm.data.get("subCategory")'
+                } else {
+                    '@session.category'
+                } hidden />
+                <div class="col-md-12 disp-inline update-second form-group" style="margin-top: 20px;">
+                    <label class="col-md-2 control-label">Email</label>
+                    <div class="col-md-10">
+                        <input type="text" value=@if(createSessionForm.data.get("email")) {
+                            '@createSessionForm.data.get("email")'
+                        } else {
+                            '@session.email'
+                        } name="email" id="email"
+                        placeholder=" Email" required class="update-field"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Date</label>
+                    <div class="col-md-10">
+                        <input type="datetime-local" value=@if(createSessionForm.data.get("date")) {
+                            '@createSessionForm.data.get("date")'
+                        } else {
+                        '@session.dateString'
+                    } name="date" id="date"
+                        placeholder="Date" required class="update-field reg"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline">
+                    <label class="col-md-2 control-label">Session</label>
+                    <div class="col-md-10">
+                        <select name="session" id="session" class="update-field login-second">
+                        @for((value, key) <- SessionValues.Sessions) {
+                            <option value="@value">@key</option>
+                        }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12 login-third update-second disp-inline form-group">
+                    <label class="col-md-2 control-label">Category</label>
+                    <div class="col-md-10">
+                        <select name="category" id="category" class="update-field login-second">
+                            <option selected value="">! Select Category Please</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Sub-Category</label>
+                    <div class="col-md-10">
+                        <select name="subCategory" id="subCategory" class="update-field login-second">
+                            <option selected value="">! Select Sub Category Please</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Feedback Form</label>
+                    <div class="col-md-7">
+                        <select name="feedbackFormId" id="feedbackFormId" class="update-field login-second">
+                            <option selected value="">! Select Please</option>
+                            @for((value, key) <- feedbackForms) {
+                                <option value="@value">@key</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3"><i class="fa fa-eye preview" id="previewId" data-toggle="tooltip" data-placement="right" title="Feedback Form preview" ></i></div>
+                </div>
+
+
+                <div class="col-md-12 disp-inline form-group">
+                    <label class="col-md-2 control-label">Session's Topic</label>
+                    <div class="col-md-10">
+                        <input type="text" name="topic" id="topic" value=@if(createSessionForm.data.get("topic")) {
+                            '@createSessionForm.data.get("topic")'
+                        } else {
+                            '@session.topic'
+                        }
+                        placeholder="Topic" required class="update-field"/>
+                    </div>
+                </div>
+
+                <div class="col-md-12 form-group">
+                    <label class="col-md-2 control-label">Feedback form expiration duration</label>
+                    <div class="col-md-10 feedback-duration ">
+                        <div class="col-md-4 feedback-expiration">
+                            <label class="radio-button default-radio">
+                                <input type='radio' name='feedbackExpirationDays' onclick='disableDays()' id='' class='custom-checkbox' value='0' checked="checked"/>
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style">Default</p>
+                            </label>
+                        </div>
+                        <div class="col-md-8 days-outer">
+                            <label class="radio-button" style="padding-top: 10px;">
+                            @if(createSessionForm.data.get("feedbackExpirationDays").nonEmpty && !createSessionForm.data.get("feedbackExpirationDays").contains("0")) {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1' checked="checked" />
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style-days">
+                                    <input type="number" min="1" max="31" value="@createSessionForm.data.get("feedbackExpirationDays")" class="days" id="days">
+                                    day/s
+                                </p>
+                            } else {
+                                <input type='radio' name='feedbackExpirationDays' onclick='enableDays()' id='radio-days' class='custom-checkbox' value='1'/>
+                                <span class="lab_text"></span>
+                                <p class="checkbox-text radio-style-days">
+                                    <input type="number" disabled min="1" max="32" value="1" class="days" id="days" >
+                                    day/s
+                                </p>
+                            }
+
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12 ">
+                    <div class="col-md-2"></div>
+                    <label class="checkbox-outer col-md-10">
+                        <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'
+                        @(if(createSessionForm.data.getOrElse("meetup", "false") == "true") {
+                            """checked="checked""""
+                        } else if(session.meetup) {
+                            """checked="checked""""
+                        })
+                        />
+
+                        <span class="label_text"></span>
+                        <p class="checkbox-text">Is Session a Meetup ?</p>
+                    </label>
+                </div>
+
+                <div class="col-md-12 login-four">
+                    <div class="hr-line-dashed"></div>
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2 loader-outer">
+                        <a href="@routes.SessionsController.renderApproveSessionByAdmin(sessionId)" class="btn" style="color: inherit;
+                            background: white;
+                            border: 1px solid #e7eaec;">Reset</a>
+                        <input type="submit" value="Approve" class="btn btn-success" style="background-color: #1ab394;"
+                        />
+                    </div>
+                    <div class="col-md-6"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    @feedbackforms.feedbackformpreview()
+
+    <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/expirationdays.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.versioned("javascripts/createsession.js")" type="text/javascript"></script>
+}

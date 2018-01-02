@@ -27,6 +27,15 @@ case class CreateSessionInfo(email: String,
                              meetup: Boolean
                             )
 
+case class CreateApproveSessionInfo(email: String,
+                                    date: Date,
+                                    category: String,
+                                    subCategory: String,
+                                    topic: String,
+                                    meetup: Boolean,
+                                    dateString: String
+                                   )
+
 case class UpdateApproveSessionInfo(email: String,
                                     date: BSONDateTime,
                                     category: String,
@@ -85,7 +94,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
     val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
-    val email = if(SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
+    val email = if (SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
     val loggedIn = SessionHelper.isLoggedIn
 
     sessionsRepository

@@ -50,7 +50,7 @@ function getSessions(startDate, endDate, callback) {
                                 start: calendarSessions[i].date,
                                 color: '#f0ad4e',
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url
+                                url: jsRoutes.controllers.SessionsController.renderApproveSessionByAdmin(calendarSessions[i].id).url
                             });
                         } else if(calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
                             events.push({

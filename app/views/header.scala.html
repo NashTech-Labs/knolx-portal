@@ -73,6 +73,12 @@
                     <span>Analysis</span></a>
             </li>
 
+            <li class="@activeLink(routes.CalendarController.renderCalendarPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Calendar">
+                <a href="@routes.CalendarController.renderCalendarPage">
+                    <i class="fa fa-calendar"></i>
+                    <span>Calendar</span></a>
+            </li>
+
             @if(!SessionHelper.isLoggedIn) {
 
 
@@ -102,11 +108,6 @@
                         <a href="@routes.SessionsController.manageSessions()" class ="manage-sub-menu">
                             <i class="fa fa-hourglass-end" aria-hidden="true"></i>
                             <span>Sessions</span></a>
-                    </li>
-                    <li class="@activeLink(routes.CalendarController.renderPendingSessionPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Pending Sessions">
-                        <a href="@routes.CalendarController.renderPendingSessionPage()" class ="manage-sub-menu">
-                            <i class="fa fa-hourglass-end" aria-hidden="true"></i>
-                            <span>Pending Sessions</span></a>
                     </li>
                     <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
                         <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)" class ="manage-sub-menu">

@@ -35,6 +35,15 @@ case class CreateApproveSessionInfo(email: String,
                                     meetup: Boolean,
                                     dateString: String
                                    )
+case class CalendarSession(id: String,
+                           date: Date,
+                           email: String,
+                           topic: String,
+                           meetup: Boolean,
+                           dateString: String,
+                           approved: Boolean,
+                           decline: Boolean,
+                           pending: Boolean)
 
 case class UpdateApproveSessionInfo(email: String,
                                     date: BSONDateTime,
@@ -46,15 +55,6 @@ case class UpdateApproveSessionInfo(email: String,
                                     approved: Boolean = false,
                                     decline: Boolean = false
                                    )
-
-case class CalendarSession(id: String,
-                           date: Date,
-                           email: String,
-                           topic: String,
-                           meetup: Boolean,
-                           approved: Boolean,
-                           decline: Boolean,
-                           pending: Boolean)
 
 case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession],
                                          isAdmin: Boolean,
@@ -106,18 +106,20 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             session.email,
             session.topic,
             session.meetup,
+            new Date(session.date.value).toString(),
             approved = true,
             decline = false,
             pending = false)
         }
 
         approvalSessionsRepository.getAllSession map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved && session.decline) map { pendingSession =>
+          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline) map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
               pendingSession.email,
               pendingSession.topic,
               pendingSession.meetup,
+              new Date(pendingSession.date.value).toString(),
               pendingSession.approved,
               pendingSession.decline,
               pending = true)
@@ -225,7 +227,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   def getPendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.getAllSession map { pendingSessions =>
-      val pendingSessionsCount = pendingSessions.length
+      val pendingSessionsCount = pendingSessions.filterNot(session => session.approved || session.decline).length
       Ok(Json.toJson(pendingSessionsCount))
     }
   }
@@ -238,6 +240,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           pendingSession.email,
           pendingSession.topic,
           pendingSession.meetup,
+          new Date(pendingSession.date.value).toString(),
           pendingSession.approved,
           pendingSession.decline,
           pending = !pendingSession.approved && !pendingSession.decline)

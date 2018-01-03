@@ -30,6 +30,15 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
       insert must beEqualTo(true)
     }
 
+    "insert sesssion for approve by admin/superUser when sessionId is not specified" in {
+      val approveSessionInfoWithoutSessionId = UpdateApproveSessionInfo("email",
+        BSONDateTime(currentMillis + 24*60*60*1000), "category", "subCategory", "topic", false, "", false, false)
+
+      val insert  = await(approveSessionRepository.insertSessionForApprove(approveSessionInfoWithoutSessionId).map(_.ok))
+
+      insert must beEqualTo(true)
+    }
+
     "get session with specified id" in {
       val sessions = await(approveSessionRepository.getSession(_id.stringify))
 
@@ -47,9 +56,9 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
         "subCategory", "topic", false, BSONObjectID.generate().stringify, true, false)
 
       val insert  = await(approveSessionRepository.insertSessionForApprove(approveSessionInfoByAdmin))
-      val sessions = await(approveSessionRepository.getAllSession)
+      val sessions = await(approveSessionRepository.getAllApprovedSession)
 
-      sessions.reverse.head.email must beEqualTo("approvedemail")
+      sessions.head.email must beEqualTo("approvedemail")
     }
 
     "approve session created by user" in {

@@ -29,6 +29,15 @@ case class CreateSessionInfo(email: String,
                              meetup: Boolean
                             )
 
+case class CreateApproveSessionInfo(email: String,
+                                    date: Date,
+                                    category: String,
+                                    subCategory: String,
+                                    topic: String,
+                                    meetup: Boolean,
+                                    dateString: String
+                                   )
+
 case class CalendarSession(id: String,
                            date: Date,
                            email: String,
@@ -50,6 +59,11 @@ case class UpdateApproveSessionInfo(email: String,
                                     decline: Boolean = false
                                    )
 
+case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession],
+                                         isAdmin: Boolean,
+                                         loggedIn: Boolean,
+                                         email: Option[String])
+
 @Singleton
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
@@ -63,6 +77,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                   ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
+  implicit val calendarSessionsWithAuthorityFormat: OFormat[CalendarSessionsWithAuthority] = Json.format[CalendarSessionsWithAuthority]
   lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val createSessionFormByUser = Form(
@@ -78,10 +93,15 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   )
 
   def renderCalendarPage: Action[AnyContent] = action { implicit request =>
+    Logger.info("------------------------------------Showing calendar page")
     Ok(views.html.calendar.calendar())
   }
 
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
+    val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
+    val email = if (SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
+    val loggedIn = SessionHelper.isLoggedIn
+
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -98,7 +118,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
 
         approvalSessionsRepository.getAllSession map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved && session.decline ) map { pendingSession =>
+          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline) map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
               pendingSession.email,
@@ -109,7 +129,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               pendingSession.decline,
               pending = true)
           }
-          Ok(Json.toJson(knolxSessions ::: pendingSessionForAdmin))
+
+          val calendarSessionsWithAuthority = CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
+          Ok(Json.toJson(calendarSessionsWithAuthority))
         }
       }
   }
@@ -171,7 +193,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def createSessionByUser(sessionId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
+  def createSessionByUser(sessionId: Option[String], date: String): Action[AnyContent] = userAction.async { implicit request =>
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
@@ -186,32 +208,37 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       },
       createSessionInfoByUser => {
-        val presenterEmail = request.user.email
-        val session = UpdateApproveSessionInfo(presenterEmail,
-          BSONDateTime(createSessionInfoByUser.date.getTime),
-          createSessionInfoByUser.category,
-          createSessionInfoByUser.subCategory,
-          createSessionInfoByUser.topic,
-          createSessionInfoByUser.meetup,
-          sessionId.fold("")(identity))
-        approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
-          if (result.ok) {
-            Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
-
-            usersRepository.getAllAdminAndSuperUser map {
-              adminAndSuperUser =>
-              emailManager ! EmailActor.SendEmail(
-                adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
-                views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
-                  createSessionInfoByUser.date).toString)
-              Logger.error(s"Email has been successfully sent to admin/superUser for session created ${presenterEmail}")
+        val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
+        if (dateString.equals(createSessionInfoByUser.date.toString)) {
+          val presenterEmail = request.user.email
+          val session = UpdateApproveSessionInfo(presenterEmail,
+            BSONDateTime(createSessionInfoByUser.date.getTime),
+            createSessionInfoByUser.category,
+            createSessionInfoByUser.subCategory,
+            createSessionInfoByUser.topic,
+            createSessionInfoByUser.meetup,
+            sessionId.fold("")(identity))
+          approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
+            if (result.ok) {
+              Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
+              usersRepository.getAllAdminAndSuperUser map {
+                adminAndSuperUser =>
+                  emailManager ! EmailActor.SendEmail(
+                    adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                    views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
+                      createSessionInfoByUser.date).toString)
+                  Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+              }
+              Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
+            } else {
+              Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
+              Future.successful(InternalServerError("Something went wrong!"))
             }
-
-            Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
-          } else {
-            Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
-            Future.successful(InternalServerError("Something went wrong!"))
           }
+        } else {
+          Future.successful(
+            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" -> "Date submitted was wrong. Please try again.")
+          )
         }
       })
   }
@@ -222,7 +249,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   def getPendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.getAllSession map { pendingSessions =>
-      val pendingSessionsCount = pendingSessions.length
+      val pendingSessionsCount = pendingSessions.filterNot(session => session.approved || session.decline).length
       Ok(Json.toJson(pendingSessionsCount))
     }
   }
@@ -238,7 +265,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           new Date(pendingSession.date.value).toString,
           pendingSession.approved,
           pendingSession.decline,
-          pending = !pendingSession.approved && !pendingSession.decline )
+          pending = !pendingSession.approved && !pendingSession.decline)
       }
       Ok(Json.toJson(pendingSessionForAdmin))
     }

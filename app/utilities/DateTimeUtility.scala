@@ -54,6 +54,8 @@ class DateTimeUtility {
     Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime.toEpochSecond(ZoneOffset) * 1000
   }
 
+  def formatDateWithT(date: Date): String = dateFormatWithT.format(date)
+
   def formatDate(stringDate: String): String = {
     val utilDate = yearMonthFormatDB.parse(stringDate)
     yearMonthFormat.format(utilDate)

@@ -1,10 +1,12 @@
 package controllers
 
 import java.time.LocalDateTime
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 
-import models.{RecommendationInfo, RecommendationResponseRepository, RecommendationResponseRepositoryInfo, RecommendationsRepository}
-import play.api.Logger
+import actors.EmailActor
+import akka.actor.ActorRef
+import models._
+import play.api.{Configuration, Logger}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent}
@@ -72,13 +74,17 @@ case class RecommendationInformation(email: Option[String],
 @Singleton
 class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          recommendationsRepository: RecommendationsRepository,
+                                         usersRepository: UsersRepository,
                                          controllerComponents: KnolxControllerComponents,
                                          dateTimeUtility: DateTimeUtility,
-                                         recommendationResponseRepository: RecommendationResponseRepository
+                                         configuration: Configuration,
+                                         recommendationResponseRepository: RecommendationResponseRepository,
+                                         @Named("EmailManager") emailManager: ActorRef
                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val recommendationsFormat: OFormat[Recommendation] = Json.format[Recommendation]
   implicit val recommendationInformationFormat: OFormat[RecommendationInformation] = Json.format[RecommendationInformation]
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
     val email = if(!SessionHelper.isLoggedIn) Some(SessionHelper.email) else None
@@ -110,6 +116,14 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           recommendationsRepository.insert(recommendationInfo).map { result =>
             if (result.ok) {
               Logger.info(s"Recommendation has been successfully received of ${recommendationInfo.name}")
+              usersRepository.getAllAdminAndSuperUser map {
+                adminAndSuperUser =>
+
+                emailManager ! EmailActor.SendEmail(
+                  adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                  views.html.emails.recommendationnotification(recommendation.name,recommendation.topic).toString)
+                Logger.error(s"Email has been successfully sent to admin/superUser for recommendation submitted by ${recommendation.name}")
+              }
               Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
             } else {
               Logger.info("Recommendation could not be added due to some error")

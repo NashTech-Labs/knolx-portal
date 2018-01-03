@@ -8,6 +8,23 @@
         </div>
     </div>
 
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-md-12">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+            @if(!flash.isEmpty) {
+                <div class="alert alert-danger fade in " style="margin-bottom: 0!important;">
+                    <ul>
+                        <li>@flash.get("message").fold("")(message => message)</li>
+                    </ul>
+                </div>
+            }
+            </div>
+            <div class="col-md-3"></div>
+
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-12 create-outer">
 

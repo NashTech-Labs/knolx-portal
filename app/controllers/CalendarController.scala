@@ -93,6 +93,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   )
 
   def renderCalendarPage: Action[AnyContent] = action { implicit request =>
+    Logger.info("------------------------------------Showing calendar page")
     Ok(views.html.calendar.calendar())
   }
 
@@ -205,8 +206,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       },
       createSessionInfoByUser => {
-        val correctDate = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
-        if (correctDate.equals(createSessionInfoByUser.date.toString)) {
+        val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
+        if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email
           val session = UpdateApproveSessionInfo(presenterEmail,
             BSONDateTime(createSessionInfoByUser.date.getTime),
@@ -220,11 +221,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
               usersRepository.getAllAdminAndSuperUser map {
                 adminAndSuperUser =>
-                  val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
                   emailManager ! EmailActor.SendEmail(
                     adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
                     views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
-                      formatter.parse(dateTimeUtility.toLocalDateTime(createSessionInfoByUser.date.getTime).toString)).toString)
+                      createSessionInfoByUser.date).toString)
                   Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
               }
               Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
@@ -234,9 +234,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             }
           }
         } else {
-          Logger.info("Date = " + new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString())
-          Logger.info("Date in form = " + createSessionInfoByUser.date.toString)
-          Future.successful(BadRequest("Date submitted was wrong. Please try again."))
+          Future.successful(
+            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" -> "Date submitted was wrong. Please try again.")
+          )
         }
       })
   }

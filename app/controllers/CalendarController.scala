@@ -37,6 +37,7 @@ case class CreateApproveSessionInfo(email: String,
                                     meetup: Boolean,
                                     dateString: String
                                    )
+
 case class CalendarSession(id: String,
                            date: Date,
                            email: String,
@@ -189,7 +190,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def createSessionByUser(sessionId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
+  def createSessionByUser(sessionId: Option[String], date: String): Action[AnyContent] = userAction.async { implicit request =>
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
@@ -204,34 +205,38 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       },
       createSessionInfoByUser => {
-        val presenterEmail = request.user.email
-        val session = UpdateApproveSessionInfo(presenterEmail,
-          BSONDateTime(createSessionInfoByUser.date.getTime),
-          createSessionInfoByUser.category,
-          createSessionInfoByUser.subCategory,
-          createSessionInfoByUser.topic,
-          createSessionInfoByUser.meetup,
-          sessionId.fold("")(identity))
-        approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
-          if (result.ok) {
-            Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
-
-            usersRepository.getAllAdminAndSuperUser map {
-              adminAndSuperUser =>
-              val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
-              emailManager ! EmailActor.SendEmail(
-                adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
-                views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
-                  formatter.parse(dateTimeUtility.toLocalDateTime(createSessionInfoByUser.date.getTime).toString)).toString)
-              Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
-
+        val correctDate = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
+        if (correctDate.equals(createSessionInfoByUser.date.toString)) {
+          val presenterEmail = request.user.email
+          val session = UpdateApproveSessionInfo(presenterEmail,
+            BSONDateTime(createSessionInfoByUser.date.getTime),
+            createSessionInfoByUser.category,
+            createSessionInfoByUser.subCategory,
+            createSessionInfoByUser.topic,
+            createSessionInfoByUser.meetup,
+            sessionId.fold("")(identity))
+          approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
+            if (result.ok) {
+              Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
+              usersRepository.getAllAdminAndSuperUser map {
+                adminAndSuperUser =>
+                  val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+                  emailManager ! EmailActor.SendEmail(
+                    adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                    views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
+                      formatter.parse(dateTimeUtility.toLocalDateTime(createSessionInfoByUser.date.getTime).toString)).toString)
+                  Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+              }
+              Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
+            } else {
+              Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
+              Future.successful(InternalServerError("Something went wrong!"))
             }
-
-            Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
-          } else {
-            Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
-            Future.successful(InternalServerError("Something went wrong!"))
           }
+        } else {
+          Logger.info("Date = " + new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString())
+          Logger.info("Date in form = " + createSessionInfoByUser.date.toString)
+          Future.successful(BadRequest("Date submitted was wrong. Please try again."))
         }
       })
   }

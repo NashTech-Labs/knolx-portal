@@ -30,10 +30,10 @@ function getPendingSessions() {
         {
             type: "GET",
             success: function(data) {
-                $(".number-circle").text(data);
+                $("#pending-sessions-number").text(data);
             },
             error: function(er) {
-                $(".number-circle").text('0');
+                $("#pending-sessions-number").text('0');
             }
         }
     )

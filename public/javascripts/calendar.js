@@ -68,12 +68,21 @@ function getSessions(startDate, endDate, callback) {
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
                             });
                         }} else {
-                        events.push({
-                            title: calendarSessions[i].topic,
-                            start: calendarSessions[i].date,
-                            color: '#31b0d5',
-                            data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
-                        });
+                        if(calendarSessions[i].meetup) {
+                            events.push({
+                                title: calendarSessions[i].topic,
+                                start: calendarSessions[i].date,
+                                color: '#8e44ad',
+                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                            });
+                        } else {
+                            events.push({
+                                title: calendarSessions[i].topic,
+                                start: calendarSessions[i].date,
+                                color: '#31b0d5',
+                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                            });
+                        }
                     }
                 }
 

@@ -1,8 +1,10 @@
 package controllers
 
+import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
+import actors.EmailActor
 import actors.SessionsScheduler.RefreshSessionsSchedulers
 import akka.actor.ActorRef
 import controllers.EmailHelper.isValidEmail
@@ -75,6 +77,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
   implicit val calendarSessionsWithAuthorityFormat: OFormat[CalendarSessionsWithAuthority] = Json.format[CalendarSessionsWithAuthority]
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val createSessionFormByUser = Form(
     mapping(
@@ -212,6 +215,18 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
           if (result.ok) {
             Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
+
+            usersRepository.getAllAdminAndSuperUser map {
+              adminAndSuperUser =>
+              val formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+              emailManager ! EmailActor.SendEmail(
+                adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
+                  formatter.parse(dateTimeUtility.toLocalDateTime(createSessionInfoByUser.date.getTime).toString)).toString)
+              Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+
+            }
+
             Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
           } else {
             Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")

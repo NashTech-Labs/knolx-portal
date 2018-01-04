@@ -96,11 +96,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
-    Logger.error("----------> 111")
     val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
     val email = if (SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
     val loggedIn = SessionHelper.isLoggedIn
-Logger.error("----------> 222")
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -165,7 +163,6 @@ Logger.error("----------> 222")
         formWithErrors.data.get("date").fold {
           Future.successful(BadRequest("Cannot get date from the request"))
         } { date =>
-          Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)))
           Future.successful(
             BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId,
               dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date))))
@@ -173,6 +170,7 @@ Logger.error("----------> 222")
         }
       },
       createSessionInfoByUser => {
+
         val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email
@@ -202,15 +200,12 @@ Logger.error("----------> 222")
           }
         } else {
           Future.successful(
-            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" -> "Date submitted was wrong. Please try again.")
+            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, dateTimeUtility.parseDateStringWithTToIST(date).toString))
+              .flashing("message" -> "Date submitted was wrong. Please try again.")
           )
         }
       })
   }
-
-  /*def renderPendingSessionPage: Action[AnyContent] = adminAction { implicit request =>
-    Ok(views.html.sessions.pendingsession())
-  }*/
 
   def getPendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.getAllSession map { pendingSessions =>

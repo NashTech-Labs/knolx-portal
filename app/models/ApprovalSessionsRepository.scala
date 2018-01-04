@@ -24,7 +24,7 @@ case class ApproveSessionInfo(email: String,
                               category: String,
                               subCategory: String,
                               topic: String,
-                              meetup: Boolean,
+                              meetup: Boolean =false,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
@@ -45,8 +45,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def insertSessionForApprove(approveSessionInfo: UpdateApproveSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
-    val selector = approveSessionInfo.id match {
-      case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.id))
+    val selector = approveSessionInfo.sessionId match {
+      case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.sessionId))
       case _                         => BSONDocument("_id" -> BSONObjectID.generate())
     }
 

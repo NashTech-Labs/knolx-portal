@@ -54,7 +54,7 @@ case class UpdateApproveSessionInfo(email: String,
                                     subCategory: String,
                                     topic: String,
                                     meetup: Boolean,
-                                    id: String,
+                                    sessionId: String,
                                     approved: Boolean = false,
                                     decline: Boolean = false
                                    )
@@ -183,11 +183,13 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           session.meetup)
         Logger.info("Date converted is ----> " + new Date(date.toLong))
         Logger.info("Date converted is ----> " + new Date(session.date.value))
-        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, dateTimeUtility.toLocalDateTime(session.date.value)))
+        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId,
+          dateTimeUtility.toLocalDateTime(session.date.value)))
       }
     } else {
       Logger.info("Date converted is ----> " + new Date(date.toLong))
-      Future.successful(Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId, dateTimeUtility.toLocalDateTime(date.toLong))))
+      Future.successful(Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId,
+        dateTimeUtility.toLocalDateTime(date.toLong))))
     }
   }
 
@@ -260,7 +262,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           pendingSession.email,
           pendingSession.topic,
           pendingSession.meetup,
-          new Date(pendingSession.date.value).toString(),
+          new Date(pendingSession.date.value).toString,
           pendingSession.approved,
           pendingSession.decline,
           pending = !pendingSession.approved && !pendingSession.decline)

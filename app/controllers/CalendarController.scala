@@ -1,6 +1,5 @@
 package controllers
 
-import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 

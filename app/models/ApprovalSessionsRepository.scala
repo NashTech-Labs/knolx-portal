@@ -8,7 +8,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -117,6 +117,19 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
 
+  }
+
+  def updateDateForPendingSession(sessionId: String, date: BSONDateTime): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "date" -> date
+      )
+    )
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
   }
 
 }

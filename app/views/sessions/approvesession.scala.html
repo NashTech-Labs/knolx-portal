@@ -201,14 +201,17 @@
                 <div class="col-md-12 login-four">
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
-                    <div class="col-md-2 loader-outer">
+                    <div class="col-md-6 loader-outer">
                         <a href="@routes.SessionsController.renderApproveSessionByAdmin(sessionId)" class="btn" style="color: inherit;
                             background: white;
                             border: 1px solid #e7eaec;">Reset</a>
                         <input type="submit" value="Approve" class="btn btn-success" style="background-color: #1ab394;"
                         />
+                        <a href="@routes.CalendarController.declineSession(sessionId)" class="btn btn-danger" style="color: white;
+                            background: white;
+                            border: 1px solid #e7eaec;">Decline</a>
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-4"></div>
                 </div>
             </form>
         </div>

@@ -1,19 +1,25 @@
+var freeSlotTitle = "Book Now!";
+var pendingSessionColor = '#f0ad4e';
+var scheduledSession = '#31b0d5';
+var scheduledMeetup = '#8e44ad';
+var freeSlotColor = '#27ae60';
+var allowedNoOfSessions = 2;
+var freeSlotId = 0;
+
 $(function () {
+
     $('#calendar').fullCalendar({
-        events: function(start, end, timezone, callback) {
-            console.log("Start date -> " + start.toString());
-            console.log("End date -> " + end.toString());
-            console.log("End date -> " + end.toDate());
+        events: function (start, end, timezone, callback) {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
-        eventRender: function(event, element){
-            if(event.title === 'Book Now!' || event.color === '#f0ad4e') {
+        eventRender: function (event, element) {
+            if (event.title === freeSlotTitle || event.color === pendingSessionColor) {
                 element.find('.fc-time').hide();
             }
             element.popover({
                 html: true,
                 container: 'body',
-                animation:true,
+                animation: true,
                 delay: 300,
                 content: event.data,
                 placement: 'bottom',
@@ -30,6 +36,37 @@ $(function () {
                 });*/
                 return false;
             }
+        },
+        eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
+            if (moment(event.start).day() === 5) {
+                var pulledEvents = $('#calendar').fullCalendar('clientEvents');
+                var numberOfEvents = 0;
+                var replaced = 0;
+                for (var i = 0; i < pulledEvents.length; i++) {
+                    if (moment(pulledEvents[i].start).date() === moment(event.start).date()
+                        && moment(pulledEvents[i].start).month() === moment(event.start).month()
+                        && pulledEvents[i].title === freeSlotTitle) {
+                        var freeSlot = {
+                            id: ++freeSlotId,
+                            title: freeSlotTitle,
+                            start: moment(event.start.valueOf()).subtract(delta),
+                            color: freeSlotColor,
+                            url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, event.start._i.valueOf()).url
+                        };
+                        $('#calendar').fullCalendar('renderEvent', freeSlot);
+                        $('#calendar').fullCalendar('removeEvents', pulledEvents[i].id);
+                        replaced = 1;
+                        numberOfEvents++;
+                        updatePendingSession(event.id, event.start.valueOf());
+                        break;
+                    }
+                }
+                if(replaced === 0) {
+                    revertFunc();
+                }
+            } else {
+                revertFunc();
+            }
         }
     });
 });
@@ -42,44 +79,51 @@ function getSessions(startDate, endDate, callback) {
                 console.log("data ->" + calendarSessionsWithAuthority.calendarSessions);
                 var events = [];
                 var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
-                for(var i=0 ; i<calendarSessions.length ; i++) {
-                    if(calendarSessions[i].pending) {
-                        if(calendarSessionsWithAuthority.isAdmin) {
+                for (var i = 0; i < calendarSessions.length; i++) {
+                    if (calendarSessions[i].pending) {
+                        if (calendarSessionsWithAuthority.isAdmin) {
                             events.push({
+                                id: calendarSessions[i].id,
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
-                                color: '#f0ad4e',
+                                color: pendingSessionColor,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.SessionsController.renderApproveSessionByAdmin(calendarSessions[i].id).url
+                                url: jsRoutes.controllers.SessionsController.renderApproveSessionByAdmin(calendarSessions[i].id).url,
+                                editable: true
                             });
-                        } else if(calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
+                        } else if (calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
                             events.push({
+                                id: calendarSessions[i].id,
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
-                                color: '#f0ad4e',
+                                color: pendingSessionColor,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url,
+                                editable: true
                             });
                         } else {
                             events.push({
+                                id: calendarSessions[i].id,
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
-                                color: '#f0ad4e',
+                                color: pendingSessionColor,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
                             });
-                        }} else {
-                        if(calendarSessions[i].meetup) {
+                        }
+                    } else {
+                        if (calendarSessions[i].meetup) {
                             events.push({
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
-                                color: '#8e44ad',
+                                color: scheduledMeetup,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
                             });
                         } else {
                             events.push({
+                                id: calendarSessions[i].id,
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
-                                color: '#31b0d5',
+                                color: scheduledSession,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
                             });
                         }
@@ -97,33 +141,44 @@ function getSessions(startDate, endDate, callback) {
 
                     var numberOfEvents = 0;
 
-                    for(var i=0 ; i<events.length ; i++) {
-                        if(moment(events[i].start).date() === friday.date() && moment(events[i].start).month() === friday.month()) {
-                            if(friday.date() === 29) {
-                                console.log("Title -> " + events[i].title);
-                                console.log("date -> " + events[i].start);
-                            }
+                    for (var i = 0; i < events.length; i++) {
+                        if (moment(events[i].start).date() === friday.date() && moment(events[i].start).month() === friday.month()) {
                             numberOfEvents++;
                         }
                     }
 
-                    if(numberOfEvents <= 2) {
-                        var openSlots = 2 - numberOfEvents;
-                        for(var i=0 ; i < openSlots ; i++) {
-                                events.push({
-                                    title: 'Book Now!',
-                                    start: friday.valueOf(),
-                                    color: '#27ae60',
-                                    url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, friday.valueOf()).url
-                                });
+                    if (numberOfEvents <= allowedNoOfSessions) {
+                        var openSlots = allowedNoOfSessions - numberOfEvents;
+                        for (var i = 0; i < openSlots; i++) {
+                            events.push({
+                                id: ++freeSlotId,
+                                title: freeSlotTitle,
+                                start: friday.valueOf(),
+                                color: freeSlotColor,
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, friday.valueOf()).url
+                            });
                         }
                     }
                     friday.add(7, 'd');
                 }
                 callback(events);
             },
-            error: function(er) {
+            error: function (er) {
                 console.log("error ->" + er.responseText);
+            }
+        }
+    )
+}
+
+function updatePendingSession(sessionId, sessionDate) {
+    jsRoutes.controllers.CalendarController.updatePendingSessionDate(sessionId, sessionDate).ajax(
+        {
+            type: 'GET',
+            success: function (data) {
+                console.log("successfully updated the date.");
+            },
+            error: function(er) {
+                console.log("Failed with the error " + er.responseText);
             }
         }
     )

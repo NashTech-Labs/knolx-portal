@@ -107,8 +107,9 @@ GET           /knolx/calendar                                       controllers.
 GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
 GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: Option[String], date: String)
 POST          /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: Option[String], date: String)
-GET           /knolx/sessions/pending/all                           controllers.CalendarController.renderPendingSessionPage
 GET           /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: Option[String], date: String)
 POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: Option[String], date: String)
 GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.getPendingSessions
 GET           /knolx/sessions/pendingstatus                         controllers.CalendarController.getAllSessionForAdmin
+GET           /knolx/sessions/updatedate                            controllers.CalendarController.updatePendingSessionDate(sessionId: String, date: String)
+GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)

@@ -4,6 +4,7 @@ var scheduledSession = '#31b0d5';
 var scheduledMeetup = '#8e44ad';
 var freeSlotColor = '#27ae60';
 var allowedNoOfSessions = 2;
+var freeSlotId = 0;
 
 $(function () {
 
@@ -46,7 +47,7 @@ $(function () {
                         && moment(pulledEvents[i].start).month() === moment(event.start).month()
                         && pulledEvents[i].title === freeSlotTitle) {
                         var freeSlot = {
-                            id: moment() + i,
+                            id: ++freeSlotId,
                             title: freeSlotTitle,
                             start: moment(event.start.valueOf()).subtract(delta),
                             color: freeSlotColor,
@@ -150,7 +151,7 @@ function getSessions(startDate, endDate, callback) {
                         var openSlots = allowedNoOfSessions - numberOfEvents;
                         for (var i = 0; i < openSlots; i++) {
                             events.push({
-                                id: moment() + i,
+                                id: ++freeSlotId,
                                 title: freeSlotTitle,
                                 start: friday.valueOf(),
                                 color: freeSlotColor,

@@ -112,3 +112,4 @@ GET           /knolx/sessions/createsession                         controllers.
 POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: Option[String], date: String)
 GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.getPendingSessions
 GET           /knolx/sessions/pendingstatus                         controllers.CalendarController.getAllSessionForAdmin
+GET           /knolx/sessions/updatedate                            controllers.CalendarController.updatePendingSessionDate(sessionId: String, date: String)

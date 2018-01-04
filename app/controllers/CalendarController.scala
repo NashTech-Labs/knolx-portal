@@ -269,4 +269,17 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
+  def updatePendingSessionDate(sessionId: String, date: String): Action[AnyContent] = userAction.async {
+    Logger.info("Date received is " + date)
+    approvalSessionsRepository.updateDateForPendingSession(sessionId, BSONDateTime(date.toLong)) map { result =>
+      if(result.ok) {
+        Logger.info("Successfully updated the date")
+        Ok("Date for the session was successfully updated")
+      } else {
+        Logger.info("Something went wrong while updating the date for the session")
+        BadRequest("Something went wrong while updating the date for the session")
+      }
+    }
+  }
+
 }

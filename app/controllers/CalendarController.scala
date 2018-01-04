@@ -283,5 +283,16 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       }
     }
   }
+  def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+    approvalSessionsRepository.declineSession(sessionId) map { result =>
+      if(result.ok) {
+        Logger.info(s"Successfuly declined session $sessionId")
+        Ok("Successfully declined the session")
+      } else {
+        Logger.info(s"Something went wrong while declining session $sessionId")
+        BadRequest("Something went wrong while declining session")
+      }
+    }
+  }
 
 }

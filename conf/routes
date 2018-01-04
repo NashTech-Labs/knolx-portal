@@ -113,3 +113,4 @@ POST          /knolx/sessions/createsession                         controllers.
 GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.getPendingSessions
 GET           /knolx/sessions/pendingstatus                         controllers.CalendarController.getAllSessionForAdmin
 GET           /knolx/sessions/updatedate                            controllers.CalendarController.updatePendingSessionDate(sessionId: String, date: String)
+GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)

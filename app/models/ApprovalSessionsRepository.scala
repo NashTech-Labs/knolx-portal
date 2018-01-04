@@ -4,10 +4,10 @@ import javax.inject.Inject
 
 import controllers.UpdateApproveSessionInfo
 import models.ApproveSessionJsonFormats._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api. ReadPreference
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -24,7 +24,7 @@ case class ApproveSessionInfo(email: String,
                               category: String,
                               subCategory: String,
                               topic: String,
-                              meetup: Boolean =false,
+                              meetup: Boolean = false,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
@@ -77,10 +77,10 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def getAllSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
     collection.
       flatMap(jsonCollection =>
-        jsonCollection.
-          find(Json.obj()).
-          sort(Json.obj("decline" -> 1, "approved" -> 1)).
-          cursor[ApproveSessionInfo](ReadPreference.Primary)
+        jsonCollection
+          .find(Json.obj())
+          .sort(Json.obj("decline" -> 1, "approved" -> 1))
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 

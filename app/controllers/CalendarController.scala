@@ -189,9 +189,8 @@ Logger.error("----------> 222")
               usersRepository.getAllAdminAndSuperUser map {
                 adminAndSuperUser =>
                   emailManager ! EmailActor.SendEmail(
-                    adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
-                    views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
-                      createSessionInfoByUser.date).toString)
+                    adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
+                    views.html.emails.sessionnotificationtoadmin(session).toString)
                   Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
               }
               Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
@@ -202,7 +201,9 @@ Logger.error("----------> 222")
           }
         } else {
           Future.successful(
-            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" -> "Date submitted was wrong. Please try again.")
+            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId,
+              dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" ->
+              "Date submitted was wrong. Please try again.")
           )
         }
       })

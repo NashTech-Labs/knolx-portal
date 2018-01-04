@@ -1,11 +1,9 @@
 package controllers
 
-import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.EmailActor
-import actors.SessionsScheduler.RefreshSessionsSchedulers
 import akka.actor.ActorRef
 import controllers.EmailHelper.isValidEmail
 import models._
@@ -98,10 +96,11 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
+    Logger.error("----------> 111")
     val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
     val email = if (SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
     val loggedIn = SessionHelper.isLoggedIn
-
+Logger.error("----------> 222")
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -135,40 +134,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       }
   }
-
-  /*def renderCreateSessionByUser(sessionId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
-    request.body.asFormUrlEncoded.fold {
-      Logger.error("Something went wrong while getting data from the request")
-      Future.successful(BadRequest("Something went wrong while getting data from the request"))
-    } {form =>
-      Logger.info("Received request with data")
-      form.get("date").fold {
-        Logger.info("Something went wrong while getting date from the request")
-        Future.successful(BadRequest("Something went wrong while getting date from the request"))
-      } { dates =>
-        dates.headOption.fold {
-          Logger.info("No date found in the request")
-          Future.successful(BadRequest("No date found in the request"))
-        } { date =>
-          if (sessionId.isDefined) {
-            approvalSessionsRepository.getSession(sessionId.get).map { session =>
-              val createSessionInfo = CreateSessionInfo(
-                session.email,
-                new Date(session.date.value),
-                session.category,
-                session.subCategory,
-                session.topic,
-                session.meetup)
-
-              Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, new Date(session.date.value)))
-            }
-          } else {
-            Future.successful(Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId, new Date(dateTimeUtility.parseDateStringToIST(date)))))
-          }
-        }
-      }
-    }
-  }*/
 
   def renderCreateSessionByUser(sessionId: Option[String], date: String): Action[AnyContent] = userAction.async { implicit request =>
     Logger.info("Date recieved is ----> " + date)
@@ -243,9 +208,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       })
   }
 
-  def renderPendingSessionPage: Action[AnyContent] = adminAction { implicit request =>
+  /*def renderPendingSessionPage: Action[AnyContent] = adminAction { implicit request =>
     Ok(views.html.sessions.pendingsession())
-  }
+  }*/
 
   def getPendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.getAllSession map { pendingSessions =>

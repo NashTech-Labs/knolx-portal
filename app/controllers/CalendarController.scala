@@ -110,7 +110,7 @@ Logger.error("----------> 222")
             session.email,
             session.topic,
             session.meetup,
-            new Date(session.date.value).toString(),
+            new Date(session.date.value).toString,
             approved = true,
             decline = false,
             pending = false)
@@ -123,7 +123,7 @@ Logger.error("----------> 222")
               pendingSession.email,
               pendingSession.topic,
               pendingSession.meetup,
-              new Date(pendingSession.date.value).toString(),
+              new Date(pendingSession.date.value).toString,
               pendingSession.approved,
               pendingSession.decline,
               pending = true)

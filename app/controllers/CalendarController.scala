@@ -46,13 +46,13 @@ case class CalendarSession(id: String,
                            decline: Boolean,
                            pending: Boolean)
 
-case class UpdateApproveSessionInfo(email: String,
-                                    date: BSONDateTime,
-                                    category: String,
-                                    subCategory: String,
-                                    topic: String,
-                                    meetup: Boolean,
-                                    sessionId: String,
+case class UpdateApproveSessionInfo(date: BSONDateTime,
+                                    sessionId: String = "",
+                                    topic: String = "Free slot",
+                                    email: String = "",
+                                    category: String = "",
+                                    subCategory: String = "",
+                                    meetup: Boolean = false,
                                     approved: Boolean = false,
                                     decline: Boolean = false
                                    )
@@ -100,7 +100,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
     val email = if (SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
     val loggedIn = SessionHelper.isLoggedIn
-Logger.error("----------> 222")
+    Logger.error("----------> 222")
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -176,13 +176,14 @@ Logger.error("----------> 222")
         val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email
-          val session = UpdateApproveSessionInfo(presenterEmail,
+          val session = UpdateApproveSessionInfo(
             BSONDateTime(createSessionInfoByUser.date.getTime),
+            sessionId.fold("")(identity),
+            createSessionInfoByUser.topic,
+            presenterEmail,
             createSessionInfoByUser.category,
             createSessionInfoByUser.subCategory,
-            createSessionInfoByUser.topic,
-            createSessionInfoByUser.meetup,
-            sessionId.fold("")(identity))
+            createSessionInfoByUser.meetup)
           approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
             if (result.ok) {
               Logger.info(s"Session By user $presenterEmail with sessionId ${sessionId.fold("")(identity)} successfully created")
@@ -239,7 +240,7 @@ Logger.error("----------> 222")
   def updatePendingSessionDate(sessionId: String, date: String): Action[AnyContent] = userAction.async {
     Logger.info("Date received is " + date)
     approvalSessionsRepository.updateDateForPendingSession(sessionId, BSONDateTime(date.toLong)) map { result =>
-      if(result.ok) {
+      if (result.ok) {
         Logger.info("Successfully updated the date")
         Ok("Date for the session was successfully updated")
       } else {
@@ -248,14 +249,27 @@ Logger.error("----------> 222")
       }
     }
   }
+
   def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.declineSession(sessionId) map { result =>
-      if(result.ok) {
+      if (result.ok) {
         Logger.info(s"Successfuly declined session $sessionId")
         Ok("Successfully declined the session")
       } else {
         Logger.info(s"Something went wrong while declining session $sessionId")
         BadRequest("Something went wrong while declining session")
+      }
+    }
+  }
+
+  def insertFreeSlot(date: String): Action[AnyContent] = adminAction.async { implicit request =>
+    val formattedDate = BSONDateTime(dateTimeUtility.parseDateStringWithTToIST(date))
+    val approveSessionInfo = UpdateApproveSessionInfo(formattedDate)
+    approvalSessionsRepository.insertSessionForApprove(approveSessionInfo) map { result =>
+      if(result.ok) {
+        Ok("Free slot has been entered successfully.")
+      } else {
+        BadRequest("Something went wrong while entering free slot.")
       }
     }
   }

@@ -19,3 +19,18 @@
 .fc-event{
     cursor: default;
 }
+
+.dayClickWindow
+{
+    width:500px;
+    height:500px;
+    border-radius:15px;
+    background-color:#000;
+    position:absolute;
+    left:50%;
+    top:50%;
+    margin-top:-250px;
+    margin-left:-250px;
+    display:none;
+    z-index:1;
+}

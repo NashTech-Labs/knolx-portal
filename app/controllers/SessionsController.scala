@@ -512,9 +512,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                     if (result.ok) {
                       Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
                       sessionsScheduler ! RefreshSessionsSchedulers
-                      val approveSessionInfo = UpdateApproveSessionInfo(createSessionInfo.email, BSONDateTime(createSessionInfo.date.getTime),
-                        createSessionInfo.category, createSessionInfo.subCategory, createSessionInfo.topic, createSessionInfo.meetup,
-                        sessionApprovedId, approved = true)
+                      val approveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(createSessionInfo.date.getTime), sessionApprovedId, createSessionInfo.topic,
+                        createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory, createSessionInfo.meetup,
+                        approved = true)
                       approvalSessionsRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
                         if (updatedResult.ok) {
                           Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully created!")

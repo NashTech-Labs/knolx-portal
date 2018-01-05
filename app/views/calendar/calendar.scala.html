@@ -5,6 +5,7 @@
     <div style = "margin-top: 20px;"></div>
     <div class = "row">
         <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+        <div class="dayClickWindow"></div>
         <div id='calendar'></div>
         @if(SessionHelper.isAdmin) {
             <div>

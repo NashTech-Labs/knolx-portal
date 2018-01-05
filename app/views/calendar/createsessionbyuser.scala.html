@@ -1,4 +1,4 @@
-@(createSessionInfo: Form[CreateSessionInfo], sessionId: Option[String], date: java.time.LocalDateTime)(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionInfo: Form[CreateSessionInfo], sessionId: String, date: java.time.LocalDateTime)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Request Session") {
 
@@ -31,7 +31,7 @@
             <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId, date.toString)" method="post">
 
                 @helper.CSRF.formField
-                <input id="sessionId" value="@sessionId.fold("")(identity)" hidden />
+                <input id="sessionId" value="@sessionId" hidden />
                 <input id="primary-category" value="@createSessionInfo.data.get("category")" hidden />
                 <input id="sub-category" value="@createSessionInfo.data.get("subCategory")" hidden />
                 <input id="email" name="email" value="@SessionHelper.email" hidden />
@@ -89,11 +89,8 @@
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
                     <div class="col-md-2 loader-outer">
-                        <a href="@routes.CalendarController.renderCreateSessionByUser(None, date.toString())" class="btn" style="color: inherit;
-                                background: white;
-                                border: 1px solid #e7eaec;">Reset</a>
-                        <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"
-                        />
+                        <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"/>
+                        <a href="@routes.CalendarController.deleteFreeSlot(sessionId)" class="btn btn-danger">Delete</a>
                     </div>
                     <div class="col-md-6"></div>
                 </div>

@@ -27,6 +27,7 @@ case class ApproveSessionInfo(email: String,
                               meetup: Boolean = false,
                               approved: Boolean = false,
                               decline: Boolean = false,
+                              freeSlot: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
                              )
 
@@ -60,7 +61,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           "topic" -> approveSessionInfo.topic,
           "meetup" -> approveSessionInfo.meetup,
           "approved" -> approveSessionInfo.approved,
-          "decline" -> approveSessionInfo.decline
+          "decline" -> approveSessionInfo.decline,
+          "freeSlot" -> approveSessionInfo.freeSlot
         )
       )
     collection.flatMap(_.update(selector, modifier, upsert = true))
@@ -139,7 +141,14 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(selector)
           .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
-    
+
+  }
+
+  def deleteFreeSlot(id: String): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    collection
+      .flatMap(_.remove(selector))
   }
 
 }

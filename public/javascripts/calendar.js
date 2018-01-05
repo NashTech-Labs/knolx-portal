@@ -67,6 +67,10 @@ $(function () {
             } else {
                 revertFunc();
             }
+        },
+        validRange: {
+            start: moment().startOf('month'),
+            end: moment().startOf('month').add(3, 'M')
         }
     });
 });

@@ -58,7 +58,7 @@ $(function () {
                                 $.alert('Date must not be empty');
                                 return false;
                             }
-                            jsRoutes.controllers.CalendarController.insertFreeSlot(freeSlot).ajax(
+                            jsRoutes.controllers.CalendarController.insertFreeSlot(null, freeSlot).ajax(
                                 {
                                     type: 'GET',
                                     processData: false,
@@ -68,6 +68,7 @@ $(function () {
                                         return request.setRequestHeader('CSRF-Token', csrfToken);
                                     },
                                     success: function (data) {
+                                        $("#calendar").fullCalendar('refetchEvents');
                                         console.log("Successfully inserted the free slot with data  -----> " + data);
                                     },
                                     error: function (er) {
@@ -195,7 +196,16 @@ function getSessions(startDate, endDate, callback) {
                 var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
                 for (var i = 0; i < calendarSessions.length; i++) {
                     if (calendarSessions[i].pending) {
-                        if (calendarSessionsWithAuthority.isAdmin) {
+                        if(calendarSessions[i].freeSlot) {
+                            events.push({
+                                id: calendarSessions[i].id,
+                                title: calendarSessions[i].topic,
+                                start: calendarSessions[i].date,
+                                color: freeSlotColor,
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date.valueOf()).url
+                            });
+                        }
+                        else if (calendarSessionsWithAuthority.isAdmin) {
                             events.push({
                                 id: calendarSessions[i].id,
                                 title: calendarSessions[i].topic,
@@ -267,7 +277,7 @@ function getSessions(startDate, endDate, callback) {
                     }
                 }
 
-                var startDay = moment(startDate).set({'hour': 0, 'minute': 0, 'second': 0, 'millisecond': 0});
+                /*var startDay = moment(startDate).set({'hour': 0, 'minute': 0, 'second': 0, 'millisecond': 0});
                 var endDay = moment(endDate);
                 console.log("Start Date -> " + startDay);
                 console.log("End Date -> " + endDay);
@@ -297,7 +307,7 @@ function getSessions(startDate, endDate, callback) {
                         }
                     }
                     friday.add(7, 'd');
-                }
+                }*/
                 callback(events);
             },
             error: function (er) {

@@ -28,15 +28,16 @@
         } else {
             @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
                 <li class="dropdown alignLinks">
-                    <a href="#" class="notification-icon dropdown-toggle" data-toggle="dropdown" style="padding-right: 30px;">
+                    <a href="#" class="notification-icon dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                        <span class="number-circle"></span>
                     </a>
                     <ul class="dropdown-menu">
                         <li class="alignLinks">
                             <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
                         </li>
                         <li class="alignLinks">
-                            <a href="#"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
+                            <a href="#"><span>Pending recommendations for approval: <span id="pending-recommendations-number">0</span></span></a>
                         </li>
                     </ul>
                 </li>

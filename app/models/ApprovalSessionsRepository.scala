@@ -133,7 +133,7 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def getAllPendingSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
-    val selector = BSONDocument("freeSlot" -> BSONDocument("$ne" -> false))
+    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false))
 
     collection
       .flatMap(jsonCollection =>

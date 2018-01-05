@@ -111,21 +111,44 @@ function getSessions(startDate, endDate, callback) {
                             });
                         }
                     } else {
-                        if (calendarSessions[i].meetup) {
-                            events.push({
-                                title: calendarSessions[i].topic,
-                                start: calendarSessions[i].date,
-                                color: scheduledMeetup,
-                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
-                            });
+                        if (calendarSessionsWithAuthority.isAdmin) {
+                            if (calendarSessions[i].meetup) {
+                                events.push({
+                                    id: calendarSessions[i].id,
+                                    title: calendarSessions[i].topic,
+                                    start: calendarSessions[i].date,
+                                    color: scheduledMeetup,
+                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
+                                    url: jsRoutes.controllers.SessionsController.update(calendarSessions[i].id).url
+                                });
+                            } else {
+                                events.push({
+                                    id: calendarSessions[i].id,
+                                    title: calendarSessions[i].topic,
+                                    start: calendarSessions[i].date,
+                                    color: scheduledSession,
+                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
+                                    url: jsRoutes.controllers.SessionsController.update(calendarSessions[i].id).url
+                                });
+                            }
                         } else {
-                            events.push({
-                                id: calendarSessions[i].id,
-                                title: calendarSessions[i].topic,
-                                start: calendarSessions[i].date,
-                                color: scheduledSession,
-                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
-                            });
+                            if (calendarSessions[i].meetup) {
+                                events.push({
+                                    id: calendarSessions[i].id,
+                                    title: calendarSessions[i].topic,
+                                    start: calendarSessions[i].date,
+                                    color: scheduledMeetup,
+                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                                });
+                            } else {
+                                events.push({
+                                    id: calendarSessions[i].id,
+                                    title: calendarSessions[i].topic,
+                                    start: calendarSessions[i].date,
+                                    color: scheduledSession,
+                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                                });
+                            }
                         }
                     }
                 }

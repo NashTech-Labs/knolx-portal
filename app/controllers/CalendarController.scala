@@ -190,7 +190,7 @@ Logger.error("----------> 222")
                 adminAndSuperUser =>
                   emailManager ! EmailActor.SendEmail(
                     adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
-                    views.html.emails.sessionnotificationtoadmin(session).toString)
+                    views.html.emails.requestedsessionnotification(session).toString)
                   Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
               }
               Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))

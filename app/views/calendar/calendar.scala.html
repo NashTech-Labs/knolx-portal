@@ -13,16 +13,6 @@
             </div>
 
             <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-                <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-                    Show
-                    <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
-                        padding-right: 2px !important; ">
-                    @for(value <- List(10, 20, 30, 40, 50)) {
-                        <option value="@value">@value</option>
-                    }
-                    </select>
-                    Entries
-                </label>
 
                 @if(!flash.isEmpty) {
                     <div class="alert alert-success  alert-dismissable user-updated-message" style="margin-bottom: 15px;">

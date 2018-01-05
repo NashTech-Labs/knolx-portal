@@ -50,6 +50,8 @@ $(function getAllPendingSession() {
                 $('#pending-sessions').html(
                     "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td><td align='center'></td></tr>"
                 );
+
+                $('.pagination').html("");
             }
         })
 

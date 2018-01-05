@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import controllers.UpdateApproveSessionInfo
 import models.ApproveSessionJsonFormats._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.ReadPreference
@@ -24,7 +24,7 @@ case class ApproveSessionInfo(email: String,
                               category: String,
                               subCategory: String,
                               topic: String,
-                              meetup: Boolean =false,
+                              meetup: Boolean = false,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
@@ -77,10 +77,10 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def getAllSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
     collection.
       flatMap(jsonCollection =>
-        jsonCollection.
-          find(Json.obj()).
-          sort(Json.obj("decline" -> 1, "approved" -> 1)).
-          cursor[ApproveSessionInfo](ReadPreference.Primary)
+        jsonCollection
+          .find(Json.obj())
+          .sort(Json.obj("decline" -> 1, "approved" -> 1))
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 
@@ -93,8 +93,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 
-  def approveSession(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+  def approveSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "approved" -> true,
@@ -106,8 +106,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   }
 
-  def declineSession(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+  def declineSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "approved" -> false,
@@ -123,9 +123,7 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
-        "date" -> date
-      )
-    )
+        "date" -> date))
 
     collection
       .flatMap(jsonCollection =>

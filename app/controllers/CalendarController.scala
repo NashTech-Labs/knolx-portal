@@ -110,7 +110,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             session.email,
             session.topic,
             session.meetup,
-            new Date(session.date.value).toString(),
+            new Date(session.date.value).toString,
             approved = true,
             decline = false,
             pending = false)
@@ -123,7 +123,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               pendingSession.email,
               pendingSession.topic,
               pendingSession.meetup,
-              new Date(pendingSession.date.value).toString(),
+              new Date(pendingSession.date.value).toString,
               pendingSession.approved,
               pendingSession.decline,
               pending = true)
@@ -173,6 +173,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       },
       createSessionInfoByUser => {
+
         val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email
@@ -190,9 +191,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               usersRepository.getAllAdminAndSuperUser map {
                 adminAndSuperUser =>
                   emailManager ! EmailActor.SendEmail(
-                    adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
-                    views.html.emails.sessionnotificationtoadmin(createSessionInfoByUser.topic,
-                      createSessionInfoByUser.date).toString)
+                    adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
+                    views.html.emails.requestedsessionnotification(session).toString)
                   Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
               }
               Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
@@ -203,7 +203,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           }
         } else {
           Future.successful(
-            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" -> "Date submitted was wrong. Please try again.")
+            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId,
+              dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" ->
+              "Date submitted was wrong. Please try again.")
           )
         }
       })

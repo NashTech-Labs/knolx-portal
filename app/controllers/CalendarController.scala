@@ -100,7 +100,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
     val email = if (SessionHelper.isLoggedIn) None else Some(SessionHelper.email)
     val loggedIn = SessionHelper.isLoggedIn
-Logger.error("----------> 222")
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -173,6 +172,7 @@ Logger.error("----------> 222")
         }
       },
       createSessionInfoByUser => {
+
         val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email

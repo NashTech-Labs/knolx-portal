@@ -105,10 +105,10 @@ POST          /knolx/analysis/leaderboard                           controllers.
 #Calendar
 GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage
 GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
-GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, date: String)
-POST          /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, date: String)
-GET           /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String, date: String)
-POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String, date: String)
+GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String)
+POST          /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String)
+GET           /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
+POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
 GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.getPendingSessions
 GET           /knolx/sessions/pendingstatus                         controllers.CalendarController.getAllSessionForAdmin
 GET           /knolx/sessions/updatedate                            controllers.CalendarController.updatePendingSessionDate(sessionId: String, date: String)

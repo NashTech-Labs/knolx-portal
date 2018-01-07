@@ -159,24 +159,21 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }*/
 
-  def renderCreateSessionByUser(sessionId: String, date: String): Action[AnyContent] = userAction.async { implicit request =>
-    Logger.info("Date recieved is ----> " + date)
-      approvalSessionsRepository.getSession(sessionId).map { session =>
-        val createSessionInfo = CreateSessionInfo(
-          session.email,
-          new Date(session.date.value),
-          session.category,
-          session.subCategory,
-          session.topic,
-          session.meetup)
-        Logger.info("Date converted is ----> " + new Date(date.toLong))
-        Logger.info("Date converted is ----> " + new Date(session.date.value))
-        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId,
-          dateTimeUtility.toLocalDateTime(session.date.value)))
-      }
+  def renderCreateSessionByUser(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
+    approvalSessionsRepository.getSession(sessionId).map { session =>
+      val createSessionInfo = CreateSessionInfo(
+        session.email,
+        new Date(session.date.value),
+        session.category,
+        session.subCategory,
+        session.topic,
+        session.meetup)
+      Logger.info("Date converted is ----> " + new Date(session.date.value))
+      Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId))
+    }
   }
 
-  def createSessionByUser(sessionId: String, date: String): Action[AnyContent] = userAction.async { implicit request =>
+  def createSessionByUser(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
@@ -185,14 +182,14 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         } { date =>
           Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)))
           Future.successful(
-            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId,
-              dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date))))
+            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId))
           )
         }
       },
       createSessionInfoByUser => {
 
-        val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
+        approvalSessionsRepository.getSession(sessionId) flatMap { approveSessionInfo =>
+          val dateString = new Date(approveSessionInfo.date.value).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email
           val session = UpdateApproveSessionInfo(
@@ -221,12 +218,11 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           }
         } else {
           Future.successful(
-            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId,
-              dateTimeUtility.parseDateStringWithTToIST(date).toString)).flashing("message" ->
+            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId)).flashing("message" ->
               "Date submitted was wrong. Please try again.")
           )
         }
-      })
+      }})
   }
 
   /*def renderPendingSessionPage: Action[AnyContent] = adminAction { implicit request =>
@@ -274,7 +270,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.declineSession(sessionId) map { result =>
       if (result.ok) {
-        Logger.info(s"Successfuly declined session $sessionId")
+        Logger.info(s"Successfully declined session $sessionId")
         Ok("Successfully declined the session")
       } else {
         Logger.info(s"Something went wrong while declining session $sessionId")
@@ -287,7 +283,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     val formattedDate = BSONDateTime(dateTimeUtility.parseDateStringWithTToIST(date))
     val approveSessionInfo = UpdateApproveSessionInfo(formattedDate, id.fold("")(identity), freeSlot = true)
     approvalSessionsRepository.insertSessionForApprove(approveSessionInfo) map { result =>
-      if(result.ok) {
+      if (result.ok) {
         Ok("Free slot has been entered successfully.")
       } else {
         BadRequest("Something went wrong while entering free slot.")
@@ -297,7 +293,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   def deleteFreeSlot(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.deleteFreeSlot(id) map { result =>
-      if(result.ok) {
+      if (result.ok) {
         Logger.info("Successfully deleted the free slot")
         Ok("Successfully deleted the free slot")
       } else {

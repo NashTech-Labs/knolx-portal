@@ -1,4 +1,4 @@
-@(createSessionInfo: Form[CreateSessionInfo], sessionId: String, date: java.time.LocalDateTime)(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionInfo: Form[CreateSessionInfo], sessionId: String)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Request Session") {
 
@@ -28,7 +28,7 @@
     <div class="row">
         <div class="col-md-12 create-outer">
 
-            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId, date.toString)" method="post">
+            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId)" method="post">
 
                 @helper.CSRF.formField
                 <input id="sessionId" value="@sessionId" hidden />
@@ -40,12 +40,10 @@
                 <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
-                        <input type="datetime-local" value=@if(createSessionInfo.data.get("date").isDefined) {
-                            '@createSessionInfo.data.get("date")'
-                        } else {
-                            '@date'
-                        } name="date" id="date"
-                               placeholder="Date" required class="update-field reg" readonly/>
+                        <input type="datetime-local" value='@createSessionInfo.data.get("date")' name="date" id="date"
+                               placeholder="Date" required class="update-field reg" @if(!SessionHelper.isAdmin && !SessionHelper.isSuperUser) {
+                        readonly
+                    } />
                     </div>
                 </div>
 
@@ -88,15 +86,20 @@
                 <div class="col-md-12 login-four">
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
-                    <div class="col-md-2 loader-outer">
+                    <div class="col-md-4 loader-outer">
                         <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"/>
-                        <a href="@routes.CalendarController.deleteFreeSlot(sessionId)" class="btn btn-danger">Delete</a>
+                        @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
+                            <div id="update-free-slot" class="btn btn-info">Update</div>
+                            <div id="delete-free-slot" class="btn btn-danger">Delete</div>
+                        }
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-4"></div>
                 </div>
             </form>
         </div>
     </div>
+
+    <script type="text/javascript" src="@routes.Assets.versioned("javascripts/calendar.js")"></script>
 
 }
 

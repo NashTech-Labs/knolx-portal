@@ -132,6 +132,18 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.update(selector, modifier))
   }
 
+  def getAllPendingSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+
+  }
+
   def deleteFreeSlot(id: String): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 

@@ -184,40 +184,40 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       createSessionInfoByUser => {
         approvalSessionsRepository.getSession(sessionId) flatMap { approveSessionInfo =>
           val dateString = new Date(approveSessionInfo.date.value).toString
-        val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
-        if (dateString.equals(createSessionInfoByUser.date.toString)) {
-          val presenterEmail = request.user.email
-          val session = UpdateApproveSessionInfo(
-            BSONDateTime(createSessionInfoByUser.date.getTime),
-            sessionId,
-            createSessionInfoByUser.topic,
-            presenterEmail,
-            createSessionInfoByUser.category,
-            createSessionInfoByUser.subCategory,
-            createSessionInfoByUser.meetup)
-          approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
-            if (result.ok) {
-              Logger.info(s"Session By user $presenterEmail with sessionId $sessionId successfully created")
-              usersRepository.getAllAdminAndSuperUser map {
-                adminAndSuperUser =>
-                  emailManager ! EmailActor.SendEmail(
-                    adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
-                    views.html.emails.requestedsessionnotification(session).toString)
-                  Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+          if (dateString.equals(createSessionInfoByUser.date.toString)) {
+            val presenterEmail = request.user.email
+            val session = UpdateApproveSessionInfo(
+              BSONDateTime(createSessionInfoByUser.date.getTime),
+              sessionId,
+              createSessionInfoByUser.topic,
+              presenterEmail,
+              createSessionInfoByUser.category,
+              createSessionInfoByUser.subCategory,
+              createSessionInfoByUser.meetup)
+            approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
+              if (result.ok) {
+                Logger.info(s"Session By user $presenterEmail with sessionId $sessionId successfully created")
+                usersRepository.getAllAdminAndSuperUser map {
+                  adminAndSuperUser =>
+                    emailManager ! EmailActor.SendEmail(
+                      adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
+                      views.html.emails.requestedsessionnotification(session).toString)
+                    Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+                }
+                Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
+              } else {
+                Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
+                Future.successful(InternalServerError("Something went wrong!"))
               }
-              Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
-            } else {
-              Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
-              Future.successful(InternalServerError("Something went wrong!"))
             }
+          } else {
+            Future.successful(
+              Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId)).flashing("message" ->
+                "Date submitted was wrong. Please try again.")
+            )
           }
-        } else {
-          Future.successful(
-            Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId)).flashing("message" ->
-              "Date submitted was wrong. Please try again.")
-          )
         }
-      }})
+      })
   }
 
   /*def renderPendingSessionPage: Action[AnyContent] = adminAction { implicit request =>

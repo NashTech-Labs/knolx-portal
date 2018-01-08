@@ -191,7 +191,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
       },
       createSessionInfoByUser => {
-
         val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email

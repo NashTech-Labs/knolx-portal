@@ -97,6 +97,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       case "approved" => Json.obj("approved" -> true)
       case "decline"  => Json.obj("decline" -> true)
       case "pending"  => Json.obj("pending" -> true)
+      case "book"     => Json.obj("book" -> true)
       case "done"     => Json.obj("done" -> true)
       case _          => Json.obj()
     }

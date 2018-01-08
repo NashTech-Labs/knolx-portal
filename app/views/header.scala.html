@@ -65,6 +65,12 @@
                     <span>Analysis</span></a>
             </li>
 
+            <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Recommendation">
+                <a href="@routes.RecommendationController.renderRecommendationPage">
+                    <i class="fa fa-inbox"></i>
+                    <span>Recommendation</span></a>
+            </li>
+
             @if(!SessionHelper.isLoggedIn) {
 
 

@@ -177,14 +177,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     createSessionFormByUser.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received a bad request for create session $formWithErrors")
-        formWithErrors.data.get("date").fold {
-          Future.successful(BadRequest("Cannot get date from the request"))
-        } { date =>
-          Logger.error("33333333333->" + dateTimeUtility.toLocalDateTime(dateTimeUtility.parseDateStringWithTToIST(date)))
-          Future.successful(
-            BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId))
-          )
-        }
+        Future.successful(
+          BadRequest(views.html.calendar.createsessionbyuser(createSessionFormByUser, sessionId))
+        )
       },
       createSessionInfoByUser => {
 

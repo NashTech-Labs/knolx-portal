@@ -203,18 +203,16 @@ function getSessions(startDate, endDate, callback) {
                                 start: calendarSessions[i].date,
                                 color: pendingSessionColor,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.SessionsController.renderApproveSessionByAdmin(calendarSessions[i].id).url,
-                                editable: true
+                                url: jsRoutes.controllers.SessionsController.renderApproveSessionByAdmin(calendarSessions[i].id).url
                             });
-                        } else if (calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
+                        } else if (!calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
                             events.push({
                                 id: calendarSessions[i].id,
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
                                 color: pendingSessionColor,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url,
-                                editable: true
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url
                             });
                         } else {
                             events.push({

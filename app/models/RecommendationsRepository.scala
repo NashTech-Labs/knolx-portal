@@ -30,6 +30,7 @@ case class RecommendationInfo(email: Option[String],
                               decline: Boolean = false,
                               pending: Boolean = true,
                               done: Boolean = false,
+                              book: Boolean = false,
                               upVotes: Int = 0,
                               downVotes: Int = 0,
                               _id: BSONObjectID = BSONObjectID.generate())
@@ -164,6 +165,19 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       "$set" -> BSONDocument(
         "pending" -> false,
         "done" -> true,
+        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def bookRecommendation(id: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id), "approved" -> true)
+
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "book" -> true,
         "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
 
     collection

@@ -184,7 +184,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       createSessionInfoByUser => {
         approvalSessionsRepository.getSession(sessionId) flatMap { approveSessionInfo =>
           val dateString = new Date(approveSessionInfo.date.value).toString
-        val dateString = new Date(dateTimeUtility.parseDateStringWithTToIST(date)).toString
         if (dateString.equals(createSessionInfoByUser.date.toString)) {
           val presenterEmail = request.user.email
           val session = UpdateApproveSessionInfo(

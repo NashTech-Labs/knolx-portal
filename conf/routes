@@ -52,7 +52,7 @@ POST          /session/update                                       controllers.
 GET           /session/update                                       controllers.SessionsController.update(id: String)
 GET           /session/:sessionId/cancel                            controllers.SessionsController.cancelScheduledSession(sessionId: String)
 GET           /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
-GET           /session/content/:sessionId                           controllers.SessionsController.shaontent(sessionId: String)
+GET           /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
 GET           /session/sendemail                                    controllers.SessionsController.sendEmailToPresenter(sessionId: String)
 POST          /session/approvesession                               controllers.SessionsController.approveSessionByAdmin(sessionId: String)
 GET           /session/approvesession                               controllers.SessionsController.renderApproveSessionByAdmin(sessionId: String)

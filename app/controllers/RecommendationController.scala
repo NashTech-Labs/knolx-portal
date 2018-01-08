@@ -26,7 +26,7 @@ case class Recommendation(email: Option[String],
                           decline: Option[Boolean],
                           pending: Boolean,
                           done: Boolean,
-                          book : Boolean,
+                          book: Boolean,
                           isLoggedIn: Boolean,
                           votes: Int,
                           upVote: Boolean,
@@ -88,7 +88,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   def renderRecommendationPage: Action[AnyContent] = action { implicit request =>
-    val email = if(!SessionHelper.isLoggedIn) Some(SessionHelper.email) else None
+    val email = if (!SessionHelper.isLoggedIn) Some(SessionHelper.email) else None
     Ok(views.html.recommendations.recommendation(email))
   }
 
@@ -120,10 +120,10 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               usersRepository.getAllAdminAndSuperUser map {
                 adminAndSuperUser =>
 
-                emailManager ! EmailActor.SendEmail(
-                  adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
-                  views.html.emails.recommendationnotification(recommendation.name,recommendation.topic).toString)
-                Logger.error(s"Email has been successfully sent to admin/superUser for recommendation submitted by ${recommendation.name}")
+                  emailManager ! EmailActor.SendEmail(
+                    adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                    views.html.emails.recommendationnotification(recommendation.name, recommendation.topic).toString)
+                  Logger.error(s"Email has been successfully sent to admin/superUser for recommendation submitted by ${recommendation.name}")
               }
               Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
             } else {

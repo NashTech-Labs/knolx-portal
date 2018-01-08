@@ -65,7 +65,15 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.CalendarController.updatePendingSessionDate,
       controllers.routes.javascript.CalendarController.declineSession,
       controllers.routes.javascript.CalendarController.insertFreeSlot,
-      controllers.routes.javascript.CalendarController.deleteFreeSlot
+      controllers.routes.javascript.CalendarController.deleteFreeSlot,
+      controllers.routes.javascript.RecommendationController.recommendationList,
+      controllers.routes.javascript.RecommendationController.addRecommendation,
+      controllers.routes.javascript.RecommendationController.approveRecommendation,
+      controllers.routes.javascript.RecommendationController.declineRecommendation,
+      controllers.routes.javascript.RecommendationController.upVote,
+      controllers.routes.javascript.RecommendationController.downVote,
+      controllers.routes.javascript.RecommendationController.pendingRecommendation,
+      controllers.routes.javascript.RecommendationController.doneRecommendation
     )).as("text/javascript")
   }
 

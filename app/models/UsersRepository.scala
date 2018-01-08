@@ -245,5 +245,4 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
       ).map(_.flatMap(_ ("email").asOpt[String]))
 
   }
-
 }

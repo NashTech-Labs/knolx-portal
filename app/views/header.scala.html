@@ -26,6 +26,22 @@
                     <span>Register</span></a>
             </li>
         } else {
+            @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
+                <li class="dropdown alignLinks">
+                    <a href="#" class="notification-icon dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                        <span class="number-circle"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="alignLinks">
+                            <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
+                        </li>
+                        <li class="alignLinks">
+                            <a href="#"><span>Pending recommendations for approval: <span id="pending-recommendations-number">0</span></span></a>
+                        </li>
+                    </ul>
+                </li>
+            }
             <li class="dropdown alignLinks">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-right: 30px;">
                     <i class="fa fa-user-circle-o"></i> <span>@SessionHelper.email.split("@")(0).split('.')(0).capitalize
@@ -65,10 +81,10 @@
                     <span>Analysis</span></a>
             </li>
 
-            <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Recommendation">
-                <a href="@routes.RecommendationController.renderRecommendationPage">
-                    <i class="fa fa-inbox"></i>
-                    <span>Recommendation</span></a>
+            <li class="@activeLink(routes.CalendarController.renderCalendarPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Calendar">
+                <a href="@routes.CalendarController.renderCalendarPage">
+                    <i class="fa fa-calendar"></i>
+                    <span>Calendar</span></a>
             </li>
 
             @if(!SessionHelper.isLoggedIn) {

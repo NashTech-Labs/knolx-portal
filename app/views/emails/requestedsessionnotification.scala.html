@@ -1,0 +1,16 @@
+@import actors._
+@import java.util.Date
+
+@(approveSessionInfo: UpdateApproveSessionInfo)
+
+<p>Hi,</p>
+
+<p>A session is requested by @approveSessionInfo.email with following details</p>
+<ul>
+    <li>Topic -> @approveSessionInfo.topic</li>
+    <li>Date -> @(new Date(approveSessionInfo.date.value))</li>
+    <li>Category -> @approveSessionInfo.category</li>
+    <li>Sub-Category -> @approveSessionInfo.subCategory</li>
+</ul>
+
+<p>Please review session details and take the required action.</p>

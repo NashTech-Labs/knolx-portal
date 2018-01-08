@@ -22,6 +22,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.SessionsController.update,
       controllers.routes.javascript.SessionsController.deleteSession,
       controllers.routes.javascript.SessionsController.sendEmailToPresenter,
+      controllers.routes.javascript.SessionsController.approveSessionByAdmin,
+      controllers.routes.javascript.SessionsController.renderApproveSessionByAdmin,
       controllers.routes.javascript.FeedbackFormsResponseController.storeFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.fetchFeedbackFormResponse,
       controllers.routes.javascript.FeedbackFormsResponseController.getFeedbackFormsForToday,
@@ -56,14 +58,14 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.KnolxUserAnalysisController.getUserDidNotAttendSessionCount,
       controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalKnolx,
       controllers.routes.javascript.KnolxUserAnalysisController.getUserTotalMeetUps,
-      controllers.routes.javascript.RecommendationController.recommendationList,
-      controllers.routes.javascript.RecommendationController.addRecommendation,
-      controllers.routes.javascript.RecommendationController.approveRecommendation,
-      controllers.routes.javascript.RecommendationController.declineRecommendation,
-      controllers.routes.javascript.RecommendationController.upVote,
-      controllers.routes.javascript.RecommendationController.downVote,
-      controllers.routes.javascript.RecommendationController.pendingRecommendation,
-      controllers.routes.javascript.RecommendationController.doneRecommendation
+      controllers.routes.javascript.CalendarController.calendarSessions,
+      controllers.routes.javascript.CalendarController.renderCreateSessionByUser,
+      controllers.routes.javascript.CalendarController.getPendingSessions,
+      controllers.routes.javascript.CalendarController.getAllSessionForAdmin,
+      controllers.routes.javascript.CalendarController.updatePendingSessionDate,
+      controllers.routes.javascript.CalendarController.declineSession,
+      controllers.routes.javascript.CalendarController.insertFreeSlot,
+      controllers.routes.javascript.CalendarController.deleteFreeSlot
     )).as("text/javascript")
   }
 

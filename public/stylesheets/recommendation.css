@@ -121,7 +121,7 @@
     color: #fff;
     text-shadow: none;
     background-color: rgb(125, 158, 192);
-    padding: 10px;
+    padding: 20px 10px;
     background-image: url(../images/mesh.svg);
     background-repeat: no-repeat;
     background-size: cover;
@@ -219,4 +219,23 @@
 
 .recommendation-description-content::placeholder {
     color:#9E9E9E !important;
+}
+
+.recommendation-type {
+    position: absolute;
+    top: -2px;
+    right: 2px;
+    z-index: 777;
+    border-radius: 0px;
+    margin: 0;
+    width: 60px;
+    height: 20px;
+    font-size: 12px;
+}
+
+.book-session {
+    height: 22px;
+    padding-top: 0px;
+    margin-left: -2px;
+    margin-top: -5px;
 }

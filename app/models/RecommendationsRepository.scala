@@ -76,6 +76,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       "$set" -> BSONDocument(
         "approved" -> false,
         "decline" -> true,
+        "pending" -> false,
         "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)
       ))
 

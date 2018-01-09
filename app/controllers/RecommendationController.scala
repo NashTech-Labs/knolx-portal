@@ -92,7 +92,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     Ok(views.html.recommendations.recommendation(email))
   }
 
-  def addRecommendation: Action[JsValue] = action(parse.json).async { implicit request =>
+  def addRecommendation(): Action[JsValue] = action(parse.json).async { implicit request =>
     request.body.validate[RecommendationInformation].asOpt.fold {
       Logger.error(s"Received a bad request for adding recommendation")
       Future.successful(BadRequest("Received a bad request due to malformed data"))
@@ -175,7 +175,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               recommendation.recommendation,
               None,
               None,
-              None,
+              Some(recommendation.approved),
               None,
               recommendation.pending,
               recommendation.done,

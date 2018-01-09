@@ -8,7 +8,13 @@ var freeSlotId = 0;
 var dragStart = 0;
 var isAdmin = false;
 
+window.onbeforeunload = function () {
+    sessionStorage.removeItem("recommendationId");
+};
+
 $(function () {
+
+    var id = sessionStorage.getItem("recommendationId");
 
     $('#calendar').fullCalendar({
         events: function (start, end, timezone, callback) {
@@ -199,7 +205,7 @@ function getSessions(startDate, endDate, callback) {
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
                                 color: freeSlotColor,
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].freeSlot).url
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].freeSlot, id).url
                             });
                         }
                         else if (calendarSessionsWithAuthority.isAdmin) {

@@ -285,6 +285,7 @@ function Recommendation() {
         if (typeof(Storage) !== "undefined") {
             sessionStorage.setItem("recommendationId", id);
         }
+        window.location = jsRoutes.controllers.CalendarController.renderCalendarPage(true).url
     };
 
 

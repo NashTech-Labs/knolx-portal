@@ -92,7 +92,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     )(CreateSessionInfo.apply)(CreateSessionInfo.unapply)
   )
 
-  def renderCalendarPage: Action[AnyContent] = action { implicit request =>
+  def renderCalendarPage(isRecommendation: Boolean = false): Action[AnyContent] = action { implicit request =>
     Ok(views.html.calendar.calendar())
   }
 

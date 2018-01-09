@@ -103,7 +103,7 @@ POST          /knolx/analysis/linechart                             controllers.
 POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard
 
 #Calendar
-GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage
+GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage()
 GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
 GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)
 POST          /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)

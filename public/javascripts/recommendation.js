@@ -143,7 +143,6 @@ function Recommendation() {
     self.recommendation = ko.observableArray([]);
 
     self.upVoteByUser = function (id) {
-        console.log("idddd" + id);
 
         jsRoutes.controllers.RecommendationController.upVote(id).ajax(
             {
@@ -167,7 +166,6 @@ function Recommendation() {
     };
 
     self.downVoteByUser = function (id) {
-        console.log("idddd111" + id);
         jsRoutes.controllers.RecommendationController.downVote(id).ajax(
             {
                 type: "POST",
@@ -283,6 +281,12 @@ function Recommendation() {
         )
     };
 
+    self.requestByUser = function (id) {
+        if (typeof(Storage) !== "undefined") {
+            sessionStorage.setItem("recommendationId", id);
+        }
+    };
+
 
     function FetchRecommendationList(pageNumber, filter, sortBy) {
 
@@ -304,18 +308,6 @@ function Recommendation() {
                 }
             }
         )
-    }
-
-    function getRecommendationId() {
-        if (typeof(Storage) !== "undefined") {
-            // Store
-            localStorage.setItem("recommendationId", "");
-            // Retrieve
-            document.getElementById("recommendation-id").innerHTML = localStorage.getItem("recommendationId");
-        } else {
-            document.getElementById("recommendation-id").innerHTML = "Sorry, your browser does not support Web Storage...";
-        }
-
     }
 
 }

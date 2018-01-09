@@ -11,7 +11,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
@@ -70,6 +70,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    approvalSessionsRepository: ApprovalSessionsRepository,
+                                   recommendationsRepository: RecommendationsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
@@ -139,13 +140,42 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   def renderCreateSessionByUser(sessionId: String,
                                 recommendationId: Option[String],
                                 isFreeSlot: Boolean): Action[AnyContent] = userAction.async { implicit request =>
+    approvalSessionsRepository.getAllFreeSlots flatMap { freeSlots =>
+      val freeSlotDates = freeSlots.map { freeSlot =>
+        dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
+      }
+      approvalSessionsRepository.getSession(sessionId) flatMap { session =>
+        val eventualTopic = recommendationId.fold(Future.successful(session.topic)) { recommendationId =>
+          recommendationsRepository.getRecommendationById(recommendationId).map { recommendationInfo =>
+            recommendationInfo.fold(session.topic)(_.topic)
+          }
+        }
+        eventualTopic flatMap { topic =>
+          val createSessionInfo = CreateSessionInfo(
+            session.email,
+            new Date(session.date.value),
+            session.category,
+            session.subCategory,
+            topic,
+            session.meetup)
+          Future.successful(
+            Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot))
+          )
+        }
+      }
+    }
+  }
+
+  /*private def createSessionPage(sessionId: String,
+                                recommendationTopic: Option[String],
+                                isFreeSlot: Boolean): Future[Result] = {
     approvalSessionsRepository.getSession(sessionId) flatMap { session =>
       val createSessionInfo = CreateSessionInfo(
         session.email,
         new Date(session.date.value),
         session.category,
         session.subCategory,
-        session.topic,
+        recommendationTopic.fold(session.topic)(identity),
         session.meetup)
       approvalSessionsRepository.getAllFreeSlots map { freeSlots =>
         val freeSlotDates = freeSlots.map { freeSlot =>
@@ -154,7 +184,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot))
       }
     }
-  }
+  }*/
 
   def createSessionByUser(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
     approvalSessionsRepository.getAllFreeSlots flatMap { freeSlots =>
@@ -318,7 +348,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
       } else {
         Logger.info("Something went wring while deleting the free slot")
-        Redirect(routes.CalendarController.renderCreateSessionByUser(id, isFreeSlot = true))
+        Redirect(routes.CalendarController.renderCreateSessionByUser(id, None, isFreeSlot = true))
           .flashing("message" -> "Something went wrong while deleting the free slot")
       }
     }

@@ -79,7 +79,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
           .find(selector)
           .cursor[RecommendationInfo](ReadPreference.Primary)
           .headOption)
-    )
   }
 
   def declineRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {

@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import controllers.UpdateApproveSessionInfo
 import models.ApproveSessionJsonFormats._
+import play.api.Logger
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
@@ -76,19 +77,29 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[ApproveSessionInfo](ReadPreference.Primary).head)
   }
 
-  def getAllSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
-    collection.
-      flatMap(jsonCollection =>
+  def getAllSessions(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] =
+    collection
+      .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj())
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+
+  def getAllBookedSessions(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
           .sort(Json.obj("decline" -> 1, "approved" -> 1))
           .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 
   def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
-    collection.
-      flatMap(jsonCollection =>
+    collection
+      .flatMap(jsonCollection =>
         jsonCollection.
           find(Json.obj("approved" -> true)).
           cursor[ApproveSessionInfo](ReadPreference.Primary)
@@ -133,7 +144,9 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def getAllPendingSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
-    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false))
+    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false),
+      "approved" -> BSONDocument("$eq" -> false),
+      "decline" -> BSONDocument("$eq" -> false))
 
     collection
       .flatMap(jsonCollection =>
@@ -149,6 +162,62 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
     collection
       .flatMap(_.remove(selector))
+  }
+
+  def getAllFreeSlots: Future[List[ApproveSessionInfo]] = {
+    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> true))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+  }
+
+  def deleteFreeSlotByDate(date: BSONDateTime): Future[WriteResult] = {
+    val selector = BSONDocument("date" -> date)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .remove(selector))
+  }
+
+  def getFreeSlotByDate(date: BSONDateTime): Future[Option[ApproveSessionInfo]] = {
+    val selector = BSONDocument("date" -> date)
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
+          .cursor[ApproveSessionInfo](ReadPreference.Primary).headOption)
+  }
+
+  def swapSlot(approveSessionInfo: UpdateApproveSessionInfo, id: BSONObjectID)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    Logger.info("Updating session ---> " + approveSessionInfo)
+    //val selector = BSONDocument("date" -> approveSessionInfo.date)
+    val selector = BSONDocument("_id" -> id)
+
+    val modifier =
+      BSONDocument(
+        "$set" -> BSONDocument(
+          "email" -> approveSessionInfo.email,
+          "date" -> approveSessionInfo.date,
+          "category" -> approveSessionInfo.category,
+          "subCategory" -> approveSessionInfo.subCategory,
+          "topic" -> approveSessionInfo.topic,
+          "meetup" -> approveSessionInfo.meetup,
+          "approved" -> approveSessionInfo.approved,
+          "decline" -> approveSessionInfo.decline,
+          "freeSlot" -> approveSessionInfo.freeSlot
+        )
+      )
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .update(selector, modifier))
   }
 
 }

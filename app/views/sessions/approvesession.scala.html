@@ -85,7 +85,7 @@
                 <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
-                        <input type="datetime-local" value=@if(createSessionForm.data.get("date")) {
+                        <input type="datetime-local" value=@if(createSessionForm.data.get("date").isDefined) {
                             '@createSessionForm.data.get("date")'
                         } else {
                         '@session.dateString'

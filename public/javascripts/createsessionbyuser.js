@@ -1,6 +1,7 @@
 $(document).ready(function () {
 
     $('#category, #subCategory').select2();
+    $('#select-date').select2();
 
     jsRoutes.controllers.SessionsCategoryController.getCategory().ajax(
         {

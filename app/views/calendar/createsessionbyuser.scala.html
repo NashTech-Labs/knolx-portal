@@ -1,10 +1,10 @@
-@(createSessionInfo: Form[CreateSessionInfo], sessionId: String)(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionInfo: Form[CreateSessionInfo], sessionId: String, freeSlotDates: List[String], isFreeSlot: Boolean)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Request Session") {
 
     <div class="row ">
         <div class="header-container">
-            <h2 style="margin-top:10px;">Add Session</h2>
+            <h2 style="margin-top: 10px;">Add Session</h2>
         </div>
     </div>
 
@@ -12,10 +12,36 @@
         <div class="col-md-12">
             <div class="col-md-3"></div>
             <div class="col-md-6">
-            @if(!flash.isEmpty) {
-                <div class="alert alert-danger fade in " style="margin-bottom: 0!important;">
+            @if(createSessionInfo.hasGlobalErrors || createSessionInfo("email").hasErrors ||
+                    createSessionInfo("date").hasErrors || createSessionInfo("category").hasErrors ||
+                    createSessionInfo("subCategory").hasErrors || createSessionInfo("topic").hasErrors ||
+                    createSessionInfo("meetup").hasErrors || !flash.isEmpty) {
+                <div class="alert alert-danger fade in " style="margin-bottom: 0 !important;">
                     <ul>
-                        <li>@flash.get("message").fold("")(message => message)</li>
+                        @if(createSessionInfo.hasGlobalErrors) {
+                            <li>@createSessionInfo.globalError.map(_.message)</li>
+                        }
+                        @if(!flash.isEmpty) {
+                            <li>@flash.get("message").fold("")(message => message)</li>
+                        }
+                        @if(createSessionInfo("email").hasErrors) {
+                            <li>@createSessionInfo("email").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionInfo("date").hasErrors) {
+                            <li>@createSessionInfo("date").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionInfo("category").hasErrors) {
+                            <li>@createSessionInfo("category").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionInfo("subCategory").hasErrors) {
+                            <li>@createSessionInfo("subCategory").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionInfo("topic").hasErrors) {
+                            <li>@createSessionInfo("topic").error.map(error => messages(error.message))</li>
+                        }
+                        @if(createSessionInfo("meetup").hasErrors) {
+                            <li>@createSessionInfo("meetup").error.map(error => messages(error.message))</li>
+                        }
                     </ul>
                 </div>
             }
@@ -30,20 +56,29 @@
 
             <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId)" method="post">
 
-                @helper.CSRF.formField
+                <input value="@helper.CSRF.getToken.value" id="csrfToken" name="csrfToken" hidden/>
                 <input id="sessionId" value="@sessionId" hidden />
                 <input id="primary-category" value="@createSessionInfo.data.get("category")" hidden />
                 <input id="sub-category" value="@createSessionInfo.data.get("subCategory")" hidden />
                 <input id="email" name="email" value="@SessionHelper.email" hidden />
                 <div class="save-user-changes"></div>
 
-                <div class="col-md-12 disp-inline form-group">
+                <div class="col-md-12 login-third update-second disp-inline form-group">
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
-                        <input type="datetime-local" value='@createSessionInfo.data.get("date")' name="date" id="date"
-                               placeholder="Date" required class="update-field reg" @if(!SessionHelper.isAdmin && !SessionHelper.isSuperUser) {
-                        readonly
-                    } />
+                        <select name="date" id="select-date" class="update-field login-second">
+                            @if(!isFreeSlot) {
+                                @for(freeSlotDate <- freeSlotDates) {
+                                        <option value="@freeSlotDate">@{freeSlotDate.replace("T", " ")}</option>
+                                }
+                                <option value="@createSessionInfo.data.get("date")" selected>@createSessionInfo.data.getOrElse("date", "").replace("T", " ")</option>
+                            } else {
+                                <option value='@createSessionInfo.data.get("date")' selected>@{createSessionInfo.data.get("date").fold(""){ date =>
+                                  date.replace("T", " ")
+                                }
+                            }</option>
+                                }
+                        </select>
                     </div>
                 </div>
 
@@ -69,7 +104,7 @@
                     <label class="col-md-2 control-label">Session's Topic</label>
                     <div class="col-md-10">
                         <input type="text" name="topic" id="topic" value='@createSessionInfo.data.get("topic")'
-                               placeholder="Topic" required class="update-field"/>
+                        placeholder="Topic" required class="update-field"/>
                     </div>
                 </div>
 
@@ -100,6 +135,7 @@
     </div>
 
     <script type="text/javascript" src="@routes.Assets.versioned("javascripts/calendar.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.versioned("javascripts/createsessionbyuser.js")"></script>
 
 }
 

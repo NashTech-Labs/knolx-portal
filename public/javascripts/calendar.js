@@ -174,6 +174,12 @@ $(function () {
         console.log("date ------> " + date);
         upsertFreeSlot(id, date);
     });
+
+    $("#delete-free-slot").click(function () {
+        var id = $("#sessionId").val();
+        console.log("Id ------> " + id);
+        deleteFreeSlot(id);
+    });
 });
 
 function getSessions(startDate, endDate, callback) {
@@ -193,7 +199,7 @@ function getSessions(startDate, endDate, callback) {
                                 title: calendarSessions[i].topic,
                                 start: calendarSessions[i].date,
                                 color: freeSlotColor,
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date.valueOf()).url
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].freeSlot).url
                             });
                         }
                         else if (calendarSessionsWithAuthority.isAdmin) {
@@ -212,7 +218,7 @@ function getSessions(startDate, endDate, callback) {
                                 start: calendarSessions[i].date,
                                 color: pendingSessionColor,
                                 data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].date).url
+                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].freeSlot).url
                             });
                         } else {
                             events.push({
@@ -357,4 +363,39 @@ function upsertFreeSlot(id, date) {
             }
         }
     )
+}
+
+function deleteFreeSlot(id) {
+    var form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = jsRoutes.controllers.CalendarController.deleteFreeSlot(id).url;
+    form.style.display = "none";
+
+    var csrfToken = $("#csrfToken").val();
+    console.log("csrfToken --> " + csrfToken);
+
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.value = csrfToken;
+    input.id = "csrfToken";
+    input.name = "csrfToken";
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    /*jsRoutes.controllers.CalendarController.deleteFreeSlot(id).ajax(
+        {
+            type: 'GET',
+            success: function (data) {
+                console.log("Free slot has been successfully deleted");
+                window.location.href = jsRoutes.controllers.CalendarController.renderCalendarPage().url;
+            },
+            error: function (er) {
+                console.log("An error occurred while deleting the free slot");
+            }
+        }
+    )*/
 }

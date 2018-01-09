@@ -3,8 +3,6 @@ var pendingSessionColor = '#f0ad4e';
 var scheduledSession = '#31b0d5';
 var scheduledMeetup = '#8e44ad';
 var freeSlotColor = '#27ae60';
-var allowedNoOfSessions = 2;
-var freeSlotId = 0;
 var dragStart = 0;
 var isAdmin = false;
 
@@ -32,10 +30,6 @@ $(function () {
         eventClick: function (event) {
             if (event.url) {
                 window.open(event.url);
-                /*openWindowWithPost(event.url, {
-                    date: event.start,
-                    csrfToken: $('#csrfToken').val()
-                });*/
                 return false;
             }
         },
@@ -47,7 +41,7 @@ $(function () {
                     content: '' +
                     '<form action="" class="formName">' +
                     '<div class="form-group">' +
-                    '<input type="datetime-local" id="free-slot" value="' + formattedDate + '" class="update-field login-second" />' +
+                    '<input type="datetime-local" id="free-slot" value="' + formattedDate + '" class="update-field login-second"/>' +
                     '</div>' +
                     '</form>',
                     buttons: {
@@ -71,7 +65,6 @@ $(function () {
                                         },
                                         success: function (data) {
                                             $("#calendar").fullCalendar('refetchEvents');
-                                            console.log("Successfully inserted the free slot with data  -----> " + data);
                                         },
                                         error: function (er) {
                                             console.log("Error with responseText -----> " + er.responseText);
@@ -89,95 +82,19 @@ $(function () {
                         this.$content.find('form').on('submit', function (e) {
                             e.preventDefault();
                             jc.$$formSubmit.trigger('click'); // reference the button and click it
-                            console.log("Akshansh1234");
-                            //$("#recommendation-form").submit();
                         });
                     }
                 });
-                //insertFreeSlot(date);
-            }
-        },
-        eventDragStart: function (event, jsEvent, ui, view) {
-            dragStart = 1;
-        },
-        eventDrop: function (event, delta, revertFunc, jsEvent, ui, view) {
-            dragStart = 0;
-            if (moment(event.start).day() === 5) {
-                var pulledEvents = $('#calendar').fullCalendar('clientEvents');
-                var numberOfEvents = 0;
-                var replaced = 0;
-                for (var i = 0; i < pulledEvents.length; i++) {
-                    if (moment(pulledEvents[i].start).date() === moment(event.start).date()
-                        && moment(pulledEvents[i].start).month() === moment(event.start).month()
-                        && pulledEvents[i].title === freeSlotTitle) {
-                        var freeSlot = {
-                            id: ++freeSlotId,
-                            title: freeSlotTitle,
-                            start: moment(event.start.valueOf()).subtract(delta),
-                            color: freeSlotColor,
-                            url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, event.start._i.valueOf()).url
-                        };
-                        $('#calendar').fullCalendar('renderEvent', freeSlot);
-                        $('#calendar').fullCalendar('removeEvents', pulledEvents[i].id);
-                        replaced = 1;
-                        numberOfEvents++;
-                        updatePendingSession(event.id, event.start.valueOf());
-                        break;
-                    }
-                }
-                if (replaced === 0) {
-                    revertFunc();
-                }
-            } else {
-                revertFunc();
             }
         },
         validRange: {
             start: moment().startOf('month'),
             end: moment().startOf('month').add(3, 'M')
-        },
-        droppable: true,
-        eventDragStop: function (event, jsEvent, ui, view) {
-
-            if (isEventOverDiv(jsEvent.clientX, jsEvent.clientY)) {
-                $('#calendar').fullCalendar('removeEvents', event.id);
-                var el = $("<div class='fc-event'>").appendTo('#box').text(event.title);
-                /*el.draggable({
-                    zIndex: 999,
-                    revert: true,
-                    revertDuration: 0
-                });*/
-                el.attr('draggable', 'true');
-                el.dataTransfer.setData('zIndex', '999');
-                el.dataTransfer.setData('revert', 'true');
-                el.dataTransfer.setData('revertDuration', '0');
-                el.data('event', {
-                    id: event.id,
-                    title: event.title,
-                    start: event.start,
-                    color: event.color,
-                    data: event.data,
-                    url: event.url,
-                    editable: true
-                });
-            }
-        },
-        drop: function () {
-            console.log("Dropping event");
         }
-    });
-
-    $("#update-free-slot").click(function () {
-        var id = $("#sessionId").val();
-        var date = $("#date").val();
-        console.log("Id ------> " + id);
-        console.log("date ------> " + date);
-        upsertFreeSlot(id, date);
     });
 
     $("#delete-free-slot").click(function () {
         var id = $("#sessionId").val();
-        console.log("Id ------> " + id);
         deleteFreeSlot(id);
     });
 });
@@ -187,179 +104,108 @@ function getSessions(startDate, endDate, callback) {
         {
             type: 'GET',
             success: function (calendarSessionsWithAuthority) {
-                console.log("data ->" + calendarSessionsWithAuthority.calendarSessions);
                 isAdmin = calendarSessionsWithAuthority.isAdmin;
                 var events = [];
                 var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
-                for (var i = 0; i < calendarSessions.length; i++) {
-                    if (calendarSessions[i].pending) {
-                        if (calendarSessions[i].freeSlot) {
+                for (var calenderSession = 0; calenderSession < calendarSessions.length; calenderSession++) {
+                    if (calendarSessions[calenderSession].pending) {
+                        if (calendarSessions[calenderSession].freeSlot) {
                             events.push({
-                                id: calendarSessions[i].id,
-                                title: calendarSessions[i].topic,
-                                start: calendarSessions[i].date,
+                                id: calendarSessions[calenderSession].id,
+                                title: calendarSessions[calenderSession].topic,
+                                start: calendarSessions[calenderSession].date,
                                 color: freeSlotColor,
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].freeSlot).url
+                                url: jsRoutes.controllers.CalendarController
+                                    .renderCreateSessionByUser(calendarSessions[calenderSession].id,
+                                        calendarSessions[calenderSession].freeSlot).url
                             });
                         }
                         else if (calendarSessionsWithAuthority.isAdmin) {
                             events.push({
-                                id: calendarSessions[i].id,
-                                title: calendarSessions[i].topic,
-                                start: calendarSessions[i].date,
+                                id: calendarSessions[calenderSession].id,
+                                title: calendarSessions[calenderSession].topic,
+                                start: calendarSessions[calenderSession].date,
                                 color: pendingSessionColor,
-                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.SessionsController.renderApproveSessionByAdmin(calendarSessions[i].id).url
+                                data: "<p>Topic: " + calendarSessions[calenderSession].topic + "<br>Email: "
+                                + calendarSessions[calenderSession].email + "</p>",
+                                url: jsRoutes.controllers.SessionsController
+                                    .renderApproveSessionByAdmin(calendarSessions[calenderSession].id).url
                             });
-                        } else if (!calendarSessionsWithAuthority.isLoggedIn && calendarSessions[i].email === calendarSessionsWithAuthority.email) {
+                        } else if (!calendarSessionsWithAuthority.isLoggedIn
+                            && calendarSessions[calenderSession].email === calendarSessionsWithAuthority.email) {
                             events.push({
-                                id: calendarSessions[i].id,
-                                title: calendarSessions[i].topic,
-                                start: calendarSessions[i].date,
+                                id: calendarSessions[calenderSession].id,
+                                title: calendarSessions[calenderSession].topic,
+                                start: calendarSessions[calenderSession].date,
                                 color: pendingSessionColor,
-                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(calendarSessions[i].id, calendarSessions[i].freeSlot).url
+                                data: "<p>Topic: " + calendarSessions[calenderSession].topic + "<br>Email: "
+                                + calendarSessions[calenderSession].email + "</p>",
+                                url: jsRoutes.controllers.CalendarController
+                                    .renderCreateSessionByUser(calendarSessions[calenderSession].id,
+                                        calendarSessions[calenderSession].freeSlot).url
                             });
                         } else {
                             events.push({
-                                id: calendarSessions[i].id,
-                                title: calendarSessions[i].topic,
-                                start: calendarSessions[i].date,
+                                id: calendarSessions[calenderSession].id,
+                                title: calendarSessions[calenderSession].topic,
+                                start: calendarSessions[calenderSession].date,
                                 color: pendingSessionColor,
-                                data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                                data: "<p>Topic: " + calendarSessions[calenderSession].topic
+                                + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
                             });
                         }
                     } else {
                         if (calendarSessionsWithAuthority.isAdmin) {
-                            if (calendarSessions[i].meetup) {
+                            if (calendarSessions[calenderSession].meetup) {
                                 events.push({
-                                    id: calendarSessions[i].id,
-                                    title: calendarSessions[i].topic,
-                                    start: calendarSessions[i].date,
+                                    id: calendarSessions[calenderSession].id,
+                                    title: calendarSessions[calenderSession].topic,
+                                    start: calendarSessions[calenderSession].date,
                                     color: scheduledMeetup,
-                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                    url: jsRoutes.controllers.SessionsController.update(calendarSessions[i].id).url
+                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
+                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>",
+                                    url: jsRoutes.controllers.SessionsController
+                                        .update(calendarSessions[calenderSession].id).url
                                 });
                             } else {
                                 events.push({
-                                    id: calendarSessions[i].id,
-                                    title: calendarSessions[i].topic,
-                                    start: calendarSessions[i].date,
+                                    id: calendarSessions[calenderSession].id,
+                                    title: calendarSessions[calenderSession].topic,
+                                    start: calendarSessions[calenderSession].date,
                                     color: scheduledSession,
-                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>",
-                                    url: jsRoutes.controllers.SessionsController.update(calendarSessions[i].id).url
+                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
+                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>",
+                                    url: jsRoutes.controllers.SessionsController
+                                        .update(calendarSessions[calenderSession].id).url
                                 });
                             }
                         } else {
-                            if (calendarSessions[i].meetup) {
+                            if (calendarSessions[calenderSession].meetup) {
                                 events.push({
-                                    id: calendarSessions[i].id,
-                                    title: calendarSessions[i].topic,
-                                    start: calendarSessions[i].date,
+                                    id: calendarSessions[calenderSession].id,
+                                    title: calendarSessions[calenderSession].topic,
+                                    start: calendarSessions[calenderSession].date,
                                     color: scheduledMeetup,
-                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
+                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
                                 });
                             } else {
                                 events.push({
-                                    id: calendarSessions[i].id,
-                                    title: calendarSessions[i].topic,
-                                    start: calendarSessions[i].date,
+                                    id: calendarSessions[calenderSession].id,
+                                    title: calendarSessions[calenderSession].topic,
+                                    start: calendarSessions[calenderSession].date,
                                     color: scheduledSession,
-                                    data: "<p>Topic: " + calendarSessions[i].topic + "<br>Email: " + calendarSessions[i].email + "</p>"
+                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
+                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
                                 });
                             }
                         }
                     }
                 }
-
-                /*var startDay = moment(startDate).set({'hour': 0, 'minute': 0, 'second': 0, 'millisecond': 0});
-                var endDay = moment(endDate);
-                console.log("Start Date -> " + startDay);
-                console.log("End Date -> " + endDay);
-                var friday = startDay.clone().day(5);
-                while (friday <= endDay) {
-                    console.log("friday.toString() ----->" + friday.toString());
-                    console.log("friday.valueOf() ----->" + friday.valueOf());
-
-                    var numberOfEvents = 0;
-
-                    for (var i = 0; i < events.length; i++) {
-                        if (moment(events[i].start).date() === friday.date() && moment(events[i].start).month() === friday.month()) {
-                            numberOfEvents++;
-                        }
-                    }
-
-                    if (numberOfEvents <= allowedNoOfSessions) {
-                        var openSlots = allowedNoOfSessions - numberOfEvents;
-                        for (var i = 0; i < openSlots; i++) {
-                            events.push({
-                                id: ++freeSlotId,
-                                title: freeSlotTitle,
-                                start: friday.valueOf(),
-                                color: freeSlotColor,
-                                url: jsRoutes.controllers.CalendarController.renderCreateSessionByUser(null, friday.valueOf()).url
-                            });
-                        }
-                    }
-                    friday.add(7, 'd');
-                }*/
                 callback(events);
             },
             error: function (er) {
                 console.log("error ->" + er.responseText);
-            }
-        }
-    )
-}
-
-function updatePendingSession(sessionId, sessionDate) {
-    jsRoutes.controllers.CalendarController.updatePendingSessionDate(sessionId, sessionDate).ajax(
-        {
-            type: 'GET',
-            success: function (data) {
-                console.log("successfully updated the date.");
-            },
-            error: function (er) {
-                console.log("Failed with the error " + er.responseText);
-            }
-        }
-    )
-}
-
-function openWindowWithPost(url, data) {
-    var form = document.createElement("form");
-    form.target = "_blank";
-    form.method = "POST";
-    form.action = url;
-    form.style.display = "none";
-
-    for (var key in data) {
-        var input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = data[key];
-        form.appendChild(input);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-}
-
-function akshansh(event) {
-    event.preventDefault();
-    console.log("Akshansh is being dropped in akshansh");
-}
-
-function upsertFreeSlot(id, date) {
-    jsRoutes.controllers.CalendarController.insertFreeSlot(id, date).ajax(
-        {
-            type: 'GET',
-            success: function (data) {
-                console.log("Free slot was inserted successfully with data ----> " + data);
-            },
-            error: function (er) {
-                console.log("Error occured ----> " + er.responseText);
             }
         }
     )
@@ -385,17 +231,4 @@ function deleteFreeSlot(id) {
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
-
-    /*jsRoutes.controllers.CalendarController.deleteFreeSlot(id).ajax(
-        {
-            type: 'GET',
-            success: function (data) {
-                console.log("Free slot has been successfully deleted");
-                window.location.href = jsRoutes.controllers.CalendarController.renderCalendarPage().url;
-            },
-            error: function (er) {
-                console.log("An error occurred while deleting the free slot");
-            }
-        }
-    )*/
 }

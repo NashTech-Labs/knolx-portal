@@ -69,6 +69,19 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
         jsonCollection.update(selector, modifier))
   }
 
+  def getRecommendationById(id: String)(implicit ex: ExecutionContext): Future[Option[RecommendationInfo]] = {
+
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
+          .cursor[RecommendationInfo](ReadPreference.Primary)
+          .headOption)
+    )
+  }
+
   def declineRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))

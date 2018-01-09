@@ -92,16 +92,16 @@
                                                     Decline</span>
                                             </div>
                                         </div>
-                                        <div class="recommendation-label" data-bind="if: book">
-                                            <span class="label label-danger custom-label-type">
+
+                                            <span class="label label-danger custom-label-type" data-bind="if: book">
                                                 Booked
                                             </span>
-                                        </div>
-                                        <div class="recommendation-label" data-bind="if: pending">
-                                            <span class="label label-warning custom-label-type">
+
+
+                                            <span class="label label-warning custom-label-type" data-bind="if: pending">
                                                 Pending
                                             </span>
-                                        </div>
+
                                         <div class="recommendation-label" data-bind="if: done" style="left: 84% !important;">
                                             <span class="label label-success custom-label-type">
                                                 Done
@@ -131,7 +131,8 @@
                                 </tbody>
                             </table>
                             <div class="recommendation-label" data-bind="if: approved">
-                                <button id="id" type="button" class="btn btn-info" href="controllers.CalendarController.renderCategoryPage()">Request Session</button>
+                                <p type="hidden" id="recommendation-id"></p>
+                                <button id="id" type="button" class="btn btn-info">Request Session</button>
                             </div>
 
                         </div>

@@ -306,5 +306,17 @@ function Recommendation() {
         )
     }
 
+    function getRecommendationId() {
+        if (typeof(Storage) !== "undefined") {
+            // Store
+            localStorage.setItem("recommendationId", "");
+            // Retrieve
+            document.getElementById("recommendation-id").innerHTML = localStorage.getItem("recommendationId");
+        } else {
+            document.getElementById("recommendation-id").innerHTML = "Sorry, your browser does not support Web Storage...";
+        }
+
+    }
+
 }
 

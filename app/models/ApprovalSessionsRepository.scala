@@ -143,7 +143,7 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.update(selector, modifier))
   }
 
-  def getAllPendingSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+  def getAllPendingSession: Future[List[ApproveSessionInfo]] = {
     val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false),
       "approved" -> BSONDocument("$eq" -> false),
       "decline" -> BSONDocument("$eq" -> false))

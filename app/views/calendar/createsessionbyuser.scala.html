@@ -67,17 +67,20 @@
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
                         <select name="date" id="select-date" class="update-field login-second">
-                            @if(!isFreeSlot) {
-                                @for(freeSlotDate <- freeSlotDates) {
-                                        <option value="@freeSlotDate">@{freeSlotDate.replace("T", " ")}</option>
-                                }
-                                <option value="@createSessionInfo.data.get("date")" selected>@createSessionInfo.data.getOrElse("date", "").replace("T", " ")</option>
-                            } else {
-                                <option value='@createSessionInfo.data.get("date")' selected>@{createSessionInfo.data.get("date").fold(""){ date =>
-                                  date.replace("T", " ")
+                        @if(!isFreeSlot) {
+                            @for(freeSlotDate <- freeSlotDates) {
+                                <option value="@freeSlotDate">@{
+                                    freeSlotDate.replace("T", " ")
+                                }</option>
+                            }
+                            <option value="@createSessionInfo.data.get("date")" selected>@createSessionInfo.data.getOrElse("date", "").replace("T", " ")</option>
+                        } else {
+                            <option value='@createSessionInfo.data.get("date")' selected>@{
+                                createSessionInfo.data.get("date").fold("") { date =>
+                                    date.replace("T", " ")
                                 }
                             }</option>
-                                }
+                        }
                         </select>
                     </div>
                 </div>
@@ -124,7 +127,6 @@
                     <div class="col-md-4 loader-outer">
                         <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"/>
                         @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
-                            <div id="update-free-slot" class="btn btn-info">Update</div>
                             <div id="delete-free-slot" class="btn btn-danger">Delete</div>
                         }
                     </div>

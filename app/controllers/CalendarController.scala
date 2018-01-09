@@ -136,7 +136,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean): Action[AnyContent] = userAction.async { implicit request =>
+  def renderCreateSessionByUser(sessionId: String,
+                                recommendationId: Option[String],
+                                isFreeSlot: Boolean): Action[AnyContent] = userAction.async { implicit request =>
     approvalSessionsRepository.getSession(sessionId) flatMap { session =>
       val createSessionInfo = CreateSessionInfo(
         session.email,

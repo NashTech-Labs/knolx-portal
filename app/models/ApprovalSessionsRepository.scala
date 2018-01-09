@@ -29,6 +29,7 @@ case class ApproveSessionInfo(email: String,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               freeSlot: Boolean = false,
+                              recommendationId: String = "",
                               _id: BSONObjectID = BSONObjectID.generate
                              )
 
@@ -63,7 +64,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           "meetup" -> approveSessionInfo.meetup,
           "approved" -> approveSessionInfo.approved,
           "decline" -> approveSessionInfo.decline,
-          "freeSlot" -> approveSessionInfo.freeSlot
+          "freeSlot" -> approveSessionInfo.freeSlot,
+          "recommendationId" -> approveSessionInfo.recommendationId
         )
       )
     collection.flatMap(_.update(selector, modifier, upsert = true))

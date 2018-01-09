@@ -56,7 +56,8 @@ case class UpdateApproveSessionInfo(date: BSONDateTime,
                                     meetup: Boolean = false,
                                     approved: Boolean = false,
                                     decline: Boolean = false,
-                                    freeSlot: Boolean = false
+                                    freeSlot: Boolean = false,
+                                    recommendationId: String = ""
                                    )
 
 case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession],
@@ -70,6 +71,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    approvalSessionsRepository: ApprovalSessionsRepository,
+                                   recommendationsRepository: RecommendationsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
@@ -151,12 +153,12 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         val freeSlotDates = freeSlots.map { freeSlot =>
           dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
         }
-        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot))
+        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotDates, isFreeSlot))
       }
     }
   }
 
-  def createSessionByUser(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
+  def createSessionByUser(sessionId: String, recommendationId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
     approvalSessionsRepository.getAllFreeSlots flatMap { freeSlots =>
       val freeSlotDates = freeSlots.map { freeSlot =>
         dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
@@ -166,7 +168,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           formWithErrors => {
             Logger.error(s"Received a bad request for create session $formWithErrors")
             Future.successful(
-              BadRequest(views.html.calendar.createsessionbyuser(formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot))
+              BadRequest(views.html.calendar.createsessionbyuser(formWithErrors, sessionId, recommendationId, freeSlotDates, approveSessionInfo.freeSlot))
             )
           },
           createSessionInfoByUser => {
@@ -177,7 +179,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               swapSlots(sessionId, createSessionInfoByUser, approveSessionInfo)
             } else {
               Future.successful(
-                Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot)).flashing("message" ->
+                Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, recommendationId, approveSessionInfo.freeSlot)).flashing("message" ->
                   "Date submitted was wrong. Please try again.")
               )
             }
@@ -287,14 +289,30 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    approvalSessionsRepository.declineSession(sessionId) map { result =>
-      if (result.ok) {
+  def declineSession(sessionId: String,
+                     recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+    approvalSessionsRepository.declineSession(sessionId) flatMap { session =>
+      if (session.ok) {
         Logger.info(s"Successfully declined session $sessionId")
-        Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Sessions has been successfully declined")
+        recommendationId.fold {
+          Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+            .flashing("message" -> "Sessions has been successfully declined"))
+        } { recommendation =>
+          recommendationsRepository.cancelBookedRecommendation(recommendation) map { result =>
+            if (result.ok) {
+              Logger.info(s"Recommendation has been unbooked now $recommendation")
+              Redirect(routes.CalendarController.renderCalendarPage())
+                .flashing("message" -> "Recommendation has been unbooked now")
+            } else {
+              Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, recommendationId))
+                .flashing("message" -> "Something went wrong while declining the session")
+            }
+          }
+        }
       } else {
         Logger.info(s"Something went wrong while declining session $sessionId")
-        Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId)).flashing("message" -> "Something went wrong while declining the session.")
+        Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, recommendationId))
+          .flashing("message" -> "Something went wrong while declining the session"))
       }
     }
   }
@@ -311,14 +329,14 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def deleteFreeSlot(id: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def deleteFreeSlot(id: String, recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.deleteFreeSlot(id) map { result =>
       if (result.ok) {
         Logger.info("Successfully deleted the free slot")
         Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
       } else {
         Logger.info("Something went wring while deleting the free slot")
-        Redirect(routes.CalendarController.renderCreateSessionByUser(id, isFreeSlot = true))
+        Redirect(routes.CalendarController.renderCreateSessionByUser(id, recommendationId, isFreeSlot = true))
           .flashing("message" -> "Something went wrong while deleting the free slot")
       }
     }

@@ -1,4 +1,4 @@
-@(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)], sessionId: String, session: CreateApproveSessionInfo)(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)], sessionId: String, recommendationId: Option[String], session: CreateApproveSessionInfo)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Approve Session") {
     <div class="row ">
@@ -57,7 +57,7 @@
     <div class="row">
         <div class="col-md-12 create-outer">
 
-            <form class="CreateForm customForm" action="@routes.SessionsController.approveSessionByAdmin(sessionId)" method="post">
+            <form class="CreateForm customForm" action="@routes.SessionsController.approveSessionByAdmin(sessionId, recommendationId)" method="post">
 
                 @helper.CSRF.formField
                 <input id="primary-category" value=@if(createSessionForm.data.get("category")) {
@@ -202,12 +202,12 @@
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
                     <div class="col-md-6 loader-outer">
-                        <a href="@routes.SessionsController.renderApproveSessionByAdmin(sessionId)" class="btn" style="color: inherit;
+                        <a href="@routes.SessionsController.renderApproveSessionByAdmin(sessionId, recommendationId)" class="btn" style="color: inherit;
                             background: white;
                             border: 1px solid #e7eaec;">Reset</a>
                         <input type="submit" value="Approve" class="btn btn-success" style="background-color: #1ab394;"
                         />
-                        <a href="@routes.CalendarController.declineSession(sessionId)" class="btn btn-danger" style="color: white;
+                        <a href="@routes.CalendarController.declineSession(sessionId, recommendationId)" class="btn btn-danger" style="color: white;
                             background: white;
                             border: 1px solid #e7eaec;">Decline</a>
                     </div>

@@ -174,15 +174,6 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
   }
 
-  def deleteFreeSlotByDate(date: BSONDateTime): Future[WriteResult] = {
-    val selector = BSONDocument("date" -> date)
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .remove(selector))
-  }
-
   def getFreeSlotByDate(date: BSONDateTime): Future[Option[ApproveSessionInfo]] = {
     val selector = BSONDocument("date" -> date)
 
@@ -191,30 +182,6 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection
           .find(selector)
           .cursor[ApproveSessionInfo](ReadPreference.Primary).headOption)
-  }
-
-  def swapSlot(approveSessionInfo: UpdateApproveSessionInfo, id: BSONObjectID)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" -> id)
-
-    val modifier =
-      BSONDocument(
-        "$set" -> BSONDocument(
-          "email" -> approveSessionInfo.email,
-          "date" -> approveSessionInfo.date,
-          "category" -> approveSessionInfo.category,
-          "subCategory" -> approveSessionInfo.subCategory,
-          "topic" -> approveSessionInfo.topic,
-          "meetup" -> approveSessionInfo.meetup,
-          "approved" -> approveSessionInfo.approved,
-          "decline" -> approveSessionInfo.decline,
-          "freeSlot" -> approveSessionInfo.freeSlot
-        )
-      )
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .update(selector, modifier))
   }
 
 }

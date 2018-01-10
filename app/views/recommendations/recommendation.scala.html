@@ -15,7 +15,8 @@
         <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
             <label class="col-md-3 filter-padding-left" style="font-weight: normal">
                 Sort By
-                <select name="Show" id="sort-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                <select name="Show" id="sort-entries" class="search-text" style="background-color: #FFFFFF;
+                    padding-right: 2px !important; ">
                     <option value="latest" selected>Submission Date</option>
                     <option value="recent">Updated Date</option>
                 </select>
@@ -29,7 +30,7 @@
                     <p class="filter-checkbox-text">All</p>
                 </label>
             </div>
-            <div class="col-md-1" style="padding-left: 25px !important;">
+            <div class="col-md-1" style="padding-left: 20px !important;">
                 <label class="checkbox-outer" style="font-weight: normal;">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='approved'/>
 
@@ -93,18 +94,18 @@
                                             </div>
                                         </div>
 
-                                            <span class="label label-danger custom-label-type recommendation-type" data-bind="if: book">
-                                                Booked
-                                            </span>
-                                            <span class="label label-warning custom-label-type recommendation-type" data-bind="if: pending">
-                                                Pending
-                                            </span>
-                                            <span class="label label-danger custom-label-type recommendation-type" data-bind="if: decline">
-                                                Decline
-                                            </span>
-                                            <span class="label label-success custom-label-type recommendation-type" data-bind="if: done" style="left: 84% !important;">
-                                                Done
-                                            </span>
+                                        <span class="label label-warning custom-label-type recommendation-type" data-bind="if: pending && !book">
+                                            Pending
+                                        </span>
+                                        <span class="label label-info custom-label-type recommendation-type" data-bind="if: (book && pending)">
+                                            Booked
+                                        </span>
+                                        <span class="label label-danger custom-label-type recommendation-type" data-bind="if: decline">
+                                            Decline
+                                        </span>
+                                        <span class="label label-success custom-label-type recommendation-type" data-bind="if: done" style="left: 84% !important;">
+                                            Done
+                                        </span>
 
                                         <p class="recommendation-presenter" data-bind="text: email"></p>
                                         <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
@@ -123,14 +124,15 @@
                                             </div>
                                         </td>
                                         <td class="recommendation-content">
-                                            <div  data-bind="text: recommendation">
+                                            <div data-bind="text: topic">
                                             </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                             <div class="recommendation-label" data-bind="if: (approved && isLoggedIn && !book)">
-                                <span class="btn btn-info book-session" data-bind="click: isLoggedIn ? function($id) { $root.requestByUser(id)}:null">Book</span>
+                                <span class="btn btn-info book-session" data-bind="click: isLoggedIn ? function($id) { $root.requestByUser(id)}:null">
+                                    Book</span>
                             </div>
 
                         </div>

@@ -89,6 +89,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
         "approved" -> false,
         "decline" -> true,
         "pending" -> false,
+        "book" -> false,
         "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)
       ))
 
@@ -192,6 +193,19 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "book" -> true,
+        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def cancelBookedRecommendation(id: String)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id), "approved" -> true)
+
+    val modifier = BSONDocument(
+      "$set" -> BSONDocument(
+        "book" -> false,
         "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
 
     collection

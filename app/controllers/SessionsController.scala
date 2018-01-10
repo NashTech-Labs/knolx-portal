@@ -458,7 +458,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def renderApproveSessionByAdmin(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def renderApproveSessionByAdmin(sessionId: String, recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -471,12 +471,12 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             session.topic,
             session.meetup,
             dateTimeUtility.formatDateWithT(new Date(session.date.value)))
-          Ok(views.html.sessions.approvesession(createSessionForm, formIds, sessionId, createSessionInfo))
+          Ok(views.html.sessions.approvesession(createSessionForm, formIds, sessionId, recommendationId, createSessionInfo))
         }
       }
   }
 
-  def approveSessionByAdmin(sessionApprovedId: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def approveSessionByAdmin(sessionApprovedId: String, recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -492,7 +492,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           createSessionForm.bindFromRequest.fold(
             formWithErrors => {
               Logger.error(s"Received a bad request for create session $formWithErrors")
-              Future.successful(BadRequest(views.html.sessions.approvesession(formWithErrors, formIds, sessionApprovedId, createApproveSessionInfo)))
+              Future.successful(BadRequest(views.html.sessions.approvesession(formWithErrors, formIds, sessionApprovedId, recommendationId, createApproveSessionInfo)))
             },
             createSessionInfo => {
               val presenterEmail = createSessionInfo.email.toLowerCase
@@ -500,7 +500,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 .getByEmail(presenterEmail)
                 .flatMap(_.fold {
                   Future.successful(
-                    BadRequest(views.html.sessions.approvesession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds, sessionApprovedId, createApproveSessionInfo)))
+                    BadRequest(views.html.sessions.approvesession(createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"), formIds, sessionApprovedId, recommendationId, createApproveSessionInfo)))
                 } { userJson =>
                   val expirationDateMillis = sessionExpirationMillis(createSessionInfo.date, createSessionInfo.feedbackExpirationDays)
                   val session = models.SessionInfo(userJson._id.stringify, createSessionInfo.email.toLowerCase,

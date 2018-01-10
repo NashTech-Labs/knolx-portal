@@ -44,6 +44,27 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
         BSONDateTime(date.getTime)
       )))
 
+  private val anonymousRecommendations = Future.successful(
+    List(
+      RecommendationInfo(None,
+        "name",
+        "topic",
+        "recommendation",
+        BSONDateTime(date.getTime),
+        BSONDateTime(date.getTime)
+      )))
+
+  private val approvedRecommendations = Future.successful(
+    List(
+      RecommendationInfo(Some("test@knoldus.com"),
+        "name",
+        "topic",
+        "recommendation",
+        BSONDateTime(date.getTime),
+        BSONDateTime(date.getTime),
+        approved = true
+      )))
+
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
 
@@ -94,6 +115,8 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.nowMillis returns date.getTime
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      usersRepository.getAllAdminAndSuperUser returns Future.successful(List("test1@knoldus.com"))
+
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -110,6 +133,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       dateTimeUtility.nowMillis returns date.getTime
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
@@ -128,6 +152,8 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
       recommendationsRepository.insert(any[RecommendationInfo])(any[ExecutionContext]) returns writeResult
+      usersRepository.getAllAdminAndSuperUser returns Future.successful(List("test1@knoldus.com"))
+
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
@@ -220,11 +246,24 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo BAD_REQUEST
     }
 
+    "do not store recommendation when recommendation's data is invalid" in new WithTestApplication {
+      val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
+
+      dateTimeUtility.nowMillis returns date.getTime
+      dateTimeUtility.nowMillis returns date.getTime
+
+      val result = controller.addRecommendation()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"", "recommendation":""}"""))
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
     "do not store recommendation when recommendation's description is greater than 280 characters" in new WithTestApplication {
       val writeResult = Future.successful(DefaultWriteResult(ok = false, 1, Seq(), None, None, None))
-      val recommendationDescription = "As recommendation's description is greater than 280 character so it can be stored in " +
-        "database. Please insert recommendation's description in less than 280 characters.As recommendation's " +
-        "description is greater than 280 character so it can be stored in DB"
+      val recommendationDescription = "a" * 290
 
       dateTimeUtility.nowMillis returns date.getTime
       dateTimeUtility.nowMillis returns date.getTime
@@ -280,6 +319,45 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
 
       recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
       recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
+
+      dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
+
+      val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=",
+            "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
+      )
+
+      status(result) must be equalTo OK
+    }
+
+    "render recommendationList to admin/super user downvoted the recommendations" in new WithTestApplication {
+      val pageNumber = 1
+      val filter = "all"
+      val sortBy = "latest"
+
+      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
+      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("downvote")
+
+      dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
+
+      val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=",
+            "admin" -> "DqDK4jVae2aLvChuBPCgmfRWXKArji6AkjVhqSxpMFP6I6L/FkeK5HQz1dxzxzhP")
+      )
+
+      status(result) must be equalTo OK
+    }
+
+    "render recommendationList to admin/super when recommendation is submitted by anonymous" in new WithTestApplication {
+      val pageNumber = 1
+      val filter = "all"
+      val sortBy = "latest"
+
+      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns anonymousRecommendations
+      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("downvote")
+
       dateTimeUtility.toLocalDateTime(date.getTime) returns localDate
 
       val result: Future[mvc.Result] = controller.recommendationList(pageNumber, filter, sortBy)(
@@ -296,8 +374,24 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val filter = "all"
       val sortBy = "latest"
 
-      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns recommendations
+      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns approvedRecommendations
       recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("upvote")
+
+      val result = controller.recommendationList(pageNumber, filter, sortBy)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+      )
+
+      status(result) must be equalTo OK
+    }
+
+    "render recommendationList to logged in / non-logged in user when user downvoted the recommendation" in new WithTestApplication {
+      val pageNumber = 1
+      val filter = "all"
+      val sortBy = "latest"
+
+      recommendationsRepository.paginate(pageNumber, filter, sortBy) returns approvedRecommendations
+      recommendationsResponseRepository.getVote(any[String], any[String]) returns Future.successful("downvote")
 
       val result = controller.recommendationList(pageNumber, filter, sortBy)(
         FakeRequest()

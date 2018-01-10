@@ -314,8 +314,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def declineSession(sessionId: String,
-                     recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+  def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     approvalSessionsRepository.getSession(sessionId).flatMap { approvalSession =>
       approvalSessionsRepository.declineSession(approvalSession._id.stringify) flatMap { session =>
         if (session.ok) {
@@ -326,14 +325,14 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 Redirect(routes.CalendarController.renderCalendarPage())
                   .flashing("message" -> "Recommendation has been unbooked now")
               } else {
-                Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, recommendationId))
+                Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
                   .flashing("message" -> "Something went wrong while declining the session")
               }
             }
           }
         else {
           Logger.info(s"Something went wrong while declining session $sessionId")
-          Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, recommendationId))
+          Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
             .flashing("message" -> "Something went wrong while declining the session"))
         }
       }

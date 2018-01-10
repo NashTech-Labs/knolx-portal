@@ -20,7 +20,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   val recommendationRepository = new RecommendationsRepository(TestDb.reactiveMongoApi, dateTimeUtility)
 
   val recommendationInfo = RecommendationInfo(Some("email"), "name", "topic", "recommendation", BSONDateTime(submissionDate),
-    BSONDateTime(updateDate), approved = true, decline = false, pending = false, done = true, upVotes = 10,
+    BSONDateTime(updateDate), approved = true, decline = false, pending = false, done = true, book = false, upVotes = 10,
     downVotes = 15, recommendationId)
   
   "Recommendations Repository" should {

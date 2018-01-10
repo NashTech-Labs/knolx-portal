@@ -3,11 +3,14 @@ package controllers
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 
+import akka.actor.ActorRef
+import com.google.inject.name.Names
 import helpers.TestEnvironment
 import models._
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
+import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.libs.json.Json
 import play.api.{Application, mvc}
 import play.api.mvc.Results
@@ -47,14 +50,20 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
     val recommendationsRepository = mock[RecommendationsRepository]
     val recommendationsResponseRepository = mock[RecommendationResponseRepository]
     val dateTimeUtility = mock[DateTimeUtility]
+    val emailManager: ActorRef = app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
+
 
     lazy val controller =
       new RecommendationController(
         knolxControllerComponent.messagesApi,
         recommendationsRepository,
+        usersRepository,
         knolxControllerComponent,
         dateTimeUtility,
-        recommendationsResponseRepository)
+        config,
+        recommendationsResponseRepository,
+        emailManager
+      )
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))

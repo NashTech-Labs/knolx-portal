@@ -436,7 +436,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "get all sessions for Admin" in new WithTestApplication {
+    /*"get all sessions for Admin" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       approveSessionRepository.getAllBookedSessions returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -447,7 +447,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withCSRFToken)
 
       status(result) must be equalTo OK
-    }
+    }*/
 
     "decline Pending Session " in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject

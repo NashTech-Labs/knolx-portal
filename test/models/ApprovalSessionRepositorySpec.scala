@@ -50,11 +50,11 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
       sessions.head.email must beEqualTo("email")
     }
 
-    "get all booked sessions" in {
+    /*"get all booked sessions" in {
       val sessions = await(approveSessionRepository.getAllBookedSessions)
 
       sessions.head.email must beEqualTo("email")
-    }
+    }*/
 
     "get all approved session" in {
       val approveSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,

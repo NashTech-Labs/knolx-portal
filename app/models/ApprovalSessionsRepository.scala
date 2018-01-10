@@ -84,18 +84,6 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
 
-  def getAllBookedSessions(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
-    val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false))
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(selector)
-          .sort(Json.obj("decline" -> 1, "approved" -> 1))
-          .cursor[ApproveSessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
-  }
-
   def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)

@@ -16,7 +16,7 @@ import play.api.Application
 import play.api.test.CSRFTokenHelper._
 import play.api.inject.{BindingKey, QualifierInstance}
 import play.api.test.{FakeRequest, PlaySpecification}
-import reactivemongo.api.commands.UpdateWriteResult
+import reactivemongo.api.commands.{DefaultWriteResult, UpdateWriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
@@ -28,7 +28,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
 
-  private val date = new SimpleDateFormat("yyyy-MM-dd").parse("2018-01-02")
+  private val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2018-01-31T23:59")
   private val _id: BSONObjectID = BSONObjectID.generate()
   private val sessionObject: Future[List[SessionInfo]] =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category",
@@ -40,8 +40,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
       "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
 
-  private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email",BSONDateTime(date.getTime), "category",
-    "subCategory", "topic", meetup = false, approved = false, decline = false, _id))
+  private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+    "subCategory", "topic", _id = _id))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
@@ -54,7 +54,6 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
         knolxControllerComponent.messagesApi,
         usersRepository,
         sessionsRepository,
-        feedbackFormsRepository,
         approveSessionRepository,
         dateTimeUtility,
         config,
@@ -63,8 +62,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       )
     val categoriesRepository = mock[CategoriesRepository]
     val sessionsRepository = mock[SessionsRepository]
+
     val dateTimeUtility = mock[DateTimeUtility]
-    val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val approveSessionRepository = mock[ApprovalSessionsRepository]
 
 
@@ -83,9 +82,9 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "get list of all Session for Calendar Page" in new WithTestApplication {
+    "get list of all Session for Calendar Page when user is not logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L)  returns sessionObject
-      approveSessionRepository.getAllSession returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -94,13 +93,13 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "render create session for user for updating" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+    "get list of all Session for Calendar Page when user is logged in" in new WithTestApplication {
+      sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L)  returns sessionObject
+      approveSessionRepository.getAllSessions returns Future.successful(approveSessionInfo)
+
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      dateTimeUtility.toLocalDateTime(1517423399999L) returns Instant.ofEpochMilli(1517423399999L).atZone(ISTZoneId).toLocalDateTime
-
-      val result = controller.renderCreateSessionByUser(None, "1517423399999")(
+      val result = controller.calendarSessions(1514745000000L, 1517423399999L)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -108,14 +107,16 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "render create session for user for new session" in new WithTestApplication {
+    "render create session for user for updating" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
-      dateTimeUtility.toLocalDateTime(date.getTime) returns Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime
 
-      val result = controller.renderCreateSessionByUser(Some(_id.stringify), "1517423399999")(
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+
+      val result = controller.renderCreateSessionByUser(_id.stringify, isFreeSlot = false)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -123,11 +124,15 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "Receive Bad Request while creating session, Date is empty" in new WithTestApplication {
+    "Receive Bad Request while creating session for incorrect form submission" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.createSessionByUser(Some(_id.stringify), "1517423399999")(
+      val result = controller.createSessionByUser(_id.stringify)(
       FakeRequest()
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -140,41 +145,29 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "Receive Bad Request while creating session when form is with error" in new WithTestApplication {
+    "create a pending session successfully" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      val writeResult = DefaultWriteResult(ok = true, 1, Seq(), None, None, None)
+
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
-      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423399999L
-      dateTimeUtility.toLocalDateTime(1517423399999L) returns Instant.ofEpochMilli(1517423399999L).atZone(ISTZoneId).toLocalDateTime
-
-      val result = controller.createSessionByUser(Some(_id.stringify), "1517423399999")(
-        FakeRequest()
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
-            "date" -> "2018-01-31T23:59",
-            "category" -> "test category",
-            "subCategory" -> "subCategory",
-            "topic" -> "",
-            "meetup" -> "true")
-          .withCSRFToken)
-
-      status(result) must be equalTo BAD_REQUEST
-    }
-
-    "session successfully created by user" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.insertSessionForApprove(updateApproveSessionInfo) returns Future.successful(writeResult)
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
-      val updateApproveSessionInfo = UpdateApproveSessionInfo("test@knoldus.com",BSONDateTime(1517423340000L), "category",
-        "subCategory", "topic", meetup = true, _id.stringify)
-
-      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-      approveSessionRepository.insertSessionForApprove(updateApproveSessionInfo) returns updateWriteResult
-
       usersRepository.getAllAdminAndSuperUser returns Future.successful(List("test@knoldus.com"))
 
-      val result = controller.createSessionByUser(Some(_id.stringify), "2018-01-31T23:59")(
+      val result = controller.createSessionByUser(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -188,18 +181,28 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "internal server error while creating session by user" in new WithTestApplication {
+    "not create a pending session due to DB insertion error" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      val writeResult = DefaultWriteResult(ok = false, 1, Seq(), None, None, None)
+
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      approveSessionRepository.insertSessionForApprove(updateApproveSessionInfo) returns Future.successful(writeResult)
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
-      val updateApproveSessionInfo = UpdateApproveSessionInfo("test@knoldus.com",BSONDateTime(1517423340000L), "category",
-        "subCategory", "topic", meetup = true, _id.stringify)
 
-      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-      approveSessionRepository.insertSessionForApprove(updateApproveSessionInfo) returns updateWriteResult
-
-      val result = controller.createSessionByUser(Some(_id.stringify), "2018-01-31T23:59")(
+      val result = controller.createSessionByUser(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -213,13 +216,200 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo INTERNAL_SERVER_ERROR
     }
 
-    "error while creating session by user when dates are not matching" in new WithTestApplication {
+    "not update date of a pending session if free slot does not exist on specified date" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(None)
+      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
+
+      val result = controller.createSessionByUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "date" -> "2018-02-01T23:59",
+            "category" -> "category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true")
+          .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not update date of a pending session due to DB updation error" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
+      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
+
+      val result = controller.createSessionByUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "date" -> "2018-02-01T23:59",
+            "category" -> "category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true")
+          .withCSRFToken)
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "not update date of free slot due to DB upsertion error" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        freeSlot = true)
+
+      val writeResult = DefaultWriteResult(ok = false, 1, Seq(), None, None, None)
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      approveSessionRepository.insertSessionForApprove(freeSlot) returns Future.successful(writeResult)
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
+      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
+
+      val result = controller.createSessionByUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "date" -> "2018-02-01T23:59",
+            "category" -> "category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true")
+          .withCSRFToken)
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "update date of a pending session" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        freeSlot = true)
+
+      val writeResult = DefaultWriteResult(ok = true, 1, Seq(), None, None, None)
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      approveSessionRepository.insertSessionForApprove(freeSlot) returns Future.successful(writeResult)
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
+      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
+
+      val result = controller.createSessionByUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "date" -> "2018-02-01T23:59",
+            "category" -> "category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "not update date of a free slot" in new WithTestApplication {
+      val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
+        sessionId = _id.stringify,
+        topic = "topic",
+        email = "test@knoldus.com",
+        category = "category",
+        subCategory = "subCategory",
+        meetup = true)
+
+      val freeSlot = ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+        "subCategory", "topic", _id = _id, freeSlot = true)
+
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(freeSlot)
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
+
+      val result = controller.createSessionByUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "date" -> "2018-02-01T23:59",
+            "category" -> "category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    /*"error while creating session by user when dates are not matching" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(Some(_id.stringify), "2018-01-31T23:59")(
+      val result = controller.createSessionByUser(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -231,11 +421,11 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
-    }
+    }*/
 
     "get pending sessions for Notification" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllSession returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getAllPendingSession returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
        val result = controller.getPendingSessions()(
@@ -248,7 +438,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get all sessions for Admin" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllSession returns Future.successful(approveSessionInfo)
+      approveSessionRepository.getAllBookedSessions returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.getAllSessionForAdmin()(
@@ -257,36 +447,6 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withCSRFToken)
 
       status(result) must be equalTo OK
-    }
-
-    "update Pending Session Date" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-
-      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517423399999L)) returns updateWriteResult
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-
-      val result = controller.updatePendingSessionDate(_id.stringify, "1517423399999")(
-        FakeRequest()
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withCSRFToken)
-
-      status(result) must be equalTo OK
-    }
-
-    "error while updating Pending Session Date" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-
-      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517423399999L)) returns updateWriteResult
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-
-      val result = controller.updatePendingSessionDate(_id.stringify, "1517423399999")(
-        FakeRequest()
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withCSRFToken)
-
-      status(result) must be equalTo BAD_REQUEST
     }
 
     "decline Pending Session " in new WithTestApplication {
@@ -301,10 +461,10 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo OK
+      status(result) must be equalTo SEE_OTHER
     }
 
-    "erroe while declining Pending Session " in new WithTestApplication {
+    "error while declining Pending Session " in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -316,7 +476,73 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "insert a free slot successfully" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), freeSlot = true)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+
+      dateTimeUtility.parseDateStringWithTToIST("2018-02-01T23:59") returns 1517509740000L
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.insertFreeSlot("2018-02-01T23:59")(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "not insert a free slot if DB insertion was unsuccessful" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), freeSlot = true)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+
+      dateTimeUtility.parseDateStringWithTToIST("2018-02-01T23:59") returns 1517509740000L
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.insertFreeSlot("2018-02-01T23:59")(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
       status(result) must be equalTo BAD_REQUEST
+    }
+
+    "delete free sot successfully" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.deleteFreeSlot(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "not delete free sot due to DB deletion error" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.deleteFreeSlot(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
     }
 
   }

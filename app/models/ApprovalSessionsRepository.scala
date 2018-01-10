@@ -4,7 +4,6 @@ import javax.inject.Inject
 
 import controllers.UpdateApproveSessionInfo
 import models.ApproveSessionJsonFormats._
-import play.api.Logger
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
@@ -197,8 +196,6 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   }
 
   def swapSlot(approveSessionInfo: UpdateApproveSessionInfo, id: BSONObjectID)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
-    Logger.info("Updating session ---> " + approveSessionInfo)
-    //val selector = BSONDocument("date" -> approveSessionInfo.date)
     val selector = BSONDocument("_id" -> id)
 
     val modifier =

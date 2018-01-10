@@ -58,7 +58,7 @@ $(function () {
                                     $.alert('Date must not be empty');
                                     return false;
                                 }
-                                jsRoutes.controllers.CalendarController.insertFreeSlot(null, freeSlot).ajax(
+                                jsRoutes.controllers.CalendarController.insertFreeSlot(freeSlot).ajax(
                                     {
                                         type: 'GET',
                                         processData: false,

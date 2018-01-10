@@ -19,8 +19,8 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
   private val date = BSONDateTime(currentDate.getTime)
   private val _id: BSONObjectID = BSONObjectID.generate()
 
-  val approveSessionInfo = UpdateApproveSessionInfo("email", date, "category",
-    "subCategory", "topic", false, _id.stringify, false, false)
+  val approveSessionInfo = UpdateApproveSessionInfo(date, _id.stringify, "topic", "email",
+    "category", "subCategory")
 
   "Approval Session Repository" should {
 
@@ -31,8 +31,8 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
     }
 
     "insert session for approve by admin/superUser when sessionId is not specified" in {
-      val approveSessionInfoWithoutSessionId = UpdateApproveSessionInfo("email",
-        date, "category", "subCategory", "topic", false, "", false, false)
+      val approveSessionInfoWithoutSessionId = UpdateApproveSessionInfo(date, _id.stringify,
+        "topic", "email", "category", "subCategory")
 
       val insert = await(approveSessionRepository.insertSessionForApprove(approveSessionInfoWithoutSessionId).map(_.ok))
 
@@ -46,14 +46,14 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
     }
 
     "get all session created by user" in {
-      val sessions = await(approveSessionRepository.getAllSession)
+      val sessions = await(approveSessionRepository.getAllSessions)
 
       sessions.head.email must beEqualTo("email")
     }
 
     "get all approved session" in {
-      val approveSessionInfoByAdmin = UpdateApproveSessionInfo("approvedemail", date, "category",
-        "subCategory", "topic", false, BSONObjectID.generate().stringify, true, false)
+      val approveSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,
+        "topic", "approvedemail", "category", "subCategory", approved = true)
 
       val insert = await(approveSessionRepository.insertSessionForApprove(approveSessionInfoByAdmin))
       val sessions = await(approveSessionRepository.getAllApprovedSession)
@@ -69,8 +69,8 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
 
     "decline session created by user" in {
       val sessionId = BSONObjectID.generate().stringify
-      val declineSessionInfoByAdmin = UpdateApproveSessionInfo("declineemail", date, "category",
-        "subCategory", "topic", false, sessionId, false, true)
+      val declineSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,
+        "topic", "declineemail", "category", "subCategory", decline = true)
 
       val insert = await(approveSessionRepository.insertSessionForApprove(declineSessionInfoByAdmin))
       val decline = await(approveSessionRepository.declineSession(sessionId))
@@ -80,8 +80,8 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
 
     "update date for pending session" in {
       val sessionId = BSONObjectID.generate().stringify
-      val declineSessionInfoByAdmin = UpdateApproveSessionInfo("email", date, "category",
-        "subCategory", "topic", false, sessionId, false, true)
+      val declineSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,
+        "topic", "email", "category", "subCategory", decline = true)
 
       val insert = await(approveSessionRepository.insertSessionForApprove(declineSessionInfoByAdmin))
       val update = await(approveSessionRepository.updateDateForPendingSession(sessionId,date))

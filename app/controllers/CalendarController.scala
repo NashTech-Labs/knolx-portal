@@ -68,7 +68,6 @@ case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession]
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
-                                   feedbackFormsRepository: FeedbackFormsRepository,
                                    approvalSessionsRepository: ApprovalSessionsRepository,
                                    recommendationsRepository: RecommendationsRepository,
                                    dateTimeUtility: DateTimeUtility,

@@ -166,26 +166,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  /*private def createSessionPage(sessionId: String,
-                                recommendationTopic: Option[String],
-                                isFreeSlot: Boolean): Future[Result] = {
-    approvalSessionsRepository.getSession(sessionId) flatMap { session =>
-      val createSessionInfo = CreateSessionInfo(
-        session.email,
-        new Date(session.date.value),
-        session.category,
-        session.subCategory,
-        session.topic,
-        session.meetup)
-      approvalSessionsRepository.getAllFreeSlots map { freeSlots =>
-        val freeSlotDates = freeSlots.map { freeSlot =>
-          dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
-        }
-        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot))
-      }
-    }
-  }*/
-
   def createSessionByUser(sessionId: String, recommendationId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
     approvalSessionsRepository.getAllFreeSlots flatMap { freeSlots =>
       val freeSlotDates = freeSlots.map { freeSlot =>

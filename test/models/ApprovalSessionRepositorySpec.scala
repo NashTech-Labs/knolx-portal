@@ -31,8 +31,7 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
     }
 
     "insert session for approve by admin/superUser when sessionId is not specified" in {
-      val approveSessionInfoWithoutSessionId = UpdateApproveSessionInfo(date, _id.stringify,
-        "topic", "email", "category", "subCategory")
+      val approveSessionInfoWithoutSessionId = UpdateApproveSessionInfo(date, freeSlot = true)
 
       val insert = await(approveSessionRepository.insertSessionForApprove(approveSessionInfoWithoutSessionId).map(_.ok))
 
@@ -45,8 +44,14 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
       sessions.email must beEqualTo("email")
     }
 
-    "get all session created by user" in {
+    "get all sessions to display in calendar" in {
       val sessions = await(approveSessionRepository.getAllSessions)
+
+      sessions.head.email must beEqualTo("email")
+    }
+
+    "get all booked sessions" in {
+      val sessions = await(approveSessionRepository.getAllBookedSessions)
 
       sessions.head.email must beEqualTo("email")
     }
@@ -70,7 +75,7 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
     "decline session created by user" in {
       val sessionId = BSONObjectID.generate().stringify
       val declineSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,
-        "topic", "declineemail", "category", "subCategory", decline = true)
+        "topic", "email", "category", "subCategory", decline = true)
 
       val insert = await(approveSessionRepository.insertSessionForApprove(declineSessionInfoByAdmin))
       val decline = await(approveSessionRepository.declineSession(sessionId))
@@ -87,6 +92,41 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
       val update = await(approveSessionRepository.updateDateForPendingSession(sessionId,date))
       update.ok must beEqualTo(true)
 
+    }
+
+    "get all pending sessions" in {
+      await(approveSessionRepository.insertSessionForApprove(approveSessionInfo))
+
+      val session = await(approveSessionRepository.getAllPendingSession)
+
+      session.head.email must be equalTo "email"
+    }
+
+    "delete free slot with specified id" in {
+      val freeSlotId = BSONObjectID.generate()
+      val freeSlot = UpdateApproveSessionInfo(date, freeSlotId.stringify, freeSlot = true)
+      await(approveSessionRepository.insertSessionForApprove(freeSlot))
+
+      val session = await(approveSessionRepository.deleteFreeSlot(freeSlotId.stringify))
+
+      session.ok must be equalTo true
+    }
+
+    "get all free slots" in {
+      val session = await(approveSessionRepository.getAllFreeSlots)
+
+      session.head.freeSlot must be equalTo true
+    }
+
+    "get a free slot on a specified date" in {
+      val freeSlotId = BSONObjectID.generate()
+      val freeSlot = UpdateApproveSessionInfo(date, freeSlotId.stringify, freeSlot = true)
+      await(approveSessionRepository.insertSessionForApprove(freeSlot))
+
+      val session = await(approveSessionRepository.getFreeSlotByDate(date))
+
+      session.isDefined must be equalTo true
+      session.get.date must be equalTo date
     }
   }
 

@@ -43,6 +43,9 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
   private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
     "subCategory", "topic", _id = _id))
 
+  private val approveSessionInfoWithRecommendationId: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+    "subCategory", "topic", recommendationId = "id", _id = _id))
+
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
 
@@ -405,26 +408,6 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    /*"error while creating session by user when dates are not matching" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-
-      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
-
-      val result = controller.createSessionByUser(_id.stringify)(
-        FakeRequest()
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
-            "date" -> "2018-02-31T23:59",
-            "category" -> "category",
-            "subCategory" -> "subCategory",
-            "topic" -> "topic",
-            "meetup" -> "true")
-          .withCSRFToken)
-
-      status(result) must be equalTo SEE_OTHER
-    }*/
-
     "get pending sessions for Notification" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       approveSessionRepository.getAllPendingSession returns Future.successful(approveSessionInfo)
@@ -455,7 +438,28 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
       approveSessionRepository.declineSession(_id.stringify) returns updateWriteResult
+
+      recommendationsRepository.cancelBookedRecommendation(approveSessionInfo.head.recommendationId) returns updateWriteResult
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.declineSession(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "decline Pending Session when ther eis recommendation id " in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfoWithRecommendationId.head)
+      approveSessionRepository.declineSession(_id.stringify) returns updateWriteResult
+
+      recommendationsRepository.cancelBookedRecommendation(approveSessionInfoWithRecommendationId.head.recommendationId) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.declineSession(_id.stringify)(
@@ -470,7 +474,28 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
       approveSessionRepository.declineSession(_id.stringify) returns updateWriteResult
+
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.declineSession(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "error while declining Pending Session but there is recommendation id" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val updateWriteResult1 = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfoWithRecommendationId.head)
+      approveSessionRepository.declineSession(_id.stringify) returns updateWriteResult
+
+      recommendationsRepository.cancelBookedRecommendation(approveSessionInfoWithRecommendationId.head.recommendationId) returns updateWriteResult1
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.declineSession(_id.stringify)(

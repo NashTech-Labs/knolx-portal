@@ -299,7 +299,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       approvalSessionsRepository.declineSession(approvalSession._id.stringify) flatMap { session =>
         if (session.ok) {
           Logger.info(s"Successfully declined session $sessionId")
-            recommendationsRepository.cancelBookedRecommendation(approvalSession.recommendationId) map { result =>
+          approvalSession.recommendationId.isEmpty match {
+            case false => recommendationsRepository.cancelBookedRecommendation(approvalSession.recommendationId) map { result =>
               if (result.ok) {
                 Logger.info(s"Recommendation has been unbooked now ${approvalSession.recommendationId}")
                 Redirect(routes.CalendarController.renderCalendarPage())
@@ -309,7 +310,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                   .flashing("message" -> "Something went wrong while declining the session")
               }
             }
+            case true  => Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+              .flashing("message" -> "Sessions has been declined"))
           }
+        }
         else {
           Logger.info(s"Something went wrong while declining session $sessionId")
           Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))

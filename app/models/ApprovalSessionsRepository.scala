@@ -7,7 +7,7 @@ import models.ApproveSessionJsonFormats._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
@@ -94,6 +94,37 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .sort(Json.obj("decline" -> 1, "approved" -> 1))
           .cursor[ApproveSessionInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+  }
+
+  def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+    val skipN = (pageNumber - 1) * pageSize
+    val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
+    val condition = keyword match {
+      case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false))
+      case None      => Json.obj("freeSlot" -> BSONDocument("$eq" -> false))
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(condition)
+          .options(queryOptions)
+          .sort(Json.obj("decline" -> 1, "approved" -> 1))
+          .cursor[ApproveSessionInfo](ReadPreference.Primary)
+          .collect[List](pageSize, FailOnError[List[ApproveSessionInfo]]()))
+  }
+
+  def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
+    val condition = keyword match {
+      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
+        "freeSlot" -> BSONDocument("$eq" -> false)))
+      case None      => Some(Json.obj("freeSlot" -> BSONDocument("$eq" -> false)))
+    }
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.count(condition))
   }
 
   def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {

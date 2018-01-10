@@ -107,7 +107,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "render create session for user for updating" in new WithTestApplication {
+    "render create session for user for creating/updating his session" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 

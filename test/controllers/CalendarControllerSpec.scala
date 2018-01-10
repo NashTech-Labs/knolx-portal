@@ -30,6 +30,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
   private val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2018-01-31T23:59")
   private val _id: BSONObjectID = BSONObjectID.generate()
+  private val recommendationId = BSONObjectID.generate()
   private val sessionObject: Future[List[SessionInfo]] =
     Future.successful(List(SessionInfo(_id.stringify, "email", BSONDateTime(date.getTime), "sessions", "category",
       "subCategory", "feedbackFormId", "topic", 1, meetup = true, "rating", 0.00, cancelled = false, active = true,
@@ -40,13 +41,18 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
       "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
 
-  private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
-    "subCategory", "topic", _id = _id))
+  private val approveSessionInfo: List[ApproveSessionInfo] =
+    List(
+      ApproveSessionInfo("email", BSONDateTime(date.getTime), "category", "subCategory", "topic", _id = _id),
+      ApproveSessionInfo("email", BSONDateTime(date.getTime), "category", "subCategory", "topic",
+        recommendationId = recommendationId.stringify , _id = _id))
+
+  private val recommendationInfo = RecommendationInfo(Some("test@knoldus.com"), "name", "topic", "recommendation",
+    BSONDateTime(date.getTime), BSONDateTime(date.getTime), _id = recommendationId)
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp()
 
-    val recommendationsRepository: RecommendationsRepository = mock[RecommendationsRepository]
     val emailManager: ActorRef =
       app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
@@ -62,6 +68,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
         knolxControllerComponent,
         emailManager
       )
+
+    val recommendationsRepository = mock[RecommendationsRepository]
     val categoriesRepository = mock[CategoriesRepository]
     val sessionsRepository = mock[SessionsRepository]
 
@@ -109,7 +117,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "render create session for user for updating" in new WithTestApplication {
+    "render create session for user for creating/updating his session" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
@@ -119,6 +127,24 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
 
       val result = controller.renderCreateSessionByUser(_id.stringify, None, isFreeSlot = false)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "render create session for respective recommendation for user" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      recommendationsRepository.getRecommendationById(recommendationId.stringify) returns Future.successful(Some(recommendationInfo))
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+
+      val result = controller.renderCreateSessionByUser(_id.stringify, Some(recommendationId.stringify), isFreeSlot = false)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

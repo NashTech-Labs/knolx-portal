@@ -56,6 +56,24 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
     }
 
+    "get recommendation by Id" in {
+      val maybeRecommendation = await(recommendationRepository.getRecommendationById(recommendationId.stringify))
+
+      maybeRecommendation.get.name must beEqualTo("name")
+    }
+
+    "update book recommendation value" in {
+      val done = await(recommendationRepository.bookRecommendation(recommendationId.stringify))
+
+      done.ok must beEqualTo(true)
+    }
+
+    "get booked recommendation" in {
+      val paginatedRecommendation = await(recommendationRepository.paginate(1, "book"))
+
+      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+    }
+
     "decline recommendation" in {
 
       val decline = await(recommendationRepository.declineRecommendation(recommendationId.stringify))
@@ -123,6 +141,11 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
       upVote.ok must beEqualTo(true)
     }
 
+    "cancel booked recommendation" in {
+      val unbook = await(recommendationRepository.cancelBookedRecommendation(recommendationId.stringify))
+
+        unbook.ok must beEqualTo(true)
+    }
   }
 
 }

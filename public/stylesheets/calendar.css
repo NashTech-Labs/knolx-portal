@@ -34,3 +34,8 @@
     display:none;
     z-index:1;
 }
+
+.calendar-flashing {
+    text-align: center;
+    font-size: 15px;
+}

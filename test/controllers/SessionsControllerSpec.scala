@@ -50,6 +50,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
   private val emptyEmailObject = Future.successful(None)
 
+  private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+    "subCategory", "topic", _id = _id))
+
   abstract class WithTestApplication extends TestEnvironment with Scope {
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
@@ -776,6 +779,209 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
           .withCSRFToken)
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "render approve session page for admin" in new WithTestApplication {
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.renderApproveSessionByAdmin(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "not approve a session if submitted form has some errors" in new WithTestApplication {
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.approveSessionByAdmin(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test@knoldus.com",
+            "date" -> "2017-06-25T16:00",
+            "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "feedbackExpirationDays" -> "1",
+            "meetup" -> "true"
+          )
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not approve a session if email is invalid or does not exist" in new WithTestApplication {
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getByEmail("test123@knoldus.com") returns Future.successful(None)
+      feedbackFormsRepository.getAll returns getAll
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.approveSessionByAdmin(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test123@knoldus.com",
+            "date" -> "2017-06-25T16:00",
+            "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "feedbackFormId" -> "feedbackFormId",
+            "topic" -> "topic",
+            "feedbackExpirationDays" -> "1",
+            "meetup" -> "true"
+          )
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not approve a session due to DB insertion error while inserting in sessions repository" in new WithTestApplication {
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getByEmail("test123@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.approveSessionByAdmin(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test123@knoldus.com",
+            "date" -> "2017-06-25T16:00",
+            "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "feedbackFormId" -> "feedbackFormId",
+            "topic" -> "topic",
+            "feedbackExpirationDays" -> "1",
+            "meetup" -> "true"
+          )
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "not approve a session due to DB insertion error while inserting in approval sessions repository" in new WithTestApplication {
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val wrongUpdateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getByEmail("test123@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+      approveSessionRepository.insertSessionForApprove(any[UpdateApproveSessionInfo])(any[ExecutionContext])
+        .returns(wrongUpdateWriteResult)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.approveSessionByAdmin(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test123@knoldus.com",
+            "date" -> "2017-06-25T16:00",
+            "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "feedbackFormId" -> "feedbackFormId",
+            "topic" -> "topic",
+            "feedbackExpirationDays" -> "1",
+            "meetup" -> "true"
+          )
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "approve a session and insert it in session repository" in new WithTestApplication {
+      val date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm").parse("2017-06-25T16:00")
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val localDateTimeEndOfDay = Instant.ofEpochMilli(date.getTime).atZone(ISTZoneId).toLocalDateTime.`with`(LocalTime.MAX)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getByEmail("test123@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+
+      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
+      approveSessionRepository.insertSessionForApprove(any[UpdateApproveSessionInfo])(any[ExecutionContext])
+        .returns(updateWriteResult)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.toLocalDateTimeEndOfDay(date) returns localDateTimeEndOfDay
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.approveSessionByAdmin(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test123@knoldus.com",
+            "date" -> "2017-06-25T16:00",
+            "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "feedbackFormId" -> "feedbackFormId",
+            "topic" -> "topic",
+            "feedbackExpirationDays" -> "1",
+            "meetup" -> "true"
+          )
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo SEE_OTHER
     }
 
   }

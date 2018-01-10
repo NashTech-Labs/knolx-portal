@@ -22,6 +22,7 @@ import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 class CalendarControllerSpec extends PlaySpecification with Mockito {
 
@@ -83,7 +84,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     }
 
     "get list of all Session for Calendar Page when user is not logged in" in new WithTestApplication {
-      sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L)  returns sessionObject
+      sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
       approveSessionRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -94,7 +95,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     }
 
     "get list of all Session for Calendar Page when user is logged in" in new WithTestApplication {
-      sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L)  returns sessionObject
+      sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
       approveSessionRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -133,14 +134,14 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.createSessionByUser(_id.stringify)(
-      FakeRequest()
-        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-        .withFormUrlEncodedBody("email" -> "test@knoldus.com",
-        "category" -> "test category",
-        "subCategory" -> "subCategory",
-        "topic" -> "topic",
-        "meetup" -> "true")
-        .withCSRFToken)
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true")
+          .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
@@ -403,32 +404,12 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    /*"error while creating session by user when dates are not matching" in new WithTestApplication {
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-
-      dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
-
-      val result = controller.createSessionByUser(_id.stringify)(
-        FakeRequest()
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
-            "date" -> "2018-02-31T23:59",
-            "category" -> "category",
-            "subCategory" -> "subCategory",
-            "topic" -> "topic",
-            "meetup" -> "true")
-          .withCSRFToken)
-
-      status(result) must be equalTo SEE_OTHER
-    }*/
-
     "get pending sessions for Notification" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       approveSessionRepository.getAllPendingSession returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-       val result = controller.getPendingSessions()(
+      val result = controller.getPendingSessions()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -436,18 +417,38 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    /*"get all sessions for Admin" in new WithTestApplication {
+    "not get all sessions for admin if form submitted is wrong" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllBookedSessions returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.getAllSessionForAdmin()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test@knoldus.com",
+            "pageSize" -> "10")
+          .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "get all sessions for admin" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.paginate(1, Some("test@knoldus.com"), 10) returns Future.successful(approveSessionInfo)
+      approveSessionRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.getAllSessionForAdmin()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test@knoldus.com",
+            "page" -> "1",
+            "pageSize" -> "10")
           .withCSRFToken)
 
       status(result) must be equalTo OK
-    }*/
+    }
 
     "decline Pending Session " in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject

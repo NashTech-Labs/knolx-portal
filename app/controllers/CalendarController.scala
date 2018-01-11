@@ -24,8 +24,7 @@ case class CreateSessionInfo(email: String,
                              category: String,
                              subCategory: String,
                              topic: String,
-                             meetup: Boolean
-                            )
+                             meetup: Boolean)
 
 case class CreateApproveSessionInfo(email: String,
                                     date: Date,
@@ -33,8 +32,7 @@ case class CreateApproveSessionInfo(email: String,
                                     subCategory: String,
                                     topic: String,
                                     meetup: Boolean,
-                                    dateString: String
-                                   )
+                                    dateString: String)
 
 case class CalendarSession(id: String,
                            date: Date,
@@ -56,8 +54,7 @@ case class UpdateApproveSessionInfo(date: BSONDateTime,
                                     meetup: Boolean = false,
                                     approved: Boolean = false,
                                     decline: Boolean = false,
-                                    freeSlot: Boolean = false
-                                   )
+                                    freeSlot: Boolean = false)
 
 case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession],
                                          isAdmin: Boolean,
@@ -68,8 +65,7 @@ case class CalendarSessionsSearchResult(calendarSessions: List[CalendarSession],
                                         pages: Int,
                                         page: Int,
                                         keyword: String,
-                                        totalSessions: Int
-                                       )
+                                        totalSessions: Int)
 
 @Singleton
 class CalendarController @Inject()(messagesApi: MessagesApi,
@@ -85,6 +81,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
   implicit val calendarSessionsWithAuthorityFormat: OFormat[CalendarSessionsWithAuthority] = Json.format[CalendarSessionsWithAuthority]
   implicit val calendarSessionsSearchResultFormat: OFormat[CalendarSessionsSearchResult] = Json.format[CalendarSessionsSearchResult]
+
   lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val createSessionFormByUser = Form(
@@ -132,19 +129,21 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
 
         sessionRequestRepository.getAllSessions map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline)
-            .map { pendingSession =>
-            CalendarSession(pendingSession._id.stringify,
-              new Date(pendingSession.date.value),
-              pendingSession.email,
-              pendingSession.topic,
-              pendingSession.meetup,
-              new Date(pendingSession.date.value).toString,
-              pendingSession.approved,
-              pendingSession.decline,
-              pending = true,
-              pendingSession.freeSlot)
-          }
+          val pendingSessionForAdmin =
+            pendingSessions
+              .filterNot(session => session.approved || session.decline)
+              .map { pendingSession =>
+                CalendarSession(pendingSession._id.stringify,
+                  new Date(pendingSession.date.value),
+                  pendingSession.email,
+                  pendingSession.topic,
+                  pendingSession.meetup,
+                  new Date(pendingSession.date.value).toString,
+                  pendingSession.approved,
+                  pendingSession.decline,
+                  pending = true,
+                  pendingSession.freeSlot)
+              }
 
           val calendarSessionsWithAuthority =
             CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
@@ -154,56 +153,64 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean): Action[AnyContent] = userAction.async { implicit request =>
-    sessionRequestRepository.getSession(sessionId) flatMap { session =>
-      val createSessionInfo = CreateSessionInfo(
-        session.email,
-        new Date(session.date.value),
-        session.category,
-        session.subCategory,
-        session.topic,
-        session.meetup)
-      sessionRequestRepository.getAllFreeSlots map { freeSlots =>
-        val freeSlotDates = freeSlots.map { freeSlot =>
-          dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
-        }
-        Ok(views.html.calendar.createsessionbyuser(
-          createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot)
-        )
+    sessionRequestRepository
+      .getSession(sessionId)
+      .flatMap { session =>
+        val createSessionInfo = CreateSessionInfo(
+          session.email,
+          new Date(session.date.value),
+          session.category,
+          session.subCategory,
+          session.topic,
+          session.meetup)
+
+        sessionRequestRepository
+          .getAllFreeSlots
+          .map { freeSlots =>
+            val freeSlotDates = freeSlots.map(freeSlot => dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value)))
+
+            Ok(views.html.calendar.createsessionbyuser(
+              createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot)
+            )
+          }
       }
-    }
   }
 
   def createSessionByUser(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
-    sessionRequestRepository.getAllFreeSlots flatMap { freeSlots =>
-      val freeSlotDates = freeSlots.map { freeSlot =>
-        dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
-      }
-      sessionRequestRepository.getSession(sessionId) flatMap { approveSessionInfo =>
-        createSessionFormByUser.bindFromRequest.fold(
-          formWithErrors => {
-            Logger.error(s"Received a bad request while creating the session $formWithErrors")
-            Future.successful(
-              BadRequest(views.html.calendar.createsessionbyuser(
-                formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot)
-              )
+    sessionRequestRepository
+      .getAllFreeSlots
+      .flatMap { freeSlots =>
+        val freeSlotDates = freeSlots.map(freeSlot => dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value)))
+
+        sessionRequestRepository
+          .getSession(sessionId)
+          .flatMap { approveSessionInfo =>
+            createSessionFormByUser.bindFromRequest.fold(
+              formWithErrors => {
+                Logger.error(s"Received a bad request while creating the session $formWithErrors")
+                Future.successful(
+                  BadRequest(views.html.calendar.createsessionbyuser(
+                    formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot)
+                  )
+                )
+              },
+              createSessionInfoByUser => {
+                val dateString = new Date(approveSessionInfo.date.value).toString
+
+                if (dateString.equals(createSessionInfoByUser.date.toString)) {
+                  insertSession(request.user.email, createSessionInfoByUser, sessionId)
+                } else if (!approveSessionInfo.freeSlot) {
+                  swapSlots(sessionId, createSessionInfoByUser, approveSessionInfo)
+                } else {
+                  Future.successful(
+                    Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot))
+                      .flashing("message" -> "Date submitted was wrong. Please try again.")
+                  )
+                }
+              }
             )
-          },
-          createSessionInfoByUser => {
-            val dateString = new Date(approveSessionInfo.date.value).toString
-            if (dateString.equals(createSessionInfoByUser.date.toString)) {
-              insertSession(request.user.email, createSessionInfoByUser, sessionId)
-            } else if (!approveSessionInfo.freeSlot) {
-              swapSlots(sessionId, createSessionInfoByUser, approveSessionInfo)
-            } else {
-              Future.successful(
-                Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot))
-                  .flashing("message" -> "Date submitted was wrong. Please try again.")
-              )
-            }
           }
-        )
       }
-    }
   }
 
   private def insertSession(presenterEmail: String,
@@ -217,55 +224,68 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       createSessionInfoByUser.category,
       createSessionInfoByUser.subCategory,
       createSessionInfoByUser.meetup)
-    sessionRequestRepository.insertSessionForApprove(session) flatMap { result =>
-      if (result.ok) {
-        Logger.info(s"Session By user $presenterEmail with sessionId $sessionId successfully created")
-        usersRepository.getAllAdminAndSuperUser map {
-          adminAndSuperUser =>
-            emailManager ! EmailActor.SendEmail(
-              adminAndSuperUser, fromEmail,
-              s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
-              views.html.emails.requestedsessionnotification(session).toString)
-            Logger.info(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+
+    sessionRequestRepository
+      .insertSessionForApprove(session)
+      .flatMap { result =>
+        if (result.ok) {
+          Logger.info(s"Session By user $presenterEmail with sessionId $sessionId successfully created")
+
+          usersRepository
+            .getAllAdminAndSuperUser
+            .map { adminAndSuperUser =>
+              emailManager ! EmailActor.SendEmail(
+                adminAndSuperUser, fromEmail,
+                s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
+                views.html.emails.requestedsessionnotification(session).toString)
+              Logger.info(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+            }
+
+          Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+            .flashing("message" -> "Session successfully created!"))
+        } else {
+          Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
+          Future.successful(InternalServerError("Something went wrong!"))
         }
-        Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
-          .flashing("message" -> "Session successfully created!"))
-      } else {
-        Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
-        Future.successful(InternalServerError("Something went wrong!"))
       }
-    }
   }
 
   private def swapSlots(sessionId: String,
                         createSessionInfoByUser: CreateSessionInfo,
                         approveSessionInfo: SessionRequestInfo) = {
-    sessionRequestRepository.getFreeSlotByDate(BSONDateTime(createSessionInfoByUser.date.getTime)) flatMap {
-      _.fold {
-        Future.successful(BadRequest("Free slot on the specified date and time does not exist"))
-      } { freeSlot =>
-        val newDate = BSONDateTime(createSessionInfoByUser.date.getTime)
+    sessionRequestRepository
+      .getFreeSlotByDate(BSONDateTime(createSessionInfoByUser.date.getTime))
+      .flatMap {
+        _.fold {
+          Future.successful(BadRequest("Free slot on the specified date and time does not exist"))
+        } { freeSlot =>
+          val newDate = BSONDateTime(createSessionInfoByUser.date.getTime)
 
-        sessionRequestRepository.updateDateForPendingSession(sessionId, newDate) flatMap { result =>
-          if (result.ok) {
-            val updateFreeSlot = UpdateApproveSessionInfo(
-              approveSessionInfo.date, sessionId = freeSlot._id.stringify, freeSlot = true)
-            sessionRequestRepository.insertSessionForApprove(updateFreeSlot) flatMap { swap =>
-              if (swap.ok) {
-                Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
-                  .flashing("message" -> "The session has been updated successfully."))
+          sessionRequestRepository
+            .updateDateForPendingSession(sessionId, newDate)
+            .flatMap { result =>
+              if (result.ok) {
+                val updateFreeSlot = UpdateApproveSessionInfo(
+                  approveSessionInfo.date, sessionId = freeSlot._id.stringify, freeSlot = true)
+
+                sessionRequestRepository
+                  .insertSessionForApprove(updateFreeSlot)
+                  .flatMap { swap =>
+                    if (swap.ok) {
+                      Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+                        .flashing("message" -> "The session has been updated successfully."))
+                    } else {
+                      Future.successful(
+                        InternalServerError("Something went wrong while inserting a free slot on session's previous date")
+                      )
+                    }
+                  }
               } else {
-                Future.successful(
-                  InternalServerError("Something went wrong while inserting a free slot on session's previous date")
-                )
+                Future.successful(InternalServerError("Something went wrong while updating the session"))
               }
             }
-          } else {
-            Future.successful(InternalServerError("Something went wrong while updating the session"))
-          }
         }
       }
-    }
   }
 
   def pendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
@@ -281,7 +301,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest("Oops! Invalid value encountered!"))
       },
       sessionInformation => {
-        sessionRequestRepository.paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
+        sessionRequestRepository
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { pendingSessions =>
             val pendingSessionForAdmin = pendingSessions map { pendingSession =>
               CalendarSession(pendingSession._id.stringify,
@@ -295,9 +316,12 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 pending = !pendingSession.approved && !pendingSession.decline,
                 freeSlot = false)
             }
-            sessionRequestRepository.activeCount(sessionInformation.email)
+
+            sessionRequestRepository
+              .activeCount(sessionInformation.email)
               .map { count =>
                 val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
+
                 Ok(Json.toJson(CalendarSessionsSearchResult(pendingSessionForAdmin,
                   pages, sessionInformation.page, sessionInformation.email.getOrElse(""),
                   count)))
@@ -307,43 +331,49 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    sessionRequestRepository.declineSession(sessionId) map { result =>
-      if (result.ok) {
-        Logger.info(s"Successfully declined session $sessionId")
-        Redirect(routes.CalendarController.renderCalendarPage())
-          .flashing("message" -> "Sessions has been successfully declined")
-      } else {
-        Logger.error(s"Something went wrong while declining session $sessionId")
-        Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId))
-          .flashing("message" -> "Something went wrong while declining the session.")
+    sessionRequestRepository
+      .declineSession(sessionId)
+      .map { result =>
+        if (result.ok) {
+          Logger.info(s"Successfully declined session $sessionId")
+          Redirect(routes.CalendarController.renderCalendarPage())
+            .flashing("message" -> "Sessions has been successfully declined")
+        } else {
+          Logger.error(s"Something went wrong while declining session $sessionId")
+          Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId))
+            .flashing("message" -> "Something went wrong while declining the session.")
+        }
       }
-    }
   }
 
   def insertFreeSlot(date: String): Action[AnyContent] = adminAction.async { implicit request =>
     val formattedDate = BSONDateTime(dateTimeUtility.parseDateStringWithTToIST(date))
     val approveSessionInfo = UpdateApproveSessionInfo(formattedDate, freeSlot = true)
 
-    sessionRequestRepository.insertSessionForApprove(approveSessionInfo) map { result =>
-      if (result.ok) {
-        Ok("Free slot has been entered successfully.")
-      } else {
-        BadRequest("Something went wrong while inserting free slot.")
+    sessionRequestRepository
+      .insertSessionForApprove(approveSessionInfo)
+      .map { result =>
+        if (result.ok) {
+          Ok("Free slot has been entered successfully.")
+        } else {
+          BadRequest("Something went wrong while inserting free slot.")
+        }
       }
-    }
   }
 
   def deleteFreeSlot(id: String): Action[AnyContent] = adminAction.async { implicit request =>
-    sessionRequestRepository.deleteFreeSlot(id) map { result =>
-      if (result.ok) {
-        Logger.info("Successfully deleted the free slot")
-        Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
-      } else {
-        Logger.error("Something went wring while deleting the free slot")
-        Redirect(routes.CalendarController.renderCreateSessionByUser(id, isFreeSlot = true))
-          .flashing("message" -> "Something went wrong while deleting the free slot")
+    sessionRequestRepository
+      .deleteFreeSlot(id)
+      .map { result =>
+        if (result.ok) {
+          Logger.info("Successfully deleted the free slot")
+          Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
+        } else {
+          Logger.error("Something went wring while deleting the free slot")
+          Redirect(routes.CalendarController.renderCreateSessionByUser(id, isFreeSlot = true))
+            .flashing("message" -> "Something went wrong while deleting the free slot")
+        }
       }
-    }
   }
 
 }

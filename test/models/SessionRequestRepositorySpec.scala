@@ -23,13 +23,13 @@ class SessionRequestRepositorySpec extends PlaySpecification {
 
   "Session Request Repository" should {
 
-    "insert session for approve by admin/superUser" in {
+    "insert session for approval by admin/superUser" in {
       val insert = await(sessionRequestRepository.insertSessionForApprove(approveSessionInfo).map(_.ok))
 
       insert must beEqualTo(true)
     }
 
-    "insert session for approve by admin/superUser when sessionId is not specified" in {
+    "insert session for approval by admin/superUser when sessionId is not specified" in {
       val approveSessionInfoWithoutSessionId = UpdateApproveSessionInfo(date, freeSlot = true)
 
       val insert = await(sessionRequestRepository.insertSessionForApprove(approveSessionInfoWithoutSessionId).map(_.ok))
@@ -73,7 +73,7 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       result must beEqualTo(1)
     }
 
-    "get all approved session" in {
+    "get all approved sessions" in {
       val approveSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,
         "topic", "approvedemail", "category", "subCategory", approved = true)
 
@@ -108,7 +108,6 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       val insert = await(sessionRequestRepository.insertSessionForApprove(declineSessionInfoByAdmin))
       val update = await(sessionRequestRepository.updateDateForPendingSession(sessionId,date))
       update.ok must beEqualTo(true)
-
     }
 
     "get all pending sessions" in {
@@ -145,6 +144,7 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       session.isDefined must be equalTo true
       session.get.date must be equalTo date
     }
+
   }
 
 }

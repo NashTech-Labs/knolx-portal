@@ -45,7 +45,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessionrequest"))
 
   def insertSessionForApprove(approveSessionInfo: UpdateApproveSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
-
     val selector = approveSessionInfo.sessionId match {
       case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.sessionId))
       case _                         => BSONDocument("_id" -> BSONObjectID.generate())
@@ -65,6 +64,7 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           "freeSlot" -> approveSessionInfo.freeSlot
         )
       )
+
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 

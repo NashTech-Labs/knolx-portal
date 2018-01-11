@@ -83,7 +83,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "get list of all Session for Calendar Page when user is not logged in" in new WithTestApplication {
+    "get list of all Sessions for Calendar Page when user is not logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
       sessionRequestRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
@@ -94,7 +94,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "get list of all Session for Calendar Page when user is logged in" in new WithTestApplication {
+    "get list of all Sessions for Calendar Page when user is logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
       sessionRequestRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
@@ -125,7 +125,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "Receive Bad Request while creating session for incorrect form submission" in new WithTestApplication {
+    "receive Bad Request while creating session for incorrect form submission" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
       sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
@@ -450,7 +450,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "decline Pending Session " in new WithTestApplication {
+    "decline Pending Session" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
@@ -531,7 +531,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not delete free sot due to DB deletion error" in new WithTestApplication {
+    "not delete free slot due to DB deletion error" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject

@@ -375,7 +375,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Logger.info("Successfully deleted the free slot")
         Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
       } else {
-        Logger.error("Something went wring while deleting the free slot")
+        Logger.error("Something went wrong while deleting the free slot")
         Redirect(routes.CalendarController.renderCreateSessionByUser(id, recommendationId, isFreeSlot = true))
           .flashing("message" -> "Something went wrong while deleting the free slot")
       }

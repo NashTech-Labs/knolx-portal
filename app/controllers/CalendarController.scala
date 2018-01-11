@@ -181,7 +181,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       approvalSessionsRepository.getSession(sessionId) flatMap { approveSessionInfo =>
         createSessionFormByUser.bindFromRequest.fold(
           formWithErrors => {
-            Logger.error(s"Received a bad request for create session $formWithErrors")
+            Logger.error(s"Received a bad request while creating the session $formWithErrors")
             Future.successful(
               BadRequest(views.html.calendar.createsessionbyuser(formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot))
             )

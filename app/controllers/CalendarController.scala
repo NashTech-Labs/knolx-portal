@@ -132,7 +132,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             pending = false,
             freeSlot = false)
         }
-
         approvalSessionsRepository.getAllSessions map { pendingSessions =>
           val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline)
             .map { pendingSession =>
@@ -176,17 +175,15 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             session.subCategory,
             topic,
             session.meetup)
-          Future.successful(
-
-            Ok(views.html.calendar.createsessionbyuser(
-              createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotDates, isFreeSlot)
-            ))
+          Future.successful(Ok(views.html.calendar.createsessionbyuser(
+            createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotDates, isFreeSlot)))
         }
       }
     }
   }
 
-  def createSessionByUser(sessionId: String, recommendationId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
+  def createSessionByUser(sessionId: String,
+                          recommendationId: Option[String]): Action[AnyContent] = userAction.async { implicit request =>
     approvalSessionsRepository.getAllFreeSlots flatMap { freeSlots =>
       val freeSlotDates = freeSlots.map { freeSlot =>
         dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
@@ -197,8 +194,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             Logger.error(s"Received a bad request while creating the session $formWithErrors")
             Future.successful(
               BadRequest(views.html.calendar.createsessionbyuser(
-                formWithErrors, sessionId, recommendationId, freeSlotDates, approveSessionInfo.freeSlot))
-            )
+                formWithErrors, sessionId, recommendationId, freeSlotDates, approveSessionInfo.freeSlot)))
           },
           createSessionInfoByUser => {
             val dateString = new Date(approveSessionInfo.date.value).toString
@@ -271,7 +267,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest("Free slot on the specified date and time does not exist"))
       } { freeSlot =>
         val newDate = BSONDateTime(createSessionInfoByUser.date.getTime)
-
         approvalSessionsRepository.updateDateForPendingSession(sessionId, newDate) flatMap { result =>
           if (result.ok) {
             val updateFreeSlot = UpdateApproveSessionInfo(

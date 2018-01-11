@@ -65,6 +65,13 @@ case class CalendarSessionsWithAuthority(calendarSessions: List[CalendarSession]
                                          loggedIn: Boolean,
                                          email: Option[String])
 
+case class CalendarSessionsSearchResult(calendarSessions: List[CalendarSession],
+                                        pages: Int,
+                                        page: Int,
+                                        keyword: String,
+                                        totalSessions: Int
+                                       )
+
 @Singleton
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
@@ -79,6 +86,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   implicit val calendarSessionFormat: OFormat[CalendarSession] = Json.format[CalendarSession]
   implicit val calendarSessionsWithAuthorityFormat: OFormat[CalendarSessionsWithAuthority] = Json.format[CalendarSessionsWithAuthority]
+  implicit val calendarSessionsSearchResultFormat: OFormat[CalendarSessionsSearchResult] = Json.format[CalendarSessionsSearchResult]
   lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val createSessionFormByUser = Form(
@@ -91,6 +99,14 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       "topic" -> nonEmptyText,
       "meetup" -> boolean
     )(CreateSessionInfo.apply)(CreateSessionInfo.unapply)
+  )
+
+  val sessionSearchForm = Form(
+    mapping(
+      "email" -> optional(nonEmptyText),
+      "page" -> number.verifying("Invalid Page Number", _ >= 1),
+      "pageSize" -> number.verifying("Invalid Page size", _ >= 10)
+    )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
   def renderCalendarPage(isRecommendation: Boolean = false): Action[AnyContent] = action { implicit request =>
@@ -277,21 +293,35 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def getAllSessionForAdmin: Action[AnyContent] = adminAction.async { implicit request =>
-    approvalSessionsRepository.getAllBookedSessions.map { pendingSessions =>
-      val pendingSessionForAdmin = pendingSessions map { pendingSession =>
-        CalendarSession(pendingSession._id.stringify,
-          new Date(pendingSession.date.value),
-          pendingSession.email,
-          pendingSession.topic,
-          pendingSession.meetup,
-          new Date(pendingSession.date.value).toString,
-          pendingSession.approved,
-          pendingSession.decline,
-          pending = !pendingSession.approved && !pendingSession.decline,
-          freeSlot = false)
-      }
-      Ok(Json.toJson(pendingSessionForAdmin))
-    }
+    sessionSearchForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
+        Future.successful(BadRequest("Oops! Invalid value encountered!"))
+      },
+      sessionInformation => {
+        approvalSessionsRepository.paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
+          .flatMap { pendingSessions =>
+            val pendingSessionForAdmin = pendingSessions map { pendingSession =>
+              CalendarSession(pendingSession._id.stringify,
+                new Date(pendingSession.date.value),
+                pendingSession.email,
+                pendingSession.topic,
+                pendingSession.meetup,
+                new Date(pendingSession.date.value).toString,
+                pendingSession.approved,
+                pendingSession.decline,
+                pending = !pendingSession.approved && !pendingSession.decline,
+                freeSlot = false)
+            }
+            approvalSessionsRepository.activeCount(sessionInformation.email)
+              .map { count =>
+                val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
+                Ok(Json.toJson(CalendarSessionsSearchResult(pendingSessionForAdmin,
+                  pages, sessionInformation.page, sessionInformation.email.getOrElse(""),
+                  count)))
+              }
+          }
+      })
   }
 
   def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>

@@ -50,10 +50,28 @@ class ApprovalSessionRepositorySpec extends PlaySpecification {
       sessions.head.email must beEqualTo("email")
     }
 
-    "get all booked sessions" in {
-      val sessions = await(approveSessionRepository.getAllBookedSessions)
+    "get starting 10 booked sessions" in {
+      val result = await(approveSessionRepository.paginate(1))
 
-      sessions.head.email must beEqualTo("email")
+      result.head.email must beEqualTo("email")
+    }
+
+    "get starting 10 booked sessions where email is email" in {
+      val result = await(approveSessionRepository.paginate(1, Some("email")))
+
+      result.head.email must beEqualTo("email")
+    }
+
+    "get count of all booked sessions" in {
+      val result = await(approveSessionRepository.activeCount())
+
+      result must beEqualTo(1)
+    }
+
+    "get count of booked sessions where email matches the given keyword" in {
+      val result = await(approveSessionRepository.activeCount(Some("email")))
+
+      result must beEqualTo(1)
     }
 
     "get all approved session" in {

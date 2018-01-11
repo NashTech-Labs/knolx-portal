@@ -1,9 +1,8 @@
 var freeSlotTitle = "Book Now!";
 var pendingSessionColor = '#f0ad4e';
-var scheduledSession = '#31b0d5';
-var scheduledMeetup = '#8e44ad';
+var scheduledSessionColor = '#31b0d5';
+var scheduledMeetupColor = '#8e44ad';
 var freeSlotColor = '#27ae60';
-var dragStart = 0;
 var isAdmin = false;
 
 $(function () {
@@ -161,7 +160,7 @@ function getSessions(startDate, endDate, callback) {
                                     id: calendarSessions[calenderSession].id,
                                     title: calendarSessions[calenderSession].topic,
                                     start: calendarSessions[calenderSession].date,
-                                    color: scheduledMeetup,
+                                    color: scheduledMeetupColor,
                                     data: "<p>Topic: " + calendarSessions[calenderSession].topic
                                     + "<br>Email: " + calendarSessions[calenderSession].email + "</p>",
                                     url: jsRoutes.controllers.SessionsController
@@ -172,7 +171,7 @@ function getSessions(startDate, endDate, callback) {
                                     id: calendarSessions[calenderSession].id,
                                     title: calendarSessions[calenderSession].topic,
                                     start: calendarSessions[calenderSession].date,
-                                    color: scheduledSession,
+                                    color: scheduledSessionColor,
                                     data: "<p>Topic: " + calendarSessions[calenderSession].topic
                                     + "<br>Email: " + calendarSessions[calenderSession].email + "</p>",
                                     url: jsRoutes.controllers.SessionsController
@@ -185,7 +184,7 @@ function getSessions(startDate, endDate, callback) {
                                     id: calendarSessions[calenderSession].id,
                                     title: calendarSessions[calenderSession].topic,
                                     start: calendarSessions[calenderSession].date,
-                                    color: scheduledMeetup,
+                                    color: scheduledMeetupColor,
                                     data: "<p>Topic: " + calendarSessions[calenderSession].topic
                                     + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
                                 });
@@ -194,7 +193,7 @@ function getSessions(startDate, endDate, callback) {
                                     id: calendarSessions[calenderSession].id,
                                     title: calendarSessions[calenderSession].topic,
                                     start: calendarSessions[calenderSession].date,
-                                    color: scheduledSession,
+                                    color: scheduledSessionColor,
                                     data: "<p>Topic: " + calendarSessions[calenderSession].topic
                                     + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
                                 });

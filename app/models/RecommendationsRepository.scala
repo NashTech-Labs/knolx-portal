@@ -55,7 +55,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
           .insert(recommendationInfo))
 
   def approveRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
-
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
@@ -70,7 +69,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
   }
 
   def getRecommendationById(id: String)(implicit ex: ExecutionContext): Future[Option[RecommendationInfo]] = {
-
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
     collection
@@ -82,7 +80,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
   }
 
   def declineRecommendation(id: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
-
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
@@ -102,7 +99,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
                filter: String = "all",
                viewBy: String = "latest",
                pageSize: Int = 8)(implicit ex: ExecutionContext): Future[List[RecommendationInfo]] = {
-
     val total = pageNumber * pageSize
     val queryOptions = new QueryOpts(skipN = 0, batchSizeN = total, flagsN = 0)
 
@@ -115,7 +111,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       case "done"     => Json.obj("done" -> true)
       case _          => Json.obj()
     }
-
     val sortBy = viewBy match {
       case "latest" => Json.obj("submissionDate" -> -1)
       case "recent" => Json.obj("updateDate" -> -1)
@@ -136,7 +131,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
     val modifier = (alreadyVoted: @switch) match {
       case true => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1, "downVotes" -> -1))
-
       case false => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1))
     }
 
@@ -150,7 +144,6 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
     val modifier = (alreadyVoted: @switch) match {
       case true => BSONDocument("$inc" -> BSONDocument("upVotes" -> -1, "downVotes" -> 1))
-
       case false => BSONDocument("$inc" -> BSONDocument("downVotes" -> 1))
     }
 

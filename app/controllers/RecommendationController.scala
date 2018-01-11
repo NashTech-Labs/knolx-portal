@@ -97,7 +97,6 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       Logger.error(s"Received a bad request for adding recommendation")
       Future.successful(BadRequest("Received a bad request due to malformed data"))
     } { recommendation =>
-
       val validatedRecommendation =
         recommendation.validateEmail orElse
           recommendation.validateName orElse
@@ -105,7 +104,6 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           recommendation.validateRecommendation
 
       if ((!SessionHelper.isLoggedIn && SessionHelper.email.equals(recommendation.email.fold("")(identity))) || SessionHelper.isLoggedIn) {
-
         validatedRecommendation.fold {
           val recommendationInfo = RecommendationInfo(recommendation.email,
             recommendation.name,

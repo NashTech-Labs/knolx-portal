@@ -11,7 +11,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
@@ -132,7 +132,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             pending = false,
             freeSlot = false)
         }
-
         approvalSessionsRepository.getAllSessions map { pendingSessions =>
           val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline)
             .map { pendingSession =>
@@ -147,7 +146,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 pending = true,
                 pendingSession.freeSlot)
             }
-
           val calendarSessionsWithAuthority =
             CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
           Ok(Json.toJson(calendarSessionsWithAuthority))
@@ -177,7 +175,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             topic,
             session.meetup)
           Future.successful(
-
             Ok(views.html.calendar.createsessionbyuser(
               createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotDates, isFreeSlot)
             ))
@@ -252,7 +249,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 } else {
                   InternalServerError("Something went wrong")
                 }
-
               }
             }
         }
@@ -272,7 +268,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest("Free slot on the specified date and time does not exist"))
       } { freeSlot =>
         val newDate = BSONDateTime(createSessionInfoByUser.date.getTime)
-
         approvalSessionsRepository.updateDateForPendingSession(sessionId, newDate) flatMap { result =>
           if (result.ok) {
             val updateFreeSlot = UpdateApproveSessionInfo(
@@ -352,8 +347,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             case true  => Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
               .flashing("message" -> "Sessions has been declined"))
           }
-        }
-        else {
+        } else {
           Logger.info(s"Something went wrong while declining session $sessionId")
           Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
             .flashing("message" -> "Something went wrong while declining the session"))

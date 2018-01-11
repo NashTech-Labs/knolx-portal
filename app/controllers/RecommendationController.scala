@@ -1,6 +1,7 @@
 package controllers
 
 import java.time.LocalDateTime
+import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
 import actors.EmailActor
@@ -20,8 +21,8 @@ case class Recommendation(email: Option[String],
                           name: String,
                           topic: String,
                           recommendation: String,
-                          submissionDate: Option[LocalDateTime],
-                          updateDate: Option[LocalDateTime],
+                          submissionDate: Option[String],
+                          updateDate: Option[String],
                           approved: Option[Boolean],
                           decline: Option[Boolean],
                           pending: Boolean,
@@ -142,18 +143,24 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
+  private def checkEmail(email: Option[String]) = {
+    email.fold("Anonymous") { userEmail =>
+      if (userEmail.nonEmpty) userEmail else "Anonymous"
+    }
+  }
+
   def recommendationList(pageNumber: Int, filter: String = "all", sortBy: String): Action[AnyContent] = action.async { implicit request =>
     recommendationsRepository.paginate(pageNumber, filter, sortBy) flatMap { recommendations =>
       if (SessionHelper.isSuperUser || SessionHelper.isAdmin) {
         Future.sequence(recommendations map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
-            val email = recommendation.email.fold("Anonymous")(identity)
+            val email = checkEmail(recommendation.email)
             Recommendation(Some(email),
               recommendation.name,
               recommendation.topic,
               recommendation.recommendation,
-              Some(dateTimeUtility.toLocalDateTime(recommendation.submissionDate.value)),
-              Some(dateTimeUtility.toLocalDateTime(recommendation.updateDate.value)),
+              Some(new Date(recommendation.submissionDate.value).toString),
+              Some(new Date(recommendation.updateDate.value).toString),
               Some(recommendation.approved),
               Some(recommendation.decline),
               recommendation.pending,
@@ -169,14 +176,13 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       } else {
         Future.sequence(recommendations filter (_.approved) map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
-            val userEmail = recommendation.email
-            val email = if(userEmail.nonEmpty) userEmail else "Anonymous"
-            Recommendation(None,
+            val email = checkEmail(recommendation.email)
+            Recommendation(Some(email),
               recommendation.name,
               recommendation.topic,
               recommendation.recommendation,
-              None,
-              None,
+              Some(new Date(recommendation.submissionDate.value).toString),
+              Some(new Date(recommendation.updateDate.value).toString),
               Some(recommendation.approved),
               None,
               recommendation.pending,

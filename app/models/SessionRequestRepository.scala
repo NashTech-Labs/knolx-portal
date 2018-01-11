@@ -194,14 +194,4 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
   }
 
-  def getFreeSlotByDate(date: BSONDateTime): Future[Option[SessionRequestInfo]] = {
-    val selector = BSONDocument("date" -> date)
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(selector)
-          .cursor[SessionRequestInfo](ReadPreference.Primary).headOption)
-  }
-
 }

@@ -16,7 +16,7 @@ $(document).ready(function () {
                     if (values[i].categoryName === primaryCategory) {
                         categories += "selected";
                     }
-                    categories+=    ">" + values[i].categoryName + "</option>";
+                    categories += ">" + values[i].categoryName + "</option>";
                 }
                 $("#category").append(categories);
                 showSubCategory(primaryCategory, subCategory, values);
@@ -43,22 +43,22 @@ $(document).ready(function () {
 });
 
 function showSubCategory(primaryCategory, subCategory, values) {
-        for (var i = 0; i < values.length; i++) {
-            if (primaryCategory === values[i].categoryName) {
-                var subCategories = "";
-                for (var j = 0; j < values[i].subCategory.length; j++) {
-                    subCategories += "<option value='" + values[i].subCategory[j] + "'";
-                    if (subCategory === values[i].subCategory[j]) {
-                        subCategories += "selected";
-                    }
-                    subCategories+=  ">"+ values[i].subCategory[j] + "</option>";
+    for (var i = 0; i < values.length; i++) {
+        if (primaryCategory === values[i].categoryName) {
+            var subCategories = "";
+            for (var j = 0; j < values[i].subCategory.length; j++) {
+                subCategories += "<option value='" + values[i].subCategory[j] + "'";
+                if (subCategory === values[i].subCategory[j]) {
+                    subCategories += "selected";
                 }
-                $("#subCategory").html(subCategories);
-                break;
-            } else {
-                var subCategories = "";
-                subCategories += "<option value=''>! Select Sub Category Please</option>";
-                $("#subCategory").html(subCategories);
+                subCategories += ">" + values[i].subCategory[j] + "</option>";
             }
+            $("#subCategory").html(subCategories);
+            break;
+        } else {
+            var subCategories = "";
+            subCategories += "<option value=''>! Select Sub Category Please</option>";
+            $("#subCategory").html(subCategories);
         }
+    }
 }

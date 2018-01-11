@@ -383,7 +383,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
               Json.obj(
                 "active" -> true,
                 "cancelled" -> false,
-                "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate), "$lte" -> BSONDateTime(filterUserSessionInformation.endDate))
+                "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate),
+                  "$lte" -> BSONDateTime(filterUserSessionInformation.endDate))
               )
             ),
             otherOperators = List(

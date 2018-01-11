@@ -14,8 +14,9 @@ i, span {
 }
 
 .wrapper {
-    height: auto;
-    overflow: auto;
+    display: flex;
+    align-items: stretch;
+    height: 100%;
 }
 
 #sidebar {
@@ -34,7 +35,7 @@ i, span {
 }
 
 #sidebar.active {
-    width:55px;
+    width: 55px;
     min-width: 55px;
     text-align: center;
     transition: width 0.5s ease-in-out;
@@ -51,7 +52,7 @@ i, span {
 }
 
 #sidebar.active ul li a i {
-    margin-right:  0;
+    margin-right: 0;
     font-size: 1.1em;
     margin-bottom: 5px;
 }
@@ -59,7 +60,6 @@ i, span {
 #sidebar.active ul ul a {
     padding: 10px !important;
 }
-
 
 .logo {
     position: absolute;
@@ -82,12 +82,12 @@ i, span {
 }
 
 #sidebar.active .sidebar-header {
-    padding-top:0;
+    padding-top: 0;
     background: #1ab394;
 }
 
 #sidebar.active ul li a span {
-    display:none;
+    display: none;
 }
 
 #sidebar .sidebar-header .img-logo {
@@ -120,7 +120,6 @@ i, span {
     background: #444a64;
 }
 
-
 a[data-toggle="collapse"] {
     position: relative;
 }
@@ -130,25 +129,25 @@ a[data-toggle="collapse"] {
     padding-left: 25px !important;
 }
 
-.navbar-top-links li{
-display: inline-block;
-font-size: 15px;
+.navbar-top-links li {
+    display: inline-block;
+    font-size: 15px;
 }
 
-.navbar-top-links li ul li{
-display: block;
+.navbar-top-links li ul li {
+    display: block;
 }
 
-.fa-comments, .fa-home, .fa-wrench, .fa-line-chart, .fa-table  {
+.fa-comments, .fa-home, .fa-wrench, .fa-line-chart, .fa-table {
     color: #fff;
     text-shadow: 0 0 10px #85929E;
 }
 
-.fa-sign-in, .fa-user-plus,.fa-sign-out {
+.fa-sign-in, .fa-user-plus, .fa-sign-out {
     color: black;
     font-size: 15px;
     margin-top: 3px;
-    margin-right:2px;
+    margin-right: 2px;
 }
 
 #sidebarCollapse {
@@ -173,14 +172,14 @@ display: block;
 }
 
 #sidebarCollapse:before {
-        content: "";
-        display: inline-block;
-        height: 0;
-        border-top: 1px solid #1ab394;
-        position: absolute;
-        left: 2px;
-        right: 2px;
-        top: 30px;
+    content: "";
+    display: inline-block;
+    height: 0;
+    border-top: 1px solid #1ab394;
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 30px;
 }
 
 .sidebar.active #sidebarCollapse:before {
@@ -196,15 +195,14 @@ display: block;
     border-color: #1ab394;
 }
 
-html,body{
+html, body {
     margin: 0;
     background-color: #eeeeee;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    height: auto;
-    overflow: auto;
+    height: 100%;
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -231,19 +229,19 @@ html,body{
     margin: 0 auto;
 }
 
-.collapsing  {
+.collapsing {
     box-shadow: 0 4px 7px -5px #333, inset 0 7px 9px -7px rgba(0, 0, 0, 0.5);
 }
 
 #content {
-    background-color:#eeeeee;
+    background-color: #eeeeee;
     width: calc(100% - 180px);
-    padding-top:0;
+    padding-top: 0;
     min-height: calc(100% - 51px);
     position: absolute;
     top: 0;
     right: 0;
-    overflow:auto;
+    overflow: auto;
     transition: width 0.5s ease-in-out;
 }
 
@@ -265,7 +263,7 @@ html,body{
     text-decoration: none;
 }
 
-.nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
+.nav .open > a, .nav .open > a:focus, .nav .open > a:hover {
     color: black;
     background-color: #eee;
     border-color: #337ab7;
@@ -273,19 +271,19 @@ html,body{
 
 .container-knolx {
     margin-bottom: 50px !important;
-    width:100%;
+    width: 100%;
     padding-left: 40px !important;
     padding-right: 10px !important;
     margin-right: 0 !important;
     margin-left: 0 !important;
 }
 
-.container-knolx .row{
-    width:100%;
+.container-knolx .row {
+    width: 100%;
 }
 
 .container-knolx > .row > .header-container {
-    padding:2px 15px;
+    padding: 2px 15px;
     background-color: #FFFFFF;
     margin-left: -23px !important;
     margin-right: -25px !important;
@@ -300,12 +298,12 @@ html,body{
     padding: .3em .6em 0.3em;
 }
 
-.nav, .nav > li , .nav > li > a {
+.nav, .nav > li, .nav > li > a {
     height: inherit;
 }
 
 .navbar-toggle-background-color {
-    background-color:#eeeeee;
+    background-color: #eeeeee;
     color: #FFFFFF;
 }
 
@@ -323,9 +321,8 @@ html,body{
 }
 
 #sidebar i {
- width:14px;
+    width: 14px;
 }
-
 
 .scrollbar {
     float: left;

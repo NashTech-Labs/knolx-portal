@@ -22,6 +22,7 @@ import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 class CalendarControllerSpec extends PlaySpecification with Mockito {
 
@@ -488,14 +489,34 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo OK
     }
 
-    "get all sessions for Admin" in new WithTestApplication {
+    "not get all sessions for admin if form submitted is wrong" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllBookedSessions returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.getAllSessionForAdmin()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test@knoldus.com",
+            "pageSize" -> "10")
+          .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "get all sessions for admin" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      approveSessionRepository.paginate(1, Some("test@knoldus.com"), 10) returns Future.successful(approveSessionInfo)
+      approveSessionRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.getAllSessionForAdmin()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test@knoldus.com",
+            "page" -> "1",
+            "pageSize" -> "10")
           .withCSRFToken)
 
       status(result) must be equalTo OK

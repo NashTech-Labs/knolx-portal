@@ -120,13 +120,17 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
             val selector = BSONDocument("email" -> updatedRecord.email)
             val modifier = (updatedRecord.password, updatedRecord.ban) match {
               case (Some(password), true)  =>
-                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> banPeriod, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password),
+                  "banTill" -> banPeriod, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
               case (Some(password), false) =>
-                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password), "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "password" -> PasswordUtility.encrypt(password),
+                  "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
               case (None, true)            =>
-                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> banPeriod, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active,
+                  "banTill" -> banPeriod, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
               case (None, false)           =>
-                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active, "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
+                BSONDocument("$set" -> BSONDocument("active" -> updatedRecord.active,
+                  "banTill" -> unban, "coreMember" -> updatedRecord.coreMember, "admin" -> updatedRecord.admin))
             }
             jsonCollection.update(selector, modifier)
           }
@@ -166,15 +170,20 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
             upsert = false)
           .map(_.result[UserInfo]))
 
-  def paginate(pageNumber: Int, keyword: Option[String] = None, filter: String = "all", pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
+  def paginate(pageNumber: Int,
+               keyword: Option[String] = None,
+               filter: String = "all",
+               pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[UserInfo]] = {
     val millis = dateTimeUtility.nowMillis
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
 
     val condition = (keyword, filter) match {
       case (Some(key), "all")       => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")))
-      case (Some(key), "banned")    => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis)))
-      case (Some(key), "allowed")   => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
+      case (Some(key), "banned")    => Json.obj("email" ->
+        Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis)))
+      case (Some(key), "allowed")   => Json.obj("email" ->
+        Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis)))
       case (Some(key), "active")    => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true)
       case (Some(key), "suspended") => Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> false)
       case (None, "all")            => Json.obj()
@@ -199,8 +208,10 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     val millis = dateTimeUtility.nowMillis
     val condition = (keyword, filter) match {
       case (Some(key), "all")       => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))))
-      case (Some(key), "banned")    => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
-      case (Some(key), "allowed")   => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
+      case (Some(key), "banned")    => Some(Json.obj("email" ->
+        Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$gte" -> BSONDateTime(millis))))
+      case (Some(key), "allowed")   => Some(Json.obj("email" ->
+        Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "banTill" -> BSONDocument("$lt" -> BSONDateTime(millis))))
       case (Some(key), "active")    => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
       case (Some(key), "suspended") => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> false))
       case (None, "all")            => None

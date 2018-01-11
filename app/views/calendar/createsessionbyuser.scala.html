@@ -1,4 +1,4 @@
-@(createSessionInfo: Form[CreateSessionInfo], sessionId: String, freeSlotDates: List[String], isFreeSlot: Boolean)(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionInfo: Form[CreateSessionInfo], sessionId: String, freeSlots: List[FreeSlot], isFreeSlot: Boolean)(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Request Session") {
 
@@ -54,7 +54,7 @@
     <div class="row">
         <div class="col-md-12 create-outer">
 
-            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId)" method="post">
+            <form id="create-session-form" class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId)" method="post">
 
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" name="csrfToken" hidden/>
                 <input id="sessionId" value="@sessionId" hidden />
@@ -68,14 +68,14 @@
                     <div class="col-md-10">
                         <select name="date" id="select-date" class="update-field login-second">
                         @if(!isFreeSlot) {
-                            @for(freeSlotDate <- freeSlotDates) {
-                                <option value="@freeSlotDate">@{
-                                    freeSlotDate.replace("T", " ")
+                            @for(freeSlot <- freeSlots) {
+                                <option value="@freeSlot.date" id="@freeSlot.id">@{
+                                    freeSlot.date.replace("T", " ")
                                 }</option>
                             }
-                            <option value="@createSessionInfo.data.get("date")" selected>@createSessionInfo.data.getOrElse("date", "").replace("T", " ")</option>
+                            <option value="@createSessionInfo.data.get("date")" id="@sessionId" selected>@createSessionInfo.data.getOrElse("date", "").replace("T", " ")</option>
                         } else {
-                            <option value='@createSessionInfo.data.get("date")' selected>@{
+                            <option value='@createSessionInfo.data.get("date")' id="@sessionId" selected>@{
                                 createSessionInfo.data.get("date").fold("") { date =>
                                     date.replace("T", " ")
                                 }

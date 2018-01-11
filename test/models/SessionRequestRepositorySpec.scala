@@ -40,7 +40,7 @@ class SessionRequestRepositorySpec extends PlaySpecification {
     "get session with specified id" in {
       val sessions = await(sessionRequestRepository.getSession(_id.stringify))
 
-      sessions.email must beEqualTo("email")
+      sessions.get.email must beEqualTo("email")
     }
 
     "get all sessions to display in calendar" in {
@@ -132,17 +132,6 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       val session = await(sessionRequestRepository.getAllFreeSlots)
 
       session.head.freeSlot must be equalTo true
-    }
-
-    "get a free slot on a specified date" in {
-      val freeSlotId = BSONObjectID.generate()
-      val freeSlot = UpdateApproveSessionInfo(date, freeSlotId.stringify, freeSlot = true)
-      await(sessionRequestRepository.insertSessionForApprove(freeSlot))
-
-      val session = await(sessionRequestRepository.getFreeSlotByDate(date))
-
-      session.isDefined must be equalTo true
-      session.get.date must be equalTo date
     }
 
   }

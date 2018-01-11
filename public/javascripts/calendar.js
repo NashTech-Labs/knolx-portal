@@ -12,9 +12,6 @@ $(function () {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
         eventRender: function (event, element) {
-            if (event.title === freeSlotTitle) {
-                element.find('.fc-time').hide();
-            }
             element.popover({
                 html: true,
                 container: 'body',
@@ -27,7 +24,7 @@ $(function () {
         },
         timezone: 'local',
         eventClick: function (event) {
-            if (event.url) {
+            if (event.url && !event.url.isEmpty) {
                 window.open(event.url);
                 return false;
             }
@@ -108,6 +105,7 @@ function getSessions(startDate, endDate, callback) {
                 var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
 
                 for (var calenderSession = 0; calenderSession < calendarSessions.length; calenderSession++) {
+
                     if (calendarSessions[calenderSession].pending) {
                         if (calendarSessions[calenderSession].freeSlot) {
                             events.push({
@@ -128,9 +126,9 @@ function getSessions(startDate, endDate, callback) {
                                 data: "<p>Topic: " + calendarSessions[calenderSession].topic + "<br>Email: "
                                 + calendarSessions[calenderSession].email + "</p>",
                                 url: jsRoutes.controllers.SessionsController
-                                    .renderApproveSessionByAdmin(calendarSessions[calenderSession].id).url
+                                    .renderScheduleSessionByAdmin(calendarSessions[calenderSession].id).url
                             });
-                        } else if (!calendarSessionsWithAuthority.isLoggedIn
+                        } else if (calendarSessionsWithAuthority.isLoggedIn
                             && calendarSessions[calenderSession].email === calendarSessionsWithAuthority.email) {
                             events.push({
                                 id: calendarSessions[calenderSession].id,

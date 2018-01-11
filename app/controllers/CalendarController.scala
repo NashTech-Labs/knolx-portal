@@ -67,6 +67,8 @@ case class CalendarSessionsSearchResult(calendarSessions: List[CalendarSession],
                                         keyword: String,
                                         totalSessions: Int)
 
+case class FreeSlot(id: String, date: String)
+
 @Singleton
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
@@ -110,8 +112,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   def calendarSessions(startDate: Long, endDate: Long): Action[AnyContent] = action.async { implicit request =>
     val isAdmin = SessionHelper.isSuperUser || SessionHelper.isAdmin
-    val loggedIn = SessionHelper.isLoggedIn
-    val email = if (loggedIn) None else Some(SessionHelper.email)
+    val loggedIn = !SessionHelper.isLoggedIn
+    val email = if (loggedIn) Some(SessionHelper.email) else None
     sessionsRepository
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
@@ -154,24 +156,32 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   def renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean): Action[AnyContent] = userAction.async { implicit request =>
     sessionRequestRepository
-      .getSession(sessionId)
-      .flatMap { session =>
-        val createSessionInfo = CreateSessionInfo(
-          session.email,
-          new Date(session.date.value),
-          session.category,
-          session.subCategory,
-          session.topic,
-          session.meetup)
+      .getAllFreeSlots
+      .flatMap { freeSlots =>
+        val freeSlotsInfo = freeSlots.map(freeSlot =>
+          FreeSlot(freeSlot._id.stringify, dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))))
 
         sessionRequestRepository
-          .getAllFreeSlots
-          .map { freeSlots =>
-            val freeSlotDates = freeSlots.map(freeSlot => dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value)))
+          .getSession(sessionId)
+          .flatMap { maybeSession =>
+            maybeSession.fold {
+              Future.successful(
+                Redirect(routes.CalendarController.renderCalendarPage())
+                  .flashing("message" -> "The selected session does not exist"))
+            } { session =>
 
-            Ok(views.html.calendar.createsessionbyuser(
-              createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot)
-            )
+              val createSessionInfo = CreateSessionInfo(
+                session.email,
+                new Date(session.date.value),
+                session.category,
+                session.subCategory,
+                session.topic,
+                session.meetup)
+
+              Future.successful(Ok(views.html.calendar.createsessionbyuser(
+                createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotsInfo, isFreeSlot)
+              ))
+            }
           }
       }
   }
@@ -180,35 +190,49 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     sessionRequestRepository
       .getAllFreeSlots
       .flatMap { freeSlots =>
-        val freeSlotDates = freeSlots.map(freeSlot => dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value)))
+        val freeSlotsInfo = freeSlots.map(freeSlot =>
+          FreeSlot(freeSlot._id.stringify, dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))))
 
         sessionRequestRepository
           .getSession(sessionId)
-          .flatMap { approveSessionInfo =>
-            createSessionFormByUser.bindFromRequest.fold(
-              formWithErrors => {
-                Logger.error(s"Received a bad request while creating the session $formWithErrors")
-                Future.successful(
-                  BadRequest(views.html.calendar.createsessionbyuser(
-                    formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot)
-                  )
-                )
-              },
-              createSessionInfoByUser => {
-                val dateString = new Date(approveSessionInfo.date.value).toString
-
-                if (dateString.equals(createSessionInfoByUser.date.toString)) {
-                  insertSession(request.user.email, createSessionInfoByUser, sessionId)
-                } else if (!approveSessionInfo.freeSlot) {
-                  swapSlots(sessionId, createSessionInfoByUser, approveSessionInfo)
-                } else {
+          .flatMap { maybeApproveSessionInfo =>
+            maybeApproveSessionInfo.fold {
+              Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+                .flashing("message" -> "The selected session does not exist"))
+            } { approveSessionInfo =>
+              createSessionFormByUser.bindFromRequest.fold(
+                formWithErrors => {
+                  Logger.error(s"Received a bad request while creating the session $formWithErrors")
                   Future.successful(
-                    Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot))
-                      .flashing("message" -> "Date submitted was wrong. Please try again.")
+                    BadRequest(views.html.calendar.createsessionbyuser(
+                      formWithErrors, sessionId, freeSlotsInfo, approveSessionInfo.freeSlot)
+                    )
                   )
+                },
+                createSessionInfoByUser => {
+                  val freeSlotId = request.body.asFormUrlEncoded.fold("") { form =>
+                    form.get("freeSlotId").fold("")(_.headOption.fold("")(identity))
+                  }
+                  val dateString = new Date(approveSessionInfo.date.value).toString
+
+                  if (freeSlotId.isEmpty) {
+                    Future.successful(
+                      Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot))
+                        .flashing("message" -> "Free slot doesn't exist")
+                    )
+                  } else if (dateString.equals(createSessionInfoByUser.date.toString)) {
+                    insertSession(request.user.email, createSessionInfoByUser, sessionId)
+                  } else if (!approveSessionInfo.freeSlot) {
+                    swapSlots(sessionId, createSessionInfoByUser, approveSessionInfo, freeSlotId)
+                  } else {
+                    Future.successful(
+                      Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot))
+                        .flashing("message" -> "Date submitted was wrong. Please try again.")
+                    )
+                  }
                 }
-              }
-            )
+              )
+            }
           }
       }
   }
@@ -252,9 +276,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   private def swapSlots(sessionId: String,
                         createSessionInfoByUser: CreateSessionInfo,
-                        approveSessionInfo: SessionRequestInfo) = {
+                        approveSessionInfo: SessionRequestInfo,
+                        freeSlotId: String) = {
     sessionRequestRepository
-      .getFreeSlotByDate(BSONDateTime(createSessionInfoByUser.date.getTime))
+      .getSession(freeSlotId)
       .flatMap {
         _.fold {
           Future.successful(BadRequest("Free slot on the specified date and time does not exist"))

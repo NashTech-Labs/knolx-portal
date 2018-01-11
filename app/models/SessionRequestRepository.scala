@@ -68,12 +68,12 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def getSession(sessionId: String): Future[SessionRequestInfo] =
+  def getSession(sessionId: String): Future[Option[SessionRequestInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(BSONDocument("_id" -> BSONDocument("$oid" -> sessionId)))
-          .cursor[SessionRequestInfo](ReadPreference.Primary).head)
+          .cursor[SessionRequestInfo](ReadPreference.Primary).headOption)
 
   def getAllSessions(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] =
     collection
@@ -104,8 +104,8 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
     val condition = keyword match {
-      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
-        "freeSlot" -> BSONDocument("$eq" -> false)))
+      case Some(key) => Some(Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false)))
       case None      => Some(Json.obj("freeSlot" -> BSONDocument("$eq" -> false)))
     }
 

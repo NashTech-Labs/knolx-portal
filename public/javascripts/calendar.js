@@ -17,7 +17,7 @@ $(function () {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
         eventRender: function (event, element) {
-            if (event.title === freeSlotTitle || event.color === pendingSessionColor) {
+            if (event.title === freeSlotTitle) {
                 element.find('.fc-time').hide();
             }
             element.popover({
@@ -85,7 +85,7 @@ $(function () {
                         var jc = this;
                         this.$content.find('form').on('submit', function (e) {
                             e.preventDefault();
-                            jc.$$formSubmit.trigger('click'); // reference the button and click it
+                            jc.$$formSubmit.trigger('click');
                         });
                     }
                 });
@@ -228,7 +228,6 @@ function deleteFreeSlot(id) {
     form.style.display = "none";
 
     var csrfToken = $("#csrfToken").val();
-    console.log("csrfToken --> " + csrfToken);
 
     var input = document.createElement("input");
     input.type = "hidden";

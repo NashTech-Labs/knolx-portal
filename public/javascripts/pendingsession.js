@@ -22,7 +22,6 @@ function slide(keyword, pageNumber, pageSize) {
     formData.append("pageSize", pageSize);
 
     jsRoutes.controllers.CalendarController.getAllSessionForAdmin().ajax(
-
         {
             type: 'POST',
             processData: false,
@@ -33,15 +32,15 @@ function slide(keyword, pageNumber, pageSize) {
 
                 return request.setRequestHeader('CSRF-Token', csrfToken);
             },
-            success: function(calendarSessionInfo) {
+            success: function (calendarSessionInfo) {
 
                 var sessions = "";
                 var calendarSessions = calendarSessionInfo["calendarSessions"];
                 var page = calendarSessionInfo["page"];
                 var pages = calendarSessionInfo["pages"];
-                if(calendarSessions.length > 0) {
+                if (calendarSessions.length > 0) {
                     for (var session = 0; session < calendarSessions.length; session++) {
-                        sessions +="<tr><td align='center'>" + calendarSessions[session].dateString + "</td>" +
+                        sessions += "<tr><td align='center'>" + calendarSessions[session].dateString + "</td>" +
                             "<td align='center'>" + calendarSessions[session].topic + "</td>" +
                             "<td align='center'>" + calendarSessions[session].email + "</td>";
 

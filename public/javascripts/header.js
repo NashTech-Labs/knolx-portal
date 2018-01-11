@@ -29,11 +29,11 @@ function getPendingSessions() {
     jsRoutes.controllers.CalendarController.getPendingSessions().ajax(
         {
             type: "GET",
-            success: function(data) {
+            success: function (data) {
                 $("#pending-sessions-number").text(data);
                 $(".number-circle").text(data);
             },
-            error: function(er) {
+            error: function (er) {
                 $("#pending-sessions-number").text('0');
             }
         }

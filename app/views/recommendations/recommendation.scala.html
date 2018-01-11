@@ -1,6 +1,6 @@
 @(email: Option[String])(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Recommendation") {
+@main("Recommendations") {
     <div class="row ">
         <div class="header-container">
             <h2 style="margin-top: 10px;">Recommendation</h2>
@@ -13,7 +13,7 @@
 
     <div class="row">
         <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
-            <label class="col-md-3 filter-padding-left" style="font-weight: normal">
+            <label class="col-md-3 filter-padding-left filter-recommendation">
                 Sort By
                 <select name="Show" id="sort-entries" class="search-text" style="background-color: #FFFFFF;
                     padding-right: 2px !important; ">
@@ -23,15 +23,14 @@
             </label>
             <div class="col-md-3"></div>
             <div class="col-md-1 filter-padding-right" style="width: fit-content">
-                <label class="checkbox-outer" style="font-weight: normal;">
+                <label class="checkbox-outer filter-recommendation">
                     <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>
-
                     <span class="filter-label_text"></span>
                     <p class="filter-checkbox-text">All</p>
                 </label>
             </div>
             <div class="col-md-1" style="padding-left: 20px !important;">
-                <label class="checkbox-outer" style="font-weight: normal;">
+                <label class="checkbox-outer filter-recommendation">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='approved'/>
 
                     <span class="filter-label_text"></span>
@@ -39,34 +38,30 @@
                 </label>
             </div>
             <div class="col-md-1" style="padding-left: 40px !important;">
-                <label class="checkbox-outer" style="font-weight: normal;">
+                <label class="checkbox-outer filter-recommendation">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='decline'/>
-
                     <span class="filter-label_text"></span>
                     <p class="filter-checkbox-text">Decline</p>
                 </label>
             </div>
             <div class="col-md-1 filter-padding-right" style="padding-left: 45px !important;">
-                <label class="checkbox-outer" style="font-weight: normal;">
-                    <input type='radio' name='user-recommend-filter' id="pp" class='custom-checkbox' value='book'/>
-
-                    <span class="filter-label_text" id="aa" ></span>
+                <label class="checkbox-outer filter-recommendation">
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='book'/>
+                    <span class="filter-label_text"></span>
                     <p class="filter-checkbox-text">Booked</p>
                 </label>
             </div>
             <div class="col-md-1" style="padding-left: 55px !important;">
-                <label class="checkbox-outer" style="font-weight: normal;">
+                <label class="checkbox-outer filter-recommendation">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='pending'/>
-
                     <span class="filter-label_text"></span>
                     <p class="filter-checkbox-text">Pending</p>
                 </label>
             </div>
             <div class="col-md-1 filter-padding-right" style="padding-left: 65px !important;">
-                <label class="checkbox-outer" style="font-weight: normal;">
-                    <input type='radio' name='user-recommend-filter' id="pp" class='custom-checkbox' value='done'/>
-
-                    <span class="filter-label_text" id="aa" ></span>
+                <label class="checkbox-outer filter-recommendation">
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='done'/>
+                    <span class="filter-label_text"></span>
                     <p class="filter-checkbox-text">Done</p>
                 </label>
             </div>
@@ -106,7 +101,6 @@
                                         <span class="label label-success custom-label-type recommendation-type" data-bind="if: done" style="left: 84% !important;">
                                             Done
                                         </span>
-
                                         <p class="recommendation-presenter" data-bind="text: email"></p>
                                         <p class="recommendation-presenter" data-bind="text : submissionDate"></p>
                                     </div>
@@ -116,10 +110,9 @@
                                 <tbody>
                                     <tr style="background-color: white">
                                         <td class="recommendation-vote">
-                                            <div >
+                                            <div>
                                                 <span class="recommendation-up" data-bind="style:{color: upVote?'green':'black'}, click: (isLoggedIn && !upVote) ? function($id){ $root.upVoteByUser(id)}:null"></span>
-                                                <span data-bind="text: votes" style="text-align: center;
-                                                    width: 20px;"></span>
+                                                <span data-bind="text: votes" class="vote-count"></span>
                                                 <span class="recommendation-down" data-bind="style:{color: downVote ?'red':'black'}, click: (isLoggedIn && !downVote) ? function($id) { $root.downVoteByUser(id)}:null"></span>
                                             </div>
                                         </td>

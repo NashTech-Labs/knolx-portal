@@ -240,3 +240,12 @@
     margin-left: -2px;
     margin-top: -5px;
 }
+
+.vote-count {
+    text-align: center;
+    width: 20px;
+}
+
+.filter-recommendation {
+    font-weight: normal;
+}

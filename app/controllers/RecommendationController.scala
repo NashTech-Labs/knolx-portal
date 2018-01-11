@@ -39,7 +39,7 @@ case class RecommendationInformation(email: Option[String],
                                      recommendation: String) {
   def validateEmail: Option[String] =
     email.fold[Option[String]](None) { userEmail =>
-      if (EmailHelper.isValidEmailForGuests(userEmail)) {
+      if (EmailHelper.isValidEmailForGuests(userEmail) || userEmail.isEmpty) {
         None
       } else {
         Some("Entered email is not valid")
@@ -98,13 +98,13 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       Future.successful(BadRequest("Received a bad request due to malformed data"))
     } { recommendation =>
 
-      val validatedRecommendation =
-        recommendation.validateEmail orElse
-          recommendation.validateName orElse
-          recommendation.validateTopic orElse
-          recommendation.validateRecommendation
-
       if ((!SessionHelper.isLoggedIn && SessionHelper.email.equals(recommendation.email.fold("")(identity))) || SessionHelper.isLoggedIn) {
+
+        val validatedRecommendation =
+          recommendation.validateEmail orElse
+            recommendation.validateName orElse
+            recommendation.validateTopic orElse
+            recommendation.validateRecommendation
 
         validatedRecommendation.fold {
           val recommendationInfo = RecommendationInfo(recommendation.email,
@@ -122,7 +122,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
                   emailManager ! EmailActor.SendEmail(
                     adminAndSuperUser, fromEmail, "Knolx/Meetup Recommendation",
-                    views.html.emails.recommendationnotification(recommendation.name, recommendation.topic).toString)
+                    views.html.emails.recommendationnotification(recommendationInfo,
+                      dateTimeUtility.toLocalDateTime(recommendationInfo.submissionDate.value).toString).toString)
                   Logger.error(s"Email has been successfully sent to admin/superUser for recommendation submitted by ${recommendation.name}")
               }
               Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
@@ -169,6 +170,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
       } else {
         Future.sequence(recommendations filter (_.approved) map { recommendation =>
           recommendationResponseRepository.getVote(SessionHelper.email, recommendation._id.stringify) map { recommendationVote =>
+            val userEmail = recommendation.email
+            val email = if(userEmail.nonEmpty) userEmail else "Anonymous"
             Recommendation(None,
               recommendation.name,
               recommendation.topic,

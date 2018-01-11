@@ -1,9 +1,20 @@
 @import actors._
+@import utilities.DateTimeUtility
 
-@(name: String, topic: String)
+@(recommendationInfo: RecommendationInfo, date: String)
 
 <p>Hi,</p>
-<p>A recommendation has been given by <strong>@name</strong> on @topic</p>
+<p>
+    A recommendation has been given by <strong>@recommendationInfo.name</strong> with following details
+</p>
+<ul>
+    @if(recommendationInfo.email.get.nonEmpty) {
+        <li>Email -> @recommendationInfo.email.get</li>
+    }
+    <li>Topic -> @recommendationInfo.topic</li>
+    <li>Description -> @recommendationInfo.recommendation</li>
+    <li>Date -> @date</li>
+</ul>
 
 <p>
 Please review the recommendation details and take the required action: <a href="http://knolx.knoldus.com/recommendation">Click Here</a>

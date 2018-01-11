@@ -183,7 +183,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           formWithErrors => {
             Logger.error(s"Received a bad request while creating the session $formWithErrors")
             Future.successful(
-              BadRequest(views.html.calendar.createsessionbyuser(formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot))
+              BadRequest(views.html.calendar.createsessionbyuser(
+                formWithErrors, sessionId, freeSlotDates, approveSessionInfo.freeSlot)
+              )
             )
           },
           createSessionInfoByUser => {
@@ -194,8 +196,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               swapSlots(sessionId, createSessionInfoByUser, approveSessionInfo)
             } else {
               Future.successful(
-                Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot)).flashing("message" ->
-                  "Date submitted was wrong. Please try again.")
+                Redirect(routes.CalendarController.renderCreateSessionByUser(sessionId, approveSessionInfo.freeSlot))
+                  .flashing("message" -> "Date submitted was wrong. Please try again.")
               )
             }
           }
@@ -221,11 +223,13 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         usersRepository.getAllAdminAndSuperUser map {
           adminAndSuperUser =>
             emailManager ! EmailActor.SendEmail(
-              adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
+              adminAndSuperUser, fromEmail,
+              s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
               views.html.emails.requestedsessionnotification(session).toString)
             Logger.info(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
         }
-        Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
+        Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+          .flashing("message" -> "Session successfully created!"))
       } else {
         Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
         Future.successful(InternalServerError("Something went wrong!"))
@@ -244,12 +248,16 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
         approvalSessionsRepository.updateDateForPendingSession(sessionId, newDate) flatMap { result =>
           if (result.ok) {
-            val updateFreeSlot = UpdateApproveSessionInfo(approveSessionInfo.date, sessionId = freeSlot._id.stringify, freeSlot = true)
+            val updateFreeSlot = UpdateApproveSessionInfo(
+              approveSessionInfo.date, sessionId = freeSlot._id.stringify, freeSlot = true)
             approvalSessionsRepository.insertSessionForApprove(updateFreeSlot) flatMap { swap =>
               if (swap.ok) {
-                Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "The session has been updated successfully."))
+                Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+                  .flashing("message" -> "The session has been updated successfully."))
               } else {
-                Future.successful(InternalServerError("Something went wrong while inserting free slot at session's old date"))
+                Future.successful(
+                  InternalServerError("Something went wrong while inserting a free slot on session's previous date")
+                )
               }
             }
           } else {
@@ -269,7 +277,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   def getAllSessionForAdmin: Action[AnyContent] = adminAction.async { implicit request =>
     sessionSearchForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.error(s"Received a bad request for user manage ==> $formWithErrors")
+        Logger.error(s"Received form with errors while getting all sessions for admin ==> $formWithErrors")
         Future.successful(BadRequest("Oops! Invalid value encountered!"))
       },
       sessionInformation => {
@@ -302,10 +310,12 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     approvalSessionsRepository.declineSession(sessionId) map { result =>
       if (result.ok) {
         Logger.info(s"Successfully declined session $sessionId")
-        Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Sessions has been successfully declined")
+        Redirect(routes.CalendarController.renderCalendarPage())
+          .flashing("message" -> "Sessions has been successfully declined")
       } else {
         Logger.error(s"Something went wrong while declining session $sessionId")
-        Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId)).flashing("message" -> "Something went wrong while declining the session.")
+        Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId))
+          .flashing("message" -> "Something went wrong while declining the session.")
       }
     }
   }
@@ -313,11 +323,12 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   def insertFreeSlot(date: String): Action[AnyContent] = adminAction.async { implicit request =>
     val formattedDate = BSONDateTime(dateTimeUtility.parseDateStringWithTToIST(date))
     val approveSessionInfo = UpdateApproveSessionInfo(formattedDate, freeSlot = true)
+
     approvalSessionsRepository.insertSessionForApprove(approveSessionInfo) map { result =>
       if (result.ok) {
         Ok("Free slot has been entered successfully.")
       } else {
-        BadRequest("Something went wrong while entering free slot.")
+        BadRequest("Something went wrong while inserting free slot.")
       }
     }
   }

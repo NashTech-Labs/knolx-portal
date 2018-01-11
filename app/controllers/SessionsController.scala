@@ -88,7 +88,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
-                                   approvalSessionsRepository: ApprovalSessionsRepository,
+                                   sessionRequestRepository: SessionRequestRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
@@ -464,7 +464,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .flatMap { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
 
-        approvalSessionsRepository.getSession(sessionId).map { session =>
+        sessionRequestRepository.getSession(sessionId).map { session =>
           val createSessionInfo = CreateApproveSessionInfo(session.email,
             new Date(session.date.value),
             session.category,
@@ -482,7 +482,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .getAll
       .flatMap { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
-        approvalSessionsRepository.getSession(sessionApprovedId).flatMap { session =>
+        sessionRequestRepository.getSession(sessionApprovedId).flatMap { session =>
           val createApproveSessionInfo = CreateApproveSessionInfo(session.email,
             new Date(session.date.value),
             session.category,
@@ -539,7 +539,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               createSessionInfo.topic, createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory,
               createSessionInfo.meetup, approved = true)
 
-            approvalSessionsRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
+            sessionRequestRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
               if (updatedResult.ok) {
                 Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully approved!")
               } else {

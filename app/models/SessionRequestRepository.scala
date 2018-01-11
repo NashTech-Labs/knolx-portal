@@ -3,7 +3,7 @@ package models
 import javax.inject.Inject
 
 import controllers.UpdateApproveSessionInfo
-import models.ApproveSessionJsonFormats._
+import models.SessionRequestJsonFormats._
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
@@ -19,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
-case class ApproveSessionInfo(email: String,
+case class SessionRequestInfo(email: String,
                               date: BSONDateTime,
                               category: String,
                               subCategory: String,
@@ -31,18 +31,18 @@ case class ApproveSessionInfo(email: String,
                               _id: BSONObjectID = BSONObjectID.generate
                              )
 
-object ApproveSessionJsonFormats {
+object SessionRequestJsonFormats {
 
   import play.api.libs.json.Json
 
-  implicit val approveSessionFormat = Json.format[ApproveSessionInfo]
+  implicit val sessionRequestFormat = Json.format[SessionRequestInfo]
 }
 
-class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
 
   import play.modules.reactivemongo.json._
 
-  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("approvesessions"))
+  protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("sessionrequest"))
 
   def insertSessionForApprove(approveSessionInfo: UpdateApproveSessionInfo)(implicit ex: ExecutionContext): Future[WriteResult] = {
 
@@ -68,23 +68,23 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def getSession(sessionId: String): Future[ApproveSessionInfo] = {
+  def getSession(sessionId: String): Future[SessionRequestInfo] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(BSONDocument("_id" -> BSONDocument("$oid" -> sessionId)))
-          .cursor[ApproveSessionInfo](ReadPreference.Primary).head)
+          .cursor[SessionRequestInfo](ReadPreference.Primary).head)
   }
 
-  def getAllSessions(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] =
+  def getAllSessions(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(Json.obj())
-          .cursor[ApproveSessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+          .cursor[SessionRequestInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
 
-  def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+  def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] = {
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
     val condition = keyword match {
@@ -99,8 +99,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(condition)
           .options(queryOptions)
           .sort(Json.obj("decline" -> 1, "approved" -> 1))
-          .cursor[ApproveSessionInfo](ReadPreference.Primary)
-          .collect[List](pageSize, FailOnError[List[ApproveSessionInfo]]()))
+          .cursor[SessionRequestInfo](ReadPreference.Primary)
+          .collect[List](pageSize, FailOnError[List[SessionRequestInfo]]()))
   }
 
   def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
@@ -115,13 +115,13 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.count(condition))
   }
 
-  def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[ApproveSessionInfo]] = {
+  def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] = {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.
           find(Json.obj("approved" -> true)).
-          cursor[ApproveSessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+          cursor[SessionRequestInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
   }
 
   def approveSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
@@ -161,7 +161,7 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.update(selector, modifier))
   }
 
-  def getAllPendingSession: Future[List[ApproveSessionInfo]] = {
+  def getAllPendingSession: Future[List[SessionRequestInfo]] = {
     val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false),
       "approved" -> BSONDocument("$eq" -> false),
       "decline" -> BSONDocument("$eq" -> false))
@@ -170,8 +170,8 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(jsonCollection =>
         jsonCollection
           .find(selector)
-          .cursor[ApproveSessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+          .cursor[SessionRequestInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
 
   }
 
@@ -182,25 +182,25 @@ class ApprovalSessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       .flatMap(_.remove(selector))
   }
 
-  def getAllFreeSlots: Future[List[ApproveSessionInfo]] = {
+  def getAllFreeSlots: Future[List[SessionRequestInfo]] = {
     val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> true))
 
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(selector)
-          .cursor[ApproveSessionInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[ApproveSessionInfo]]()))
+          .cursor[SessionRequestInfo](ReadPreference.Primary)
+          .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
   }
 
-  def getFreeSlotByDate(date: BSONDateTime): Future[Option[ApproveSessionInfo]] = {
+  def getFreeSlotByDate(date: BSONDateTime): Future[Option[SessionRequestInfo]] = {
     val selector = BSONDocument("date" -> date)
 
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(selector)
-          .cursor[ApproveSessionInfo](ReadPreference.Primary).headOption)
+          .cursor[SessionRequestInfo](ReadPreference.Primary).headOption)
   }
 
 }

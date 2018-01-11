@@ -75,7 +75,7 @@ case class CalendarSessionsSearchResult(calendarSessions: List[CalendarSession],
 class CalendarController @Inject()(messagesApi: MessagesApi,
                                    usersRepository: UsersRepository,
                                    sessionsRepository: SessionsRepository,
-                                   approvalSessionsRepository: ApprovalSessionsRepository,
+                                   sessionRequestRepository: SessionRequestRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
@@ -131,7 +131,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             freeSlot = false)
         }
 
-        approvalSessionsRepository.getAllSessions map { pendingSessions =>
+        sessionRequestRepository.getAllSessions map { pendingSessions =>
           val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline)
             .map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
@@ -154,7 +154,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean): Action[AnyContent] = userAction.async { implicit request =>
-    approvalSessionsRepository.getSession(sessionId) flatMap { session =>
+    sessionRequestRepository.getSession(sessionId) flatMap { session =>
       val createSessionInfo = CreateSessionInfo(
         session.email,
         new Date(session.date.value),
@@ -162,7 +162,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         session.subCategory,
         session.topic,
         session.meetup)
-      approvalSessionsRepository.getAllFreeSlots map { freeSlots =>
+      sessionRequestRepository.getAllFreeSlots map { freeSlots =>
         val freeSlotDates = freeSlots.map { freeSlot =>
           dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
         }
@@ -174,11 +174,11 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def createSessionByUser(sessionId: String): Action[AnyContent] = userAction.async { implicit request =>
-    approvalSessionsRepository.getAllFreeSlots flatMap { freeSlots =>
+    sessionRequestRepository.getAllFreeSlots flatMap { freeSlots =>
       val freeSlotDates = freeSlots.map { freeSlot =>
         dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
       }
-      approvalSessionsRepository.getSession(sessionId) flatMap { approveSessionInfo =>
+      sessionRequestRepository.getSession(sessionId) flatMap { approveSessionInfo =>
         createSessionFormByUser.bindFromRequest.fold(
           formWithErrors => {
             Logger.error(s"Received a bad request while creating the session $formWithErrors")
@@ -217,7 +217,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       createSessionInfoByUser.category,
       createSessionInfoByUser.subCategory,
       createSessionInfoByUser.meetup)
-    approvalSessionsRepository.insertSessionForApprove(session) flatMap { result =>
+    sessionRequestRepository.insertSessionForApprove(session) flatMap { result =>
       if (result.ok) {
         Logger.info(s"Session By user $presenterEmail with sessionId $sessionId successfully created")
         usersRepository.getAllAdminAndSuperUser map {
@@ -239,18 +239,18 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
 
   private def swapSlots(sessionId: String,
                         createSessionInfoByUser: CreateSessionInfo,
-                        approveSessionInfo: ApproveSessionInfo) = {
-    approvalSessionsRepository.getFreeSlotByDate(BSONDateTime(createSessionInfoByUser.date.getTime)) flatMap {
+                        approveSessionInfo: SessionRequestInfo) = {
+    sessionRequestRepository.getFreeSlotByDate(BSONDateTime(createSessionInfoByUser.date.getTime)) flatMap {
       _.fold {
         Future.successful(BadRequest("Free slot on the specified date and time does not exist"))
       } { freeSlot =>
         val newDate = BSONDateTime(createSessionInfoByUser.date.getTime)
 
-        approvalSessionsRepository.updateDateForPendingSession(sessionId, newDate) flatMap { result =>
+        sessionRequestRepository.updateDateForPendingSession(sessionId, newDate) flatMap { result =>
           if (result.ok) {
             val updateFreeSlot = UpdateApproveSessionInfo(
               approveSessionInfo.date, sessionId = freeSlot._id.stringify, freeSlot = true)
-            approvalSessionsRepository.insertSessionForApprove(updateFreeSlot) flatMap { swap =>
+            sessionRequestRepository.insertSessionForApprove(updateFreeSlot) flatMap { swap =>
               if (swap.ok) {
                 Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
                   .flashing("message" -> "The session has been updated successfully."))
@@ -269,7 +269,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def getPendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
-    approvalSessionsRepository.getAllPendingSession map { pendingSessions =>
+    sessionRequestRepository.getAllPendingSession map { pendingSessions =>
       Ok(Json.toJson(pendingSessions.length))
     }
   }
@@ -281,7 +281,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         Future.successful(BadRequest("Oops! Invalid value encountered!"))
       },
       sessionInformation => {
-        approvalSessionsRepository.paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
+        sessionRequestRepository.paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
           .flatMap { pendingSessions =>
             val pendingSessionForAdmin = pendingSessions map { pendingSession =>
               CalendarSession(pendingSession._id.stringify,
@@ -295,7 +295,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 pending = !pendingSession.approved && !pendingSession.decline,
                 freeSlot = false)
             }
-            approvalSessionsRepository.activeCount(sessionInformation.email)
+            sessionRequestRepository.activeCount(sessionInformation.email)
               .map { count =>
                 val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
                 Ok(Json.toJson(CalendarSessionsSearchResult(pendingSessionForAdmin,
@@ -307,7 +307,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    approvalSessionsRepository.declineSession(sessionId) map { result =>
+    sessionRequestRepository.declineSession(sessionId) map { result =>
       if (result.ok) {
         Logger.info(s"Successfully declined session $sessionId")
         Redirect(routes.CalendarController.renderCalendarPage())
@@ -324,7 +324,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     val formattedDate = BSONDateTime(dateTimeUtility.parseDateStringWithTToIST(date))
     val approveSessionInfo = UpdateApproveSessionInfo(formattedDate, freeSlot = true)
 
-    approvalSessionsRepository.insertSessionForApprove(approveSessionInfo) map { result =>
+    sessionRequestRepository.insertSessionForApprove(approveSessionInfo) map { result =>
       if (result.ok) {
         Ok("Free slot has been entered successfully.")
       } else {
@@ -334,7 +334,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def deleteFreeSlot(id: String): Action[AnyContent] = adminAction.async { implicit request =>
-    approvalSessionsRepository.deleteFreeSlot(id) map { result =>
+    sessionRequestRepository.deleteFreeSlot(id) map { result =>
       if (result.ok) {
         Logger.info("Successfully deleted the free slot")
         Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")

@@ -41,7 +41,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     Future.successful(Some(UserInfo("test@knoldus.com", "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
       "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(date.getTime), 0, _id)))
 
-  private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+  private val approveSessionInfo: List[SessionRequestInfo] = List(SessionRequestInfo("email", BSONDateTime(date.getTime), "category",
     "subCategory", "topic", _id = _id))
 
   abstract class WithTestApplication extends Around with Scope with TestEnvironment {
@@ -55,7 +55,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
         knolxControllerComponent.messagesApi,
         usersRepository,
         sessionsRepository,
-        approveSessionRepository,
+        sessionRequestRepository,
         dateTimeUtility,
         config,
         knolxControllerComponent,
@@ -65,7 +65,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     val sessionsRepository = mock[SessionsRepository]
 
     val dateTimeUtility = mock[DateTimeUtility]
-    val approveSessionRepository = mock[ApprovalSessionsRepository]
+    val sessionRequestRepository = mock[SessionRequestRepository]
 
 
     override def around[T: AsResult](t: => T): Result = {
@@ -85,7 +85,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get list of all Session for Calendar Page when user is not logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
-      approveSessionRepository.getAllSessions returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -96,7 +96,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get list of all Session for Calendar Page when user is logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
-      approveSessionRepository.getAllSessions returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getAllSessions returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -110,9 +110,9 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "render create session for user for creating/updating his session" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
@@ -127,8 +127,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "Receive Bad Request while creating session for incorrect form submission" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -158,10 +158,10 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val writeResult = DefaultWriteResult(ok = true, 1, Seq(), None, None, None)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
-      approveSessionRepository.insertSessionForApprove(updateApproveSessionInfo) returns Future.successful(writeResult)
+      sessionRequestRepository.insertSessionForApprove(updateApproveSessionInfo) returns Future.successful(writeResult)
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -194,10 +194,10 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val writeResult = DefaultWriteResult(ok = false, 1, Seq(), None, None, None)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
-      approveSessionRepository.insertSessionForApprove(updateApproveSessionInfo) returns Future.successful(writeResult)
+      sessionRequestRepository.insertSessionForApprove(updateApproveSessionInfo) returns Future.successful(writeResult)
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -227,13 +227,13 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
         meetup = true)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(None)
+      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(None)
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
       val result = controller.createSessionByUser(_id.stringify)(
@@ -262,14 +262,14 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
-      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
+      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
       val result = controller.createSessionByUser(_id.stringify)(
@@ -303,15 +303,15 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
-      approveSessionRepository.insertSessionForApprove(freeSlot) returns Future.successful(writeResult)
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns Future.successful(writeResult)
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
-      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
+      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
       val result = controller.createSessionByUser(_id.stringify)(
@@ -345,15 +345,15 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
 
-      approveSessionRepository.insertSessionForApprove(freeSlot) returns Future.successful(writeResult)
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns Future.successful(writeResult)
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      approveSessionRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
-      approveSessionRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
+      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
       val result = controller.createSessionByUser(_id.stringify)(
@@ -379,12 +379,12 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
         subCategory = "subCategory",
         meetup = true)
 
-      val freeSlot = ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+      val freeSlot = SessionRequestInfo("email", BSONDateTime(date.getTime), "category",
         "subCategory", "topic", _id = _id, freeSlot = true)
 
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(freeSlot)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(freeSlot)
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -406,7 +406,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get pending sessions for Notification" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.getAllPendingSession returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getAllPendingSession returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.getPendingSessions()(
@@ -434,8 +434,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get all sessions for admin" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.paginate(1, Some("test@knoldus.com"), 10) returns Future.successful(approveSessionInfo)
-      approveSessionRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionRequestRepository.paginate(1, Some("test@knoldus.com"), 10) returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.getAllSessionForAdmin()(
@@ -454,7 +454,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
-      approveSessionRepository.declineSession(_id.stringify) returns updateWriteResult
+      sessionRequestRepository.declineSession(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.declineSession(_id.stringify)(
@@ -469,7 +469,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
-      approveSessionRepository.declineSession(_id.stringify) returns updateWriteResult
+      sessionRequestRepository.declineSession(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.declineSession(_id.stringify)(
@@ -485,7 +485,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), freeSlot = true)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
 
       dateTimeUtility.parseDateStringWithTToIST("2018-02-01T23:59") returns 1517509740000L
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -503,7 +503,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), freeSlot = true)
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
 
       dateTimeUtility.parseDateStringWithTToIST("2018-02-01T23:59") returns 1517509740000L
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -520,7 +520,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
+      sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.deleteFreeSlot(_id.stringify)(
@@ -535,7 +535,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      approveSessionRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
+      sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.deleteFreeSlot(_id.stringify)(

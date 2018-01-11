@@ -409,7 +409,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.getAllPendingSession returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.getPendingSessions()(
+      val result = controller.pendingSessions()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -421,7 +421,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.getAllSessionForAdmin()(
+      val result = controller.allSessionForAdmin()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody(
@@ -438,7 +438,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.getAllSessionForAdmin()(
+      val result = controller.allSessionForAdmin()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody(

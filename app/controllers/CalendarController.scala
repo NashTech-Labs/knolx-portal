@@ -268,13 +268,13 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def getPendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
+  def pendingSessions: Action[AnyContent] = adminAction.async { implicit request =>
     sessionRequestRepository.getAllPendingSession map { pendingSessions =>
       Ok(Json.toJson(pendingSessions.length))
     }
   }
 
-  def getAllSessionForAdmin: Action[AnyContent] = adminAction.async { implicit request =>
+  def allSessionForAdmin: Action[AnyContent] = adminAction.async { implicit request =>
     sessionSearchForm.bindFromRequest.fold(
       formWithErrors => {
         Logger.error(s"Received form with errors while getting all sessions for admin ==> $formWithErrors")

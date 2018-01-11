@@ -109,8 +109,8 @@ GET           /knolx/sessions/create                                controllers.
 POST          /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)
 GET           /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
 POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
-GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.getPendingSessions
-POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.getAllSessionForAdmin
+GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.pendingSessions
+POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.allSessionForAdmin
 GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)
 GET           /knolx/sessions/insertfreeslot                        controllers.CalendarController.insertFreeSlot(date: String)
 POST          /knolx/sessions/deletefreeslot                        controllers.CalendarController.deleteFreeSlot(id: String)

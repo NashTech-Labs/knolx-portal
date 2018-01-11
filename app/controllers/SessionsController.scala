@@ -458,7 +458,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def renderApproveSessionByAdmin(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
+  def renderScheduleSessionByAdmin(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>

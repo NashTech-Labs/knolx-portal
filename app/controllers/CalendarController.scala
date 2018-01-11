@@ -314,7 +314,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           .flashing("message" -> "Sessions has been successfully declined")
       } else {
         Logger.error(s"Something went wrong while declining session $sessionId")
-        Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId))
+        Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId))
           .flashing("message" -> "Something went wrong while declining the session.")
       }
     }

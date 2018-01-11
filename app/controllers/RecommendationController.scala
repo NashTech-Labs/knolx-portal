@@ -121,7 +121,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
                 adminAndSuperUser =>
 
                   emailManager ! EmailActor.SendEmail(
-                    adminAndSuperUser, fromEmail, "Request for Session Scheduled!",
+                    adminAndSuperUser, fromEmail, "Knolx/Meetup Recommendation",
                     views.html.emails.recommendationnotification(recommendation.name, recommendation.topic).toString)
                   Logger.error(s"Email has been successfully sent to admin/superUser for recommendation submitted by ${recommendation.name}")
               }

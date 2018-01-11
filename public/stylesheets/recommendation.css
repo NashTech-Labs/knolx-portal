@@ -105,7 +105,7 @@
 }
 
 .recommendation-content {
-    height: 100px;
+    height: 150px;
     color: #7F8C8D;
     font-size: 14px;
     padding-top: 10px;
@@ -113,6 +113,7 @@
     text-align: center;
     background-color: #FFFFFF;
 }
+
 .recommendation-card-topic {
     position: relative;
     font-size: 14px;

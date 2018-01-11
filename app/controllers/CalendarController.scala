@@ -250,16 +250,15 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                   Logger(s"Recommendation has been booked $recommendation")
                   Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!")
                 } else {
-                  InternalServerError("Something went wrong")
+                  InternalServerError("Something went wrong while inserting session for respective recommendation")
                 }
-
               }
             }
         }
         Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
       } else {
         Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
-        Future.successful(InternalServerError("Something went wrong!"))
+        Future.successful(InternalServerError("Something went wrong while inserting session"))
       }
     }
   }

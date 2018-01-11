@@ -116,24 +116,23 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
 
           recommendationsRepository.insert(recommendationInfo).map { result =>
             if (result.ok) {
-              Logger.info(s"Recommendation has been successfully received of ${recommendationInfo.name}")
+              Logger.info(s"Recommendation has been successfully given by ${recommendationInfo.name}")
               usersRepository.getAllAdminAndSuperUser map {
                 adminAndSuperUser =>
-
                   emailManager ! EmailActor.SendEmail(
                     adminAndSuperUser, fromEmail, "Knolx/Meetup Recommendation",
                     views.html.emails.recommendationnotification(recommendationInfo,
                       dateTimeUtility.toLocalDateTime(recommendationInfo.submissionDate.value).toString).toString)
-                  Logger.error(s"Email has been successfully sent to admin/superUser for recommendation submitted by ${recommendation.name}")
+                  Logger.error(s"Email has been successfully sent to admin/superUser for recommendation given by ${recommendation.name}")
               }
-              Ok(Json.toJson("Your Recommendation has been successfully received. Wait for approval."))
+              Ok(Json.toJson("Your recommendation has been successfully received. Wait for approval!"))
             } else {
-              Logger.info("Recommendation could not be added due to some error")
+              Logger.info("Something went wrong while adding recommendation")
               BadRequest(Json.toJson("Recommendation could not be added due to some error"))
             }
           }
         } { errorMessage =>
-          Logger.error("Recommendation submission unsuccessful with the reason -> " + errorMessage)
+          Logger.error("Recommendation submission unsuccessful with the reason " + errorMessage)
           Future.successful(BadRequest(errorMessage))
         }
       } else {
@@ -197,8 +196,10 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def approveRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.approveRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation Successfully Approved"))
+        Logger.info(s"Recommendation with id $recommendationId has been successfully approved")
+        Ok(Json.toJson("Recommendation has been successfully approved"))
       } else {
+        Logger.info(s"Something went wrong while approving recommendation with id $recommendationId")
         BadRequest(Json.toJson("Recommendation could not be approved due to some error"))
       }
     }
@@ -207,15 +208,16 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def declineRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.declineRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation Successfully Declined"))
+        Logger.info(s"Recommendation with id $recommendationId has been successfully declined")
+        Ok(Json.toJson("Recommendation has been successfully declined"))
       } else {
-        BadRequest(Json.toJson("Recommendation could not be decline due to some error"))
+        Logger.info(s"Something went wrong while declining recommendation with id $recommendationId")
+        BadRequest(Json.toJson("Recommendation could not be declined due to some error"))
       }
     }
   }
 
   def upVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    Logger.info(s"Upvoting recommendation => $recommendationId")
     val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
@@ -223,7 +225,8 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         upVote = true,
         downVote = false)
       if (vote.equals("upvote")) {
-        Future.successful(BadRequest("You have already upvoted the recommendation."))
+        Logger.info(s"Recommendation with id $recommendationId was already upvoted")
+        Future.successful(BadRequest("You have already upvoted the recommendation"))
       } else {
         if (vote.equals("downvote")) {
           recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
@@ -232,9 +235,11 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         }
         recommendationResponseRepository.upsert(recommendationResponse) map { result =>
           if (result.ok) {
-            Ok("Upvoted")
+            Logger.info(s"Recommendation with id $recommendationId has been successfully upvoted")
+            Ok("You have successfully upvoted the recommendation")
           } else {
-            BadRequest("Something went wrong while upvoting the recommendation.")
+            Logger.info(s"Something went wrong while upvoting recommendation with id $recommendationId")
+            BadRequest("Recommendation could not be upvoted due to some error")
           }
         }
       }
@@ -242,7 +247,6 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def downVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    Logger.info(s"Downvoting recommendation => $recommendationId")
     val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse = RecommendationResponseRepositoryInfo(email,
@@ -250,6 +254,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         upVote = false,
         downVote = true)
       if (vote.equals("downvote")) {
+        Logger.info(s"Recommendation with id $recommendationId was already downvoted")
         Future.successful(BadRequest("You have already downvoted the recommendation"))
       } else {
         if (vote.equals("upvote")) {
@@ -259,9 +264,11 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         }
         recommendationResponseRepository.upsert(recommendationResponse) map { result =>
           if (result.ok) {
-            Ok("Downvoted")
+            Logger.info(s"Recommendation with id $recommendationId has been successfully downvoted")
+            Ok("You have successfully downVoted the recommendation")
           } else {
-            BadRequest("Something went wrong while downvoting the recommendation.")
+            Logger.info(s"Something went wrong while downvoting recommendation with id $recommendationId")
+            BadRequest("Recommendation could not be downvoted due to some error")
           }
         }
       }
@@ -271,9 +278,11 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def doneRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.doneRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation has been marked as Done"))
+        Logger.info(s"Recommendation with id $recommendationId has been successfully marked as done")
+        Ok(Json.toJson("Recommendation has been successfully marked as done"))
       } else {
-        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Done"))
+        Logger.info(s"Something went wrong while marking recommendation with id $recommendationId as done")
+        BadRequest(Json.toJson("Recommendation could not be marked as done due to some error"))
       }
     }
   }
@@ -281,9 +290,11 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def pendingRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     recommendationsRepository.pendingRecommendation(recommendationId).map { result =>
       if (result.ok) {
-        Ok(Json.toJson("Recommendation has been marked as Pending"))
+        Logger.info(s"Recommendation with id $recommendationId has been successfully marked as pending")
+        Ok(Json.toJson("Recommendation has been successfully marked as pending"))
       } else {
-        BadRequest(Json.toJson("Got Internal Server Error while marking the recommendation as Pending"))
+        Logger.info(s"Something went wrong while marking recommendation with id $recommendationId as pending")
+        BadRequest(Json.toJson("Recommendation could not be marked as pending due to some error"))
       }
     }
   }

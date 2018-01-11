@@ -166,7 +166,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         val freeSlotDates = freeSlots.map { freeSlot =>
           dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))
         }
-        Ok(views.html.calendar.createsessionbyuser(createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot))
+        Ok(views.html.calendar.createsessionbyuser(
+          createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotDates, isFreeSlot)
+        )
       }
     }
   }

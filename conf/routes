@@ -106,8 +106,6 @@ POST          /knolx/analysis/leaderboard                           controllers.
 GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage
 GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
 GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)
-# POST          /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)
-# GET           /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
 POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
 GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.pendingSessions
 POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.allSessionForAdmin

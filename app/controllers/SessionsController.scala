@@ -463,6 +463,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       .getAll
       .flatMap { feedbackForms =>
         val formIds = feedbackForms.map(form => (form._id.stringify, form.name))
+
         approvalSessionsRepository.getSession(sessionId).map { session =>
           val createSessionInfo = CreateApproveSessionInfo(session.email,
             new Date(session.date.value),
@@ -491,8 +492,9 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             dateTimeUtility.formatDateWithT(new Date(session.date.value)))
           createSessionForm.bindFromRequest.fold(
             formWithErrors => {
-              Logger.error(s"Received a bad request for create session $formWithErrors")
-              Future.successful(BadRequest(views.html.sessions.approvesession(formWithErrors, formIds, sessionApprovedId, createApproveSessionInfo)))
+              Logger.error(s"Received a bad request while approving the session $formWithErrors")
+              Future.successful(BadRequest(
+                views.html.sessions.approvesession(formWithErrors, formIds, sessionApprovedId, createApproveSessionInfo)))
             },
             createSessionInfo => {
               val presenterEmail = createSessionInfo.email.toLowerCase
@@ -502,8 +504,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                   Future.successful(
                     BadRequest(
                       views.html.sessions.approvesession(
-                        createSessionForm.fill(createSessionInfo)
-                          .withGlobalError("Email not valid!"),
+                        createSessionForm.fill(createSessionInfo).withGlobalError("Email not valid!"),
                         formIds,
                         sessionApprovedId,
                         createApproveSessionInfo)
@@ -529,22 +530,24 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           createSessionInfo.subCategory, createSessionInfo.feedbackFormId,
           createSessionInfo.topic, createSessionInfo.feedbackExpirationDays, createSessionInfo.meetup, rating = "",
           0, cancelled = false, active = true, BSONDateTime(expirationDateMillis), None, None)
+
         sessionsRepository.insert(session) flatMap { result =>
           if (result.ok) {
-            Logger.info(s"Session for user ${createSessionInfo.email} successfully created")
+            Logger.info(s"Session for user ${createSessionInfo.email} successfully approved")
             sessionsScheduler ! RefreshSessionsSchedulers
-            val approveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(createSessionInfo.date.getTime), sessionApprovedId, createSessionInfo.topic,
-              createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory, createSessionInfo.meetup,
-              approved = true)
+            val approveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(createSessionInfo.date.getTime), sessionApprovedId,
+              createSessionInfo.topic, createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory,
+              createSessionInfo.meetup, approved = true)
+
             approvalSessionsRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
               if (updatedResult.ok) {
-                Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully created!")
+                Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully approved!")
               } else {
                 InternalServerError("Something went wrong!")
               }
             }
           } else {
-            Logger.error(s"Something went wrong when creating a new Knolx session for user ${createSessionInfo.email}")
+            Logger.error(s"Something went wrong while approving a requested Knolx session for user ${createSessionInfo.email}")
             Future.successful(InternalServerError("Something went wrong!"))
           }
         }

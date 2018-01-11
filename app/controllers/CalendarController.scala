@@ -146,7 +146,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
               pendingSession.freeSlot)
           }
 
-          val calendarSessionsWithAuthority = CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
+          val calendarSessionsWithAuthority =
+            CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
           Ok(Json.toJson(calendarSessionsWithAuthority))
         }
       }

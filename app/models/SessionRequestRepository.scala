@@ -75,13 +75,19 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(BSONDocument("_id" -> BSONDocument("$oid" -> sessionId)))
           .cursor[SessionRequestInfo](ReadPreference.Primary).headOption)
 
-  def getAllSessions(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] =
+  def getSessionsInMonth(startDate: Long, endDate: Long)(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] = {
+    val selector = BSONDocument(
+      "date" -> BSONDocument(
+        "$gte" -> BSONDateTime(startDate),
+        "$lte" -> BSONDateTime(endDate)))
+
     collection
       .flatMap(jsonCollection =>
         jsonCollection
-          .find(Json.obj())
+          .find(selector)
           .cursor[SessionRequestInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
+  }
 
   def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] = {
     val skipN = (pageNumber - 1) * pageSize

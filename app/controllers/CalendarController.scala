@@ -130,7 +130,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             freeSlot = false)
         }
 
-        sessionRequestRepository.getAllSessions map { pendingSessions =>
+        sessionRequestRepository.getSessionsInMonth map { pendingSessions =>
           val pendingSessionForAdmin =
             pendingSessions
               .filterNot(session => session.approved || session.decline)

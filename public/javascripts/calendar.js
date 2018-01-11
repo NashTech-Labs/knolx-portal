@@ -106,6 +106,7 @@ function getSessions(startDate, endDate, callback) {
                 isAdmin = calendarSessionsWithAuthority.isAdmin;
                 var events = [];
                 var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
+
                 for (var calenderSession = 0; calenderSession < calendarSessions.length; calenderSession++) {
                     if (calendarSessions[calenderSession].pending) {
                         if (calendarSessions[calenderSession].freeSlot) {
@@ -118,8 +119,7 @@ function getSessions(startDate, endDate, callback) {
                                     .renderCreateSessionByUser(calendarSessions[calenderSession].id,
                                         calendarSessions[calenderSession].freeSlot).url
                             });
-                        }
-                        else if (calendarSessionsWithAuthority.isAdmin) {
+                        } else if (calendarSessionsWithAuthority.isAdmin) {
                             events.push({
                                 id: calendarSessions[calenderSession].id,
                                 title: calendarSessions[calenderSession].topic,

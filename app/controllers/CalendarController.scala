@@ -132,7 +132,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         }
 
         approvalSessionsRepository.getAllSessions map { pendingSessions =>
-          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline) map { pendingSession =>
+          val pendingSessionForAdmin = pendingSessions.filterNot(session => session.approved || session.decline)
+            .map { pendingSession =>
             CalendarSession(pendingSession._id.stringify,
               new Date(pendingSession.date.value),
               pendingSession.email,

@@ -44,7 +44,12 @@ class SessionRequestRepositorySpec extends PlaySpecification {
     }
 
     "get all sessions to display in calendar" in {
-      val sessions = await(sessionRequestRepository.getAllSessions)
+      val insertApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(1514745000010L), _id.stringify, "topic", "email",
+        "category", "subCategory")
+
+      await(sessionRequestRepository.insertSessionForApprove(insertApproveSessionInfo))
+
+      val sessions = await(sessionRequestRepository.getSessionsInMonth(1514745000000L, 1517423399999L))
 
       sessions.head.email must beEqualTo("email")
     }
@@ -106,7 +111,7 @@ class SessionRequestRepositorySpec extends PlaySpecification {
         "topic", "email", "category", "subCategory", decline = true)
 
       val insert = await(sessionRequestRepository.insertSessionForApprove(declineSessionInfoByAdmin))
-      val update = await(sessionRequestRepository.updateDateForPendingSession(sessionId,date))
+      val update = await(sessionRequestRepository.updateDateForPendingSession(sessionId, date))
       update.ok must beEqualTo(true)
     }
 

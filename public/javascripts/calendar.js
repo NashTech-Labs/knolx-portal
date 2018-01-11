@@ -128,7 +128,7 @@ function getSessions(startDate, endDate, callback) {
                                 url: jsRoutes.controllers.SessionsController
                                     .renderScheduleSessionByAdmin(calendarSessions[calenderSession].id).url
                             });
-                        } else if (calendarSessionsWithAuthority.isLoggedIn
+                        } else if (calendarSessionsWithAuthority.loggedIn
                             && calendarSessions[calenderSession].email === calendarSessionsWithAuthority.email) {
                             events.push({
                                 id: calendarSessions[calenderSession].id,

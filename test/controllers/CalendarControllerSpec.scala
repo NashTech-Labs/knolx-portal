@@ -85,7 +85,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get list of all Sessions for Calendar Page when user is not logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
-      sessionRequestRepository.getAllSessions returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSessionsInMonth(1514745000000L, 1517423399999L) returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -96,7 +96,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
     "get list of all Sessions for Calendar Page when user is logged in" in new WithTestApplication {
       sessionsRepository.getSessionInMonth(1514745000000L, 1517423399999L) returns sessionObject
-      sessionRequestRepository.getAllSessions returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSessionsInMonth(1514745000000L, 1517423399999L) returns Future.successful(approveSessionInfo)
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
@@ -142,7 +142,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "receive Bad Request while creating session if session/free slot does not exist" in new WithTestApplication {
+    "redirect to calendar page while creating session if session/free slot does not exist" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
       sessionRequestRepository.getSession(_id.stringify) returns Future.successful(None)
@@ -184,6 +184,29 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo BAD_REQUEST
     }
 
+    "redirect to calendar page while creating session if freeSlotId is empty" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.createSessionByUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "date" -> "2018-01-31T23:59",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "meetup" -> "true",
+            "freeSlotId" -> "")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
     "create a pending session successfully" in new WithTestApplication {
       val updateApproveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(date.getTime),
         sessionId = _id.stringify,
@@ -214,7 +237,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
@@ -249,7 +273,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
@@ -271,7 +296,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(None)
+      sessionRequestRepository.getSession("freeSlotId") returns Future.successful(None)
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
       val result = controller.createSessionByUser(_id.stringify)(
@@ -282,7 +307,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
@@ -306,7 +332,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.getSession("freeSlotId") returns Future.successful(Some(approveSessionInfo.head))
       sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
@@ -318,7 +344,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
@@ -348,7 +375,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.getSession("freeSlotId") returns Future.successful(Some(approveSessionInfo.head))
       sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
@@ -360,7 +387,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo INTERNAL_SERVER_ERROR
@@ -390,7 +418,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      sessionRequestRepository.getFreeSlotByDate(BSONDateTime(1517509740000L)) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.getSession("freeSlotId") returns Future.successful(Some(approveSessionInfo.head))
       sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
@@ -402,7 +430,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
@@ -436,7 +465,8 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
             "category" -> "category",
             "subCategory" -> "subCategory",
             "topic" -> "topic",
-            "meetup" -> "true")
+            "meetup" -> "true",
+            "freeSlotId" -> "freeSlotId")
           .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER

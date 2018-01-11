@@ -68,13 +68,12 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection.flatMap(_.update(selector, modifier, upsert = true))
   }
 
-  def getSession(sessionId: String): Future[SessionRequestInfo] = {
+  def getSession(sessionId: String): Future[SessionRequestInfo] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection
           .find(BSONDocument("_id" -> BSONDocument("$oid" -> sessionId)))
           .cursor[SessionRequestInfo](ReadPreference.Primary).head)
-  }
 
   def getAllSessions(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] =
     collection
@@ -115,14 +114,13 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.count(condition))
   }
 
-  def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] = {
+  def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] =
     collection
       .flatMap(jsonCollection =>
         jsonCollection.
           find(Json.obj("approved" -> true)).
           cursor[SessionRequestInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
-  }
 
   def approveSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
@@ -134,7 +132,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
-
   }
 
   def declineSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
@@ -147,7 +144,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
-
   }
 
   def updateDateForPendingSession(sessionId: String, date: BSONDateTime): Future[UpdateWriteResult] = {
@@ -172,7 +168,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .find(selector)
           .cursor[SessionRequestInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
-
   }
 
   def deleteFreeSlot(id: String): Future[WriteResult] = {

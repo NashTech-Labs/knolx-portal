@@ -43,7 +43,8 @@ case class CalendarSession(id: String,
                            approved: Boolean,
                            decline: Boolean,
                            pending: Boolean,
-                           freeSlot: Boolean)
+                           freeSlot: Boolean,
+                           contentAvailable: Boolean = false)
 
 case class UpdateApproveSessionInfo(date: BSONDateTime,
                                     sessionId: String = "",
@@ -118,6 +119,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .getSessionInMonth(startDate, endDate)
       .flatMap { sessionInfo =>
         val knolxSessions = sessionInfo map { session =>
+          val contentAvailable = session.youtubeURL.isDefined || session.slideShareURL.isDefined
           CalendarSession(session._id.stringify,
             new Date(session.date.value),
             session.email,
@@ -127,7 +129,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             approved = true,
             decline = false,
             pending = false,
-            freeSlot = false)
+            freeSlot = false,
+            contentAvailable = contentAvailable)
         }
 
         sessionRequestRepository.getSessionsInMonth(startDate, endDate) map { pendingSessions =>

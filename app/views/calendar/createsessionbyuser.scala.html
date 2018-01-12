@@ -127,7 +127,11 @@
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
                     <div class="col-md-4 loader-outer">
-                        <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"/>
+                        <input type="submit" value="@if(isFreeSlot) {
+                            Create
+                        } else {
+                            Update
+                        }" class="btn btn-success" style="background-color: #1ab394;"/>
                         @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
                             <div id="delete-free-slot" class="btn btn-danger">Delete</div>
                         }

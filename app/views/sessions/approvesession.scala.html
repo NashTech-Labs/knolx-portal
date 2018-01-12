@@ -98,6 +98,7 @@
                     <label class="col-md-2 control-label">Session</label>
                     <div class="col-md-10">
                         <select name="session" id="session" class="update-field login-second">
+                            <option selected value="">! Select Session Slot Please</option>
                         @for((value, key) <- SessionValues.Sessions) {
                             <option value="@value">@key</option>
                         }

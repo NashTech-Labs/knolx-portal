@@ -493,12 +493,6 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             dateTimeUtility.formatDateWithT(new Date(session.date.value)))
           createSessionForm.bindFromRequest.fold(
             formWithErrors => {
-              Logger.error(s"Received a bad request for create session $formWithErrors")
-              Future.successful(BadRequest(views.html.sessions.approvesession(formWithErrors,
-                formIds,
-                sessionApprovedId,
-                recommendationId,
-                createApproveSessionInfo)))
               Logger.error(s"Received a bad request while approving the session $formWithErrors")
               Future.successful(BadRequest(
                 views.html.sessions.approvesession(formWithErrors, formIds, sessionApprovedId,

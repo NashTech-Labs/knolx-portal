@@ -128,18 +128,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           cursor[SessionRequestInfo](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
 
-  def approveSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
-    val modifier = BSONDocument(
-      "$set" -> BSONDocument(
-        "approved" -> true,
-        "decline" -> false))
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection.update(selector, modifier))
-  }
-
   def declineSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val modifier = BSONDocument(

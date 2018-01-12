@@ -88,12 +88,6 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       sessions.head.email must beEqualTo("approvedemail")
     }
 
-    "approve session created by user" in {
-      val approve = await(sessionRequestRepository.approveSession(_id.stringify))
-
-      approve.ok must beEqualTo(true)
-    }
-
     "decline session created by user" in {
       val sessionId = BSONObjectID.generate().stringify
       val declineSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,

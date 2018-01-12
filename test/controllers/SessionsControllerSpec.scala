@@ -792,7 +792,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.renderApproveSessionByAdmin(_id.stringify, None)(
+      val result = controller.renderScheduleSessionByAdmin(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -811,7 +811,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.renderScheduleSessionByAdmin(_id.stringify)(
+      val result = controller.renderScheduleSessionByAdmin(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -830,7 +830,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.approveSessionByAdmin(_id.stringify)(
+      val result = controller.approveSessionByAdmin(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody(

@@ -165,25 +165,30 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
         val freeSlotsInfo = freeSlots.map(freeSlot =>
           FreeSlot(freeSlot._id.stringify, dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))))
 
-        sessionRequestRepository.getSession(sessionId) flatMap { session =>
-          val eventualTopic = recommendationId.fold(Future.successful(session.topic)) { recommendationId =>
-            recommendationsRepository.getRecommendationById(recommendationId).map { recommendationInfo =>
-              recommendationInfo.fold(session.topic)(_.topic)
+        sessionRequestRepository.getSession(sessionId) flatMap { maybeApproveSessionInfo =>
+          maybeApproveSessionInfo.fold {
+            Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+              .flashing("message" -> "The selected session does not exist"))
+          } { session =>
+            val eventualTopic = recommendationId.fold(Future.successful(session.topic)) { recommendationId =>
+              recommendationsRepository.getRecommendationById(recommendationId).map { recommendationInfo =>
+                recommendationInfo.fold(session.topic)(_.topic)
+              }
+            }
+            eventualTopic flatMap { topic =>
+              val createSessionInfo = CreateSessionInfo(
+                session.email,
+                new Date(session.date.value),
+                session.category,
+                session.subCategory,
+                topic,
+                session.meetup)
+              Future.successful(Ok(views.html.calendar.createsessionbyuser(
+                createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotsInfo, isFreeSlot)))
             }
           }
-          eventualTopic flatMap { topic =>
-            val createSessionInfo = CreateSessionInfo(
-              session.email,
-              new Date(session.date.value),
-              session.category,
-              session.subCategory,
-              topic,
-              session.meetup)
-            Future.successful(Ok(views.html.calendar.createsessionbyuser(
-              createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotsInfo, isFreeSlot)))
-          }
         }
-    }
+      }
   }
 
   def createSessionByUser(sessionId: String,
@@ -367,31 +372,38 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
   }
 
   def declineSession(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
-    sessionRequestRepository.getSession(sessionId).flatMap { approvalSession =>
-      sessionRequestRepository.declineSession(approvalSession._id.stringify) flatMap { session =>
-        if (session.ok) {
-          Logger.info(s"Successfully declined session $sessionId" + "--->" + approvalSession.recommendationId)
-          approvalSession.recommendationId.isEmpty match {
-            case false => recommendationsRepository.cancelBookedRecommendation(approvalSession.recommendationId) map { result =>
-              if (result.ok) {
-                Logger.info(s"Recommendation has been unbooked now ${approvalSession.recommendationId}")
-                Redirect(routes.CalendarController.renderCalendarPage())
-                  .flashing("message" -> "Recommendation has been unbooked now")
-              } else {
-                Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
-                  .flashing("message" -> "Something went wrong while declining the session")
+    sessionRequestRepository
+      .getSession(sessionId)
+      .flatMap { maybeApproveSessionInfo =>
+        maybeApproveSessionInfo.fold {
+          Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+            .flashing("message" -> "The selected session does not exist"))
+        } { approvalSession =>
+          sessionRequestRepository.declineSession(approvalSession._id.stringify) flatMap { session =>
+            if (session.ok) {
+              Logger.info(s"Successfully declined session $sessionId" + "--->" + approvalSession.recommendationId)
+              approvalSession.recommendationId.isEmpty match {
+                case false => recommendationsRepository.cancelBookedRecommendation(approvalSession.recommendationId) map { result =>
+                  if (result.ok) {
+                    Logger.info(s"Recommendation has been unbooked now ${approvalSession.recommendationId}")
+                    Redirect(routes.CalendarController.renderCalendarPage())
+                      .flashing("message" -> "Recommendation has been unbooked now")
+                  } else {
+                    Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
+                      .flashing("message" -> "Something went wrong while declining the session")
+                  }
+                }
+                case true  => Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+                  .flashing("message" -> "Sessions has been declined"))
               }
+            } else {
+              Logger.info(s"Something went wrong while declining session $sessionId")
+              Future.successful(Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
+                .flashing("message" -> "Something went wrong while declining the session"))
             }
-            case true  => Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
-              .flashing("message" -> "Sessions has been declined"))
           }
-        } else {
-          Logger.info(s"Something went wrong while declining session $sessionId")
-          Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
-            .flashing("message" -> "Something went wrong while declining the session"))
         }
       }
-    }
   }
 
   def insertFreeSlot(date: String): Action[AnyContent] = adminAction.async { implicit request =>

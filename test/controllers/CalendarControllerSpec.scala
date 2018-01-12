@@ -56,6 +56,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
         usersRepository,
         sessionsRepository,
         sessionRequestRepository,
+        recommendationRepository,
         dateTimeUtility,
         config,
         knolxControllerComponent,
@@ -67,6 +68,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     val dateTimeUtility = mock[DateTimeUtility]
     val sessionRequestRepository = mock[SessionRequestRepository]
 
+    val recommendationRepository = mock[RecommendationsRepository]
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))
@@ -117,7 +119,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
 
-      val result = controller.renderCreateSessionByUser(_id.stringify, isFreeSlot = false)(
+      val result = controller.renderCreateSessionByUser(_id.stringify, None, isFreeSlot = false)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -134,7 +136,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
 
-      val result = controller.renderCreateSessionByUser(_id.stringify, isFreeSlot = false)(
+      val result = controller.renderCreateSessionByUser(_id.stringify, None, isFreeSlot = false)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -150,7 +152,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -171,7 +173,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -192,7 +194,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -229,7 +231,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
       usersRepository.getAllAdminAndSuperUser returns Future.successful(List("test@knoldus.com"))
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -265,7 +267,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -299,7 +301,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.getSession("freeSlotId") returns Future.successful(None)
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -336,7 +338,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -379,7 +381,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -422,7 +424,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.updateDateForPendingSession(_id.stringify, BSONDateTime(1517509740000L)) returns updateWriteResult
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -457,7 +459,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       dateTimeUtility.parseDateStringWithTToIST("2018-01-31T23:59") returns 1517423340999L
 
-      val result = controller.createSessionByUser(_id.stringify)(
+      val result = controller.createSessionByUser(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withFormUrlEncodedBody("email" -> "test@knoldus.com",
@@ -591,7 +593,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.deleteFreeSlot(_id.stringify)(
+      val result = controller.deleteFreeSlot(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -606,7 +608,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.deleteFreeSlot(_id.stringify)(
+      val result = controller.deleteFreeSlot(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

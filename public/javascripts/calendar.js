@@ -106,98 +106,14 @@ function getSessions(startDate, endDate, callback) {
 
                 for (var calenderSession = 0; calenderSession < calendarSessions.length; calenderSession++) {
 
-                    if (calendarSessions[calenderSession].pending) {
-                        if (calendarSessions[calenderSession].freeSlot) {
-                            events.push({
-                                id: calendarSessions[calenderSession].id,
-                                title: calendarSessions[calenderSession].topic,
-                                start: calendarSessions[calenderSession].date,
-                                color: freeSlotColor,
-                                url: jsRoutes.controllers.CalendarController
-                                    .renderCreateSessionByUser(calendarSessions[calenderSession].id,
-                                        calendarSessions[calenderSession].freeSlot).url
-                            });
-                        } else if (calendarSessionsWithAuthority.isAdmin) {
-                            events.push({
-                                id: calendarSessions[calenderSession].id,
-                                title: calendarSessions[calenderSession].topic,
-                                start: calendarSessions[calenderSession].date,
-                                color: pendingSessionColor,
-                                data: "<p>Topic: " + calendarSessions[calenderSession].topic + "<br>Email: "
-                                + calendarSessions[calenderSession].email + "</p>",
-                                url: jsRoutes.controllers.SessionsController
-                                    .renderScheduleSessionByAdmin(calendarSessions[calenderSession].id).url
-                            });
-                        } else if (calendarSessionsWithAuthority.loggedIn
-                            && calendarSessions[calenderSession].email === calendarSessionsWithAuthority.email) {
-                            events.push({
-                                id: calendarSessions[calenderSession].id,
-                                title: calendarSessions[calenderSession].topic,
-                                start: calendarSessions[calenderSession].date,
-                                color: pendingSessionColor,
-                                data: "<p>Topic: " + calendarSessions[calenderSession].topic + "<br>Email: "
-                                + calendarSessions[calenderSession].email + "</p>",
-                                url: jsRoutes.controllers.CalendarController
-                                    .renderCreateSessionByUser(calendarSessions[calenderSession].id,
-                                        calendarSessions[calenderSession].freeSlot).url
-                            });
-                        } else {
-                            events.push({
-                                id: calendarSessions[calenderSession].id,
-                                title: calendarSessions[calenderSession].topic,
-                                start: calendarSessions[calenderSession].date,
-                                color: pendingSessionColor,
-                                data: "<p>Topic: " + calendarSessions[calenderSession].topic
-                                + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
-                            });
-                        }
-                    } else {
-                        if (calendarSessionsWithAuthority.isAdmin) {
-                            if (calendarSessions[calenderSession].meetup) {
-                                events.push({
-                                    id: calendarSessions[calenderSession].id,
-                                    title: calendarSessions[calenderSession].topic,
-                                    start: calendarSessions[calenderSession].date,
-                                    color: scheduledMeetupColor,
-                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
-                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>",
-                                    url: jsRoutes.controllers.SessionsController
-                                        .update(calendarSessions[calenderSession].id).url
-                                });
-                            } else {
-                                events.push({
-                                    id: calendarSessions[calenderSession].id,
-                                    title: calendarSessions[calenderSession].topic,
-                                    start: calendarSessions[calenderSession].date,
-                                    color: scheduledSessionColor,
-                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
-                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>",
-                                    url: jsRoutes.controllers.SessionsController
-                                        .update(calendarSessions[calenderSession].id).url
-                                });
-                            }
-                        } else {
-                            if (calendarSessions[calenderSession].meetup) {
-                                events.push({
-                                    id: calendarSessions[calenderSession].id,
-                                    title: calendarSessions[calenderSession].topic,
-                                    start: calendarSessions[calenderSession].date,
-                                    color: scheduledMeetupColor,
-                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
-                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
-                                });
-                            } else {
-                                events.push({
-                                    id: calendarSessions[calenderSession].id,
-                                    title: calendarSessions[calenderSession].topic,
-                                    start: calendarSessions[calenderSession].date,
-                                    color: scheduledSessionColor,
-                                    data: "<p>Topic: " + calendarSessions[calenderSession].topic
-                                    + "<br>Email: " + calendarSessions[calenderSession].email + "</p>"
-                                });
-                            }
-                        }
-                    }
+                    events.push({
+                        id: calendarSessions[calenderSession].id,
+                        title: calendarSessions[calenderSession].topic,
+                        start: calendarSessions[calenderSession].date,
+                        color: getColor(calendarSessions[calenderSession]),
+                        data: getData(calendarSessions[calenderSession]),
+                        url: getUrl(calendarSessions[calenderSession], calendarSessionsWithAuthority)
+                    });
                 }
                 callback(events);
             },
@@ -227,4 +143,46 @@ function deleteFreeSlot(id) {
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
+}
+
+function getColor(calendarSession) {
+    if (calendarSession.pending) {
+        if (calendarSession.freeSlot) {
+            return freeSlotColor;
+        } else {
+            return pendingSessionColor;
+        }
+    } else if (calendarSession.meetup) {
+        return scheduledMeetupColor;
+    } else {
+        return scheduledSessionColor;
+    }
+}
+
+function getData(calendarSession) {
+    if(!calendarSession.freeSlot) {
+        return "<p>Topic: " + calendarSession.topic
+            + "<br>Email: " + calendarSession.email + "</p>";
+    }
+}
+
+function getUrl(calendarSession, calendarSessionsWithAuthority) {
+    if(calendarSession.freeSlot) {
+        return jsRoutes.controllers.CalendarController
+            .renderCreateSessionByUser(calendarSession.id,
+                calendarSession.freeSlot).url;
+    } else if(calendarSession.pending) {
+        if(calendarSessionsWithAuthority.isAdmin) {
+            return jsRoutes.controllers.SessionsController
+                .renderScheduleSessionByAdmin(calendarSession.id).url;
+        } else if (calendarSessionsWithAuthority.loggedIn
+            && calendarSession.email === calendarSessionsWithAuthority.email) {
+            return jsRoutes.controllers.CalendarController
+                .renderCreateSessionByUser(calendarSession.id,
+                    calendarSession.freeSlot).url;
+        }
+    } else if(calendarSessionsWithAuthority.isAdmin) {
+        return jsRoutes.controllers.SessionsController
+            .update(calendarSession.id).url;
+    }
 }

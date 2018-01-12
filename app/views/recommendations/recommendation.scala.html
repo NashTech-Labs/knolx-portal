@@ -22,47 +22,51 @@
                 </select>
             </label>
             <div class="col-md-3"></div>
-            <div class="col-md-1 filter-padding-right" style="width: fit-content">
-                <label class="checkbox-outer filter-recommendation">
-                    <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>
-                    <span class="filter-label_text"></span>
-                    <p class="filter-checkbox-text">All</p>
-                </label>
-            </div>
-            <div class="col-md-1" style="padding-left: 20px !important;">
-                <label class="checkbox-outer filter-recommendation">
-                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='approved'/>
+            @if(SessionHelper.isAdmin) {
+                <div class="col-md-1" style="padding-left: 40px !important;
+                    float: right">
+                    <label class="checkbox-outer filter-recommendation">
+                        <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='decline'/>
+                        <span class="filter-label_text"></span>
+                        <p class="filter-checkbox-text">Decline</p>
+                    </label>
+                </div>
+                <div class="col-md-1" style="padding-left: 20px !important;
+                    float: right;">
+                    <label class="checkbox-outer filter-recommendation">
+                        <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='approved'/>
 
-                    <span class="filter-label_text"></span>
-                    <p class="filter-checkbox-text">Approved</p>
-                </label>
-            </div>
-            <div class="col-md-1" style="padding-left: 40px !important;">
+                        <span class="filter-label_text"></span>
+                        <p class="filter-checkbox-text">Approved</p>
+                    </label>
+                </div>
+            }
+            <div class="col-md-1 filter-padding-right" style="padding-left: 40px !important; float: right">
                 <label class="checkbox-outer filter-recommendation">
-                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='decline'/>
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='done'/>
                     <span class="filter-label_text"></span>
-                    <p class="filter-checkbox-text">Decline</p>
+                    <p class="filter-checkbox-text">Done</p>
                 </label>
             </div>
-            <div class="col-md-1 filter-padding-right" style="padding-left: 45px !important;">
-                <label class="checkbox-outer filter-recommendation">
-                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='book'/>
-                    <span class="filter-label_text"></span>
-                    <p class="filter-checkbox-text">Booked</p>
-                </label>
-            </div>
-            <div class="col-md-1" style="padding-left: 55px !important;">
+            <div class="col-md-1" style="padding-left: 30px !important; float: right">
                 <label class="checkbox-outer filter-recommendation">
                     <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='pending'/>
                     <span class="filter-label_text"></span>
                     <p class="filter-checkbox-text">Pending</p>
                 </label>
             </div>
-            <div class="col-md-1 filter-padding-right" style="padding-left: 65px !important;">
+            <div class="col-md-1 filter-padding-right" style="padding-left: 25px !important; float: right">
                 <label class="checkbox-outer filter-recommendation">
-                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='done'/>
+                    <input type='radio' name='user-recommend-filter' class='custom-checkbox' value='book'/>
                     <span class="filter-label_text"></span>
-                    <p class="filter-checkbox-text">Done</p>
+                    <p class="filter-checkbox-text">Booked</p>
+                </label>
+            </div>
+            <div class="col-md-1 filter-padding-right" style="width: fit-content;  float: right">
+                <label class="checkbox-outer filter-recommendation">
+                    <input type='radio' name='user-recommend-filter' checked class='custom-checkbox' value='all'/>
+                    <span class="filter-label_text"></span>
+                    <p class="filter-checkbox-text">All</p>
                 </label>
             </div>
         </div>

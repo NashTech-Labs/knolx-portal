@@ -126,7 +126,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo OK
+      status(result) must be equalTo SEE_OTHER
     }
 
     "render create session for user for creating/updating his session" in new WithTestApplication {

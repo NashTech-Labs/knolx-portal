@@ -54,7 +54,7 @@
     <div class="row">
         <div class="col-md-12 create-outer">
 
-            <form class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId, recommendationId)" method="post">
+            <form id="create-session-form" class="CreateForm customForm" action="@routes.CalendarController.createSessionByUser(sessionId, recommendationId)" method="post">
 
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" name="csrfToken" hidden/>
                 <input id="sessionId" value="@sessionId" hidden />

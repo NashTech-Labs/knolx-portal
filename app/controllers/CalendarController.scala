@@ -206,7 +206,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .flatMap { freeSlots =>
         val freeSlotsInfo = freeSlots.map(freeSlot =>
           FreeSlot(freeSlot._id.stringify, dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))))
-
         sessionRequestRepository
           .getSession(sessionId)
           .flatMap { maybeApproveSessionInfo =>

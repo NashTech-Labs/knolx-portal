@@ -550,7 +550,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
             sessionRequestRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
               if (updatedResult.ok) {
-                Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully approved!")
+                Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
               } else {
                 InternalServerError("Something went wrong!")
               }

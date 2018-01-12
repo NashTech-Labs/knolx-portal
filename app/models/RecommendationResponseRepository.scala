@@ -32,7 +32,6 @@ object RecommendationResponseJsonFormats {
 }
 
 class RecommendationResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
-
   import play.modules.reactivemongo.json._
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("recommendationsresponse"))
@@ -69,8 +68,8 @@ class RecommendationResponseRepository @Inject()(reactiveMongoApi: ReactiveMongo
           case (false, true) => "downvote"
           case _             => ""
         }
-
       }
     }
   }
+
 }

@@ -11,7 +11,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
 import utilities.DateTimeUtility
@@ -146,7 +146,6 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 pending = true,
                 pendingSession.freeSlot)
             }
-
           val calendarSessionsWithAuthority =
             CalendarSessionsWithAuthority(knolxSessions ::: pendingSessionForAdmin, isAdmin, loggedIn, email)
           Ok(Json.toJson(calendarSessionsWithAuthority))
@@ -346,8 +345,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             case true  => Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
               .flashing("message" -> "Sessions has been declined"))
           }
-        }
-        else {
+        } else {
           Logger.info(s"Something went wrong while declining session $sessionId")
           Future.successful(Redirect(routes.SessionsController.renderApproveSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
             .flashing("message" -> "Something went wrong while declining the session"))

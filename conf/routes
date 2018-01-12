@@ -54,6 +54,8 @@ GET           /session/:sessionId/cancel                            controllers.
 GET           /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
 GET           /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
 GET           /session/sendemail                                    controllers.SessionsController.sendEmailToPresenter(sessionId: String)
+GET           /session/approvesession                               controllers.SessionsController.renderScheduleSessionByAdmin(sessionId: String)
+POST          /session/approvesession                               controllers.SessionsController.approveSessionByAdmin(sessionId: String)
 
 # Feedback
 GET           /feedbackform/manage/:pageNumber                      controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
@@ -99,3 +101,14 @@ POST          /knolx/analysis/columnchart                           controllers.
 POST          /knolx/analysis/piechart                              controllers.KnolxAnalysisController.renderPieChart
 POST          /knolx/analysis/linechart                             controllers.KnolxAnalysisController.renderLineChart
 POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard
+
+#Calendar
+GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage
+GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
+GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)
+POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
+GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.pendingSessions
+POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.allSessionForAdmin
+GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)
+GET           /knolx/sessions/insertfreeslot                        controllers.CalendarController.insertFreeSlot(date: String)
+POST          /knolx/sessions/deletefreeslot                        controllers.CalendarController.deleteFreeSlot(id: String)

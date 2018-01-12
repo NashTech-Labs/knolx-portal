@@ -26,15 +26,12 @@ class Module(environment: Environment,
   private val httpTransport = new NetHttpTransport
   private val jsonFactory = new JacksonFactory
 
-  private val youTubeCredentails = configuration.get[String]("youtube.credentials")
-  private val clientSecretReader = new InputStreamReader(new FileInputStream(youTubeCredentails))
+  private val youTubeCredentials = configuration.get[String]("youtube.credentials")
+  private val clientSecretReader = new InputStreamReader(new FileInputStream(youTubeCredentials))
   private val clientSecrets = GoogleClientSecrets.load(jsonFactory, clientSecretReader)
 
   private val credentialsDirectory = ".oauth-credentials"
   private val credentialDataStore = "uploadvideo"
-
-  private val videoFileFormat = "video/*"
-  val part = "snippet,statistics,status"
 
   private val scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube")

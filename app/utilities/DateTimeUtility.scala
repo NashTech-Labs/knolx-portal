@@ -13,6 +13,7 @@ class DateTimeUtility {
   val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   val ZoneOffset = ISTZoneId.getRules.getOffset(LocalDateTime.now(ISTZoneId))
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+  val dateFormatWithT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
   val yearMonthFormatDB = new SimpleDateFormat("yyyy-MM")
   val yearMonthFormat = new SimpleDateFormat("yyyy-MMMM")
 
@@ -47,6 +48,13 @@ class DateTimeUtility {
     val millis = dateFormat.parse(date).getTime
     Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime.toEpochSecond(ZoneOffset) * 1000
   }
+
+  def parseDateStringWithTToIST(date: String): Long = {
+    val millis = dateFormatWithT.parse(date).getTime
+    Instant.ofEpochMilli(millis).atZone(ISTZoneId).toLocalDateTime.toEpochSecond(ZoneOffset) * 1000
+  }
+
+  def formatDateWithT(date: Date): String = dateFormatWithT.format(date)
 
   def formatDate(stringDate: String): String = {
     val utilDate = yearMonthFormatDB.parse(stringDate)

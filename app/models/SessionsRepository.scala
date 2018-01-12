@@ -473,7 +473,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
     val selector = BSONDocument(
       "date" -> BSONDocument(
         "$gte" -> BSONDateTime(startDate),
-        "$lte" -> BSONDateTime(endDate)))
+        "$lte" -> BSONDateTime(endDate)),
+      "active" -> true)
 
     collection
       .flatMap(jsonCollection =>

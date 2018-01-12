@@ -25,7 +25,7 @@ $(function () {
         timezone: 'local',
         eventClick: function (event) {
             if (event.url && !event.url.isEmpty) {
-                window.open(event.url);
+                window.open(event.url, "_self");
                 return false;
             }
         },

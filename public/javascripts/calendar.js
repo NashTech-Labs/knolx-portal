@@ -85,7 +85,18 @@ $(function () {
         },
         validRange: {
             start: moment().startOf('month'),
-            end: moment().startOf('month').add(3, 'M')
+            end: moment().startOf('month').add(4, 'M')
+        },
+        viewRender: function (view) {
+            $('.fc-day').filter(
+                function (index) {
+                    return moment($(this).data('date')).isBefore(moment(), 'day')
+                }).addClass('fc-other-month');
+
+            $('.fc-day-top').filter(
+                function (index) {
+                    return moment($(this).data('date')).isBefore(moment(), 'day')
+                }).addClass('fc-other-month');
         }
     });
 
@@ -160,19 +171,19 @@ function getColor(calendarSession) {
 }
 
 function getData(calendarSession) {
-    if(!calendarSession.freeSlot) {
+    if (!calendarSession.freeSlot) {
         return "<p>Topic: " + calendarSession.topic
             + "<br>Email: " + calendarSession.email + "</p>";
     }
 }
 
 function getUrl(calendarSession, calendarSessionsWithAuthority) {
-    if(calendarSession.freeSlot) {
+    if (calendarSession.freeSlot) {
         return jsRoutes.controllers.CalendarController
             .renderCreateSessionByUser(calendarSession.id,
                 calendarSession.freeSlot).url;
-    } else if(calendarSession.pending) {
-        if(calendarSessionsWithAuthority.isAdmin) {
+    } else if (calendarSession.pending) {
+        if (calendarSessionsWithAuthority.isAdmin) {
             return jsRoutes.controllers.SessionsController
                 .renderScheduleSessionByAdmin(calendarSession.id).url;
         } else if (calendarSessionsWithAuthority.loggedIn
@@ -181,7 +192,7 @@ function getUrl(calendarSession, calendarSessionsWithAuthority) {
                 .renderCreateSessionByUser(calendarSession.id,
                     calendarSession.freeSlot).url;
         }
-    } else if(calendarSessionsWithAuthority.isAdmin) {
+    } else if (calendarSessionsWithAuthority.isAdmin) {
         return jsRoutes.controllers.SessionsController
             .update(calendarSession.id).url;
     }

@@ -50,14 +50,14 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
   private val emptyEmailObject = Future.successful(None)
 
-  private val approveSessionInfo: List[ApproveSessionInfo] = List(ApproveSessionInfo("email", BSONDateTime(date.getTime), "category",
+  private val approveSessionInfo: List[SessionRequestInfo] = List(SessionRequestInfo("email", BSONDateTime(date.getTime), "category",
     "subCategory", "topic", _id = _id))
 
   abstract class WithTestApplication extends TestEnvironment with Scope {
     val sessionsRepository = mock[SessionsRepository]
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val categoriesRepository = mock[CategoriesRepository]
-    val approveSessionRepository = mock[ApprovalSessionsRepository]
+    val sessionRequestRepository = mock[SessionRequestRepository]
 
     val dateTimeUtility = mock[DateTimeUtility]
 
@@ -78,7 +78,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         usersRepository,
         sessionsRepository,
         feedbackFormsRepository,
-        approveSessionRepository,
+        sessionRequestRepository,
         dateTimeUtility,
         config,
         knolxControllerComponent,
@@ -787,17 +787,66 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.renderApproveSessionByAdmin(_id.stringify, None)(
+      val result = controller.renderScheduleSessionByAdmin(_id.stringify, None)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
       status(result) must be equalTo OK
+    }
+
+    "not render approve session page for admin when session does not exist" in new WithTestApplication {
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(None)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.renderScheduleSessionByAdmin(_id.stringify, None)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "not approve a session if the session does not exist" in new WithTestApplication {
+      val questions = Question("How good is knolx portal?", List("1", "2", "3", "4", "5"), "MCQ", mandatory = true)
+      val getAll = Future.successful(List(FeedbackForm("Test Form", List(questions))))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      feedbackFormsRepository.getAll returns getAll
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(None)
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.approveSessionByAdmin(_id.stringify, None)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "email" -> "test@knoldus.com",
+            "date" -> "2017-06-25T16:00",
+            "session" -> "session 1",
+            "category" -> "test category",
+            "subCategory" -> "subCategory",
+            "topic" -> "topic",
+            "feedbackExpirationDays" -> "1",
+            "meetup" -> "true"
+          )
+          .withCSRFToken
+      )
+
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not approve a session if submitted form has some errors" in new WithTestApplication {
@@ -806,7 +855,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -837,7 +886,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.getByEmail("test123@knoldus.com") returns Future.successful(None)
       feedbackFormsRepository.getAll returns getAll
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -874,7 +923,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       usersRepository.getByEmail("test123@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
 
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
@@ -914,9 +963,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       usersRepository.getByEmail("test123@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
 
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
-      approveSessionRepository.insertSessionForApprove(any[UpdateApproveSessionInfo])(any[ExecutionContext])
+      sessionRequestRepository.insertSessionForApprove(any[UpdateApproveSessionInfo])(any[ExecutionContext])
         .returns(wrongUpdateWriteResult)
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
@@ -955,9 +1004,9 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       usersRepository.getByEmail("test123@knoldus.com") returns emailObject
       feedbackFormsRepository.getAll returns getAll
 
-      approveSessionRepository.getSession(_id.stringify) returns Future.successful(approveSessionInfo.head)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
       sessionsRepository.insert(any[SessionInfo])(any[ExecutionContext]) returns updateWriteResult
-      approveSessionRepository.insertSessionForApprove(any[UpdateApproveSessionInfo])(any[ExecutionContext])
+      sessionRequestRepository.insertSessionForApprove(any[UpdateApproveSessionInfo])(any[ExecutionContext])
         .returns(updateWriteResult)
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"

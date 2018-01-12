@@ -78,16 +78,6 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       result must beEqualTo(1)
     }
 
-    "get all approved sessions" in {
-      val approveSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,
-        "topic", "approvedemail", "category", "subCategory", approved = true)
-
-      val insert = await(sessionRequestRepository.insertSessionForApprove(approveSessionInfoByAdmin))
-      val sessions = await(sessionRequestRepository.getAllApprovedSession)
-
-      sessions.head.email must beEqualTo("approvedemail")
-    }
-
     "decline session created by user" in {
       val sessionId = BSONObjectID.generate().stringify
       val declineSessionInfoByAdmin = UpdateApproveSessionInfo(date, _id.stringify,

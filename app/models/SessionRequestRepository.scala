@@ -120,14 +120,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
         jsonCollection.count(condition))
   }
 
-  def getAllApprovedSession(implicit ex: ExecutionContext): Future[List[SessionRequestInfo]] =
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection.
-          find(Json.obj("approved" -> true)).
-          cursor[SessionRequestInfo](ReadPreference.Primary)
-          .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
-
   def declineSession(sessionId: String)(implicit ex: ExecutionContext): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> sessionId))
     val modifier = BSONDocument(

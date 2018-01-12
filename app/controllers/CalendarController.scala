@@ -178,7 +178,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 session.topic,
                 session.meetup)
 
-              if ((session.freeSlot && isFreeSlot) || !(session.freeSlot && isFreeSlot)) {
+              if (session.freeSlot == isFreeSlot) {
                 Future.successful(Ok(views.html.calendar.createsessionbyuser(
                   createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotsInfo, isFreeSlot)
                 ))

@@ -153,7 +153,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
 
       dateTimeUtility.formatDateWithT(date) returns "formattedDate"
 
-      val result = controller.renderCreateSessionByUser(_id.stringify, isFreeSlot = false)(
+      val result = controller.renderCreateSessionByUser(_id.stringify, isFreeSlot = true)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

@@ -109,8 +109,27 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
     }
 
     "render create session for user for creating/updating his session" in new WithTestApplication {
+      val sessionRequestInfo = approveSessionInfo.head.copy(freeSlot = true)
+
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(sessionRequestInfo))
+
+      sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      dateTimeUtility.formatDateWithT(date) returns "formattedDate"
+
+      val result = controller.renderCreateSessionByUser(_id.stringify, isFreeSlot = true)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "render create session for user for creating/updating his session" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(None)
 
       sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
@@ -122,12 +141,12 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
 
-      status(result) must be equalTo OK
+      status(result) must be equalTo SEE_OTHER
     }
 
-    "render create session for user for creating/updating his session" in new WithTestApplication {
+    "not render create session for user for creating/updating his session when the free slot doesn't exist" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(None)
+      sessionRequestRepository.getSession(_id.stringify) returns Future.successful(Some(approveSessionInfo.head))
 
       sessionRequestRepository.getAllFreeSlots returns Future.successful(approveSessionInfo)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone

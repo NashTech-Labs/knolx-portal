@@ -167,7 +167,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
             maybeSession.fold {
               Future.successful(
                 Redirect(routes.CalendarController.renderCalendarPage())
-                  .flashing("message" -> "The selected session does not exist"))
+                  .flashing("error" -> "The selected session does not exist"))
             } { session =>
 
               val createSessionInfo = CreateSessionInfo(
@@ -178,9 +178,15 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 session.topic,
                 session.meetup)
 
-              Future.successful(Ok(views.html.calendar.createsessionbyuser(
-                createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotsInfo, isFreeSlot)
-              ))
+              if (session.freeSlot && isFreeSlot) {
+                Future.successful(Ok(views.html.calendar.createsessionbyuser(
+                  createSessionFormByUser.fill(createSessionInfo), sessionId, freeSlotsInfo, isFreeSlot)
+                ))
+              } else {
+                Future.successful(
+                  Redirect(routes.CalendarController.renderCalendarPage())
+                    .flashing("error" -> "The selected session does not exist"))
+              }
             }
           }
       }
@@ -198,7 +204,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           .flatMap { maybeApproveSessionInfo =>
             maybeApproveSessionInfo.fold {
               Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
-                .flashing("message" -> "The selected session does not exist"))
+                .flashing("error" -> "The selected session does not exist"))
             } { approveSessionInfo =>
               createSessionFormByUser.bindFromRequest.fold(
                 formWithErrors => {

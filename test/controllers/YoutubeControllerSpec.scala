@@ -58,7 +58,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
     "upload video file" in new WithTestApplication {
       val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
         "description" -> Seq("description"),
-        "tags" -> Seq("tag1"),
+        "tags[]" -> Seq("tag1, tag2, tag3"),
         "status" -> Seq("private"),
         "category" -> Seq("category"))
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
@@ -75,18 +75,18 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "send bad request if video file not found in the request" in new WithTestApplication {
       val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
         "description" -> Seq("description"),
-        "tags" -> Seq("tag1"),
+        "tags[]" -> Seq("tag1"),
         "status" -> Seq("private"),
         "category" -> Seq("category"))
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
-      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+      val multipartBody = MultipartFormData(parameters, Seq[FilePart[Files.TemporaryFile]](), Seq[BadPart]())
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
@@ -95,15 +95,10 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withHeaders(("fileSize", "10"))
           .withMultipartFormDataBody(multipartBody)
-          .withFormUrlEncodedBody(("title", "title"),
-            ("description", "description"),
-            ("tags", "tag1, tag2"),
-            ("status", "private"),
-            ("category", "27"))
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "send bad request if multipart form data is corrupted in the request" in new WithTestApplication {
@@ -115,21 +110,20 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
           .withHeaders(("fileSize", "10"))
           .withFormUrlEncodedBody(("title", "title"),
             ("description", "description"),
-            ("tags", "tag1, tag2"),
+            ("tags[]", "tag1, tag2"),
             ("status", "private"),
-            ("category", "27"))
+            ("category", "education"))
 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
-    "send bad request if one of the mandatory field is not provided" in new WithTestApplication {
+    "send bad request if status field is not provided" in new WithTestApplication {
       val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
         "description" -> Seq("description"),
-        "tags" -> Seq("tag1"),
-        "status" -> Seq("private"),
+        "tags[]" -> Seq("tag1"),
         "category" -> Seq("category"))
       val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
       val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
@@ -145,10 +139,108 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
 
       val result = controller.upload(sessionId)(request)
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
-    "return Ok when asked for percentage of file" in new WithTestApplication {
+    "send bad request if category field is not provided" in new WithTestApplication {
+      val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
+        "description" -> Seq("description"),
+        "tags[]" -> Seq("tag1"),
+        "status" -> Seq("status"))
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
+      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withHeaders(("fileSize", "10"))
+          .withMultipartFormDataBody(multipartBody)
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "send bad request if tags field is not provided" in new WithTestApplication {
+      val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
+        "description" -> Seq("description"),
+        "status" -> Seq("status"),
+        "category" -> Seq("category"))
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
+      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withHeaders(("fileSize", "10"))
+          .withMultipartFormDataBody(multipartBody)
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "send bad request if title field is not provided" in new WithTestApplication {
+      val parameters = Map[String, Seq[String]](
+        "description" -> Seq("description"),
+        "tags" -> Seq("tag1"),
+        "status" -> Seq("status"),
+        "category" -> Seq("category"))
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
+      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withHeaders(("fileSize", "10"))
+          .withMultipartFormDataBody(multipartBody)
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "send bad request if description field is not provided" in new WithTestApplication {
+      val parameters = Map[String, Seq[String]]("title" -> Seq("title"),
+        "tags" -> Seq("tag1"),
+        "status" -> Seq("status"),
+        "category" -> Seq("category"))
+      val tempFile = Files.SingletonTemporaryFileCreator.create("prefix", "suffix")
+      val files = Seq[FilePart[TemporaryFile]](FilePart("key", "filename", Some("multipart/form-data"), tempFile))
+      val multipartBody = MultipartFormData(parameters, files, Seq[BadPart]())
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val request =
+        FakeRequest(POST, "/uploadapi/" + sessionId + "/upload")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withHeaders(("fileSize", "10"))
+          .withMultipartFormDataBody(multipartBody)
+
+      val result = controller.upload(sessionId)(request)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "return 0 percentage if upload of file hasn't yet started" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/progress")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo OK
+    }
+
+    "return percentage when asked for percentage of file" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
 
       youtubeProgressManager ! AddSessionUploader(sessionId)
@@ -156,7 +248,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getPercentageUploaded(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/progress")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "cancel the upload of a video" in new WithTestApplication {
@@ -165,7 +257,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.cancel(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/cancel")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "get the video ID of a session" in new WithTestApplication {
@@ -175,7 +267,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request while getting video ID of a session when videoID is not found" in new WithTestApplication {
@@ -185,7 +277,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request while getting video ID of a session when videoID is an empty string" in new WithTestApplication {
@@ -195,7 +287,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.getVideoId(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/videoid")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request for wrong json" in new WithTestApplication {
@@ -207,7 +299,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(wrongJson)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return bad request if no video URL is found for the session" in new WithTestApplication {
@@ -228,7 +320,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "update video details" in new WithTestApplication {
@@ -249,7 +341,128 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
         .withBody(jsonBody)
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
+    }
+
+    "not update video details if title is not provided" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"description": "None",
+          |	"tags": ["tag1", "tag2"],
+          |	"status": "private",
+          |	"category": "Education"
+          |}""".stripMargin
+      )
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
+        .withBody(jsonBody)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not update video details if description is not provided" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"title": "title",
+          |	"tags": ["tag1", "tag2"],
+          |	"status": "private",
+          |	"category": "Education"
+          |}""".stripMargin
+      )
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
+        .withBody(jsonBody)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not update video details if tags are not provided" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"title": "title",
+          |	"description": "None",
+          |	"status": "private",
+          |	"category": "Education"
+          |}""".stripMargin
+      )
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
+        .withBody(jsonBody)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not update video details if status is not provided" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"title": "title",
+          |	"description": "None",
+          |	"tags": ["tag1", "tag2"],
+          |	"category": "Education"
+          |}""".stripMargin
+      )
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
+        .withBody(jsonBody)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not update video details if category is not provided" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"title": "title",
+          |	"description": "None",
+          |	"tags": ["tag1", "tag2"],
+          |	"status": "private"
+          |}""".stripMargin
+      )
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
+        .withBody(jsonBody)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "not update video details if no video URL exists" in new WithTestApplication {
+      private val jsonBody = Json.parse(
+        """{
+          |	"title": "title",
+          |	"description": "None",
+          |	"tags": ["tag1", "tag2"],
+          |	"status": "private",
+          |	"category": "Education"
+          |}""".stripMargin
+      )
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionsRepository.getVideoURL(sessionId) returns Future(List())
+
+      val result = controller.updateVideo(sessionId)(FakeRequest(POST, "/uploadapi/sessionId/update")
+        .withBody(jsonBody)
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
     "return ok if a video upload is currently going on" in new WithTestApplication {
@@ -260,7 +473,7 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 200
+      status(result) must be equalTo OK
     }
 
     "return bad request if a video upload is not currently going on" in new WithTestApplication {
@@ -269,7 +482,40 @@ class YoutubeControllerSpec extends PlaySpecification with Results with Mockito 
       val result = controller.checkIfUploading(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkIfUploading")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
 
-      status(result) must be equalTo 400
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "return ok if temporary URL exists" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      sessionsRepository.getTemporaryVideoURL(sessionId) returns Future(List("dummy/youtube/videoId"))
+
+      val result = controller.checkIfTemporaryUrlExists(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkiftemporaryurlexists")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo OK
+    }
+
+    "return bad request if temporary URL does not exist" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      sessionsRepository.getTemporaryVideoURL(sessionId) returns Future(List())
+
+      val result = controller.checkIfTemporaryUrlExists(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkiftemporaryurlexists")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "return bad request if temporary URL exists as an empty string in DB" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      sessionsRepository.getTemporaryVideoURL(sessionId) returns Future(List(""))
+
+      val result = controller.checkIfTemporaryUrlExists(sessionId)(FakeRequest(GET, "/uploadapi/sessionId/checkiftemporaryurlexists")
+        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc="))
+
+      status(result) must be equalTo BAD_REQUEST
     }
 
   }

@@ -1,10 +1,9 @@
-@(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)])(implicit request: Request[_], messages: Messages, flash: Flash)
+@(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)], sessionId: String, session: CreateApproveSessionInfo)(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Create Session") {
-
+@main("Schedule Session") {
     <div class="row ">
         <div class="header-container">
-            <h2 style="margin-top:10px;">Create Session</h2>
+            <h2 style="margin-top:10px;">Approve/Decline Session</h2>
         </div>
     </div>
 
@@ -58,13 +57,27 @@
     <div class="row">
         <div class="col-md-12 create-outer">
 
-            <form class="CreateForm customForm" action="@routes.SessionsController.createSession()" method="post">
+            <form class="CreateForm customForm" action="@routes.SessionsController.approveSessionByAdmin(sessionId)" method="post">
 
                 @helper.CSRF.formField
+                <input id="primary-category" value=@if(createSessionForm.data.get("category")) {
+                    '@createSessionForm.data.get("category")'
+                } else {
+                    '@session.category'
+                } hidden />
+                <input id="sub-category" value=@if(createSessionForm.data.get("subCategory")) {
+                    '@createSessionForm.data.get("subCategory")'
+                } else {
+                    '@session.category'
+                } hidden />
                 <div class="col-md-12 disp-inline update-second form-group" style="margin-top: 20px;">
                     <label class="col-md-2 control-label">Email</label>
                     <div class="col-md-10">
-                        <input type="text" value='@createSessionForm.data.get("email")' name="email" id="email"
+                        <input type="text" value=@if(createSessionForm.data.get("email")) {
+                            '@createSessionForm.data.get("email")'
+                        } else {
+                            '@session.email'
+                        } name="email" id="email"
                         placeholder=" Email" required class="update-field"/>
                     </div>
                 </div>
@@ -72,7 +85,11 @@
                 <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Date</label>
                     <div class="col-md-10">
-                        <input type="datetime-local" value='@createSessionForm.data.get("date")' name="date" id="date"
+                        <input type="datetime-local" value=@if(createSessionForm.data.get("date").isDefined) {
+                            '@createSessionForm.data.get("date")'
+                        } else {
+                        '@session.dateString'
+                    } name="date" id="date"
                         placeholder="Date" required class="update-field reg"/>
                     </div>
                 </div>
@@ -124,7 +141,11 @@
                 <div class="col-md-12 disp-inline form-group">
                     <label class="col-md-2 control-label">Session's Topic</label>
                     <div class="col-md-10">
-                        <input type="text" name="topic" id="topic" value='@createSessionForm.data.get("topic")'
+                        <input type="text" name="topic" id="topic" value=@if(createSessionForm.data.get("topic")) {
+                            '@createSessionForm.data.get("topic")'
+                        } else {
+                            '@session.topic'
+                        }
                         placeholder="Topic" required class="update-field"/>
                     </div>
                 </div>
@@ -165,7 +186,13 @@
                 <div class="col-md-12 ">
                     <div class="col-md-2"></div>
                     <label class="checkbox-outer col-md-10">
-                        <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'/>
+                        <input type='checkbox' name='meetup' id='meetup' class='custom-checkbox' value='true'
+                        @(if(createSessionForm.data.getOrElse("meetup", "false") == "true") {
+                            """checked="checked""""
+                        } else if(session.meetup) {
+                            """checked="checked""""
+                        })
+                        />
 
                         <span class="label_text"></span>
                         <p class="checkbox-text">Is Session a Meetup ?</p>
@@ -175,14 +202,17 @@
                 <div class="col-md-12 login-four">
                     <div class="hr-line-dashed"></div>
                     <div class="col-md-2"></div>
-                    <div class="col-md-2 loader-outer">
-                        <a href="@routes.SessionsController.create()" class="btn" style="color: inherit;
+                    <div class="col-md-6 loader-outer">
+                        <a href="@routes.SessionsController.renderScheduleSessionByAdmin(sessionId)" class="btn" style="color: inherit;
                             background: white;
                             border: 1px solid #e7eaec;">Reset</a>
-                        <input type="submit" value="Create" class="btn btn-success" style="background-color: #1ab394;"
+                        <input type="submit" value="Approve" class="btn btn-success" style="background-color: #1ab394;"
                         />
+                        <a href="@routes.CalendarController.declineSession(sessionId)" class="btn btn-danger" style="color: white;
+                            background: white;
+                            border: 1px solid #e7eaec;">Decline</a>
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-4"></div>
                 </div>
             </form>
         </div>

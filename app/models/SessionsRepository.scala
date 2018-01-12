@@ -383,7 +383,8 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
               Json.obj(
                 "active" -> true,
                 "cancelled" -> false,
-                "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate), "$lte" -> BSONDateTime(filterUserSessionInformation.endDate))
+                "date" -> BSONDocument("$gte" -> BSONDateTime(filterUserSessionInformation.startDate),
+                  "$lte" -> BSONDateTime(filterUserSessionInformation.endDate))
               )
             ),
             otherOperators = List(
@@ -466,5 +467,19 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .cursor[SessionInfo](ReadPreference.primary)
           .collect[List](-1, FailOnError[List[SessionInfo]]()))
 
+  }
+
+  def getSessionInMonth(startDate: Long, endDate: Long): Future[List[SessionInfo]] = {
+    val selector = BSONDocument(
+      "date" -> BSONDocument(
+        "$gte" -> BSONDateTime(startDate),
+        "$lte" -> BSONDateTime(endDate)))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
+          .cursor[SessionInfo](ReadPreference.primary)
+          .collect[List](-1, FailOnError[List[SessionInfo]]()))
   }
 }

@@ -1,0 +1,83 @@
+#calendar {
+    background-color: white;
+}
+
+.fc-toolbar {
+    border-bottom: 1px solid #e7eaec;
+    padding: 10px 10px;
+}
+
+.fc-view-container {
+    padding: 10px 10px;
+}
+
+.fc-day-header {
+    color: black;
+    font-weight: normal;
+}
+
+.fc-event {
+    cursor: default;
+}
+
+.dayClickWindow {
+    width: 500px;
+    height: 500px;
+    border-radius: 15px;
+    background-color: #000;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-top: -250px;
+    margin-left: -250px;
+    display: none;
+    z-index: 1;
+}
+
+.calendar-flashing {
+    text-align: center;
+    font-size: 15px;
+}
+
+.color-code-table {
+    border-width: 0px !important;
+    width: 25% !important;
+    margin-left: 75%;
+}
+
+.color-code-table td {
+    height: 15px;
+    border-width: 0px !important;
+    vertical-align: middle;
+    text-align: left;
+}
+
+.color-code-table span.color-code {
+    float: right;
+}
+
+.color-code {
+    height: 10px;
+    width: 30px;
+    border-radius: 3px;
+}
+
+.meetup-color-code {
+    background-color: #8e44ad;
+}
+
+.freeslot-color-code {
+    background-color: #27ae60;
+}
+
+.approve-color-code {
+    background-color: #31b0d5;
+}
+
+.pending-color-code {
+    background-color: #f0ad4e;
+}
+
+.left-margin {
+    margin-left: 5px;
+}

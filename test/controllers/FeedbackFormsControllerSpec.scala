@@ -143,7 +143,7 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
     "not create feedback form because name is empty" in new TestScope {
       val payload =
         """{"name":"","questions":
-          |[{"question":"","options":["1","2","3","4","5"]}]}""".stripMargin
+          |[{"question":"How good is knolx portal?","options":["1","2","3","4","5"]}]}""".stripMargin
 
       val request =
         FakeRequest(POST, "/feedbackform/create")
@@ -287,6 +287,19 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
       status(response) must be equalTo SEE_OTHER
     }
 
+    "not edit Feedback Form as it is attached to an active session" in new TestScope {
+      sessionsRepository.activeSessions() returns sessionObject
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.getByFeedbackFormId("5943cdd60900000900409b26") returns Future.successful(None)
+
+      val response = controller.update("feedbackFormId")(
+        FakeRequest()
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken)
+
+      status(response) must be equalTo SEE_OTHER
+    }
+
     "getByEmail feedback form" in new TestScope {
       val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
 
@@ -307,6 +320,27 @@ class FeedbackFormsControllerSpec extends PlaySpecification with Mockito {
 
       status(response) must be equalTo OK
       contentAsString(response) must be equalTo "Feedback form successfully updated!"
+    }
+
+    "not get feedback form if it is attached to an active session" in new TestScope {
+      val writeResult = Future.successful(DefaultWriteResult(ok = true, 1, Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@example.com") returns emailObject
+      feedbackFormsRepository.update(any[String], any[FeedbackForm])(any[ExecutionContext]) returns writeResult
+      sessionsRepository.activeSessions() returns sessionObject
+
+      val request =
+        FakeRequest(POST, "/feedbackform/getByEmail")
+          .withBody(Json.parse(
+            """{"id":"feedbackFormId","name":"title","questions":
+              |[{"question":"question?","options":["option","option"],
+              |"questionType":"MCQ","mandatory":true}]}""".stripMargin))
+          .withSession("username" -> "uNtgSXeM+2V+h8ChQT/PiHq70PfDk+sGdsYAXln9GfU=")
+          .withCSRFToken
+
+      val response = controller.updateFeedbackForm()(request)
+
+      status(response) must be equalTo SEE_OTHER
     }
 
     "not getByEmail feedback form due to malformed data" in new TestScope {

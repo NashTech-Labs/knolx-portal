@@ -4,20 +4,14 @@ import java.text.SimpleDateFormat
 import java.time.{Instant, ZoneId}
 import java.util.TimeZone
 
-import actors._
-import akka.actor.{ActorRef, ActorSystem, Props}
-import com.google.inject.AbstractModule
+import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.name.Names
 import helpers._
-import com.typesafe.config.ConfigFactory
 import models.{UpdatedUserInfo, _}
-import org.specs2.execute.{AsResult, Result}
-import org.specs2.mutable.Around
-import org.specs2.specification.Scope
 import org.specs2.mock.Mockito
-import play.api.{Application, Configuration}
+import org.specs2.specification.Scope
+import play.api.Application
 import play.api.inject.{BindingKey, QualifierInstance}
-import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.mailer.MailerClient
 import play.api.mvc.Results
 import play.api.test.CSRFTokenHelper._
@@ -44,6 +38,10 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
   private val passwordChangeRequest = PasswordChangeRequestInfo("test@knoldus.com", "token", BSONDateTime(currentMillis + 24 * 60 * 60 * 1000))
   private val emailObject = Future.successful(Some(UserInfo("test@knoldus.com",
     "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = false, BSONDateTime(currentMillis), 0, _id)))
+  private val superUserObject = Future.successful(Some(UserInfo("test@knoldus.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = true, coreMember = false, superUser = true, BSONDateTime(currentMillis), 0, _id)))
+  private val normalUserObject = Future.successful(Some(UserInfo("test@knoldus.com",
+    "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.", "BCrypt", active = true, admin = false, coreMember = false, superUser = false, BSONDateTime(currentMillis), 0, _id)))
 
   abstract class WithTestApplication extends TestEnvironment with Scope {
     val forgotPasswordRepository = mock[ForgotPasswordRepository]
@@ -196,9 +194,9 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "login user when he is not an admin" in new WithTestApplication {
+    "login user when he is not an admin or a superUser" in new WithTestApplication {
 
-      usersRepository.getActiveByEmail("test@knoldus.com") returns emailObject
+      usersRepository.getActiveByEmail("test@knoldus.com") returns normalUserObject
 
       val result = controller.loginUser(
         FakeRequest()
@@ -237,6 +235,19 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo UNAUTHORIZED
     }
 
+    "login user when user is an admin and as well as a superuser" in new WithTestApplication {
+      usersRepository.getActiveByEmail("test@knoldus.com") returns superUserObject
+
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "password" -> "12345678")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
     "not login user due to BadFormRequest" in new WithTestApplication {
       val result = controller.loginUser(
         FakeRequest()
@@ -246,6 +257,19 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
           .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
+    }
+
+    "throw unauthroized error if user is not found when checking for normal user" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns Future.successful(None)
+
+      val result = controller.renderChangePassword(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "password" -> "12345678")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
     }
 
     "render manage user page" in new WithTestApplication {
@@ -299,7 +323,14 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
     "redirect to manage user page on successful submission of form" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin= true, Some("12345678"))) returns updateWriteResult
+      usersRepository.update(
+        UpdatedUserInfo(
+          "test@knoldus.com",
+          active = true,
+          ban = false,
+          coreMember = false,
+          admin = true,
+          Some("12345678"))) returns updateWriteResult
 
       val result = controller.updateUser()(FakeRequest(POST, "getByEmail")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
@@ -314,20 +345,95 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "redirect to manage user page on successful submission of form by admin" in new WithTestApplication {
+    "redirect to manage user page on successful submission of form by superuser" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      usersRepository.update(UpdatedUserInfo("test@knoldus.com", active = true, ban = false, coreMember = false, admin= false, Some("12345678"))) returns updateWriteResult
+      usersRepository.getByEmail("superusertest@knoldus.com") returns superUserObject
+      usersRepository.update(
+        UpdatedUserInfo(
+          "superusertest@knoldus.com",
+          active = true,
+          ban = false,
+          coreMember = false,
+          admin = true,
+          Some("12345678"))) returns updateWriteResult
 
       val result = controller.updateUserBySuperUser()(FakeRequest(POST, "getByEmail")
-        .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+        .withSession("username" -> "saKUdjulVnaxLBJIDwbW2XsVD1i7gkd2cV/lL2nw46A=")
         .withFormUrlEncodedBody(
-          "email" -> "test@knoldus.com",
+          "email" -> "superusertest@knoldus.com",
           "active" -> "true",
           "ban"    -> "false",
           "admin"  -> "true",
           "coreMember" -> "false",
           "password" -> "12345678"))
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "throw bad request for malformed data in form submitted by superuser" in new WithTestApplication {
+      usersRepository.getByEmail("superusertest@knoldus.com") returns superUserObject
+
+      val result = controller.updateUserBySuperUser()(FakeRequest(POST, "getByEmail")
+        .withSession("username" -> "saKUdjulVnaxLBJIDwbW2XsVD1i7gkd2cV/lL2nw46A=")
+        .withFormUrlEncodedBody(
+          "email" -> "superusertest@knoldus.com",
+          "active" -> "",
+          "ban"    -> "false",
+          "admin"  -> "true",
+          "coreMember" -> "false",
+          "password" -> "12345678")
+        .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "throw internal server error if DB update during form submission by superuser is unsuccessful" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      usersRepository.getByEmail("superusertest@knoldus.com") returns superUserObject
+      usersRepository.update(
+        UpdatedUserInfo(
+          "superusertest@knoldus.com",
+          active = true,
+          ban = false,
+          coreMember = false,
+          admin = true,
+          Some("12345678")))returns updateWriteResult
+
+      val result = controller.updateUserBySuperUser()(FakeRequest(POST, "getByEmail")
+        .withSession("username" -> "saKUdjulVnaxLBJIDwbW2XsVD1i7gkd2cV/lL2nw46A=")
+        .withFormUrlEncodedBody(
+          "email" -> "superusertest@knoldus.com",
+          "active" -> "true",
+          "ban"    -> "false",
+          "admin"  -> "true",
+          "coreMember" -> "false",
+          "password" -> "12345678"))
+
+      status(result) must be equalTo INTERNAL_SERVER_ERROR
+    }
+
+    "throw unauthroized error when non-superuser is trying to access a superuser page" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.updateUserBySuperUser()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "password" -> "12345678")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "throw unauthroized error if user is not found when checking for super user" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns Future.successful(None)
+
+      val result = controller.updateUserBySuperUser()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "password" -> "12345678")
+          .withCSRFToken)
 
       status(result) must be equalTo SEE_OTHER
     }

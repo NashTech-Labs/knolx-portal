@@ -9,16 +9,26 @@ import com.google.api.services.youtube.model.{Video, VideoCategory, VideoCategor
 import org.apache.commons.mail.EmailException
 import play.api.Logger
 
+import scala.collection.mutable.ListBuffer
+
 case class AddSessionUploader(sessionId: String)
 
 case class RemoveSessionUploader(sessionId: String)
 
+case object InsertTrue
+
+case object InsertFalse
+
 class DummySessionsScheduler extends Actor {
+
+  var list: ListBuffer[Boolean] = ListBuffer()
 
   def receive: Receive = {
     case GetScheduledSessions              => sender ! ScheduledSessions(List.empty)
-    case CancelScheduledSession(sessionId) => sender ! true
+    case CancelScheduledSession(sessionId) => sender ! list.head
     case ScheduleSession(sessionId)        => sender ! true
+    case InsertTrue                        => list += true
+    case InsertFalse                       => list += false
   }
 
 }
@@ -34,6 +44,7 @@ class DummyUsersBanScheduler extends Actor {
 class TestEmailActor extends Actor {
 
   def receive: Receive = {
+    case EmailActor.SendEmail(_, _, subject, _) if subject == "Exception" => throw new Exception
     case EmailActor.SendEmail(_, _, subject, _) if subject == "crash" => throw new EmailException
     case request: EmailActor.SendEmail                                => sender ! request
   }
@@ -79,8 +90,8 @@ class DummyYouTubeManager extends Actor {
     case request: YouTubeUploader.Upload => sender() ! "Upload started"
     case request: UpdateVideoDetails     => sender() ! "Updated video details"
     case GetCategories                   =>
-      val videoCategorySnippet = new VideoCategorySnippet().setTitle("Education")
-      sender() ! List(new VideoCategory().setSnippet(videoCategorySnippet).setId("12"))
+    val videoCategorySnippet = new VideoCategorySnippet().setTitle("Education")
+    sender() ! List(new VideoCategory().setSnippet(videoCategorySnippet).setId("12"))
     case request: GetDetails             => sender() ! None
     case _                               => sender() ! "What?!?!?!"
   }

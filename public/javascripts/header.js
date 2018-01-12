@@ -26,7 +26,7 @@ $(document).ready(function () {
 });
 
 function getPendingSessions() {
-    jsRoutes.controllers.CalendarController.getPendingSessions().ajax(
+    jsRoutes.controllers.CalendarController.pendingSessions().ajax(
         {
             type: "GET",
             success: function (data) {

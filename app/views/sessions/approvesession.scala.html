@@ -1,9 +1,9 @@
 @(createSessionForm: Form[CreateSessionInformation], feedbackForms: Seq[(String, String)], sessionId: String, recommendationId: Option[String], session: CreateApproveSessionInfo)(implicit request: Request[_], messages: Messages, flash: Flash)
 
-@main("Approve Session") {
+@main("Schedule Session") {
     <div class="row ">
         <div class="header-container">
-            <h2 style="margin-top:10px;">Approve Session</h2>
+            <h2 style="margin-top:10px;">Approve/Decline Session</h2>
         </div>
     </div>
 

@@ -254,4 +254,5 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .collect[List](-1, FailOnError[List[JsValue]]())
       ).map(_.flatMap(_ ("email").asOpt[String]))
   }
+
 }

@@ -21,7 +21,7 @@ function slide(keyword, pageNumber, pageSize) {
     formData.append("page", pageNumber);
     formData.append("pageSize", pageSize);
 
-    jsRoutes.controllers.CalendarController.getAllSessionForAdmin().ajax(
+    jsRoutes.controllers.CalendarController.allSessionForAdmin().ajax(
         {
             type: 'POST',
             processData: false,

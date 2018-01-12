@@ -104,15 +104,15 @@ function getSessions(startDate, endDate, callback) {
                 var events = [];
                 var calendarSessions = calendarSessionsWithAuthority.calendarSessions;
 
-                for (var calenderSession = 0; calenderSession < calendarSessions.length; calenderSession++) {
+                for (var calendarSession = 0; calendarSession < calendarSessions.length; calendarSession++) {
 
                     events.push({
-                        id: calendarSessions[calenderSession].id,
-                        title: calendarSessions[calenderSession].topic,
-                        start: calendarSessions[calenderSession].date,
-                        color: getColor(calendarSessions[calenderSession]),
-                        data: getData(calendarSessions[calenderSession]),
-                        url: getUrl(calendarSessions[calenderSession], calendarSessionsWithAuthority)
+                        id: calendarSessions[calendarSession].id,
+                        title: calendarSessions[calendarSession].topic,
+                        start: calendarSessions[calendarSession].date,
+                        color: getColor(calendarSessions[calendarSession]),
+                        data: getData(calendarSessions[calendarSession]),
+                        url: getUrl(calendarSessions[calendarSession], calendarSessionsWithAuthority)
                     });
                 }
                 callback(events);

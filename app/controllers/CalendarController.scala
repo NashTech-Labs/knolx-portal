@@ -183,8 +183,16 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 session.subCategory,
                 topic,
                 session.meetup)
-              Future.successful(Ok(views.html.calendar.createsessionbyuser(
-                createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotsInfo, isFreeSlot)))
+
+              if (session.freeSlot == isFreeSlot) {
+                Future.successful(Ok(views.html.calendar.createsessionbyuser(
+                  createSessionFormByUser.fill(createSessionInfo), sessionId, recommendationId, freeSlotsInfo, isFreeSlot)
+                ))
+              } else {
+                Future.successful(
+                  Redirect(routes.CalendarController.renderCalendarPage())
+                    .flashing("error" -> "The selected session does not exist"))
+              }
             }
           }
         }
@@ -198,12 +206,13 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .flatMap { freeSlots =>
         val freeSlotsInfo = freeSlots.map(freeSlot =>
           FreeSlot(freeSlot._id.stringify, dateTimeUtility.formatDateWithT(new Date(freeSlot.date.value))))
+
         sessionRequestRepository
           .getSession(sessionId)
           .flatMap { maybeApproveSessionInfo =>
             maybeApproveSessionInfo.fold {
               Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
-                .flashing("message" -> "The selected session does not exist"))
+                .flashing("error" -> "The selected session does not exist"))
             } { approveSessionInfo =>
               createSessionFormByUser.bindFromRequest.fold(
                 formWithErrors => {
@@ -261,33 +270,38 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .flatMap { status =>
         if (status.ok) {
           Logger.info(s"Session By user $presenterEmail with sessionId $sessionId successfully created")
-          usersRepository.getAllAdminAndSuperUser map {
-            adminAndSuperUser =>
-              emailManager ! EmailActor.SendEmail(
-                adminAndSuperUser, fromEmail, s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
-                views.html.emails.requestedsessionnotification(session).toString)
-              Logger.error(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
 
-              recommendationId.fold {
-                Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
-              } { recommendation =>
-                recommendationsRepository.bookRecommendation(recommendation) map { result =>
-                  if (result.ok) {
-                    Logger(s"Recommendation has been booked $recommendation")
-                    Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!")
-                  } else {
-                    InternalServerError("Something went wrong while inserting session for respective recommendation")
-                  }
-                }
+          usersRepository
+            .getAllAdminAndSuperUser
+            .map { adminAndSuperUser =>
+              emailManager ! EmailActor.SendEmail(
+                adminAndSuperUser, fromEmail,
+                s"Session requested: ${createSessionInfoByUser.topic} for ${createSessionInfoByUser.date}",
+                views.html.emails.requestedsessionnotification(session).toString)
+              Logger.info(s"Email has been successfully sent to admin/superUser for session created by $presenterEmail")
+            }
+
+          recommendationId.fold {
+            Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
+          } { recommendation =>
+            recommendationsRepository.bookRecommendation(recommendation) map { result =>
+              if (result.ok) {
+                Logger(s"Recommendation has been booked $recommendation")
+                Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!")
+              } else {
+                InternalServerError("Something went wrong while inserting session for respective recommendation")
               }
+            }
           }
           Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully created!"))
-        } else {
+        }
+        else {
           Logger.error(s"Something went wrong when creating a new session for user $presenterEmail")
           Future.successful(InternalServerError("Something went wrong while inserting session"))
         }
       }
   }
+
 
   private def swapSlots(sessionId: String,
                         createSessionInfoByUser: CreateSessionInfo,

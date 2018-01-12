@@ -61,6 +61,7 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.CalendarController.renderCalendarPage,
       controllers.routes.javascript.CalendarController.calendarSessions,
       controllers.routes.javascript.CalendarController.renderCreateSessionByUser,
+      controllers.routes.javascript.CalendarController.allSessionForAdmin,
       controllers.routes.javascript.CalendarController.declineSession,
       controllers.routes.javascript.CalendarController.insertFreeSlot,
       controllers.routes.javascript.CalendarController.deleteFreeSlot,

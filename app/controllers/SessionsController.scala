@@ -117,8 +117,8 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       "email" -> email.verifying("Invalid Email", email => isValidEmail(email)),
       "date" -> date("yyyy-MM-dd'T'HH:mm", dateTimeUtility.ISTTimeZone)
         .verifying("Invalid date selected!", date => date.after(new Date(dateTimeUtility.startOfDayMillis))),
-      "session" -> nonEmptyText.verifying("Wrong session type specified!",
-        session => SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
+      "session" -> text.verifying("Wrong session type specified!",
+        session => !session.isEmpty && SessionValues.Sessions.map { case (value, _) => value }.contains(session)),
       "category" -> text.verifying("Please attach a category", !_.isEmpty),
       "subCategory" -> text.verifying("Please attach a sub-category", !_.isEmpty),
       "feedbackFormId" -> text.verifying("Please attach a feedback form template", !_.isEmpty),
@@ -552,7 +552,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
             sessionRequestRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
               if (updatedResult.ok) {
-                Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Session successfully approved!")
+                Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
               } else {
                 InternalServerError("Something went wrong!")
               }

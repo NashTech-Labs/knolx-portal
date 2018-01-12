@@ -51,15 +51,15 @@ function slide(keyword, pageNumber, pageSize) {
                         }
 
                         if (calendarSessions[session].approved) {
-                            sessions += "<td align='center' class='suspended'>Yes</td>";
+                            sessions += "<td align='center' class='active-status'>Yes</td>";
                         } else {
-                            sessions += "<td align='center' class='active-status'>No</td>";
+                            sessions += "<td align='center' class='suspended'>No</td>";
                         }
 
                         if (calendarSessions[session].decline) {
-                            sessions += "<td align='center' class='suspended'>Yes</td>";
+                            sessions += "<td align='center' class='active-status'>Yes</td>";
                         } else {
-                            sessions += "<td align='center' class='active-status'>No</td>";
+                            sessions += "<td align='center' class='suspended'>No</td>";
                         }
                         sessions += "</tr>"
                     }

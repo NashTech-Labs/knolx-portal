@@ -5,14 +5,40 @@
     <div style = "margin-top: 20px;"></div>
     <div class = "row">
         @if(!flash.isEmpty) {
-            <div class="alert alert-success  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                @flash.get("message").fold("")(identity)
-            </div>
+            @if(flash.get("message").isDefined) {
+                <div class="alert alert-success  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    @flash.get("message").fold("")(identity)
+                </div>
+            } else {
+                <div class="alert alert-danger  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    @flash.get("error").fold("")(identity)
+                </div>
+            }
         }
         <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
         <div class="dayClickWindow"></div>
-        <div id='calendar'></div>
+        <div id='calendar'>
+            <table class="color-code-table" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td><span class="freeslot-color-code color-code"></span></td>
+                    <td><span class="left-margin">Free Slot</span></td>
+                </tr>
+                <tr>
+                    <td><span class="pending-color-code color-code"></span></td>
+                    <td><span class="left-margin">Requested Session</span></td>
+                </tr>
+                <tr>
+                    <td><span class="meetup-color-code color-code"></span></td>
+                    <td><span class="left-margin">Scheduled Meetup</span></td>
+                </tr>
+                <tr>
+                    <td><span class="approve-color-code color-code"></span></td>
+                    <td><span class="left-margin">Scheduled Knolx</span></td>
+                </tr>
+            </table>
+        </div>
         @if(SessionHelper.isAdmin) {
             <div>
                 <h2>Requested Sessions</h2>

@@ -1,7 +1,7 @@
 @import actors._
 @import utilities.DateTimeUtility
-
-@(recommendationInfo: RecommendationInfo, date: String)
+@import java.util.Date
+@(recommendationInfo: RecommendationInfo)
 
 <p>Hi,</p>
 <p>
@@ -13,7 +13,7 @@
     }
     <li>Topic -> @recommendationInfo.topic</li>
     <li>Description -> @recommendationInfo.recommendation</li>
-    <li>Date -> @date</li>
+    <li>Date -> @(new Date(recommendationInfo.submissionDate.value))</li>
 </ul>
 
 <p>

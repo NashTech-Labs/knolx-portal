@@ -21,21 +21,4 @@ $(document).ready(function () {
         $('#collapse-button').addClass("fa-angle-double-left").removeClass("fa-angle-double-right");
         $('#content').addClass("");
     }
-
-    getPendingSessions();
 });
-
-function getPendingSessions() {
-    jsRoutes.controllers.CalendarController.pendingSessions().ajax(
-        {
-            type: "GET",
-            success: function (data) {
-                $("#pending-sessions-number").text(data);
-                $(".number-circle").text(data);
-            },
-            error: function (er) {
-                $("#pending-sessions-number").text('0');
-            }
-        }
-    )
-}

@@ -304,4 +304,10 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
+  def allPendingRecommendations: Action[AnyContent] = adminAction.async { implicit request =>
+    recommendationsRepository.allPendingRecommendations map { count =>
+      Ok(Json.toJson(count))
+    }
+  }
+
 }

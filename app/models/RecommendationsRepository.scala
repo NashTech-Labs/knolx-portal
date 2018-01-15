@@ -206,4 +206,11 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
         jsonCollection.update(selector, modifier))
   }
 
+  def allPendingRecommendations(implicit ex: ExecutionContext): Future[Int] = {
+    val selector = Some(Json.obj("pending" -> true))
+
+    collection
+      .flatMap(_.count(selector))
+  }
+
 }

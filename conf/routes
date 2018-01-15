@@ -125,3 +125,4 @@ POST          /recommendation/upvote                                 controllers
 POST          /recommendation/downvote                               controllers.RecommendationController.downVote(recommendationId: String)
 POST          /recommendation/done                                   controllers.RecommendationController.doneRecommendation(recommendationId: String)
 POST          /recommendation/pending                                controllers.RecommendationController.pendingRecommendation(recommendationId: String)
+GET           /recommendation/allpending                             controllers.RecommendationController.allPendingRecommendations

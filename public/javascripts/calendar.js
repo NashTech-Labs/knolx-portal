@@ -23,13 +23,15 @@ $(function () {
             }).on("mouseenter", function () {
                 var _this = this;
                 $(this).popover("show");
-                $(".popover").on("mouseleave", function () {
+                var popoverId = $(this).attr("aria-describedby");
+                $("#" + popoverId).on("mouseleave", function () {
                     $(_this).popover('hide');
                 });
             }).on("mouseleave", function () {
                 var _this = this;
+                var popoverId = $(this).attr("aria-describedby");
                 setTimeout(function () {
-                    if (!$(".popover:hover").length) {
+                    if (!$("#" + popoverId + ":hover").length) {
                         $(_this).popover("hide");
                     }
                 }, 300);
@@ -185,7 +187,7 @@ function getColor(calendarSession) {
 
 function getData(calendarSession) {
     if (!calendarSession.freeSlot) {
-        if(calendarSession.contentAvailable) {
+        if (calendarSession.contentAvailable) {
             return "<p>Topic: " + calendarSession.topic
                 + "<br>Email: " + calendarSession.email + "</p>"
                 + "<br><a href='" + jsRoutes.controllers.SessionsController.shareContent(calendarSession.id).url +

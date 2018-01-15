@@ -21,7 +21,7 @@ i, span {
 
 #sidebar {
     margin-top: 45px;
-    width: 180px;
+    width: 205px;
     position: fixed;
     top: 0;
     left: 0;
@@ -235,7 +235,7 @@ html, body {
 
 #content {
     background-color: #eeeeee;
-    width: calc(100% - 180px);
+    width: calc(100% - 205px);
     padding-top: 0;
     min-height: calc(100% - 51px);
     position: absolute;

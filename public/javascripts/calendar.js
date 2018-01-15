@@ -19,7 +19,20 @@ $(function () {
                 delay: 300,
                 content: event.data,
                 placement: 'bottom',
-                trigger: 'hover'
+                trigger: 'manual'
+            }).on("mouseenter", function () {
+                var _this = this;
+                $(this).popover("show");
+                $(".popover").on("mouseleave", function () {
+                    $(_this).popover('hide');
+                });
+            }).on("mouseleave", function () {
+                var _this = this;
+                setTimeout(function () {
+                    if (!$(".popover:hover").length) {
+                        $(_this).popover("hide");
+                    }
+                }, 300);
             });
         },
         timezone: 'local',
@@ -85,7 +98,18 @@ $(function () {
         },
         validRange: {
             start: moment().startOf('month'),
-            end: moment().startOf('month').add(3, 'M')
+            end: moment().startOf('month').add(4, 'M')
+        },
+        viewRender: function (view) {
+            $('.fc-day').filter(
+                function (index) {
+                    return moment($(this).data('date')).isBefore(moment(), 'day')
+                }).addClass('fc-other-month');
+
+            $('.fc-day-top').filter(
+                function (index) {
+                    return moment($(this).data('date')).isBefore(moment(), 'day')
+                }).addClass('fc-other-month');
         }
     });
 
@@ -160,19 +184,26 @@ function getColor(calendarSession) {
 }
 
 function getData(calendarSession) {
-    if(!calendarSession.freeSlot) {
-        return "<p>Topic: " + calendarSession.topic
-            + "<br>Email: " + calendarSession.email + "</p>";
+    if (!calendarSession.freeSlot) {
+        if(calendarSession.contentAvailable) {
+            return "<p>Topic: " + calendarSession.topic
+                + "<br>Email: " + calendarSession.email + "</p>"
+                + "<br><a href='" + jsRoutes.controllers.SessionsController.shareContent(calendarSession.id).url +
+                "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Slide deck & Videos</span></a>";
+        } else {
+            return "<p>Topic: " + calendarSession.topic
+                + "<br>Email: " + calendarSession.email + "</p>";
+        }
     }
 }
 
 function getUrl(calendarSession, calendarSessionsWithAuthority) {
-    if(calendarSession.freeSlot) {
+    if (calendarSession.freeSlot) {
         return jsRoutes.controllers.CalendarController
             .renderCreateSessionByUser(calendarSession.id,
                 calendarSession.freeSlot).url;
-    } else if(calendarSession.pending) {
-        if(calendarSessionsWithAuthority.isAdmin) {
+    } else if (calendarSession.pending) {
+        if (calendarSessionsWithAuthority.isAdmin) {
             return jsRoutes.controllers.SessionsController
                 .renderScheduleSessionByAdmin(calendarSession.id).url;
         } else if (calendarSessionsWithAuthority.loggedIn
@@ -181,7 +212,7 @@ function getUrl(calendarSession, calendarSessionsWithAuthority) {
                 .renderCreateSessionByUser(calendarSession.id,
                     calendarSession.freeSlot).url;
         }
-    } else if(calendarSessionsWithAuthority.isAdmin) {
+    } else if (calendarSessionsWithAuthority.isAdmin) {
         return jsRoutes.controllers.SessionsController
             .update(calendarSession.id).url;
     }

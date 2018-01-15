@@ -22,7 +22,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
   val recommendationInfo = RecommendationInfo(Some("email"), "name", "topic", "recommendation", BSONDateTime(submissionDate),
     BSONDateTime(updateDate), approved = true, decline = false, pending = false, done = true, book = false, upVotes = 10,
     downVotes = 15, recommendationId)
-  
+
   "Recommendations Repository" should {
 
     "insert recommendation" in {
@@ -144,7 +144,19 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "cancel booked recommendation" in {
       val unbook = await(recommendationRepository.cancelBookedRecommendation(recommendationId.stringify))
 
-        unbook.ok must beEqualTo(true)
+      unbook.ok must beEqualTo(true)
+    }
+
+    "return all sessions waiting for admin's action" in {
+      val pendingRecommendationInfo = RecommendationInfo(Some("email"), "name", "topic", "recommendation", BSONDateTime(submissionDate),
+        BSONDateTime(updateDate), approved = false, decline = false, pending = false, done = true, book = false, upVotes = 10,
+        downVotes = 15, BSONObjectID.generate)
+
+      await(recommendationRepository.insert(pendingRecommendationInfo))
+
+      val pendingRecommendations = await(recommendationRepository.allPendingRecommendations)
+
+      pendingRecommendations must beEqualTo(1)
     }
   }
 

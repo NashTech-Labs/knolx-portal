@@ -68,7 +68,6 @@ function showSubCategory(primaryCategory, subCategory, values) {
 function onFormSubmit() {
     $('#create-session-form').submit( function () {
         var selectedId = $("#select-date option:selected").attr('id');
-        console.log("ID of a free slot ---> " + selectedId);
         $('<input />').attr('name', 'freeSlotId')
             .attr('id', "freeSlotId")
             .attr('value', selectedId)

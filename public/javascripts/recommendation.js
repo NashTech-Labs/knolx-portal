@@ -16,8 +16,6 @@ function Recommendation() {
         readonly = "";
     }
 
-    console.log("CSRFTOKEN ->" + CSRFToken);
-
     function getDocumentHeight() {
         const body = document.body;
         const html = document.documentElement;
@@ -118,8 +116,6 @@ function Recommendation() {
             this.$content.find('form').on('submit', function (e) {
                 e.preventDefault();
                 jc.$$formSubmit.trigger('click'); // reference the button and click it
-                console.log("Akshansh1234");
-                //$("#recommendation-form").submit();
             });
         }
     });

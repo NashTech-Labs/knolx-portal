@@ -26,8 +26,6 @@ function UserReportsModel(pageNumber) {
                     var pages = values["pages"];
                     var page = values["pageNumber"];
 
-                    console.log(feedbackReportHeaderList);
-
                     for (var i = 0; i < feedbackReportHeaderList.length; i++) {
                         var url = jsRoutes.controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(feedbackReportHeaderList[i].sessionId).url;
                         feedbackReportHeaderList[i]["url"] = url;

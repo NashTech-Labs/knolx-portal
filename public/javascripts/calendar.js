@@ -149,7 +149,7 @@ function getSessions(startDate, endDate, callback) {
                 callback(events);
             },
             error: function (er) {
-                console.log("error ->" + er.responseText);
+                console.log("Error ->" + er.responseText);
             }
         }
     )

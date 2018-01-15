@@ -431,9 +431,9 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .insertSessionForApprove(approveSessionInfo)
       .map { result =>
         if (result.ok) {
-          Ok("Free slot has been entered successfully.")
+          Ok("Free slot has been entered successfully")
         } else {
-          BadRequest("Something went wrong while inserting free slot.")
+          BadRequest("Something went wrong while inserting free slot")
         }
       }
   }
@@ -443,10 +443,10 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       .deleteFreeSlot(id)
       .map { result =>
         if (result.ok) {
-          Logger.info("Successfully deleted the free slot")
+          Logger.info("Free slot has been successfully deleted")
           Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
         } else {
-          Logger.error("Something went wring while deleting the free slot")
+          Logger.error("Something went wrong while deleting the free slot")
           Redirect(routes.CalendarController.renderCreateSessionByUser(id, recommendationId, isFreeSlot = true))
             .flashing("message" -> "Something went wrong while deleting the free slot")
         }

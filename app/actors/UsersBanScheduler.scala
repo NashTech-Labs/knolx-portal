@@ -20,6 +20,8 @@ object UsersBanScheduler {
 
   case class EmailBodyInfo(topic: String, presenter: String, date: String)
   case class EmailContent(to: String, body: List[EmailBodyInfo])
+  case class ScheduleLinkExpiration(id: String)
+  case class ExpireLink(id: String)
 
   // messages used internally for starting session schedulers/emails
   private[actors] case object ScheduleBanEmails
@@ -57,7 +59,8 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
   def receive: Receive = initializingHandler orElse
     schedulingHandler orElse
     emailHandler orElse
-    defaultHandler
+    defaultHandler orElse
+    verificationLinkHandler
 
   def initializingHandler: Receive = {
     case InitiateBanEmails(delay, interval) =>
@@ -92,6 +95,13 @@ class UsersBanScheduler @Inject()(sessionsRepository: SessionsRepository,
         emailManager ! EmailActor.SendEmail(
           List(emailContent.to), fromEmail, s"BAN FROM KNOLX", views.html.emails.ban(emailContent.body).toString)
       }
+  }
+
+  def verificationLinkHandler: Receive = {
+    case ScheduleLinkExpiration(id) =>
+      scheduler.scheduleOnce(5 seconds, self, ExpireLink(id))
+    case ExpireLink(id) =>
+      usersRepository.expireLink(id)
   }
 
   def getBanInfo(sessions: List[SessionInfo], emails: List[String]): Future[List[EmailContent]] = {

@@ -207,7 +207,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
   }
 
   def allPendingRecommendations(implicit ex: ExecutionContext): Future[Int] = {
-    val selector = Some(Json.obj("pending" -> true))
+    val selector = Some(Json.obj("approve" -> false, "decline" -> "false"))
 
     collection
       .flatMap(_.count(selector))

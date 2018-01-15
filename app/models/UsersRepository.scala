@@ -268,4 +268,16 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
         jsonCollection.update(selector, modifier))
   }
 
+  def approveUser(id: String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    val modifier = BSONDocument("$set" -> BSONDocument("approved" -> true))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+
+
+  }
+
 }

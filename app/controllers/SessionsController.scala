@@ -89,6 +89,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                                    sessionsRepository: SessionsRepository,
                                    feedbackFormsRepository: FeedbackFormsRepository,
                                    sessionRequestRepository: SessionRequestRepository,
+                                   recommendationsRepository: RecommendationsRepository,
                                    dateTimeUtility: DateTimeUtility,
                                    configuration: Configuration,
                                    controllerComponents: KnolxControllerComponents,
@@ -550,11 +551,22 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
           createSessionInfo.topic, createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory,
           createSessionInfo.meetup, approved = true)
 
-            sessionRequestRepository.insertSessionForApprove(approveSessionInfo).map { updatedResult =>
+            sessionRequestRepository.insertSessionForApprove(approveSessionInfo).flatMap { updatedResult =>
               if (updatedResult.ok) {
-                Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
+                if (approveSessionInfo.recommendationId.isEmpty) {
+                  Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!"))
+                } else {
+                  recommendationsRepository.bookRecommendation(approveSessionInfo.recommendationId).map { status =>
+                    if (status.ok) {
+                      Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
+                    } else {
+                      Logger.error("Something went wrong while booking a recommendation")
+                      Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
+                    }
+                  }
+                }
               } else {
-                InternalServerError("Something went wrong!")
+                Future.successful(InternalServerError("Something went wrong!"))
               }
             }
           } else {

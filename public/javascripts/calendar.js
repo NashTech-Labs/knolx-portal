@@ -3,6 +3,7 @@ var pendingSessionColor = '#f0ad4e';
 var scheduledSessionColor = '#31b0d5';
 var scheduledMeetupColor = '#8e44ad';
 var freeSlotColor = '#27ae60';
+var notificationColor = '#d9534f';
 var isAdmin = false;
 
 window.onbeforeunload = function () {
@@ -16,6 +17,10 @@ $(function () {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },
         eventRender: function (event, element) {
+            if (event.notification) {
+                $(element).find(".fc-time").hide();
+                $(element).addClass("pointer-cursor");
+            }
             element.popover({
                 html: true,
                 container: 'body',
@@ -27,13 +32,15 @@ $(function () {
             }).on("mouseenter", function () {
                 var _this = this;
                 $(this).popover("show");
-                $(".popover").on("mouseleave", function () {
+                var popoverId = $(this).attr("aria-describedby");
+                $("#" + popoverId).on("mouseleave", function () {
                     $(_this).popover('hide');
                 });
             }).on("mouseleave", function () {
                 var _this = this;
+                var popoverId = $(this).attr("aria-describedby");
                 setTimeout(function () {
-                    if (!$(".popover:hover").length) {
+                    if (!$("#" + popoverId + ":hover").length) {
                         $(_this).popover("hide");
                     }
                 }, 300);
@@ -41,6 +48,9 @@ $(function () {
         },
         timezone: 'local',
         eventClick: function (event) {
+            if (event.notification) {
+                deleteSlot(event.id);
+            }
             if (event.url && !event.url.isEmpty) {
                 window.open(event.url, "_self");
                 return false;
@@ -50,11 +60,17 @@ $(function () {
             if (isAdmin) {
                 var formattedDate = moment(date).format("YYYY-MM-DDThh:mm").replace("A", "T");
                 $.confirm({
-                    title: 'Add Free Slot!',
+                    title: 'Add Free Slot/Notification',
                     content: '' +
                     '<form action="" class="formName">' +
                     '<div class="form-group">' +
-                    '<input type="datetime-local" id="free-slot" value="' + formattedDate + '" class="update-field login-second"/>' +
+                    '<input type="datetime-local" id="slot-date" value="' + formattedDate + '" class="update-field login-second"/>' +
+                    '<input type="text" id="slot-name" value="Free Slot" class="update-field login-second" placeholder="Topic"/>' +
+                    '<label class="checkbox-outer">' +
+                    '<input type="checkbox" id="is-notification" class="custom-checkbox"/>' +
+                    '<span class="label_text"></span>' +
+                    '<p class="checkbox-text">Is it a notification?</p>' +
+                    '</label>' +
                     '</div>' +
                     '</form>',
                     buttons: {
@@ -62,15 +78,31 @@ $(function () {
                             text: 'Add',
                             btnClass: 'btn-blue',
                             action: function () {
-                                var freeSlot = this.$content.find('#free-slot').val();
-                                if (!freeSlot) {
-                                    $.alert('Date must not be empty');
+
+                                var slotName = $("#slot-name").val();
+                                var slotDate = $("#slot-date").val();
+                                var isNotification = $("#is-notification").is(":checked");
+
+                                if (!slotName) {
+                                    $.alert('Slot topic must not be empty');
                                     return false;
                                 }
-                                jsRoutes.controllers.CalendarController.insertFreeSlot(freeSlot).ajax(
+                                if (!slotDate) {
+                                    $.alert('Slot date must not be empty');
+                                    return false;
+                                }
+
+                                var formData = new FormData();
+                                formData.append("slotName", slotName);
+                                formData.append("date", slotDate);
+                                formData.append("isNotification", isNotification);
+
+                                jsRoutes.controllers.CalendarController.insertSlot().ajax(
                                     {
-                                        type: 'GET',
+                                        type: 'POST',
+                                        contentType: false,
                                         processData: false,
+                                        data: formData,
                                         beforeSend: function (request) {
                                             var csrfToken = document.getElementById('csrfToken').value;
 
@@ -91,6 +123,14 @@ $(function () {
                         }
                     },
                     onContentReady: function () {
+                        $("#is-notification").change(function () {
+                            console.log("Getting here");
+                            if ($("#slot-name").val().length > 0) {
+                                $("#slot-name").val('');
+                            } else {
+                                $("#slot-name").val('Free Slot');
+                            }
+                        });
                         var jc = this;
                         this.$content.find('form').on('submit', function (e) {
                             e.preventDefault();
@@ -144,6 +184,7 @@ function getSessions(startDate, endDate, callback) {
                         color: getColor(calendarSessions[calendarSession]),
                         data: getData(calendarSessions[calendarSession]),
                         url: getUrl(calendarSessions[calendarSession], calendarSessionsWithAuthority, recommendationId)
+                        notification: calendarSessions[calendarSession].notification
                     });
                 }
                 callback(events);
@@ -159,7 +200,7 @@ function deleteFreeSlot(id) {
     var form = document.createElement("form");
 
     form.method = "POST";
-    form.action = jsRoutes.controllers.CalendarController.deleteFreeSlot(id).url;
+    form.action = jsRoutes.controllers.CalendarController.deleteSlot(id).url;
     form.style.display = "none";
 
     var csrfToken = $("#csrfToken").val();
@@ -177,7 +218,9 @@ function deleteFreeSlot(id) {
 }
 
 function getColor(calendarSession) {
-    if (calendarSession.pending) {
+    if (calendarSession.notification) {
+        return notificationColor;
+    } else if (calendarSession.pending) {
         if (calendarSession.freeSlot) {
             return freeSlotColor;
         } else {
@@ -191,8 +234,8 @@ function getColor(calendarSession) {
 }
 
 function getData(calendarSession) {
-    if (!calendarSession.freeSlot) {
-        if(calendarSession.contentAvailable) {
+    if (!calendarSession.freeSlot && !calendarSession.notification) {
+        if (calendarSession.contentAvailable) {
             return "<p>Topic: " + calendarSession.topic
                 + "<br>Email: " + calendarSession.email + "</p>"
                 + "<br><a href='" + jsRoutes.controllers.SessionsController.shareContent(calendarSession.id).url +
@@ -221,8 +264,49 @@ function getUrl(calendarSession, calendarSessionsWithAuthority, recommendationId
                     recommendationId,
                     calendarSession.freeSlot).url;
         }
-    } else if (calendarSessionsWithAuthority.isAdmin) {
+    } else if (calendarSessionsWithAuthority.isAdmin && !calendarSession.notification) {
         return jsRoutes.controllers.SessionsController
             .update(calendarSession.id).url;
     }
+}
+
+function deleteSlot(slotId) {
+    $.confirm({
+        title: 'Delete Slot',
+        buttons: {
+            formSubmit: {
+                text: 'Delete',
+                btnClass: 'btn-danger',
+                action: function () {
+
+                    jsRoutes.controllers.CalendarController.deleteSlot(slotId).ajax(
+                        {
+                            type: 'POST',
+                            beforeSend: function (request) {
+                                var csrfToken = document.getElementById('csrfToken').value;
+
+                                return request.setRequestHeader('CSRF-Token', csrfToken);
+                            },
+                            success: function (data) {
+                                $("#calendar").fullCalendar('refetchEvents');
+                            },
+                            error: function (er) {
+                                console.log("Error with responseText -----> " + er.responseText);
+                            }
+                        }
+                    )
+                }
+            },
+            cancel: function () {
+                //close
+            }
+        },
+        onContentReady: function () {
+            var jc = this;
+            this.$content.find('form').on('submit', function (e) {
+                e.preventDefault();
+                jc.$$formSubmit.trigger('click');
+            });
+        }
+    });
 }

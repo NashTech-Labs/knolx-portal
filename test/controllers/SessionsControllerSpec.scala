@@ -58,6 +58,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
     val feedbackFormsRepository = mock[FeedbackFormsRepository]
     val categoriesRepository = mock[CategoriesRepository]
     val sessionRequestRepository = mock[SessionRequestRepository]
+    val recommendationsRepository = mock[RecommendationsRepository]
 
     val dateTimeUtility = mock[DateTimeUtility]
 
@@ -79,6 +80,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         sessionsRepository,
         feedbackFormsRepository,
         sessionRequestRepository,
+        recommendationsRepository,
         dateTimeUtility,
         config,
         knolxControllerComponent,

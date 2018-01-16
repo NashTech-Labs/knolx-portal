@@ -96,8 +96,9 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
     val condition = keyword match {
       case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
-        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false))
-      case None      => Json.obj("freeSlot" -> BSONDocument("$eq" -> false))
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false),
+        "notification" -> BSONDocument("$eq" -> false))
+      case None      => Json.obj("freeSlot" -> BSONDocument("$eq" -> false), "notification" -> BSONDocument("$eq" -> false))
     }
 
     collection

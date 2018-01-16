@@ -1,8 +1,0 @@
-@(message: String)(implicit flash: Flash, request: Request[_])
-
-<p class="information">
-    @flash.get("message").fold("")(identity)
-</p>
-
-<h3 style="margin-top: 8em;">@message not available</h3>
-<p></p>

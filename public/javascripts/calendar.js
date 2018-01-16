@@ -6,6 +6,10 @@ var freeSlotColor = '#27ae60';
 var notificationColor = '#d9534f';
 var isAdmin = false;
 
+window.onbeforeunload = function () {
+    sessionStorage.removeItem("recommendationId");
+};
+
 $(function () {
 
     $('#calendar').fullCalendar({
@@ -162,6 +166,9 @@ $(function () {
 });
 
 function getSessions(startDate, endDate, callback) {
+
+    var recommendationId = sessionStorage.getItem("recommendationId");
+
     jsRoutes.controllers.CalendarController.calendarSessions(startDate, endDate).ajax(
         {
             type: 'GET',
@@ -178,14 +185,14 @@ function getSessions(startDate, endDate, callback) {
                         start: calendarSessions[calendarSession].date,
                         color: getColor(calendarSessions[calendarSession]),
                         data: getData(calendarSessions[calendarSession]),
-                        url: getUrl(calendarSessions[calendarSession], calendarSessionsWithAuthority),
+                        url: getUrl(calendarSessions[calendarSession], calendarSessionsWithAuthority, recommendationId),
                         notification: calendarSessions[calendarSession].notification
                     });
                 }
                 callback(events);
             },
             error: function (er) {
-                console.log("error ->" + er.responseText);
+                console.log("Error ->" + er.responseText);
             }
         }
     )
@@ -242,10 +249,11 @@ function getData(calendarSession) {
     }
 }
 
-function getUrl(calendarSession, calendarSessionsWithAuthority) {
-    if (calendarSession.freeSlot) {
+function getUrl(calendarSession, calendarSessionsWithAuthority, recommendationId) {
+    if(calendarSession.freeSlot) {
         return jsRoutes.controllers.CalendarController
             .renderCreateSessionByUser(calendarSession.id,
+                recommendationId,
                 calendarSession.freeSlot).url;
     } else if (calendarSession.pending) {
         if (calendarSessionsWithAuthority.isAdmin) {
@@ -255,6 +263,7 @@ function getUrl(calendarSession, calendarSessionsWithAuthority) {
             && calendarSession.email === calendarSessionsWithAuthority.email) {
             return jsRoutes.controllers.CalendarController
                 .renderCreateSessionByUser(calendarSession.id,
+                    recommendationId,
                     calendarSession.freeSlot).url;
         }
     } else if (calendarSessionsWithAuthority.isAdmin && !calendarSession.notification) {

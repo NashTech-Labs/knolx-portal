@@ -28,6 +28,7 @@ case class SessionRequestInfo(email: String,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               freeSlot: Boolean = false,
+                              recommendationId: String = "",
                               notification: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
                              )
@@ -50,7 +51,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.sessionId))
       case _                         => BSONDocument("_id" -> BSONObjectID.generate())
     }
-
     val modifier =
       BSONDocument(
         "$set" -> BSONDocument(
@@ -63,7 +63,8 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           "approved" -> approveSessionInfo.approved,
           "decline" -> approveSessionInfo.decline,
           "freeSlot" -> approveSessionInfo.freeSlot,
-          "notification" -> approveSessionInfo.notification
+          "notification" -> approveSessionInfo.notification,
+          "recommendationId" -> approveSessionInfo.recommendationId
         )
       )
 

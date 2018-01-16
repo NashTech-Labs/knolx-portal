@@ -22,6 +22,7 @@ POST          /user/forgotpassword/reset                            controllers.
 GET           /user/changepassword                                  controllers.UsersController.renderChangePassword
 POST          /user/changepassword                                  controllers.UsersController.changePassword
 POST          /user/userList                                        controllers.UsersController.usersList(email: Option[String])
+GET           /user/verification                                    controllers.UsersController.approveUser(id: String)
 
 #User Analysis
 GET           /user/knolx/analysis                                  controllers.KnolxUserAnalysisController.renderUserAnalyticsPage

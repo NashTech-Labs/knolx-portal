@@ -280,4 +280,14 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
 
   }
 
+  def getUser(id: String): Future[Option[UserInfo]] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(selector)
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
+  }
+
 }

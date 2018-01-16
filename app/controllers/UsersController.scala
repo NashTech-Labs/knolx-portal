@@ -3,7 +3,7 @@ package controllers
 import java.util.{Date, UUID}
 import javax.inject._
 
-import actors.UsersBanScheduler.ScheduleLinkExpiration
+import actors.VerificationLinkScheduler.ScheduleLinkExpiration
 import actors.{EmailActor, UsersBanScheduler}
 import akka.actor.ActorRef
 import controllers.EmailHelper._
@@ -63,8 +63,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                                 configuration: Configuration,
                                 dateTimeUtility: DateTimeUtility,
                                 controllerComponents: KnolxControllerComponents,
-                                @Named("EmailManager") emailManager: ActorRef,
-                                @Named("UsersBanScheduler") usersBanScheduler: ActorRef
+                                @Named("EmailManager") emailManager: ActorRef
                                ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
   implicit val manageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
@@ -189,12 +188,36 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           .flashing("error" -> "Something went wrong during the registration process. Please try again.")
       } { userInfo =>
         Logger.info(s"Sending email to $email with verification link")
-        emailManager ! EmailActor.SendEmail(List(email), fromEmail, "Please verify your email",
+        emailManager ! EmailActor.SendEmail(List(email), fromEmail, "Knolx Portal: Email Verification",
           views.html.emails.verification(userInfo._id.stringify).toString)
-        Logger.info("Starting scheduler for link expiration")
-        usersBanScheduler ! ScheduleLinkExpiration(userInfo._id.stringify)
         Redirect(routes.UsersController.login())
           .flashing("message" -> "A verification email has been sent to your email. Please click on the sent link to verify your account.")
+      }
+    }
+  }
+
+  def approveUser(id: String): Action[AnyContent] = action.async { implicit request =>
+    Logger.info(s"Approving user with id $id")
+    val username = configuration.get[String]("session.username")
+    usersRepository.getUser(id) flatMap {
+      _.fold {
+        Future.successful(Redirect(routes.UsersController.login())
+          .flashing("error" -> "The requested account was not found."))
+      } { userInfo =>
+        if(userInfo.linkExpired) {
+          Future.successful(Redirect(routes.UsersController.register())
+            .flashing("message" -> "The verification link has expired. Please register again for a new verification link."))
+        } else {
+          usersRepository.approveUser(id) map { result =>
+            if(result.ok) {
+              Redirect(routes.HomeController.index())
+                .withSession(username -> EncryptionUtility.encrypt(userInfo.email))
+            } else {
+              Redirect(routes.UsersController.login())
+                .flashing("error" -> "Something went wrong while verifying this account.")
+            }
+          }
+        }
       }
     }
   }

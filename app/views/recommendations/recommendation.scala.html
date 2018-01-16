@@ -80,14 +80,17 @@
                                         <div class="recommendation-dropdown dropdown" style="float: right;">
                                             <i class="fa fa-ellipsis-v"></i>
                                             <div class="dropdown-content">
-                                                <span data-bind="click: pending ? null: function($id) { $root.pendingByAdmin(id)}">
-                                                    Pending</span>
-                                                <span data-bind="click: done ? null: function($id) { $root.doneByAdmin(id)}">
-                                                    Done</span>
+
                                                 <span data-bind="click: approved ? null: function($id) { $root.approveByAdmin(id)}">
                                                     Approved</span>
                                                 <span data-bind="click: decline ? null: function($id) { $root.declineByAdmin(id)}">
                                                     Decline</span>
+                                                <div data-bind = "if : !book">
+                                                    <span data-bind="click: pending ? null: function($id) { $root.pendingByAdmin(id)}">
+                                                        Pending</span>
+                                                </div>
+                                                <span data-bind="click: done ? null: function($id) { $root.doneByAdmin(id)}">
+                                                    Done</span>
                                             </div>
                                         </div>
 

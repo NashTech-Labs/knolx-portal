@@ -27,7 +27,7 @@ case class RecommendationInfo(email: Option[String],
                               submissionDate: BSONDateTime,
                               updateDate: BSONDateTime,
                               approved: Boolean = false,
-                              decline: Boolean = false,
+                              declined: Boolean = false,
                               pending: Boolean = true,
                               done: Boolean = false,
                               book: Boolean = false,
@@ -42,7 +42,7 @@ object RecommendationsJsonFormats {
   implicit val recommendationsFormat = Json.format[RecommendationInfo]
 }
 
-class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtitlity: DateTimeUtility) {
+class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtility: DateTimeUtility) {
 
   import play.modules.reactivemongo.json._
 
@@ -59,8 +59,8 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "approved" -> true,
-        "decline" -> false,
-        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)
+        "declined" -> false,
+        "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)
       ))
 
     collection
@@ -84,10 +84,10 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "approved" -> false,
-        "decline" -> true,
+        "declined" -> true,
         "pending" -> false,
         "book" -> false,
-        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)
+        "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)
       ))
 
     collection
@@ -105,7 +105,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val condition = filter match {
       case "all"      => Json.obj()
       case "approved" => Json.obj("approved" -> true)
-      case "decline"  => Json.obj("decline" -> true)
+      case "decline"  => Json.obj("declined" -> true)
       case "pending"  => Json.obj("pending" -> true)
       case "book"     => Json.obj("book" -> true)
       case "done"     => Json.obj("done" -> true)
@@ -161,7 +161,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       "$set" -> BSONDocument(
         "pending" -> true,
         "done" -> false,
-        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+        "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)))
 
     collection
       .flatMap(jsonCollection =>
@@ -175,7 +175,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
       "$set" -> BSONDocument(
         "pending" -> false,
         "done" -> true,
-        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+        "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)))
 
     collection
       .flatMap(jsonCollection =>
@@ -188,7 +188,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "book" -> true,
-        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+        "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)))
 
     collection
       .flatMap(jsonCollection =>
@@ -201,7 +201,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "book" -> false,
-        "updateDate" -> BSONDateTime(dateTimeUtitlity.nowMillis)))
+        "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)))
 
     collection
       .flatMap(jsonCollection =>
@@ -209,7 +209,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
   }
 
   def allPendingRecommendations(implicit ex: ExecutionContext): Future[Int] = {
-    val selector = Some(Json.obj("approved" -> false, "decline" -> false))
+    val selector = Some(Json.obj("approved" -> false, "declined" -> false))
 
     collection
       .flatMap(_.count(selector))

@@ -79,7 +79,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
                                          controllerComponents: KnolxControllerComponents,
                                          dateTimeUtility: DateTimeUtility,
                                          configuration: Configuration,
-                                         recommendationResponseRepository: RecommendationResponseRepository,
+                                         recommendationResponseRepository: RecommendationsResponseRepository,
                                          @Named("EmailManager") emailManager: ActorRef
                                         ) extends KnolxAbstractController(controllerComponents) with I18nSupport {
 
@@ -160,7 +160,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
               Some(new Date(recommendation.submissionDate.value).toString),
               Some(new Date(recommendation.updateDate.value).toString),
               Some(recommendation.approved),
-              Some(recommendation.decline),
+              Some(recommendation.declined),
               recommendation.pending,
               recommendation.done,
               recommendation.book,
@@ -225,7 +225,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
       val recommendationResponse =
-        RecommendationResponseRepositoryInfo(email,
+        RecommendationsResponseRepositoryInfo(email,
           recommendationId,
           upVote = true,
           downVote = false)
@@ -255,7 +255,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def downVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
-      val recommendationResponse = RecommendationResponseRepositoryInfo(email,
+      val recommendationResponse = RecommendationsResponseRepositoryInfo(email,
         recommendationId,
         upVote = false,
         downVote = true)

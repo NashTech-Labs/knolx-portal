@@ -120,7 +120,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo OK
@@ -139,7 +139,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "")
           .withBody(Json.parse(
             s"""{"email":"test@knoldus.com", "name":111, "topic":"topic",
-               | "recommendation":"recommendation"}""".stripMargin))
+               | "description":"recommendation"}""".stripMargin))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -157,7 +157,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"name": "name", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"name": "name", "topic":"topic", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo OK
@@ -173,7 +173,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"email":"testknolduscom", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"email":"testknolduscom", "name":"name", "topic":"topic", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -189,7 +189,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"", "topic":"topic", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -205,7 +205,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -224,7 +224,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
           .withBody(Json.parse(
             s"""{"email":"test@knoldus.com", "name":"name",
                | "topic":"As recommendation's topic is greater than 140 character so it can stored in database. Please insert recommendation's topic in less than 140 characters",
-               |  "recommendation":"recommendation"}""".stripMargin))
+               |  "description":"recommendation"}""".stripMargin))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -240,7 +240,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":""}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "description":""}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -255,7 +255,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"", "recommendation":""}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"", "description":""}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -274,7 +274,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
           .withSession("username" -> "")
           .withBody(Json.parse(
             s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic",
-               | "recommendation":"$recommendationDescription"}""".stripMargin))
+               | "description":"$recommendationDescription"}""".stripMargin))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -290,7 +290,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST
@@ -306,7 +306,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       val result = controller.addRecommendation()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "recommendation":"recommendation"}"""))
+          .withBody(Json.parse(s"""{"email":"test@knoldus.com", "name":"name", "topic":"topic", "description":"recommendation"}"""))
       )
 
       status(result) must be equalTo BAD_REQUEST

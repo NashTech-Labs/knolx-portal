@@ -32,8 +32,7 @@ case class UserInfo(email: String,
                     banTill: BSONDateTime,
                     banCount: Int = 0,
                     _id: BSONObjectID = BSONObjectID.generate,
-                    approved: Boolean = false,
-                    linkExpired: Boolean = false)
+                    approved: Boolean = false)
 
 case class UpdatedUserInfo(email: String,
                            active: Boolean,
@@ -258,16 +257,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
 
   }
 
-  def expireLink(id: String): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-
-    val modifier = BSONDocument("$set" -> BSONDocument("linkExpired" -> true))
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection.update(selector, modifier))
-  }
-
   def approveUser(id: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
@@ -276,11 +265,9 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
-
-
   }
 
-  def getUser(id: String): Future[Option[UserInfo]] = {
+  def getUserById(id: String): Future[Option[UserInfo]] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
     collection

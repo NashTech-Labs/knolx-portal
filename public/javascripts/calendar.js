@@ -185,7 +185,7 @@ function getSessions(startDate, endDate, callback) {
                         start: calendarSessions[calendarSession].date,
                         color: getColor(calendarSessions[calendarSession]),
                         data: getData(calendarSessions[calendarSession]),
-                        url: getUrl(calendarSessions[calendarSession], calendarSessionsWithAuthority, recommendationId)
+                        url: getUrl(calendarSessions[calendarSession], calendarSessionsWithAuthority, recommendationId),
                         notification: calendarSessions[calendarSession].notification
                     });
                 }

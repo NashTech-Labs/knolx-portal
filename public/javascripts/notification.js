@@ -28,7 +28,6 @@ function getPendingRecommendations() {
         {
             type: 'GET',
             success: function (data) {
-                console.log("Data --> " + data);
                 $("#pending-recommendations-number").text(data);
                 total += data;
                 $(".number-circle").text(total);

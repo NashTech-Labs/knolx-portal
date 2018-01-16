@@ -8,6 +8,12 @@ var isAdmin = false;
 $(function () {
 
     $('#calendar').fullCalendar({
+        loading: function () {
+            $("#calendar").css("opacity", "0.6");
+        },
+        eventAfterAllRender: function () {
+            $("#calendar").css("opacity", "1");
+        },
         events: function (start, end, timezone, callback) {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },

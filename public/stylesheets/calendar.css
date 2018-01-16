@@ -81,3 +81,10 @@
 .left-margin {
     margin-left: 5px;
 }
+
+#loader {
+    background-image: url("/assets/images/gears.gif");
+    height: 100px;
+    width: auto;
+    z-index: 1000000000000;
+}

@@ -72,7 +72,7 @@
         </div>
 
         <div class="col-md-12">
-            <div data-bind="foreach: recommendation">
+            <div data-bind="foreach: recommendations">
                 <div class="col-md-3 filter-padding-left" style="margin-bottom: 25px;">
                     <div class="col-md-12">
                         <div class="feedback-response-sessions custom-position">
@@ -122,7 +122,7 @@
                                         </td>
                                         <td class="recommendation-content">
                                             <strong><p data-bind="text: topic"></p></strong>
-                                            <p data-bind="text: recommendation"></p>
+                                            <p data-bind="text: description"></p>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -138,7 +138,7 @@
                 </div>
             </div>
         </div>
-        <div class="empty-reports" data-bind="if: (recommendation().length) == 0">
+        <div class="empty-reports" data-bind="if: (recommendations().length) == 0">
             <i class="fa fa-folder-open" aria-hidden="true"></i>
             <p class="empty-reports_text">No Recommendations found!</p>
         </div>

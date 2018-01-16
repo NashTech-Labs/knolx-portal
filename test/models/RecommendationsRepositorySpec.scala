@@ -44,7 +44,6 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "approved recommendation" in {
-
       val approve = await(recommendationRepository.approveRecommendation(recommendationId.stringify))
 
       approve.ok must beEqualTo(true)
@@ -75,7 +74,6 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "decline recommendation" in {
-
       val decline = await(recommendationRepository.declineRecommendation(recommendationId.stringify))
 
       decline.ok must beEqualTo(true)
@@ -158,6 +156,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
 
       pendingRecommendations must beEqualTo(1)
     }
+
   }
 
 }

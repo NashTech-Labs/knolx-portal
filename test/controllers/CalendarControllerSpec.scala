@@ -567,50 +567,93 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "insert a free slot successfully" in new WithTestApplication {
-      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
-      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), freeSlot = true)
-
+    "receive a bad request while inserting a free slot/notification due to errors in form" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
-
-      dateTimeUtility.parseDateStringWithTToIST("2018-02-01T23:59") returns 1517509740000L
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.insertFreeSlot("2018-02-01T23:59")(
+      val result = controller.insertSlot()(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
-          .withCSRFToken)
-
-      status(result) must be equalTo OK
-    }
-
-    "not insert a free slot if DB insertion was unsuccessful" in new WithTestApplication {
-      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
-      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), freeSlot = true)
-
-      usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
-
-      dateTimeUtility.parseDateStringWithTToIST("2018-02-01T23:59") returns 1517509740000L
-      dateTimeUtility.ISTTimeZone returns ISTTimeZone
-
-      val result = controller.insertFreeSlot("2018-02-01T23:59")(
-        FakeRequest()
-          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "date" -> "2018-02-01T23:59",
+            "isNotification" -> "false"
+          )
           .withCSRFToken)
 
       status(result) must be equalTo BAD_REQUEST
     }
 
-    "delete free sot successfully" in new WithTestApplication {
+    "insert a free slot successfully" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), topic = "Free Slot", freeSlot = true)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.insertSlot()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "slotName" -> "Free Slot",
+            "date" -> "2018-02-01T23:59",
+            "isNotification" -> "false"
+          )
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "insert a notification successfully" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), topic = "Notification", notification = true)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.insertSlot()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "slotName" -> "Notification",
+            "date" -> "2018-02-01T23:59",
+            "isNotification" -> "true"
+          )
+          .withCSRFToken)
+
+      status(result) must be equalTo OK
+    }
+
+    "not insert a slot if DB insertion was unsuccessful" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val freeSlot = UpdateApproveSessionInfo(BSONDateTime(1517509740000L), topic = "Free Slot", freeSlot = true)
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      sessionRequestRepository.insertSessionForApprove(freeSlot) returns updateWriteResult
+      dateTimeUtility.ISTTimeZone returns ISTTimeZone
+
+      val result = controller.insertSlot()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody(
+            "slotName" -> "Free Slot",
+            "date" -> "2018-02-01T23:59",
+            "isNotification" -> "false"
+          )
+          .withCSRFToken)
+
+      status(result) must be equalTo BAD_REQUEST
+    }
+
+    "delete sot successfully" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
+      sessionRequestRepository.deleteSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.deleteFreeSlot(_id.stringify)(
+      val result = controller.deleteSlot(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -618,14 +661,14 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "not delete free slot due to DB deletion error" in new WithTestApplication {
+    "not delete slot due to DB deletion error" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
+      sessionRequestRepository.deleteSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.deleteFreeSlot(_id.stringify)(
+      val result = controller.deleteSlot(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

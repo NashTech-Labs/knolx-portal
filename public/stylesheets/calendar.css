@@ -20,6 +20,10 @@
     cursor: default;
 }
 
+.pointer-cursor {
+    cursor: pointer !important;
+}
+
 .dayClickWindow {
     width: 500px;
     height: 500px;

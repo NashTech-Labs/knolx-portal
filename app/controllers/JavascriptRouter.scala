@@ -64,8 +64,8 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.CalendarController.pendingSessions,
       controllers.routes.javascript.CalendarController.allSessionForAdmin,
       controllers.routes.javascript.CalendarController.declineSession,
-      controllers.routes.javascript.CalendarController.insertFreeSlot,
-      controllers.routes.javascript.CalendarController.deleteFreeSlot
+      controllers.routes.javascript.CalendarController.insertSlot,
+      controllers.routes.javascript.CalendarController.deleteSlot
     )).as("text/javascript")
   }
 

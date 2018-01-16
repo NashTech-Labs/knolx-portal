@@ -199,23 +199,18 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   def approveUser(id: String): Action[AnyContent] = action.async { implicit request =>
     Logger.info(s"Approving user with id $id")
     val username = configuration.get[String]("session.username")
-    usersRepository.getUser(id) flatMap {
+    usersRepository.getUserById(id) flatMap {
       _.fold {
         Future.successful(Redirect(routes.UsersController.login())
           .flashing("error" -> "The requested account was not found."))
       } { userInfo =>
-        if(userInfo.linkExpired) {
-          Future.successful(Redirect(routes.UsersController.register())
-            .flashing("message" -> "The verification link has expired. Please register again for a new verification link."))
-        } else {
-          usersRepository.approveUser(id) map { result =>
-            if(result.ok) {
-              Redirect(routes.HomeController.index())
-                .withSession(username -> EncryptionUtility.encrypt(userInfo.email))
-            } else {
-              Redirect(routes.UsersController.login())
-                .flashing("error" -> "Something went wrong while verifying this account.")
-            }
+        usersRepository.approveUser(id) map { result =>
+          if (result.ok) {
+            Redirect(routes.HomeController.index())
+              .withSession(username -> EncryptionUtility.encrypt(userInfo.email))
+          } else {
+            Redirect(routes.UsersController.login())
+              .flashing("error" -> "Something went wrong while verifying this account.")
           }
         }
       }

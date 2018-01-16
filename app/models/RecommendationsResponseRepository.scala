@@ -2,7 +2,7 @@ package models
 
 import javax.inject.Inject
 
-import models.RecommendationResponseJsonFormats._
+import models.RecommendationsResponseJsonFormats._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.UpdateWriteResult
@@ -16,25 +16,25 @@ import scala.concurrent.Future
 import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 
-case class RecommendationResponseRepositoryInfo(email: String,
+case class RecommendationsResponseRepositoryInfo(email: String,
                                                 recommendationId: String,
                                                 upVote: Boolean,
                                                 downVote: Boolean,
                                                 _id: BSONObjectID = BSONObjectID.generate())
 
-object RecommendationResponseJsonFormats {
+object RecommendationsResponseJsonFormats {
 
   import play.api.libs.json.Json
 
-  implicit val recommendationResponseFormat = Json.format[RecommendationResponseRepositoryInfo]
+  implicit val recommendationResponseFormat = Json.format[RecommendationsResponseRepositoryInfo]
 }
 
-class RecommendationResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
+class RecommendationsResponseRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   import play.modules.reactivemongo.json._
 
   protected def collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("recommendationsresponse"))
 
-  def upsert(recommendationResponseRepositoryInfo: RecommendationResponseRepositoryInfo): Future[UpdateWriteResult] = {
+  def upsert(recommendationResponseRepositoryInfo: RecommendationsResponseRepositoryInfo): Future[UpdateWriteResult] = {
     val selector = BSONDocument("email" -> recommendationResponseRepositoryInfo.email,
       "recommendationId" -> recommendationResponseRepositoryInfo.recommendationId)
 
@@ -56,7 +56,7 @@ class RecommendationResponseRepository @Inject()(reactiveMongoApi: ReactiveMongo
       .flatMap(jsonCollection =>
         jsonCollection
           .find(selector)
-          .cursor[RecommendationResponseRepositoryInfo](ReadPreference.Primary)
+          .cursor[RecommendationsResponseRepositoryInfo](ReadPreference.Primary)
           .headOption)
 
     eventualRecommendationResponse.map { maybeRecommendationResponse =>

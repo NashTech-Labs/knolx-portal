@@ -617,7 +617,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.deleteFreeSlot(_id.stringify, None)(
+      val result = controller.deleteFreeSlot(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)
@@ -632,7 +632,7 @@ class CalendarControllerSpec extends PlaySpecification with Mockito {
       sessionRequestRepository.deleteFreeSlot(_id.stringify) returns updateWriteResult
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
-      val result = controller.deleteFreeSlot(_id.stringify, None)(
+      val result = controller.deleteFreeSlot(_id.stringify)(
         FakeRequest()
           .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
           .withCSRFToken)

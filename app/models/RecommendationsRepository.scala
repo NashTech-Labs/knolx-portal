@@ -162,6 +162,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
         "pending" -> true,
+        "book" -> false,
         "done" -> false,
         "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)))
 
@@ -189,6 +190,7 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
 
     val modifier = BSONDocument(
       "$set" -> BSONDocument(
+        "pending" -> false,
         "book" -> true,
         "updateDate" -> BSONDateTime(dateTimeUtility.nowMillis)))
 

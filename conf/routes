@@ -113,7 +113,7 @@ GET           /knolx/sessions/pendingsessions                        controllers
 POST          /knolx/sessions/pendingstatus                          controllers.CalendarController.allSessionForAdmin
 GET           /knolx/sessions/decline                                controllers.CalendarController.declineSession(sessionId: String)
 GET           /knolx/sessions/insertfreeslot                         controllers.CalendarController.insertFreeSlot(date: String)
-POST          /knolx/sessions/deletefreeslot                         controllers.CalendarController.deleteFreeSlot(id: String, recommendationId: Option[String])
+POST          /knolx/sessions/deletefreeslot                         controllers.CalendarController.deleteFreeSlot(id: String)
 
 #Recommendation
 GET           /recommendation                                        controllers.RecommendationController.renderRecommendationPage

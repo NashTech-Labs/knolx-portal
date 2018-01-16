@@ -442,7 +442,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
       }
   }
 
-  def deleteFreeSlot(id: String, recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+  def deleteFreeSlot(id: String): Action[AnyContent] = adminAction.async { implicit request =>
     sessionRequestRepository
       .deleteFreeSlot(id)
       .map { result =>
@@ -451,7 +451,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
           Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Successfully deleted the free slot")
         } else {
           Logger.error("Something went wrong while deleting the free slot")
-          Redirect(routes.CalendarController.renderCreateSessionByUser(id, recommendationId, isFreeSlot = true))
+          Redirect(routes.CalendarController.renderCreateSessionByUser(id, None, isFreeSlot = true))
             .flashing("message" -> "Something went wrong while deleting the free slot")
         }
       }

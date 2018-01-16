@@ -3,9 +3,7 @@ $(function () {
 });
 
 function Recommendation() {
-
     var page = 1;
-    var CSRFToken = $("#csrfToken").val();
 
     var readonly = "";
     var email = $("#user-email").val();
@@ -34,7 +32,7 @@ function Recommendation() {
         if (getScrollTop() < getDocumentHeight() - window.innerHeight) return;
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         var sort = $('#sort-entries').val();
-        FetchRecommendationList(++page, filter, sort);
+        fetchRecommendationList(++page, filter, sort);
     };
 
     $('#add-button').confirm({
@@ -55,7 +53,7 @@ function Recommendation() {
                 action: function () {
                     var username = this.$content.find('#user-name').val();
                     var recommendationTopic = this.$content.find('#recommend-topic').val();
-                    var recommendation = this.$content.find('#recommend-text').val();
+                    var description = this.$content.find('#recommend-text').val();
                     if (!username) {
                         $.alert('Username must not be empty');
                         return false;
@@ -68,19 +66,19 @@ function Recommendation() {
                         $.alert('Recommendation Topic must be of 140 characters or less');
                         return false;
                     }
-                    if (!recommendation) {
-                        $.alert('Recommendation must not be empty');
+                    if (!description) {
+                        $.alert('Description must not be empty');
                         return false;
                     }
-                    if (recommendation.length > 280) {
-                        $.alert('Recommendation must be of 280 characters or less');
+                    if (description.length > 280) {
+                        $.alert('Description must be of 280 characters or less');
                         return false;
                     }
                     var formData = {
                         'email': $("#email").val(),
                         'name': $("#user-name").val(),
                         'topic': $("#recommend-topic").val(),
-                        'recommendation': $("#recommend-text").val()
+                        'description': $("#recommend-text").val()
                     };
                     jsRoutes.controllers.RecommendationController.addRecommendation().ajax(
                         {
@@ -97,7 +95,7 @@ function Recommendation() {
                                 $.alert(values);
                                 var filter = $('input[name="user-recommend-filter"]:checked').val();
                                 var sort = $('#sort-entries').val();
-                                FetchRecommendationList(page, filter, sort);
+                                fetchRecommendationList(page, filter, sort);
                             },
                             error: function (er) {
                                 $.alert(er.responseText);
@@ -121,22 +119,22 @@ function Recommendation() {
     });
 
     var sort = $('#sort-entries').val();
-    FetchRecommendationList(page, "all", sort);
+    fetchRecommendationList(page, "all", sort);
 
     $('.custom-checkbox').click(function () {
         var sort = $('#sort-entries').val();
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         page = 1;
-        FetchRecommendationList(page, filter, sort);
+        fetchRecommendationList(page, filter, sort);
     });
 
     $('#sort-entries').on('change', function () {
         var filter = $('input[name="user-recommend-filter"]:checked').val();
-        FetchRecommendationList(page, filter, this.value);
+        fetchRecommendationList(page, filter, this.value);
     });
 
     var self = this;
-    self.recommendation = ko.observableArray([]);
+    self.recommendations = ko.observableArray([]);
 
     self.upVoteByUser = function (id) {
 
@@ -152,7 +150,7 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     var sort = $('#sort-entries').val();
-                    FetchRecommendationList(page, filter, sort);
+                    fetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -174,7 +172,7 @@ function Recommendation() {
                 success: function (values) {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     var sort = $('#sort-entries').val();
-                    FetchRecommendationList(page, filter, sort);
+                    fetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -197,7 +195,7 @@ function Recommendation() {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
                     var sort = $('#sort-entries').val();
-                    FetchRecommendationList(page, filter, sort);
+                    fetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -220,7 +218,7 @@ function Recommendation() {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
                     var sort = $('#sort-entries').val();
-                    FetchRecommendationList(page, filter, sort);
+                    fetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -244,7 +242,7 @@ function Recommendation() {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
                     var sort = $('#sort-entries').val();
-                    FetchRecommendationList(page, filter, sort);
+                    fetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -268,7 +266,7 @@ function Recommendation() {
                     var filter = $('input[name="user-recommend-filter"]:checked').val();
                     page = 1;
                     var sort = $('#sort-entries').val();
-                    FetchRecommendationList(page, filter, sort);
+                    fetchRecommendationList(page, filter, sort);
                 },
                 error: function (er) {
                     console.log(er);
@@ -285,7 +283,7 @@ function Recommendation() {
     };
 
 
-    function FetchRecommendationList(pageNumber, filter, sortBy) {
+    function fetchRecommendationList(pageNumber, filter, sortBy) {
 
         jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter, sortBy).ajax(
             {
@@ -298,7 +296,7 @@ function Recommendation() {
                 },
                 success: function (values) {
                     $('.wrapper').height($('#content').height());
-                    self.recommendation(values);
+                    self.recommendations(values);
                 },
                 error: function (er) {
                     console.log(er);

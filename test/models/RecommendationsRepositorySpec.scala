@@ -34,13 +34,13 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "get all recommendation according to submission date" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "get all recommendation according to update date" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, viewBy = "recent"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "approved recommendation" in {
@@ -52,7 +52,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "get approved recommendation" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, "approved"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "get recommendation by Id" in {
@@ -70,7 +70,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "get booked recommendation" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, "book"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "decline recommendation" in {
@@ -82,7 +82,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "get decline recommendation" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, "decline"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "update pending recommendation value" in {
@@ -94,7 +94,7 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "get pending recommendation" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, "pending"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "update done recommendation value" in {
@@ -106,13 +106,13 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     "get done recommendation" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, "done"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "get recommendation for unmatched string" in {
       val paginatedRecommendation = await(recommendationRepository.paginate(1, "unmatched"))
 
-      paginatedRecommendation.head.recommendation must beEqualTo("recommendation")
+      paginatedRecommendation.head.description must beEqualTo("recommendation")
     }
 
     "upvote a recommendation when already voted" in {
@@ -146,9 +146,9 @@ class RecommendationsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "return all sessions waiting for admin's action" in {
-      val pendingRecommendationInfo = RecommendationInfo(Some("email"), "name", "topic", "recommendation", BSONDateTime(submissionDate),
-        BSONDateTime(updateDate), approved = false, declined = false, pending = false, done = true, book = false, upVotes = 10,
-        downVotes = 15, BSONObjectID.generate)
+      val pendingRecommendationInfo = RecommendationInfo(Some("email"), "name", "topic", "recommendation",
+        BSONDateTime(submissionDate), BSONDateTime(updateDate), approved = false, declined = false, pending = false,
+        done = true, book = false, upVotes = 10, downVotes = 15, BSONObjectID.generate)
 
       await(recommendationRepository.insert(pendingRecommendationInfo))
 

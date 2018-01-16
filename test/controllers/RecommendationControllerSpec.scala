@@ -69,7 +69,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
     lazy val app: Application = fakeApp()
 
     val recommendationsRepository = mock[RecommendationsRepository]
-    val recommendationsResponseRepository = mock[RecommendationResponseRepository]
+    val recommendationsResponseRepository = mock[RecommendationsResponseRepository]
     val dateTimeUtility = mock[DateTimeUtility]
     val emailManager: ActorRef = app.injector.instanceOf(BindingKey(classOf[ActorRef], Some(QualifierInstance(Names.named("EmailManager")))))
 
@@ -472,7 +472,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("downvote")
       recommendationsRepository.upVote(recommendationId, alreadyVoted = true) returns updateWriteResult
-      recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
+      recommendationsResponseRepository.upsert(any[RecommendationsResponseRepositoryInfo]) returns updateWriteResult
 
       val result = controller.upVote(recommendationId)(
         FakeRequest()
@@ -503,7 +503,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("")
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
-      recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
+      recommendationsResponseRepository.upsert(any[RecommendationsResponseRepositoryInfo]) returns updateWriteResult
 
       val result = controller.upVote(recommendationId)(
         FakeRequest()
@@ -521,7 +521,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("downvote")
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
-      recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns wrongUpdateWriteResult
+      recommendationsResponseRepository.upsert(any[RecommendationsResponseRepositoryInfo]) returns wrongUpdateWriteResult
 
       val result = controller.upVote(recommendationId)(
         FakeRequest()
@@ -538,7 +538,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("upvote")
       recommendationsRepository.upVote(recommendationId, alreadyVoted = true) returns updateWriteResult
-      recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
+      recommendationsResponseRepository.upsert(any[RecommendationsResponseRepositoryInfo]) returns updateWriteResult
 
       val result = controller.downVote(recommendationId)(
         FakeRequest()
@@ -570,7 +570,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("")
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
-      recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns updateWriteResult
+      recommendationsResponseRepository.upsert(any[RecommendationsResponseRepositoryInfo]) returns updateWriteResult
 
       val result = controller.downVote(recommendationId)(
         FakeRequest()
@@ -588,7 +588,7 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       recommendationsResponseRepository.getVote(email, recommendationId) returns Future.successful("upvote")
       recommendationsRepository.upVote(recommendationId, alreadyVoted = false) returns updateWriteResult
-      recommendationsResponseRepository.upsert(any[RecommendationResponseRepositoryInfo]) returns wrongUpdateWriteResult
+      recommendationsResponseRepository.upsert(any[RecommendationsResponseRepositoryInfo]) returns wrongUpdateWriteResult
 
       val result = controller.downVote(recommendationId)(
         FakeRequest()

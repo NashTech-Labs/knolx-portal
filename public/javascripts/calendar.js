@@ -15,7 +15,9 @@ $(function () {
         eventRender: function (event, element) {
             if (event.notification) {
                 $(element).find(".fc-time").hide();
-                $(element).addClass("pointer-cursor");
+                if(isAdmin) {
+                    $(element).addClass("pointer-cursor");
+                }
             }
             element.popover({
                 html: true,
@@ -44,7 +46,7 @@ $(function () {
         },
         timezone: 'local',
         eventClick: function (event) {
-            if (event.notification) {
+            if (event.notification && isAdmin) {
                 deleteSlot(event.id);
             }
             if (event.url && !event.url.isEmpty) {

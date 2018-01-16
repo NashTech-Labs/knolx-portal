@@ -129,10 +129,11 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
   def upVote(id: String, alreadyVoted: Boolean)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
-    val modifier = (alreadyVoted: @switch) match {
-      case true => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1, "downVotes" -> -1))
-      case false => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1))
-    }
+    val modifier =
+      (alreadyVoted: @switch) match {
+        case true  => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1, "downVotes" -> -1))
+        case false => BSONDocument("$inc" -> BSONDocument("upVotes" -> 1))
+      }
 
     collection
       .flatMap(jsonCollection =>
@@ -142,10 +143,11 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
   def downVote(id: String, alreadyVoted: Boolean)(implicit ex: ExecutionContext): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
-    val modifier = (alreadyVoted: @switch) match {
-      case true => BSONDocument("$inc" -> BSONDocument("upVotes" -> -1, "downVotes" -> 1))
-      case false => BSONDocument("$inc" -> BSONDocument("downVotes" -> 1))
-    }
+    val modifier =
+      (alreadyVoted: @switch) match {
+        case true  => BSONDocument("$inc" -> BSONDocument("upVotes" -> -1, "downVotes" -> 1))
+        case false => BSONDocument("$inc" -> BSONDocument("downVotes" -> 1))
+      }
 
     collection
       .flatMap(jsonCollection =>
@@ -204,6 +206,13 @@ class RecommendationsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, da
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
+  }
+
+  def allPendingRecommendations(implicit ex: ExecutionContext): Future[Int] = {
+    val selector = Some(Json.obj("approved" -> false, "decline" -> false))
+
+    collection
+      .flatMap(_.count(selector))
   }
 
 }

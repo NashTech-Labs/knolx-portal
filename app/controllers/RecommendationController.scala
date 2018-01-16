@@ -1,6 +1,5 @@
 package controllers
 
-import java.time.LocalDateTime
 import java.util.Date
 import javax.inject.{Inject, Named, Singleton}
 
@@ -148,7 +147,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def recommendationList(pageNumber: Int, filter: String = "all", sortBy: String): Action[AnyContent] = action.async { implicit request =>
+  def recommendationList(pageNumber: Int, filter: String, sortBy: String): Action[AnyContent] = action.async { implicit request =>
     recommendationsRepository.paginate(pageNumber, filter, sortBy) flatMap { recommendations =>
       if (SessionHelper.isSuperUser || SessionHelper.isAdmin) {
         Future.sequence(recommendations map { recommendation =>
@@ -225,10 +224,12 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   def upVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
     val email = request.user.email
     recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
-      val recommendationResponse = RecommendationResponseRepositoryInfo(email,
-        recommendationId,
-        upVote = true,
-        downVote = false)
+      val recommendationResponse =
+        RecommendationResponseRepositoryInfo(email,
+          recommendationId,
+          upVote = true,
+          downVote = false)
+
       if (vote.equals("upvote")) {
         Logger.info(s"Recommendation with id $recommendationId was already upvoted")
         Future.successful(BadRequest("You have already upvoted the recommendation"))
@@ -301,6 +302,12 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
         Logger.info(s"Something went wrong while marking recommendation with id $recommendationId as pending")
         BadRequest(Json.toJson("Recommendation could not be marked as pending due to some error"))
       }
+    }
+  }
+
+  def allPendingRecommendations: Action[AnyContent] = adminAction.async { implicit request =>
+    recommendationsRepository.allPendingRecommendations map { count =>
+      Ok(Json.toJson(count))
     }
   }
 

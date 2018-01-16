@@ -657,6 +657,18 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
 
       status(result) must be equalTo BAD_REQUEST
     }
+
+    "return all sessions waiting for admin's action" in new WithTestApplication {
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      recommendationsRepository.allPendingRecommendations returns Future.successful(1)
+
+      val result = controller.allPendingRecommendations()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+      )
+
+      status(result) must be equalTo OK
+    }
   }
 
 }

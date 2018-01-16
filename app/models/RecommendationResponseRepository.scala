@@ -2,7 +2,6 @@ package models
 
 import javax.inject.Inject
 
-import play.api.libs.json.Json
 import models.RecommendationResponseJsonFormats._
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.ReadPreference
@@ -22,7 +21,6 @@ case class RecommendationResponseRepositoryInfo(email: String,
                                                 upVote: Boolean,
                                                 downVote: Boolean,
                                                 _id: BSONObjectID = BSONObjectID.generate())
-
 
 object RecommendationResponseJsonFormats {
 

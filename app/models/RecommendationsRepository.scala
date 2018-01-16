@@ -23,7 +23,7 @@ import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
 case class RecommendationInfo(email: Option[String],
                               name: String,
                               topic: String,
-                              recommendation: String,
+                              description: String,
                               submissionDate: BSONDateTime,
                               updateDate: BSONDateTime,
                               approved: Boolean = false,

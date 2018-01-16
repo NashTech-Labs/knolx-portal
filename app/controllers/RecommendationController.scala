@@ -20,7 +20,7 @@ import scala.concurrent.Future
 case class Recommendation(email: Option[String],
                           name: String,
                           topic: String,
-                          recommendation: String,
+                          description: String,
                           submissionDate: Option[String],
                           updateDate: Option[String],
                           approved: Option[Boolean],
@@ -37,7 +37,7 @@ case class Recommendation(email: Option[String],
 case class RecommendationInformation(email: Option[String],
                                      name: String,
                                      topic: String,
-                                     recommendation: String) {
+                                     description: String) {
   def validateEmail: Option[String] =
     email.fold[Option[String]](None) { userEmail =>
       if (EmailHelper.isValidEmailForGuests(userEmail) || userEmail.isEmpty) {
@@ -63,11 +63,11 @@ case class RecommendationInformation(email: Option[String],
       None
     }
 
-  def validateRecommendation: Option[String] =
-    if (recommendation.isEmpty) {
-      Some("Recommendation must not be empty")
-    } else if (recommendation.length > 280) {
-      Some("Recommendation must be of 280 characters or less")
+  def validateDescription: Option[String] =
+    if (description.isEmpty) {
+      Some("Description must not be empty")
+    } else if (description.length > 280) {
+      Some("Description must be of 280 characters or less")
     } else {
       None
     }
@@ -105,13 +105,13 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
           recommendation.validateEmail orElse
             recommendation.validateName orElse
             recommendation.validateTopic orElse
-            recommendation.validateRecommendation
+            recommendation.validateDescription
 
         validatedRecommendation.fold {
           val recommendationInfo = RecommendationInfo(recommendation.email,
             recommendation.name,
             recommendation.topic,
-            recommendation.recommendation,
+            recommendation.description,
             BSONDateTime(dateTimeUtility.nowMillis),
             BSONDateTime(dateTimeUtility.nowMillis))
 
@@ -157,7 +157,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
             Recommendation(Some(email),
               recommendation.name,
               recommendation.topic,
-              recommendation.recommendation,
+              recommendation.description,
               Some(new Date(recommendation.submissionDate.value).toString),
               Some(new Date(recommendation.updateDate.value).toString),
               Some(recommendation.approved),
@@ -179,7 +179,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
             Recommendation(Some(email),
               recommendation.name,
               recommendation.topic,
-              recommendation.recommendation,
+              recommendation.description,
               Some(new Date(recommendation.submissionDate.value).toString),
               Some(new Date(recommendation.updateDate.value).toString),
               Some(recommendation.approved),

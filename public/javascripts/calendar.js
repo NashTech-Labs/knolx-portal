@@ -272,7 +272,7 @@ function deleteSlot(slotId) {
 
                     jsRoutes.controllers.CalendarController.deleteSlot(slotId).ajax(
                         {
-                            type: 'GET',
+                            type: 'POST',
                             beforeSend: function (request) {
                                 var csrfToken = document.getElementById('csrfToken').value;
 

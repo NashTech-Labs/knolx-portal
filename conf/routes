@@ -111,5 +111,4 @@ GET           /knolx/sessions/pendingsessions                       controllers.
 POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.allSessionForAdmin
 GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)
 POST          /knolx/sessions/insertslot                            controllers.CalendarController.insertSlot
-GET           /knolx/sessions/deleteslot                            controllers.CalendarController.deleteSlot(id: String)
 POST          /knolx/sessions/deleteslot                            controllers.CalendarController.deleteSlot(id: String)

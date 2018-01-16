@@ -53,7 +53,7 @@ function Recommendation() {
                 action: function () {
                     var username = this.$content.find('#user-name').val();
                     var recommendationTopic = this.$content.find('#recommend-topic').val();
-                    var recommendation = this.$content.find('#recommend-text').val();
+                    var description = this.$content.find('#recommend-text').val();
                     if (!username) {
                         $.alert('Username must not be empty');
                         return false;
@@ -66,11 +66,11 @@ function Recommendation() {
                         $.alert('Recommendation Topic must be of 140 characters or less');
                         return false;
                     }
-                    if (!recommendation) {
+                    if (!description) {
                         $.alert('Description must not be empty');
                         return false;
                     }
-                    if (recommendation.length > 280) {
+                    if (description.length > 280) {
                         $.alert('Description must be of 280 characters or less');
                         return false;
                     }

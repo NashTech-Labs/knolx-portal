@@ -14,7 +14,7 @@ $(function () {
 
     $('#calendar').fullCalendar({
         loading: function () {
-            $("#calendar").css("opacity", "0.6");
+            $("#calendar").css("opacity", "0.3");
             $("#loader").show();
         },
         eventAfterAllRender: function () {

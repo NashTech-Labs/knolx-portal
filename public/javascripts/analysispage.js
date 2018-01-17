@@ -34,7 +34,7 @@ function analysis(startDate, EndDate) {
     pieChart(startDate, EndDate);
     columnChart(startDate, EndDate);
     lineGraph(startDate, EndDate);
-    leaderBoard(startDate, EndDate);
+    //leaderBoard(startDate, EndDate);
 }
 
 function columnChart(startDate, EndDate) {
@@ -258,6 +258,7 @@ function lineGraph(startDate, EndDate) {
         })
 }
 
+/*
 function leaderBoard(startDate, EndDate) {
 
     var formData = {
@@ -292,3 +293,4 @@ function leaderBoard(startDate, EndDate) {
         }
     )
 }
+*/

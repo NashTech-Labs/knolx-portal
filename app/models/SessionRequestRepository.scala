@@ -28,6 +28,8 @@ case class SessionRequestInfo(email: String,
                               approved: Boolean = false,
                               decline: Boolean = false,
                               freeSlot: Boolean = false,
+                              recommendationId: String = "",
+                              notification: Boolean = false,
                               _id: BSONObjectID = BSONObjectID.generate
                              )
 
@@ -49,7 +51,6 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
       case id: String if id.nonEmpty => BSONDocument("_id" -> BSONDocument("$oid" -> approveSessionInfo.sessionId))
       case _                         => BSONDocument("_id" -> BSONObjectID.generate())
     }
-
     val modifier =
       BSONDocument(
         "$set" -> BSONDocument(
@@ -61,7 +62,9 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           "meetup" -> approveSessionInfo.meetup,
           "approved" -> approveSessionInfo.approved,
           "decline" -> approveSessionInfo.decline,
-          "freeSlot" -> approveSessionInfo.freeSlot
+          "freeSlot" -> approveSessionInfo.freeSlot,
+          "notification" -> approveSessionInfo.notification,
+          "recommendationId" -> approveSessionInfo.recommendationId
         )
       )
 
@@ -94,8 +97,9 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
     val condition = keyword match {
       case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
-        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false))
-      case None      => Json.obj("freeSlot" -> BSONDocument("$eq" -> false))
+        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false),
+        "notification" -> BSONDocument("$eq" -> false))
+      case None      => Json.obj("freeSlot" -> BSONDocument("$eq" -> false), "notification" -> BSONDocument("$eq" -> false))
     }
 
     collection
@@ -146,7 +150,8 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
   def getAllPendingSession: Future[List[SessionRequestInfo]] = {
     val selector = BSONDocument("freeSlot" -> BSONDocument("$eq" -> false),
       "approved" -> BSONDocument("$eq" -> false),
-      "decline" -> BSONDocument("$eq" -> false))
+      "decline" -> BSONDocument("$eq" -> false),
+      "notification" -> BSONDocument("$eq" -> false))
 
     collection
       .flatMap(jsonCollection =>
@@ -156,7 +161,7 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
           .collect[List](-1, FailOnError[List[SessionRequestInfo]]()))
   }
 
-  def deleteFreeSlot(id: String): Future[WriteResult] = {
+  def deleteSlot(id: String): Future[WriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
     collection

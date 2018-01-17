@@ -1,7 +1,7 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET           /                                                     controllers.HomeController.index
+GET           /                                                      controllers.HomeController.index
 
 # User
 GET           /login                                                controllers.UsersController.login
@@ -25,91 +25,103 @@ POST          /user/userList                                        controllers.
 GET           /user/verification                                    controllers.UsersController.approveUser(id: String)
 
 #User Analysis
-GET           /user/knolx/analysis                                  controllers.KnolxUserAnalysisController.renderUserAnalyticsPage
-POST          /user/knolx/analysis                                  controllers.KnolxUserAnalysisController.userSessionsResponseComparison(email: String)
-POST          /user/knolx/analysis/bancount                         controllers.KnolxUserAnalysisController.getBanCount(email: String)
-POST          /user/knolx/analysis/totalknolx                       controllers.KnolxUserAnalysisController.getUserTotalKnolx(email: String)
-POST          /user/knolx/analysis/totalmeetups                     controllers.KnolxUserAnalysisController.getUserTotalMeetUps(email: String)
-POST          /user/knolx/analysis/totaldidnotattendsessions        controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email: String)
+GET           /user/knolx/analysis                                   controllers.KnolxUserAnalysisController.renderUserAnalyticsPage
+POST          /user/knolx/analysis                                   controllers.KnolxUserAnalysisController.userSessionsResponseComparison(email: String)
+POST          /user/knolx/analysis/bancount                          controllers.KnolxUserAnalysisController.getBanCount(email: String)
+POST          /user/knolx/analysis/totalknolx                        controllers.KnolxUserAnalysisController.getUserTotalKnolx(email: String)
+POST          /user/knolx/analysis/totalmeetups                      controllers.KnolxUserAnalysisController.getUserTotalMeetUps(email: String)
+POST          /user/knolx/analysis/totaldidnotattendsessions         controllers.KnolxUserAnalysisController.getUserDidNotAttendSessionCount(email: String)
 
 # Upload
-POST          /uploadapi/:sessionId/upload                          controllers.YoutubeController.upload(sessionId: String)
-GET           /uploadapi/:sessionId/videoid                         controllers.YoutubeController.getVideoId(sessionId: String)
-GET           /uploadapi/:sessionId/progress                        controllers.YoutubeController.getPercentageUploaded(sessionId: String)
-POST          /uploadapi/:sessionId/update                          controllers.YoutubeController.updateVideo(sessionId)
-GET           /uploadapi/:sessionId/cancel                          controllers.YoutubeController.cancel(sessionId: String)
-GET           /uploadapi/:sessionId/checkifuploading                controllers.YoutubeController.checkIfUploading(sessionId: String)
-GET           /uploadapi/:sessionId/checkiftemporaryurlexists       controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
+POST          /uploadapi/:sessionId/upload                           controllers.YoutubeController.upload(sessionId: String)
+GET           /uploadapi/:sessionId/videoid                          controllers.YoutubeController.getVideoId(sessionId: String)
+GET           /uploadapi/:sessionId/progress                         controllers.YoutubeController.getPercentageUploaded(sessionId: String)
+POST          /uploadapi/:sessionId/update                           controllers.YoutubeController.updateVideo(sessionId)
+GET           /uploadapi/:sessionId/cancel                           controllers.YoutubeController.cancel(sessionId: String)
+GET           /uploadapi/:sessionId/checkifuploading                 controllers.YoutubeController.checkIfUploading(sessionId: String)
+GET           /uploadapi/:sessionId/checkiftemporaryurlexists        controllers.YoutubeController.checkIfTemporaryUrlExists(sessionId: String)
 
 # Session
-GET           /session                                              controllers.SessionsController.sessions
-POST          /session/search                                       controllers.SessionsController.searchSessions
-GET           /session/manage                                       controllers.SessionsController.manageSessions()
-POST          /session/manage/search                                controllers.SessionsController.searchManageSession
-GET           /session/create                                       controllers.SessionsController.create
-POST          /session/create                                       controllers.SessionsController.createSession
-GET           /session/delete                                       controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
-POST          /session/update                                       controllers.SessionsController.updateSession
-GET           /session/update                                       controllers.SessionsController.update(id: String)
-GET           /session/:sessionId/cancel                            controllers.SessionsController.cancelScheduledSession(sessionId: String)
-GET           /session/:sessionId/schedule                          controllers.SessionsController.scheduleSession(sessionId: String)
-GET           /session/content/:sessionId                           controllers.SessionsController.shareContent(sessionId: String)
-GET           /session/sendemail                                    controllers.SessionsController.sendEmailToPresenter(sessionId: String)
-GET           /session/approvesession                               controllers.SessionsController.renderScheduleSessionByAdmin(sessionId: String)
-POST          /session/approvesession                               controllers.SessionsController.approveSessionByAdmin(sessionId: String)
+GET           /session                                               controllers.SessionsController.sessions
+POST          /session/search                                        controllers.SessionsController.searchSessions
+GET           /session/manage                                        controllers.SessionsController.manageSessions()
+POST          /session/manage/search                                 controllers.SessionsController.searchManageSession
+GET           /session/create                                        controllers.SessionsController.create
+POST          /session/create                                        controllers.SessionsController.createSession
+GET           /session/delete                                        controllers.SessionsController.deleteSession(id: String, pageNumber:Int)
+POST          /session/update                                        controllers.SessionsController.updateSession
+GET           /session/update                                        controllers.SessionsController.update(id: String)
+GET           /session/:sessionId/cancel                             controllers.SessionsController.cancelScheduledSession(sessionId: String)
+GET           /session/:sessionId/schedule                           controllers.SessionsController.scheduleSession(sessionId: String)
+GET           /session/content/:sessionId                            controllers.SessionsController.shareContent(sessionId: String)
+GET           /session/sendemail                                     controllers.SessionsController.sendEmailToPresenter(sessionId: String)
+GET           /session/approvesession                                controllers.SessionsController.renderScheduleSessionByAdmin(sessionId: String, recommendationId: Option[String])
+POST          /session/approvesession                                controllers.SessionsController.approveSessionByAdmin(sessionId: String, recommendationId: Option[String])
 
 # Feedback
-GET           /feedbackform/manage/:pageNumber                      controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
-GET           /feedbackform/create                                  controllers.FeedbackFormsController.feedbackForm
-POST          /feedbackform/create                                  controllers.FeedbackFormsController.createFeedbackForm
-GET           /feedbackform/update                                  controllers.FeedbackFormsController.update(id: String)
-POST          /feedbackform/update                                  controllers.FeedbackFormsController.updateFeedbackForm
-GET           /feedbackform/delete                                  controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
-GET           /feedbackform/preview                                 controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
-POST          /feedbackform/submit                                  controllers.FeedbackFormsResponseController.storeFeedbackFormResponse
-GET           /feedbackform/response                                controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
-GET           /feedbackresponse/fetch                               controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse(id: String)
-GET           /jsRoutes                                             controllers.JavascriptRouter.jsRoutes
+GET           /feedbackform/manage/:pageNumber                       controllers.FeedbackFormsController.manageFeedbackForm(pageNumber: Int)
+GET           /feedbackform/create                                   controllers.FeedbackFormsController.feedbackForm
+POST          /feedbackform/create                                   controllers.FeedbackFormsController.createFeedbackForm
+GET           /feedbackform/update                                   controllers.FeedbackFormsController.update(id: String)
+POST          /feedbackform/update                                   controllers.FeedbackFormsController.updateFeedbackForm
+GET           /feedbackform/delete                                   controllers.FeedbackFormsController.deleteFeedbackForm(id: String)
+GET           /feedbackform/preview                                  controllers.FeedbackFormsController.getFeedbackFormPreview(id: String)
+POST          /feedbackform/submit                                   controllers.FeedbackFormsResponseController.storeFeedbackFormResponse
+GET           /feedbackform/response                                 controllers.FeedbackFormsResponseController.getFeedbackFormsForToday
+GET           /feedbackresponse/fetch                                controllers.FeedbackFormsResponseController.fetchFeedbackFormResponse(id: String)
+GET           /jsRoutes                                              controllers.JavascriptRouter.jsRoutes
 
 # Reports
-GET           /reports/user                                         controllers.FeedbackFormsReportController.renderUserFeedbackReports
-POST          /reports/user                                         controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
-GET           /reports/user/responses                               controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
-GET           /reports/manage                                       controllers.FeedbackFormsReportController.renderAllFeedbackReports
-POST          /reports/manage                                       controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
-GET           /reports/manage/responses                             controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
-GET           /reports/manage/response                              controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
+GET           /reports/user                                          controllers.FeedbackFormsReportController.renderUserFeedbackReports
+POST          /reports/user                                          controllers.FeedbackFormsReportController.manageUserFeedbackReports(pageNumber: Int)
+GET           /reports/user/responses                                controllers.FeedbackFormsReportController.fetchUserResponsesBySessionId(id: String)
+GET           /reports/manage                                        controllers.FeedbackFormsReportController.renderAllFeedbackReports
+POST          /reports/manage                                        controllers.FeedbackFormsReportController.manageAllFeedbackReports(pageNumber: Int)
+GET           /reports/manage/responses                              controllers.FeedbackFormsReportController.fetchAllResponsesBySessionId(id: String)
+GET           /reports/manage/response                               controllers.FeedbackFormsReportController.searchAllResponsesBySessionId(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET           /assets/*file                                         controllers.Assets.versioned(path="/public", file: Asset)
-GET           /favicon.ico                                          controllers.Assets.at(path="/public/images", file="favicon.png")
+GET           /assets/*file                                          controllers.Assets.versioned(path="/public", file: Asset)
+GET           /favicon.ico                                           controllers.Assets.at(path="/public/images", file="favicon.png")
 
 #Category
-GET           /category                                             controllers.SessionsCategoryController.renderCategoryPage
-PUT           /category/add                                         controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
-POST          /category/update                                      controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)
-DELETE        /category/delete                                      controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
-GET           /category/all                                         controllers.SessionsCategoryController.getCategory
-GET           /category/subcategories                               controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
-PUT           /subcategory/add                                      controllers.SessionsCategoryController.addSubCategory(categoryName: String, subCategory: String)
-POST          /subcategory/update                                   controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
-DELETE        /subcategory/delete                                   controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
-GET           /subcategory/topics                                   controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
+GET           /category                                              controllers.SessionsCategoryController.renderCategoryPage
+PUT           /category/add                                          controllers.SessionsCategoryController.addPrimaryCategory(categoryName: String)
+POST          /category/update                                       controllers.SessionsCategoryController.modifyPrimaryCategory(oldCategoryName: String, newCategoryName: String)
+DELETE        /category/delete                                       controllers.SessionsCategoryController.deletePrimaryCategory(categoryName: String)
+GET           /category/all                                          controllers.SessionsCategoryController.getCategory
+GET           /category/subcategories                                controllers.SessionsCategoryController.getSubCategoryByPrimaryCategory(categoryName: String)
+PUT           /subcategory/add                                       controllers.SessionsCategoryController.addSubCategory(categoryName: String, subCategory: String)
+POST          /subcategory/update                                    controllers.SessionsCategoryController.modifySubCategory(categoryName: String, oldSubCategoryName: String, newSubCategoryName: String)
+DELETE        /subcategory/delete                                    controllers.SessionsCategoryController.deleteSubCategory(categoryName: String, subCategoryName: String)
+GET           /subcategory/topics                                    controllers.SessionsCategoryController.getTopicsBySubCategory(categoryName: String, subCategory: String)
 
 # Analysis
-GET           /knolx/analysis                                       controllers.KnolxAnalysisController.renderAnalysisPage
-POST          /knolx/analysis/columnchart                           controllers.KnolxAnalysisController.renderColumnChart
-POST          /knolx/analysis/piechart                              controllers.KnolxAnalysisController.renderPieChart
-POST          /knolx/analysis/linechart                             controllers.KnolxAnalysisController.renderLineChart
-POST          /knolx/analysis/leaderboard                           controllers.KnolxAnalysisController.leaderBoard
+GET           /knolx/analysis                                        controllers.KnolxAnalysisController.renderAnalysisPage
+POST          /knolx/analysis/columnchart                            controllers.KnolxAnalysisController.renderColumnChart
+POST          /knolx/analysis/piechart                               controllers.KnolxAnalysisController.renderPieChart
+POST          /knolx/analysis/linechart                              controllers.KnolxAnalysisController.renderLineChart
+POST          /knolx/analysis/leaderboard                            controllers.KnolxAnalysisController.leaderBoard
 
 #Calendar
-GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage
+GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage()
 GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
-GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, isFreeSlot: Boolean)
-POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String)
+GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, recommendationId: Option[String], isFreeSlot: Boolean)
+POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String, recommendationId: Option[String])
 GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.pendingSessions
 POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.allSessionForAdmin
 GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)
-GET           /knolx/sessions/insertfreeslot                        controllers.CalendarController.insertFreeSlot(date: String)
-POST          /knolx/sessions/deletefreeslot                        controllers.CalendarController.deleteFreeSlot(id: String)
+POST          /knolx/sessions/insertslot                            controllers.CalendarController.insertSlot
+POST          /knolx/sessions/deleteslot                            controllers.CalendarController.deleteSlot(id: String)
+
+#Recommendation
+GET           /recommendation                                        controllers.RecommendationController.renderRecommendationPage
+POST          /recommendation                                        controllers.RecommendationController.recommendationList(pageNumber: Int, filter: String, sortBy: String)
+POST          /recommendation/add                                    controllers.RecommendationController.addRecommendation
+POST          /recommendation/approve                                controllers.RecommendationController.approveRecommendation(recommendationId: String)
+POST          /recommendation/decline                                controllers.RecommendationController.declineRecommendation(recommendationId: String)
+POST          /recommendation/upvote                                 controllers.RecommendationController.upVote(recommendationId: String)
+POST          /recommendation/downvote                               controllers.RecommendationController.downVote(recommendationId: String)
+POST          /recommendation/done                                   controllers.RecommendationController.doneRecommendation(recommendationId: String)
+POST          /recommendation/pending                                controllers.RecommendationController.pendingRecommendation(recommendationId: String)
+GET           /recommendation/allpending                             controllers.RecommendationController.allPendingRecommendations

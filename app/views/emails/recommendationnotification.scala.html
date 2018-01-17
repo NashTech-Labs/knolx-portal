@@ -1,0 +1,19 @@
+@import java.util.Date
+@(recommendationInfo: RecommendationInfo)
+
+<p>Hi,</p>
+<p>
+    A recommendation has been given by <strong>@recommendationInfo.name</strong> with following details
+</p>
+<ul>
+    @if(recommendationInfo.email.get.nonEmpty) {
+        <li>Email -> @recommendationInfo.email.get</li>
+    }
+    <li>Topic -> @recommendationInfo.topic</li>
+    <li>Description -> @recommendationInfo.description</li>
+    <li>Date -> @(new Date(recommendationInfo.submissionDate.value))</li>
+</ul>
+
+<p>
+Please review the recommendation details and take the required action: <a href="http://knolx.knoldus.com/recommendation">Click Here</a>
+</p>

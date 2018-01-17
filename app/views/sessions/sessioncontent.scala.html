@@ -11,7 +11,7 @@
     <div class="col-md-12">
         <div class="col-md-6 text-center" style="margin-top: 25px;">
             @session.slideShareURL.fold{
-            @sessionNotFound("Slides")
+                <h3 style="margin-top: 8em;">Slides not available</h3>
             } { slideShareURL =>
             <iframe src="//@slideShareURL" class="frame-panel" allowfullscreen></iframe>
 
@@ -37,7 +37,7 @@
         </div>
         <div class="col-md-6 text-center" style="margin-top: 25px;">
             @session.youtubeURL.fold{
-            @sessionNotFound("Video Session")
+                <h3 style="margin-top: 8em;">Video Session not available</h3>
             } { youtubeURL =>
             <iframe src="//@youtubeURL" allowfullscreen class="frame-panel"></iframe>
 

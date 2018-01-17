@@ -254,7 +254,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
       ).map(_.flatMap(_ ("email").asOpt[String]))
-
   }
 
   def approveUser(id: String): Future[UpdateWriteResult] = {
@@ -265,16 +264,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
-  }
-
-  def getUserById(id: String): Future[Option[UserInfo]] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(selector)
-          .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
 }

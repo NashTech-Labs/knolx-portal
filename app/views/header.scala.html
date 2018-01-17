@@ -36,6 +36,9 @@
                         <li class="alignLinks">
                             <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
                         </li>
+                        <li class="alignLinks">
+                            <a href="@routes.RecommendationController.renderRecommendationPage()"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
+                        </li>
                     </ul>
                 </li>
                 <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
@@ -83,6 +86,12 @@
                 <a href="@routes.CalendarController.renderCalendarPage">
                     <i class="fa fa-calendar"></i>
                     <span>Book a Session</span></a>
+            </li>
+
+            <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Suggest a Topic">
+                <a href="@routes.RecommendationController.renderRecommendationPage">
+                    <i class="fa fa-inbox"></i>
+                    <span>Suggest a Topic</span></a>
             </li>
 
             @if(!SessionHelper.isLoggedIn) {

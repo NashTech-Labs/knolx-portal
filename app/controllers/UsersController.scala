@@ -3,8 +3,7 @@ package controllers
 import java.util.{Date, UUID}
 import javax.inject._
 
-import actors.VerificationLinkScheduler.ScheduleLinkExpiration
-import actors.{EmailActor, UsersBanScheduler}
+import actors.EmailActor
 import akka.actor.ActorRef
 import controllers.EmailHelper._
 import models.{ForgotPasswordRepository, PasswordChangeRequestInfo, UpdatedUserInfo, UsersRepository}
@@ -166,7 +165,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
               .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"User $email successfully created")
-                  sendVerificationEmail(email)
+                  val domain = request.host
+                  sendVerificationEmail(email, domain)
                 } else {
                   Logger.error(s"Something went wrong while creating a new user $email")
                   Future.successful(Redirect(routes.HomeController.index())
@@ -181,7 +181,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     )
   }
 
-  private def sendVerificationEmail(email: String): Future[Result] = {
+  private def sendVerificationEmail(email: String, domain: String): Future[Result] = {
     usersRepository.getByEmail(email) map {
       _.fold {
         Redirect(routes.UsersController.register())
@@ -189,7 +189,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       } { userInfo =>
         Logger.info(s"Sending email to $email with verification link")
         emailManager ! EmailActor.SendEmail(List(email), fromEmail, "Knolx Portal: Email Verification",
-          views.html.emails.verification(userInfo._id.stringify).toString)
+          views.html.emails.verification(userInfo._id.stringify, domain).toString)
         Redirect(routes.UsersController.login())
           .flashing("message" -> "A verification email has been sent to your email. Please click on the sent link to verify your account.")
       }
@@ -197,22 +197,16 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   def approveUser(id: String): Action[AnyContent] = action.async { implicit request =>
-    Logger.info(s"Approving user with id $id")
     val username = configuration.get[String]("session.username")
-    usersRepository.getUserById(id) flatMap {
-      _.fold {
-        Future.successful(Redirect(routes.UsersController.login())
-          .flashing("error" -> "The requested account was not found."))
-      } { userInfo =>
-        usersRepository.approveUser(id) map { result =>
-          if (result.ok) {
-            Redirect(routes.HomeController.index())
-              .withSession(username -> EncryptionUtility.encrypt(userInfo.email))
-          } else {
-            Redirect(routes.UsersController.login())
-              .flashing("error" -> "Something went wrong while verifying this account.")
-          }
-        }
+    Logger.info(s"Approving user with id $id")
+    usersRepository.approveUser(id) map { result =>
+      if (result.ok) {
+        Redirect(routes.UsersController.login())
+          .withSession(request.session - username)
+          .flashing("message" -> "Your account has been successfully verified. Please login again to continue.")
+      } else {
+        Redirect(routes.UsersController.login())
+          .flashing("error" -> "Something went wrong while verifying this account.")
       }
     }
   }
@@ -221,8 +215,10 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     val username = configuration.get[String]("session.username")
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
     if (emailFromSession.isEmpty) {
+      Logger.info("Email is empty in session")
       Future.successful(Ok(views.html.users.login(loginForm)))
     } else {
+      Logger.info("Email is not empty in session")
       Future.successful(Redirect(routes.HomeController.index()))
     }
   }
@@ -260,9 +256,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                       "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                     .flashing("message" -> "Welcome back!")
                 case (false, false) =>
-                  Redirect(routes.HomeController.index())
-                    .withSession(username -> EncryptionUtility.encrypt(email))
-                    .flashing("message" -> "Welcome back!")
+                  if(user.approved) {
+                    Redirect(routes.HomeController.index())
+                      .withSession(username -> EncryptionUtility.encrypt(email))
+                      .flashing("message" -> "Welcome back!")
+                  } else {
+                    Redirect(routes.UsersController.login())
+                      .flashing("error" -> "Please verify your account first to continue.")
+                  }
               }
 
             } else {

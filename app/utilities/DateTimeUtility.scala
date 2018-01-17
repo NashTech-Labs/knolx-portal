@@ -60,5 +60,5 @@ class DateTimeUtility {
     val utilDate = yearMonthFormatDB.parse(stringDate)
     yearMonthFormat.format(utilDate)
   }
-}
 
+}

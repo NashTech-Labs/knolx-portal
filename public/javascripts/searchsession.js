@@ -38,6 +38,7 @@ function slide(keyword, pageNumber, pageSize) {
                 var page = sessionInfo["page"];
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
+                var mobileSessionsFound = "";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
                         usersFound += "<tr>" +
@@ -103,10 +104,26 @@ function slide(keyword, pageNumber, pageSize) {
                             slide(keyword, this.id, pageSize);
                         });
                     }
+
+                    const mq = window.matchMedia( "(max-width: 768px)" );
+
+                    if(mq.matches)
+                    {
+                        for (var session = 0; session < sessions.length; session++) {
+                            mobileSessionsFound += "<div>" + sessions[session].dateString +
+                                "</div>"
+                        }
+                        $('#main-session-table-mobile').html(mobileSessionsFound);
+                    }
                 } else {
                     $('#user-found').html(
                         "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
+
+                    $('#main-session-table-mobile').html(
+                        "<p class='col-md-12 text-center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></p>"
+                    );
+
                     $('.pagination').html("");
                 }
             },

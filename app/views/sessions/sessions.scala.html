@@ -47,7 +47,7 @@
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class=" manage-user-custom-table-margin">
-                    <table class="table table-responsive table-striped">
+                    <table class="table table-responsive table-striped" id="main-sessions-table">
                         <thead>
                             <tr class="table-header-color">
                                 <th>Date</th>
@@ -63,6 +63,9 @@
                         <tbody id="user-found">
                         </tbody>
                     </table>
+                    <div id="main-session-table-mobile">
+
+                    </div>
                 </div>
             </div>
             <div class="col-md-12" style="margin-bottom: 25px;">

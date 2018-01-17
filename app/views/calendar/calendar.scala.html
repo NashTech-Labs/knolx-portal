@@ -1,116 +1,119 @@
 @()(implicit request: Request[_], flash: Flash)
 
-@main("Book a Session") {
+    @main("Book a Session") {
 
-    <div style = "margin-top: 20px;"></div>
-    <div class = "row">
-        @if(!flash.isEmpty) {
-            @if(flash.get("message").isDefined) {
-                <div class="alert alert-success  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    @flash.get("message").fold("")(identity)
-                </div>
-            } else {
-                <div class="alert alert-danger  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
-                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                    @flash.get("error").fold("")(identity)
-                </div>
+        <div style = "margin-top: 20px;"></div>
+        <div class = "row">
+            @if(!flash.isEmpty) {
+                @if(flash.get("message").isDefined) {
+                    <div class="alert alert-success  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @flash.get("message").fold("")(identity)
+                    </div>
+                } else {
+                    <div class="alert alert-danger  alert-dismissable calendar-flashing" style="margin-bottom: 15px;">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @flash.get("error").fold("")(identity)
+                    </div>
+                }
             }
-        }
-        <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-        <div class="dayClickWindow"></div>
-        <div id='calendar'>
-            <table class="color-code-table" cellspacing="0" cellpadding="0">
-                <tr>
-                    <td><span class="freeslot-color-code color-code"></span></td>
-                    <td><span class="left-margin">Free Slot</span></td>
-                </tr>
-                <tr>
-                    <td><span class="pending-color-code color-code"></span></td>
-                    <td><span class="left-margin">Requested Session</span></td>
-                </tr>
-                <tr>
-                    <td><span class="meetup-color-code color-code"></span></td>
-                    <td><span class="left-margin">Scheduled Meetup</span></td>
-                </tr>
-                <tr>
-                    <td><span class="approve-color-code color-code"></span></td>
-                    <td><span class="left-margin">Scheduled Knolx</span></td>
-                </tr>
-            </table>
-        </div>
-        @if(SessionHelper.isAdmin) {
-            <div>
-                <h2>Requested Sessions</h2>
+            <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+            <div class="dayClickWindow"></div>
+            <div id="calendar-loader-container">
+                <div id="loader"></div>
+                <div id='calendar'>
+                    <table class="color-code-table" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td><span class="freeslot-color-code color-code"></span></td>
+                            <td><span class="left-margin">Free Slot</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="pending-color-code color-code"></span></td>
+                            <td><span class="left-margin">Requested Session</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="meetup-color-code color-code"></span></td>
+                            <td><span class="left-margin">Scheduled Meetup</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="approve-color-code color-code"></span></td>
+                            <td><span class="left-margin">Scheduled Knolx</span></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
+            @if(SessionHelper.isAdmin) {
+                <div>
+                    <h2>Requested Sessions</h2>
+                </div>
 
-            <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-                <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-                    Show
-                    <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
-                        padding-right: 2px !important; ">
-                    @for(value <- List(10, 20, 30, 40, 50)) {
-                        <option value="@value">@value</option>
-                    }
-                    </select>
-                    Entries
-                </label>
-                <div class="col-md-7"></div>
-                <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
-                    font-weight: normal;
-                    text-align: right">
-                    Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
-                        display: inline-block;
-                        width: 65%;"/>
-                </label>
-                <div class="col-md-12">
-                    <label class="col-md-3 filter-padding-left" style="font-weight: normal;
-                        cursor: default;">
-                        Showing
-                        <span id="starting-range"></span>
-                        to
-                        <span id="ending-range"></span>
-                        of
-                        <span id="total-range"></span>
+                <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
+                    <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+                        Show
+                        <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
+                            padding-right: 2px !important; ">
+                        @for(value <- List(10, 20, 30, 40, 50)) {
+                            <option value="@value">@value</option>
+                        }
+                        </select>
                         Entries
                     </label>
-                </div>
-                <div class="col-md-12 all-users">
-                    <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
-                    <div class="col-md-12" id="found-user-details"></div>
-                    <div class="manage-user-custom-table-margin">
-                        <table class="table table-responsive table-striped">
-                            <thead>
-                                <tr class="table-header-color">
-                                    <th>Date</th>
-                                    <th>Topic</th>
-                                    <th>Email</th>
-                                    <th>Type</th>
-                                    <th>Approved</th>
-                                    <th>Declined</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pending-sessions">
-                            </tbody>
-                        </table>
+                    <div class="col-md-7"></div>
+                    <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
+                        font-weight: normal;
+                        text-align: right">
+                        Search
+                        <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
+                            display: inline-block;
+                            width: 65%;"/>
+                    </label>
+                    <div class="col-md-12">
+                        <label class="col-md-3 filter-padding-left" style="font-weight: normal;
+                            cursor: default;">
+                            Showing
+                            <span id="starting-range"></span>
+                            to
+                            <span id="ending-range"></span>
+                            of
+                            <span id="total-range"></span>
+                            Entries
+                        </label>
                     </div>
-                </div>
-                <div class="col-md-12" style="margin-bottom: 25px;">
-                    <div class="center">
-                        <div class="v-align v-align-mobile">
-                            <ul class="pagination pagination-lg">
-                            </ul>
+                    <div class="col-md-12 all-users">
+                        <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
+                        <div class="col-md-12" id="found-user-details"></div>
+                        <div class="manage-user-custom-table-margin">
+                            <table class="table table-responsive table-striped">
+                                <thead>
+                                    <tr class="table-header-color">
+                                        <th>Date</th>
+                                        <th>Topic</th>
+                                        <th>Email</th>
+                                        <th>Type</th>
+                                        <th>Approved</th>
+                                        <th>Declined</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pending-sessions">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-12" style="margin-bottom: 25px;">
+                        <div class="center">
+                            <div class="v-align v-align-mobile">
+                                <ul class="pagination pagination-lg">
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
-            <script type="text/javascript" src="@routes.Assets.versioned("javascripts/pendingsession.js")"></script>
-        }
-    </div>
+                <script src="@routes.Assets.versioned("javascripts/paginate.js")" type="text/javascript"></script>
+                <script type="text/javascript" src="@routes.Assets.versioned("javascripts/pendingsession.js")"></script>
+            }
+        </div>
 
 
-    <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
-    <script type="text/javascript" src="@routes.Assets.versioned("javascripts/calendar.js")"></script>
-}
+        <script src="@routes.Assets.versioned("javascripts/collapsemanagemenu.js")" type="text/javascript"></script>
+        <script type="text/javascript" src="@routes.Assets.versioned("javascripts/calendar.js")"></script>
+    }

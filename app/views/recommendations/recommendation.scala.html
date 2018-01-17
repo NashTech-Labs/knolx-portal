@@ -116,9 +116,9 @@
                                     <tr style="background-color: white">
                                         <td class="recommendation-vote">
                                             <div>
-                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'black'}, click: (isLoggedIn && !upVote) ? function($id){ $root.upVoteByUser(id)}:null"></span>
+                                                <span class="recommendation-up" data-bind="style:{color: upVote?'green':'black'}, click: isLoggedIn ?  upVote ? null: function($id){ $root.upVoteByUser(id)}: function($id) { $root.redirectToLogin(id, 'upvote')}"></span>
                                                 <span data-bind="text: votes" class="vote-count"></span>
-                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'red':'black'}, click: (isLoggedIn && !downVote) ? function($id) { $root.downVoteByUser(id)}:null"></span>
+                                                <span class="recommendation-down" data-bind="style:{color: downVote ?'red':'black'}, click: isLoggedIn ?  downVote ? null: function($id){ $root.downVoteByUser(id)}: function($id) { $root.redirectToLogin(id, 'downvote')}"></span>
                                             </div>
                                         </td>
                                         <td class="recommendation-content">

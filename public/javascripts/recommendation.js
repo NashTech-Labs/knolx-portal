@@ -282,6 +282,32 @@ function Recommendation() {
         window.location = jsRoutes.controllers.CalendarController.renderCalendarPage(true).url
     };
 
+    self.redirectToLogin = function (id, vote) {
+        var form = document.createElement("form");
+
+        form.method = "POST";
+        var url = "";
+        if(vote === "upvote") {
+            url = jsRoutes.controllers.RecommendationController.upVote(id).url;
+        } else {
+            url = jsRoutes.controllers.RecommendationController.downVote(id).url;
+        }
+        form.action = url;
+        form.style.display = "none";
+        var csrfToken = $("#csrfToken").val();
+
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.value = csrfToken;
+        input.id = "csrfToken";
+        input.name = "csrfToken";
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    };
+
 
     function fetchRecommendationList(pageNumber, filter, sortBy) {
 
@@ -306,4 +332,3 @@ function Recommendation() {
     }
 
 }
-

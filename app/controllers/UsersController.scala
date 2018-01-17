@@ -13,6 +13,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.{Configuration, Logger}
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONDateTime
 import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
 
@@ -182,7 +183,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   }
 
   private def sendVerificationEmail(email: String, domain: String): Future[Result] = {
-    usersRepository.getByEmail(email) map {
+    usersRepository.getActiveByEmail(email) map {
       _.fold {
         Redirect(routes.UsersController.register())
           .flashing("error" -> "Something went wrong during the registration process. Please try again.")

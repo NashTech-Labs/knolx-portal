@@ -32,8 +32,7 @@ case class UserInfo(email: String,
                     banTill: BSONDateTime,
                     banCount: Int = 0,
                     _id: BSONObjectID = BSONObjectID.generate,
-                    approved: Boolean = false,
-                    linkExpired: Boolean = false)
+                    approved: Boolean = false)
 
 case class UpdatedUserInfo(email: String,
                            active: Boolean,

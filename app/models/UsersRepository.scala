@@ -256,16 +256,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
       ).map(_.flatMap(_ ("email").asOpt[String]))
   }
 
-  def expireLink(id: String): Future[UpdateWriteResult] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-
-    val modifier = BSONDocument("$set" -> BSONDocument("linkExpired" -> true))
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection.update(selector, modifier))
-  }
-
   def approveUser(id: String): Future[UpdateWriteResult] = {
     val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
 
@@ -274,18 +264,6 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
     collection
       .flatMap(jsonCollection =>
         jsonCollection.update(selector, modifier))
-
-
-  }
-
-  def getUser(id: String): Future[Option[UserInfo]] = {
-    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
-
-    collection
-      .flatMap(jsonCollection =>
-        jsonCollection
-          .find(selector)
-          .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
 }

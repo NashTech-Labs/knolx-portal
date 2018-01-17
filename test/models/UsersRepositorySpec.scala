@@ -7,7 +7,7 @@ import java.util.TimeZone
 import org.specs2.mock.Mockito
 import play.api.test.PlaySpecification
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.BSONDateTime
+import reactivemongo.bson.{BSONDateTime, BSONObjectID}
 import utilities.DateTimeUtility
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -22,9 +22,11 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
   private val millis = date.getTime
   private val ISTTimeZone = TimeZone.getTimeZone("Asia/Kolkata")
   private val ISTZoneId = ZoneId.of("Asia/Kolkata")
+  private val id = BSONObjectID.generate
   private val currentMillis = formatter.parse("2017-07-12T14:30:00").getTime
   val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
-  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false, coreMember = false, superUser = false, BSONDateTime(millis))
+  val document = UserInfo("test@knoldus.com", "password", "encryptedpassword", active = true, admin = false,
+    coreMember = false, superUser = false, BSONDateTime(millis),_id = id, approved = false)
 
   "Users Repository" should {
 
@@ -344,6 +346,13 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       val result = await(usersRepository.userListSearch(None))
 
       result must beEqualTo(List(document.email))
+    }
+
+    "approve new user" in {
+      val updateWriteResult: UpdateWriteResult = UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None)
+      val result = await(usersRepository.approveUser(id.stringify))
+
+      result must beEqualTo(updateWriteResult)
     }
 
   }

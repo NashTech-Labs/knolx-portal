@@ -790,6 +790,20 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo OK
     }
 
+    "approve new register user" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not approve user "
 
   }
 

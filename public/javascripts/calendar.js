@@ -13,6 +13,14 @@ window.onbeforeunload = function () {
 $(function () {
 
     $('#calendar').fullCalendar({
+        loading: function () {
+            $("#calendar").css("opacity", "0.6");
+            $("#loader").show();
+        },
+        eventAfterAllRender: function () {
+            $("#calendar").css("opacity", "1");
+            $("#loader").hide();
+        },
         events: function (start, end, timezone, callback) {
             getSessions(start.valueOf(), end.valueOf(), callback)
         },

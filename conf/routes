@@ -4,25 +4,25 @@
 GET           /                                                      controllers.HomeController.index
 
 # User
-GET           /login                                                controllers.UsersController.login
-POST          /login                                                controllers.UsersController.loginUser
-GET           /logout                                               controllers.UsersController.logout
-GET           /register                                             controllers.UsersController.register
-POST          /register                                             controllers.UsersController.createUser
-GET           /users/manage                                         controllers.UsersController.manageUser()
-POST          /users/search                                         controllers.UsersController.searchUser
-GET           /user/update                                          controllers.UsersController.getByEmail(email: String)
-POST          /user/update                                          controllers.UsersController.updateUser
-POST          /user/manage/update                                   controllers.UsersController.updateUserBySuperUser
-GET           /user/delete                                          controllers.UsersController.deleteUser(email: String)
-GET           /user/forgotpassword                                  controllers.UsersController.renderForgotPassword
-POST          /user/forgotpassword                                  controllers.UsersController.generateForgotPasswordToken
-GET           /user/forgotpassword/validate                         controllers.UsersController.validateForgotPasswordToken(token: String)
-POST          /user/forgotpassword/reset                            controllers.UsersController.resetPassword
-GET           /user/changepassword                                  controllers.UsersController.renderChangePassword
-POST          /user/changepassword                                  controllers.UsersController.changePassword
-POST          /user/userList                                        controllers.UsersController.usersList(email: Option[String])
-GET           /user/verification                                    controllers.UsersController.approveUser(id: String)
+GET           /login                                                 controllers.UsersController.login
+POST          /login                                                 controllers.UsersController.loginUser
+GET           /logout                                                controllers.UsersController.logout
+GET           /register                                              controllers.UsersController.register
+POST          /register                                              controllers.UsersController.createUser
+GET           /users/manage                                          controllers.UsersController.manageUser()
+POST          /users/search                                          controllers.UsersController.searchUser
+GET           /user/update                                           controllers.UsersController.getByEmail(email: String)
+POST          /user/update                                           controllers.UsersController.updateUser
+POST          /user/manage/update                                    controllers.UsersController.updateUserBySuperUser
+GET           /user/delete                                           controllers.UsersController.deleteUser(email: String)
+GET           /user/forgotpassword                                   controllers.UsersController.renderForgotPassword
+POST          /user/forgotpassword                                   controllers.UsersController.generateForgotPasswordToken
+GET           /user/forgotpassword/validate                          controllers.UsersController.validateForgotPasswordToken(token: String)
+POST          /user/forgotpassword/reset                             controllers.UsersController.resetPassword
+GET           /user/changepassword                                   controllers.UsersController.renderChangePassword
+POST          /user/changepassword                                   controllers.UsersController.changePassword
+POST          /user/userList                                         controllers.UsersController.usersList(email: Option[String])
+GET           /user/verification                                     controllers.UsersController.approveUser(id: String)
 
 #User Analysis
 GET           /user/knolx/analysis                                   controllers.KnolxUserAnalysisController.renderUserAnalyticsPage
@@ -104,15 +104,15 @@ POST          /knolx/analysis/linechart                              controllers
 POST          /knolx/analysis/leaderboard                            controllers.KnolxAnalysisController.leaderBoard
 
 #Calendar
-GET           /knolx/calendar                                       controllers.CalendarController.renderCalendarPage()
-GET           /knolx/calendar/sessions                              controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
-GET           /knolx/sessions/create                                controllers.CalendarController.renderCreateSessionByUser(sessionId: String, recommendationId: Option[String], isFreeSlot: Boolean)
-POST          /knolx/sessions/createsession                         controllers.CalendarController.createSessionByUser(sessionId: String, recommendationId: Option[String])
-GET           /knolx/sessions/pendingsessions                       controllers.CalendarController.pendingSessions
-POST          /knolx/sessions/pendingstatus                         controllers.CalendarController.allSessionForAdmin
-GET           /knolx/sessions/decline                               controllers.CalendarController.declineSession(sessionId: String)
-POST          /knolx/sessions/insertslot                            controllers.CalendarController.insertSlot
-POST          /knolx/sessions/deleteslot                            controllers.CalendarController.deleteSlot(id: String)
+GET           /knolx/calendar                                        controllers.CalendarController.renderCalendarPage()
+GET           /knolx/calendar/sessions                               controllers.CalendarController.calendarSessions(startDate: Long, endDate: Long)
+GET           /knolx/sessions/create                                 controllers.CalendarController.renderCreateSessionByUser(sessionId: String, recommendationId: Option[String], isFreeSlot: Boolean)
+POST          /knolx/sessions/createsession                          controllers.CalendarController.createSessionByUser(sessionId: String, recommendationId: Option[String])
+GET           /knolx/sessions/pendingsessions                        controllers.CalendarController.pendingSessions
+POST          /knolx/sessions/pendingstatus                          controllers.CalendarController.allSessionForAdmin
+GET           /knolx/sessions/decline                                controllers.CalendarController.declineSession(sessionId: String)
+POST          /knolx/sessions/insertslot                             controllers.CalendarController.insertSlot
+POST          /knolx/sessions/deleteslot                             controllers.CalendarController.deleteSlot(id: String)
 
 #Recommendation
 GET           /recommendation                                        controllers.RecommendationController.renderRecommendationPage

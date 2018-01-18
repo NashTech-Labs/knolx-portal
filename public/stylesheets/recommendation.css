@@ -251,31 +251,31 @@
 }
 
 .decline-filter {
-    padding-left: 40px !important;
-    float: right
+    float: right;
+    padding-left: 16px;
 }
 
 .approved-filter {
-    padding-left: 20px !important;
     float: right;
+    padding-left: 16px;
 }
 
 .done-filter {
-    padding-left: 40px !important;
-    float: right
+    float: right;
+    padding-left: 16px;
 }
 
 .pending-filter {
-    padding-left: 30px !important;
-    float: right
+    float: right;
+    padding-left: 16px;
 }
 
 .book-filter {
-    padding-left: 25px !important;
-    float: right
+    float: right;
+    padding-left: 16px;
 }
 
 .all-filter {
-    width: fit-content;
-    float: right
+    float: right;
+    padding-left: 16px;
 }

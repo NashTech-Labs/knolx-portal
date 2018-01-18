@@ -259,6 +259,7 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
   }
 
   def downVote(recommendationId: String): Action[AnyContent] = action.async { implicit request =>
+
     if (!SessionHelper.isLoggedIn) {
       val email = SessionHelper.email
       recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>

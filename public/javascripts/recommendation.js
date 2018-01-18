@@ -251,7 +251,6 @@ function Recommendation() {
         )
     };
 
-
     self.approveByAdmin = function (id) {
         jsRoutes.controllers.RecommendationController.approveRecommendation(id).ajax(
             {

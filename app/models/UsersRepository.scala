@@ -5,14 +5,12 @@ import javax.inject.Inject
 
 import models.UserJsonFormats._
 import play.api.libs.json._
-import reactivemongo.play.json.BSONFormats.BSONDocumentFormat
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import utilities.{DateTimeUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global

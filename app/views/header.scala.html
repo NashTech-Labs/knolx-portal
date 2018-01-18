@@ -167,6 +167,25 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
+                    <ul class="nav navbar-nav navbar-right" >
+                    <li class="dropdown alignLinks">
+                        <a href="#" class="notification-icon dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                            <span class="number-circle"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="alignLinks">
+                                <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
+                            </li>
+                            <li class="alignLinks">
+                                <a href="@routes.RecommendationController.renderRecommendationPage()"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
+                            </li>
+                        </ul>
+                    </li>
+                    </ul>
+                    <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
+                }
                 <span class="main-logo" >
                     <a href="@routes.SessionsController.sessions()" class="pull-left logo">
                         <img src='@routes.Assets.versioned("images/logo3.png")' style="padding-left: 15px;">
@@ -260,20 +279,6 @@
                                 <span>Register</span></a>
                         </li>
                     } else {
-                        @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
-                            <li class="dropdown alignLinks">
-                                <a href="#" class="notification-icon dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fa fa-bullhorn" aria-hidden="true"></i>
-                                    <span class="number-circle"></span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li class="alignLinks">
-                                        <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
-                        }
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-right: 30px;">
                                 <i class="fa fa-user-circle-o"></i> <span>@SessionHelper.email.split("@")(0).split('.')(0).capitalize

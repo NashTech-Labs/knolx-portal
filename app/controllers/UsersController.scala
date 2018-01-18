@@ -13,7 +13,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.{Configuration, Logger}
-import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.BSONDateTime
 import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
 
@@ -216,10 +215,8 @@ class UsersController @Inject()(messagesApi: MessagesApi,
     val username = configuration.get[String]("session.username")
     val emailFromSession = EncryptionUtility.decrypt(request.session.get(username).getOrElse(""))
     if (emailFromSession.isEmpty) {
-      Logger.info("Email is empty in session")
       Future.successful(Ok(views.html.users.login(loginForm)))
     } else {
-      Logger.info("Email is not empty in session")
       Future.successful(Redirect(routes.HomeController.index()))
     }
   }

@@ -162,15 +162,13 @@
     <nav id="mobile-navbar" class="navbar navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <button type="button" class="navbar-toggle margin-left" data-toggle="collapse" data-target="#myNavbar">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
                 @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
-                    <ul class="nav navbar-nav navbar-right" >
-                    <li class="dropdown alignLinks">
-                        <a href="#" class="notification-icon dropdown-toggle" data-toggle="dropdown">
+                        <a href="#" class="notification-icon dropdown-toggle navbar-nav dropdown alignLinks float-right" data-toggle="dropdown">
                             <i class="fa fa-bullhorn" aria-hidden="true"></i>
                             <span class="number-circle"></span>
                         </a>
@@ -182,8 +180,6 @@
                                 <a href="@routes.RecommendationController.renderRecommendationPage()"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
                             </li>
                         </ul>
-                    </li>
-                    </ul>
                     <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
                 }
                 <span class="main-logo" >

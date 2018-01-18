@@ -279,3 +279,7 @@
     width: fit-content;
     float: right
 }
+
+.full-width {
+    width: 100%;
+}

@@ -264,4 +264,12 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
         jsonCollection.update(selector, modifier))
   }
 
+  def getUserById(id: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("_id" -> BSONDocument("$oid" -> id)))
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
+  }
+
 }

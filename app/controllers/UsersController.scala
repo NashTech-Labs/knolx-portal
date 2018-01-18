@@ -199,14 +199,28 @@ class UsersController @Inject()(messagesApi: MessagesApi,
   def approveUser(id: String): Action[AnyContent] = action.async { implicit request =>
     val username = configuration.get[String]("session.username")
     Logger.info(s"Approving user with id $id")
-    usersRepository.approveUser(id) map { result =>
-      if (result.ok) {
-        Redirect(routes.UsersController.login())
+    usersRepository.getUserById(id) flatMap {
+      _.fold {
+        Future.successful(Redirect(routes.UsersController.register())
           .withSession(request.session - username)
-          .flashing("message" -> "Your account has been successfully verified. Please login again to continue.")
-      } else {
-        Redirect(routes.UsersController.login())
-          .flashing("error" -> "Something went wrong while verifying this account.")
+          .flashing("message" -> "Your account is not registered with us. Please register to continue."))
+      } { userInfo =>
+        if (userInfo.approved) {
+          Future.successful(Redirect(routes.UsersController.login())
+            .withSession(request.session - username)
+            .flashing("message" -> "Your account has been already approved. Please login to continue."))
+        } else {
+          usersRepository.approveUser(id) map { result =>
+            if (result.ok) {
+              Redirect(routes.UsersController.login())
+                .withSession(request.session - username)
+                .flashing("message" -> "Your account has been successfully verified. Please login again to continue.")
+            } else {
+              Redirect(routes.UsersController.login())
+                .flashing("error" -> "Something went wrong while verifying this account.")
+            }
+          }
+        }
       }
     }
   }

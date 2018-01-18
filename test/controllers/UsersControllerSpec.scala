@@ -792,8 +792,10 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
 
     "approve newly registered user" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns emailObject
 
       val result = controller.approveUser(_id.stringify)(
         FakeRequest()
@@ -803,10 +805,53 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "do not approve newly registered user" in new WithTestApplication {
+    "do not approve user if he/she is not registered" in new WithTestApplication {
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns Future.successful(None)
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not approve user if he/she is already approved" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val approvedEmailObject = Future.successful(Some(UserInfo("test@knoldus.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
+        "BCrypt",
+        active = true,
+        admin = true,
+        coreMember = false,
+        superUser = false,
+        BSONDateTime(currentMillis),
+        0,
+        _id,
+        approved = true)))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns emailObject
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not approve newly registered user due to DB upsertion error" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns emailObject
 
       val result = controller.approveUser(_id.stringify)(
         FakeRequest()

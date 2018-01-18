@@ -355,6 +355,12 @@ class UsersRepositorySpec extends PlaySpecification with Mockito {
       result must beEqualTo(updateWriteResult)
     }
 
+    "return user by id" in {
+      val result = await(usersRepository.getUserById(id.stringify))
+
+      result.map(_.email) must be equalTo Some(document.email)
+    }
+
   }
 
 }

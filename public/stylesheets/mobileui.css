@@ -36,6 +36,26 @@
         display: none;
     }
 
+    .float-right {
+        float: right;
+    }
+
+    .margin-left {
+        margin-left: 30px !important;
+    }
+
+    .notification-icon {
+        font-size: 20px;
+        border-left: 2px solid;
+        border-right: 2px solid;
+        padding: 5px 15px;
+    }
+
+    a[aria-expanded="true"] {
+        color: black;
+        background: #FFFFFF;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {

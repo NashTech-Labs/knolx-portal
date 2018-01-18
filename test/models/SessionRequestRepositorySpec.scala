@@ -112,7 +112,7 @@ class SessionRequestRepositorySpec extends PlaySpecification {
       val freeSlot = UpdateApproveSessionInfo(date, freeSlotId.stringify, freeSlot = true)
       await(sessionRequestRepository.insertSessionForApprove(freeSlot))
 
-      val session = await(sessionRequestRepository.deleteFreeSlot(freeSlotId.stringify))
+      val session = await(sessionRequestRepository.deleteSlot(freeSlotId.stringify))
 
       session.ok must be equalTo true
     }

@@ -36,6 +36,10 @@
         display: none;
     }
 
+    #mobile-navbar i {
+        width: 14px;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {
@@ -48,6 +52,6 @@
     }
 
     #main-sessions-table {
-        display: block;
+        display: inline-table;
     }
 }

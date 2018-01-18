@@ -292,9 +292,9 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def redirectToLogin: Action[AnyContent] = action.async { implicit request =>
-    Future.successful(Redirect(routes.UsersController.login())
-      .flashing("error" -> "Please login to vote"))
+  def scheduleSession: Action[AnyContent] = action.async { implicit request =>
+    Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+      .flashing("message" -> "Please select a free slot to schedule your session."))
   }
 
   def doneRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>

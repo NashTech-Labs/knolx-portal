@@ -278,7 +278,7 @@ function Recommendation() {
         if (typeof(Storage) !== "undefined") {
             sessionStorage.setItem("recommendationId", id);
         }
-        window.location = jsRoutes.controllers.CalendarController.renderCalendarPage(true).url
+        window.location = jsRoutes.controllers.RecommendationController.scheduleSession().url
     };
 
     self.redirectToLogin = function (id, vote) {
@@ -306,7 +306,6 @@ function Recommendation() {
         form.submit();
         document.body.removeChild(form);
     };
-
 
     function fetchRecommendationList(pageNumber, filter, sortBy) {
 

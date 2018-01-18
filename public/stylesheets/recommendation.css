@@ -181,9 +181,10 @@
 .recommendation-label {
     font-size: 16px !important;
     position: relative;
-    bottom: 21px;
-    left: 77%;
+    bottom: 26px;
+    left: -4%;
     width: fit-content;
+    float: right;
 }
 
 .recommendation-vote {
@@ -250,32 +251,7 @@
     font-weight: normal;
 }
 
-.decline-filter {
-    float: right;
-    padding-left: 16px;
-}
-
-.approved-filter {
-    float: right;
-    padding-left: 16px;
-}
-
-.done-filter {
-    float: right;
-    padding-left: 16px;
-}
-
-.pending-filter {
-    float: right;
-    padding-left: 16px;
-}
-
-.book-filter {
-    float: right;
-    padding-left: 16px;
-}
-
-.all-filter {
+.recommendation-list {
     float: right;
     padding-left: 16px;
 }

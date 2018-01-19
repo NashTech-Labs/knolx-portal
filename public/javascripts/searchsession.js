@@ -42,7 +42,7 @@ function slide(keyword, pageNumber, pageSize) {
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
 
-                        mobileSessionsFound += "<tr class='session-topic'><td class='session-topic' colspan='2'>" + "<p>" + sessions[session].topic + "</p>" + "</td></tr>" +
+                        mobileSessionsFound += "<tr class='session-topic'><td class='session-topic' colspan='2'>" + sessions[session].topic + "</td></tr>" +
                             "<tr class='session-info'><td>" +
                             "<p>" + sessions[session].email + "</p>" +
                             "<p>" + sessions[session].dateString + "</p>" +

@@ -155,11 +155,11 @@ ul.pagination.pagination-lg li a {
 
 @media only screen and (max-width: 768px) {
     #session-mobile-table {
-        margin-top: 10px;
+        margin-top: 20px;
     }
 
     #main-session-tbody-mobile tr {
-        border: 1px solid;
+        border: 1px solid rgb(26, 179, 148);
         width: 100%;
     }
 
@@ -178,6 +178,8 @@ ul.pagination.pagination-lg li a {
         font-size: 15px;
         letter-spacing: 1px;
         color: #fff;
+        border-bottom: none !important;
+        border-top: none !important;
     }
 
     .manage-user-container-custom-margin {
@@ -190,5 +192,9 @@ ul.pagination.pagination-lg li a {
 
     .session-info {
         height: 75px;
+    }
+
+    .table-header-color {
+        background-color: rgb(26, 179, 148);
     }
 }

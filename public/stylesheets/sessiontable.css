@@ -159,8 +159,9 @@ ul.pagination.pagination-lg li a {
     }
 
     #main-session-tbody-mobile tr {
-        border: 1px solid rgb(26, 179, 148);
+        border: 1px solid #FFFFFF;
         width: 100%;
+        background-color: #eeeeee;
     }
 
     #main-session-tbody-mobile tr td {
@@ -170,6 +171,7 @@ ul.pagination.pagination-lg li a {
 
     .row-space {
         height: 10px;
+        background-color: #FFFFFF !important;
     }
 
     .session-topic {
@@ -177,7 +179,6 @@ ul.pagination.pagination-lg li a {
         font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
         font-size: 15px;
         letter-spacing: 1px;
-        color: #fff;
         border-bottom: none !important;
         border-top: none !important;
     }
@@ -188,6 +189,15 @@ ul.pagination.pagination-lg li a {
 
     .manage-user-container-custom-margin>label {
         padding-bottom: 10px;
+    }
+
+    /*.manage-user-custom-table-margin {
+        background-color: #eeeeee;
+        padding: 1px;
+    }*/
+
+    .all-users {
+        padding-top: 10px;
     }
 
     .session-info {

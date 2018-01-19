@@ -362,7 +362,7 @@ html, body {
 }
 
 @media only screen and (max-width: 768px) {
-    .fa-line-chart {
+    .fa-comments, .fa-home, .fa-wrench, .fa-line-chart, .fa-table {
         color: #333333 !important;
     }
 }

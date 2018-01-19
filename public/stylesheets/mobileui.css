@@ -60,6 +60,10 @@
         width: 14px;
     }
 
+    .filter-no-padding-mobile {
+        padding-left: 0px !important;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {
@@ -73,5 +77,13 @@
 
     #main-sessions-table {
         display: inline-table;
+    }
+
+    .padding-left-30 {
+        padding-left: 30px;!important;
+    }
+
+    .padding-left-45 {
+        padding-left: 45px;!important;
     }
 }

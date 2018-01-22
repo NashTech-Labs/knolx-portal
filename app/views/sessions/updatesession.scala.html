@@ -1,4 +1,4 @@
-@(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], youtubeCategories: List[VideoCategories], videoDetails: Option[UpdateVideoDetails])(implicit request: Request[_], messages: Messages, flash: Flash)
+ @(sessionInfo: Form[UpdateSessionInformation], feedbackForms: Seq[(String, String)], youtubeCategories: List[VideoCategories], videoDetails: Option[UpdateVideoDetails])(implicit request: Request[_], messages: Messages, flash: Flash)
 
 @main("Update Session") {
 
@@ -96,7 +96,7 @@
                                 <p class="checkbox-text radio-style">Default</p>
                             </label>
                         </div>
-                        <div class="col-md-8 days-outer" >
+                        <div class="col-md-8 days-outer margin-top-15" >
                             <label class="radio-button">
                                 @if(sessionInfo.data.get("feedbackExpirationDays").nonEmpty && !sessionInfo.data.get("feedbackExpirationDays").contains("0")) {
                                 <input type='radio' name='feedbackExpirationDays' id='radio-days' class='custom-checkbox' value='@sessionInfo.data.get("feedbackExpirationDays")' checked="checked" />

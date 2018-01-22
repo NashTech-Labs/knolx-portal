@@ -38,7 +38,13 @@ function slide(keyword, pageNumber, pageSize) {
                 var page = sessionInfo["page"];
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
-                var mobileSessionsFound = "";
+                var mobileSessionsFound = "<tr class='new-button-tr'><td class='table-buttons new-button-td'><div class='col col-xs-6 text-right new-button'>" +
+                    "<a href='@routes.SessionsController.create()' class='btn btn-sm btn-primary btn-create float-left'>" +
+                    "<i class='fa fa-plus' aria-hidden='true'></i>" +
+                    "New" +
+                    "</a>" +
+                    "</div></td></tr>" +
+                    "<tr class='row-space'></tr>";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
                         var rating = "";
@@ -140,7 +146,7 @@ function slide(keyword, pageNumber, pageSize) {
                         }
                         usersFound += "</td></tr>";
 
-                        mobileSessionsFound += "<tr><td colspan='2'>" +
+                        mobileSessionsFound += "<tr><td colspan='2' class='table-buttons'>" +
                         "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default manage-btn' " +
                         "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Edit' >" +
                         "<em class='fa fa-pencil'></em>" +

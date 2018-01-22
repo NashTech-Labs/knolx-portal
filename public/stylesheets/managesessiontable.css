@@ -87,4 +87,21 @@ a.btn.btn-sm.btn-primary.btn-create {
         margin-top: 5px;
         margin-bottom: 5px;
     }
+
+    .table-buttons {
+        text-align: left;
+    }
+
+    .new-button-tr {
+        text-align: left !important;
+        background-color: #FFFFFF !important;
+    }
+
+    .new-button, .new-button-td {
+        padding-left: 0px !important;
+    }
+
+    .float-left {
+        float: left;
+    }
 }

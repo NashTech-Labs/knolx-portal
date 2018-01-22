@@ -256,3 +256,10 @@ h5 {
 #categories-list-delete + .select2-container--default .select2-selection--single .select2-selection__arrow {
     top: 3px !important;
 }
+
+@media only screen and (max-width: 768px) {
+    .mobile-filter-padding-left {
+        padding-left: 14px;
+    }
+
+}

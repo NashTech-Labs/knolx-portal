@@ -2,6 +2,7 @@
     #mobile-navbar {
         display: block;
     }
+
     #sidebar {
         display: none;
     }
@@ -9,6 +10,7 @@
     #non-mobile-header {
         display: none;
     }
+
     .navbar {
         max-height: 51px;
         width: 100%;
@@ -21,18 +23,16 @@
     #content.active {
         width: 100%;
     }
+
     .container-fluid > .navbar-collapse {
         background-color: #ffffff;
     }
+
     .navbar-toggle {
         background-color: #2f4050;
     }
 
-    #main-session-table-mobile {
-        display: block;
-    }
-
-    #main-sessions-table {
+    .main-table {
         display: none;
     }
 
@@ -71,19 +71,21 @@
         display: none;
     }
 
-    #session-mobile-table {
+    #session-mobile-table, #manage-session-mobile-table {
         display: none;
     }
 
-    #main-sessions-table {
+    .main-table {
         display: inline-table;
     }
 
     .padding-left-30 {
-        padding-left: 30px;!important;
+        padding-left: 30px;
+    !important;
     }
 
     .padding-left-45 {
-        padding-left: 45px;!important;
+        padding-left: 45px;
+    !important;
     }
 }

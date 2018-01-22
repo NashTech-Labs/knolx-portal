@@ -29,3 +29,62 @@ a.btn.btn-sm.btn-primary.btn-create {
 .manage-session-btn {
     display: flex;
 }
+
+@media only screen and (max-width: 768px) {
+    #manage-session-mobile-table {
+        margin-top: 20px;
+    }
+
+    #manage-session-tbody-mobile tr {
+        border: 1px solid #FFFFFF;
+        width: 100%;
+        background-color: #eeeeee;
+    }
+
+    #manage-session-tbody-mobile tr td {
+        font-size: 12px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .row-space {
+        height: 10px;
+        background-color: #FFFFFF !important;
+    }
+
+    .session-topic {
+        text-align: center;
+        font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 15px !important;
+        letter-spacing: 1px;
+        border-bottom: none !important;
+        border-top: none !important;
+        padding: 5px 0px;
+    }
+
+    .manage-user-container-custom-margin {
+        text-align: center;
+    }
+
+    .manage-user-container-custom-margin>label {
+        padding-bottom: 10px;
+    }
+
+    .all-users {
+        padding-top: 10px;
+    }
+
+    .session-info {
+        height: 75px;
+    }
+
+    .table-header-color {
+        background-color: rgb(26, 179, 148);
+    }
+
+    .manage-btn {
+        padding: 2px 6px !important;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}

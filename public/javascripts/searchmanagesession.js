@@ -90,11 +90,9 @@ function slide(keyword, pageNumber, pageSize) {
                         if (sessions[session].rating === "" || !sessions[session].expired) {
                             usersFound += "<td>N/A</td>";
                             rating = "N/A";
-                            //mobileSessionsFound += "N/A";
                         } else {
                             usersFound += "<td>" + sessions[session].rating + "</td>";
                             rating = sessions[session].rating;
-                            //mobileSessionsFound += sessions[session].rating;
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {

@@ -181,9 +181,10 @@
 .recommendation-label {
     font-size: 16px !important;
     position: relative;
-    bottom: 21px;
-    left: 77%;
+    bottom: 26px;
+    left: -4%;
     width: fit-content;
+    float: right;
 }
 
 .recommendation-vote {
@@ -252,4 +253,9 @@
 
 .full-width {
     width: 100%;
+}
+
+.recommendation-list {
+    float: right;
+    padding-left: 16px;
 }

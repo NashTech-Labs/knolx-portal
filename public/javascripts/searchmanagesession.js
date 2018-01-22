@@ -39,7 +39,7 @@ function slide(keyword, pageNumber, pageSize) {
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
                 var mobileSessionsFound = "<tr class='new-button-tr'><td class='table-buttons new-button-td'><div class='col col-xs-6 text-right new-button'>" +
-                    "<a href='@routes.SessionsController.create()' class='btn btn-sm btn-primary btn-create float-left'>" +
+                    "<a href='" + jsRoutes.controllers.SessionsController.create()['url'] + "' class='btn btn-sm btn-primary btn-create float-left'>" +
                     "<i class='fa fa-plus' aria-hidden='true'></i>" +
                     "New" +
                     "</a>" +

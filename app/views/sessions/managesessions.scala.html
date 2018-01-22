@@ -18,17 +18,6 @@
                 Search
                 <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
             </label>
-            <div class="col-md-12">
-                <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
-                    Showing
-                    <span id="starting-range"></span>
-                    to
-                    <span id="ending-range"></span>
-                    of
-                    <span id="total-range"></span>
-                    Entries
-                </label>
-            </div>
 
             @if(!flash.isEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message" style="margin-bottom: 15px;">
@@ -40,7 +29,7 @@
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="manage-user-custom-table-margin">
-                    <table class="table table-responsive table-striped">
+                    <table class="table table-responsive table-striped main-table">
                         <thead>
                             <tr class="table-header-color">
                                 <th>
@@ -65,7 +54,21 @@
                         <tbody id="user-found">
                         </tbody>
                     </table>
+                    <table align="center" id="manage-session-mobile-table">
+                        <tbody id="manage-session-tbody-mobile"></tbody>
+                    </table>
                 </div>
+            </div>
+            <div class="col-md-12">
+                <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
+                    Showing
+                    <span id="starting-range"></span>
+                    to
+                    <span id="ending-range"></span>
+                    of
+                    <span id="total-range"></span>
+                    Entries
+                </label>
             </div>
             <div class="col-md-12" style="margin-bottom: 25px;">
                 <div class="center">

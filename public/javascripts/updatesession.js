@@ -172,7 +172,7 @@ function showProgress(sessionId) {
                 }
             },
             error: function (er) {
-                console.log("showProgress failed with error = " + er.responseText);
+                console.log("Show Progress failed with error = " + er.responseText);
             }
         });
 }
@@ -276,7 +276,6 @@ function checkIfTemporaryUrlExists(sessionId) {
             processData: false,
             contentType: false,
             success: function (data) {
-            console.log("Received temporary URL => " + data);
                 newVideoURL = data;
                 $("#attach-video").show();
             }

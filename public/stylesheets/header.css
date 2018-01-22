@@ -360,3 +360,9 @@ html, body {
     padding: 0px 5px;
     font-size: 12px;
 }
+
+@media only screen and (max-width: 768px) {
+    .fa-comments, .fa-home, .fa-wrench, .fa-line-chart, .fa-table {
+        color: #333333 !important;
+    }
+}

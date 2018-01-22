@@ -38,18 +38,32 @@ function slide(keyword, pageNumber, pageSize) {
                 var page = sessionInfo["page"];
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
+                var mobileSessionsFound = "<tr class='new-button-tr'><td class='table-buttons new-button-td'><div class='col col-xs-6 text-right new-button'>" +
+                    "<a href='" + jsRoutes.controllers.SessionsController.create()['url'] + "' class='btn btn-sm btn-primary btn-create float-left'>" +
+                    "<i class='fa fa-plus' aria-hidden='true'></i>" +
+                    "New" +
+                    "</a>" +
+                    "</div></td></tr>" +
+                    "<tr class='row-space'></tr>";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
+                        var rating = "";
+                        mobileSessionsFound += "<tr class='session-topic'><td class='session-topic' colspan='2'>" + sessions[session].topic + "<sup class='rating'></sup></td></tr>" +
+                            "<tr class='session-info'><td>" +
+                            "<p>" + sessions[session].email + "</p>" +
+                            "<p>" + sessions[session].dateString + "</p>" +
+                            "</td>" + "<td>";
+
                         usersFound += "<tr><td align='center' class='manage-session-btn'>" +
-                            "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default manage-btn' "+
+                            "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default manage-btn' " +
                             "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Edit' >" +
                             "<em class='fa fa-pencil'></em>" +
                             "</a> " +
-                            "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete manage-btn'"+
+                            "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete manage-btn'" +
                             "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Delete'>" +
                             "<em class='fa fa-trash'></em>" +
                             "</a> " +
-                            "<a href='" + jsRoutes.controllers.SessionsController.sendEmailToPresenter(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' "+
+                            "<a href='" + jsRoutes.controllers.SessionsController.sendEmailToPresenter(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' " +
                             "data-toggle='tooltip' data-placement='top' title='Send Instructions Email'>" +
                             "<em class='fa fa-envelope-o'></em>" +
                             "</a>" +
@@ -61,8 +75,10 @@ function slide(keyword, pageNumber, pageSize) {
 
                         if (sessions[session].meetup) {
                             usersFound += '<td><span class="label label-info meetup-session ">Meetup</span></td>';
+                            mobileSessionsFound += '<span class="label label-info meetup-session ">Meetup</span>';
                         } else {
                             usersFound += '<td><span class="label label-info knolx-session ">Knolx</span></td>';
+                            mobileSessionsFound += '<span class="label label-info knolx-session ">Knolx</span>';
                         }
 
                         if (sessions[session].cancelled) {
@@ -71,27 +87,41 @@ function slide(keyword, pageNumber, pageSize) {
                             usersFound += "<td class='active-status'>No</td>";
                         }
 
-                        if (sessions[session].rating == "" || !sessions[session].expired) {
+                        if (sessions[session].rating === "" || !sessions[session].expired) {
                             usersFound += "<td>N/A</td>";
+                            rating = "N/A";
                         } else {
                             usersFound += "<td>" + sessions[session].rating + "</td>";
+                            rating = sessions[session].rating;
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
                             usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
-                        } else if(sessions[session].cancelled) {
+                            mobileSessionsFound += "<div><span class='label label-success' >Completed</span></div>";
+                        } else if (sessions[session].cancelled) {
                             usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
+                            mobileSessionsFound += "<div><span class='label label-warning cancelled-session'>Cancelled</span></div>";
                         } else {
                             if (sessions[session].feedbackFormScheduled) {
                                 usersFound += "<td><div><span class='label label-success' >Scheduled</span><br/>" +
                                     "<a href='/session/" + sessions[session].id + "/cancel' class='cancel-red'>" +
                                     "Cancel</a>" +
                                     "</div></td>";
+
+                                mobileSessionsFound += "<div><span class='label label-success' >Scheduled</span><br/>" +
+                                    "<a href='/session/" + sessions[session].id + "/cancel' class='cancel-red'>" +
+                                    "Cancel</a>" +
+                                    "</div>";
                             } else {
                                 usersFound += "<td><div><span class='label label-warning' >Pending</span><br/>" +
                                     "<a href='/session/" + sessions[session].id + "/schedule' class='Schedule-green'>" +
                                     "Schedule</a>" +
                                     "</div></td>";
+
+                                mobileSessionsFound += "<div><span class='label label-warning' >Pending</span><br/>" +
+                                    "<a href='/session/" + sessions[session].id + "/schedule' class='Schedule-green'>" +
+                                    "Schedule</a>" +
+                                    "</div>";
                             }
                         }
 
@@ -100,19 +130,41 @@ function slide(keyword, pageNumber, pageSize) {
                                 usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
                                     "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
                                     "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Click here</span></a>";
+
+                                mobileSessionsFound += "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                                    "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Click here</span></a>";
                             } else {
                                 usersFound += "<td><span class='label label-danger'>Not Available</span>";
                             }
-                        } else if(sessions[session].cancelled) {
+                        } else if (sessions[session].cancelled) {
                             usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span>";
                         }
-                        else if(!sessions[session].completed) {
+                        else if (!sessions[session].completed) {
                             usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span>";
                         }
-                            usersFound += "</td></tr>"
+                        usersFound += "</td></tr>";
+
+                        mobileSessionsFound += "<tr><td colspan='2' class='table-buttons'>" +
+                        "<a href='" + jsRoutes.controllers.SessionsController.update(sessions[session].id)['url'] + "' class='btn btn-default manage-btn' " +
+                        "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Edit' >" +
+                        "<em class='fa fa-pencil'></em>" +
+                        "</a> " +
+                        "<a href='" + jsRoutes.controllers.SessionsController.deleteSession(sessions[session].id, sessionInfo['page'])['url'] + "' class='btn btn-danger delete manage-btn'" +
+                        "style='margin-right: 5px;' data-toggle='tooltip' data-placement='top' title='Delete'>" +
+                        "<em class='fa fa-trash'></em>" +
+                        "</a> " +
+                        "<a href='" + jsRoutes.controllers.SessionsController.sendEmailToPresenter(sessions[session].id)['url'] + "' class='btn btn-info manage-btn' " +
+                        "data-toggle='tooltip' data-placement='top' title='Send Instructions Email'>" +
+                        "<em class='fa fa-envelope-o'></em>" +
+                        "</a>" +
+                        "</td></tr>";
+
+                        mobileSessionsFound += "</td><tr class='row-space'></tr>";
                     }
 
                     $('#user-found').html(usersFound);
+                    $('#manage-session-tbody-mobile').html(mobileSessionsFound);
+                    $(".rating").text(rating);
 
                     var totalSessions = sessionInfo["totalSessions"];
                     var startingRange = (pageSize * (page - 1)) + 1;

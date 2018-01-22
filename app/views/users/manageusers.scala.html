@@ -14,7 +14,7 @@
                     Entries
                 </label>
                 <div class="col-md-6 filter-outer filter-padding-left">
-                    <div class="col-md-9 filter-padding-left">
+                    <div class="col-md-10 filter-padding-left">
                         <div class="col-md-1 filter-padding-left filter-padding-right">
                             <label class="checkbox-outer" style="font-weight: normal;">
                                 <input type='radio' name='user-filter' checked class='custom-checkbox' value='all'/>
@@ -23,7 +23,7 @@
                                 <p class="filter-checkbox-text">All</p>
                             </label>
                         </div>
-                        <div class="col-md-2 ">
+                        <div class="col-md-2 filter-no-padding-mobile">
                             <label class="checkbox-outer" style="font-weight: normal;">
                                 <input type='radio' name='user-filter' class='custom-checkbox' value='banned'/>
 
@@ -31,7 +31,7 @@
                                 <p class="filter-checkbox-text">Banned</p>
                             </label>
                         </div>
-                        <div class="col-md-2 " style="padding-left: 30px !important;">
+                        <div class="col-md-2 filter-no-padding-mobile padding-left-30">
                             <label class="checkbox-outer" style="font-weight: normal;">
                                 <input type='radio' name='user-filter' class='custom-checkbox' value='allowed'/>
 
@@ -39,7 +39,7 @@
                                 <p class="filter-checkbox-text">Allowed</p>
                             </label>
                         </div>
-                        <div class="col-md-2" style="padding-left: 45px !important;">
+                        <div class="col-md-2 filter-no-padding-mobile padding-left-45">
                             <label class="checkbox-outer" style="font-weight: normal;">
                                 <input type='radio' name='user-filter' class='custom-checkbox' value='active'/>
 
@@ -47,7 +47,7 @@
                                 <p class="filter-checkbox-text">Active</p>
                             </label>
                         </div>
-                        <div class="col-md-5" style="padding-left: 45px !important;">
+                        <div class="col-md-5 filter-no-padding-mobile padding-left-45">
                             <label class="checkbox-outer" style="font-weight: normal;">
                                 <input type='radio' name='user-filter' id="pp" class='custom-checkbox' value='suspended'/>
 
@@ -56,23 +56,12 @@
                             </label>
                         </div>
                     </div>
-                    <div class="col-md-3 rest">
+                    <div class="col-md-2 rest">
                     </div>
                 </div>
                 <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
                     Search
                     <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
-                </label>
-            </div>
-            <div class="col-md-12">
-                <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
-                    Showing
-                    <span id="starting-range"></span>
-                    to
-                    <span id="ending-range"></span>
-                    of
-                    <span id="total-range"></span>
-                    Entries
                 </label>
             </div>
             @if(flash.get("success").fold("")(identity).nonEmpty) {
@@ -105,6 +94,17 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="col-md-12">
+                <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
+                    Showing
+                    <span id="starting-range"></span>
+                    to
+                    <span id="ending-range"></span>
+                    of
+                    <span id="total-range"></span>
+                    Entries
+                </label>
             </div>
             <div class="col-md-12" style="margin-bottom: 25px;">
                 <div class="center">

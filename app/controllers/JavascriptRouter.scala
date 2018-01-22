@@ -16,6 +16,7 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.UsersController.searchUser,
       controllers.routes.javascript.UsersController.getByEmail,
       controllers.routes.javascript.UsersController.deleteUser,
+      controllers.routes.javascript.SessionsController.create,
       controllers.routes.javascript.SessionsController.searchManageSession,
       controllers.routes.javascript.SessionsController.searchSessions,
       controllers.routes.javascript.SessionsController.shareContent,
@@ -61,11 +62,21 @@ class JavascriptRouter @Inject()(controllerComponents: KnolxControllerComponents
       controllers.routes.javascript.CalendarController.renderCalendarPage,
       controllers.routes.javascript.CalendarController.calendarSessions,
       controllers.routes.javascript.CalendarController.renderCreateSessionByUser,
-      controllers.routes.javascript.CalendarController.pendingSessions,
       controllers.routes.javascript.CalendarController.allSessionForAdmin,
       controllers.routes.javascript.CalendarController.declineSession,
       controllers.routes.javascript.CalendarController.insertSlot,
-      controllers.routes.javascript.CalendarController.deleteSlot
+      controllers.routes.javascript.CalendarController.deleteSlot,
+      controllers.routes.javascript.CalendarController.pendingSessions,
+      controllers.routes.javascript.RecommendationController.recommendationList,
+      controllers.routes.javascript.RecommendationController.addRecommendation,
+      controllers.routes.javascript.RecommendationController.approveRecommendation,
+      controllers.routes.javascript.RecommendationController.declineRecommendation,
+      controllers.routes.javascript.RecommendationController.upVote,
+      controllers.routes.javascript.RecommendationController.downVote,
+      controllers.routes.javascript.RecommendationController.pendingRecommendation,
+      controllers.routes.javascript.RecommendationController.doneRecommendation,
+      controllers.routes.javascript.RecommendationController.allPendingRecommendations,
+      controllers.routes.javascript.RecommendationController.scheduleSession
     )).as("text/javascript")
   }
 

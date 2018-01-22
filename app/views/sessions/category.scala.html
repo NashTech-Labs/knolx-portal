@@ -20,7 +20,7 @@
         <div class="col-md-12 ">
             <!--Add Category -->
             @if(SessionHelper.isSuperUser) {
-            <div class="col-md-6 filter-padding-left mobile-filter-padding-left">
+            <div class="col-md-6 filter-padding-left">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="ibox">
                     <div class="ibox-title">
@@ -81,7 +81,7 @@
 
             <!--Modify category-->
             @if(SessionHelper.isSuperUser) {
-            <div class="col-md-6 filter-padding-left mobile-filter-padding-left">
+            <div class="col-md-6 filter-padding-left">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="ibox ">
                     <div class="ibox-title">
@@ -155,7 +155,7 @@
 
             <!--Delete category-->
             @if(SessionHelper.isSuperUser) {
-            <div class="col-md-6 filter-padding-left mobile-filter-padding-left">
+            <div class="col-md-6 filter-padding-left">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="ibox ">
                     <div class="ibox-title">

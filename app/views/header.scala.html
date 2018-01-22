@@ -159,7 +159,7 @@
             </i>
         </div>
     </nav>
-    <nav id="mobile-navbar" class="navbar navbar-fixed-top">
+     <nav id="mobile-navbar" class="navbar navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle margin-left" data-toggle="collapse" data-target="#myNavbar">
@@ -172,7 +172,7 @@
                             <i class="fa fa-bullhorn" aria-hidden="true"></i>
                             <span class="number-circle"></span>
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu right-zero">
                             <li class="alignLinks">
                                 <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
                             </li>
@@ -205,6 +205,12 @@
                         <a href="@routes.CalendarController.renderCalendarPage">
                             <i class="fa fa-calendar"></i>
                             <span>Book a Session</span></a>
+                    </li>
+
+                    <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Suggest a Topic">
+                        <a href="@routes.RecommendationController.renderRecommendationPage">
+                            <i class="fa fa-inbox"></i>
+                            <span>Suggest a Topic</span></a>
                     </li>
                     @if(!SessionHelper.isLoggedIn) {
 

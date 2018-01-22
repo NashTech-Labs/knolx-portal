@@ -1,4 +1,4 @@
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 767px) {
     #mobile-navbar {
         display: block;
     }
@@ -56,12 +56,24 @@
         background: #FFFFFF;
     }
 
-    #mobile-navbar i {
-        width: 14px;
-    }
-
     .filter-no-padding-mobile {
         padding-left: 0px !important;
+    }
+
+    .padding-left-30-mobile {
+     padding-left: 30px !important;
+    }
+
+    .margin-top-25 {
+        margin-top: 25px !important;
+    }
+
+    .right-zero {
+        right: 0 !important;
+    }
+
+    .margin-top-15 {
+        margin-top: 15px !important;
     }
 
 }
@@ -88,4 +100,35 @@
         padding-left: 45px;
     !important;
     }
+
+    .decline-filter {
+        padding-left: 40px !important;
+        float: right
+    }
+
+    .approved-filter {
+        padding-left: 20px !important;
+        float: right;
+    }
+
+    .done-filter {
+        padding-left: 40px !important;
+        float: right
+    }
+
+    .pending-filter {
+        padding-left: 30px !important;
+        float: right
+    }
+
+    .book-filter {
+        padding-left: 25px !important;
+        float: right
+    }
+
+    .all-filter {
+        width: fit-content;
+        float: right
+    }
+
 }

@@ -482,6 +482,18 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       status(result) must be equalTo OK
     }
 
+    "redirect to login page if user is not logged in while upvoting" in new WithTestApplication {
+      val recommendationId = "RecommendationId"
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.upVote(recommendationId)(
+        FakeRequest()
+          .withSession())
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
     "not upvote the recommendation if user has already upvoted" in new WithTestApplication {
       val recommendationId = "RecommendationId"
 
@@ -546,6 +558,18 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
       )
 
       status(result) must be equalTo OK
+    }
+
+    "redirect to login page if user is not logged in while downvoting" in new WithTestApplication {
+      val recommendationId = "RecommendationId"
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+
+      val result = controller.downVote(recommendationId)(
+        FakeRequest()
+          .withSession())
+
+      status(result) must be equalTo SEE_OTHER
     }
 
     "not downvote the recommendation if user has already downvoted" in new WithTestApplication {
@@ -669,6 +693,16 @@ class RecommendationControllerSpec extends PlaySpecification with Results {
 
       status(result) must be equalTo OK
     }
+
+    "schedule a session" in new WithTestApplication {
+      val result = controller.scheduleSession()(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
   }
 
 }

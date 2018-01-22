@@ -221,64 +221,80 @@ class RecommendationController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def upVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    val email = request.user.email
-    recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
-      val recommendationResponse =
-        RecommendationsResponseRepositoryInfo(email,
-          recommendationId,
-          upVote = true,
-          downVote = false)
+  def upVote(recommendationId: String): Action[AnyContent] = action.async { implicit request =>
 
-      if (vote.equals("upvote")) {
-        Logger.info(s"Recommendation with id $recommendationId was already upvoted")
-        Future.successful(BadRequest("You have already upvoted the recommendation"))
-      } else {
-        if (vote.equals("downvote")) {
-          recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
+    if (!SessionHelper.isLoggedIn) {
+
+      val email = SessionHelper.email
+      recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
+        val recommendationResponse =
+          RecommendationsResponseRepositoryInfo(email,
+            recommendationId,
+            upVote = true,
+            downVote = false)
+        if (vote.equals("upvote")) {
+          Logger.info(s"Recommendation with id $recommendationId was already upvoted")
+          Future.successful(BadRequest("You have already upvoted the recommendation"))
         } else {
-          recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
-        }
-        recommendationResponseRepository.upsert(recommendationResponse) map { result =>
-          if (result.ok) {
-            Logger.info(s"Recommendation with id $recommendationId has been successfully upvoted")
-            Ok("You have successfully upvoted the recommendation")
+          if (vote.equals("downvote")) {
+            recommendationsRepository.upVote(recommendationId, alreadyVoted = true)
           } else {
-            Logger.info(s"Something went wrong while upvoting recommendation with id $recommendationId")
-            BadRequest("Recommendation could not be upvoted due to some error")
+            recommendationsRepository.upVote(recommendationId, alreadyVoted = false)
+          }
+          recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+            if (result.ok) {
+              Logger.info(s"Recommendation with id $recommendationId has been successfully upvoted")
+              Ok("You have successfully upvoted the recommendation")
+            } else {
+              Logger.info(s"Something went wrong while upvoting recommendation with id $recommendationId")
+              BadRequest("Recommendation could not be upvoted due to some error")
+            }
           }
         }
       }
+    } else {
+      Future.successful(Redirect(routes.UsersController.login()).flashing("error" -> "Please login to vote."))
+    }
+
+  }
+
+  def downVote(recommendationId: String): Action[AnyContent] = action.async { implicit request =>
+
+    if (!SessionHelper.isLoggedIn) {
+      val email = SessionHelper.email
+      recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
+        val recommendationResponse = RecommendationsResponseRepositoryInfo(email,
+          recommendationId,
+          upVote = false,
+          downVote = true)
+        if (vote.equals("downvote")) {
+          Logger.info(s"Recommendation with id $recommendationId was already downvoted")
+          Future.successful(BadRequest("You have already downvoted the recommendation"))
+        } else {
+          if (vote.equals("upvote")) {
+            recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
+          } else {
+            recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
+          }
+          recommendationResponseRepository.upsert(recommendationResponse) map { result =>
+            if (result.ok) {
+              Logger.info(s"Recommendation with id $recommendationId has been successfully downvoted")
+              Ok("You have successfully downVoted the recommendation")
+            } else {
+              Logger.info(s"Something went wrong while downvoting recommendation with id $recommendationId")
+              BadRequest("Recommendation could not be downvoted due to some error")
+            }
+          }
+        }
+      }
+    } else {
+      Future.successful(Redirect(routes.UsersController.login()).flashing("error" -> "Please login to vote."))
     }
   }
 
-  def downVote(recommendationId: String): Action[AnyContent] = userAction.async { implicit request =>
-    val email = request.user.email
-    recommendationResponseRepository.getVote(email, recommendationId) flatMap { vote =>
-      val recommendationResponse = RecommendationsResponseRepositoryInfo(email,
-        recommendationId,
-        upVote = false,
-        downVote = true)
-      if (vote.equals("downvote")) {
-        Logger.info(s"Recommendation with id $recommendationId was already downvoted")
-        Future.successful(BadRequest("You have already downvoted the recommendation"))
-      } else {
-        if (vote.equals("upvote")) {
-          recommendationsRepository.downVote(recommendationId, alreadyVoted = true)
-        } else {
-          recommendationsRepository.downVote(recommendationId, alreadyVoted = false)
-        }
-        recommendationResponseRepository.upsert(recommendationResponse) map { result =>
-          if (result.ok) {
-            Logger.info(s"Recommendation with id $recommendationId has been successfully downvoted")
-            Ok("You have successfully downVoted the recommendation")
-          } else {
-            Logger.info(s"Something went wrong while downvoting recommendation with id $recommendationId")
-            BadRequest("Recommendation could not be downvoted due to some error")
-          }
-        }
-      }
-    }
+  def scheduleSession: Action[AnyContent] = action.async { implicit request =>
+    Future.successful(Redirect(routes.CalendarController.renderCalendarPage())
+      .flashing("message" -> "Please select a free slot to schedule your session."))
   }
 
   def doneRecommendation(recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>

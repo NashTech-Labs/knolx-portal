@@ -96,6 +96,7 @@ function Recommendation() {
                                 var filter = $('input[name="user-recommend-filter"]:checked').val();
                                 var sort = $('#sort-entries').val();
                                 fetchRecommendationList(page, filter, sort);
+                                getNotificationCount();
                             },
                             error: function (er) {
                                 $.alert(er.responseText);

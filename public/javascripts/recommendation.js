@@ -287,7 +287,7 @@ function Recommendation() {
 
         form.method = "POST";
         var url = "";
-        if(vote === "upvote") {
+        if (vote === "upvote") {
             url = jsRoutes.controllers.RecommendationController.upVote(id).url;
         } else {
             url = jsRoutes.controllers.RecommendationController.downVote(id).url;

@@ -152,7 +152,7 @@
     display: inline-block;
 }
 
-.dropdown-content {
+.drop-rec {
     display: none;
     position: absolute;
     right: 0;
@@ -162,7 +162,7 @@
     z-index: 1;
 }
 
-.dropdown-content span {
+.drop-rec span {
     font-size: 12px;
     color: black;
     padding: 3px;
@@ -171,11 +171,7 @@
     cursor: pointer;
 }
 
-.dropdown-content span:hover {background-color: #f1f1f1}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
+.drop-rec span:hover {background-color: #f1f1f1}
 
 .recommendation-label {
     font-size: 16px !important;
@@ -248,6 +244,10 @@
 
 .filter-recommendation {
     font-weight: normal;
+}
+
+.full-width {
+    width: 100%;
 }
 
 .recommendation-list {

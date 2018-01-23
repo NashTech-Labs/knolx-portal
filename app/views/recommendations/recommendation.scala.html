@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-12 margin-top-25">
             <div data-bind="foreach: recommendations">
                 <div class="col-md-3 filter-padding-left" style="margin-bottom: 25px;">
                     <div class="col-md-12">
@@ -80,9 +80,8 @@
                                 <div data-bind="if: isLoggedIn">
                                     <div class="col-md-12 recommendation-card-topic">
                                         <div class="recommendation-dropdown dropdown" style="float: right;">
-                                            <i class="fa fa-ellipsis-v"></i>
-                                            <div class="dropdown-content">
-
+                                            <i class="fa fa-ellipsis-v" href="#" class="dropdown-toggle" data-toggle="dropdown"></i>
+                                            <div class="drop-rec dropdown-menu right-zero right-zero-main">
                                                 <span data-bind="click: approved ? null: function($id) { $root.approveByAdmin(id)}">
                                                     Approve</span>
                                                 <span data-bind="click: decline ? null: function($id) { $root.declineByAdmin(id)}">
@@ -105,7 +104,7 @@
                                         <span class="label label-danger custom-label-type recommendation-type" data-bind="if: decline">
                                             Decline
                                         </span>
-                                        <span class="label label-success custom-label-type recommendation-type" data-bind="if: done" style="left: 84% !important;">
+                                        <span class="label label-success custom-label-type recommendation-type" data-bind="if: done">
                                             Done
                                         </span>
                                         <p class="recommendation-presenter" data-bind="text: email"></p>
@@ -113,7 +112,7 @@
                                     </div>
                                 </div>
                             }
-                            <table class="col-md-12">
+                            <table class="col-md-12 full-width">
                                 <tbody>
                                     <tr style="background-color: white">
                                         <td class="recommendation-vote">
@@ -130,7 +129,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div class="recommendation-label" data-bind="if: (approved && isLoggedIn && !book)">
+                            <div class="recommendation-label" data-bind="if: (approved && isLoggedIn && !book && !done)">
                                 <span class="btn btn-info book-session" data-toggle="tooltip" data-placement="bottom" title="Schedule a Session"
                                 data-bind="click: isLoggedIn ? function($id) { $root.requestByUser(id)}:null">
                                     Book</span>

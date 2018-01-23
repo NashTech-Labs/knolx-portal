@@ -38,8 +38,16 @@ function slide(keyword, pageNumber, pageSize) {
                 var page = sessionInfo["page"];
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
+                var mobileSessionsFound = "";
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
+
+                        mobileSessionsFound += "<tr class='session-topic'><td class='session-topic' colspan='2'>" + sessions[session].topic + "</td></tr>" +
+                            "<tr class='session-info'><td>" +
+                            "<p>" + sessions[session].email + "</p>" +
+                            "<p>" + sessions[session].dateString + "</p>" +
+                            "</td>" + "<td>";
+
                         usersFound += "<tr>" +
                             "<td>" + sessions[session].dateString + "</td>" +
                             "<td>" + sessions[session].session + "</td>" +
@@ -48,8 +56,10 @@ function slide(keyword, pageNumber, pageSize) {
 
                         if (sessions[session].meetup) {
                             usersFound += '<td><span class="label label-info meetup-session ">Meetup</span></td>';
+                            mobileSessionsFound += '<span class="label label-info meetup-session ">Meetup</span>';
                         } else {
                             usersFound += '<td><span class="label label-info knolx-session ">Knolx</span></td>';
+                            mobileSessionsFound += '<span class="label label-info knolx-session ">Knolx</span>';
                         }
 
                         if (sessions[session].cancelled) {
@@ -60,10 +70,13 @@ function slide(keyword, pageNumber, pageSize) {
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
                             usersFound += "<td><div><span class='label label-success' >Completed</span></div></td>";
-                        } else if(sessions[session].cancelled) {
-                            usersFound += "<td><div><span class='label label-warning cancelled-session'>Cancelled</span></div></td>"
+                            mobileSessionsFound += "<div><span class='label label-success' >Completed</span></div>";
+                        } else if (sessions[session].cancelled) {
+                            usersFound += "<td><div><span class='label label-warning cancelled-session'>Cancelled</span></div></td>";
+                            mobileSessionsFound += "<div><span class='label label-warning cancelled-session'>Cancelled</span></div>";
                         } else {
                             usersFound += "<td><div><span class='label label-warning' >Pending</span><br/></div></td>";
+                            mobileSessionsFound += "<div><span class='label label-warning' >Pending</span><br/></div>";
                         }
 
                         if (sessions[session].completed && !sessions[session].cancelled) {
@@ -71,19 +84,25 @@ function slide(keyword, pageNumber, pageSize) {
                                 usersFound += "<td  title='Click here for slides & videos' class='clickable-row'>" +
                                     "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
                                     "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Click here</span></a></td>";
+
+                                mobileSessionsFound += "<a href='" + jsRoutes.controllers.SessionsController.shareContent(sessions[session].id)['url'] +
+                                    "' style='text-decoration: none;' target='_blank'><span class='label more-detail-session'>Click here</span></a>";
                             } else {
                                 usersFound += "<td><span class='label label-danger'>Not Available</span></td>";
                             }
-                        } else if(sessions[session].cancelled) {
+                        } else if (sessions[session].cancelled) {
                             usersFound += "<td title='The session has been cancelled'><span class='label label-warning cancelled-session'>Cancelled</span></td>";
                         }
-                        else if(!sessions[session].completed) {
-                           usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span></td>";
+                        else if (!sessions[session].completed) {
+                            usersFound += "<td title='Wait for session to be completed'><span class='label label-warning'>Pending</span></td>";
                         }
-                        usersFound += "</tr>"
-                    }
+                        usersFound += "</tr>";
 
-                    $('#user-found').html(usersFound);
+                        mobileSessionsFound += "</td><tr class='row-space'></tr>";
+
+                        $('#user-found').html(usersFound);
+                        $('#main-session-tbody-mobile').html(mobileSessionsFound);
+                    }
 
                     var totalSessions = sessionInfo["totalSessions"];
                     var startingRange = (pageSize * (page - 1)) + 1;
@@ -107,6 +126,11 @@ function slide(keyword, pageNumber, pageSize) {
                     $('#user-found').html(
                         "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
+
+                    $('#main-session-table-mobile').html(
+                        "<p class='col-md-12 text-center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></p>"
+                    );
+
                     $('.pagination').html("");
                 }
             },

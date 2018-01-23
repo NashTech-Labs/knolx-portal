@@ -131,6 +131,11 @@
         float: right
     }
 
+    .right-zero-main {
+        right: 0 !important;
+        left: unset;
+    }
+
 }
 
 

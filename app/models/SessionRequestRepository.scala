@@ -116,7 +116,8 @@ class SessionRequestRepository @Inject()(reactiveMongoApi: ReactiveMongoApi) {
     val condition = keyword match {
       case Some(key) => Some(Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
         Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "freeSlot" -> BSONDocument("$eq" -> false)))
-      case None      => Some(Json.obj("freeSlot" -> BSONDocument("$eq" -> false)))
+      case None      => Some(Json.obj("freeSlot" -> BSONDocument("$eq" -> false),
+        "notification" -> BSONDocument("$eq" -> false)))
     }
 
     collection

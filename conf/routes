@@ -115,6 +115,7 @@ POST          /knolx/sessions/deleteslot                            controllers.
 
 #Recommendation
 GET           /recommendation                                        controllers.RecommendationController.renderRecommendationPage
+GET           /recommendation/book                                   controllers.RecommendationController.scheduleSession
 POST          /recommendation                                        controllers.RecommendationController.recommendationList(pageNumber: Int, filter: String, sortBy: String)
 POST          /recommendation/add                                    controllers.RecommendationController.addRecommendation
 POST          /recommendation/approve                                controllers.RecommendationController.approveRecommendation(recommendationId: String)

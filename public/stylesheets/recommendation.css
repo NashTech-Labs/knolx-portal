@@ -108,8 +108,7 @@
     height: 150px;
     color: #7F8C8D;
     font-size: 14px;
-    padding-top: 10px;
-    padding-bottom:10px;
+    padding: 10px;
     text-align: center;
     background-color: #FFFFFF;
 }
@@ -153,7 +152,7 @@
     display: inline-block;
 }
 
-.dropdown-content {
+.drop-rec {
     display: none;
     position: absolute;
     right: 0;
@@ -163,7 +162,7 @@
     z-index: 1;
 }
 
-.dropdown-content span {
+.drop-rec span {
     font-size: 12px;
     color: black;
     padding: 3px;
@@ -172,18 +171,15 @@
     cursor: pointer;
 }
 
-.dropdown-content span:hover {background-color: #f1f1f1}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
+.drop-rec span:hover {background-color: #f1f1f1}
 
 .recommendation-label {
     font-size: 16px !important;
     position: relative;
-    bottom: 21px;
-    left: 77%;
+    bottom: 26px;
+    left: -4%;
     width: fit-content;
+    float: right;
 }
 
 .recommendation-vote {
@@ -252,4 +248,9 @@
 
 .full-width {
     width: 100%;
+}
+
+.recommendation-list {
+    float: right;
+    padding-left: 16px;
 }

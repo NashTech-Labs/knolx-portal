@@ -548,35 +548,34 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       if (result.ok) {
         Logger.info(s"Session for user ${createSessionInfo.email} successfully approved")
         sessionsScheduler ! RefreshSessionsSchedulers
-        Logger.info("---->>>" + recommendationId)
         val approveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(createSessionInfo.date.getTime), sessionApprovedId,
           createSessionInfo.topic, createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory,
           createSessionInfo.meetup, approved = true, recommendationId = recommendationId)
 
-            sessionRequestRepository.insertSessionForApprove(approveSessionInfo).flatMap { updatedResult =>
-              if (updatedResult.ok) {
-                if (approveSessionInfo.recommendationId.isEmpty) {
-                  Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!"))
+        sessionRequestRepository.insertSessionForApprove(approveSessionInfo).flatMap { updatedResult =>
+          if (updatedResult.ok) {
+            if (approveSessionInfo.recommendationId.isEmpty) {
+              Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!"))
+            } else {
+              recommendationsRepository.doneRecommendation(approveSessionInfo.recommendationId).map { status =>
+                if (status.ok) {
+                  Logger.info("Session with respective recommendation has been scheduled ")
+                  Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
                 } else {
-                  recommendationsRepository.doneRecommendation(approveSessionInfo.recommendationId).map { status =>
-                    if (status.ok) {
-                      Logger.info("Session with respective recommendation has been scheduled ")
-                      Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
-                    } else {
-                      Logger.error("Something went wrong while scheduling a session with respective recommendation")
-                      Redirect(routes.CalendarController.renderCalendarPage()).flashing("error" -> "Something went wrong!")
-                    }
-                  }
+                  Logger.error("Something went wrong while scheduling a session with respective recommendation")
+                  Redirect(routes.CalendarController.renderCalendarPage()).flashing("error" -> "Something went wrong!")
                 }
-              } else {
-                Future.successful(InternalServerError("Something went wrong!"))
               }
             }
           } else {
-            Logger.error(s"Something went wrong while approving a requested Knolx session for user ${createSessionInfo.email}")
             Future.successful(InternalServerError("Something went wrong!"))
           }
         }
+      } else {
+        Logger.error(s"Something went wrong while approving a requested Knolx session for user ${createSessionInfo.email}")
+        Future.successful(InternalServerError("Something went wrong!"))
+      }
+    }
   }
 
 }

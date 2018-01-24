@@ -1,6 +1,5 @@
 @media only screen and (max-width: 767px) {
 
-
     #mobile-navbar {
         display: block;
     }
@@ -82,6 +81,18 @@
         margin-top: 15px !important;
     }
 
+    #manage-pending-session-mobile-table tr {
+        border: 1px solid #FFFFFF;
+        width: 100%;
+        background-color: #eeeeee;
+    }
+
+    #manage-pending-session-mobile-table tr td {
+        font-size: 12px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {
@@ -89,7 +100,7 @@
         display: none;
     }
 
-    #session-mobile-table, #manage-session-mobile-table, #manage-user-mobile-table {
+    #session-mobile-table, #manage-session-mobile-table, #manage-user-mobile-table, #manage-pending-session-mobile-table {
         display: none;
     }
 

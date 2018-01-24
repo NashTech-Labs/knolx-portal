@@ -83,7 +83,7 @@
                         <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                         <div class="col-md-12" id="found-user-details"></div>
                         <div class="manage-user-custom-table-margin">
-                            <table class="table table-responsive table-striped">
+                            <table class="table table-responsive table-striped main-table">
                                 <thead>
                                     <tr class="table-header-color">
                                         <th>Date</th>
@@ -96,6 +96,9 @@
                                 </thead>
                                 <tbody id="pending-sessions">
                                 </tbody>
+                            </table>
+                            <table align="center" id="manage-pending-session-mobile-table">
+                                <tbody id="manage-pending-session-tbody-mobile"></tbody>
                             </table>
                         </div>
                     </div>

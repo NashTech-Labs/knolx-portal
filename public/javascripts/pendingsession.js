@@ -38,16 +38,26 @@ function slide(keyword, pageNumber, pageSize) {
                 var calendarSessions = calendarSessionInfo["calendarSessions"];
                 var page = calendarSessionInfo["page"];
                 var pages = calendarSessionInfo["pages"];
+                var mobilePendingSessionsFound = "";
                 if (calendarSessions.length > 0) {
                     for (var session = 0; session < calendarSessions.length; session++) {
+
+                        mobilePendingSessionsFound += "<tr class='session-topic'><td class='session-topic' colspan='2'>" +calendarSessions[session].topic+"</td></tr>"+
+                            "<tr class='session-info'><td>" +
+                            "<p>" + calendarSessions[session].email + "</p>" +
+                            "<p>" + calendarSessions[session].dateString + "</p>" +
+                            "</td>" + "<td>";
+
                         sessions += "<tr><td align='center'>" + calendarSessions[session].dateString + "</td>" +
                             "<td align='center'>" + calendarSessions[session].topic + "</td>" +
                             "<td align='center'>" + calendarSessions[session].email + "</td>";
 
                         if (calendarSessions[session].meetup) {
                             sessions += '<td align="center"><span class="label label-info meetup-session ">Meetup</span></td>';
+                            mobilePendingSessionsFound += '<span class="label label-info meetup-session ">Meetup</span>';
                         } else {
                             sessions += '<td align="center"><span class="label label-info knolx-session ">Knolx</span></td>';
+                            mobilePendingSessionsFound += '<span class="label label-info knolx-session ">Knolx</span>';
                         }
 
                         if (calendarSessions[session].approved) {
@@ -62,9 +72,13 @@ function slide(keyword, pageNumber, pageSize) {
                             sessions += "<td align='center' class='suspended'>No</td>";
                         }
                         sessions += "</tr>"
+
+                        mobilePendingSessionsFound += "</td><tr class='row-space'></tr>";
                     }
 
                     $('#pending-sessions').html(sessions);
+                    $('#manage-pending-session-mobile-table').html(mobilePendingSessionsFound);
+
 
                     var totalSessions = calendarSessionInfo["totalSessions"];
                     var startingRange = (pageSize * (page - 1)) + 1;

@@ -1,6 +1,12 @@
 @media only screen and (max-width: 767px) {
+
+
     #mobile-navbar {
         display: block;
+    }
+
+    #mobile-navbar i {
+        width: 20px !important;
     }
 
     #sidebar {
@@ -83,7 +89,7 @@
         display: none;
     }
 
-    #session-mobile-table, #manage-session-mobile-table {
+    #session-mobile-table, #manage-session-mobile-table, #manage-user-mobile-table {
         display: none;
     }
 

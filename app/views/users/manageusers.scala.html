@@ -79,8 +79,8 @@
             <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
-                <div class="table-responsive manage-user-custom-table-margin">
-                    <table class="table all-users-table table-responsive table-striped">
+                <div class=" manage-user-custom-table-margin">
+                    <table class="table all-users-table table-responsive table-striped main-table">
                         <thead>
                             <tr class="table-header-color">
                                 <th class='col col-xs-2'>Edit</th>
@@ -92,6 +92,9 @@
                         </thead>
                         <tbody id="user-found">
                         </tbody>
+                    </table>
+                    <table align="center" id="manage-user-mobile-table">
+                        <tbody id="manage-user-tbody-mobile"></tbody>
                     </table>
                 </div>
             </div>

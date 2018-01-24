@@ -31,17 +31,17 @@ a.btn.btn-sm.btn-primary.btn-create {
 }
 
 @media only screen and (max-width: 768px) {
-    #manage-session-mobile-table {
+    #manage-session-mobile-table, #manage-user-mobile-table {
         margin-top: 20px;
     }
 
-    #manage-session-tbody-mobile tr {
+    #manage-session-tbody-mobile tr, #manage-user-tbody-mobile tr {
         border: 1px solid #FFFFFF;
         width: 100%;
         background-color: #eeeeee;
     }
 
-    #manage-session-tbody-mobile tr td {
+    #manage-session-tbody-mobile tr td, #manage-user-tbody-mobile tr td {
         font-size: 12px;
         padding-left: 15px;
         padding-right: 15px;

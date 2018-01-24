@@ -41,7 +41,6 @@
                         </li>
                     </ul>
                 </li>
-                <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
             }
             <li class="dropdown alignLinks">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="padding-right: 30px;">
@@ -180,7 +179,6 @@
                                 <a href="@routes.RecommendationController.renderRecommendationPage()"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
                             </li>
                         </ul>
-                    <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
                 }
                 <span class="main-logo" >
                     <a href="@routes.SessionsController.sessions()" class="pull-left logo">
@@ -304,4 +302,8 @@
             </div>
         </div>
     </nav>
+    @if(SessionHelper.isAdmin) {
+        <script type="text/javascript" src="@routes.Assets.versioned("javascripts/notification.js")"></script>
+    }
+
     <div id="content" style="margin-top: 60px;">

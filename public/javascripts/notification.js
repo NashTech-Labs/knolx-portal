@@ -1,20 +1,15 @@
-var total = 0;
-var sessions = 0;
-var recommendations = 0;
-
 $(function () {
     getNotificationCount();
 });
 
 function getNotificationCount() {
+    var total = 0;
     jsRoutes.controllers.CalendarController.pendingSessions().ajax(
         {
             type: "GET",
             success: function (data) {
-                console.log("pending session ->>> " + data);
                 $("#pending-sessions-number").text(data);
-                sessions = data;
-                total += sessions;
+                total += data;
                 $(".number-circle").text(total);
             },
             error: function (er) {
@@ -27,8 +22,7 @@ function getNotificationCount() {
                         type: 'GET',
                         success: function (data) {
                             $("#pending-recommendations-number").text(data);
-                            recommendations = data;
-                            total = sessions + recommendations;
+                            total += data;
                             $(".number-circle").text(total);
                         },
                         error: function (er) {

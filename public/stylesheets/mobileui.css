@@ -109,13 +109,11 @@
     }
 
     .padding-left-30 {
-        padding-left: 30px;
-    !important;
+        padding-left: 30px !important;
     }
 
     .padding-left-45 {
-        padding-left: 45px;
-    !important;
+        padding-left: 45px !important;
     }
 
     .decline-filter {
@@ -154,5 +152,3 @@
     }
 
 }
-
-

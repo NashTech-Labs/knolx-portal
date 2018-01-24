@@ -25,19 +25,19 @@
                     <table class="color-code-table" cellspacing="0" cellpadding="0">
                         <tr>
                             <td><span class="freeslot-color-code color-code"></span></td>
-                            <td><span class="left-margin">Free Slot</span></td>
+                            <td class="color-code-label"><span class="left-margin">Free Slot</span></td>
                         </tr>
                         <tr>
                             <td><span class="pending-color-code color-code"></span></td>
-                            <td><span class="left-margin">Requested Session</span></td>
+                            <td class="color-code-label"><span class="left-margin">Requested Session</span></td>
                         </tr>
                         <tr>
                             <td><span class="meetup-color-code color-code"></span></td>
-                            <td><span class="left-margin">Scheduled Meetup</span></td>
+                            <td class="color-code-label"><span class="left-margin">Scheduled Meetup</span></td>
                         </tr>
                         <tr>
                             <td><span class="approve-color-code color-code"></span></td>
-                            <td><span class="left-margin">Scheduled Knolx</span></td>
+                            <td class="color-code-label"><span class="left-margin">Scheduled Knolx</span></td>
                         </tr>
                     </table>
                 </div>
@@ -67,18 +67,6 @@
                             display: inline-block;
                             width: 65%;"/>
                     </label>
-                    <div class="col-md-12">
-                        <label class="col-md-3 filter-padding-left" style="font-weight: normal;
-                            cursor: default;">
-                            Showing
-                            <span id="starting-range"></span>
-                            to
-                            <span id="ending-range"></span>
-                            of
-                            <span id="total-range"></span>
-                            Entries
-                        </label>
-                    </div>
                     <div class="col-md-12 all-users">
                         <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                         <div class="col-md-12" id="found-user-details"></div>
@@ -101,6 +89,18 @@
                                 <tbody id="manage-pending-session-tbody-mobile"></tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="col-md-3 filter-padding-left" style="font-weight: normal;
+                            cursor: default;">
+                            Showing
+                            <span id="starting-range"></span>
+                            to
+                            <span id="ending-range"></span>
+                            of
+                            <span id="total-range"></span>
+                            Entries
+                        </label>
                     </div>
                     <div class="col-md-12" style="margin-bottom: 25px;">
                         <div class="center">

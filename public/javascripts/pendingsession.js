@@ -38,7 +38,7 @@ function slide(keyword, pageNumber, pageSize) {
                 var calendarSessions = calendarSessionInfo["calendarSessions"];
                 var page = calendarSessionInfo["page"];
                 var pages = calendarSessionInfo["pages"];
-                var mobilePendingSessionsFound = "";
+                var mobilePendingSessionsFound = "<tr class='row-space'></tr>";
                 if (calendarSessions.length > 0) {
                     for (var session = 0; session < calendarSessions.length; session++) {
 
@@ -53,25 +53,27 @@ function slide(keyword, pageNumber, pageSize) {
                             "<td align='center'>" + calendarSessions[session].email + "</td>";
 
                         if (calendarSessions[session].meetup) {
-                            sessions += '<td align="center"><span class="label label-info meetup-session ">Meetup</span></td>';
-                            mobilePendingSessionsFound += '<span class="label label-info meetup-session ">Meetup</span>';
+                            sessions += '<td align="center"><span class="label label-info meetup-session">Meetup</span></td>';
+                            mobilePendingSessionsFound += '<span class="label label-info meetup-session">Meetup</span>';
                         } else {
-                            sessions += '<td align="center"><span class="label label-info knolx-session ">Knolx</span></td>';
-                            mobilePendingSessionsFound += '<span class="label label-info knolx-session ">Knolx</span>';
+                            sessions += '<td align="center"><span class="label label-info knolx-session">Knolx</span></td>';
+                            mobilePendingSessionsFound += '<span class="label label-info knolx-session">Knolx</span>';
                         }
 
                         if (calendarSessions[session].approved) {
                             sessions += "<td align='center' class='active-status'>Yes</td>";
+                            mobilePendingSessionsFound += "<div><span class='label label-success'>Approved</span></div>";
                         } else {
                             sessions += "<td align='center' class='suspended'>No</td>";
                         }
 
                         if (calendarSessions[session].decline) {
                             sessions += "<td align='center' class='active-status'>Yes</td>";
+                            mobilePendingSessionsFound += "<div><span class='label label-danger'>Declined</span></div>";
                         } else {
                             sessions += "<td align='center' class='suspended'>No</td>";
                         }
-                        sessions += "</tr>"
+                        sessions += "</tr>";
 
                         mobilePendingSessionsFound += "</td><tr class='row-space'></tr>";
                     }

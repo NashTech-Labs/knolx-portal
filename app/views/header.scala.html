@@ -34,10 +34,12 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li class="alignLinks">
-                            <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
+                            <a href="@routes.CalendarController.renderCalendarPage()"><span>
+                                Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
                         </li>
                         <li class="alignLinks">
-                            <a href="@routes.RecommendationController.renderRecommendationPage()"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
+                            <a href="@routes.RecommendationController.renderRecommendationPage()"><span>
+                                Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
                         </li>
                     </ul>
                 </li>
@@ -95,7 +97,6 @@
 
             @if(!SessionHelper.isLoggedIn) {
 
-
                 <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback">
                     <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday">
                         <i class="fa fa-comments"></i>
@@ -117,39 +118,39 @@
                         <b class="caret"></b>
                     </a>
 
-                <ul class="collapse list-unstyled" id="manageSubmenu">
-                    <li class="@activeLink(routes.SessionsController.manageSessions().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Scheduled Sessions">
-                        <a href="@routes.SessionsController.manageSessions()" class ="manage-sub-menu">
-                            <i class="fa fa-hourglass-end" aria-hidden="true"></i>
-                            <span>Scheduled Sessions</span></a>
-                    </li>
-                    <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
-                        <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)" class ="manage-sub-menu">
-                            <i class="fa fa-file" aria-hidden="true"></i>
-                            <span>Feedback Forms</span></a>
-                    </li>
-                    <li class="@activeLink(routes.UsersController.manageUser().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
-                        <a href="@routes.UsersController.manageUser()" class ="manage-sub-menu">
-                            <i class="fa fa-users" aria-hidden="true"></i>
-                            <span>Users</span></a>
-                    </li>
-                    <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Reports">
-                        <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()" class ="manage-sub-menu">
-                            <i class="fa fa-folder-open" aria-hidden="true"></i>
-                            <span>Reports</span></a>
-                    </li>
-                    <li class="@activeLink(routes.SessionsCategoryController.renderCategoryPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Categories">
-                        <a href="@routes.SessionsCategoryController.renderCategoryPage()" class ="manage-sub-menu">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
-                            <span>Categories</span></a>
-                    </li>
-                    <li class="@activeLink(routes.KnolxUserAnalysisController.renderUserAnalyticsPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="User Analytics">
-                        <a href="@routes.KnolxUserAnalysisController.renderUserAnalyticsPage()" class ="manage-sub-menu">
-                            <i class="fa fa-area-chart" aria-hidden="true"></i>
-                            <span>User Analytics</span></a>
-                    </li>
-                </ul>
-            </li>
+                    <ul class="collapse list-unstyled" id="manageSubmenu">
+                        <li class="@activeLink(routes.SessionsController.manageSessions().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Scheduled Sessions">
+                            <a href="@routes.SessionsController.manageSessions()" class ="manage-sub-menu">
+                                <i class="fa fa-hourglass-end" aria-hidden="true"></i>
+                                <span>Scheduled Sessions</span></a>
+                        </li>
+                        <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
+                            <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)" class ="manage-sub-menu">
+                                <i class="fa fa-file" aria-hidden="true"></i>
+                                <span>Feedback Forms</span></a>
+                        </li>
+                        <li class="@activeLink(routes.UsersController.manageUser().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
+                            <a href="@routes.UsersController.manageUser()" class ="manage-sub-menu">
+                                <i class="fa fa-users" aria-hidden="true"></i>
+                                <span>Users</span></a>
+                        </li>
+                        <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Reports">
+                            <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()" class ="manage-sub-menu">
+                                <i class="fa fa-folder-open" aria-hidden="true"></i>
+                                <span>Reports</span></a>
+                        </li>
+                        <li class="@activeLink(routes.SessionsCategoryController.renderCategoryPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Categories">
+                            <a href="@routes.SessionsCategoryController.renderCategoryPage()" class ="manage-sub-menu">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                                <span>Categories</span></a>
+                        </li>
+                        <li class="@activeLink(routes.KnolxUserAnalysisController.renderUserAnalyticsPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="User Analytics">
+                            <a href="@routes.KnolxUserAnalysisController.renderUserAnalyticsPage()" class ="manage-sub-menu">
+                                <i class="fa fa-area-chart" aria-hidden="true"></i>
+                                <span>User Analytics</span></a>
+                        </li>
+                    </ul>
+                </li>
 
             }
         </ul>
@@ -158,7 +159,7 @@
             </i>
         </div>
     </nav>
-     <nav id="mobile-navbar" class="navbar navbar-fixed-top">
+    <nav id="mobile-navbar" class="navbar navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle margin-left" data-toggle="collapse" data-target="#myNavbar">
@@ -167,18 +168,20 @@
                     <span class="icon-bar"></span>
                 </button>
                 @if(SessionHelper.isAdmin || SessionHelper.isSuperUser) {
-                        <a href="#" class="notification-icon dropdown-toggle navbar-nav dropdown alignLinks float-right" data-toggle="dropdown">
-                            <i class="fa fa-bullhorn" aria-hidden="true"></i>
-                            <span class="number-circle"></span>
-                        </a>
-                        <ul class="dropdown-menu right-zero">
-                            <li class="alignLinks">
-                                <a href="@routes.CalendarController.renderCalendarPage()"><span>Pending sessions for approval: <span id="pending-sessions-number"></span></span></a>
-                            </li>
-                            <li class="alignLinks">
-                                <a href="@routes.RecommendationController.renderRecommendationPage()"><span>Pending recommendations for approval: <span id="pending-recommendations-number"></span></span></a>
-                            </li>
-                        </ul>
+                    <a href="#" class="notification-icon dropdown-toggle navbar-nav dropdown alignLinks float-right" data-toggle="dropdown">
+                        <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                        <span class="number-circle"></span>
+                    </a>
+                    <ul class="dropdown-menu right-zero">
+                        <li class="alignLinks">
+                            <a href="@routes.CalendarController.renderCalendarPage()"><span>
+                                Pending sessions for approval: <span id="pending-sessions-number-mobile"></span></span></a>
+                        </li>
+                        <li class="alignLinks">
+                            <a href="@routes.RecommendationController.renderRecommendationPage()"><span>
+                                Pending recommendations for approval: <span id="pending-recommendations-number-mobile"></span></span></a>
+                        </li>
+                    </ul>
                 }
                 <span class="main-logo" >
                     <a href="@routes.SessionsController.sessions()" class="pull-left logo">

@@ -6,7 +6,7 @@
 
 <div class="wrapper">
 
-        <!-- Sidebar Holder -->
+    <!-- Sidebar Holder -->
     <nav class="navbar navbar-fixed-top" role="navigation" style="margin-bottom: 0" id="non-mobile-header">
         <div class="navbar-header" style="height: 50px;">
             <span class="main-logo" >
@@ -96,7 +96,6 @@
             </li>
 
             @if(!SessionHelper.isLoggedIn) {
-
 
                 <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback">
                     <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday">

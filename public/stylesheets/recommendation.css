@@ -175,9 +175,6 @@
 
 .recommendation-label {
     font-size: 16px !important;
-    /*position: relative;
-    bottom: 26px;
-    left: -4%;*/
     width: fit-content;
     float: right;
 }

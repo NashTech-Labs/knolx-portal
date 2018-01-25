@@ -459,7 +459,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
     }
   }
 
-  def renderScheduleSessionByAdmin(sessionId: String, recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+  def renderScheduleSessionByAdmin(sessionId: String): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -476,14 +476,14 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
               session.topic,
               session.meetup,
               dateTimeUtility.formatDateWithT(new Date(session.date.value)))
-            Ok(views.html.sessions.approvesession(createSessionForm, formIds, sessionId, recommendationId, createSessionInfo))
+            Ok(views.html.sessions.approvesession(createSessionForm, formIds, sessionId, session.recommendationId, createSessionInfo))
           }
         }
       }
   }
 
   def approveSessionByAdmin(sessionApprovedId: String,
-                            recommendationId: Option[String]): Action[AnyContent] = adminAction.async { implicit request =>
+                            recommendationId: String): Action[AnyContent] = adminAction.async { implicit request =>
     feedbackFormsRepository
       .getAll
       .flatMap { feedbackForms =>
@@ -522,7 +522,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                       )
                     )
                   } { userJson =>
-                    approveSession(createSessionInfo, sessionApprovedId, createApproveSessionInfo, formIds, request, userJson)
+                    approveSession(createSessionInfo, sessionApprovedId, recommendationId, createApproveSessionInfo, formIds, request, userJson)
                   })
               })
           }
@@ -532,6 +532,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
 
   private def approveSession(createSessionInfo: CreateSessionInformation,
                              sessionApprovedId: String,
+                             recommendationId: String,
                              createApproveSessionInfo: CreateApproveSessionInfo,
                              formIds: List[(String, String)],
                              request: SecuredRequest[AnyContent],
@@ -549,31 +550,32 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
         sessionsScheduler ! RefreshSessionsSchedulers
         val approveSessionInfo = UpdateApproveSessionInfo(BSONDateTime(createSessionInfo.date.getTime), sessionApprovedId,
           createSessionInfo.topic, createSessionInfo.email, createSessionInfo.category, createSessionInfo.subCategory,
-          createSessionInfo.meetup, approved = true)
+          createSessionInfo.meetup, approved = true, recommendationId = recommendationId)
 
-            sessionRequestRepository.insertSessionForApprove(approveSessionInfo).flatMap { updatedResult =>
-              if (updatedResult.ok) {
-                if (approveSessionInfo.recommendationId.isEmpty) {
-                  Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!"))
+        sessionRequestRepository.insertSessionForApprove(approveSessionInfo).flatMap { updatedResult =>
+          if (updatedResult.ok) {
+            if (approveSessionInfo.recommendationId.isEmpty) {
+              Future.successful(Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!"))
+            } else {
+              recommendationsRepository.doneRecommendation(approveSessionInfo.recommendationId).map { status =>
+                if (status.ok) {
+                  Logger.info("Session with respective recommendation has been scheduled ")
+                  Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
                 } else {
-                  recommendationsRepository.bookRecommendation(approveSessionInfo.recommendationId).map { status =>
-                    if (status.ok) {
-                      Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
-                    } else {
-                      Logger.error("Something went wrong while booking a recommendation")
-                      Redirect(routes.CalendarController.renderCalendarPage()).flashing("message" -> "Session successfully approved!")
-                    }
-                  }
+                  Logger.error("Something went wrong while scheduling a session with respective recommendation")
+                  Redirect(routes.CalendarController.renderCalendarPage()).flashing("error" -> "Something went wrong!")
                 }
-              } else {
-                Future.successful(InternalServerError("Something went wrong!"))
               }
             }
           } else {
-            Logger.error(s"Something went wrong while approving a requested Knolx session for user ${createSessionInfo.email}")
             Future.successful(InternalServerError("Something went wrong!"))
           }
         }
+      } else {
+        Logger.error(s"Something went wrong while approving a requested Knolx session for user ${createSessionInfo.email}")
+        Future.successful(InternalServerError("Something went wrong!"))
+      }
+    }
   }
 
 }

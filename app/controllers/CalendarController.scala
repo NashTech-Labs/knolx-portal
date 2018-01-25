@@ -425,7 +425,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                           Redirect(routes.CalendarController.renderCalendarPage())
                             .flashing("message" -> "Recommendation has been unbooked now")
                         } else {
-                          Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
+                          Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId))
                             .flashing("message" -> "Something went wrong while declining the session")
                         }
                       }
@@ -434,7 +434,7 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
                 }
               } else {
                 Logger.info(s"Something went wrong while declining session $sessionId")
-                Future.successful(Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId, Some(approvalSession.recommendationId)))
+                Future.successful(Redirect(routes.SessionsController.renderScheduleSessionByAdmin(sessionId))
                   .flashing("message" -> "Something went wrong while declining the session"))
               }
             }

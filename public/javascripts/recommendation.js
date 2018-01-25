@@ -96,6 +96,7 @@ function Recommendation() {
                                 var filter = $('input[name="user-recommend-filter"]:checked').val();
                                 var sort = $('#sort-entries').val();
                                 fetchRecommendationList(page, filter, sort);
+                                getNotificationCount();
                             },
                             error: function (er) {
                                 $.alert(er.responseText);
@@ -266,6 +267,7 @@ function Recommendation() {
                     page = 1;
                     var sort = $('#sort-entries').val();
                     fetchRecommendationList(page, filter, sort);
+                    getNotificationCount();
                 },
                 error: function (er) {
                     console.log(er);
@@ -286,7 +288,7 @@ function Recommendation() {
 
         form.method = "POST";
         var url = "";
-        if(vote === "upvote") {
+        if (vote === "upvote") {
             url = jsRoutes.controllers.RecommendationController.upVote(id).url;
         } else {
             url = jsRoutes.controllers.RecommendationController.downVote(id).url;

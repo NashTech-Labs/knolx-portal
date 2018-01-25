@@ -283,5 +283,6 @@ h5 {
     #drop-down-btn-modify,#drop-down-btn-delete {
         float: right;
         position: absolute;
+        margin-top: 0px;
     }
 }

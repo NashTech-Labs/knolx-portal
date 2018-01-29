@@ -97,6 +97,10 @@
         margin-top: 28px;
     }
 
+    .login-form {
+        border-right: none;
+    }
+
     #manage-pending-session-mobile-table tr td {
         font-size: 12px;
         padding-left: 20px;
@@ -159,6 +163,11 @@
     .right-zero-main {
         right: 0 !important;
         left: unset;
+    }
+
+    .login-form {
+        border-right: 1px solid #e7eaec;
+        margin:auto;
     }
 
 }

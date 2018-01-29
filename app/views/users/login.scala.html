@@ -33,7 +33,7 @@
                         <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
                     </div>
                 }
-                <div class="col-md-6 " style="border-right: 1px solid #e7eaec; margin:auto;">
+                <div class="col-md-6 login-form" style="">
                     <form id="loginForm" class='customForm' action="@routes.UsersController.loginUser()" method="POST">
 
                         @helper.CSRF.formField

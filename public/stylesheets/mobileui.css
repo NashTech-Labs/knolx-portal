@@ -112,6 +112,15 @@
         padding-right: 20px;
     }
 
+    .register-form {
+        text-align: center;
+        padding-bottom: 10px;
+    }
+
+    .register-outer {
+        margin: auto 0px;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {
@@ -173,6 +182,10 @@
     .login-form {
         border-right: 1px solid #e7eaec;
         margin:auto;
+    }
+
+    .register-form{
+        padding-bottom: 10px;
     }
 
 }

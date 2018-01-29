@@ -87,6 +87,16 @@
         background-color: #eeeeee;
     }
 
+    .register-div {
+       /* margin-left: -120px;
+        display: inline-grid;
+        margin-top: 28px;*/
+        /*display: inline-block;*/
+        display: inline-flex;
+        /*margin-left: -119px;*/
+        margin-top: 28px;
+    }
+
     #manage-pending-session-mobile-table tr td {
         font-size: 12px;
         padding-left: 20px;

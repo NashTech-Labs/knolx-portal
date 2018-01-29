@@ -4,20 +4,48 @@
 
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-            <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-            Show
-                <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
-                @for(value <- List(10,20,30,40,50)) {
-                    <option value="@value">@value</option>
-                }
-                </select>
-            Entries
-            </label>
-            <div class="col-md-7"></div>
-            <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
-                Search
-                <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
-            </label>
+            <div class="desktop-view">
+                <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+                    Show
+                    <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
+                        padding-right: 2px !important; ">
+                    @for(value <- List(10, 20, 30, 40, 50)) {
+                        <option value="@value">@value</option>
+                    }
+                    </select>
+                    Entries
+                </label>
+                <div class="col-md-7"></div>
+                <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
+                    font-weight: normal;
+                    text-align: right">
+                    Search
+                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
+                        display: inline-block;
+                        width: 65%;"/>
+                </label>
+            </div>
+
+                <!--Mobile view-->
+            <div class="mobile-view">
+                <label class="col-md-3 search-bar-mobile" id="search-bar">
+                    Search
+                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
+                        display: inline-block;
+                        width: 65%;"/>
+                </label>
+                <div class="col-md-7"></div>
+                <label class="col-md-2 customize-entries" style="font-weight: normal">
+                    Show
+                    <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
+                        padding-right: 2px !important; ">
+                    @for(value <- List(10, 20, 30, 40, 50)) {
+                        <option value="@value">@value</option>
+                    }
+                    </select>
+                    Entries
+                </label>
+            </div>
 
             @if(!flash.isEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message" style="margin-bottom: 15px;">
@@ -60,7 +88,8 @@
                 </div>
             </div>
             <div class="col-md-12">
-                <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
+                <label class="col-md-3 filter-padding-left" style="font-weight: normal;
+                    cursor: default;">
                     Showing
                     <span id="starting-range"></span>
                     to

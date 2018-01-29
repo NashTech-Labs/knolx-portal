@@ -68,6 +68,11 @@
     .padding-left-30-mobile {
      padding-left: 30px !important;
     }
+    .filter-no-padding {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
 
     .margin-top-25 {
         margin-top: 25px !important;

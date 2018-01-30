@@ -108,3 +108,14 @@ input.input-field.logo:focus {
     text-align: center;
     font-size: 16px;
 }
+
+@media only screen and (max-width: 767px) {
+    .login-outer {
+        text-align: left;
+        margin: auto 0px;
+    }
+
+    .sign-in-form {
+        text-align: center;
+    }
+}

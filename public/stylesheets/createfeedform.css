@@ -83,6 +83,7 @@ input#form-name:focus {
     text-align: center;
     color: #EC7063;
     font-weight: bold;
+    padding-left: 15px;
 }
 
 .card-options {

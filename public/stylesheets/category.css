@@ -269,7 +269,7 @@ h5 {
     }
 
     #sub-categories-list-delete, #sub-categories-list-modify {
-        padding: 1px 0px 1px 6px;
+        padding: 2px 0px 6px 6px;   
     }
 
     .fa-caret-down {

@@ -66,13 +66,13 @@
     }
 
     .padding-left-30-mobile {
-     padding-left: 30px !important;
+        padding-left: 30px !important;
     }
+
     .filter-no-padding {
         padding-left: 0px;
         padding-right: 0px;
     }
-
 
     .margin-top-25 {
         margin-top: 25px !important;
@@ -93,9 +93,9 @@
     }
 
     .register-div {
-       /* margin-left: -120px;
-        display: inline-grid;
-        margin-top: 28px;*/
+        /* margin-left: -120px;
+         display: inline-grid;
+         margin-top: 28px;*/
         /*display: inline-block;*/
         display: inline-flex;
         /*margin-left: -119px;*/
@@ -149,6 +149,7 @@
 }
 
 @media only screen and (min-width: 768px) {
+
     #mobile-navbar {
         display: none;
     }

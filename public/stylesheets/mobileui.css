@@ -1,6 +1,11 @@
 @media only screen and (max-width: 767px) {
+
     #mobile-navbar {
         display: block;
+    }
+
+    #mobile-navbar i {
+        width: 20px !important;
     }
 
     #sidebar {
@@ -61,7 +66,12 @@
     }
 
     .padding-left-30-mobile {
-     padding-left: 30px !important;
+        padding-left: 30px !important;
+    }
+
+    .filter-no-padding {
+        padding-left: 0px;
+        padding-right: 0px;
     }
 
     .margin-top-25 {
@@ -76,14 +86,70 @@
         margin-top: 15px !important;
     }
 
+    #manage-pending-session-mobile-table tr {
+        border: 1px solid #FFFFFF;
+        width: 100%;
+        background-color: #eeeeee;
+    }
+
+    .register-div {
+        display: inline-flex;
+        margin-top: 28px;
+    }
+
+    .login-form {
+        border-right: none;
+    }
+
+    #manage-pending-session-mobile-table tr td {
+        font-size: 12px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .register-form {
+        text-align: center;
+        padding-bottom: 10px;
+    }
+
+    .register-outer {
+        margin: auto 0px;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+
+    .desktop-view {
+        display: none;
+    }
+
+    .search-bar-mobile {
+        font-weight: normal;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .customize-entries {
+        font-weight: normal;
+        float: right;
+        margin-right: 5px;
+        margin-top: 8px;
+    }
+
+    .recommendation-list {
+        float: none;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {
+
     #mobile-navbar {
         display: none;
     }
 
-    #session-mobile-table, #manage-session-mobile-table {
+    #session-mobile-table, #manage-session-mobile-table, #manage-user-mobile-table, #manage-pending-session-mobile-table {
         display: none;
     }
 
@@ -91,14 +157,16 @@
         display: inline-table;
     }
 
+    .mobile-view {
+        display: block;
+    }
+
     .padding-left-30 {
-        padding-left: 30px;
-    !important;
+        padding-left: 30px !important;
     }
 
     .padding-left-45 {
-        padding-left: 45px;
-    !important;
+        padding-left: 45px !important;
     }
 
     .decline-filter {
@@ -134,6 +202,23 @@
     .right-zero-main {
         right: 0 !important;
         left: unset;
+    }
+
+    .login-form {
+        border-right: 1px solid #e7eaec;
+        margin: auto;
+    }
+
+    .register-form {
+        padding-bottom: 10px;
+    }
+
+    .mobile-view {
+        display: none;
+    }
+
+    .desktop-view {
+        display: block;
     }
 
 }

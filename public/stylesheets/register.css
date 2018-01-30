@@ -18,3 +18,8 @@ input.input-field.reg:focus {
     margin-top: 20px;
     font-size: 16px;
 }
+
+.register-label {
+    font-weight: none;
+    float: left;
+}

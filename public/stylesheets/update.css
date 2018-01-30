@@ -15,7 +15,6 @@
     margin-bottom: 20px;
 }
 
-
 .disp-inline {
     display: inline;
 }
@@ -52,6 +51,7 @@ label {
 
 .checkbox-outer {
     display: flex;
+    font-weight: normal;
 }
 
 .label_text {
@@ -121,7 +121,7 @@ label {
 .update-button {
     background-color: #1ab394;
     color: #fff;
-    margin-bottom:15px;
+    margin-bottom: 15px;
     font-size: 3vh;
 }
 
@@ -141,7 +141,7 @@ label {
     padding: 15px 15px 7px;
     min-height: 48px;
     border-bottom-width: 1px;
-    color:#676a6c;
+    color: #676a6c;
 }
 
 .select-height {

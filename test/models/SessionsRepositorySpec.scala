@@ -137,9 +137,10 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get active and uncancelled sessions count when serched with empty string" in new TestScope {
+      dateTimeUtility.nowMillis returns currentMillis
       val count: Int = await(sessionsRepository.activeUncancelledCount(None))
 
-      count must beEqualTo(1)
+      count must beEqualTo(0)
     }
 
     "get users session till now for a particular user" in new TestScope {
@@ -161,9 +162,10 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get active and cancelled sessions count when serched with some string" in new TestScope {
+      dateTimeUtility.nowMillis returns currentMillis
       val count: Int = await(sessionsRepository.activeUncancelledCount(Some("test")))
 
-      count must beEqualTo(1)
+      count must beEqualTo(0)
     }
 
     "delete session" in new TestScope {

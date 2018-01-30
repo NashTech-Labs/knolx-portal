@@ -191,24 +191,24 @@
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
-                    <li class="@activeLink("/session") alignLinks" data-toggle="tooltip" data-placement="right" title="Scheduled Sessions">
+                    <li class="@activeLink("/session") alignLinks">
                         <a href="@routes.SessionsController.sessions()">
                             <i class="fa fa-clock-o"></i>
                             <span>Scheduled Sessions</span>
                         </a>
                     </li>
-                    <li class="@activeLink(routes.KnolxAnalysisController.renderAnalysisPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Analysis">
+                    <li class="@activeLink(routes.KnolxAnalysisController.renderAnalysisPage().url) alignLinks" >
                         <a href="@routes.KnolxAnalysisController.renderAnalysisPage">
                             <i class="fa fa-line-chart"></i>
                             <span>Analysis</span></a>
                     </li>
-                    <li class="@activeLink(routes.CalendarController.renderCalendarPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Book a Session">
+                    <li class="@activeLink(routes.CalendarController.renderCalendarPage().url) alignLinks" >
                         <a href="@routes.CalendarController.renderCalendarPage">
                             <i class="fa fa-calendar"></i>
                             <span>Book a Session</span></a>
                     </li>
 
-                    <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Suggest a Topic">
+                    <li class="@activeLink(routes.RecommendationController.renderRecommendationPage().url) alignLinks" >
                         <a href="@routes.RecommendationController.renderRecommendationPage">
                             <i class="fa fa-inbox"></i>
                             <span>Suggest a Topic</span></a>
@@ -216,12 +216,12 @@
                     @if(!SessionHelper.isLoggedIn) {
 
 
-                        <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback">
+                        <li class="@activeLink(routes.FeedbackFormsResponseController.getFeedbackFormsForToday().url) alignLinks">
                             <a href="@routes.FeedbackFormsResponseController.getFeedbackFormsForToday">
                                 <i class="fa fa-comments"></i>
                                 <span>Feedbacks</span></a>
                         </li>
-                        <li class="@activeLink(routes.FeedbackFormsReportController.renderUserFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Knolx Report">
+                        <li class="@activeLink(routes.FeedbackFormsReportController.renderUserFeedbackReports().url) alignLinks">
                             <a href="@routes.FeedbackFormsReportController.renderUserFeedbackReports()">
                                 <i class="fa fa-table"></i>
                                 <span>Knolx reports</span></a>
@@ -238,32 +238,32 @@
                             </a>
 
                             <ul class="dropdown-menu">
-                                <li class="@activeLink(routes.SessionsController.manageSessions().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Scheduled Sessions">
+                                <li class="@activeLink(routes.SessionsController.manageSessions().url) alignLinks">
                                     <a href="@routes.SessionsController.manageSessions()" class ="manage-sub-menu">
                                         <i class="fa fa-hourglass-end" aria-hidden="true"></i>
                                         <span>Scheduled Sessions</span></a>
                                 </li>
-                                <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks" data-toggle="tooltip" data-placement="right" title="Feedback Forms">
+                                <li class="@activeLink(routes.FeedbackFormsController.manageFeedbackForm(1).url) alignLinks">
                                     <a href="@routes.FeedbackFormsController.manageFeedbackForm(1)" class ="manage-sub-menu">
                                         <i class="fa fa-file" aria-hidden="true"></i>
                                         <span>Feedback Forms</span></a>
                                 </li>
-                                <li class="@activeLink(routes.UsersController.manageUser().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Users">
+                                <li class="@activeLink(routes.UsersController.manageUser().url) alignLinks">
                                     <a href="@routes.UsersController.manageUser()" class ="manage-sub-menu">
                                         <i class="fa fa-users" aria-hidden="true"></i>
                                         <span>Users</span></a>
                                 </li>
-                                <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Reports">
+                                <li class="@activeLink(routes.FeedbackFormsReportController.renderAllFeedbackReports().url) alignLinks">
                                     <a href="@routes.FeedbackFormsReportController.renderAllFeedbackReports()" class ="manage-sub-menu">
                                         <i class="fa fa-folder-open" aria-hidden="true"></i>
                                         <span>Reports</span></a>
                                 </li>
-                                <li class="@activeLink(routes.SessionsCategoryController.renderCategoryPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="Categories">
+                                <li class="@activeLink(routes.SessionsCategoryController.renderCategoryPage().url) alignLinks"
                                     <a href="@routes.SessionsCategoryController.renderCategoryPage()" class ="manage-sub-menu">
                                         <i class="fa fa-plus" aria-hidden="true"></i>
                                         <span>Categories</span></a>
                                 </li>
-                                <li class="@activeLink(routes.KnolxUserAnalysisController.renderUserAnalyticsPage().url) alignLinks" data-toggle="tooltip" data-placement="right" title="User Analytics">
+                                <li class="@activeLink(routes.KnolxUserAnalysisController.renderUserAnalyticsPage().url) alignLinks">
                                     <a href="@routes.KnolxUserAnalysisController.renderUserAnalyticsPage()" class ="manage-sub-menu">
                                         <i class="fa fa-area-chart" aria-hidden="true"></i>
                                         <span>User Analytics</span></a>

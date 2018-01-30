@@ -33,7 +33,7 @@
                         <strong>Success!</strong> @flash.get("successMessage").fold("")(message => message)
                     </div>
                 }
-                <div class="col-md-6 " style="border-right: 1px solid #e7eaec; margin:auto;">
+                <div class="col-md-6 login-form">
                     <form id="loginForm" class='customForm' action="@routes.UsersController.loginUser()" method="POST">
 
                         @helper.CSRF.formField
@@ -56,7 +56,8 @@
                     </form>
 
                     </div>
-                <div class="col-md-6"><h4>Not a member?</h4>
+                <div class="col-md-6">
+                    <h4 class="register-div">Not a member?</h4>
                     <p>You can create an account:</p>
                     <p class="text-center">
                         <a href="@routes.UsersController.register()"><i class="fa fa-sign-in" style="font-size:140px; color: #e5e6e7;"></i></a>

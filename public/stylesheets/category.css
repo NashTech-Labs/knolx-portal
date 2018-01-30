@@ -82,9 +82,11 @@
     outline: none;
     font-size: 16px;
     background: #fff;
-    width: 21px;
+    width: 20px;
     height: 20px;
     text-align: center;
+    float: right;
+    margin-top: 5px;
 }
 
 .fa-caret-down {
@@ -211,21 +213,21 @@ h5 {
 #categories-list-delete + span > span > span.category-select2 {
     width: 100%;
     height: 34px;
-    border: 1px solid #e5e6e7 !important ;
+    border: 1px solid #e5e6e7 !important;
     padding: 2px 0px !important;
 }
 
 #categories-list-modify + span > span > span.category-select2 {
     width: 100%;
     height: 34px;
-    border: 1px solid #e5e6e7 !important ;
+    border: 1px solid #e5e6e7 !important;
     padding: 2px 0px !important;
 }
 
 #categories-list-add + span > span > span.category-select2 {
     width: 100%;
     height: 34px;
-    border: 1px solid #e5e6e7 !important ;
+    border: 1px solid #e5e6e7 !important;
     padding: 2px 0px !important;
 }
 
@@ -255,4 +257,32 @@ h5 {
 
 #categories-list-delete + .select2-container--default .select2-selection--single .select2-selection__arrow {
     top: 3px !important;
+}
+
+@media only screen and (max-width: 768px) {
+    .filter-padding-left {
+        padding-left: 14px;
+    }
+
+    .ibox-content {
+        max-height: 250px;
+    }
+
+    #sub-categories-list-delete, #sub-categories-list-modify {
+        padding: 2px 0px 6px 6px;
+    }
+
+    .fa-caret-down {
+        margin-left: -3px;
+    }
+
+    #input-box-modify-sub-category, #input-box-delete-sub-category {
+        margin-top: 20px;
+    }
+
+    #drop-down-btn-modify, #drop-down-btn-delete {
+        float: right;
+        position: absolute;
+        margin-top: 0px;
+    }
 }

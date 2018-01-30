@@ -99,3 +99,13 @@
     width: 100%;
     z-index: 1000;
 }
+
+@media only screen and (max-width: 768px) {
+    .color-code-table{
+        margin-left: 60%;
+    }
+
+    .color-code-label {
+        width: 140px;
+    }
+}

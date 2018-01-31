@@ -207,3 +207,9 @@
     height: 1px;
     padding-top: 10px;
 }
+
+@media only screen and (max-width: 767px) {
+    .pin_text:before {
+        margin-left: 30px;
+    }
+}

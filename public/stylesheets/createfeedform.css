@@ -187,7 +187,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
     text-align: center;
     color: #EC7063;
     font-weight: bold;
-    margin-left: 8%;
+    margin-left: 12.5%;
 
 }
 
@@ -379,4 +379,18 @@ textarea{
 .comment-content:-ms-input-placeholder {
     /* Internet Explorer 10-11 */
     text-align: center;
+}
+
+.feedback-comment-div {
+    margin-left: 14%;
+}
+
+@media only screen and (max-width: 767px){
+    .card-questions-other {
+        margin-left: 8%;
+    }
+
+    .feedback-comment-div {
+        margin-left: 11%;
+    }
 }

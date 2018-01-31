@@ -178,11 +178,17 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
   }
 
   def activeUncancelledCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
+    val millis = dateTimeUtility.nowMillis
+
     val condition = keyword match {
       case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
         "active" -> true,
-        "cancelled" -> false))
-      case None => Some(Json.obj("active" -> true, "cancelled" -> false))
+        "cancelled" -> false,
+        "date" -> BSONDocument("$lt" -> BSONDateTime(millis))
+      ))
+      case None => Some(Json.obj("active" -> true, "cancelled" -> false,
+        "date" -> BSONDocument("$lt" -> BSONDateTime(millis))
+      ))
     }
 
     collection

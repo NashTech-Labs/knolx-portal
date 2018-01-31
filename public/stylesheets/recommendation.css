@@ -273,3 +273,10 @@
 .recommendation-book-row {
     background-color: white;
 }
+
+@media only screen and (max-width: 767px) {
+    .recommendation-margin-btm:first-child {
+        margin-top: 190px;
+    }
+
+}

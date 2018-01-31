@@ -101,10 +101,18 @@
 }
 
 @media only screen and (max-width: 768px) {
-    .color-code-table{
+    .color-code-table {
         margin-left: 60%;
     }
 
+    .color-code-table td {
+        height: 15px;
+        border-width: 0px !important;
+        vertical-align: middle;
+        text-align: left;
+        padding: 4px 0px;
+    }
+    
     .color-code-label {
         width: 140px;
     }

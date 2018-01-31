@@ -63,7 +63,7 @@
     text-align: center;
     color: #2980B9;
     font-weight: bold;
-    margin-left: 7.5%;
+    margin-left: 1.5%;
 }
 
 input#form-name:focus {
@@ -83,6 +83,7 @@ input#form-name:focus {
     text-align: center;
     color: #EC7063;
     font-weight: bold;
+    padding-left: 15px;
 }
 
 .card-options {
@@ -186,7 +187,7 @@ a.fa.fa-times-circle.delete-option-button:hover {
     text-align: center;
     color: #EC7063;
     font-weight: bold;
-    margin-left: 10%;
+    margin-left: 8%;
 
 }
 
@@ -206,7 +207,9 @@ i.fa.fa-trash-o.delQuestion {
     cursor: pointer;
     text-shadow: 0px 0px 3px #eee;
     text-align: center;
-
+    float: right;
+    margin-top: 18px;
+    padding-right: 10px;
 }
 
 a.fa.fa-trash.delete-form:hover {
@@ -310,8 +313,7 @@ textarea{
 
 .comment-section{
     width:100%;
-    text-align:center
-    border:none;
+    text-align:center;
     border-bottom: 1px dotted #dcdcdc;
     outline: none;
     font-size: 18px;

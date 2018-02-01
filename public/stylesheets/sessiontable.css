@@ -217,4 +217,11 @@ ul.pagination.pagination-lg li a {
     #show-entries-mobile-div {
         padding-right: 8px;
     }
+
+    #search-bar-mobile {
+        margin-top: 10px;
+        padding-right: 6px !important;
+        font-weight: normal;
+        text-align: center
+    }
 }

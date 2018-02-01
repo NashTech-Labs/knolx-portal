@@ -30,6 +30,10 @@ a.btn.btn-sm.btn-primary.btn-create {
     display: flex;
 }
 
+.paginate-number{
+    margin-bottom: 25px;
+}
+
 @media only screen and (max-width: 768px) {
     #manage-user-mobile-table {
         margin-top: 20px;
@@ -118,5 +122,9 @@ a.btn.btn-sm.btn-primary.btn-create {
 
     .remove-padding-left {
         padding-left: 0px;
+    }
+
+    .paginate-number{
+        margin-right: 15px;
     }
 }

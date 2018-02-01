@@ -30,7 +30,7 @@ a.btn.btn-sm.btn-primary.btn-create {
     display: flex;
 }
 
-.paginate-number{
+.paginate-number {
     margin-bottom: 25px;
 }
 
@@ -70,7 +70,7 @@ a.btn.btn-sm.btn-primary.btn-create {
         text-align: center;
     }
 
-    .manage-user-container-custom-margin>label {
+    .manage-user-container-custom-margin > label {
         padding-bottom: 10px;
     }
 
@@ -124,7 +124,7 @@ a.btn.btn-sm.btn-primary.btn-create {
         padding-left: 0px;
     }
 
-    .paginate-number{
+    .paginate-number {
         margin-right: 15px;
     }
 }

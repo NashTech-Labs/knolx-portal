@@ -3,7 +3,7 @@
     color: #000;
     margin-top: 20px;
     padding: 0px 0px;
- // padding-bottom: 50 px;
+/ / padding-bottom: 50 px;
     -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
     -moz-animation: fadein 2s; /* Firefox < 16 */
     -ms-animation: fadein 2s; /* Internet Explorer */
@@ -91,6 +91,6 @@ a.btn.btn-sm.btn-primary.btn-create-feed:hover {
     text-align: center;
 }
 
-.custom-attributes{
+.custom-attributes {
     border-top: 1px solid #fff;
 }

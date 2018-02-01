@@ -3,7 +3,7 @@
 @main("Manage Scheduled Sessions") {
 
     <div class="row">
-        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
+        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin" style="display: inline-table">
             <div class="desktop-view">
                 <label class="col-md-2 filter-padding-left" style="font-weight: normal">
                     Show
@@ -28,12 +28,11 @@
 
                 <!--Mobile view-->
             <div class="mobile-view">
-                <div class="col-md-2"></div>
                 <label class="col-md-8 search-bar-mobile" id="search-bar">
                     Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text-mobile" style="margin-left: 0.5em; display: inline-block; width: 65%;"/>
+                    <input class="search-text" autocomplete="off" name="email" id="search-text-mobile"/>
                 </label>
-                <div class="col-md-7"></div>
+                <div class="col-md-2"></div>
             </div>
 
             @if(!flash.isEmpty) {
@@ -87,7 +86,7 @@
                     Entries
                 </label>
             </div>
-            <div class="col-md-12" style="margin-bottom: 25px;">
+            <div class="col-md-12 paginate-number" style="margin-bottom: 25px;">
                 <div class="center">
                     <div class="v-align v-align-mobile">
                         <ul class="pagination pagination-lg">

@@ -31,7 +31,7 @@ a.btn.btn-sm.btn-primary.btn-create {
 }
 
 @media only screen and (max-width: 768px) {
-    #manage-session-mobile-table, #manage-user-mobile-table {
+    #manage-user-mobile-table {
         margin-top: 20px;
     }
 
@@ -108,5 +108,15 @@ a.btn.btn-sm.btn-primary.btn-create {
     .mobile-manage-session-div {
         margin-left: 13px;
         margin-right: 13px;
+    }
+
+    #search-text-mobile {
+        margin-left: 0.5em;
+        display: inline-block;
+        width: 65%;
+    }
+
+    .remove-padding-left {
+        padding-left: 0px;
     }
 }

@@ -208,7 +208,6 @@ function slide(keyword, pageNumber, pageSize) {
 
                     $('#show-entries-mobile').on('change', function () {
                         var keyword = $('#search-text-mobile').val();
-                        alert(this.value);
                         slide(keyword, 1, this.value);
                     });
 

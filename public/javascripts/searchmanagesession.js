@@ -16,27 +16,6 @@ $(function () {
         var keyword = $('#search-text').val();
         slide(keyword, 1, this.value);
     });
-
-    /*const detectIt = {
-        deviceType: 'mouseOnly' / 'touchOnly' / 'hybrid',
-        passiveEvents: true / false,
-        hasMouse: true / false,
-        hasTouch: true / false,
-        primaryInput: 'mouse' / 'touch',
-
-        // access to the four micro state machines that it contains
-        state: {
-            detectHover,
-            detectPointer,
-            detectTouchEvents,
-            detectPassiveEvents,
-        },
-
-        // updates the state of the four micro state machines it contains, and then updates its own state
-        update() {...},
-    }*/
-
-
 });
 
 function slide(keyword, pageNumber, pageSize) {

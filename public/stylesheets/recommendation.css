@@ -274,9 +274,30 @@
     background-color: white;
 }
 
+.sort-by-label {
+    padding-left: 0px !important;
+}
+
 @media only screen and (max-width: 767px) {
-    .recommendation-margin-btm:first-child {
-        margin-top: 190px;
+    .recommendation-list {
+        padding-left: 0px;
+    }
+
+    #recommendation-filter-adjust {
+        padding-left: 0px;
+    }
+
+    .recommendation-overlap-adjust {
+        margin-bottom: 120px;
+    }
+
+    #sort-entries {
+        float: right;
+    }
+
+    .sort-by-label {
+        float: right;
+        padding-right: 0px;
     }
 
 }

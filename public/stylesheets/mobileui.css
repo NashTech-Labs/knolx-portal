@@ -138,7 +138,8 @@
     }
 
     .recommendation-list {
-        float: none;
+        width: 50%;
+    /*    float: none;*/
     }
 
 }

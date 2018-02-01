@@ -3,23 +3,45 @@
 
 @main("Scheduled Sessions") {
     <div class="row">
-        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-            <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-            Show
-                <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+        <div class="col-md-12 col-sm-12 col-xs-12 feedback-form-container manage-user-container-custom-margin">
+           <div class="desktop-view">
+                <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+                Show
+                    <select name="Show" id="show-entries" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                        @for(value <- List(10,20,30,40,50)) {
+                            <option value="@value">@value</option>
+                        }
+                        </select>
+                Entries
+                </label>
+                <div class="col-md-7"></div>
+                <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
+                    Search
+                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
+                </label>
+           </div>
+
+        <div class="mobile-view">
+            <label class="col-md-12 col-sm-12 col-xs-12 search-bar disp-inline form-group" id="search-bar-mobile" style="margin-top: 10px;padding-right: 6px !important; font-weight: normal; text-align: right">
+                Search
+                <input class="search-text-mobile" autocomplete="off" name="email" id="search-text-mobile" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
+            </label>
+            <div class="col-md-12 col-sm-12 col-xs-12" id="show-entries-mobile-div">
+                <label class="filter-padding-left" style="font-weight: normal; float:right">
+                    Show
+                    <select name="Show" id="show-entries-mobile" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
                     @for(value <- List(10,20,30,40,50)) {
                         <option value="@value">@value</option>
                     }
                     </select>
-            Entries
-            </label>
-            <div class="col-md-7"></div>
-            <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
-                Search
-                <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
-            </label>
+                    Entries
+                </label>
+            </div>
 
-            <div class="col-md-12 all-users">
+
+        </div>
+
+            <div class="col-md-12 all-users mobile-top-adjusment">
                @if(!flash.isEmpty) {
                 @if(flash.get("message").isDefined) {
                     <div class="alert alert-success  alert-dismissable">

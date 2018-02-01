@@ -204,4 +204,17 @@ ul.pagination.pagination-lg li a {
     .table-header-color {
         background-color: rgb(26, 179, 148);
     }
+
+    #show-entries {
+        padding-right: 2%;
+        padding-bottom: 4px;
+    }
+
+    .mobile-top-adjusment {
+        margin-top: 65px;
+    }
+
+    #show-entries-mobile-div {
+        padding-right: 8px;
+    }
 }

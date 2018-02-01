@@ -104,4 +104,9 @@ a.btn.btn-sm.btn-primary.btn-create {
     .float-left {
         float: left;
     }
+
+    .mobile-manage-session-div {
+        margin-left: 13px;
+        margin-right: 13px;
+    }
 }

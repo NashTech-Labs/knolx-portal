@@ -122,6 +122,9 @@ function Recommendation() {
     var sort = $('#sort-entries').val();
     fetchRecommendationList(page, "all", sort);
 
+    var mobileSort = $('#sort-entries-mobile').val();
+    fetchRecommendationList(page, "all", mobileSort);
+
     $('.custom-checkbox').click(function () {
         var sort = $('#sort-entries').val();
         var filter = $('input[name="user-recommend-filter"]:checked').val();
@@ -132,6 +135,12 @@ function Recommendation() {
     $('#sort-entries').on('change', function () {
         var filter = $('input[name="user-recommend-filter"]:checked').val();
         fetchRecommendationList(page, filter, this.value);
+    });
+
+    $('#sort-entries-mobile').on('change', function () {
+        var filter = $('input[name="user-recommend-filter"]:checked').val();
+        var ms = $('#sort-entries-mobile').val();
+        fetchRecommendationList(page, filter, ms);
     });
 
     var self = this;
@@ -310,7 +319,6 @@ function Recommendation() {
     };
 
     function fetchRecommendationList(pageNumber, filter, sortBy) {
-
         jsRoutes.controllers.RecommendationController.recommendationList(pageNumber, filter, sortBy).ajax(
             {
                 type: "POST",

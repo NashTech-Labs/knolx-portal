@@ -2,7 +2,7 @@
     margin-bottom: 0px;
 }
 
-.search-icon{
+.search-icon {
     padding-left: 10px;
     color: #9E9E9E;
     font-size: 20px;
@@ -11,8 +11,8 @@
 }
 
 input::placeholder {
-        color:#9E9E9E !important;
-    }
+    color: #9E9E9E !important;
+}
 
 .search-button {
     float: left;
@@ -374,7 +374,7 @@ input::placeholder {
     padding-left: 0px;
 }
 
-.filter-padding-right{
+.filter-padding-right {
     padding-right: 0px;
 }
 
@@ -386,15 +386,16 @@ input::placeholder {
     font-size: 13px;
 }
 
-.update-user-table>tbody>tr>td {
-    border: 0px ;
-    padding-top: 0px ;
-    padding-bottom:0px;
+.update-user-table > tbody > tr > td {
+    border: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
     margin-bottom: 0px;
-    border-top:0px;
+    border-top: 0px;
 }
-.update-user-table{
-    border:none;
+
+.update-user-table {
+    border: none;
 }
 
 .label-superUser {

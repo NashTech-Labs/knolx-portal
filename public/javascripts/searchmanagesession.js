@@ -7,6 +7,11 @@ $(function () {
         slide(this.value, 1, pageSize);
     });
 
+    $('#search-text-mobile').keyup(function () {
+        var pageSize = $('#show-entries-mobile').val();
+        slide(this.value, 1, pageSize);
+    });
+
     $('#show-entries').on('change', function () {
         var keyword = $('#search-text').val();
         slide(keyword, 1, this.value);
@@ -38,13 +43,27 @@ function slide(keyword, pageNumber, pageSize) {
                 var page = sessionInfo["page"];
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
-                var mobileSessionsFound = "<tr class='new-button-tr'><td class='table-buttons new-button-td'><div class='col col-xs-6 text-right new-button'>" +
-                    "<a href='" + jsRoutes.controllers.SessionsController.create()['url'] + "' class='btn btn-sm btn-primary btn-create float-left'>" +
+                var mobileSessionsFound = "<tr class='new-button-tr'><td class='col-xs-12 table-buttons new-button-td' colspan='2'><div class='col-xs-12 text-right new-button'>" +
+                    "<div class='col-xs-6 remove-padding-left'><a href='" + jsRoutes.controllers.SessionsController.create()['url'] + "' class='btn btn-sm btn-primary btn-create float-left'>" +
                     "<i class='fa fa-plus' aria-hidden='true'></i>" +
-                    "New" +
-                    "</a>" +
-                    "</div></td></tr>" +
-                    "<tr class='row-space'></tr>";
+                    " New" +
+                    "</a></div>" +
+                    "<div class='col-xs-6' style='white-space: nowrap; float:right;'><label class='customize-entries' style='font-weight: normal; display: inline-block;'>" +
+                    "Show" +
+                    "<select name ='Show' id='show-entries-mobile' class='search-text' style='background-color: #FFFFFF; padding-right: 2px !important;'>";
+                    for(i = 10; i <= 50; i = i+10) {
+                        if(i == pageSize){
+                            mobileSessionsFound+="<option value ="+ i +" selected>" +i+"</option>"
+                        }else{
+                            mobileSessionsFound+="<option value ="+ i +">" +i+"</option>"
+                        }
+                    }
+                    mobileSessionsFound+="</select>" +
+                        "Entries" +
+                        "</label></div>"+
+                        "</div></td></tr>" +
+                        "<tr class='row-space'></tr>";
+
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
                         var rating = "";
@@ -165,6 +184,11 @@ function slide(keyword, pageNumber, pageSize) {
                     $('#user-found').html(usersFound);
                     $('#manage-session-tbody-mobile').html(mobileSessionsFound);
                     $(".rating").text(rating);
+
+                    $('#show-entries-mobile').on('change', function () {
+                        var keyword = $('#search-text-mobile').val();
+                        slide(keyword, 1, this.value);
+                    });
 
                     var totalSessions = sessionInfo["totalSessions"];
                     var startingRange = (pageSize * (page - 1)) + 1;

@@ -30,8 +30,12 @@ a.btn.btn-sm.btn-primary.btn-create {
     display: flex;
 }
 
+.paginate-number {
+    margin-bottom: 25px;
+}
+
 @media only screen and (max-width: 768px) {
-    #manage-session-mobile-table, #manage-user-mobile-table {
+    #manage-user-mobile-table {
         margin-top: 20px;
     }
 
@@ -66,12 +70,14 @@ a.btn.btn-sm.btn-primary.btn-create {
         text-align: center;
     }
 
-    .manage-user-container-custom-margin>label {
+    .manage-user-container-custom-margin > label {
         padding-bottom: 10px;
     }
 
     .all-users {
         padding-top: 10px;
+        padding-right: 6px;
+        padding-left: 6px;
     }
 
     .session-info {
@@ -103,5 +109,24 @@ a.btn.btn-sm.btn-primary.btn-create {
 
     .float-left {
         float: left;
+    }
+
+    .mobile-manage-session-div {
+        margin-left: 13px;
+        margin-right: 13px;
+    }
+
+    #search-text-mobile {
+        margin-left: 0.5em;
+        display: inline-block;
+        width: 65%;
+    }
+
+    .remove-padding-left {
+        padding-left: 0px;
+    }
+
+    .paginate-number {
+        margin-right: 15px;
     }
 }

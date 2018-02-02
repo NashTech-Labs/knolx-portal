@@ -108,6 +108,11 @@ input.input-field.logo:focus {
     font-size: 16px;
 }
 
+.change-password-label, .reset-password-label {
+    font-weight: none;
+    float: left;
+}
+
 @media only screen and (max-width: 767px) {
     .login-outer {
         text-align: left;

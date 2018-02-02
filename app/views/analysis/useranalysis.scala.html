@@ -21,7 +21,7 @@
                 </table>
             </div>
         </div>
-        <div class="col-md-9 filter-padding-right" id="user-analytics">
+        <div class="col-md-9 filter-padding-right filter-no-padding-mobile" id="user-analytics">
             <div data-bind="if: (emailList().length) == 0">
                 <div class="col-md-12 empty-reports" ><i class="fa fa-folder-open" aria-hidden="true"></i>
                     <p class="empty-reports_text">No Record found!</p>
@@ -31,7 +31,7 @@
             <div class="col-md-12 user-title" data-bind="text: email"></div>
             <div class="col-md-12">
                     <!-- Ban count -->
-                <div class="col-md-3 filter-padding-left">
+                <div class="col-md-3 filter-padding-left filter-no-padding">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
                             <h5>Ban Count</h5>
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                     <!-- Did not attend count -->
-                <div class="col-md-3 filter-padding-left">
+                <div class="col-md-3 filter-padding-left filter-no-padding">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
                             <h5>Sessions Not Attended</h5>
@@ -55,7 +55,7 @@
 
 
                     <!-- Total knolx -->
-                <div class="col-md-3 filter-padding-left">
+                <div class="col-md-3 filter-padding-left filter-no-padding">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
                             <h5>Knolx Given</h5>
@@ -67,7 +67,7 @@
                 </div>
 
                     <!-- total Meetups -->
-                <div class="col-md-3 filter-padding-left filter-padding-right">
+                <div class="col-md-3 filter-padding-left filter-padding-right filter-no-padding">
                     <div class="user-analytics-ibox">
                         <div class="user-analytics-title">
                             <h5>Meetups Given</h5>

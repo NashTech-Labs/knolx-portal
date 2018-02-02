@@ -108,7 +108,7 @@ input.input-field.logo:focus {
     font-size: 16px;
 }
 
-.change-password-label {
+.change-password-label, .reset-password-label {
     font-weight: none;
     float: left;
 }

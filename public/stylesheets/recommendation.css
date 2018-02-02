@@ -298,6 +298,7 @@
     .sort-by-label {
         float: right;
         padding-right: 0px;
+        padding-bottom: 8px;
     }
 
 }

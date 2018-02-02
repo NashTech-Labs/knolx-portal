@@ -60,8 +60,7 @@
                     </div>
                 </div>
                 <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important; font-weight: normal; text-align: right">
-                    Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
+                    <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
                 </label>
             </div>
             @if(flash.get("success").fold("")(identity).nonEmpty) {

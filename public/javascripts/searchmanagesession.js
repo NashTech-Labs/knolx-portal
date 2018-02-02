@@ -50,7 +50,7 @@ function slide(keyword, pageNumber, pageSize) {
                     "</a></div>" +
                     "<div class='col-xs-6' style='white-space: nowrap; float:right;'><label class='customize-entries' style='font-weight: normal; display: inline-block;'>" +
                     "Show" +
-                    "<select name ='Show' id='show-entries-mobile' class='search-text' style='background-color: #FFFFFF; padding-right: 2px !important;'>";
+                    "<select name ='Show' id='show-entries-mobile' class='search-text' style='background-color: #FFFFFF; padding-right: 2px !important; margin: 0px 4px'>";
                     for(i = 10; i <= 50; i = i+10) {
                         if(i == pageSize){
                             mobileSessionsFound+="<option value ="+ i +" selected>" +i+"</option>"

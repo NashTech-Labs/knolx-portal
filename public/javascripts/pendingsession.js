@@ -11,6 +11,16 @@ $(function () {
         var keyword = $('#search-text').val();
         slide(keyword, 1, this.value);
     });
+
+    $('#search-text-mobile').keyup(function () {
+        var pageSize = $('#show-entries-mobile').val();
+        slide(this.value, 1, pageSize);
+    });
+
+    $('#show-entries-mobile').on('change', function () {
+        var keyword = $('#search-text-mobile').val();
+        slide(keyword, 1, this.value);
+    });
 });
 
 function slide(keyword, pageNumber, pageSize) {

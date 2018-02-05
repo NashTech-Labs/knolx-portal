@@ -48,25 +48,47 @@
                 </div>
 
                 <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
-                    <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-                        Show
-                        <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
-                            padding-right: 2px !important; ">
-                        @for(value <- List(10, 20, 30, 40, 50)) {
-                            <option value="@value">@value</option>
-                        }
-                        </select>
-                        Entries
-                    </label>
-                    <div class="col-md-7"></div>
-                    <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
-                        font-weight: normal;
-                        text-align: right">
-                        Search
-                        <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
-                            display: inline-block;
-                            width: 65%;"/>
-                    </label>
+                    <div class="desktop-view">
+                        <label class="col-md-2 filter-padding-left" style="font-weight: normal">
+                            Show
+                            <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
+                                padding-right: 2px !important; ">
+                            @for(value <- List(10, 20, 30, 40, 50)) {
+                                <option value="@value">@value</option>
+                            }
+                            </select>
+                            Entries
+                        </label>
+                        <div class="col-md-7"></div>
+                        <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
+                            font-weight: normal;
+                            text-align: right">
+                            <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
+                                display: inline-block;
+                                width: 65%;"/>
+                        </label>
+                    </div>
+                    <div class="mobile-view" style="padding-top: 13px;">
+                        <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
+                            font-weight: normal;
+                            text-align: right">
+                            <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile" style="margin-left: 0.5em;
+                                display: inline-block;
+                                width: 65%;"/>
+                        </label>
+                        <div class="col-md-7"></div>
+                        <label class="col-md-2 filter-padding-left" style="font-weight: normal; margin-top: 18px; float: right">
+                            Show
+                            <select name="Show" id="show-entries-mobile" class="search-text" style="background-color: #FFFFFF;
+                                padding-right: 2px !important; ">
+                            @for(value <- List(10, 20, 30, 40, 50)) {
+                                <option value="@value">@value</option>
+                            }
+                            </select>
+                            Entries
+                        </label>
+                    </div>
+
                     <div class="col-md-12 all-users">
                         <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                         <div class="col-md-12" id="found-user-details"></div>
@@ -102,7 +124,7 @@
                             Entries
                         </label>
                     </div>
-                    <div class="col-md-12" style="margin-bottom: 25px;">
+                    <div class="col-md-12 requested-session-paginate">
                         <div class="center">
                             <div class="v-align v-align-mobile">
                                 <ul class="pagination pagination-lg">

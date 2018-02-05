@@ -188,6 +188,10 @@ ul.pagination.pagination-lg li a {
         text-align: center;
     }
 
+    .custom-display {
+        display: inline-table;
+    }
+
     .manage-user-container-custom-margin > label {
         padding-bottom: 10px;
     }

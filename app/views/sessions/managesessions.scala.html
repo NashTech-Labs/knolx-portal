@@ -3,7 +3,7 @@
 @main("Manage Scheduled Sessions") {
 
     <div class="row">
-        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin" style="display: inline-table">
+        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin custom-display">
             <div class="desktop-view">
                 <label class="col-md-2 filter-padding-left" style="font-weight: normal">
                     Show
@@ -19,8 +19,7 @@
                 <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
                     font-weight: normal;
                     text-align: right">
-                    Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
+                    <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
                         display: inline-block;
                         width: 65%;"/>
                 </label>
@@ -29,8 +28,7 @@
                 <!--Mobile view-->
             <div class="mobile-view">
                 <label class="col-md-8 search-bar-mobile" id="search-bar">
-                    Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text-mobile"/>
+                    <input class="custom-search-bar-mobile" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile" style="width: 85%" />
                 </label>
                 <div class="col-md-2"></div>
             </div>
@@ -75,7 +73,7 @@
                     </table>
                 </div>
             </div>
-            <div class="col-md-12">
+            <div class="col-md-12 margin-top-15">
                 <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
                     Showing
                     <span id="starting-range"></span>

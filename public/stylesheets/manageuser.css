@@ -256,20 +256,24 @@ input::placeholder {
 
 .search-text::-webkit-input-placeholder { /* Chrome */
     color: #fff;
+    text-align: center;
 }
 
 .search-text:-ms-input-placeholder { /* IE 10+ */
     color: #fff;
+    text-align: center;
 }
 
 .search-text::-moz-placeholder { /* Firefox 19+ */
     color: #fff;
     opacity: 1;
+    text-align: center;
 }
 
 .search-text:-moz-placeholder { /* Firefox 4 - 18 */
     color: #fff;
     opacity: 1;
+    text-align: center;
 }
 
 .all-users-table > thead > tr > th {
@@ -408,4 +412,28 @@ input::placeholder {
 
 .coreMember {
     margin-left: 5px;
+}
+
+@media only screen and (max-width: 767px) {
+    .search-text-mobile::-webkit-input-placeholder { /* Chrome */
+        color: #fff;
+        text-align: center;
+    }
+
+    .search-text-mobile:-ms-input-placeholder { /* IE 10+ */
+        color: #fff;
+        text-align: center;
+    }
+
+    .search-text-mobile::-moz-placeholder { /* Firefox 19+ */
+        color: #fff;
+        opacity: 1;
+        text-align: center;
+    }
+
+    .search-text-mobile:-moz-placeholder { /* Firefox 4 - 18 */
+        color: #fff;
+        opacity: 1;
+        text-align: center;
+    }
 }

@@ -34,9 +34,14 @@ a.btn.btn-sm.btn-primary.btn-create {
     margin-bottom: 25px;
 }
 
+.custom-margin-left {
+    margin-left: 5px;
+}
+
 @media only screen and (max-width: 768px) {
     #manage-user-mobile-table {
         margin-top: 20px;
+        width: -webkit-fill-available;
     }
 
     #manage-session-tbody-mobile tr, #manage-user-tbody-mobile tr {
@@ -119,7 +124,7 @@ a.btn.btn-sm.btn-primary.btn-create {
     #search-text-mobile {
         margin-left: 0.5em;
         display: inline-block;
-        width: 65%;
+        width: 58%;
     }
 
     .remove-padding-left {
@@ -127,6 +132,10 @@ a.btn.btn-sm.btn-primary.btn-create {
     }
 
     .paginate-number {
-        margin-right: 15px;
+        margin-right: 20px;
+    }
+
+    .user-paginate-number {
+        margin-right: 8px;
     }
 }

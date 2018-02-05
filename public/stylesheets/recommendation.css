@@ -278,6 +278,12 @@
     padding-left: 0px !important;
 }
 
+.recommendation-sort-by {
+    background-color: #FFFFFF;
+    padding-right: 2px !important;
+    margin-left: 6px
+}
+
 @media only screen and (max-width: 767px) {
     .recommendation-list {
         padding-left: 0px;
@@ -298,6 +304,7 @@
     .sort-by-label {
         float: right;
         padding-right: 0px;
+        padding-bottom: 8px;
     }
 
 }

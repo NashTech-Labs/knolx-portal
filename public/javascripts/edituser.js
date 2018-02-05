@@ -148,11 +148,10 @@ function slide(keyword, pageNumber, filter, pageSize) {
                             mobileUserFound += "</td></tr>"
                         }
 
-                        mobileUserFound += "<tr>";
+                        mobileUserFound += "<tr><td class='table-buttons' colspan='2'>";
 
                         if (superUser) {
-                            mobileUserFound += "<td class='table-buttons'>" +
-                                               "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default manage-btn'>" +
+                            mobileUserFound += "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default manage-btn'>" +
                                                "<em class='fa fa-pencil'></em>" +
                                                "</a>  ";
                             if (users[user].admin && users[user].superUser) {
@@ -168,8 +167,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                             }
                         } else {
                             if (users[user].admin && !users[user].superUser) {
-                                mobileUserFound += "<td class='table-buttons'>" +
-                                                   "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default manage-btn'>" +
+                                mobileUserFound += "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default manage-btn'>" +
                                                    "<em class='fa fa-pencil'></em>" +
                                                    "</a> " +
                                                    "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete disabled manage-btn'>" +
@@ -177,8 +175,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                                                    "</a>" +
                                                    "</td>";
                             } else if (users[user].admin && users[user].superUser) {
-                                mobileUserFound += "<td class='table-buttons'>" +
-                                                   "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default disabled manage-btn'>" +
+                                mobileUserFound += "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default disabled manage-btn'>" +
                                                    "<em class='fa fa-pencil'></em>" +
                                                    "</a> " +
                                                    "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete disabled manage-btn'>" +
@@ -186,8 +183,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                                                    "</a>" +
                                                    "</td>";
                             } else {
-                                mobileUserFound += "<td class='table-buttons'>" +
-                                                   "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default manage-btn'>" +
+                                mobileUserFound += "<a href='" + jsRoutes.controllers.UsersController.getByEmail(users[user].email)['url'] + "' class='btn btn-default manage-btn'>" +
                                                    "<em class='fa fa-pencil'></em>" +
                                                    "</a> " +
                                                    "<a href='" + jsRoutes.controllers.UsersController.deleteUser(users[user].email)['url'] + "' class='btn btn-danger delete manage-btn'>" +
@@ -197,7 +193,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                             }
                         }
 
-                        mobileUserFound += "<td class='table-buttons'></td></tr><tr class='row-space'></tr>";
+                        mobileUserFound += "</tr><tr class='row-space'></tr>";
                     }
 
                     $('#user-found').html(usersFound);

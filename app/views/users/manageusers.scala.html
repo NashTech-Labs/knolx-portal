@@ -3,6 +3,7 @@
 @main("Manage User") {
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
+            <div class="desktop-view">
             <div class="col-md-12">
                 <label class="col-md-3 filter-padding-left" style="font-weight: normal">
                     Show
@@ -63,6 +64,71 @@
                     <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
                 </label>
             </div>
+            </div>
+            <div class="mobile-view">
+                <div class="col-md-3 search-bar-mobile">
+                    <label class="search-bar disp-inline form-group" id="search-bar-mobile" style="padding-right: 0px !important; font-weight: normal; text-align: right">
+                        <input class="search-text-mobile" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile" style="margin-left: 0.5em; display: inline-block;width: 65%;"/>
+                    </label>
+                </div>
+                <div class="col-md-6 filter-outer filter-padding-left" style="margin-top: 14px; margin-left: 8px; padding-left: 0px">
+                    <div class="col-md-10 filter-padding-left" style="padding-left: 0px;">
+                        <div class="col-md-1 filter-padding-left filter-no-padding-mobile filter-padding-right">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='user-filter' checked class='custom-checkbox' value='all'/>
+
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">All</p>
+                            </label>
+                        </div>
+                        <div class="col-md-2 filter-no-padding-mobile">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='user-filter' class='custom-checkbox' value='banned'/>
+
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Banned</p>
+                            </label>
+                        </div>
+                        <div class="col-md-2 filter-no-padding-mobile padding-left-30">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='user-filter' class='custom-checkbox' value='allowed'/>
+
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Allowed</p>
+                            </label>
+                        </div>
+                        <div class="col-md-2 filter-no-padding-mobile padding-left-45">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='user-filter' class='custom-checkbox' value='active'/>
+
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Active</p>
+                            </label>
+                        </div>
+                        <div class="col-md-5 filter-no-padding-mobile padding-left-45">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='user-filter' id="pp" class='custom-checkbox' value='suspended'/>
+
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Suspended</p>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-2 rest">
+                    </div>
+                </div>
+                <div class="col-md-3" style="float: right">
+                    <label class="filter-padding-left" style="font-weight: normal">
+                        Show
+                        <select name="Show" id="show-entries-mobile" class="search-text" style="background-color:#FFFFFF;padding-right:2px !important; ">
+                        @for(value <- List(10,20,30,40,50)) {
+                            <option value="@value">@value</option>
+                        }
+                        </select>
+                        Entries
+                    </label>
+                </div>
+            </div>
             @if(flash.get("success").fold("")(identity).nonEmpty) {
                 <div class="alert alert-success  alert-dismissable user-updated-message">
                     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -108,7 +174,7 @@
                     Entries
                 </label>
             </div>
-            <div class="col-md-12" style="margin-bottom: 25px;">
+            <div class="col-md-12 user-paginate-number" style="margin-bottom: 25px;">
                 <div class="center">
                     <div class="v-align v-align-mobile">
                         <ul class="pagination pagination-lg">

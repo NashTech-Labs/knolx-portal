@@ -114,7 +114,7 @@ function slide(keyword, pageNumber, pageSize) {
                         $('#main-session-tbody-mobile').html(mobileSessionsFound);
                     }
 
-                    var totalSessions = sessionInfo["totalSessions"];
+                    var totalSessions = sessions.length;
                     var startingRange = (pageSize * (page - 1)) + 1;
                     var endRange = (pageSize * (page - 1)) + sessions.length;
 
@@ -137,16 +137,23 @@ function slide(keyword, pageNumber, pageSize) {
                         "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
                     );
 
-                    $('#main-session-table-mobile').html(
-                        "<p class='col-md-12 text-center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></p>"
+                    $('#main-session-tbody-mobile').html(
+                        "<tr class='no-record-mobile'><td align='center' class='col-md-12' colspan='2'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>"
                     );
 
+                    $('#starting-range').html('0');
+                    $('#ending-range').html('0');
+                    $('#total-range').html('0');
                     $('.pagination').html("");
                 }
             },
             error: function (er) {
                 $('#user-found').html(
                     "<tr><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-6'>" + er.responseText + "</td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td><td align='center' class='col-md-1'></td></tr>"
+                );
+
+                $('#main-session-tbody-mobile').html(
+                    "<tr><td align='center'>" + er.responseText + "</td></tr>"
                 );
                 $('.pagination').html("");
             }

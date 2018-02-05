@@ -141,6 +141,16 @@
         width: 50%;
     }
 
+    .no-record-mobile {
+        border: 1px solid #FFFFFF;
+        width: 100%;
+        background-color: #eeeeee;
+    }
+
+    .session-paginate-number {
+        margin-right: 8px;
+    }
+
 }
 
 @media only screen and (min-width: 768px) {

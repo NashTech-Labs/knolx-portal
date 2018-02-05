@@ -199,7 +199,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                     $('#user-found').html(usersFound);
                     $('#manage-user-tbody-mobile').html(mobileUserFound);
 
-                    var totalUsers = userInfo["totalUsers"];
+                    var totalUsers = users.length;
                     var startingRange = (pageSize * (page - 1)) + 1;
                     var endRange = (pageSize * (page - 1)) + users.length;
 
@@ -223,7 +223,7 @@ function slide(keyword, pageNumber, filter, pageSize) {
                         "<tr><td align='center' class='col-md-12' colspan='5'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>"
                     );
                     $('#manage-user-tbody-mobile').html(
-                        "<tr><td align='center' class='col-md-12' colspan='3'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>"
+                        "<tr class='no-record-mobile'><td align='center' class='col-md-12' colspan='2'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>"
                     );
                     $('#starting-range').html('0');
                     $('#ending-range').html('0');

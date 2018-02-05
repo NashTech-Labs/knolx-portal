@@ -18,6 +18,34 @@ $(function () {
     });
 });
 
+var mobileSessionsFound = "";
+
+function createNewButtons(){
+ mobileSessionsFound = "";
+ mobileSessionsFound = "<tr class='new-button-tr'><td class='col-xs-12 table-buttons new-button-td' colspan='2'><div class='col-xs-12 text-right new-button'>" +
+        "<div class='col-xs-6 remove-padding-left'><a href='" + jsRoutes.controllers.SessionsController.create()['url'] + "' class='btn btn-sm btn-primary btn-create float-left'>" +
+        "<i class='fa fa-plus' aria-hidden='true'></i>" +
+        " New" +
+        "</a></div>" +
+        "<div class='col-xs-6' style='white-space: nowrap; float:right;'><label class='customize-entries' style='font-weight: normal; display: inline-block;'>" +
+        "Show" +
+        "<select name ='Show' id='show-entries-mobile' class='search-text' style='background-color: #FFFFFF; padding-right: 2px !important; margin: 0px 4px'>";
+    var pageSize = $('#show-entries-mobile').val();
+        for(i = 10; i <= 50; i = i+10) {
+        if(i == pageSize){
+            mobileSessionsFound+="<option value ="+ i +" selected>" +i+"</option>"
+        }else{
+            mobileSessionsFound+="<option value ="+ i +">" +i+"</option>"
+        }
+    }
+    mobileSessionsFound+="</select>" +
+        "Entries" +
+        "</label></div>"+
+        "</div></td></tr>" +
+        "<tr class='row-space'></tr>";
+
+}
+
 function slide(keyword, pageNumber, pageSize) {
     var email = keyword;
 
@@ -43,27 +71,9 @@ function slide(keyword, pageNumber, pageSize) {
                 var page = sessionInfo["page"];
                 var pages = sessionInfo["pages"];
                 var usersFound = "";
-                var mobileSessionsFound = "<tr class='new-button-tr'><td class='col-xs-12 table-buttons new-button-td' colspan='2'><div class='col-xs-12 text-right new-button'>" +
-                    "<div class='col-xs-6 remove-padding-left'><a href='" + jsRoutes.controllers.SessionsController.create()['url'] + "' class='btn btn-sm btn-primary btn-create float-left'>" +
-                    "<i class='fa fa-plus' aria-hidden='true'></i>" +
-                    " New" +
-                    "</a></div>" +
-                    "<div class='col-xs-6' style='white-space: nowrap; float:right;'><label class='customize-entries' style='font-weight: normal; display: inline-block;'>" +
-                    "Show" +
-                    "<select name ='Show' id='show-entries-mobile' class='search-text' style='background-color: #FFFFFF; padding-right: 2px !important; margin: 0px 4px'>";
-                    for(i = 10; i <= 50; i = i+10) {
-                        if(i == pageSize){
-                            mobileSessionsFound+="<option value ="+ i +" selected>" +i+"</option>"
-                        }else{
-                            mobileSessionsFound+="<option value ="+ i +">" +i+"</option>"
-                        }
-                    }
-                    mobileSessionsFound+="</select>" +
-                        "Entries" +
-                        "</label></div>"+
-                        "</div></td></tr>" +
-                        "<tr class='row-space'></tr>";
 
+                // function goes here
+                createNewButtons();
                 if (sessions.length > 0) {
                     for (var session = 0; session < sessions.length; session++) {
                         var rating = "";
@@ -190,7 +200,7 @@ function slide(keyword, pageNumber, pageSize) {
                         slide(keyword, 1, this.value);
                     });
 
-                    var totalSessions = sessionInfo["totalSessions"];
+                    var totalSessions = sessions.length;
                     var startingRange = (pageSize * (page - 1)) + 1;
                     var endRange = (pageSize * (page - 1)) + sessions.length;
 
@@ -213,13 +223,24 @@ function slide(keyword, pageNumber, pageSize) {
                         "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
                     );
 
+                    $('#starting-range').html('0');
+                    $('#ending-range').html('0');
+                    $('#total-range').html('0');
                     $('.pagination').html("");
+
+                    mobileSessionsFound+="<tr class='no-record-mobile'><td align='center' class='col-md-12' colspan='2'><i class='fa fa-database' aria-hidden='true'></i><span class='no-record-found'>Oops! No Record Found</span></td></tr>";
+
+                    $('#manage-session-tbody-mobile').html(mobileSessionsFound);
                 }
             },
             error: function (er) {
                 $('#user-found').html(
                     "<tr><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'></td><td align='center'>" + er.responseText + "</td><td align='center'></td><td align='center'></td><td align='center'></td></tr>"
                 );
+                $('#manage-session-tbody-mobile').html(
+                    "<tr><td align='center'>" + er.responseText + "</td></tr>"
+                );
+                $('#manage-session-tbody-mobile').html(mobileSessionsFound);
                 $('.pagination').html("");
             }
         });

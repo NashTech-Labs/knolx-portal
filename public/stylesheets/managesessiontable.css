@@ -40,7 +40,6 @@ a.btn.btn-sm.btn-primary.btn-create {
 
 @media only screen and (max-width: 768px) {
     #manage-user-mobile-table {
-        margin-top: 20px;
         width: -webkit-fill-available;
     }
 

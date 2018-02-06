@@ -2,7 +2,7 @@
     margin-bottom: 0px;
 }
 
-.search-icon{
+.search-icon {
     padding-left: 10px;
     color: #9E9E9E;
     font-size: 20px;
@@ -11,8 +11,8 @@
 }
 
 input::placeholder {
-        color:#9E9E9E !important;
-    }
+    color: #9E9E9E !important;
+}
 
 .search-button {
     float: left;
@@ -256,20 +256,24 @@ input::placeholder {
 
 .search-text::-webkit-input-placeholder { /* Chrome */
     color: #fff;
+    text-align: center;
 }
 
 .search-text:-ms-input-placeholder { /* IE 10+ */
     color: #fff;
+    text-align: center;
 }
 
 .search-text::-moz-placeholder { /* Firefox 19+ */
     color: #fff;
     opacity: 1;
+    text-align: center;
 }
 
 .search-text:-moz-placeholder { /* Firefox 4 - 18 */
     color: #fff;
     opacity: 1;
+    text-align: center;
 }
 
 .all-users-table > thead > tr > th {
@@ -374,7 +378,7 @@ input::placeholder {
     padding-left: 0px;
 }
 
-.filter-padding-right{
+.filter-padding-right {
     padding-right: 0px;
 }
 
@@ -386,15 +390,16 @@ input::placeholder {
     font-size: 13px;
 }
 
-.update-user-table>tbody>tr>td {
-    border: 0px ;
-    padding-top: 0px ;
-    padding-bottom:0px;
+.update-user-table > tbody > tr > td {
+    border: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
     margin-bottom: 0px;
-    border-top:0px;
+    border-top: 0px;
 }
-.update-user-table{
-    border:none;
+
+.update-user-table {
+    border: none;
 }
 
 .label-superUser {
@@ -407,4 +412,28 @@ input::placeholder {
 
 .coreMember {
     margin-left: 5px;
+}
+
+@media only screen and (max-width: 767px) {
+    .search-text-mobile::-webkit-input-placeholder { /* Chrome */
+        color: #fff;
+        text-align: center;
+    }
+
+    .search-text-mobile:-ms-input-placeholder { /* IE 10+ */
+        color: #fff;
+        text-align: center;
+    }
+
+    .search-text-mobile::-moz-placeholder { /* Firefox 19+ */
+        color: #fff;
+        opacity: 1;
+        text-align: center;
+    }
+
+    .search-text-mobile:-moz-placeholder { /* Firefox 4 - 18 */
+        color: #fff;
+        opacity: 1;
+        text-align: center;
+    }
 }

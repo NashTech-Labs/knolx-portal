@@ -133,12 +133,31 @@
     .customize-entries {
         font-weight: normal;
         float: right;
-        margin-right: 5px;
+        margin-right: -26px;
         margin-top: 8px;
     }
 
     .recommendation-list {
-        float: none;
+        width: 50%;
+    }
+
+    .no-record-mobile {
+        border: 1px solid #FFFFFF;
+        width: 100%;
+        background-color: #eeeeee;
+    }
+
+    .session-paginate-number {
+        margin-right: 8px;
+    }
+
+    .requested-session-adjustment {
+        margin-top: 35px;
+    }
+
+    .manage-user-adjust {
+        margin-top: 25px;
+        padding-top: 0px;
     }
 
 }

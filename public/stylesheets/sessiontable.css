@@ -35,9 +35,8 @@ th {
     -ms-animation: fadein 2s; /* Internet Explorer */
     -o-animation: fadein 2s; /* Opera < 12.1 */
     animation: fadein 2s;
-    overflow-x : inherit;
+    overflow-x: inherit;
 }
-
 
 .center {
     display: table;
@@ -54,7 +53,7 @@ ul.pagination.pagination-lg li a {
     color: #676a6c;
     font-size: 15px;
     border: 1px solid #e7eaec;
-    border-radius:0 ;
+    border-radius: 0;
     padding: 2px 5px !important;
 }
 
@@ -109,7 +108,7 @@ ul.pagination.pagination-lg li a {
 
 .pagination li.active a {
     background-color: #f4f4f4;
-    color: #676a6c!important;
+    color: #676a6c !important;
 }
 
 .pagination li:hover.active a {
@@ -119,7 +118,7 @@ ul.pagination.pagination-lg li a {
     border: 1px solid #e7eaec;
 }
 
-.pagination{
+.pagination {
     margin: 0;
 }
 
@@ -134,23 +133,23 @@ ul.pagination.pagination-lg li a {
 }
 
 .knolx-session {
-    background-color :#26A69A;
+    background-color: #26A69A;
 }
 
 .meetup-session {
-    background-color :#8e44ad;
+    background-color: #8e44ad;
 }
 
 .more-detail-session {
-    background-color :#00BCD4;
+    background-color: #00BCD4;
 }
 
 .cancelled-session {
-    background-color:#F4511E;
+    background-color: #F4511E;
 }
 
 .table-header-color {
-    background-color :#7d9ec0;
+    background-color: #7d9ec0;
 }
 
 @media only screen and (max-width: 768px) {
@@ -189,7 +188,11 @@ ul.pagination.pagination-lg li a {
         text-align: center;
     }
 
-    .manage-user-container-custom-margin>label {
+    .custom-display {
+        display: inline-table;
+    }
+
+    .manage-user-container-custom-margin > label {
         padding-bottom: 10px;
     }
 
@@ -203,5 +206,25 @@ ul.pagination.pagination-lg li a {
 
     .table-header-color {
         background-color: rgb(26, 179, 148);
+    }
+
+    #show-entries {
+        padding-right: 2%;
+        padding-bottom: 4px;
+    }
+
+    .mobile-top-adjusment {
+        margin-top: 65px;
+    }
+
+    #show-entries-mobile-div {
+        padding-right: 8px;
+    }
+
+    #search-bar-mobile {
+        margin-top: 10px;
+        padding-right: 6px !important;
+        font-weight: normal;
+        text-align: center
     }
 }

@@ -12,17 +12,25 @@
     <input value="@email.fold("")(identity)" id="user-email" hidden/>
 
     <div class="row">
-        <div class="col-md-12 filter-padding-left filter-padding-right" style="margin-top: 20px;">
-                <label class="col-md-3 col-sm-12 col-xs-12 filter-padding-left filter-recommendation">
-                    Sort By
-                    <select name="Show" id="sort-entries" class="search-text" style="background-color: #FFFFFF;
-                        padding-right: 2px !important; ">
+        <div class="col-md-12 filter-padding-left filter-padding-right recommendation-overlap-adjust" style="margin-top: 20px">
+            <div class="col-md-3 desktop-view sort-by-label">
+                <label class="filter-recommendation">Sort By
+                    <select name="Show" id="sort-entries" class="search-text recommendation-sort-by">
                         <option value="latest" selected>Submission Date</option>
                         <option value="recent">Updated Date</option>
                     </select>
                 </label>
+            </div>
+            <div class="col-md-3 mobile-view">
+                <label class="col-md-3 filter-recommendation sort-by-label">Sort By
+                    <select name="Show" id="sort-entries-mobile" class="search-text recommendation-sort-by">
+                        <option value="latest" selected>Submission Date</option>
+                        <option value="recent">Updated Date</option>
+                    </select>
+                </label>
+            </div>
             <div class="col-md-3 col-sm-12 col-xs-12"></div>
-            <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="col-md-6 col-sm-12 col-xs-12" id="recommendation-filter-adjust">
                 @if(SessionHelper.isAdmin) {
                     <div class="recommendation-list">
                         <label class="checkbox-outer filter-recommendation">

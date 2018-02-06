@@ -3,7 +3,7 @@
 @main("Manage Scheduled Sessions") {
 
     <div class="row">
-        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin">
+        <div class="col-md-12 feedback-form-container manage-user-container-custom-margin custom-display">
             <div class="desktop-view">
                 <label class="col-md-2 filter-padding-left" style="font-weight: normal">
                     Show
@@ -19,8 +19,7 @@
                 <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
                     font-weight: normal;
                     text-align: right">
-                    Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
+                    <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
                         display: inline-block;
                         width: 65%;"/>
                 </label>
@@ -28,20 +27,10 @@
 
                 <!--Mobile view-->
             <div class="mobile-view">
-                <label class="col-md-3 search-bar-mobile" id="search-bar">
-                    Search
-                    <input class="search-text" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em; display: inline-block; width: 65%;"/>
+                <label class="col-md-8 search-bar-mobile" id="search-bar">
+                    <input class="custom-search-bar-mobile" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile" style="width: 85%" />
                 </label>
-                <div class="col-md-7"></div>
-                <label class="col-md-2 customize-entries" style="font-weight: normal">
-                    Show
-                    <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF; padding-right: 2px !important; ">
-                    @for(value <- List(10, 20, 30, 40, 50)) {
-                        <option value="@value">@value</option>
-                    }
-                    </select>
-                    Entries
-                </label>
+                <div class="col-md-2"></div>
             </div>
 
             @if(!flash.isEmpty) {
@@ -79,12 +68,12 @@
                         <tbody id="user-found">
                         </tbody>
                     </table>
-                    <table align="center" id="manage-session-mobile-table">
+                    <table class="mobile-manage-session-div" align="center" id="manage-session-mobile-table">
                         <tbody id="manage-session-tbody-mobile"></tbody>
                     </table>
                 </div>
             </div>
-            <div class="col-md-12">
+            <div class="col-md-12 margin-top-15">
                 <label class="col-md-3 filter-padding-left" style="font-weight: normal; cursor: default;">
                     Showing
                     <span id="starting-range"></span>
@@ -95,7 +84,7 @@
                     Entries
                 </label>
             </div>
-            <div class="col-md-12" style="margin-bottom: 25px;">
+            <div class="col-md-12 paginate-number">
                 <div class="center">
                     <div class="v-align v-align-mobile">
                         <ul class="pagination pagination-lg">

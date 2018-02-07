@@ -122,7 +122,8 @@ a.btn.btn-sm.btn-primary.btn-create {
 
     #search-text-mobile {
         display: inline-block;
-        width: 94%;
+        width: 97%;
+        margin-left: 5px;
     }
 
     .remove-padding-left {

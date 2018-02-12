@@ -234,7 +234,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
             }
             eventualKnolxSessions flatMap { sessions =>
               sessionsRepository
-                .activeCount(sessionInformation.email)
+                .activeCount(sessionInformation.email, sessionInformation.filter)
                 .map { count =>
                   val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
                   Ok(Json.toJson(SessionSearchResult(sessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""), count)).toString)

@@ -119,19 +119,19 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get paginated sessions when searched with empty string" in new TestScope {
-      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1))
+      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, filter="all"))
 
       paginatedSessions must beEqualTo(List(sessionInfo.copy(session = "updatedSession", topic = "updatedTopic", meetup = false)))
     }
 
     "get paginated sessions when searched with some string" in new TestScope {
-      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, Some("test")))
+      val paginatedSessions: List[SessionInfo] = await(sessionsRepository.paginate(1, Some("test"), filter="all"))
 
       paginatedSessions must beEqualTo(List(sessionInfo.copy(session = "updatedSession", topic = "updatedTopic", meetup = false)))
     }
 
     "get active sessions count when searched with empty string" in new TestScope {
-      val count: Int = await(sessionsRepository.activeCount(None))
+      val count: Int = await(sessionsRepository.activeCount(None, "all"))
 
       count must beEqualTo(1)
     }
@@ -156,7 +156,7 @@ class SessionsRepositorySpec extends PlaySpecification with Mockito {
     }
 
     "get active sessions count when searched with some string" in new TestScope {
-      val count: Int = await(sessionsRepository.activeCount(Some("test")))
+      val count: Int = await(sessionsRepository.activeCount(Some("test"), "all"))
 
       count must beEqualTo(1)
     }

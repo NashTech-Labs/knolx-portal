@@ -58,15 +58,12 @@
                 </div>
             </div>
 
-
             <div class="mobile-view">
-                <div class="col-md-3 search-bar-mobile">
-                    <label class="col-md-12 col-sm-12 col-xs-12 search-bar disp-inline form-group" id="search-bar-mobile">
-                        <input class="search-text-mobile" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile"/>
-                    </label>
-                </div>
+                <label class="col-md-3 col-sm-12 col-xs-12 search-bar disp-inline form-group filter-no-padding-mobile" id="search-bar-mobile">
+                    <input class="search-text-mobile" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile"/>
+                </label>
                 <div class="col-md-6 filter-outer filter-padding-left" style="display: flex">
-                    <div class="col-md-10 filter-padding-left">
+                    <div class="col-md-10 filter-padding-left" style="padding-left: 0px">
                         <div class="col-md-4"></div>
                         <div class="col-md-1 filter-padding-left filter-no-padding-mobile">
                             <label class="checkbox-outer">
@@ -108,7 +105,7 @@
                 </div>
             </div>
 
-            <div class="col-md-12 all-users mobile-top-adjusment" style="margin-top: 8px">
+            <div class="col-md-12 all-users mobile-top-adjusment" style="margin-top: 12px">
                @if(!flash.isEmpty) {
                 @if(flash.get("message").isDefined) {
                     <div class="alert alert-success  alert-dismissable">

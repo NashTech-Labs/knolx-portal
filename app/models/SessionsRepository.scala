@@ -147,13 +147,35 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
         jsonCollection
           .insert(session))
 
-  def paginate(pageNumber: Int, keyword: Option[String] = None, pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+  def paginate(pageNumber: Int,
+               keyword: Option[String] = None,
+               filter: String = "completed",
+               pageSize: Int = 10)(implicit ex: ExecutionContext): Future[List[SessionInfo]] = {
+    val millis = dateTimeUtility.nowMillis
     val skipN = (pageNumber - 1) * pageSize
     val queryOptions = new QueryOpts(skipN = skipN, batchSizeN = pageSize, flagsN = 0)
-    val condition = keyword match {
-      case Some(key) => Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
-        Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "active" -> true)
-      case None      => Json.obj("active" -> true)
+
+    val condition = (keyword, filter) match {
+
+      case (Some(key), "all") =>
+        Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+          Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))), "active" -> true)
+
+      case (Some(key), "completed") =>
+        Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+          Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))),
+          "date" -> BSONDocument("$lte" -> BSONDateTime(millis)), "active" -> true)
+
+      case (Some(key), "upcoming") =>
+        Json.obj("$or" -> List(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*"))),
+          Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))),
+          "date" -> BSONDocument("$gt" -> BSONDateTime(millis)), "active" -> true)
+
+      case (None, "all")       => Json.obj()
+      case (None, "completed") => Json.obj("date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
+      case (None, "upcoming")  => Json.obj("date" -> BSONDocument("$gt" -> BSONDateTime(millis)))
+
+      case _ => Json.obj()
     }
 
     collection
@@ -166,10 +188,24 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           .collect[List](pageSize, FailOnError[List[SessionInfo]]()))
   }
 
-  def activeCount(keyword: Option[String] = None)(implicit ex: ExecutionContext): Future[Int] = {
-    val condition = keyword match {
-      case Some(key) => Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
-      case None      => Some(Json.obj("active" -> true))
+  def activeCount(keyword: Option[String] = None,
+                  filter: String = "completed")(implicit ex: ExecutionContext): Future[Int] = {
+    val millis = dateTimeUtility.nowMillis
+    val condition = (keyword, filter) match {
+
+      case (Some(key), "completed") =>
+        Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
+          "date" -> BSONDocument("$lte" -> BSONDateTime(millis)), "active" -> true))
+      case (Some(key), "upcoming")  =>
+        Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")),
+          "date" -> BSONDocument("$gt" -> BSONDateTime(millis)), "active" -> true))
+      case (Some(key), "all")       =>
+        Some(Json.obj("email" -> Json.obj("$regex" -> (".*" + key.replaceAll("\\s", "").toLowerCase + ".*")), "active" -> true))
+
+      case (None, "completed") => Some(Json.obj("date" -> BSONDocument("$lte" -> BSONDateTime(millis)),"active" -> true))
+      case (None, "upcoming")  => Some(Json.obj("date" -> BSONDocument("$gt" -> BSONDateTime(millis)),"active" -> true))
+      case (None, "all")       => Some(Json.obj("active" -> true))
+      case _ => Some(Json.obj())
     }
 
     collection

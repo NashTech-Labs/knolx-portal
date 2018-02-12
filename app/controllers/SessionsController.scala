@@ -69,7 +69,7 @@ case class KnolxSession(id: String,
                         expired: Boolean = false,
                         contentAvailable: Boolean)
 
-case class SessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
+case class SessionEmailInformation(email: Option[String], page: Int, filter: String, pageSize: Int)
 
 case class SessionSearchResult(sessions: List[KnolxSession],
                                pages: Int,
@@ -108,8 +108,10 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
   val sessionSearchForm = Form(
     mapping(
       "email" -> optional(nonEmptyText),
-      "page" -> number.verifying("Invalid Page Number", _ >= 1),
-      "pageSize" -> number.verifying("Invalid Page size", _ >= 10)
+      "page" -> number.verifying("Invalid Page Number", number => number >= 0),
+      "filter" -> nonEmptyText.verifying("Invalid filter",
+        filter => filter == "all" || filter == "completed" || filter == "upcoming"),
+      "pageSize" -> number.verifying("Invalid Page size", number => number >= 10)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )
 
@@ -160,7 +162,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       },
       sessionInformation => {
         sessionsRepository
-          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.filter, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
             val knolxSessions = sessionInfo map { session =>
               val contentAvailable = session.youtubeURL.isDefined || session.slideShareURL.isDefined
@@ -180,7 +182,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
                 contentAvailable = contentAvailable)
             }
             sessionsRepository
-              .activeCount(sessionInformation.email)
+              .activeCount(sessionInformation.email, sessionInformation.filter)
               .map { count =>
                 val pages = Math.ceil(count.toDouble / sessionInformation.pageSize).toInt
                 Ok(Json.toJson(SessionSearchResult(knolxSessions, pages, sessionInformation.page, sessionInformation.email.getOrElse(""), count)).toString)
@@ -201,7 +203,7 @@ class SessionsController @Inject()(messagesApi: MessagesApi,
       },
       sessionInformation => {
         sessionsRepository
-          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.pageSize)
+          .paginate(sessionInformation.page, sessionInformation.email, sessionInformation.filter, sessionInformation.pageSize)
           .flatMap { sessionInfo =>
             val knolxSessions = sessionInfo map { sessionInfo =>
               val contentAvailable = sessionInfo.youtubeURL.isDefined || sessionInfo.slideShareURL.isDefined

@@ -152,10 +152,6 @@ ul.pagination.pagination-lg li a {
     background-color: #7d9ec0;
 }
 
-.mobile-top-adjusment {
-    margin-top: 8px;
-}
-
 @media only screen and (max-width: 768px) {
     #session-mobile-table {
         margin-top: 20px;

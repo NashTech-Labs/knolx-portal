@@ -5,32 +5,86 @@
     <div class="row">
         <div class="col-md-12 feedback-form-container manage-user-container-custom-margin custom-display">
             <div class="desktop-view">
-                <label class="col-md-2 filter-padding-left" style="font-weight: normal">
-                    Show
-                    <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
-                        padding-right: 2px !important; ">
-                    @for(value <- List(10, 20, 30, 40, 50)) {
-                        <option value="@value">@value</option>
-                    }
-                    </select>
-                    Entries
-                </label>
-                <div class="col-md-7"></div>
-                <label class="col-md-3 search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
-                    font-weight: normal;
-                    text-align: right">
-                    <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 0.5em;
-                        display: inline-block;
-                        width: 65%;"/>
-                </label>
+                <div class="col-md-2 filter-padding-left">
+                    <label class="filter-padding-left" style="font-weight: normal">
+                        Show
+                        <select name="Show" id="show-entries" class="search-text" style="background-color: #FFFFFF;
+                            padding-right: 2px !important; ">
+                        @for(value <- List(10, 20, 30, 40, 50)) {
+                            <option value="@value">@value</option>
+                        }
+                        </select>
+                        Entries
+                    </label>
+                </div>
+                <div class="col-md-10 filter-padding-right">
+                    <div class="filter-outer filter-padding-left">
+                        <div>
+                            <label class="search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
+                                font-weight: normal;
+                                float: right">
+                                <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 1em;
+                                    display: inline-block;"/>
+                            </label>
+                        </div>
+                        <div class="completed-session">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' id="default-check" class='custom-checkbox' value='completed'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Completed</p>
+                            </label>
+                        </div>
+                        <div class="filter-no-padding-mobile upcoming-session">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' class='custom-checkbox' value='upcoming'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Upcoming</p>
+                            </label>
+                        </div>
+                        <div class="filter-padding-left filter-no-padding-mobile all-session">
+                            <label class="checkbox-outer" style="margin-left: 38px">
+                                <input type='radio' name='session-filter' class='custom-checkbox' value='all'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">All</p>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
                 <!--Mobile view-->
             <div class="mobile-view margin-top-15">
-                <label class="col-md-8 search-bar disp-inline form-group" id="search-bar">
+
+                <label class="col-md-3 search-bar disp-inline form-group" id="search-bar">
                     <input class="custom-search-bar-mobile" placeholder="Search" autocomplete="off" name="email" id="search-text-mobile" style="width: 87%; text-align: center; margin-left: 0px" />
                 </label>
-                <div class="col-md-2"></div>
+
+                <div class="col-md-6 filter-outer filter-padding-left" style="padding-top: 16px; display: flex">
+                    <div class="col-md-10 filter-padding-left">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-1 filter-padding-left filter-no-padding-mobile">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' class='custom-checkbox' value='all'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">All</p>
+                            </label>
+                        </div>
+                        <div class="col-md-2 filter-no-padding-mobile">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' checked class='custom-checkbox' value='completed' id="myCheck">
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Completed</p>
+                            </label>
+                        </div>
+                        <div class="col-md-2 filter-no-padding-mobile">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' class='custom-checkbox' value='upcoming'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Upcoming</p>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             @if(!flash.isEmpty) {

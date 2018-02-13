@@ -1,21 +1,32 @@
 $(function () {
 
-    slide("", 1, 10);
+    slide("", 1, "completed", 10);
 
     $('#search-text').keyup(function () {
+        var filter = $('input[name="session-filter"]:checked').val();
         var pageSize = $('#show-entries').val();
-        slide(this.value, 1, pageSize);
+        slide(this.value, 1, filter, pageSize);
+    });
+
+    $('.custom-checkbox').click(function () {
+        var filter = $('input[name="session-filter"]:checked').val();
+        var pageSize = $('#show-entries').val();
+        slide($('#search-text').val(), 1, filter, pageSize);
     });
 
     $('#search-text-mobile').keyup(function () {
+        var filter = $('input[name="session-filter"]:checked').val();
         var pageSize = $('#show-entries-mobile').val();
-        slide(this.value, 1, pageSize);
+        slide(this.value, 1, filter, pageSize);
     });
 
     $('#show-entries').on('change', function () {
+        var filter = $('input[name="session-filter"]:checked').val();
         var keyword = $('#search-text').val();
-        slide(keyword, 1, this.value);
+        slide(keyword, 1, filter, this.value);
     });
+
+    document.getElementById("default-check").checked = true;
 });
 
 var mobileSessionsFound = "";
@@ -46,12 +57,13 @@ function createNewButtons(){
 
 }
 
-function slide(keyword, pageNumber, pageSize) {
+function slide(keyword, pageNumber, filter, pageSize) {
     var email = keyword;
 
     var formData = new FormData();
     formData.append("email", email);
     formData.append("page", pageNumber);
+    formData.append("filter", filter);
     formData.append("pageSize", pageSize);
 
     jsRoutes.controllers.SessionsController.searchManageSession().ajax(
@@ -196,11 +208,12 @@ function slide(keyword, pageNumber, pageSize) {
                     $(".rating").text(rating);
 
                     $('#show-entries-mobile').on('change', function () {
+                        var filter = $('input[name="session-filter"]:checked').val();
                         var keyword = $('#search-text-mobile').val();
-                        slide(keyword, 1, this.value);
+                        slide(keyword, 1, filter, this.value);
                     });
 
-                    var totalSessions = sessions.length;
+                    var totalSessions = sessionInfo["totalSessions"];
                     var startingRange = (pageSize * (page - 1)) + 1;
                     var endRange = (pageSize * (page - 1)) + sessions.length;
 
@@ -214,8 +227,9 @@ function slide(keyword, pageNumber, pageSize) {
 
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
+                            var filter = $('input[name="session-filter"]:checked').val();
                             var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id, pageSize);
+                            slide(keyword, this.id, filter, pageSize);
                         });
                     }
                 } else {

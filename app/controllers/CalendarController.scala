@@ -111,6 +111,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     mapping(
       "email" -> optional(nonEmptyText),
       "page" -> number.verifying("Invalid Page Number", _ >= 1),
+      "filter" -> nonEmptyText.verifying("Invalid filter",
+        filter => filter == "completed" || filter == "upcoming" || filter == "all"),
       "pageSize" -> number.verifying("Invalid Page size", _ >= 10)
     )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
   )

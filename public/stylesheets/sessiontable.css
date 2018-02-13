@@ -152,6 +152,27 @@ ul.pagination.pagination-lg li a {
     background-color: #7d9ec0;
 }
 
+.completed-session {
+    padding-left: 15px;
+    padding-right: 15px;
+    float: right;
+}
+
+.upcoming-session {
+    padding-left: 15px;
+    float: right;
+}
+
+.all-session {
+    float: right;
+}
+
+.search-bar {
+    padding-right: 0px !important;
+    font-weight: normal;
+    float: right
+}
+
 @media only screen and (max-width: 768px) {
     #session-mobile-table {
         margin-top: 20px;
@@ -214,7 +235,8 @@ ul.pagination.pagination-lg li a {
     }
 
     .mobile-top-adjusment {
-        margin-top: 65px;
+        margin-top: 28px;
+        padding-top: 0px !important;
     }
 
     #show-entries-mobile-div {

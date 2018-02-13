@@ -643,8 +643,8 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
     "return json for the session searched by email" in new WithTestApplication {
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.paginate(1, Some("test@knoldus.com"), 10) returns sessionObject
-      sessionsRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionsRepository.paginate(1, Some("test@knoldus.com"), "completed", 10) returns sessionObject
+      sessionsRepository.activeCount(Some("test@knoldus.com"), "completed") returns Future.successful(1)
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       val result = controller.searchSessions()(FakeRequest(POST, "search")
@@ -652,6 +652,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",
           "page" -> "1",
+          "filter" -> "completed",
           "pageSize" -> "10"))
 
       status(result) must be equalTo OK
@@ -666,6 +667,7 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",
           "page" -> "invalid value",
+          "filter" -> "completed",
           "pageSize" -> "10"))
 
       status(result) must be equalTo BAD_REQUEST
@@ -679,14 +681,15 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
 
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.paginate(1, Some("test@knoldus.com"), 10) returns sessionInfo
-      sessionsRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionsRepository.paginate(1, Some("test@knoldus.com"), "completed", 10) returns sessionInfo
+      sessionsRepository.activeCount(Some("test@knoldus.com"), "completed") returns Future.successful(1)
 
       val result = controller.searchManageSession()(FakeRequest(POST, "search")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",
           "page" -> "1",
+          "filter" -> "completed",
           "pageSize" -> "10"))
 
       status(result) must be equalTo OK
@@ -701,14 +704,15 @@ class SessionsControllerSpec extends PlaySpecification with Mockito with Specifi
       dateTimeUtility.ISTTimeZone returns ISTTimeZone
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
-      sessionsRepository.paginate(1, Some("test@knoldus.com"), 10) returns sessionInfo
-      sessionsRepository.activeCount(Some("test@knoldus.com")) returns Future.successful(1)
+      sessionsRepository.paginate(1, Some("test@knoldus.com"), "completed", 10) returns sessionInfo
+      sessionsRepository.activeCount(Some("test@knoldus.com"), "completed") returns Future.successful(1)
 
       val result = controller.searchManageSession()(FakeRequest(POST, "search")
         .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
         .withFormUrlEncodedBody(
           "email" -> "test@knoldus.com",
           "page" -> "1",
+          "filter" -> "completed",
           "pageSize" -> "10"))
 
       status(result) must be equalTo OK

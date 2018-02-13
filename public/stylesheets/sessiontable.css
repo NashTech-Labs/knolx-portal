@@ -152,6 +152,20 @@ ul.pagination.pagination-lg li a {
     background-color: #7d9ec0;
 }
 
+.completed-session {
+    padding-left: 15px;
+    float: right;
+}
+
+.upcoming-session {
+    padding-left: 15px;
+    float: right;
+}
+
+.all-session {
+    float: right;
+}
+
 @media only screen and (max-width: 768px) {
     #session-mobile-table {
         margin-top: 20px;

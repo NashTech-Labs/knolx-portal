@@ -18,39 +18,35 @@
                     </label>
                 </div>
                 <div class="col-md-10 filter-padding-right">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="col-md-offset-2 col-md-7 filter-outer filter-padding-left">
-                                <div class="col-md-3 filter-padding-left" style="margin-right: 8px; float: right">
-                                    <label class="checkbox-outer">
-                                        <input type='radio' name='session-filter' id="default-check" class='custom-checkbox' value='completed'/>
-                                        <span class="filter-label_text"></span>
-                                        <p class="filter-checkbox-text">Completed</p>
-                                    </label>
-                                </div>
-                                <div class="col-md-3 filter-no-padding-mobile" style="float: right">
-                                    <label class="checkbox-outer">
-                                        <input type='radio' name='session-filter' class='custom-checkbox' value='upcoming'/>
-                                        <span class="filter-label_text"></span>
-                                        <p class="filter-checkbox-text">Upcoming</p>
-                                    </label>
-                                </div>
-                                <div class="col-md-2 filter-padding-left filter-no-padding-mobile" style="float: right">
-                                    <label class="checkbox-outer" style="margin-left: 38px">
-                                        <input type='radio' name='session-filter' class='custom-checkbox' value='all'/>
-                                        <span class="filter-label_text"></span>
-                                        <p class="filter-checkbox-text">All</p>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-3" style="padding-left: 33px">
-                                <label class="search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
-                                    font-weight: normal;
-                                    float: right">
-                                    <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 1em;
-                                        display: inline-block;"/>
-                                </label>
-                            </div>
+                    <div class="filter-outer filter-padding-left">
+                        <div>
+                            <label class="search-bar disp-inline form-group" id="search-bar" style="padding-right: 0px !important;
+                                font-weight: normal;
+                                float: right">
+                                <input class="search-text" placeholder="Search" autocomplete="off" name="email" id="search-text" style="margin-left: 1em;
+                                    display: inline-block;"/>
+                            </label>
+                        </div>
+                        <div class="completed-session">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' id="default-check" class='custom-checkbox' value='completed'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Completed</p>
+                            </label>
+                        </div>
+                        <div class="filter-no-padding-mobile upcoming-session">
+                            <label class="checkbox-outer">
+                                <input type='radio' name='session-filter' class='custom-checkbox' value='upcoming'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">Upcoming</p>
+                            </label>
+                        </div>
+                        <div class="filter-padding-left filter-no-padding-mobile all-session">
+                            <label class="checkbox-outer" style="margin-left: 38px">
+                                <input type='radio' name='session-filter' class='custom-checkbox' value='all'/>
+                                <span class="filter-label_text"></span>
+                                <p class="filter-checkbox-text">All</p>
+                            </label>
                         </div>
                     </div>
                 </div>

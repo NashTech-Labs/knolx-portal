@@ -154,6 +154,7 @@ ul.pagination.pagination-lg li a {
 
 .completed-session {
     padding-left: 15px;
+    padding-right: 15px;
     float: right;
 }
 
@@ -164,6 +165,12 @@ ul.pagination.pagination-lg li a {
 
 .all-session {
     float: right;
+}
+
+.search-bar {
+    padding-right: 0px !important;
+    font-weight: normal;
+    float: right
 }
 
 @media only screen and (max-width: 768px) {

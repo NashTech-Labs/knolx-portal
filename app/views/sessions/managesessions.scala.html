@@ -93,7 +93,7 @@
                     @flash.get("message").fold("")(identity)
                 </div>
             }
-            <div class="col-md-12 all-users" style="margin-top: 8px">
+            <div class="col-md-12 all-users">
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>
                 <div class="manage-user-custom-table-margin">

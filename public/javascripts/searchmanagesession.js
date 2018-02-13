@@ -25,6 +25,8 @@ $(function () {
         var keyword = $('#search-text').val();
         slide(keyword, 1, filter, this.value);
     });
+
+    document.getElementById("default-check").checked = true;
 });
 
 var mobileSessionsFound = "";

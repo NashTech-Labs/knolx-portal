@@ -173,6 +173,10 @@ ul.pagination.pagination-lg li a {
     float: right
 }
 
+.custom-manage-search-bar {
+    float: none;
+}
+
 @media only screen and (max-width: 768px) {
     #session-mobile-table {
         margin-top: 20px;

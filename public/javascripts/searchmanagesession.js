@@ -27,6 +27,7 @@ $(function () {
     });
 
     document.getElementById("default-check").checked = true;
+    document.getElementById("mobile-default-check").checked = true;
 });
 
 var mobileSessionsFound = "";

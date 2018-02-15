@@ -71,6 +71,8 @@ case class CalendarSessionsSearchResult(calendarSessions: List[CalendarSession],
                                         keyword: String,
                                         totalSessions: Int)
 
+case class RequestedSessionEmailInformation(email: Option[String], page: Int, pageSize: Int)
+
 case class FreeSlot(id: String, date: String)
 
 case class Slot(slotName: String,
@@ -111,10 +113,8 @@ class CalendarController @Inject()(messagesApi: MessagesApi,
     mapping(
       "email" -> optional(nonEmptyText),
       "page" -> number.verifying("Invalid Page Number", _ >= 1),
-      "filter" -> nonEmptyText.verifying("Invalid filter",
-        filter => filter == "completed" || filter == "upcoming" || filter == "all"),
       "pageSize" -> number.verifying("Invalid Page size", _ >= 10)
-    )(SessionEmailInformation.apply)(SessionEmailInformation.unapply)
+    )(RequestedSessionEmailInformation.apply)(RequestedSessionEmailInformation.unapply)
   )
 
   val slotForm = Form(

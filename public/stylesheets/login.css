@@ -122,4 +122,8 @@ input.input-field.logo:focus {
     .sign-in-form {
         text-align: center;
     }
+
+    .register-mobile-div {
+        margin-top: 40px;
+    }
 }

@@ -45,11 +45,11 @@ label {
     cursor: pointer;
 }
 
-.custom-checkbox {
+.custom-checkbox, .mobile-custom-checkbox {
     display: none;
 }
 
-.checkbox-outer {
+.checkbox-outer, .mobile-checkbox-outer {
     display: flex;
     font-weight: normal;
 }

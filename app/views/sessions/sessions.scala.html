@@ -38,6 +38,7 @@
                                 <p class="filter-checkbox-text">Upcoming</p>
                             </label>
                         </div>
+
                         <div class="filter-padding-left filter-no-padding-mobile all-session">
                             <label class="checkbox-outer" style="margin-left: 38px">
                                 <input type='radio' name='session-filter' class='custom-checkbox' value='all'/>
@@ -57,23 +58,23 @@
                     <div class="col-md-10 filter-padding-left" style="padding-left: 0px">
                         <div class="col-md-4"></div>
                         <div class="col-md-1 filter-padding-left filter-no-padding-mobile">
-                            <label class="checkbox-outer">
-                                <input type='radio' name='session-filter' class='custom-checkbox' value='all'/>
-                                <span class="filter-label_text"></span>
+                            <label class="mobile-checkbox-outer">
+                                <input type='radio' name='mobile-session-filter' class='mobile-custom-checkbox' value='all'/>
+                                <span class="mobile-filter-label_text"></span>
                                 <p class="filter-checkbox-text">All</p>
                             </label>
                         </div>
                         <div class="col-md-2 filter-no-padding-mobile">
-                            <label class="checkbox-outer">
-                                <input type='radio' name='session-filter' class='custom-checkbox' value='upcoming'/>
-                                <span class="filter-label_text"></span>
+                            <label class="mobile-checkbox-outer">
+                                <input type='radio' name='mobile-session-filter' class='mobile-custom-checkbox' value='upcoming'/>
+                                <span class="mobile-filter-label_text"></span>
                                 <p class="filter-checkbox-text">Upcoming</p>
                             </label>
                         </div>
                         <div class="col-md-2 filter-no-padding-mobile">
-                            <label class="checkbox-outer">
-                                <input type='radio' name='session-filter' id="mobile-default-check" class='custom-checkbox' value='completed' id="myCheck">
-                                <span class="filter-label_text"></span>
+                            <label class="mobile-checkbox-outer">
+                                <input type='radio' name='mobile-session-filter' id="mobile-default-check" class='mobile-custom-checkbox' value='completed'>
+                                <span class="mobile-filter-label_text"></span>
                                 <p class="filter-checkbox-text">Completed</p>
                             </label>
                         </div>
@@ -96,18 +97,18 @@
             </div>
 
             <div class="col-md-12 all-users mobile-top-adjusment">
-               @if(!flash.isEmpty) {
-                @if(flash.get("message").isDefined) {
-                    <div class="alert alert-success  alert-dismissable">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        @flash.get("message").fold("")(identity)
-                    </div>
-                } else {
-                    <div class="alert alert-danger  alert-dismissable">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        @flash.get("error").fold("")(identity)
-                    </div>
-                }
+                @if(!flash.isEmpty) {
+                    @if(flash.get("message").isDefined) {
+                        <div class="alert alert-success  alert-dismissable">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            @flash.get("message").fold("")(identity)
+                        </div>
+                    } else {
+                        <div class="alert alert-danger  alert-dismissable">
+                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                            @flash.get("error").fold("")(identity)
+                        </div>
+                    }
                 }
                 <input value="@helper.CSRF.getToken.value" id="csrfToken" hidden/>
                 <div class="col-md-12" id="found-user-details"></div>

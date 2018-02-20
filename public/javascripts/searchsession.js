@@ -14,6 +14,12 @@ $(document).ready(function () {
         slide($('#search-text').val(), 1, filter, pageSize);
     });
 
+    $('.mobile-custom-checkbox').click(function () {
+        var filter = $('input[name="mobile-session-filter"]:checked').val();
+        var pageSize = $('#show-entries-mobile').val();
+        slide($('#search-text-mobile').val(), 1, filter, pageSize);
+    });
+
     $('#show-entries').on('change', function () {
         var filter = $('input[name="session-filter"]:checked').val();
         var keyword = $('#search-text').val();
@@ -21,14 +27,14 @@ $(document).ready(function () {
     });
 
     $('#search-text-mobile').keyup(function () {
-        var filter = $('input[name="session-filter"]:checked').val();
-        var pageSize = $('#show-entries').val();
+        var filter = $('input[name="mobile-session-filter"]:checked').val();
+        var pageSize = $('#show-entries-mobile').val();
         slide(this.value, 1, filter, pageSize);
     });
 
     $('#show-entries-mobile').on('change', function () {
-        var filter = $('input[name="session-filter"]:checked').val();
-        var keyword = $('#search-text').val();
+        var filter = $('input[name="mobile-session-filter"]:checked').val();
+        var keyword = $('#search-text-mobile').val();
         slide(keyword, 1, filter, this.value);
     });
 
@@ -143,6 +149,14 @@ function slide(keyword, pageNumber, filter, pageSize) {
                     for (var i = 0; i < paginationLinks.length; i++) {
                         paginationLinks[i].addEventListener('click', function (event) {
                             var filter = $('input[name="session-filter"]:checked').val();
+                            var keyword = document.getElementById('search-text').value;
+                            slide(keyword, this.id, filter, pageSize);
+                        });
+                    }
+
+                    for (var i = 0; i < paginationLinks.length; i++) {
+                        paginationLinks[i].addEventListener('click', function (event) {
+                            var filter = $('input[name="mobile-session-filter"]:checked').val();
                             var keyword = document.getElementById('search-text').value;
                             slide(keyword, this.id, filter, pageSize);
                         });

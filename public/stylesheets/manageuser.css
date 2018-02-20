@@ -332,15 +332,15 @@ input::placeholder {
     box-shadow: none;
 }
 
-.custom-checkbox {
+.custom-checkbox, .mobile-custom-checkbox {
     display: none;
 }
 
-.checkbox-outer {
+.checkbox-outer, .mobile-checkbox-outer {
     display: flex;
 }
 
-.filter-label_text {
+.filter-label_text, .mobile-filter-label_text  {
     font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #676a6c;
     align-self: center;
@@ -356,7 +356,7 @@ input::placeholder {
     margin-left: 3px;
 }
 
-.filter-label_text:before {
+.filter-label_text:before, .mobile-filter-label_text:before {
     content: "\f096";
     font-family: "FontAwesome";
     display: inline-block;
@@ -366,7 +366,7 @@ input::placeholder {
     margin-right: 8px;
 }
 
-.custom-checkbox:checked + .filter-label_text:before {
+.custom-checkbox:checked + .filter-label_text:before, .mobile-custom-checkbox:checked + .mobile-filter-label_text:before {
     content: "\f14a";
     font-family: "FontAwesome";
     display: inline-block;

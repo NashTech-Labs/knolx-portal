@@ -14,10 +14,10 @@ $(function () {
         slide($('#search-text').val(), 1, filter, pageSize);
     });
 
-    $('#search-text-mobile').keyup(function () {
-        var filter = $('input[name="session-filter"]:checked').val();
+    $('.mobile-custom-checkbox').click(function () {
+        var filter = $('input[name="mobile-session-filter"]:checked').val();
         var pageSize = $('#show-entries-mobile').val();
-        slide(this.value, 1, filter, pageSize);
+        slide($('#search-text-mobile').val(), 1, filter, pageSize);
     });
 
     $('#show-entries').on('change', function () {
@@ -26,8 +26,21 @@ $(function () {
         slide(keyword, 1, filter, this.value);
     });
 
+    $('#search-text-mobile').keyup(function () {
+        var filter = $('input[name="mobile-session-filter"]:checked').val();
+        var pageSize = $('#show-entries-mobile').val();
+        slide(this.value, 1, filter, pageSize);
+    });
+
+    $('#show-entries-mobile').on('change', function () {
+        var filter = $('input[name="mobile-session-filter"]:checked').val();
+        var keyword = $('#search-text-mobile').val();
+        slide(keyword, 1, filter, this.value);
+    });
+
     document.getElementById("default-check").checked = true;
     document.getElementById("mobile-default-check").checked = true;
+
 });
 
 var mobileSessionsFound = "";

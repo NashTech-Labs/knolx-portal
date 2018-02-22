@@ -238,13 +238,23 @@ function slide(keyword, pageNumber, filter, pageSize) {
                     paginate(page, pages);
 
                     var paginationLinks = document.querySelectorAll('.paginate');
-
-                    for (var i = 0; i < paginationLinks.length; i++) {
-                        paginationLinks[i].addEventListener('click', function (event) {
-                            var filter = $('input[name="session-filter"]:checked').val();
-                            var keyword = document.getElementById('search-text').value;
-                            slide(keyword, this.id, filter, pageSize);
-                        });
+                    var width = screen.width;
+                    if(width > 768) {
+                        for (var i = 0; i < paginationLinks.length; i++) {
+                            paginationLinks[i].addEventListener('click', function () {
+                                var filter = $('input[name="session-filter"]:checked').val();
+                                var keyword = document.getElementById('search-text').value;
+                                slide(keyword, this.id, filter, pageSize);
+                            });
+                        }
+                    } else {
+                        for (var i = 0; i < paginationLinks.length; i++) {
+                            paginationLinks[i].addEventListener('click', function () {
+                                var filter = $('input[name="mobile-session-filter"]:checked').val();
+                                var keyword = document.getElementById('search-text').value;
+                                slide(keyword, this.id, filter, pageSize);
+                            });
+                        }
                     }
                 } else {
                     $('#user-found').html(

@@ -171,11 +171,11 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
           Json.obj("topic" -> Json.obj("$regex" -> (".*" + key + ".*"), "$options" -> "i"))),
           "date" -> BSONDocument("$gt" -> BSONDateTime(millis)), "active" -> true)
 
-      case (None, "all")       => Json.obj()
-      case (None, "completed") => Json.obj("date" -> BSONDocument("$lte" -> BSONDateTime(millis)))
-      case (None, "upcoming")  => Json.obj("date" -> BSONDocument("$gt" -> BSONDateTime(millis)))
+      case (None, "all")       => Json.obj("active" -> true)
+      case (None, "completed") => Json.obj("date" -> BSONDocument("$lte" -> BSONDateTime(millis)), "active" -> true)
+      case (None, "upcoming")  => Json.obj("date" -> BSONDocument("$gt" -> BSONDateTime(millis)), "active" -> true)
 
-      case _ => Json.obj()
+      case _ => Json.obj("active" -> true)
     }
 
     collection
@@ -205,7 +205,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       case (None, "completed") => Some(Json.obj("date" -> BSONDocument("$lte" -> BSONDateTime(millis)),"active" -> true))
       case (None, "upcoming")  => Some(Json.obj("date" -> BSONDocument("$gt" -> BSONDateTime(millis)),"active" -> true))
       case (None, "all")       => Some(Json.obj("active" -> true))
-      case _ => Some(Json.obj())
+      case _ => Some(Json.obj("active" -> true))
     }
 
     collection

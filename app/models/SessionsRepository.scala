@@ -205,7 +205,7 @@ class SessionsRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeU
       case (None, "completed") => Some(Json.obj("date" -> BSONDocument("$lte" -> BSONDateTime(millis)),"active" -> true))
       case (None, "upcoming")  => Some(Json.obj("date" -> BSONDocument("$gt" -> BSONDateTime(millis)),"active" -> true))
       case (None, "all")       => Some(Json.obj("active" -> true))
-      case _ => Some(Json.obj())
+      case _ => Some(Json.obj("active" -> true))
     }
 
     collection

@@ -30,7 +30,8 @@ case class FeedbackSessions(userId: String,
                             cancelled: Boolean,
                             active: Boolean,
                             id: String,
-                            expirationDate: String)
+                            expirationDate: String,
+                            isUserSubmitted: Boolean = false)
 
 case class FeedbackForms(name: String,
                          questions: List[QuestionInformation],
@@ -97,31 +98,24 @@ class FeedbackFormsResponseController @Inject()(messagesApi: MessagesApi,
             if (activeSessions.nonEmpty) {
               val sessionFeedbackMappings = Future.sequence(activeSessions filterNot { session => session.email == request.user.email.toLowerCase }
                 map { session =>
-                feedbackRepository.getByFeedbackFormId(session.feedbackFormId) map {
+                feedbackRepository.getByFeedbackFormId(session.feedbackFormId) flatMap {
                   case Some(form) =>
-                    val sessionInformation =
-                      FeedbackSessions(session.userId,
-                        session.email,
-                        new Date(session.date.value),
-                        session.session,
-                        session.feedbackFormId,
-                        session.topic,
-                        session.meetup,
-                        session.rating,
-                        session.cancelled,
-                        session.active,
-                        session._id.stringify,
-                        new Date(session.expirationDate.value).toString)
-                    val questions = form.questions.map(questions => QuestionInformation(questions.question,
-                      questions.options,
-                      questions.questionType,
-                      questions.mandatory))
-                    val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
+                    feedbackResponseRepository.getByUsersSession(request.user.id, session._id.stringify) map { response: Option[FeedbackFormsResponse] =>
+                      val sessionInformation =
+                        FeedbackSessions(session.userId, session.email, new Date(session.date.value), session.session, session.feedbackFormId,
+                          session.topic, session.meetup, session.rating, session.cancelled, session.active, session._id.stringify,
+                          new Date(session.expirationDate.value).toString, response.isDefined)
 
-                    Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
+                      val questions = form.questions.map(questions => QuestionInformation(questions.question, questions.options,
+                        questions.questionType, questions.mandatory))
+
+                      val associatedFeedbackFormInformation = FeedbackForms(form.name, questions, form.active, form._id.stringify)
+
+                      Some((sessionInformation, Json.toJson(associatedFeedbackFormInformation).toString))
+                    }
                   case None       =>
                     Logger.info(s"No feedback form found correspond to feedback form id: ${session.feedbackFormId} for session id :${session._id}")
-                    None
+                    Future.successful(None)
                 }
               })
 

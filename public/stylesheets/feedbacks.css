@@ -160,6 +160,16 @@
     margin: 0;
 }
 
+.session-type-left {
+    position: absolute;
+    top: -2px;
+    left: 0;
+    z-index: 777;
+    border-radius: 0px;
+    margin: 0;
+    ima
+}
+
 .custom-label-type {
     border-radius: 0px;
     margin: 0px;

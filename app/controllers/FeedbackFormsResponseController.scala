@@ -31,7 +31,7 @@ case class FeedbackSessions(userId: String,
                             active: Boolean,
                             id: String,
                             expirationDate: String,
-                            isUserSubmitted: Boolean = false)
+                            feedbackSubmitted: Boolean = false)
 
 case class FeedbackForms(name: String,
                          questions: List[QuestionInformation],

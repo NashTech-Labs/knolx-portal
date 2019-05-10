@@ -17,7 +17,7 @@
                                         } else {
                                             label-success
                                         } custom-label-type">@sessionType</span></div>
-                                        @if(session.isUserSubmitted) {
+                                        @if(session.feedbackSubmitted) {
                                             <div class="session-type-left"><span class="label label-success custom-label-type">Submitted</span></div>
                                         }
                                         <p class="report-content-width" title="@session.topic">@session.topic</p>

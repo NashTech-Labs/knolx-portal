@@ -123,6 +123,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
           temporaryYoutubeURL = None, reminder = false, notification = false, _id)))
 
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(None)
       sessionsRepository.activeSessions() returns sessionObjectWithCurrentDate
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
 
@@ -138,6 +139,7 @@ class FeedbackFormsResponseControllerSpec extends PlaySpecification with Mockito
       usersRepository.getActiveAndBanned("test@knoldus.com") returns Future.successful(None)
       usersRepository.getByEmail("test@knoldus.com") returns emailObject
       sessionsRepository.activeSessions() returns sessionObject
+      feedbackResponseRepository.getByUsersSession(_id.stringify, _id.stringify) returns Future.successful(None)
       feedbackFormsRepository.getByFeedbackFormId("feedbackFormId") returns Future.successful(Some(feedbackForms))
 
       val response = controller.getFeedbackFormsForToday(

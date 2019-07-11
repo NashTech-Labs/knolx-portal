@@ -199,7 +199,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           from = "test@example.com",
           to = List("test@example.com"),
           bodyHtml = None,
-          bodyText = Some("Hello World"), replyTo = None)
+          bodyText = Some("Hello World"), replyTo = Nil)
 
       usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com"))
 
@@ -214,7 +214,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           from = "test@example.com",
           to = List("test1@example.com"),
           bodyHtml = None,
-          bodyText = Some(" knolx reminder"), replyTo = None)
+          bodyText = Some(" knolx reminder"), replyTo = Nil)
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getAllActiveEmails returns Future.successful(List("test@example.com", "test1@example.com","test2@example.com"))
@@ -236,7 +236,7 @@ class SessionsSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           from = "test@example.com",
           to = List("test@example.com", "test2@example.com"),
           bodyHtml = None,
-          bodyText = Some(" knolx reminder"), replyTo = None)
+          bodyText = Some(" knolx reminder"), replyTo = Nil)
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 

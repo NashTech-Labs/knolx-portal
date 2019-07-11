@@ -18,6 +18,8 @@ import controllers.{DefaultKnolxControllerComponents, KnolxControllerComponents}
 import net.codingwell.scalaguice.ScalaModule
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Configuration, Environment}
+import play.api.libs.mailer._
+import play.api.{Configuration, Environment}
 import play.libs.Akka
 
 class Module(environment: Environment,
@@ -82,6 +84,9 @@ class Module(environment: Environment,
       .asEagerSingleton()
 
     bind[YouTube].toInstance(youtube)
+
+    bind(classOf[MailerClient]).to(classOf[SMTPDynamicMailer]).asEagerSingleton()
+
 
   }
 

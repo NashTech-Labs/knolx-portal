@@ -4,14 +4,18 @@ import java.util.UUID
 import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Stop
-import akka.actor.{Actor, OneForOneStrategy}
+import akka.actor.{Actor, OneForOneStrategy, Terminated}
+import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
 import org.apache.commons.mail.EmailException
-import play.api.Logger
+import play.api.{Configuration, Logger}
 import play.api.libs.concurrent.InjectedActorSupport
 
 class EmailManager @Inject()(
-                              emailChildFactory: ConfiguredEmailActor.Factory
+                              emailChildFactory: ConfiguredEmailActor.Factory,
+                              configuration: Configuration
                             ) extends Actor with InjectedActorSupport {
+
+  lazy val limit: Int = configuration.get[Int]("youtube.actors.limit")
 
   override val supervisorStrategy: OneForOneStrategy =
     OneForOneStrategy() {
@@ -23,13 +27,23 @@ class EmailManager @Inject()(
         Stop
     }
 
+  var emailActor: Router = {
+    val emailActors = Vector.fill(limit) {
+      val emailChild = injectedChild(emailChildFactory(), s"EmailActor-${UUID.randomUUID}")
+      context watch emailChild
+      ActorRefRoutee(emailChild)
+    }
+    Router(RoundRobinRoutingLogic(), emailActors)
+  }
+
   override def receive: Receive = {
     case request: EmailActor.SendEmail =>
-      val emailActor = injectedChild(emailChildFactory(), s"EmailActor-${UUID.randomUUID}")
-
-      Logger.info(s"Got a request to send email to ${request.to}. Finding email actor and forwarding request.")
-
-      emailActor forward request
+      emailActor.route(request, sender())
+    case Terminated(emailRoutee)       =>
+      emailActor = emailActor.removeRoutee(emailRoutee)
+      val newEmailActor = injectedChild(emailChildFactory(), s"EmailActor-${UUID.randomUUID}")
+      context watch newEmailActor
+      emailActor = emailActor.addRoutee(newEmailActor)
     case msg                           => Logger.warn(s"Got an unhandled message $msg")
   }
 

@@ -108,7 +108,7 @@ class UsersBanSchedulerSpec(_system: ActorSystem) extends TestKit(_system: Actor
           from = "test@example.com",
           to = List("test@example.com"),
           bodyHtml = None,
-          bodyText = Some("Hello World"), replyTo = None)
+          bodyText = Some("Hello World"), replyTo = Nil)
 
       usersRepository.ban("test@example.com") returns Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
       usersBanScheduler ! SendEmail(EmailContent("test@example.com", List(EmailBodyInfo("topic", "presenter", "date"))))

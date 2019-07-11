@@ -4,13 +4,14 @@ import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActorRef, TestKit}
 import helpers.{TestEmailActor, TestEnvironment}
+import com.typesafe.config.ConfigFactory
 import org.apache.commons.mail.EmailException
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpecLike}
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Around
 import org.specs2.specification.Scope
-import play.api.Application
+import play.api.{Application, Configuration}
 import play.api.inject.BindingKey
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
@@ -20,6 +21,8 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
   with Mockito with ImplicitSender with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("MySpec"))
+
+  val config = Configuration(ConfigFactory.load("application.conf"))
 
   object TestEmailActorFactory extends actors.ConfiguredEmailActor.Factory {
     def apply(): Actor = {
@@ -35,13 +38,13 @@ class EmailManagerSpec(_system: ActorSystem) extends TestKit(_system: ActorSyste
       }
     }
 
-    val emailManager = TestActorRef(new EmailManager(TestEmailActorFactory) with TestInjectedActorSupport)
+    val emailManager = TestActorRef(new EmailManager(TestEmailActorFactory, config) with TestInjectedActorSupport)
   }
 
   abstract class IntegrationTestScope extends Around with Scope with TestEnvironment {
     lazy val app: Application = fakeApp(_system)
     lazy val configuredEmailFactory = app.injector.instanceOf(BindingKey(classOf[ConfiguredEmailActor.Factory]))
-    lazy val emailManager = TestActorRef(new EmailManager(configuredEmailFactory))
+    lazy val emailManager = TestActorRef(new EmailManager(configuredEmailFactory, config))
 
     override def around[T: AsResult](t: => T): Result = {
       TestHelpers.running(app)(AsResult.effectively(t))

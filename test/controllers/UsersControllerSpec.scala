@@ -86,11 +86,31 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "create user" in new WithTestApplication {
+    "create user but not send verification email if DB insertion goes wrong" in new WithTestApplication {
 
       val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
 
       usersRepository.getByEmail("usertest@knoldus.com") returns emptyEmailObject
+      usersRepository.getActiveByEmail("usertest@knoldus.com") returns emptyEmailObject
+      usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
+
+      val result = controller.createUser(
+        FakeRequest(POST, "create")
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "usertest@knoldus.com",
+            "password" -> "12345678",
+            "confirmPassword" -> "12345678")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "create user and send verification email" in new WithTestApplication {
+
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("usertest@knoldus.com") returns emptyEmailObject
+      usersRepository.getActiveByEmail("usertest@knoldus.com") returns emailObject
       usersRepository.insert(any[UserInfo])(any[ExecutionContext]) returns updateWriteResult
 
       val result = controller.createUser(
@@ -194,9 +214,34 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo SEE_OTHER
     }
 
-    "login user when he is not an admin or a superUser" in new WithTestApplication {
+    "not login user when he is not an admin or a superUser and is not approved yet" in new WithTestApplication {
 
       usersRepository.getActiveByEmail("test@knoldus.com") returns normalUserObject
+
+      val result = controller.loginUser(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withFormUrlEncodedBody("email" -> "test@knoldus.com",
+            "password" -> "12345678")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "login user when he is not an admin or a superUser but is approved" in new WithTestApplication {
+      val approvedUser = Future.successful(Some(UserInfo("test@knoldus.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
+        "BCrypt",
+        active = true,
+        admin = false,
+        coreMember = false,
+        superUser = false,
+        BSONDateTime(currentMillis),
+        0,
+        _id,
+        approved = true)))
+
+      usersRepository.getActiveByEmail("test@knoldus.com") returns approvedUser
 
       val result = controller.loginUser(
         FakeRequest()
@@ -745,6 +790,76 @@ class UsersControllerSpec extends PlaySpecification with Results with Mockito {
       status(result) must be equalTo OK
     }
 
+    "approve newly registered user" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = true, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns emailObject
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not approve user if he/she is not registered" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns Future.successful(None)
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not approve user if he/she is already approved" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+      val approvedEmailObject = Future.successful(Some(UserInfo("test@knoldus.com",
+        "$2a$10$NVPy0dSpn8bbCNP5SaYQOOiQdwGzX0IvsWsGyKv.Doj1q0IsEFKH.",
+        "BCrypt",
+        active = true,
+        admin = true,
+        coreMember = false,
+        superUser = false,
+        BSONDateTime(currentMillis),
+        0,
+        _id,
+        approved = true)))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns emailObject
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
+
+    "do not approve newly registered user due to DB upsertion error" in new WithTestApplication {
+      val updateWriteResult = Future.successful(UpdateWriteResult(ok = false, 1, 1, Seq(), Seq(), None, None, None))
+
+      usersRepository.getByEmail("test@knoldus.com") returns emailObject
+      usersRepository.approveUser(_id.stringify) returns updateWriteResult
+      usersRepository.getUserById(_id.stringify) returns emailObject
+
+      val result = controller.approveUser(_id.stringify)(
+        FakeRequest()
+          .withSession("username" -> "F3S8qKBy5yvWCLZKmvTE0WSoLzcLN2ztG8qPvOvaRLc=")
+          .withCSRFToken)
+
+      status(result) must be equalTo SEE_OTHER
+    }
 
   }
 

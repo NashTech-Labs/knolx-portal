@@ -11,7 +11,7 @@ import play.api.data.Forms.{nonEmptyText, _}
 import play.api.data._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import play.api.{Configuration, Logger}
 import reactivemongo.bson.BSONDateTime
 import utilities.{DateTimeUtility, EncryptionUtility, PasswordUtility}
@@ -67,6 +67,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
   implicit val manageUserInfoFormat: OFormat[ManageUserInfo] = Json.format[ManageUserInfo]
   implicit val userSearchResultInfoFormat: OFormat[UserSearchResult] = Json.format[UserSearchResult]
+  lazy val fromEmail: String = configuration.getOptional[String]("play.mailer.user").getOrElse("support@knoldus.com")
 
   val userForm = Form(
     mapping(
@@ -161,14 +162,15 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                   coreMember = false,
                   superUser = false,
                   BSONDateTime(dateTimeUtility.nowMillis)))
-              .map { result =>
+              .flatMap { result =>
                 if (result.ok) {
                   Logger.info(s"User $email successfully created")
-                  Redirect(routes.HomeController.index())
-                    .withSession(username -> EncryptionUtility.encrypt(email))
+                  val domain = request.host
+                  sendVerificationEmail(email, domain)
                 } else {
                   Logger.error(s"Something went wrong while creating a new user $email")
-                  Redirect(routes.HomeController.index()).flashing("message" -> "Something went wrong!")
+                  Future.successful(Redirect(routes.HomeController.index())
+                    .flashing("message" -> "Something went wrong!"))
                 }
               }
           } { _ =>
@@ -177,6 +179,50 @@ class UsersController @Inject()(messagesApi: MessagesApi,
           })
       }
     )
+  }
+
+  private def sendVerificationEmail(email: String, domain: String): Future[Result] = {
+    usersRepository.getActiveByEmail(email) map {
+      _.fold {
+        Redirect(routes.UsersController.register())
+          .flashing("error" -> "Something went wrong during the registration process. Please try again.")
+      } { userInfo =>
+        Logger.info(s"Sending email to $email with verification link")
+        emailManager ! EmailActor.SendEmail(List(email), fromEmail, "Knolx Portal: Email Verification",
+          views.html.emails.verification(userInfo._id.stringify, domain).toString)
+        Redirect(routes.UsersController.login())
+          .flashing("message" -> "A verification email has been sent to your email. Please click on the sent link to verify your account.")
+      }
+    }
+  }
+
+  def approveUser(id: String): Action[AnyContent] = action.async { implicit request =>
+    val username = configuration.get[String]("session.username")
+    Logger.info(s"Approving user with id $id")
+    usersRepository.getUserById(id) flatMap {
+      _.fold {
+        Future.successful(Redirect(routes.UsersController.register())
+          .withSession(request.session - username)
+          .flashing("message" -> "Your account is not registered with us. Please register to continue."))
+      } { userInfo =>
+        if (userInfo.approved) {
+          Future.successful(Redirect(routes.UsersController.login())
+            .withSession(request.session - username)
+            .flashing("message" -> "Your account has been already approved. Please login to continue."))
+        } else {
+          usersRepository.approveUser(id) map { result =>
+            if (result.ok) {
+              Redirect(routes.UsersController.login())
+                .withSession(request.session - username)
+                .flashing("message" -> "Your account has been successfully verified. Please login again to continue.")
+            } else {
+              Redirect(routes.UsersController.login())
+                .flashing("error" -> "Something went wrong while verifying this account.")
+            }
+          }
+        }
+      }
+    }
   }
 
   def login: Action[AnyContent] = action.async { implicit request =>
@@ -207,7 +253,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
 
             if (PasswordUtility.isPasswordValid(loginInfo.password, user.password)) {
               Logger.info(s"User $email successfully logged in")
-              ((user.admin, user.superUser) : @unchecked) match {
+              ((user.admin, user.superUser): @unchecked) match {
                 case (true, false)  =>
                   Redirect(routes.HomeController.index())
                     .withSession(
@@ -222,9 +268,14 @@ class UsersController @Inject()(messagesApi: MessagesApi,
                       "admin" -> EncryptionUtility.encrypt(EncryptionUtility.AdminKey))
                     .flashing("message" -> "Welcome back!")
                 case (false, false) =>
-                  Redirect(routes.HomeController.index())
-                    .withSession(username -> EncryptionUtility.encrypt(email))
-                    .flashing("message" -> "Welcome back!")
+                  if(user.approved) {
+                    Redirect(routes.HomeController.index())
+                      .withSession(username -> EncryptionUtility.encrypt(email))
+                      .flashing("message" -> "Welcome back!")
+                  } else {
+                    Redirect(routes.UsersController.login())
+                      .flashing("error" -> "Please verify your account first to continue.")
+                  }
               }
 
             } else {
@@ -285,7 +336,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       userInfo => {
         usersRepository
-          .update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban,userInfo.coreMember,userInfo.admin, userInfo.password))
+          .update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban, userInfo.coreMember, userInfo.admin, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
@@ -306,7 +357,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
       },
       userInfo => {
         usersRepository
-          .update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban,userInfo.coreMember,userInfo.admin, userInfo.password))
+          .update(UpdatedUserInfo(userInfo.email, userInfo.active, userInfo.ban, userInfo.coreMember, userInfo.admin, userInfo.password))
           .flatMap { result =>
             if (result.ok) {
               Logger.info(s"User details successfully updated for $email")
@@ -326,7 +377,7 @@ class UsersController @Inject()(messagesApi: MessagesApi,
         case Some(userInformation) =>
           val ban = new Date(userInformation.banTill.value).after(new Date(dateTimeUtility.nowMillis))
           val filledForm = updateUserForm.fill(
-            UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember,userInformation.admin, None))
+            UpdateUserInfo(userInformation.email, userInformation.active, ban, userInformation.coreMember, userInformation.admin, None))
           Future.successful(Ok(views.html.users.updateuser(filledForm)))
         case None                  =>
           Future.successful(Redirect(routes.SessionsController.manageSessions()).flashing("message" -> "Something went wrong!"))

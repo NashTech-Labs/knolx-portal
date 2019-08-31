@@ -5,14 +5,12 @@ import javax.inject.Inject
 
 import models.UserJsonFormats._
 import play.api.libs.json._
-import reactivemongo.play.json.BSONFormats.BSONDocumentFormat
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.Cursor.FailOnError
 import reactivemongo.api.{QueryOpts, ReadPreference}
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONObjectID}
 import reactivemongo.play.json.collection.JSONCollection
-import reactivemongo.play.json.BSONFormats.BSONObjectIDFormat
 import utilities.{DateTimeUtility, PasswordUtility}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,7 +29,8 @@ case class UserInfo(email: String,
                     superUser :Boolean,
                     banTill: BSONDateTime,
                     banCount: Int = 0,
-                    _id: BSONObjectID = BSONObjectID.generate)
+                    _id: BSONObjectID = BSONObjectID.generate,
+                    approved: Boolean = false)
 
 case class UpdatedUserInfo(email: String,
                            active: Boolean,
@@ -253,6 +252,24 @@ class UsersRepository @Inject()(reactiveMongoApi: ReactiveMongoApi, dateTimeUtil
           .cursor[JsValue](ReadPreference.Primary)
           .collect[List](-1, FailOnError[List[JsValue]]())
       ).map(_.flatMap(_ ("email").asOpt[String]))
+  }
+
+  def approveUser(id: String): Future[UpdateWriteResult] = {
+    val selector = BSONDocument("_id" -> BSONDocument("$oid" -> id))
+
+    val modifier = BSONDocument("$set" -> BSONDocument("approved" -> true))
+
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection.update(selector, modifier))
+  }
+
+  def getUserById(id: String)(implicit ex: ExecutionContext): Future[Option[UserInfo]] = {
+    collection
+      .flatMap(jsonCollection =>
+        jsonCollection
+          .find(Json.obj("_id" -> BSONDocument("$oid" -> id)))
+          .cursor[UserInfo](ReadPreference.Primary).headOption)
   }
 
 }
